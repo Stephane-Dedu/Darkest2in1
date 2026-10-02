@@ -60,7 +60,7 @@ internal static class Dd2Combat
 
     public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised)
     {
-        var modes = Dd2.Modes;
+        var modes = Dd2Api.Modes;
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[combat] mode change in progress"); return false; }
         if (party == null || party.Count == 0) { Plugin.Log.LogError("[combat] no party"); return false; }
 
@@ -77,7 +77,7 @@ internal static class Dd2Combat
                    : CombatSource.DUNGEON;
         var scenario = new CombatScenarioData(battle, arena, source, party);
 
-        Dd2.Torch = torch;
+        Dd2Api.Torch = torch;
         LastBattleId = battle;
         InFight = true;
         Plugin.Log.LogInfo($"[combat] {plan.Kind} fight {battle} in {scenario.BackgroundSceneName ?? "(default arena)"}, source {source.GetName()}, torch {torch}");
@@ -107,6 +107,6 @@ internal static class FightOverOnLeavingCombat
         if (!Dd2Combat.InFight) return;
         var from = GameModeMgr.CurrentMode;
         if (mode == GameModeType.DRIVING && (from == GameModeType.RESULTS || from == GameModeType.COMBAT))
-            Dd2.Modes.OnNextGameModeEnterComplete(_ => Dd2Combat.OnFightOver(partyWiped: Dd2.Party.Count == 0));
+            Dd2Api.Modes.OnNextGameModeEnterComplete(_ => Dd2Combat.OnFightOver(partyWiped: Dd2Api.Party.Count == 0));
     }
 }

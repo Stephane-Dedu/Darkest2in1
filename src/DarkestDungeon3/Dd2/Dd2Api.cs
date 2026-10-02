@@ -11,7 +11,7 @@ using Assets.Code.Utils;
 namespace DarkestDungeon3.Dd2;
 
 /// <summary>Thin, null-safe access to the DD2 systems the mod drives. Every call here was read off the decomp.</summary>
-internal static class Dd2
+internal static class Dd2Api
 {
     public static GameTypeMgr GameType => Singleton<GameTypeMgr>.Instance;
     public static GameModeMgr Modes => Singleton<GameModeMgr>.Instance;

@@ -24,7 +24,7 @@ internal static class Dd2Heroes
     /// <summary>Replace DD2's party with our heroes, front rank first. Returns hero id → actor guid.</summary>
     public static Dictionary<string, uint> BuildParty(IReadOnlyList<HeroRecord> heroes)
     {
-        var roster = Dd2.Roster;
+        var roster = Dd2Api.Roster;
         var map = new Dictionary<string, uint>();
         if (roster == null) { Plugin.Log.LogError("BuildParty: no RosterManager (is a run active?)"); return map; }
 
@@ -36,7 +36,7 @@ internal static class Dd2Heroes
         foreach (var hero in heroes)
         {
             uint guid = LibraryActors.LibraryActorsInstance.CreateActor(hero.ClassId);
-            var actor = Dd2.Actor(guid);
+            var actor = Dd2Api.Actor(guid);
             if (actor == null) { Plugin.Log.LogError($"Could not create a DD2 {hero.ClassId} for {hero.Name}"); continue; }
 
             Apply(hero, actor);
@@ -77,8 +77,8 @@ internal static class Dd2Heroes
     /// <summary>Read an actor's condition back into a homecoming outcome.</summary>
     public static HeroOutcome ReadBack(HeroRecord hero, uint guid)
     {
-        var actor = Dd2.Actor(guid);
-        bool dead = actor == null || Dd2.IsDead(guid);
+        var actor = Dd2Api.Actor(guid);
+        bool dead = actor == null || Dd2Api.IsDead(guid);
         var outcome = new HeroOutcome { HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null };
         if (dead) return outcome;
 
