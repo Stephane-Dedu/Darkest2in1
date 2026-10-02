@@ -142,6 +142,20 @@ Pattern 1 from mashup-mods ("port the content"): a **BepInEx 5 + HarmonyX plugin
   wired through `RefsDir` / `GameRefs` / `BepInExRefs` in `Directory.Build.props`.
 - Need a healthy install (D: = Samsung 840 PRO SSD, 102 GB free). C: has only 16 GB free.
 
-## Next step
-User approval to install BepInEx into `E:\DarkestDungeonII`, then: plugin skeleton → log line in
-`BepInEx/LogOutput.log` → a debug key that starts one DD2 fight from our code (vertical slice #1).
+## Status (2026-10-02, end of session 1)
+- Commits: plugin scaffold (F8/F9 debug keys, mode logging) → Core: map generator → campaign + quest board →
+  crawl rules → homecoming + saves. 23 unit tests pass (`dotnet test tests/DarkestDungeon3.Core.Tests`).
+- The plugin builds but has **never run in game**: blocked on the failing E: drive.
+- The user is reinstalling DD2 to `D:\DarkestDungeonII` (matches `GameDir` in `Directory.Build.props`).
+  The old partial copy was renamed `D:\DarkestDungeonII.partial-copy` (safe to delete once the reinstall works).
+- Judgment calls to revisit: resolve XP per quest (2/4/6 by length, not in DD1 data), trap damage per trap id
+  (hardcoded, should come from `props/trap_definitions.json`), gather/activate quests fall back to explore rules.
+
+## Next steps
+1. After the reinstall: install BepInEx 5.4.23.5 into D:, launch windowed (`-screen-fullscreen 0 -screen-width 1600
+   -screen-height 900`), confirm `BepInEx/LogOutput.log` shows "Darkest Dungeon 3 0.1.0 loaded".
+2. Slice 1: start a normal DD2 run, press F9 on the road → a DUNGEON-source fight in `combat_arena_catacombs_cultist`
+   with the run's party; confirm it ends back on the road. Screenshot + log.
+3. Slice 2: our crawl UI (uGUI canvas, DD1 corridor PNGs from the DD1 install) driven by `Core.Expedition.Crawl`,
+   with hall/room fights going to DD2 combat and back. `IParty` implemented over DD2 `ActorInstance`s.
+4. Slice 3: Hamlet entry from the main menu; embark builds the DD2 party from `HeroRecord`s; homecoming writes back.
