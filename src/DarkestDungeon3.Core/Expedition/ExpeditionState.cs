@@ -32,6 +32,10 @@ public sealed class ExpeditionState
     /// <summary>DD1 buffs (camp, curios) waiting to become DD2 tokens at the next fight, per hero.</summary>
     public Dictionary<string, List<string>> PendingBuffs = new();
     public int CampsMade;
+    /// <summary>Gold paid at the provisioner, refunded if the expedition is cancelled before it starts.</summary>
+    public int ProvisionCost;
+    /// <summary>True once the party stood in the dungeon (Crawl.Begin ran).</summary>
+    public bool Started;
 
     public int StepsTaken;
     public int BattlesWon;

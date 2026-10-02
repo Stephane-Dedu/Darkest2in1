@@ -57,7 +57,15 @@ internal sealed class Driver : MonoBehaviour
     public void EnterHamlet(int slot)
     {
         S.LoadOrCreate(slot);
-        if (S.Save.Expedition != null)
+        if (S.Save.Expedition is { Started: false } stillborn)
+        {
+            // The party never reached the dungeon (the game closed or failed during embark): call it off.
+            S.Save.Estate.Add(Currency.Gold, stillborn.ProvisionCost);
+            S.Save.Expedition = null;
+            Say($"The expedition never left. {stillborn.ProvisionCost} gold of provisions refunded.");
+            S.Persist();
+        }
+        else if (S.Save.Expedition != null)
         {
             // An expedition was interrupted (the game closed mid-dungeon). DD1 counts that as a retreat.
             Say("The last expedition was cut short. The party limps home.");
@@ -87,6 +95,7 @@ internal sealed class Driver : MonoBehaviour
 
         S.Save.Estate.Add(Currency.Gold, -cost);
         var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, S.Provisioner);
+        exp.ProvisionCost = cost;
         S.Save.Expedition = exp;
         // DD1 resolves town activities while the party is away.
         S.Hamlet.EndWeek();

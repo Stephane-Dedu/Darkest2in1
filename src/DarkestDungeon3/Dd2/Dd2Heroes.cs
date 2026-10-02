@@ -42,6 +42,9 @@ internal static class Dd2Heroes
             Apply(hero, actor);
             var entry = new RosterEntry(hero.ClassId, guid);
             entries.Add(entry);
+            // Like DD2's own roster code: a new entry starts IDLE, then joins the party. Going straight to PARTY
+            // crashes ActorInstance.HandleEventRosterEntryStatusChanged (it reads the previous status, null here).
+            entry.SetRosterStatus(RosterStatusType.IDLE, 0u);
             entry.SetRosterStatus(RosterStatusType.PARTY, 0u);
             map[hero.Id] = guid;
             Plugin.Log.LogInfo($"[party] {hero.Name} ({hero.ClassId}) → actor {guid}, hp {actor.HpRaw}/{actor.CurrentHpMax}, stress {actor.Stress}/{actor.StressMax}");

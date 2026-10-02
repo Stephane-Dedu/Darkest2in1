@@ -1,7 +1,7 @@
 <Project>
   <!-- Machine-specific paths. Override on the command line: dotnet build -p:GameDir=... -->
   <PropertyGroup>
-    <GameDir Condition="'$(GameDir)' == ''">D:\DarkestDungeonII</GameDir>
+    <GameDir Condition="'$(GameDir)' == ''">C:\Users\Piral\DarkestDungeon3\game</GameDir>
     <GameManaged>$(GameDir)\Darkest Dungeon II_Data\Managed</GameManaged>
     <!-- Compile-time references: a local copy, so builds don't depend on a working game folder. -->
     <RefsDir Condition="'$(RefsDir)' == ''">C:\Users\Piral\dd2-decomp\refs</RefsDir>

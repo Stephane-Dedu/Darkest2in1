@@ -29,6 +29,13 @@ public sealed class Hamlet
     {
         var estate = new Estate { Seed = seed };
         estate.Add(Currency.Gold, 500);
+        // DD1 opens with the Ruins tutorial; we skip it but pay out what it pays (3000 gold, 4 crests).
+        var tutorial = dd1.Goals?.Plot.FirstOrDefault(p => p.Id == "plot_tutorial_crypts");
+        if (tutorial != null)
+        {
+            foreach (var r in tutorial.Rewards.Where(r => r.Type != "trinket")) estate.Add(r.Type, r.Amount);
+            estate.CompletedPlotQuests.Add(tutorial.Id);
+        }
         var hamlet = new Hamlet(estate, dd1, buildings, catalog, camping);
         var rng = estate.NextRng();
         // DD1's first recruits are fixed (Crusader, Highwayman, Plague Doctor, Vestal). Use the DD2 classes

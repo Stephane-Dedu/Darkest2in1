@@ -44,7 +44,8 @@
   </ItemGroup>
 
   <!-- Deploy into the game after every build. -->
-  <Target Name="DeployToGame" AfterTargets="Build" Condition="Exists('$(BepInExDir)')">
+  <!-- Pass -p:Deploy=false while the game is running (it locks the loaded DLLs). -->
+  <Target Name="DeployToGame" AfterTargets="Build" Condition="Exists('$(BepInExDir)') and '$(Deploy)' != 'false'">
     <MakeDir Directories="$(PluginDeployDir)" />
     <!-- Only our own assemblies: the game already ships Newtonsoft.Json. -->
     <ItemGroup>

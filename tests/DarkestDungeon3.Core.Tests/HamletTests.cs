@@ -59,6 +59,9 @@ public class HamletTests
         Assert.Equal(2, h.Estate.WagonStock.Count);
         Assert.NotEmpty(h.Estate.Quests);
         Assert.All(h.Estate.Roster, hero => Assert.NotEmpty(hero.Quirks));
+        // DD1's skipped tutorial pays out: 500 base + 3000 gold, 4 crests.
+        Assert.Equal(3500, h.Estate.Get(Currency.Gold));
+        Assert.Equal(4, h.Estate.Get(Currency.Crest));
     }
 
     [Fact]

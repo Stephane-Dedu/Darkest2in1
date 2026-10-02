@@ -120,6 +120,7 @@ public sealed class Crawl
     public List<CrawlEvent> Begin()
     {
         _events.Clear();
+        State.Started = true;
         State.RoomId = Map.EntranceRoomId;
         EnterRoom(Map.Room(State.RoomId));
         return Flush();
