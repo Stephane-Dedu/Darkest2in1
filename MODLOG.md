@@ -171,9 +171,24 @@ arenas, bosses; 46 refs validated against DD2 CSVs).
 - Judgment calls to revisit: resolve XP per quest (2/4/6 by length, not in DD1 data), trap damage per trap id
   (hardcoded, should come from `props/trap_definitions.json`), gather/activate quests fall back to explore rules.
 
+## Playable loop (compiled, untested in game) — plugin 0.2.0
+`Runtime/Session` (DD1 content on a worker thread, saves at `<persistentDataPath>/DarkestDungeon3/estate_N.json`),
+`Runtime/Driver` (Phase: Off → Hamlet → Embarking → Crawling ⇄ Fighting → Homecoming), `Dd2/Dd2Run` (host run:
+SKIP_VALLEY, SKIP_PROLOGUE, DRIVING_DISABLE_COMBATS, no intro/tutorials; ends with ABANDON → MAIN_MENU),
+`Ui/*` (IMGUI on a 1920x1080 virtual canvas + uGUI input blocker). Main-menu button "The Hamlet" → slot picker.
+
+## First in-game session checklist (when DD2 is on D:)
+1. Install BepInEx 5.4.23.5 into D:, launch windowed, check LogOutput.log for "Darkest Dungeon 3 0.2.0 loaded" and
+   "[session] DD1 content loaded".
+2. Main menu: the Hamlet button shows; new estate in slot 1; screens render; DD1 art loads (town_bg.png).
+3. Embark: watch `[run]` lines. Does DRIVING start without hero select? Does the roster swap (`[party]`) work?
+4. Crawl: walk, hit a fight, `[combat]` lines; does DD2 return to DRIVING after RESULTS? Does the overlay come back?
+5. Leave: does ABANDON → MAIN_MENU work without DD2's end-of-run screens? Homecoming log right?
+6. Risky assumptions to verify: arena names, trinket rarity tags, quirk library access, IMGUI clicks not leaking.
+
 ## Next steps
 1. After the reinstall: install BepInEx 5.4.23.5 into D:, launch windowed (`-screen-fullscreen 0 -screen-width 1600
-   -screen-height 900`), confirm `BepInEx/LogOutput.log` shows "Darkest Dungeon 3 0.1.0 loaded".
+   -screen-height 900`), confirm `BepInEx/LogOutput.log` shows "Darkest Dungeon 3 0.2.0 loaded".
 2. Slice 1: start a normal DD2 run, press F9 on the road → a DUNGEON-source fight in `combat_arena_catacombs_cultist`
    with the run's party; confirm it ends back on the road. Screenshot + log.
 3. Slice 2: our crawl UI (uGUI canvas, DD1 corridor PNGs from the DD1 install) driven by `Core.Expedition.Crawl`,
