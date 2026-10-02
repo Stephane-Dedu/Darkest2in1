@@ -86,8 +86,8 @@ internal sealed class CrawlUi
                 if (top != null) GUI.DrawTexture(new Rect(x, 0, 720, top.height), top);
                 if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
             }
-            DrawHallContent(crawl.CurrentTile);
         }
+        DrawProp(crawl, exp);
 
         // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
         float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
@@ -99,24 +99,65 @@ internal sealed class CrawlUi
         }
     }
 
-    /// <summary>What's on the current hall square, drawn in front of the party (no DD1 prop art yet: its map icon).</summary>
-    private static void DrawHallContent(HallTile tile)
+    /// <summary>
+    /// What stands in front of the party: DD1's own prop art (curios closed, highlighted under the mouse, open
+    /// once used; obstacles; spotted traps), drawn from its Spine skeletons. Falls back to the map icon.
+    /// </summary>
+    /// <summary>Debug (F6): show this curio in front of the party instead of what's really there.</summary>
+    public static string PreviewCurio;
+
+    private static void DrawProp(Crawl crawl, ExpeditionState exp)
     {
-        if (tile == null || tile.Resolved && tile.Content != HallContent.Curio) return;
-        string icon = tile.Content switch
+        string kind = null, id = null;
+        bool used = false;
+        if (PreviewCurio != null) { kind = "curios"; id = PreviewCurio; }
+        else if (exp.InRoom)
         {
-            HallContent.Curio when !tile.Resolved => "marker_curio",
-            HallContent.Obstacle => "marker_obstacle",
-            HallContent.Trap when tile.Scouted => "marker_trap",
-            _ => null,
-        };
-        if (icon == null) return;
+            var room = crawl.CurrentRoom;
+            if (room?.CurioId != null) { kind = "curios"; id = room.CurioId; used = room.CurioTaken; }
+        }
+        else if (crawl.CurrentTile is { } tile)
+        {
+            switch (tile.Content)
+            {
+                case HallContent.Curio: kind = "curios"; id = tile.ContentId; used = tile.Resolved; break;
+                case HallContent.Obstacle when !tile.Resolved: kind = "obstacles"; id = tile.ContentId; break;
+                case HallContent.Trap when tile.Scouted && !tile.Resolved: kind = "traps"; id = tile.ContentId; break;
+            }
+        }
+        if (kind == null) return;
+
+        var feet = new Vector2(PropX, Feet + 10);
+        string folder = S.Dd1.PathOf("props", "shared", kind, id ?? "");
+        SpineArt.Picture pic;
+        if (kind == "curios")
+        {
+            var closed = SpineArt.Get(folder, "closed", sl => sl.Name != "active" && sl.Name != "open");
+            bool hover = !used && closed != null && closed.Hit(feet, 1f, Event.current.mousePosition);
+            pic = used ? SpineArt.Get(folder, "open", sl => sl.Name != "active" && sl.Name != "closed")
+                : hover ? SpineArt.Get(folder, "active", sl => sl.Name != "closed" && sl.Name != "open") ?? closed
+                : closed;
+        }
+        else pic = SpineArt.Get(folder, "idle", sl => sl.Name != "active" && !sl.Name.StartsWith("dust") && sl.Name != "splash" && sl.Name != "foam");
+
+        var shadow = Art.Overlay("charactershadow_med.png");
+        if (pic != null)
+        {
+            var r = pic.RectAt(feet);
+            if (shadow != null) GUI.DrawTexture(new Rect(feet.x - r.width * 0.45f, feet.y - 30, r.width * 0.9f, 50), shadow);
+            pic.Draw(feet);
+            return;
+        }
+        if (used) return;
+        string icon = kind switch { "curios" => "marker_curio", "obstacles" => "marker_obstacle", _ => "marker_trap" };
         var tex = Art.MapIcon(icon);
         if (tex == null) return;
-        var r = new Rect(1130, 470, 150, 150);
-        Gui.Fill(new Rect(r.x - 10, r.yMax + 2, r.width + 20, 14), new Color(0, 0, 0, 0.4f));
-        GUI.DrawTexture(r, tex, ScaleMode.ScaleToFit);
+        var ir = new Rect(PropX - 75, Feet - 150, 150, 150);
+        Gui.Fill(new Rect(ir.x - 10, ir.yMax + 2, ir.width + 20, 14), new Color(0, 0, 0, 0.4f));
+        GUI.DrawTexture(ir, tex, ScaleMode.ScaleToFit);
     }
+
+    private const float PropX = 1130;
 
     // ---------------- party ----------------
 
@@ -418,7 +459,7 @@ internal sealed class CrawlUi
         bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
         if (curio == null && !obstacle && !trap && !battleStuck) return;
 
-        var r = new Rect(1150, 170, 420, 400);
+        var r = new Rect(1460, 150, 420, 400);
         Gui.Fill(r, new Color(0.05f, 0.04f, 0.03f, 0.93f));
         Gui.Fill(new Rect(r.x, r.y, r.width, 3), Gui.Gold);
         Gui.Fill(new Rect(r.x, r.yMax - 3, r.width, 3), Gui.Gold);

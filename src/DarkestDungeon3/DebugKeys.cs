@@ -28,6 +28,15 @@ public class DebugKeys : MonoBehaviour
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
             if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f6Key.wasPressedThisFrame)
+            {
+                // Cycle through DD1's curios (Shift+F6 clears the preview).
+                var dir = Runtime.Session.Current?.Dd1.PathOf("props", "shared", "curios");
+                var all = dir != null && System.IO.Directory.Exists(dir) ? System.IO.Directory.GetDirectories(dir).Select(System.IO.Path.GetFileName).OrderBy(n => n).ToList() : new System.Collections.Generic.List<string>();
+                if (kb.shiftKey.isPressed || all.Count == 0) Ui.CrawlUi.PreviewCurio = null;
+                else Ui.CrawlUi.PreviewCurio = all[(all.IndexOf(Ui.CrawlUi.PreviewCurio ?? "") + 1) % all.Count];
+                Plugin.Log.LogInfo("[F6] curio preview: " + (Ui.CrawlUi.PreviewCurio ?? "off"));
+            }
             if (kb.f7Key.wasPressedThisFrame)
                 Plugin.Log.LogInfo("[F7] " + (DarkestDungeon3.Dd2.HeroStage.Instance?.Dump(System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "DarkestDungeon3", "herostage.png")) ?? "no stage"));
             if (kb.f11Key.wasPressedThisFrame) DarkestDungeon3.Runtime.Driver.Instance?.DebugFight();
