@@ -28,6 +28,18 @@ public class DebugKeys : MonoBehaviour
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
             if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f5Key.wasPressedThisFrame)
+            {
+                // Make camp here: hand the party firewood and some food first (testing).
+                var d = Runtime.Driver.Instance;
+                if (d?.Expedition != null)
+                {
+                    d.Expedition.Pack.Add(Core.Expedition.Supply.Firewood, 1);
+                    if (d.Expedition.Pack.Count(Core.Expedition.Supply.Food) < 8) d.Expedition.Pack.Add(Core.Expedition.Supply.Food, 8);
+                    d.MakeCamp();
+                    Plugin.Log.LogInfo("[F5] camp: " + (d.Expedition.Camp != null ? "made" : "refused (needs a safe room)"));
+                }
+            }
             if (kb.f6Key.wasPressedThisFrame)
             {
                 // Cycle through DD1's curios (Shift+F6 clears the preview).

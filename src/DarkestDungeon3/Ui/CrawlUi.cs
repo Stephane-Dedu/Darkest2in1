@@ -17,12 +17,13 @@ namespace DarkestDungeon3.Ui;
 internal sealed class CrawlUi
 {
     private static readonly float[] HeroX = { 788, 620, 452, 284 };   // rank 1..4 (DD1 overlays.hero_start_pos/spacing)
+    private static readonly float[] CampX = { 1250, 1450, 670, 470 }; // at camp: two each side of the fire
     private const float Feet = 680;
     private const float MapUnit = 40;                                  // map pixels per fine grid unit
 
     private bool _inventoryTab;
     private bool _confirmRetreat;
-    private string _campHero, _campTarget;
+    private string _campSkillPending, _campSkillUser;   // a camp skill waiting for its target
 
     private static Session S => Session.Current;
     private static Driver D => Driver.Instance;
@@ -36,13 +37,13 @@ internal sealed class CrawlUi
         if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
 
         DrawScene(crawl, exp, zone);
+        if (exp.Camp != null) DrawCampfire();
         DrawHeroes(exp);
-        DrawTorch(exp.Light);
+        if (exp.Camp != null) DrawRespite(exp.Camp); else DrawTorch(exp.Light);
         DrawQuestInfo(crawl, exp);
         DrawHud(exp);
         if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
-        DrawPrompt(crawl, exp);
-        if (exp.Camp != null) DrawCamp(crawl, exp);
+        if (exp.Camp != null) DrawCamp(crawl, exp); else DrawPrompt(crawl, exp);
         Gui.DrawAnnouncement();
     }
 
@@ -175,7 +176,8 @@ internal sealed class CrawlUi
             uint guid = D.Party.Guid(id);
             var actor = Dd2Api.Actor(guid);
             bool dead = actor == null || Dd2Api.IsDead(guid);
-            float x = HeroX[rank];
+            bool camping = exp.Camp != null;
+            float x = camping ? CampX[rank] : HeroX[rank];
 
             if (shadow != null) GUI.DrawTexture(new Rect(x - 85, Feet - 30, 170, 50), shadow);
             if (!dead && id == D.SelectedHeroId && selected != null) GUI.DrawTexture(new Rect(x - 87, Feet - 196, 175, 206), selected);
@@ -184,7 +186,9 @@ internal sealed class CrawlUi
             if (dead) GUI.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
             var sprite = models != null && !dead ? null : Art.HeroFigure(hero?.ClassId);
             bool large = sprite != null && sprite != Art.Portrait(hero?.ClassId);
-            if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420, 240, 430) : new Rect(x - 80, Feet - 230, 160, 220), sprite);
+            // At camp the two front ranks sit on the far side of the fire, facing back toward it.
+            bool facingLeft = camping && rank < 2;
+            if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420, 240, 430) : new Rect(x - 80, Feet - 230, 160, 220), sprite, flipX: facingLeft);
             else if (models == null) Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             GUI.color = old;
 
@@ -196,7 +200,18 @@ internal sealed class CrawlUi
             }
             else Gui.Text(new Rect(x - 80, Feet + 6, 160, 30), "Dead", 22, Gui.Blood, TextAnchor.UpperCenter, heading: true);
 
-            if (!dead && Gui.Hotspot(new Rect(x - 80, Feet - 240, 160, 290))) D.SelectedHeroId = id;
+            var hit = new Rect(x - 80, Feet - 240, 160, 290);
+            if (!dead && _campSkillPending != null && hit.Contains(Event.current.mousePosition))
+                Gui.Fill(new Rect(x - 60, Feet + 40, 120, 4), Gui.Gold);   // target under the mouse
+            if (!dead && Gui.Hotspot(hit))
+            {
+                if (_campSkillPending != null)
+                {
+                    D.UseCampSkill(_campSkillUser, _campSkillPending, id);
+                    _campSkillPending = null;
+                }
+                else D.SelectedHeroId = id;
+            }
         }
     }
 
@@ -510,46 +525,156 @@ internal sealed class CrawlUi
 
     // ---------------- camp (restyled; full DD1 camp screen comes later) ----------------
 
+    // ---------------- camp ----------------
+
+    private static void DrawCampfire()
+    {
+        // Night falls on the room; the fire lights the middle.
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, 0.45f));
+        var glow = Art.Overlay("torch_flame.png");
+        float flicker = 1f + 0.06f * Mathf.Sin(Time.unscaledTime * 7f) + 0.04f * Mathf.Sin(Time.unscaledTime * 13f);
+        if (glow != null)
+        {
+            var old = GUI.color;
+            GUI.color = new Color(1f, 0.6f, 0.25f, 0.35f);
+            float w = 900 * flicker, h = 420 * flicker;
+            GUI.DrawTexture(new Rect(960 - w / 2, Feet - 130 - h / 2, w, h), glow);
+            GUI.color = new Color(1f, 0.85f, 0.5f, 0.9f);
+            GUI.DrawTexture(new Rect(960 - 40 * flicker, Feet - 150, 80 * flicker, 110 * flicker), glow);
+            GUI.color = old;
+        }
+        var camp = Art.Dd1("props", "shared", "campfire.png");
+        if (camp != null) GUI.DrawTexture(new Rect(960 - camp.width / 2f, Feet + 30 - camp.height, camp.width, camp.height), camp);
+    }
+
+    private static void DrawRespite(CampState camp)
+    {
+        Gui.Text(new Rect(660, 30, 600, 40), "Respite", 30, Gui.Dd1Class, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(660, 64, 600, 70), camp.RespiteLeft.ToString(), 64, Gui.Gold, TextAnchor.MiddleCenter, heading: true);
+    }
+
+    private static string Describe(CampEffect e)
+    {
+        string who = e.Selection switch { "self" => "self", "individual" => "one ally", "party" => "party", "party_other" => "the others", _ => e.Selection };
+        string what = e.Type switch
+        {
+            "stress_heal_amount" => $"-{Gui.Num(e.Amount / 10f)} stress",
+            "stress_damage_amount" => $"+{Gui.Num(e.Amount / 10f)} stress",
+            "health_heal_max_health_percent" => $"heal {Gui.Num(e.Amount * 100f, "0")}% HP",
+            "buff" => HamletUi.Pretty(e.SubType),
+            "remove_bleeding" or "remove_bleed" => "cure bleeding",
+            "remove_poison" => "cure blight",
+            "remove_disease" => "cure a disease",
+            "remove_deaths_door_recovery_buffs" => "shake off death's door",
+            "reduce_ambush_chance" => "no ambush tonight",
+            "loot" => "find supplies",
+            _ => HamletUi.Pretty(e.Type),
+        };
+        return (e.Chance < 1f ? $"{Gui.Num(e.Chance * 100f, "0")}%: " : "") + what + $" ({who})";
+    }
+
     private void DrawCamp(Crawl crawl, ExpeditionState exp)
     {
-        var area = new Rect(560, 60, 800, 600);
-        Gui.Fill(area, new Color(0.05f, 0.04f, 0.03f, 0.95f));
-        Gui.Fill(new Rect(area.x, area.y, area.width, 3), Gui.Gold);
         var camp = exp.Camp;
-        Gui.Text(new Rect(area.x, area.y + 14, area.width, 44), $"Camp — Respite {camp.RespiteLeft}", 38, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
-
         if (!camp.Ate)
         {
-            int i = 0;
-            foreach (Meal m in Enum.GetValues(typeof(Meal)))
-            {
-                int cost = crawl.MealCost(m);
-                if (Gui.DdButton(new Rect(area.x + 20 + i++ * 192, area.y + 72, 184, 50), $"{m} ({cost})", exp.Pack.Count(Supply.Food) >= cost, 22))
-                    D.EatMeal(m);
-            }
+            DrawMealChoice(crawl, exp);
+            return;
         }
-        var alive = D.Party.Alive;
-        for (int i = 0; i < alive.Count; i++)
-            if (Gui.DdButton(new Rect(area.x + 20 + i * 192, area.y + 140, 184, 44), (_campHero == alive[i] ? "> " : "") + S.Save.Estate.Hero(alive[i])?.Name, true, 22))
-                _campHero = alive[i];
-        if (_campHero != null && exp.CampSkills.TryGetValue(_campHero, out var skills))
+
+        // The selected hero's camping skills, in a row above the camp.
+        string hero = D.SelectedHeroId;
+        if (hero != null && exp.CampSkills.TryGetValue(hero, out var skills) && skills.Count > 0)
         {
+            Gui.Text(new Rect(560, 150, 800, 34), $"{S.Save.Estate.Hero(hero)?.Name}'s camping skills", 24, Gui.Dd1Class, TextAnchor.MiddleCenter, heading: true);
+            float w = skills.Count * 92 - 12, x0 = 960 - w / 2;
+            string hovered = null;
             for (int i = 0; i < skills.Count; i++)
             {
                 var skill = S.Content.Camping.Get(skills[i]);
                 if (skill == null) continue;
-                string why = crawl.WhyCantUseCampSkill(_campHero, skill.Id);
-                if (Gui.DdButton(new Rect(area.x + 20 + (i % 2) * 384, area.y + 200 + (i / 2) * 56, 376, 50), $"{HamletUi.Pretty(skill.Id)} ({skill.Cost})", why == null, 22))
+                var r = new Rect(x0 + i * 92, 190, 80, 80);
+                string why = crawl.WhyCantUseCampSkill(hero, skill.Id);
+                bool hover = r.Contains(Event.current.mousePosition);
+                if (hover) hovered = skill.Id;
+                var old = GUI.color;
+                if (why != null) GUI.color = new Color(0.35f, 0.35f, 0.35f, 1f);
+                var icon = Art.Dd1("raid", "camping", "skill_icons", $"camp_skill_{skill.Id}.png");
+                if (icon != null) GUI.DrawTexture(hover ? new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6) : r, icon);
+                else Gui.Fill(r, new Color(0.15f, 0.12f, 0.1f));
+                GUI.color = old;
+                if (_campSkillPending == skill.Id && _campSkillUser == hero) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
+                Gui.Fill(new Rect(r.xMax - 26, r.y, 26, 26), new Color(0, 0, 0, 0.8f));
+                Gui.Text(new Rect(r.xMax - 26, r.y, 26, 26), skill.Cost.ToString(), 20, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter, heading: true);
+                if (why == null && Gui.Hotspot(r))
                 {
-                    if (skill.NeedsTarget && _campTarget == null) Gui.Announce("Choose a target first.");
-                    else D.UseCampSkill(_campHero, skill.Id, _campTarget);
+                    if (skill.NeedsTarget)
+                    {
+                        _campSkillPending = skill.Id;
+                        _campSkillUser = hero;
+                        Gui.Announce("Choose who receives it.");
+                    }
+                    else
+                    {
+                        _campSkillPending = null;
+                        D.UseCampSkill(hero, skill.Id, null);
+                    }
                 }
             }
-            Gui.Text(new Rect(area.x + 20, area.y + 432, 120, 30), "Target", 22, Gui.Dd1Class, heading: true);
-            for (int i = 0; i < alive.Count; i++)
-                if (Gui.DdButton(new Rect(area.x + 130 + i * 162, area.y + 426, 156, 42), (_campTarget == alive[i] ? "> " : "") + S.Save.Estate.Hero(alive[i])?.Name, true, 20))
-                    _campTarget = alive[i];
+            if (hovered != null) DrawCampSkillTip(crawl, exp, hero, hovered);
         }
-        if (Gui.DdButton(new Rect(area.xMax - 260, area.yMax - 70, 240, 54), "Break camp")) D.BreakCamp();
+        else Gui.Text(new Rect(560, 190, 800, 40), "Click a hero to see their camping skills.", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
+
+        if (_campSkillPending != null && Event.current.type == EventType.MouseDown && Event.current.button == 1)
+        {
+            _campSkillPending = null;    // right-click cancels the targeting
+            Event.current.Use();
+        }
+        if (Gui.DdButton(new Rect(1620, 600, 270, 60), "Break camp", true, 26))
+        {
+            _campSkillPending = null;
+            D.BreakCamp();
+        }
+    }
+
+    private static void DrawMealChoice(Crawl crawl, ExpeditionState exp)
+    {
+        // DD1 starts the night with a meal: how much food to share out.
+        var r = new Rect(560, 150, 800, 230);
+        Gui.Fill(r, new Color(0.03f, 0.025f, 0.02f, 0.92f));
+        Gui.Fill(new Rect(r.x, r.y, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
+        Gui.Fill(new Rect(r.x, r.yMax - 2, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
+        Gui.Text(new Rect(r.x, r.y + 10, r.width, 44), "The meal", 36, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        int i = 0, food = exp.Pack.Count(Supply.Food);
+        foreach (Meal m in Enum.GetValues(typeof(Meal)))
+        {
+            int cost = crawl.MealCost(m);
+            var b = new Rect(r.x + 30 + i * 192, r.y + 70, 180, 140);
+            i++;
+            bool can = food >= cost;
+            bool hover = can && b.Contains(Event.current.mousePosition);
+            Gui.Fill(b, hover ? new Color(0.2f, 0.16f, 0.1f, 0.9f) : new Color(0.08f, 0.07f, 0.06f, 0.9f));
+            var icon = cost > 0 ? Art.InventoryIcon(Supply.Food, Mathf.Max(1, cost), 12) : null;
+            if (icon != null) GUI.DrawTexture(new Rect(b.x + 10, b.y + 6, 64, 128), icon, ScaleMode.ScaleToFit);
+            string name = cost == 0 ? "Go hungry" : m.ToString();
+            Gui.Text(new Rect(b.x + 74, b.y + 20, 104, 40), name, 26, can ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(b.x + 74, b.y + 62, 104, 60), cost == 0 ? "No food" : $"{cost} food", 20, can ? Gui.Dd1Text : Gui.Dim, TextAnchor.UpperLeft);
+            if (can && Gui.Hotspot(b)) D.EatMeal(m);
+        }
+    }
+
+    private static void DrawCampSkillTip(Crawl crawl, ExpeditionState exp, string hero, string skillId)
+    {
+        var skill = S.Content.Camping.Get(skillId);
+        string why = crawl.WhyCantUseCampSkill(hero, skillId);
+        exp.Camp.Uses.TryGetValue(hero + ":" + skillId, out int used);
+        var lines = skill.Effects.Select(Describe).ToList();
+        if (skill.UseLimit > 0) lines.Add($"Uses: {used}/{skill.UseLimit}");
+        if (why != null) lines.Add(why);
+        var tip = new Rect(660, 286, 600, 52 + 26 * lines.Count);
+        Gui.Fill(tip, new Color(0.03f, 0.025f, 0.02f, 0.94f));
+        Gui.Text(new Rect(tip.x + 14, tip.y + 6, tip.width - 28, 34), $"{Dd1Text.CampSkillName(skillId)}  ·  {skill.Cost} respite", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        for (int i = 0; i < lines.Count; i++)
+            Gui.Text(new Rect(tip.x + 14, tip.y + 44 + i * 26, tip.width - 28, 26), lines[i], 19, i < skill.Effects.Count ? Gui.Dd1Text : Gui.Dd1Class, TextAnchor.MiddleLeft);
     }
 }

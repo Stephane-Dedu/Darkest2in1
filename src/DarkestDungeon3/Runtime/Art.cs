@@ -170,7 +170,7 @@ internal static class Art
         LargePortrait(classId, Plugin.HeroArt.Value) ?? Portrait(classId);
 
     /// <summary>Draw a sprite (from an atlas) into a rect, keeping its aspect ratio.</summary>
-    public static void DrawSprite(Rect r, Sprite s, bool fit = true)
+    public static void DrawSprite(Rect r, Sprite s, bool fit = true, bool flipX = false)
     {
         if (s == null || s.texture == null) return;
         var t = s.texture;
@@ -182,6 +182,7 @@ internal static class Art
             float w = tr.width * k, h = tr.height * k;
             r = new Rect(r.x + (r.width - w) / 2f, r.yMax - h, w, h);   // bottom-aligned: heroes stand on the floor
         }
+        if (flipX) uv = new Rect(uv.xMax, uv.y, -uv.width, uv.height);
         GUI.DrawTextureWithTexCoords(r, t, uv, true);
     }
 }

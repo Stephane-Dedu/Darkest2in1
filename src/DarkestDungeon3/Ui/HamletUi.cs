@@ -223,7 +223,7 @@ internal sealed class HamletUi
 
         var gold = Art.Dd1("shared", "estate", "currency.gold.large_icon.png");
         if (gold != null) GUI.DrawTexture(new Rect(120, BarY + 14, 88, 88), gold);
-        Gui.Text(new Rect(210, BarY + 30, 200, 56), E.Get(Currency.Gold).ToString("N0"), 34, Gui.Gold, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(210, BarY + 30, 200, 56), Gui.Num(E.Get(Currency.Gold), "#,0"), 34, Gui.Gold, TextAnchor.MiddleLeft, heading: true);
 
         var heirlooms = new[] { (Currency.Bust, "bust"), (Currency.Portrait, "portrait"), (Currency.Deed, "deed"), (Currency.Crest, "crest") };
         for (int i = 0; i < heirlooms.Length; i++)
@@ -392,7 +392,7 @@ internal sealed class HamletUi
             var inside = E.Roster.Where(h => h.Activity == a.Key).Select(h => h.Name);
             Gui.Text(new Rect(r.x + 118, r.y + 4, 400, 34), Pretty(a.Id), 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
             Gui.Text(new Rect(r.x + 118, r.y + 36, 420, 74),
-                $"{cost?.Amount} {cost?.Type}  ·  {hamlet.UsedSlots(a.Key)}/{a.Slots(E)} places  ·  relieves {lo / 10f:0.#}-{hi / 10f:0.#} stress\n{string.Join(", ", inside)}", 17, Gui.Dd1Class);
+                $"{cost?.Amount} {cost?.Type}  ·  {hamlet.UsedSlots(a.Key)}/{a.Slots(E)} places  ·  relieves {Gui.Num(lo / 10f)}-{Gui.Num(hi / 10f)} stress\n{string.Join(", ", inside)}", 17, Gui.Dd1Class);
             var hero = E.Hero(_assignHero);
             string why = hero == null ? "Pick a hero" : hamlet.WhyCantDo(hero, a);
             if (Gui.DdButton(new Rect(r.xMax - 176, r.y + 30, 164, 52), why ?? "Send " + hero.Name, why == null, why == null ? 22 : 16))

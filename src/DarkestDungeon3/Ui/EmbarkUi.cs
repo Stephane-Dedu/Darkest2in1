@@ -254,7 +254,7 @@ internal sealed class EmbarkUi
         int cost = CartCost(), gold = E.Get(Currency.Gold);
         var goldIcon = Art.Dd1("shared", "estate", "currency.gold.large_icon.png");
         if (goldIcon != null) GUI.DrawTexture(new Rect(820, 920, 72, 72), goldIcon);
-        Gui.Text(new Rect(900, 924, 600, 64), $"{gold:N0}   −{cost:N0}", 34, cost > gold ? Gui.Blood : Gui.Gold, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(900, 924, 600, 64), $"{Gui.Num(gold, "#,0")}   -{Gui.Num(cost, "#,0")}", 34, cost > gold ? Gui.Blood : Gui.Gold, TextAnchor.MiddleLeft, heading: true);
 
         if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the quests", size: 24)) { _provisioning = false; _confirmLow = false; }
 

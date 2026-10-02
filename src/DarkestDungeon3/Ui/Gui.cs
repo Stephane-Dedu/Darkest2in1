@@ -81,6 +81,9 @@ internal static class Gui
         Fill(new Rect(r.x + 1, r.y + 1, (r.width - 2) * Mathf.Clamp01(fraction), r.height - 2), fg);
     }
 
+    /// <summary>A number for display, in the invariant culture (the player's locale may use separators DD1's fonts lack).</summary>
+    public static string Num(float value, string format = "0.#") => value.ToString(format, System.Globalization.CultureInfo.InvariantCulture);
+
     public static string Colour(string text, Color c) => $"<color=#{ColorUtility.ToHtmlStringRGB(c)}>{text}</color>";
 
     // ---- DD1 look ----
