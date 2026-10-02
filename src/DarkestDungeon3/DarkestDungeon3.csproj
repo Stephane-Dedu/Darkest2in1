@@ -51,6 +51,10 @@
       <DeployFiles Include="$(TargetDir)DarkestDungeon3.dll;$(TargetDir)DarkestDungeon3.pdb;$(TargetDir)DarkestDungeon3.Core.dll;$(TargetDir)DarkestDungeon3.Core.pdb" />
     </ItemGroup>
     <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(PluginDeployDir)" Condition="Exists('%(FullPath)')" />
+    <ItemGroup>
+      <DeployData Include="$(MSBuildThisFileDirectory)..\..\data\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployData)" DestinationFolder="$(PluginDeployDir)\data\%(RecursiveDir)" />
     <Message Importance="high" Text="Deployed $(TargetFileName) to $(PluginDeployDir)" />
   </Target>
 
