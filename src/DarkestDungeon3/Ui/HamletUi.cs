@@ -20,7 +20,6 @@ internal sealed class HamletUi
     private string _building;          // the building whose window is open
     private string _heroId;
     private Vector2 _panelScroll, _logScroll;
-    private int _rosterTop;
 
     public bool WantsEmbark;
 
@@ -28,8 +27,7 @@ internal sealed class HamletUi
     private static Estate E => S.Save.Estate;
 
     // ---- DD1 layout (campaign/town/*.layout.darkest) ----
-    private const float RosterX = 1550, RosterFirstY = 132, RosterSpacing = 97;
-    private const int RosterVisible = 8;
+    private const float RosterX = RosterColumn.X;
     private static readonly Rect Window = new(144, 132, 1395, 776);
     private const float NavX = 70, NavY = 230, NavSpacing = 68;
     private const float BarY = 958;
@@ -209,72 +207,13 @@ internal sealed class HamletUi
 
     private void DrawRoster()
     {
-        var grad = Art.Dd1("campaign", "town", "roster", "roster_bggrad.png");
-        if (grad != null) GUI.DrawTexture(new Rect(RosterX, 0, 373, 1080), grad);
-        else Gui.Fill(new Rect(RosterX, 0, 370, 1080), new Color(0, 0, 0, 0.7f));
-
-        var top = Art.Dd1("campaign", "town", "roster", "roster_topframe.png");
-        if (top != null) GUI.DrawTexture(new Rect(RosterX - 6, RosterFirstY - 60, 383, 60), top);
-        Gui.Text(new Rect(RosterX + 20, 40, 330, 40), $"Roster  {E.Roster.Count}/{S.Buildings.RosterSize(E)}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-
-        var area = new Rect(RosterX, RosterFirstY, 370, RosterSpacing * RosterVisible);
-        if (Event.current.type == EventType.ScrollWheel && area.Contains(Event.current.mousePosition))
+        var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: _panel == Panel.Hero && _heroId == h.Id));
+        if (clicked != null)
         {
-            _rosterTop += Event.current.delta.y > 0 ? 1 : -1;
-            Event.current.Use();
+            _heroId = clicked.Id;
+            _panel = Panel.Hero;
+            _building = null;
         }
-        _rosterTop = Mathf.Clamp(_rosterTop, 0, Mathf.Max(0, E.Roster.Count - RosterVisible));
-
-        var bg = Art.Dd1("campaign", "town", "roster", "rosterelement.background.png");
-        var full = Art.Overlay("stress_pip_full.png");
-        var over = Art.Overlay("stress_pip_full_overstressed.png");
-        var empty = Art.Overlay("stress_pip_empty.png");
-        for (int i = 0; i < RosterVisible && _rosterTop + i < E.Roster.Count; i++)
-        {
-            var h = E.Roster[_rosterTop + i];
-            float x = RosterX - 12, y = RosterFirstY + i * RosterSpacing;
-            var r = new Rect(x, y, 383, 100);
-            bool hover = r.Contains(Event.current.mousePosition);
-            bool selected = _panel == Panel.Hero && _heroId == h.Id;
-            if (bg != null) GUI.DrawTexture(new Rect(x, y, 395, 104), bg);
-            if (hover || selected) Gui.Fill(new Rect(x + 8, y + 6, 360, 90), new Color(1f, 0.9f, 0.6f, selected ? 0.12f : 0.06f));
-
-            var portrait = new Rect(x + 21, y + 9, 82, 82);
-            var sprite = Art.HeroIcon(h.ClassId);
-            if (sprite != null) Art.DrawSprite(portrait, sprite);
-            string busyIn = h.Activity?.Split('.')[0];
-            if (busyIn != null)
-            {
-                var icon = Art.Dd1("campaign", "town", "buildings", busyIn, busyIn + ".icon_roster.png");
-                if (icon != null) GUI.DrawTexture(new Rect(x + 20, y + 10, 82, 82), icon, ScaleMode.ScaleToFit);
-            }
-            if (h.MissingWeeks > 0)
-            {
-                var missing = Art.Dd1("campaign", "town", "roster", "missing.icon_roster.png");
-                if (missing != null) GUI.DrawTexture(new Rect(x + 20, y + 10, 82, 82), missing, ScaleMode.ScaleToFit);
-            }
-
-            Gui.Text(new Rect(x + 116, y + 6, 200, 32), h.Name, 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(x + 116, y + 30, 160, 24), Pretty(h.ClassId), 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            Gui.Text(new Rect(x + 290, y + 6, 70, 32), h.ResolveLevel.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
-            for (int p = 0; p < 10; p++)
-            {
-                var pip = p < h.Stress ? (h.Stress >= 10 ? over ?? full : full) : empty;
-                if (pip != null) GUI.DrawTexture(new Rect(x + 116 + p * 13, y + 58, 11, 18), pip, ScaleMode.ScaleToFit);
-            }
-            if (Gui.Hotspot(r))
-            {
-                _heroId = h.Id;
-                _panel = Panel.Hero;
-                _building = null;
-            }
-        }
-
-        var bottom = Art.Dd1("campaign", "town", "roster", "roster_bottomframe.png");
-        float by = RosterFirstY + RosterSpacing * Mathf.Min(RosterVisible, Mathf.Max(1, E.Roster.Count)) + 4;
-        if (bottom != null) GUI.DrawTexture(new Rect(RosterX - 6, by, 383, 60), bottom);
-        if (E.Roster.Count > RosterVisible)
-            Gui.Text(new Rect(RosterX + 20, by + 50, 330, 30), $"{_rosterTop + 1}-{Mathf.Min(E.Roster.Count, _rosterTop + RosterVisible)} of {E.Roster.Count}  (scroll)", 18, Gui.Dim, TextAnchor.MiddleCenter);
     }
 
     private void DrawEstateBar()
