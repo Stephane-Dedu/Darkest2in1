@@ -127,7 +127,10 @@ internal sealed class CrawlUi
                 : room.Visited ? new Color(0.55f, 0.5f, 0.42f) : new Color(0.35f, 0.32f, 0.28f));
             if (room.IsQuestGoal && !room.CurioTaken) Gui.Fill(new Rect(r.x + cell * 0.35f, r.y + cell * 0.35f, cell * 0.3f, cell * 0.3f), Gui.Gold);
             if (neighbour && !D.Crawl.IsBlocked && GUI.Button(r, GUIContent.none, GUIStyle.none))
+            {
                 D.Travel(room.Id);
+                return;
+            }
         }
         Gui.Small(new Rect(area.x + 10, area.yMax - 30, area.width - 20, 26), "Click a neighbouring room to walk there.");
     }
@@ -144,22 +147,24 @@ internal sealed class CrawlUi
             return Gui.Button(r, label, enabled);
         }
 
-        if (crawl.IsBlocked && (exp.InRoom || crawl.CurrentTile.Content == HallContent.Battle))
+        // Every action can move the party (corridor ↔ room) or end the crawl, so after one runs this frame's
+        // drawing stops: the next OnGUI pass redraws from the new state.
+        var tile = crawl.CurrentTile;
+        if (crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle))
         {
-            if (Btn(Gui.Colour("<b>Fight!</b>", Gui.Blood))) D.Fight();
+            if (Btn(Gui.Colour("<b>Fight!</b>", Gui.Blood))) { D.Fight(); return; }
         }
-        else if (!exp.InRoom)
+        else if (!exp.InRoom && tile != null)
         {
-            if (Btn("Walk forward ▶")) D.Step(true);
-            if (Btn("◀ Back up")) D.Step(false);
-            var tile = crawl.CurrentTile;
-            if (tile.Content == HallContent.Obstacle && !tile.Resolved && Btn($"Clear obstacle ({(exp.Pack.Count(Supply.Shovel) > 0 ? "shovel" : "by hand")})")) D.ClearObstacle();
-            if (tile.Content == HallContent.Trap && !tile.Resolved && Btn("Disarm the trap")) D.DisarmTrap();
+            if (Btn("Walk forward ▶")) { D.Step(true); return; }
+            if (Btn("◀ Back up")) { D.Step(false); return; }
+            if (tile.Content == HallContent.Obstacle && !tile.Resolved && Btn($"Clear obstacle ({(exp.Pack.Count(Supply.Shovel) > 0 ? "shovel" : "by hand")})")) { D.ClearObstacle(); return; }
+            if (tile.Content == HallContent.Trap && !tile.Resolved && Btn("Disarm the trap")) { D.DisarmTrap(); return; }
         }
 
-        if (Btn($"Light a torch ({exp.Pack.Count(Supply.Torch)})", exp.Pack.Count(Supply.Torch) > 0 && exp.Light < 100)) D.UseTorch();
-        if (crawl.CanCamp && Btn($"Make camp ({exp.Pack.Count(Supply.Firewood)} firewood)")) D.MakeCamp();
-        if (Btn(exp.QuestComplete ? Gui.Colour("<b>Return to the Hamlet</b>", Gui.Gold) : "Retreat", exp.InRoom || exp.QuestComplete)) D.Leave();
+        if (Btn($"Light a torch ({exp.Pack.Count(Supply.Torch)})", exp.Pack.Count(Supply.Torch) > 0 && exp.Light < 100)) { D.UseTorch(); return; }
+        if (crawl.CanCamp && Btn($"Make camp ({exp.Pack.Count(Supply.Firewood)} firewood)")) { D.MakeCamp(); return; }
+        if (Btn(exp.QuestComplete ? Gui.Colour("<b>Return to the Hamlet</b>", Gui.Gold) : "Retreat", exp.InRoom || exp.QuestComplete)) { D.Leave(); return; }
 
         // Curio here: pick who touches it, and optionally an item.
         string curio = crawl.CurioHere;
@@ -172,11 +177,11 @@ internal sealed class CrawlUi
             for (int i = 0; i < alive.Count; i++)
                 if (Gui.Button(new Rect(x + i * 152, cy + 34, 146, 40), (alive[i] == _curioHero ? "▶" : "") + S.Save.Estate.Hero(alive[i])?.Name)) _curioHero = alive[i];
             string needed = crawl.QuestItemNeededHere;
-            if (Gui.Button(new Rect(x, cy + 80, 200, 46), needed != null ? $"Use {HamletUi.Pretty(needed)}" : "Investigate")) D.Investigate(_curioHero, needed);
+            if (Gui.Button(new Rect(x, cy + 80, 200, 46), needed != null ? $"Use {HamletUi.Pretty(needed)}" : "Investigate")) { D.Investigate(_curioHero, needed); return; }
             int k = 0;
             foreach (var item in S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).Take(2))
-                if (Gui.Button(new Rect(x + 210 + k++ * 200, cy + 80, 194, 46), "Use " + HamletUi.Pretty(item))) D.Investigate(_curioHero, item);
-            if (Gui.Button(new Rect(x + 420 - (k > 1 ? 0 : 0), cy + 80, 190, 46), "Leave it")) D.SkipCurio();
+                if (Gui.Button(new Rect(x + 210 + k++ * 200, cy + 80, 194, 46), "Use " + HamletUi.Pretty(item))) { D.Investigate(_curioHero, item); return; }
+            if (Gui.Button(new Rect(x + 420, cy + 80, 190, 46), "Leave it")) { D.SkipCurio(); return; }
         }
 
         Gui.Small(new Rect(x, area.yMax - 34, 620, 30),
