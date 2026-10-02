@@ -28,6 +28,7 @@ public class FakeParty : IParty
     public List<string> Quirks = new();
     public string AddDd1Quirk(string heroId, string dd1QuirkId) { Quirks.Add(heroId + ":" + dd1QuirkId); return "dd2_" + dd1QuirkId; }
     public string PurgeNegative(string heroId) => "purged";
+    public string CureDisease(string heroId) => "cured";
 }
 
 public class CrawlTests

@@ -26,4 +26,7 @@ public interface IParty
 
     /// <summary>DD1 "purge": remove one negative quirk or disease. Returns what was removed, or null.</summary>
     string PurgeNegative(string heroId);
+
+    /// <summary>Cure one disease (camp medicine). Returns what was cured, or null.</summary>
+    string CureDisease(string heroId);
 }

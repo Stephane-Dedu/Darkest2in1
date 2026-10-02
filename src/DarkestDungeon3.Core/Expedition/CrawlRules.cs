@@ -34,6 +34,13 @@ public sealed class CrawlRules
     public float ReturnBattleChance = 0.05f, ReturnHungerChance = 0.075f;
     public float AmbushCampChance = 0.33f;
     public int CampPoints = 12;
+    public float CampRestoreTorch = 100f;
+    /// <summary>DD1 meals: food per living hero, HP healed (fraction of max), DD1 stress (negative relieves).</summary>
+    public Dictionary<Meal, (float RationsPer, float Heal, float StressDd1)> Meals = new()
+    {
+        [Meal.None] = (0f, -0.2f, 15f), [Meal.Half] = (0.5f, 0f, 0f),
+        [Meal.Full] = (1f, 0.1f, 0f), [Meal.Feast] = (2f, 0.25f, -10f),
+    };
     public List<DarknessBand> Darkness = new();
 
     public static CrawlRules Defaults() => new();
@@ -75,6 +82,12 @@ public sealed class CrawlRules
         if (rules["difficulty_trap_base"] is JArray trap) r.TrapDifficultyPenalty = trap.Select(t => (float)t).ToArray();
         r.AmbushCampChance = Get(rules, "ambush_camping_base_chance", r.AmbushCampChance);
         r.CampPoints = (int)Get(rules, "camp_start_camping_points", r.CampPoints);
+        r.CampRestoreTorch = Get(rules, "camp_restore_torch", r.CampRestoreTorch);
+        foreach (var m in rules["meals_table"] ?? new JArray())
+        {
+            var meal = (string)m["type"] switch { "none" => Meal.None, "half" => Meal.Half, "full" => Meal.Full, _ => Meal.Feast };
+            r.Meals[meal] = ((float)m["rations_per"], (float)m["healing"], (float)m["stress"]);
+        }
 
         foreach (var e in rules["corridor_return_content"] ?? new JArray())
         {

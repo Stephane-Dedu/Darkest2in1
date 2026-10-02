@@ -23,6 +23,14 @@ public sealed class ExpeditionState
     public int Seed;
     public int RandomCounter;
 
+    /// <summary>Hero id → DD2 class id and known camp skills, filled at embark.</summary>
+    public Dictionary<string, string> HeroClasses = new();
+    public Dictionary<string, List<string>> CampSkills = new();
+    public CampState Camp;
+    /// <summary>DD1 buffs (camp, curios) waiting to become DD2 tokens at the next fight, per hero.</summary>
+    public Dictionary<string, List<string>> PendingBuffs = new();
+    public int CampsMade;
+
     public int StepsTaken;
     public int BattlesWon;
     public bool QuestComplete;

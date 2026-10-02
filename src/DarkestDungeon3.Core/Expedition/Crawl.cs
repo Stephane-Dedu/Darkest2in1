@@ -196,6 +196,125 @@ public sealed class Crawl
         return Flush();
     }
 
+    // ---- camping ----
+
+    /// <summary>DD1 camps need firewood and a safe (cleared) room.</summary>
+    public bool CanCamp => State.InRoom && !IsBlocked && State.Camp == null && State.Pack.Count(Supply.Firewood) > 0;
+
+    public List<CrawlEvent> MakeCamp()
+    {
+        _events.Clear();
+        if (!CanCamp) return Blocked();
+        State.Pack.TryUse(Supply.Firewood);
+        State.Camp = new CampState { RespiteLeft = _rules.CampPoints };
+        State.CampsMade++;
+        return Flush();
+    }
+
+    /// <summary>Food for each living hero by meal size. Not enough food means no meal at all.</summary>
+    public int MealCost(Meal meal) => (int)Math.Ceiling(_party.Alive.Count * _rules.Meals[meal].RationsPer);
+
+    public bool EatMeal(Meal meal)
+    {
+        if (State.Camp == null || State.Camp.Ate) return false;
+        if (!State.Pack.TryUse(Supply.Food, MealCost(meal)) && MealCost(meal) > 0) return false;
+        var (_, heal, stress) = _rules.Meals[meal];
+        var rng = NextRng();
+        foreach (var hero in _party.Alive)
+        {
+            if (heal > 0) _party.Heal(hero, heal);
+            else if (heal < 0) _party.Damage(hero, -heal, "hunger");
+            if (stress != 0) StressDd1(hero, stress, rng, "meal");
+        }
+        State.Camp.Ate = true;
+        return true;
+    }
+
+    public string WhyCantUseCampSkill(string heroId, string skillId)
+    {
+        var camp = State.Camp;
+        var skill = _content?.Camping?.Get(skillId);
+        if (camp == null) return "Not camping.";
+        if (skill == null) return "Unknown skill.";
+        if (!_party.Alive.Contains(heroId)) return "Dead.";
+        if (!State.CampSkills.TryGetValue(heroId, out var known) || !known.Contains(skillId)) return "Not known.";
+        if (skill.Cost > camp.RespiteLeft) return "Not enough respite.";
+        if (camp.Uses.TryGetValue(heroId + ":" + skillId, out var used) && used >= skill.UseLimit) return "Already used.";
+        return null;
+    }
+
+    /// <summary>Use a camp skill. Individual-target skills need a target hero.</summary>
+    public bool UseCampSkill(string heroId, string skillId, string targetId = null)
+    {
+        if (WhyCantUseCampSkill(heroId, skillId) != null) return false;
+        var skill = _content.Camping.Get(skillId);
+        if (skill.NeedsTarget && (targetId == null || !_party.Alive.Contains(targetId))) return false;
+
+        var camp = State.Camp;
+        camp.RespiteLeft -= skill.Cost;
+        string key = heroId + ":" + skillId;
+        camp.Uses[key] = (camp.Uses.TryGetValue(key, out var n) ? n : 0) + 1;
+
+        var rng = NextRng();
+        foreach (var effect in skill.Effects)
+        {
+            if (!rng.Chance(effect.Chance)) continue;
+            var targets = effect.Selection switch
+            {
+                "self" => new[] { heroId },
+                "individual" => new[] { targetId },
+                "party" => _party.Alive.ToArray(),
+                "party_other" => _party.Alive.Where(h => h != heroId).ToArray(),
+                _ => new[] { heroId },
+            };
+            foreach (var t in targets) ApplyCampEffect(effect, t, rng);
+        }
+        return true;
+    }
+
+    private void ApplyCampEffect(CampEffect effect, string hero, Rng rng)
+    {
+        switch (effect.Type)
+        {
+            case "stress_heal_amount": StressDd1(hero, -effect.Amount, rng, "camp"); break;
+            case "stress_damage_amount": StressDd1(hero, effect.Amount, rng, "camp"); break;
+            case "health_heal_max_health_percent": _party.Heal(hero, effect.Amount); break;
+            case "health_damage_max_health_percent": _party.Damage(hero, effect.Amount, "camp"); break;
+            case "remove_disease": _party.CureDisease(hero); break;
+            case "reduce_ambush_chance": State.Camp.AmbushReduction += effect.Amount; break;
+            case "reduce_torch": ChangeLight(-effect.Amount); break;
+            case "buff":
+                if (!string.IsNullOrEmpty(effect.SubType))
+                {
+                    if (!State.PendingBuffs.TryGetValue(hero, out var list)) State.PendingBuffs[hero] = list = new List<string>();
+                    list.Add(effect.SubType);
+                }
+                break;
+            case "loot":
+                if (_content?.Loot != null && !string.IsNullOrEmpty(effect.SubType))
+                    foreach (var d in _content.Loot.Roll(effect.SubType, Math.Max(1, (int)effect.Amount), State.Quest?.Difficulty ?? 1, State.Quest?.Dungeon ?? "", rng))
+                        State.Pack.Add(d.Key, d.Amount);
+                break;
+            // remove_bleeding / remove_poison / remove_deaths_door_recovery_buffs: DoTs already landed out of
+            // combat, and DD2 owns death's door recovery, so there's nothing left to undo.
+        }
+    }
+
+    /// <summary>Strike camp: the torch is relit, and DD1 rolls for a night ambush.</summary>
+    public List<CrawlEvent> BreakCamp()
+    {
+        _events.Clear();
+        if (State.Camp == null) return Blocked();
+        var rng = NextRng();
+        float ambush = Math.Max(0f, _rules.AmbushCampChance - State.Camp.AmbushReduction);
+        if (!State.Camp.Ate) foreach (var hero in _party.Alive) StressDd1(hero, _rules.Meals[Meal.None].StressDd1, rng, "no meal");
+        State.Camp = null;
+        ChangeLight(_rules.CampRestoreTorch - State.Light);
+        if (rng.Chance(ambush))
+            _events.Add(new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" });
+        return Flush();
+    }
+
     public void Retreat()
     {
         State.Retreated = true;
