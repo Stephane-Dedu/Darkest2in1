@@ -1,0 +1,15 @@
+<Project>
+  <!-- Machine-specific paths. Override on the command line: dotnet build -p:GameDir=... -->
+  <PropertyGroup>
+    <GameDir Condition="'$(GameDir)' == ''">D:\DarkestDungeonII</GameDir>
+    <GameManaged>$(GameDir)\Darkest Dungeon II_Data\Managed</GameManaged>
+    <!-- Compile-time references: a local copy, so builds don't depend on a working game folder. -->
+    <RefsDir Condition="'$(RefsDir)' == ''">C:\Users\Piral\dd2-decomp\refs</RefsDir>
+    <GameRefs Condition="'$(GameRefs)' == '' and Exists('$(RefsDir)\IronCrown.dll')">$(RefsDir)</GameRefs>
+    <GameRefs Condition="'$(GameRefs)' == ''">$(GameManaged)</GameRefs>
+    <BepInExRefs Condition="'$(BepInExRefs)' == '' and Exists('$(RefsDir)\bepinex\BepInEx.dll')">$(RefsDir)\bepinex</BepInExRefs>
+    <BepInExRefs Condition="'$(BepInExRefs)' == ''">$(GameDir)\BepInEx\core</BepInExRefs>
+    <BepInExDir>$(GameDir)\BepInEx</BepInExDir>
+    <PluginDeployDir>$(BepInExDir)\plugins\DarkestDungeon3</PluginDeployDir>
+  </PropertyGroup>
+</Project>

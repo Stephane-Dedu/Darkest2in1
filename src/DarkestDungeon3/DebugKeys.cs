@@ -1,0 +1,79 @@
+using System;
+using System.Linq;
+using Assets.Code.Combat;
+using Assets.Code.Combat.BattleConfiguration;
+using Assets.Code.Game;
+using Assets.Code.Library;
+using Assets.Code.Roster;
+using Assets.Code.UI.Screens;
+using Assets.Code.Utils;
+using HarmonyLib;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+namespace DarkestDungeon3;
+
+/// <summary>Developer hotkeys used to verify each slice in the running game.</summary>
+public class DebugKeys : MonoBehaviour
+{
+    // Slice 1 test fight: a catacombs encounter in a catacombs arena, standing in for DD1's Ruins.
+    private const string TestArena = "combat_arena_catacombs_cultist";
+
+    private void Update()
+    {
+        var kb = Keyboard.current;
+        if (kb == null) return;
+        try
+        {
+            if (kb.f8Key.wasPressedThisFrame) DumpState();
+            if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.LogError(e);
+        }
+    }
+
+    private static void DumpState()
+    {
+        Plugin.Log.LogInfo($"[F8] mode={GameModeMgr.CurrentMode?.GetName()} changing={Singleton<GameModeMgr>.Instance.IsChangingState()}");
+        var roster = Singleton<GameTypeMgr>.Instance?.RosterManager;
+        if (roster != null)
+            Plugin.Log.LogInfo($"[F8] party guids: {string.Join(",", roster.GetActorGuids(RosterStatusType.PARTY))}");
+
+        var lib = SingletonMonoBehaviour<Library<string, BattleConfigurationDefinition>>.Instance;
+        if (lib == null) { Plugin.Log.LogInfo("[F8] battle configuration library not loaded"); return; }
+        var ids = lib.GetLibraryElementKeys();
+        Plugin.Log.LogInfo($"[F8] {ids.Count} battle configurations; catacombs ones: " +
+                           string.Join(", ", ids.Where(i => i.Contains("catacomb")).Take(40)));
+    }
+
+    private static void StartTestCombat()
+    {
+        var modes = Singleton<GameModeMgr>.Instance;
+        if (modes.IsChangingState()) { Plugin.Log.LogWarning("[F9] mode change in progress, ignoring"); return; }
+
+        var party = Singleton<GameTypeMgr>.Instance?.RosterManager?.GetActorGuids(RosterStatusType.PARTY);
+        if (party == null || party.Count == 0) { Plugin.Log.LogWarning("[F9] no party (start a run first)"); return; }
+
+        var lib = SingletonMonoBehaviour<Library<string, BattleConfigurationDefinition>>.Instance;
+        var configId = lib.GetLibraryElementKeys().FirstOrDefault(i => i.Contains("catacomb"))
+                       ?? lib.GetLibraryElementKeys().First();
+
+        var scenario = new CombatScenarioData(configId, TestArena, CombatSource.DUNGEON, party);
+        Plugin.Log.LogInfo($"[F9] starting combat config={configId} arena={scenario.BackgroundSceneName} party={party.Count} from mode={GameModeMgr.CurrentMode.GetName()}");
+
+        // Same order as TriggerCombatBhv: clear screens, switch mode, install the scenario once the old mode is gone.
+        SingletonMonoBehaviour<ScreenStackBhv>.Instance.Clear();
+        modes.OnNextGameModeExitComplete(_ => Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true));
+        modes.SetMode(GameModeType.COMBAT, isLoad: false);
+    }
+}
+
+/// <summary>Log every game-mode switch: the cheapest way to learn DD2's flow.</summary>
+[HarmonyPatch(typeof(GameModeMgr), nameof(GameModeMgr.SetMode))]
+internal static class LogModeChanges
+{
+    private static void Prefix(GameModeType mode, bool isLoad) =>
+        Plugin.Log.LogInfo($"[mode] {GameModeMgr.CurrentMode?.GetName()} -> {mode?.GetName()} (isLoad={isLoad})");
+}

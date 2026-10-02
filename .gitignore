@@ -1,0 +1,9 @@
+bin/
+obj/
+*.user
+.vs/
+# never commit game files or decompiled code
+decomp/
+extracted/
+*.dll
+!lib/README.md
