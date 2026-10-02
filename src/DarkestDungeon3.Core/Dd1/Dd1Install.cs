@@ -19,6 +19,22 @@ public sealed class Dd1Install
     public string PathOf(params string[] parts) => Path.Combine(new[] { Root }.Concat(parts).ToArray());
 
     public string MapGenerator => PathOf("scripts", "map_generator.darkest");
+
+    /// <summary>The Spine skeleton and atlas in a DD1 animation folder (named x.sprite.skel or x.skel), or null.</summary>
+    public static (string skel, string atlas)? SpineIn(string folder)
+    {
+        if (!Directory.Exists(folder)) return null;
+        string name = Path.GetFileName(folder.TrimEnd('/', Path.DirectorySeparatorChar));
+        foreach (var stem in new[] { name + ".sprite", name })
+        {
+            string skel = Path.Combine(folder, stem + ".skel"), atlas = Path.Combine(folder, stem + ".atlas");
+            if (File.Exists(skel) && File.Exists(atlas)) return (skel, atlas);
+        }
+        return null;
+    }
+
+    /// <summary>A curio's animation folder (props/shared/curios/&lt;id&gt;), or null.</summary>
+    public string CurioArt(string curioId) => PathOf("props", "shared", "curios", curioId);
     public string ZoneDir(string zone) => PathOf("dungeons", zone);
     public string ZoneProps(string zone) => PathOf("dungeons", zone, zone + ".props.darkest");
     public string Rules => PathOf("shared", "rules.json");

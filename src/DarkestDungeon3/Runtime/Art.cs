@@ -98,20 +98,27 @@ internal static class Art
 
     // ---- DD2 hero portraits ----
     private static readonly Dictionary<string, Sprite> Portraits = new();
+    private static readonly Dictionary<string, float> PortraitRetry = new();
 
     public static Sprite Portrait(string classId, ResourceActor.PortraitIconType type = ResourceActor.PortraitIconType.Color)
     {
+        if (classId == null) return null;
         string key = classId + "/" + type;
         if (Portraits.TryGetValue(key, out var s)) return s;
+        // Outside a run (DD2's main menu) the portrait atlas may not be loaded yet: retry now and then.
+        if (PortraitRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         try
         {
-            var res = Singleton<ResourceDatabaseActors>.Instance?.GetResource(classId, isErrorValid: false);
-            s = res?.GetPortraitIconByType(type);
+            s = Dd2.ActorResources.Get(classId)?.GetPortraitIconByType(type);
         }
         catch (System.Exception e) { Plugin.Log.LogWarning($"portrait {key}: {e.Message}"); s = null; }
-        Portraits[key] = s;
+        if (s != null && s.texture != null) Portraits[key] = s;
+        else { PortraitRetry[key] = Time.unscaledTime + 2f; s = null; }
         return s;
     }
+
+    /// <summary>A small hero picture for lists: the colour portrait, else DD2's painted story bust.</summary>
+    public static Sprite HeroIcon(string classId) => Portrait(classId) ?? LargePortrait(classId, LargeArt.Story);
 
     // DD2's larger hero art lives behind addressable references; load once, asynchronously, and cache.
     private static readonly Dictionary<string, Sprite> Large = new();
@@ -129,7 +136,12 @@ internal static class Art
         {
             try
             {
-                var res = Singleton<ResourceDatabaseActors>.Instance?.GetResource(classId, isErrorValid: false);
+                var res = Dd2.ActorResources.Get(classId);
+                if (res == null)
+                {
+                    LargeRequested.Remove(key);   // still loading: ask again next time
+                    return null;
+                }
                 var reference = kind switch
                 {
                     LargeArt.Altar => res?.m_ClassAltarPortraitReference,
