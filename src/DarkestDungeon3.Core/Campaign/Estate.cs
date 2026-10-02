@@ -40,6 +40,9 @@ public sealed class Estate
     public List<HeroRecord> Graveyard = new();
     public List<QuestOffer> Quests = new();
     public List<string> Trinkets = new();
+    public List<string> WagonStock = new();
+    /// <summary>Messages for the next town screen ("Dismas went missing", ...).</summary>
+    public List<string> TownLog = new();
 
     /// <summary>Optional extras the user can switch on (e.g. DD2 regions as expedition zones).</summary>
     public Dictionary<string, bool> Toggles = new();

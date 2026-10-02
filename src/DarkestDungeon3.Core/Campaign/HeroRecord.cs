@@ -34,6 +34,9 @@ public sealed class HeroRecord
 
     // Town.
     public string Activity;                                // e.g. "abbey.prayer"; null = idle
+    public string ActivityTarget;                          // sanitarium: the quirk being treated
+    public bool ActivityLocked;                            // DD1 side effect: refuses to leave next week
+    public List<string> PendingBuffs = new();              // DD1 town buffs (hangover...) for the next expedition
     public int MissingWeeks;                               // "went missing" side effect
     public int WeekRecruited;
 
