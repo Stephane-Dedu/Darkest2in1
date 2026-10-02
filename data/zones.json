@@ -1,0 +1,92 @@
+{
+  "_comment": [
+    "How each DD1 zone is fought in DD2. Our own mapping (no game data), edit freely.",
+    "Battle entries: 'table:<id>' rolls a DD2 BattleConfigurationTable, 'config:<id>' is one BattleConfiguration.",
+    "Difficulty keys are DD1's: 1 apprentice, 3 veteran, 5 champion, 6 Darkest Dungeon.",
+    "Arenas are DD2 combat_arena_* scenes; the plugin checks each one exists and skips any that don't.",
+    "Faction choice follows DD2's own region natives: forest = Lost Battalion, farm = Plague Eaters,",
+    "city = Fanatics, coast = Coastal crews, caves = Swine, mountain = the Cult."
+  ],
+  "zones": {
+    "crypts": {
+      "name": "The Ruins",
+      "arenas": {
+        "hall": ["combat_arena_forest_dungeon_exterior", "combat_arena_city_dungeon_exterior"],
+        "room": ["combat_arena_forest_dungeon_interior", "combat_arena_city_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:lost_battalion_mashes_normal"], "room": ["table:lost_battalion_mashes_normal", "table:fanatic_mashes_normal"] },
+        "3": { "hall": ["table:lost_battalion_mashes_hard"], "room": ["table:lost_battalion_mashes_hard", "table:lost_battalion_mashes_normal_champions"] },
+        "5": { "hall": ["table:lost_battalion_mashes_hard_champions"], "room": ["table:lost_battalion_mashes_brutal_champions", "table:fanatic_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "necromancer": { "battle": "config:forest_dungeon_3", "arena": "combat_arena_forest_dungeon_interior" },
+        "prophet": { "battle": "config:city_dungeon_3_a", "arena": "combat_arena_city_dungeon_interior" }
+      }
+    },
+    "weald": {
+      "name": "The Weald",
+      "arenas": {
+        "hall": ["combat_arena_forest_pillager", "combat_arena_forest_faction"],
+        "room": ["combat_arena_forest_dungeon_exterior", "combat_arena_farm_dungeon_exterior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:pillager_mashes_normal"], "room": ["table:plague_eater_mashes_normal", "table:pillager_mashes_normal"] },
+        "3": { "hall": ["table:pillager_mashes_hard"], "room": ["table:plague_eater_mashes_hard", "table:plague_eater_mashes_normal_champions"] },
+        "5": { "hall": ["table:plague_eater_mashes_hard_champions"], "room": ["table:plague_eater_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "hag": { "battle": "config:farm_dungeon_3", "arena": "combat_arena_farm_dungeon_interior" },
+        "brigand_cannon": { "battle": "table:pillager_mashes_antiq", "arena": "combat_arena_forest_pillager" }
+      }
+    },
+    "warrens": {
+      "name": "The Warrens",
+      "arenas": {
+        "hall": ["combat_arena_caves_faction", "combat_arena_cave_faction"],
+        "room": ["combat_arena_farm_dungeon_interior", "combat_arena_caves_faction"]
+      },
+      "battles": {
+        "1": { "hall": ["table:swine_mashes_normal"], "room": ["table:swine_mashes_normal"] },
+        "3": { "hall": ["table:swine_mashes_hard"], "room": ["table:swine_mashes_hard", "table:swine_mashes_normal_champions"] },
+        "5": { "hall": ["table:swine_mashes_hard_champions"], "room": ["table:swine_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "swine_prince": { "battle": "table:swine_mashes_brutal_champions", "arena": "combat_arena_farm_dungeon_interior" },
+        "formless_flesh": { "battle": "config:shambler", "arena": "combat_arena_caves_faction" }
+      }
+    },
+    "cove": {
+      "name": "The Cove",
+      "arenas": {
+        "hall": ["combat_arena_coast_dungeon_exterior", "combat_arena_coast_faction"],
+        "room": ["combat_arena_coast_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:coastal_mashes_normal"], "room": ["table:coastal_mashes_normal"] },
+        "3": { "hall": ["table:coastal_mashes_hard"], "room": ["table:coastal_mashes_hard", "table:coastal_mashes_normal_champions"] },
+        "5": { "hall": ["table:coastal_mashes_hard_champions"], "room": ["table:coastal_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "siren": { "battle": "config:coast_dungeon_3", "arena": "combat_arena_coast_dungeon_interior" },
+        "drowned_crew": { "battle": "table:coastal_mashes_brutal_champions", "arena": "combat_arena_coast_dungeon_interior" }
+      }
+    },
+    "darkestdungeon": {
+      "name": "The Darkest Dungeon",
+      "arenas": {
+        "hall": ["combat_arena_caves_cultist", "combat_arena_city_cultist"],
+        "room": ["combat_arena_caves_cultist", "combat_arena_city_cultist"]
+      },
+      "battles": {
+        "6": { "hall": ["table:cultist_mashes_hard", "table:cultist_mashes_hard_enhanced"], "room": ["table:cultist_mashes_brutal_enhanced"] }
+      },
+      "bosses": {
+        "shuffler": { "battle": "table:cultist_guardian_biome_2_boss_cardinal", "arena": "combat_arena_caves_cultist" },
+        "ancestor_heart": { "battle": "table:mountain_boss_table_body", "arena": "combat_arena_mountain_boss_body" }
+      }
+    }
+  },
+  "camp_ambush": "table:camp_mashes_master",
+  "fallback_battle": "table:faction_mashes_road_master"
+}
