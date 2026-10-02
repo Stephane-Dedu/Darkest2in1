@@ -40,10 +40,14 @@ public sealed class DarkestRecord
             ? (int)Math.Round(double.Parse(v[index], CultureInfo.InvariantCulture))
             : fallback;
 
+    /// <summary>A number; DD1 writes chances as "75%", which reads as 0.75.</summary>
     public float Float(string key, int index = 0, float fallback = 0f) =>
-        _params.TryGetValue(key, out var v) && v.Count > index
-            ? float.Parse(v[index], CultureInfo.InvariantCulture)
-            : fallback;
+        _params.TryGetValue(key, out var v) && v.Count > index ? ParseFloat(v[index]) : fallback;
+
+    public static float ParseFloat(string s) =>
+        s.EndsWith("%", StringComparison.Ordinal)
+            ? float.Parse(s.Substring(0, s.Length - 1), CultureInfo.InvariantCulture) / 100f
+            : float.Parse(s, CultureInfo.InvariantCulture);
 
     /// <summary>A "min max" pair; a single value means min == max.</summary>
     public IntRange Range(string key)

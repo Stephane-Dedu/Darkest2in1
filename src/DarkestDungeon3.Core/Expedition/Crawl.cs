@@ -15,13 +15,50 @@ public sealed class Crawl
     public ExpeditionState State { get; }
     private readonly CrawlRules _rules;
     private readonly IParty _party;
+    private readonly CrawlContent _content;
     private readonly List<CrawlEvent> _events = new();
 
-    public Crawl(ExpeditionState state, CrawlRules rules, IParty party)
+    public Crawl(ExpeditionState state, CrawlRules rules, IParty party, CrawlContent content = null)
     {
         State = state;
         _rules = rules;
         _party = party;
+        _content = content;
+    }
+
+    /// <summary>The untouched curio where the party stands (room or hall square), if any.</summary>
+    public string CurioHere =>
+        State.InRoom
+            ? (CurrentRoom.CurioId != null && !CurrentRoom.CurioTaken && !IsBlocked ? CurrentRoom.CurioId : null)
+            : (CurrentTile is { Content: HallContent.Curio, Resolved: false } t ? t.ContentId : null);
+
+    /// <summary>
+    /// A hero investigates the curio here, optionally using an item on it. Loot goes into the pack; whatever
+    /// doesn't fit comes back in <paramref name="overflow"/> for the player to sort out, as in DD1.
+    /// </summary>
+    public CurioReport InteractCurio(string heroId, string itemId, out List<LootDrop> overflow)
+    {
+        overflow = new List<LootDrop>();
+        string curio = CurioHere;
+        if (curio == null || _content?.Curios == null) return null;
+
+        var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
+        if (State.InRoom) CurrentRoom.CurioTaken = true;
+        else CurrentTile.Resolved = true;
+
+        foreach (var drop in report.Loot)
+        {
+            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items)) State.Pack.Add(drop.Key, drop.Amount);
+            else overflow.Add(drop);
+        }
+        return report;
+    }
+
+    /// <summary>Walk past a curio without touching it.</summary>
+    public void SkipCurio()
+    {
+        if (State.InRoom) { if (CurrentRoom.CurioId != null) CurrentRoom.CurioTaken = true; }
+        else if (CurrentTile is { Content: HallContent.Curio } t) t.Resolved = true;
     }
 
     private DungeonMap Map => State.Map;
@@ -275,27 +312,31 @@ public sealed class Crawl
         int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
         float disarm = 0.5f - _rules.TrapDifficultyPenalty[difficulty] + (scouted ? _rules.TrapScoutDisarmBonus : 0f);
         tile.Resolved = true;
+        var trap = _content?.Traps?.Get(tile.ContentId, State.Quest?.Difficulty ?? 1);
+        // The front hero deals with it, as in DD1.
+        var hero = _party.Alive.FirstOrDefault();
         if (rng.Chance(disarm))
         {
-            Emit(CrawlEventType.TrapDisarmed, tile: tile, contentId: tile.ContentId);
+            if (hero != null && trap != null)
+                foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
+            Emit(CrawlEventType.TrapDisarmed, tile: tile, contentId: tile.ContentId, heroId: hero);
             return;
         }
-        // The front hero takes it, as in DD1.
-        var victim = _party.Alive.FirstOrDefault();
-        if (victim != null)
+        if (hero != null)
         {
-            _party.Damage(victim, TrapDamage(tile.ContentId), "trap");
-            StressDd1(victim, 20, rng, "trap");
+            if (trap != null)
+            {
+                if (trap.HealthFraction < 0) _party.Damage(hero, -trap.HealthFraction, "trap");
+                foreach (var e in trap.FailEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
+            }
+            else
+            {
+                _party.Damage(hero, 0.2f, "trap");
+                StressDd1(hero, 15, rng, "trap");
+            }
         }
-        Emit(CrawlEventType.TrapSprung, tile: tile, contentId: tile.ContentId, heroId: victim);
+        Emit(CrawlEventType.TrapSprung, tile: tile, contentId: tile.ContentId, heroId: hero);
     }
-
-    private static float TrapDamage(string trapId) => trapId switch
-    {
-        "spikes" => 0.25f,
-        "poison_cloud" => 0.15f,
-        _ => 0.2f,
-    };
 
     /// <summary>On entering a new room, maybe reveal what lies within two corridors (DD1 scouting).</summary>
     private void Scout(Room room)

@@ -25,6 +25,9 @@ public class FakeParty : IParty
     public void Damage(string heroId, float f, string cause) { Hp[heroId] = System.Math.Max(0.01f, Hp[heroId] - f); Log.Add($"dmg {heroId} {f} {cause}"); }
     public void Heal(string heroId, float f) => Hp[heroId] = System.Math.Min(1f, Hp[heroId] + f);
     public void AddStress(string heroId, int points, string cause) => Stress[heroId] += points;
+    public List<string> Quirks = new();
+    public string AddDd1Quirk(string heroId, string dd1QuirkId) { Quirks.Add(heroId + ":" + dd1QuirkId); return "dd2_" + dd1QuirkId; }
+    public string PurgeNegative(string heroId) => "purged";
 }
 
 public class CrawlTests

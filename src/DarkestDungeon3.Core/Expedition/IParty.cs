@@ -20,4 +20,10 @@ public interface IParty
 
     /// <summary>Add DD2 stress points (negative relieves).</summary>
     void AddStress(string heroId, int points, string cause);
+
+    /// <summary>Give a quirk or disease named by its DD1 id; the game maps it to DD2. Returns the DD2 id or null.</summary>
+    string AddDd1Quirk(string heroId, string dd1QuirkId);
+
+    /// <summary>DD1 "purge": remove one negative quirk or disease. Returns what was removed, or null.</summary>
+    string PurgeNegative(string heroId);
 }

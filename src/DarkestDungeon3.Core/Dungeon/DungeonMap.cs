@@ -39,7 +39,7 @@ public sealed class Room
     public List<int> CorridorIds = new();
 
     // Expedition state.
-    public bool Visited, Scouted, Cleared;
+    public bool Visited, Scouted, Cleared, CurioTaken;
 
     public bool HasBattle => Content is RoomContent.Battle or RoomContent.GuardedCurio or RoomContent.GuardedTreasure or RoomContent.Boss;
 }
