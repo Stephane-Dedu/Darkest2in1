@@ -13,7 +13,9 @@ public sealed class QuestOffer
     public int MapSeed;
     public bool IsPlot;             // boss / Darkest Dungeon quests
     public string PlotId;
-    public string BossId;           // for kill_boss
+    public string BossId;           // for kill_boss: DD1 boss monster class (e.g. "necromancer_A")
+    public string GoalId;           // DD1 quest goal id (gather_holy_relic, kill_hag_B ...)
+    public int ResolveXp;           // 0 = by length
     public List<Reward> Rewards = new();
 
     public string Size => Length switch { 1 => "short", 2 => "medium", _ => "long" };

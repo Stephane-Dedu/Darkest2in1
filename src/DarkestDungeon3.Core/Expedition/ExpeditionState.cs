@@ -8,6 +8,8 @@ namespace DarkestDungeon3.Core.Expedition;
 public sealed class ExpeditionState
 {
     public QuestOffer Quest;
+    public QuestGoal Goal;
+    public int GoalProgress;
     public DungeonMap Map;
     public List<string> Party = new();           // hero ids, rank order
     public Inventory Pack = new();

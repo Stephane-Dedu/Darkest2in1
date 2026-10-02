@@ -22,11 +22,14 @@ public static class Homecoming
     /// <summary>DD1 heroes above a difficulty's resolve band refuse that quest.</summary>
     public static int MaxResolveFor(int difficulty) => difficulty switch { 1 => 2, 3 => 4, _ => 6 };
 
+    /// <summary>The Darkest Dungeon (difficulty 6) only admits seasoned heroes.</summary>
+    public static int MinResolveFor(int difficulty) => difficulty >= 6 ? 5 : 0;
+
     public static bool WillEmbark(HeroRecord hero, QuestOffer quest) =>
-        hero.IsAvailable && hero.ResolveLevel <= MaxResolveFor(quest.Difficulty);
+        hero.IsAvailable && hero.ResolveLevel <= MaxResolveFor(quest.Difficulty) && hero.ResolveLevel >= MinResolveFor(quest.Difficulty);
 
     /// <summary>Resolve XP for a finished quest: 2 / 4 / 6 by length (DD1's values; not in its data files).</summary>
-    public static int ResolveXp(QuestOffer quest) => 2 * Math.Max(1, quest.Length);
+    public static int ResolveXp(QuestOffer quest) => quest.ResolveXp > 0 ? quest.ResolveXp : 2 * Math.Max(1, quest.Length);
 
     public static List<string> Apply(Estate estate, Dd1Campaign dd1, ExpeditionState expedition, IEnumerable<HeroOutcome> outcomes)
     {

@@ -31,6 +31,7 @@ public sealed class Dd1Campaign
     /// <summary>[difficulty][length] → gold.</summary>
     public JArray GoldTable { get; private set; }
     public JObject Rules { get; private set; }
+    public QuestGoals Goals { get; private set; }
 
     private readonly Dictionary<string, ZoneProps> _props = new();
 
@@ -66,6 +67,7 @@ public sealed class Dd1Campaign
         c.ZoneLevelThresholds.AddRange(progression["dungeon"]["level_threshold_table"].Select(t => (int)t));
 
         c.Rules = (JObject)ReadJson(dd1.Rules);
+        c.Goals = QuestGoals.Load(dd1);
         return c;
     }
 

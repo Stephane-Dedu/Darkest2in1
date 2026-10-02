@@ -13,21 +13,23 @@ public sealed class Hamlet
     public Dd1Campaign Dd1 { get; }
     public Buildings Buildings { get; }
     public IHeroCatalog Catalog { get; }
+    public CampingSkills Camping { get; }
 
-    public Hamlet(Estate estate, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog)
+    public Hamlet(Estate estate, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
         Estate = estate;
         Dd1 = dd1;
         Buildings = buildings;
         Catalog = catalog;
+        Camping = camping;
     }
 
     /// <summary>A brand-new estate: DD1 starts you with two heroes, some gold, and the Ruins open.</summary>
-    public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog)
+    public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
         var estate = new Estate { Seed = seed };
         estate.Add(Currency.Gold, 500);
-        var hamlet = new Hamlet(estate, dd1, buildings, catalog);
+        var hamlet = new Hamlet(estate, dd1, buildings, catalog, camping);
         var rng = estate.NextRng();
         // DD1's first recruits are fixed (Crusader, Highwayman, Plague Doctor, Vestal). Use the DD2 classes
         // that share those names, falling back to whatever DD2 offers.
@@ -52,6 +54,7 @@ public sealed class Hamlet
         };
         // DD1 recruits arrive with one positive and one negative quirk, more for experienced recruits.
         hero.Quirks.AddRange(Catalog.StartingQuirks(classId, rng, positives: 1 + level / 2, negatives: 1 + level / 3));
+        if (Camping != null) hero.CampingSkills = Camping.Starting(classId, rng);
         return hero;
     }
 

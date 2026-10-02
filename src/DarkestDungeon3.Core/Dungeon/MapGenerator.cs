@@ -14,7 +14,7 @@ public static class MapGenerator
 {
     private static readonly (int dx, int dy)[] Dirs = { (1, 0), (-1, 0), (0, 1), (0, -1) };
 
-    public static DungeonMap Generate(MapGenParams p, int seed, ZoneProps props = null)
+    public static DungeonMap Generate(MapGenParams p, int seed, ZoneProps props = null, Campaign.QuestGoal goal = null)
     {
         props ??= ZoneProps.Empty;
         var rng = new Rng(seed);
@@ -89,7 +89,37 @@ public static class MapGenerator
 
         FillRooms(map, p, rng, props);
         FillHalls(map, p, rng, props);
+        PlaceQuestCurios(map, goal, rng);
         return map;
+    }
+
+    /// <summary>Gather and activate quests need their curios (reliquaries, altars...): rooms first, then halls.</summary>
+    private static void PlaceQuestCurios(DungeonMap map, Campaign.QuestGoal goal, Rng rng)
+    {
+        if (goal == null || string.IsNullOrEmpty(goal.CurioName) || goal.Amount <= 0) return;
+        var rooms = map.Rooms.Where(r => r.Id != map.EntranceRoomId && r.Id != map.BossRoomId && !r.IsQuestGoal)
+                             .OrderBy(r => r.Content == RoomContent.Empty ? 0 : r.HasBattle ? 1 : 2)
+                             .ThenBy(_ => rng.Next(1000))
+                             .ToList();
+        int placed = 0;
+        foreach (var r in rooms)
+        {
+            if (placed == goal.Amount) return;
+            if (r.Content == RoomContent.Empty) r.Content = RoomContent.Curio;
+            else if (r.Content == RoomContent.Battle) r.Content = RoomContent.GuardedCurio;
+            else continue;   // keep treasures as they are
+            r.CurioId = goal.CurioName;
+            r.IsQuestGoal = true;
+            placed++;
+        }
+        foreach (var t in map.AllTiles.Where(t => t.Content == HallContent.Empty || t.Content == HallContent.Curio).OrderBy(_ => rng.Next(1000)))
+        {
+            if (placed == goal.Amount) return;
+            t.Content = HallContent.Curio;
+            t.ContentId = goal.CurioName;
+            t.IsQuestGoal = true;
+            placed++;
+        }
     }
 
     private static int AddRoom(DungeonMap map, Dictionary<(int, int), int> cellToRoom, (int x, int y) cell)

@@ -40,7 +40,11 @@ public sealed class Crawl
     {
         overflow = new List<LootDrop>();
         string curio = CurioHere;
-        if (curio == null || _content?.Curios == null) return null;
+        if (curio == null) return null;
+
+        bool isGoal = State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal;
+        if (isGoal && State.Goal != null) return InteractQuestCurio(curio, heroId, itemId);
+        if (_content?.Curios == null) return null;
 
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
         if (State.InRoom) CurrentRoom.CurioTaken = true;
@@ -51,6 +55,45 @@ public sealed class Crawl
             if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items)) State.Pack.Add(drop.Key, drop.Amount);
             else overflow.Add(drop);
         }
+        return report;
+    }
+
+    /// <summary>The item an inventory-activate quest curio needs (e.g. holy water for a corrupted altar), or null.</summary>
+    public string QuestItemNeededHere
+    {
+        get
+        {
+            bool isGoal = CurioHere != null && (State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal);
+            return isGoal && State.Goal is { NeedsItem: true } g ? g.StartingItems[0].Id : null;
+        }
+    }
+
+    private CurioReport InteractQuestCurio(string curio, string heroId, string itemId)
+    {
+        var goal = State.Goal;
+        var report = new CurioReport { CurioId = curio, HeroId = heroId, OutcomeType = "Quest" };
+        if (goal.NeedsItem)
+        {
+            string needed = goal.StartingItems[0].Id;
+            if (itemId != needed || !State.Pack.TryUse(needed))
+            {
+                report.OutcomeType = "NeedsItem";
+                report.Text = $"Something is needed here: {needed}.";
+                return report;   // left untouched; the party can come back with the item
+            }
+            report.ItemUsed = needed;
+        }
+        else if (goal.Type == "gather" && goal.QuestItem != null)
+        {
+            State.Pack.Add(goal.QuestItem, 1);
+            report.Loot.Add(new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 });
+        }
+
+        State.GoalProgress++;
+        report.Text = $"Quest objective {State.GoalProgress}/{goal.Amount}.";
+        if (State.InRoom) CurrentRoom.CurioTaken = true;
+        else CurrentTile.Resolved = true;
+        CheckQuest();
         return report;
     }
 
@@ -507,12 +550,14 @@ public sealed class Crawl
     private void CheckQuest()
     {
         if (State.QuestComplete || State.Quest == null) return;
+        var goal = State.Goal;
+        float explorePct = goal?.Type == "explore_room" && goal.Percentage > 0 ? goal.Percentage : 0.9f;
         bool done = State.Quest.Type switch
         {
-            "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
+            "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * explorePct),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
-            // gather / activate / inventory_activate need quest curios (not placed yet): fall back to explore.
+            "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
             _ => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
         };
         if (!done) return;

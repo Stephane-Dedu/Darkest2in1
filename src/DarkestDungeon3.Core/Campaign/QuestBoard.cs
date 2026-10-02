@@ -37,7 +37,50 @@ public static class QuestBoard
 
             offers.Add(Build(estate, dd1, zone, type, length, difficulty, rng));
         }
+        offers.AddRange(PlotOffers(estate, dd1, zones));
         return offers;
+    }
+
+    public const string DarkestDungeon = "darkestdungeon";
+
+    /// <summary>
+    /// DD1's boss quests appear when a zone reaches their level and stay until beaten. The Darkest Dungeon chain
+    /// opens once any zone reaches level 6 (champion bosses), one part at a time.
+    /// </summary>
+    public static IEnumerable<QuestOffer> PlotOffers(Estate estate, Dd1Campaign dd1, IEnumerable<string> zones)
+    {
+        if (dd1.Goals == null) yield break;
+        var open = new HashSet<string>(zones);
+        int bestZoneLevel = 0;
+        foreach (var z in open)
+            bestZoneLevel = Math.Max(bestZoneLevel, dd1.ZoneLevel(estate.ZoneXp.TryGetValue(z, out var x) ? x : 0));
+
+        var nextDarkest = dd1.Goals.Plot.FirstOrDefault(p => p.Dungeon == DarkestDungeon && p.Progression && !estate.CompletedPlotQuests.Contains(p.Id));
+        foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && p.Type != "explore"))
+        {
+            if (estate.CompletedPlotQuests.Contains(p.Id)) continue;
+            bool available = p.Dungeon == DarkestDungeon
+                ? p == nextDarkest && bestZoneLevel >= 6
+                : open.Contains(p.Dungeon) && dd1.ZoneLevel(estate.ZoneXp.TryGetValue(p.Dungeon, out var xp) ? xp : 0) >= p.ZoneLevel;
+            if (!available) continue;
+
+            var goal = p.GoalIds.Select(g => dd1.Goals.Goals.TryGetValue(g, out var d) ? d : null).FirstOrDefault(g => g != null);
+            yield return new QuestOffer
+            {
+                Id = "plot:" + p.Id,
+                Dungeon = p.Dungeon,
+                Type = p.Type,
+                Length = Math.Min(3, p.Length),
+                Difficulty = p.Difficulty,
+                MapSeed = estate.NextSeed(),
+                IsPlot = true,
+                PlotId = p.Id,
+                GoalId = goal?.Id,
+                BossId = goal?.MonsterClasses.FirstOrDefault(),
+                ResolveXp = p.ResolveXp,
+                Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
+            };
+        }
     }
 
     public static QuestOffer Build(Estate estate, Dd1Campaign dd1, string zone, string type, int length, int difficulty, Rng rng)
@@ -50,6 +93,7 @@ public static class QuestBoard
             Length = length,
             Difficulty = difficulty,
             MapSeed = estate.NextSeed(),
+            GoalId = dd1.Goals?.For(type, zone)?.Id,
         };
 
         int gold = dd1.Gold(difficulty, length);
