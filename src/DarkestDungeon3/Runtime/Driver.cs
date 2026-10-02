@@ -65,10 +65,23 @@ internal sealed class Driver : MonoBehaviour
         Plugin.Log.LogInfo("[dd3] " + line);
     }
 
+    private static readonly float[] RankX = { 788, 620, 452, 284 };
+
     private void Update()
     {
+        var stage = HeroStage.Instance;
+        stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value);
         if (Phase != Phase.Crawling || Crawl == null) return;
         LockRoadInput();
+        if (stage != null && Plugin.HeroModels.Value)
+        {
+            HeroStage.HeroScale = Plugin.HeroModelScale.Value;
+            // Living heroes keep their DD1 rank slots; the dead leave a gap.
+            var guids = Expedition.Party.Select(Party.Guid).ToList();
+            var alive = guids.Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
+            var xs = guids.Select((g, i) => (g, x: RankX[System.Math.Min(i, 3)])).Where(t => alive.Contains(t.g)).Select(t => t.x).ToList();
+            stage.SetParty(alive, xs);
+        }
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
         if (kb != null && Expedition.Camp == null && !Expedition.InRoom)
@@ -421,6 +434,7 @@ internal sealed class Driver : MonoBehaviour
         S.Persist();
         Crawl = null;
         Party = null;
+        HeroStage.Instance?.Clear();
         Phase = Phase.Homecoming;
         Dd2Run.End();
     }

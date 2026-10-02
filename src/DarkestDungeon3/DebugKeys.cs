@@ -28,6 +28,8 @@ public class DebugKeys : MonoBehaviour
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
             if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f7Key.wasPressedThisFrame)
+                Plugin.Log.LogInfo("[F7] " + (DarkestDungeon3.Dd2.HeroStage.Instance?.Dump(System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "DarkestDungeon3", "herostage.png")) ?? "no stage"));
             if (kb.f11Key.wasPressedThisFrame) DarkestDungeon3.Runtime.Driver.Instance?.DebugFight();
         }
         catch (Exception e)
@@ -38,6 +40,9 @@ public class DebugKeys : MonoBehaviour
 
     private static void DumpState()
     {
+        foreach (var cls in new[] { "highwayman", "plague_doctor", "man_at_arms", "vestal" })
+            foreach (DarkestDungeon3.Runtime.Art.LargeArt k in System.Enum.GetValues(typeof(DarkestDungeon3.Runtime.Art.LargeArt)))
+                DarkestDungeon3.Runtime.Art.LargePortrait(cls, k);   // sizes are logged as they load
         Plugin.Log.LogInfo($"[F8] mode={GameModeMgr.CurrentMode?.GetName()} changing={Singleton<GameModeMgr>.Instance.IsChangingState()}");
         var roster = Singleton<GameTypeMgr>.Instance?.RosterManager;
         if (roster != null)

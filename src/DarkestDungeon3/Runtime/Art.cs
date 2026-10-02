@@ -113,6 +113,50 @@ internal static class Art
         return s;
     }
 
+    // DD2's larger hero art lives behind addressable references; load once, asynchronously, and cache.
+    private static readonly Dictionary<string, Sprite> Large = new();
+    private static readonly HashSet<string> LargeRequested = new();
+
+    public enum LargeArt { Altar, HeroStory, Story }
+
+    /// <summary>A large DD2 hero picture, or null until it has loaded (callers fall back to the portrait).</summary>
+    public static Sprite LargePortrait(string classId, LargeArt kind)
+    {
+        if (classId == null) return null;
+        string key = classId + "/" + kind;
+        if (Large.TryGetValue(key, out var s)) return s;
+        if (LargeRequested.Add(key))
+        {
+            try
+            {
+                var res = Singleton<ResourceDatabaseActors>.Instance?.GetResource(classId, isErrorValid: false);
+                var reference = kind switch
+                {
+                    LargeArt.Altar => res?.m_ClassAltarPortraitReference,
+                    LargeArt.HeroStory => res?.m_HeroStoryPortrait,
+                    _ => res?.StoryPortraitSpriteReference,
+                };
+                if (reference != null && reference.RuntimeKeyIsValid())
+                {
+                    var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(reference.RuntimeKey);
+                    handle.Completed += h =>
+                    {
+                        Large[key] = h.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded ? h.Result : null;
+                        var r = Large[key]?.textureRect;
+                        Plugin.Log.LogInfo($"[art] {key}: {(r.HasValue ? $"{r.Value.width}x{r.Value.height}" : "none")}");
+                    };
+                }
+                else Large[key] = null;
+            }
+            catch (System.Exception e) { Plugin.Log.LogWarning($"[art] {key}: {e.Message}"); Large[key] = null; }
+        }
+        return null;
+    }
+
+    /// <summary>The picture of a hero standing in the dungeon: the largest DD2 art available, else the portrait.</summary>
+    public static Sprite HeroFigure(string classId) =>
+        LargePortrait(classId, Plugin.HeroArt.Value) ?? Portrait(classId);
+
     /// <summary>Draw a sprite (from an atlas) into a rect, keeping its aspect ratio.</summary>
     public static void DrawSprite(Rect r, Sprite s, bool fit = true)
     {

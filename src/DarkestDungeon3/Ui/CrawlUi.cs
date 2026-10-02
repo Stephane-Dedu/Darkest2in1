@@ -124,6 +124,9 @@ internal sealed class CrawlUi
     {
         var shadow = Art.Overlay("charactershadow_med.png");
         var selected = Art.Overlay("selected_1.png");
+        // DD2's animated hero models, rendered off-screen at DD1's rank positions (see HeroStage).
+        var models = Plugin.HeroModels.Value ? Dd2.HeroStage.Instance?.Texture : null;
+        if (models != null) GUI.DrawTexture(new Rect(0, 0, 1920, 720), models);
         for (int rank = 0; rank < exp.Party.Count && rank < 4; rank++)
         {
             string id = exp.Party[rank];
@@ -138,9 +141,10 @@ internal sealed class CrawlUi
 
             var old = GUI.color;
             if (dead) GUI.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
-            var sprite = Art.Portrait(hero?.ClassId);
-            if (sprite != null) Art.DrawSprite(new Rect(x - 80, Feet - 230, 160, 220), sprite);
-            else Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            var sprite = models != null && !dead ? null : Art.HeroFigure(hero?.ClassId);
+            bool large = sprite != null && sprite != Art.Portrait(hero?.ClassId);
+            if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420, 240, 430) : new Rect(x - 80, Feet - 230, 160, 220), sprite);
+            else if (models == null) Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             GUI.color = old;
 
             if (!dead)
