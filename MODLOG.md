@@ -93,6 +93,28 @@ Pattern 1 from mashup-mods ("port the content"): a **BepInEx 5 + HarmonyX plugin
 - Corridors v0: a 2D DD1-style side view (DD1 corridor/room PNGs loaded from the user's DD1 install +
   DD2 hero art). A DD2 3D-actor corridor is a later upgrade.
 
+## Core library (game-independent, unit tested): `src/DarkestDungeon3.Core`
+| Part | DD1 source of truth |
+|---|---|
+| `Dd1/DarkestFile` parser | `.darkest` record format |
+| `Dungeon/MapGenerator` | `scripts/map_generator.darkest` (44 blocks: zone × size × quest type) |
+| `Dungeon/ZoneProps` | `dungeons/<zone>/<zone>.props.darkest` (curios, treasures, traps, obstacles) |
+| `Campaign/QuestBoard` | `campaign/quest/quest.generation.json`, `number.quest.generation.json`, `campaign/progression/progression.json` |
+| `Expedition/ItemCatalog` | `inventory/base.*.inventory.items.darkest` (prices, stack limits) |
+| `Expedition/CrawlRules` + `Crawl` | `shared/rules.json` (light loss 6/1 per square, hallway stress, hunger, scouting, surprise, darkness bands, backtrack ambush) |
+
+- DD1 → DD2 stress: DD1 affliction at 100, DD2 meltdown at 10, so 10 DD1 stress = 1 DD2 point, with
+  probabilistic rounding (2 DD1 → 20% chance of +1).
+- Map gen gotcha: per-room nudges made bent corridors cross. Fixed by nudging whole rows/columns (straight
+  corridors, still variable length). DD1 configs sometimes list fewer corridors than rooms−1 (long kill_boss: 14/11),
+  so the spanning tree comes first and the corridor count is a target.
+- Not yet: curio outcomes (`curios/curio_type_library.csv`), trap effects from `props/trap_definitions.json`,
+  gather/activate quest items, camping, loot tables, plot (boss) quests, buildings and town activities.
+- DD2 hero classes (recruitable): flagellant, grave_robber, hellion, highwayman, jester, leper, man_at_arms,
+  occultist, plague_doctor, runaway, vestal, bounty_hunter (Kingdoms data).
+- DD2 dev levers: launch flags `-allowEditorPrefs` (reads `StreamingAssets/editor_prefs.txt`) and `-consoleEnabled`.
+  Prefs can also be set from code (`TextBasedEditorPrefsBaseType.X`).
+
 ## Open questions
 - [x] How does DD2 start a battle? → CombatScenarioData + GameModeMgr.SetMode(COMBAT). Any party, config, arena.
 - [ ] How are DD2 heroes (ActorInstance) created and put in the party (RosterManager)? Persist across runs?

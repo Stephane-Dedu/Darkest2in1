@@ -1,0 +1,399 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using DarkestDungeon3.Core.Dungeon;
+
+namespace DarkestDungeon3.Core.Expedition;
+
+/// <summary>
+/// DD1's dungeon crawl: walking corridors square by square, spending light, taking hallway stress, tripping
+/// traps, eating, scouting, and stopping for fights. Fights themselves happen in DD2's combat; the caller
+/// reports the outcome back with <see cref="ResolveBattle"/>.
+/// </summary>
+public sealed class Crawl
+{
+    public ExpeditionState State { get; }
+    private readonly CrawlRules _rules;
+    private readonly IParty _party;
+    private readonly List<CrawlEvent> _events = new();
+
+    public Crawl(ExpeditionState state, CrawlRules rules, IParty party)
+    {
+        State = state;
+        _rules = rules;
+        _party = party;
+    }
+
+    private DungeonMap Map => State.Map;
+
+    public Room CurrentRoom => State.InRoom ? Map.Room(State.RoomId) : null;
+    public Corridor CurrentCorridor => State.CorridorId >= 0 ? Map.Corridor(State.CorridorId) : null;
+    public HallTile CurrentTile => !State.InRoom && CurrentCorridor != null ? CurrentCorridor.Tiles[State.TileIndex] : null;
+
+    /// <summary>A fight or obstacle the party has to deal with before it can go on.</summary>
+    public bool IsBlocked =>
+        State.InRoom
+            ? CurrentRoom.HasBattle && !CurrentRoom.Cleared
+            : CurrentTile != null && !CurrentTile.Resolved && CurrentTile.Content is HallContent.Battle or HallContent.Obstacle;
+
+    /// <summary>Put the party in the entrance room at the start of the expedition.</summary>
+    public List<CrawlEvent> Begin()
+    {
+        _events.Clear();
+        State.RoomId = Map.EntranceRoomId;
+        EnterRoom(Map.Room(State.RoomId));
+        return Flush();
+    }
+
+    /// <summary>From a room, step into the corridor leading to a neighbouring room.</summary>
+    public List<CrawlEvent> Travel(int toRoomId)
+    {
+        _events.Clear();
+        if (!State.InRoom || IsBlocked) return Blocked();
+        var corridor = Map.FindCorridor(State.RoomId, toRoomId);
+        if (corridor == null) return Blocked();
+
+        State.CorridorId = corridor.Id;
+        State.HeadingRoomId = toRoomId;
+        State.TileIndex = corridor.RoomA == State.RoomId ? 0 : corridor.Tiles.Count - 1;
+        State.RoomId = -1;
+        EnterTile(forward: true);
+        return Flush();
+    }
+
+    /// <summary>Walk one square toward the room the party is heading for (forward) or back the way it came.</summary>
+    public List<CrawlEvent> Step(bool forward)
+    {
+        _events.Clear();
+        if (State.InRoom) return Blocked();
+        var tile = CurrentTile;
+        // An unresolved fight pins the party; an obstacle only blocks the way forward.
+        if (!tile.Resolved && (tile.Content == HallContent.Battle || (forward && tile.Content == HallContent.Obstacle)))
+            return Blocked();
+
+        var corridor = CurrentCorridor;
+        int towardB = State.HeadingRoomId == corridor.RoomB ? 1 : -1;
+        int dir = forward ? towardB : -towardB;
+        int next = State.TileIndex + dir;
+
+        if (next < 0 || next >= corridor.Tiles.Count)
+        {
+            int roomId = next < 0 ? corridor.RoomA : corridor.RoomB;
+            State.RoomId = roomId;
+            State.CorridorId = -1;
+            State.TileIndex = -1;
+            State.HeadingRoomId = -1;
+            EnterRoom(Map.Room(roomId));
+        }
+        else
+        {
+            State.TileIndex = next;
+            EnterTile(forward);
+        }
+        return Flush();
+    }
+
+    /// <summary>Report a won fight at the party's current spot.</summary>
+    public List<CrawlEvent> ResolveBattle()
+    {
+        _events.Clear();
+        State.BattlesWon++;
+        if (State.InRoom)
+        {
+            var room = CurrentRoom;
+            room.Cleared = true;
+            if (room.Content is RoomContent.GuardedCurio or RoomContent.GuardedTreasure && room.CurioId != null)
+                Emit(CrawlEventType.Curio, roomId: room.Id, contentId: room.CurioId);
+        }
+        else if (CurrentTile != null)
+        {
+            CurrentTile.Resolved = true;
+        }
+        CheckQuest();
+        return Flush();
+    }
+
+    /// <summary>Clear the obstacle ahead: with a shovel, or by force (damage and stress, as in DD1).</summary>
+    public List<CrawlEvent> ClearObstacle()
+    {
+        _events.Clear();
+        var tile = CurrentTile;
+        if (tile == null || tile.Content != HallContent.Obstacle || tile.Resolved) return Blocked();
+
+        if (!State.Pack.TryUse(Supply.Shovel))
+        {
+            var rng = NextRng();
+            foreach (var hero in _party.Alive)
+            {
+                _party.Damage(hero, 0.1f, "obstacle");
+                StressDd1(hero, 10, rng, "obstacle");
+            }
+        }
+        tile.Resolved = true;
+        Emit(CrawlEventType.ObstacleCleared, tile: tile, contentId: tile.ContentId);
+        return Flush();
+    }
+
+    /// <summary>Try to disarm a trap the party scouted (DD1 gives a bonus for seeing it coming).</summary>
+    public List<CrawlEvent> DisarmTrap()
+    {
+        _events.Clear();
+        var tile = CurrentTile;
+        if (tile == null || tile.Content != HallContent.Trap || tile.Resolved) return Blocked();
+        TriggerTrap(tile, scouted: true);
+        return Flush();
+    }
+
+    public List<CrawlEvent> UseTorch()
+    {
+        _events.Clear();
+        if (State.Light < 100 && State.Pack.TryUse(Supply.Torch)) ChangeLight(_rules.TorchLight);
+        return Flush();
+    }
+
+    /// <summary>Snuff the torch (DD1 lets you trade safety for loot and surprise).</summary>
+    public List<CrawlEvent> SnuffTorch(float amount = 25f)
+    {
+        _events.Clear();
+        ChangeLight(-amount);
+        return Flush();
+    }
+
+    public void Retreat()
+    {
+        State.Retreated = true;
+        State.Ended = true;
+    }
+
+    // ---- internals ----
+
+    private void EnterTile(bool forward)
+    {
+        var tile = CurrentTile;
+        var rng = NextRng();
+        State.StepsTaken++;
+
+        ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
+        HallwayStress(forward, rng);
+
+        bool firstVisit = !tile.Visited;
+        tile.Visited = true;
+        Emit(CrawlEventType.EnteredTile, tile: tile, contentId: tile.ContentId);
+
+        if (firstVisit && !tile.Resolved)
+        {
+            switch (tile.Content)
+            {
+                case HallContent.Battle:
+                    EmitBattle(CrawlEventType.Battle, tile, corridor: true, rng);
+                    break;
+                case HallContent.Trap:
+                    if (tile.Scouted) Emit(CrawlEventType.Trap, tile: tile, contentId: tile.ContentId);
+                    else TriggerTrap(tile, scouted: false);
+                    break;
+                case HallContent.Obstacle:
+                    Emit(CrawlEventType.Obstacle, tile: tile, contentId: tile.ContentId);
+                    break;
+                case HallContent.Curio:
+                    Emit(CrawlEventType.Curio, tile: tile, contentId: tile.ContentId);
+                    break;
+                case HallContent.Hunger:
+                    tile.Resolved = true;
+                    HungerCheck();
+                    break;
+            }
+        }
+        else if (!firstVisit)
+        {
+            // Walking back through explored halls: DD1 can spring a wandering fight or a hunger check.
+            if (rng.Chance(_rules.ReturnBattleChance)) EmitBattle(CrawlEventType.Ambush, tile, corridor: true, rng);
+            else if (rng.Chance(_rules.ReturnHungerChance)) HungerCheck();
+        }
+    }
+
+    private void EnterRoom(Room room)
+    {
+        bool firstVisit = !room.Visited;
+        room.Visited = true;
+        Emit(CrawlEventType.EnteredRoom, roomId: room.Id);
+
+        if (firstVisit) Scout(room);
+
+        if (room.HasBattle && !room.Cleared)
+            EmitBattle(CrawlEventType.Battle, null, corridor: false, NextRng(), room.Id);
+        else if (firstVisit && room.CurioId != null && room.Content is RoomContent.Curio or RoomContent.Treasure)
+            Emit(CrawlEventType.Curio, roomId: room.Id, contentId: room.CurioId);
+
+        CheckQuest();
+    }
+
+    private void HallwayStress(bool forward, Rng rng)
+    {
+        var band = _rules.Band(State.Light);
+        float chance = (forward ? _rules.StressChanceForward : _rules.StressChanceBack) + band.StressChanceIncrease / 100f;
+        float dd1 = (forward ? _rules.StressDd1Forward : _rules.StressDd1Back) * (1f + band.StressDamageIncrease / 100f);
+        foreach (var hero in _party.Alive)
+            if (rng.Chance(chance)) StressDd1(hero, dd1, rng, "hallway");
+    }
+
+    /// <summary>
+    /// DD1 stress amounts become whole DD2 points by probabilistic rounding: 2 DD1 stress is a 20% chance of
+    /// one DD2 point, 15 is one point plus a 50% chance of a second.
+    /// </summary>
+    private void StressDd1(string hero, float dd1Amount, Rng rng, string cause)
+    {
+        float points = dd1Amount / CrawlRules.Dd1StressPerDd2Point;
+        int whole = (int)Math.Floor(points);
+        if (rng.Chance(points - whole)) whole++;
+        if (whole == 0) return;
+        _party.AddStress(hero, whole, cause);
+        Emit(CrawlEventType.Stress, heroId: hero, amount: whole, contentId: cause);
+    }
+
+    private void HungerCheck()
+    {
+        var alive = _party.Alive;
+        if (State.Pack.TryUse(Supply.Food, alive.Count))
+        {
+            foreach (var hero in alive) _party.Heal(hero, _rules.HungerHealFraction);
+            Emit(CrawlEventType.Ate, amount: alive.Count);
+            return;
+        }
+        // Not enough for everyone: DD1 skips the meal entirely and everybody starves.
+        var rng = NextRng();
+        foreach (var hero in alive)
+        {
+            _party.Damage(hero, _rules.StarveHpFraction, "starvation");
+            StressDd1(hero, _rules.StarveStressDd1, rng, "starvation");
+        }
+        Emit(CrawlEventType.Starving, amount: alive.Count);
+    }
+
+    private void TriggerTrap(HallTile tile, bool scouted)
+    {
+        var rng = NextRng();
+        int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
+        float disarm = 0.5f - _rules.TrapDifficultyPenalty[difficulty] + (scouted ? _rules.TrapScoutDisarmBonus : 0f);
+        tile.Resolved = true;
+        if (rng.Chance(disarm))
+        {
+            Emit(CrawlEventType.TrapDisarmed, tile: tile, contentId: tile.ContentId);
+            return;
+        }
+        // The front hero takes it, as in DD1.
+        var victim = _party.Alive.FirstOrDefault();
+        if (victim != null)
+        {
+            _party.Damage(victim, TrapDamage(tile.ContentId), "trap");
+            StressDd1(victim, 20, rng, "trap");
+        }
+        Emit(CrawlEventType.TrapSprung, tile: tile, contentId: tile.ContentId, heroId: victim);
+    }
+
+    private static float TrapDamage(string trapId) => trapId switch
+    {
+        "spikes" => 0.25f,
+        "poison_cloud" => 0.15f,
+        _ => 0.2f,
+    };
+
+    /// <summary>On entering a new room, maybe reveal what lies within two corridors (DD1 scouting).</summary>
+    private void Scout(Room room)
+    {
+        var rng = NextRng();
+        float chance = _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
+        if (!rng.Chance(chance)) return;
+
+        var dist = Map.Distances(room.Id);
+        int revealed = 0;
+        foreach (var r in Map.Rooms.Where(r => dist[r.Id] > 0 && dist[r.Id] <= 2 && !r.Scouted))
+        {
+            r.Scouted = true;
+            revealed++;
+        }
+        foreach (var c in Map.Corridors.Where(c => Math.Min(dist[c.RoomA], dist[c.RoomB]) <= 1))
+            foreach (var t in c.Tiles.Where(t => !t.Scouted))
+            {
+                t.Scouted = true;
+                revealed++;
+            }
+        if (revealed > 0) Emit(CrawlEventType.Scouted, roomId: room.Id, amount: revealed);
+    }
+
+    private void EmitBattle(CrawlEventType type, HallTile tile, bool corridor, Rng rng, int roomId = -1)
+    {
+        var band = _rules.Band(State.Light);
+        float heroes = (corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty) + band.HeroesSurprisedIncrease / 100f;
+        float monsters = (corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters) + band.MonstersSurprisedIncrease / 100f;
+        bool heroesSurprised = rng.Chance(Math.Min(heroes, _rules.SurpriseMaxParty));
+        bool monstersSurprised = !heroesSurprised && rng.Chance(monsters);
+
+        var e = new CrawlEvent
+        {
+            Type = type,
+            RoomId = roomId,
+            HeroesSurprised = heroesSurprised,
+            MonstersSurprised = monstersSurprised,
+        };
+        if (tile != null)
+        {
+            e.CorridorId = State.CorridorId;
+            e.TileIndex = tile.Index;
+            if (type == CrawlEventType.Ambush) { tile.Content = HallContent.Battle; tile.Resolved = false; }
+        }
+        _events.Add(e);
+    }
+
+    private void CheckQuest()
+    {
+        if (State.QuestComplete || State.Quest == null) return;
+        bool done = State.Quest.Type switch
+        {
+            "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
+            "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
+            "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
+            // gather / activate / inventory_activate need quest curios (not placed yet): fall back to explore.
+            _ => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
+        };
+        if (!done) return;
+        State.QuestComplete = true;
+        Emit(CrawlEventType.QuestComplete);
+    }
+
+    private void ChangeLight(float delta)
+    {
+        float before = State.Light;
+        State.Light = Math.Max(0f, Math.Min(100f, State.Light + delta));
+        if (Math.Abs(State.Light - before) > 0.001f) Emit(CrawlEventType.LightChanged, amount: State.Light);
+    }
+
+    private Rng NextRng() => new(unchecked(State.Seed * 31 + ++State.RandomCounter * 977));
+
+    private List<CrawlEvent> Blocked()
+    {
+        Emit(CrawlEventType.Blocked);
+        return Flush();
+    }
+
+    private void Emit(CrawlEventType type, HallTile tile = null, int roomId = -1, string contentId = null,
+                      string heroId = null, float amount = 0)
+    {
+        _events.Add(new CrawlEvent
+        {
+            Type = type,
+            RoomId = roomId,
+            CorridorId = tile != null ? State.CorridorId : -1,
+            TileIndex = tile?.Index ?? -1,
+            ContentId = contentId,
+            HeroId = heroId,
+            Amount = amount,
+        });
+    }
+
+    private List<CrawlEvent> Flush()
+    {
+        var copy = new List<CrawlEvent>(_events);
+        _events.Clear();
+        return copy;
+    }
+}
