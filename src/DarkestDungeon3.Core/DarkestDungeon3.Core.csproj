@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Game-independent rules: DD1 data loading, dungeon generation, campaign state. No Unity references,
+       so it's unit-testable on plain .NET. Unity's Mono loads netstandard2.0 fine. -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>DarkestDungeon3.Core</AssemblyName>
+    <RootNamespace>DarkestDungeon3.Core</RootNamespace>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Same version the game ships (13.0.2); the game's copy is used at runtime. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+</Project>

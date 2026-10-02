@@ -39,11 +39,18 @@
     <Reference Include="netstandard"><HintPath>$(GameRefs)\netstandard.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DarkestDungeon3.Core\DarkestDungeon3.Core.csproj" />
+  </ItemGroup>
+
   <!-- Deploy into the game after every build. -->
   <Target Name="DeployToGame" AfterTargets="Build" Condition="Exists('$(BepInExDir)')">
     <MakeDir Directories="$(PluginDeployDir)" />
-    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginDeployDir)" />
-    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" DestinationFolder="$(PluginDeployDir)" Condition="Exists('$(TargetDir)$(TargetName).pdb')" />
+    <!-- Only our own assemblies: the game already ships Newtonsoft.Json. -->
+    <ItemGroup>
+      <DeployFiles Include="$(TargetDir)DarkestDungeon3.dll;$(TargetDir)DarkestDungeon3.pdb;$(TargetDir)DarkestDungeon3.Core.dll;$(TargetDir)DarkestDungeon3.Core.pdb" />
+    </ItemGroup>
+    <Copy SourceFiles="@(DeployFiles)" DestinationFolder="$(PluginDeployDir)" Condition="Exists('%(FullPath)')" />
     <Message Importance="high" Text="Deployed $(TargetFileName) to $(PluginDeployDir)" />
   </Target>
 

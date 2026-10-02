@@ -104,6 +104,21 @@ Pattern 1 from mashup-mods ("port the content"): a **BepInEx 5 + HarmonyX plugin
 ## Lab
 - DD2 saves backed up: `C:\Users\Piral\.universal-modder\backups\dd2-saves\20261002-070440.zip`
   (restore: `um backup restore dd2-saves`).
+- BepInEx 5.4.23.5 installed into `E:\DarkestDungeonII` on 2026-10-02 (`winhttp.dll` currently renamed to
+  `winhttp.dll.off` from the vanilla-launch test).
+
+## BLOCKER (2026-10-02): the E: drive is failing
+- E: is a Storage Spaces "Simple" virtual disk (no redundancy) on one Seagate ST1000VX000 HDD (`Harddisk1`).
+  The System log has **`disk` event 7 ("bloc défectueux")** on `\Device\Harddisk1\DR1` 4×/day for 10+ days.
+- Symptoms: unzip stalled writing a DLL; DD2 hung at 17 MB with an unkillable thread in an `Executive` wait;
+  vanilla DD2 needed 2+ min just to reach "Discovering subsystems"; disk shows 0% idle with ~0 B/s.
+- Measured: 0.52 MB/s sequential single-threaded read (a healthy HDD does 100-150 MB/s); robocopy /MT:4 got
+  31 KB/s. A full copy of the 5.4 GB game would take ~3 h and may hit unreadable sectors.
+- User chose "copy to D:". The copy is infeasible at that speed, so it was stopped. `D:\DarkestDungeonII` holds a
+  **partial** copy (BepInEx core + 21 Managed DLLs + our plugin), **not a working game**.
+- Builds no longer need the game folder: reference DLLs live in `C:\Users\Piral\dd2-decomp\refs` (+ `refs\bepinex`),
+  wired through `RefsDir` / `GameRefs` / `BepInExRefs` in `Directory.Build.props`.
+- Need a healthy install (D: = Samsung 840 PRO SSD, 102 GB free). C: has only 16 GB free.
 
 ## Next step
 User approval to install BepInEx into `E:\DarkestDungeonII`, then: plugin skeleton → log line in
