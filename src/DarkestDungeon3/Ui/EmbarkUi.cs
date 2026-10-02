@@ -14,6 +14,7 @@ internal sealed class EmbarkUi
     private readonly List<string> _party = new();
     private readonly Inventory _cart = new();
     private string _error;
+    private bool _confirmLow;
 
     public bool WantsBack;
 
@@ -35,8 +36,19 @@ internal sealed class EmbarkUi
 
         var heroes = _party.Select(E.Hero).Where(h => h != null).ToList();
         string why = Embark.WhyCantEmbark(E, _quest, heroes);
+
+        // DD1 asks for confirmation before leaving with too little food or no torches.
+        int minFood = S.Provisioner.MinimumFood(_quest?.Length ?? 1);
+        bool lowFood = _cart.Count(Supply.Food) < minFood, noTorch = _cart.Count(Supply.Torch) == 0;
+        if (why == null && (lowFood || noTorch))
+        {
+            string warn = lowFood ? $"Less than {minFood} food: the party may starve." : "No torches: the dark will press in.";
+            Gui.Label(new Rect(980, 940, 590, 50), Gui.Colour(warn + (_confirmLow ? " Click Embark again to go anyway." : ""), Gui.Blood));
+        }
         if (Gui.Button(new Rect(1580, 990, 320, 76), why ?? Gui.Colour("<b>Embark!</b>", Gui.Gold), why == null))
         {
+            if ((lowFood || noTorch) && !_confirmLow) { _confirmLow = true; return; }
+            _confirmLow = false;
             var bought = new Inventory();
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);
             _error = Driver.Instance.Embark(_quest, heroes, bought);
