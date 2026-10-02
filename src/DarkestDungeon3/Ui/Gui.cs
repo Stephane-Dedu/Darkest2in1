@@ -83,6 +83,74 @@ internal static class Gui
 
     public static string Colour(string text, Color c) => $"<color=#{ColorUtility.ToHtmlStringRGB(c)}>{text}</color>";
 
+    // ---- DD1 look ----
+
+    public static readonly Color Dd1Name = new(177 / 255f, 161 / 255f, 108 / 255f);
+    public static readonly Color Dd1Class = new(154 / 255f, 152 / 255f, 143 / 255f);
+    public static readonly Color Dd1Health = new(0.75f, 0f, 0f);
+    public static readonly Color Dd1Text = new(0.82f, 0.78f, 0.68f);
+
+    /// <summary>Text in DD1's fonts (DwarvenAxe for headings, Ubuntu for body), falling back to IMGUI.</summary>
+    public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
+    {
+        var font = heading ? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Body;
+        if (font != null) { font.Draw(r, text, size, colour, align); return; }
+        EnsureStyles();
+        var style = new GUIStyle(_label) { fontSize = (int)(size * 0.8f), alignment = align, normal = { textColor = colour } };
+        GUI.Label(r, text, style);
+    }
+
+    /// <summary>Draw a DD1 texture at its natural size with its top-left at (x, y).</summary>
+    public static Rect At(Texture tex, float x, float y, bool flipX = false)
+    {
+        if (tex == null) return new Rect(x, y, 0, 0);
+        var r = new Rect(x, y, tex.width, tex.height);
+        if (flipX) GUI.DrawTextureWithTexCoords(r, tex, new Rect(1, 0, -1, 1), true);
+        else GUI.DrawTexture(r, tex);
+        return r;
+    }
+
+    /// <summary>A DD1-style text button: dark plate, thin gold frame, DwarvenAxe label, brighter on hover.</summary>
+    public static bool DdButton(Rect r, string label, bool enabled = true, float size = 26)
+    {
+        bool hover = enabled && r.Contains(Event.current.mousePosition);
+        Fill(r, new Color(0.06f, 0.05f, 0.04f, 0.92f));
+        var frame = enabled ? (hover ? Gold : new Color(0.45f, 0.38f, 0.24f)) : new Color(0.25f, 0.23f, 0.2f);
+        Fill(new Rect(r.x, r.y, r.width, 2), frame);
+        Fill(new Rect(r.x, r.yMax - 2, r.width, 2), frame);
+        Fill(new Rect(r.x, r.y, 2, r.height), frame);
+        Fill(new Rect(r.xMax - 2, r.y, 2, r.height), frame);
+        Text(r, label, size, enabled ? (hover ? Color.white : Dd1Name) : Dim, TextAnchor.MiddleCenter, heading: true);
+        return enabled && GUI.Button(r, GUIContent.none, GUIStyle.none);
+    }
+
+    /// <summary>An invisible click area (for art that acts as a button).</summary>
+    public static bool Hotspot(Rect r) => GUI.Button(r, GUIContent.none, GUIStyle.none);
+
+    // ---- announcements (DD1 shows events as a banner, not a log) ----
+
+    private static string _announce;
+    private static float _announceUntil;
+
+    public static void Announce(string text, float seconds = 2.2f)
+    {
+        _announce = text;
+        _announceUntil = Time.unscaledTime + seconds;
+    }
+
+    public static void DrawAnnouncement()
+    {
+        if (_announce == null || Time.unscaledTime > _announceUntil) return;
+        float a = Mathf.Clamp01((_announceUntil - Time.unscaledTime) * 2f);
+        var frame = Runtime.Art.Overlay("announcement_frame.png");
+        var r = new Rect(960 - 310, 210 - 68, 620, 136);
+        var old = GUI.color;
+        GUI.color = new Color(1, 1, 1, a);
+        if (frame != null) GUI.DrawTexture(r, frame); else Fill(r, new Color(0, 0, 0, 0.8f));
+        GUI.color = old;
+        Text(new Rect(r.x + 40, r.y + 20, r.width - 80, r.height - 50), _announce, 30, new Color(Dd1Name.r, Dd1Name.g, Dd1Name.b, a), TextAnchor.MiddleCenter, heading: true);
+    }
+
     // ---- input blocker: a uGUI raycast target under IMGUI so clicks don't reach DD2's own UI ----
 
     private static GameObject _blocker;

@@ -27,6 +27,8 @@ public class DebugKeys : MonoBehaviour
         {
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
+            if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f11Key.wasPressedThisFrame) DarkestDungeon3.Runtime.Driver.Instance?.DebugFight();
         }
         catch (Exception e)
         {
@@ -46,6 +48,25 @@ public class DebugKeys : MonoBehaviour
         var ids = lib.GetLibraryElementKeys();
         Plugin.Log.LogInfo($"[F8] {ids.Count} battle configurations; catacombs ones: " +
                            string.Join(", ", ids.Where(i => i.Contains("catacomb")).Take(40)));
+    }
+
+    /// <summary>F10 (testing): every enemy in the current fight takes lethal damage, twice to finish corpses.</summary>
+    private static void WinFight()
+    {
+        var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
+        if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
+        var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
+        int hit = 0;
+        for (int pass = 0; pass < 2; pass++)
+            foreach (var a in combat.AllActors.ToList())
+            {
+                var actor = a?.ActorInstance;
+                if (actor == null || party.Contains(actor.ActorGuid)) continue;
+                actor.ApplyHealthDamage(9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
+                                        Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
+                hit++;
+            }
+        Plugin.Log.LogInfo($"[F10] struck {hit} enemy actors");
     }
 
     private static void StartTestCombat()

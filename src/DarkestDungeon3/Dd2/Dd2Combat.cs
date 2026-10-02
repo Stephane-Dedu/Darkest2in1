@@ -98,6 +98,23 @@ internal static class Dd2Combat
     }
 }
 
+/// <summary>
+/// When a results screen closes, DD2's CombatResultsPresentationBhv force-unloads "its own scene". In our host
+/// run a second instance lives in the road scene (MainScene), so closing the results unloaded the road, and
+/// RunBhv then waited forever for it ("Waiting on RunBhv. Blocking Itr ..."). Never let it unload the road.
+/// </summary>
+[HarmonyPatch(typeof(Assets.Code.Combat.Presentation.CombatResultsPresentationBhv), "UnloadScene")]
+internal static class KeepRoadSceneLoaded
+{
+    private static bool Prefix(Assets.Code.Combat.Presentation.CombatResultsPresentationBhv __instance)
+    {
+        string scene = __instance.gameObject.scene.name;
+        if (scene != GameModeType.DRIVING.m_sceneName) return true;
+        Plugin.Log.LogWarning($"[combat] results screen object lives in {scene}; not unloading the road scene");
+        return false;
+    }
+}
+
 /// <summary>Our fights end when DD2 heads back to the road (DRIVING) after the results screen.</summary>
 [HarmonyPatch(typeof(GameModeMgr), nameof(GameModeMgr.SetMode))]
 internal static class FightOverOnLeavingCombat

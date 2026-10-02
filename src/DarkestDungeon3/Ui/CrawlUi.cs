@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using Assets.Code.Actor;
 using DarkestDungeon3.Core.Dungeon;
 using DarkestDungeon3.Core.Expedition;
 using DarkestDungeon3.Dd2;
@@ -7,12 +10,19 @@ using UnityEngine;
 
 namespace DarkestDungeon3.Ui;
 
-/// <summary>The DD1 dungeon: a side view of the current square, the party, the torch, the map and the actions.</summary>
+/// <summary>
+/// The dungeon, laid out like DD1's raid screen (positions from DD1's scripts/layout/screen.raid.darkest):
+/// scene and party on top, torch above, banner + hero panel bottom-left, map/inventory bottom-right.
+/// </summary>
 internal sealed class CrawlUi
 {
-    private string _curioHero;
+    private static readonly float[] HeroX = { 788, 620, 452, 284 };   // rank 1..4 (DD1 overlays.hero_start_pos/spacing)
+    private const float Feet = 680;
+    private const float MapUnit = 40;                                  // map pixels per fine grid unit
+
+    private bool _inventoryTab;
+    private bool _confirmRetreat;
     private string _campHero, _campTarget;
-    private Vector2 _logScroll;
 
     private static Session S => Session.Current;
     private static Driver D => Driver.Instance;
@@ -23,200 +33,459 @@ internal sealed class CrawlUi
         var exp = D.Expedition;
         if (crawl == null || exp == null) return;
         string zone = exp.Quest.Dungeon;
+        if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
 
-        DrawScene(new Rect(0, 0, Gui.W, 620), crawl, zone);
-        DrawParty(new Rect(40, 380, 1100, 220));
-        DrawTorch(new Rect(560, 20, 800, 40), exp.Light);
-        DrawMap(new Rect(1260, 630, 650, 440), exp.Map, exp);
-        DrawActions(new Rect(10, 630, 640, 440), crawl, exp);
-        DrawLog(new Rect(660, 630, 590, 440));
-        if (exp.Camp != null) DrawCamp(new Rect(360, 90, 1200, 520), crawl, exp);
+        DrawScene(crawl, exp, zone);
+        DrawHeroes(exp);
+        DrawTorch(exp.Light);
+        DrawQuestInfo(crawl, exp);
+        DrawHud(exp);
+        if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
+        DrawPrompt(crawl, exp);
+        if (exp.Camp != null) DrawCamp(crawl, exp);
+        Gui.DrawAnnouncement();
     }
 
-    private static void DrawScene(Rect r, Crawl crawl, string zone)
+    // ---------------- scene ----------------
+
+    private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone)
     {
-        Gui.Fill(r, Color.black);
-        Gui.Image(r, Art.CorridorBackground(zone));
-        Texture wall = crawl.State.InRoom
-            ? (crawl.State.RoomId == crawl.State.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, RoomKind(crawl.State.RoomId)))
-            : Art.CorridorWall(zone, crawl.State.TileIndex + crawl.State.CorridorId);
-        Gui.Image(r, wall);
-        // DD1's darkness: the lower the torch, the darker the scene.
-        float dark = Mathf.Clamp01((60f - crawl.State.Light) / 120f);
-        if (dark > 0) Gui.Fill(r, new Color(0, 0, 0, dark));
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), Color.black);
+        float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
+        float slide = t < 1f ? D.LastStepDir * 720f * (1f - Mathf.SmoothStep(0, 1, t)) : 0f;
 
-        string where = crawl.State.InRoom
-            ? (crawl.State.RoomId == crawl.State.Map.EntranceRoomId ? "The entrance" : "A room")
-            : $"Corridor, square {crawl.State.TileIndex + 1}";
-        Gui.Panel(new Rect(20, 16, 520, 48));
-        Gui.Label(new Rect(34, 24, 500, 40), $"{S.Zones.ZoneName(zone)} — {where}");
-        Gui.Panel(new Rect(1380, 16, 520, 48));
-        Gui.Label(new Rect(1394, 24, 500, 40), $"{crawl.State.Quest}{(crawl.State.QuestComplete ? Gui.Colour("  ✔ complete", Gui.Gold) : "")}");
-    }
-
-    private static readonly string[] RoomKinds = { "altar", "arch", "barrels", "drain", "empty", "library", "torture" };
-    private static string RoomKind(int roomId) => RoomKinds[(roomId * 7 + 3) % RoomKinds.Length];
-
-    private static void DrawParty(Rect area)
-    {
-        var exp = D.Expedition;
-        // DD1 shows the front rank on the right; so do we.
-        for (int i = 0; i < exp.Party.Count; i++)
+        if (exp.InRoom)
         {
-            string id = exp.Party[i];
-            var hero = S.Save.Estate.Hero(id);
-            var actor = Dd2Api.Actor(D.Party?.Guid(id) ?? 0);
-            float x = area.xMax - (i + 1) * 270;
-            var r = new Rect(x, area.y, 260, area.height);
-            Gui.Panel(r);
-            bool dead = actor == null || Dd2Api.IsDead(D.Party.Guid(id));
-            Gui.Label(new Rect(r.x + 10, r.y + 6, 240, 60), $"<b>{hero?.Name}</b>\n{Gui.Colour(HamletUi.Pretty(hero?.ClassId), Gui.Dim)}");
-            if (dead) { Gui.Label(new Rect(r.x + 10, r.y + 80, 240, 40), Gui.Colour("Dead", Gui.Blood)); continue; }
-            Gui.Small(new Rect(r.x + 10, r.y + 74, 240, 26), $"HP {actor.HpRounded:0}/{actor.CurrentHpMax:0}");
-            Gui.Bar(new Rect(r.x + 10, r.y + 100, 240, 16), Dd2Api.HpFraction(actor), Gui.Blood);
-            Gui.Small(new Rect(r.x + 10, r.y + 122, 240, 26), $"Stress {actor.Stress:0}/{actor.StressMax:0}");
-            Gui.Bar(new Rect(r.x + 10, r.y + 148, 240, 16), actor.StressMax > 0 ? actor.Stress / actor.StressMax : 0, new Color(0.85f, 0.85f, 0.85f));
-            var buffs = exp.PendingBuffs.TryGetValue(id, out var b) ? b.Count : 0;
-            if (buffs > 0) Gui.Small(new Rect(r.x + 10, r.y + 170, 240, 26), Gui.Colour($"{buffs} camp/curio buff(s)", Gui.Gold));
+            var tex = exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
+            if (tex != null) GUI.DrawTexture(new Rect(slide, 0, 1920, 720), tex);
+        }
+        else
+        {
+            var c = crawl.CurrentCorridor;
+            int dir = exp.HeadingRoomId == c.RoomB ? 1 : -1;   // screen-right is the way the party is heading
+            for (int k = -2; k <= 2; k++)
+            {
+                int i = exp.TileIndex + k * dir;
+                float x = 600 + k * 720 + slide;
+                if (x > 1920 || x + 720 < 0) continue;
+                bool beyond = i < 0 || i >= c.Tiles.Count;
+                if (beyond && Math.Abs(k) > 1 && (i < -1 || i > c.Tiles.Count)) continue;
+                if (beyond)
+                {
+                    // DD1's door segment has its doorway on the right: mirror it for the door behind the party.
+                    var door = Art.CorridorDoor(zone);
+                    if (door != null) GUI.DrawTextureWithTexCoords(new Rect(x, 0, 720, 720), door, k > 0 ? new Rect(0, 0, 1, 1) : new Rect(1, 0, -1, 1));
+                }
+                else
+                {
+                    var wall = Art.CorridorWall(zone, c.Id * 3 + i);
+                    if (wall != null) GUI.DrawTexture(new Rect(x, 0, 720, 720), wall);
+                }
+                var top = Art.ForegroundTop(zone);
+                var bottom = Art.ForegroundBottom(zone);
+                if (top != null) GUI.DrawTexture(new Rect(x, 0, 720, top.height), top);
+                if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
+            }
+            DrawHallContent(crawl.CurrentTile);
+        }
+
+        // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
+        float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
+        if (dark > 0)
+        {
+            Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, dark * 0.55f));
+            Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
+            Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
         }
     }
 
-    private static void DrawTorch(Rect r, float light)
+    /// <summary>What's on the current hall square, drawn in front of the party (no DD1 prop art yet: its map icon).</summary>
+    private static void DrawHallContent(HallTile tile)
     {
-        Gui.Panel(new Rect(r.x - 10, r.y - 6, r.width + 20, r.height + 12));
-        Gui.Bar(new Rect(r.x, r.y + 4, r.width - 220, r.height - 8), light / 100f, Gui.Gold);
-        Gui.Label(new Rect(r.xMax - 210, r.y + 2, 210, r.height), $"{Core.Expedition.CrawlRules.BandName(light)} ({light:0})");
+        if (tile == null || tile.Resolved && tile.Content != HallContent.Curio) return;
+        string icon = tile.Content switch
+        {
+            HallContent.Curio when !tile.Resolved => "marker_curio",
+            HallContent.Obstacle => "marker_obstacle",
+            HallContent.Trap when tile.Scouted => "marker_trap",
+            _ => null,
+        };
+        if (icon == null) return;
+        var tex = Art.MapIcon(icon);
+        if (tex == null) return;
+        var r = new Rect(1130, 470, 150, 150);
+        Gui.Fill(new Rect(r.x - 10, r.yMax + 2, r.width + 20, 14), new Color(0, 0, 0, 0.4f));
+        GUI.DrawTexture(r, tex, ScaleMode.ScaleToFit);
     }
 
-    private static void DrawMap(Rect area, DungeonMap map, ExpeditionState exp)
+    // ---------------- party ----------------
+
+    private void DrawHeroes(ExpeditionState exp)
     {
-        Gui.Panel(area);
-        int minX = map.Rooms.Min(r => r.X), maxX = map.Rooms.Max(r => r.X);
-        int minY = map.Rooms.Min(r => r.Y), maxY = map.Rooms.Max(r => r.Y);
-        float cell = Mathf.Min((area.width - 60) / (maxX - minX + 1), (area.height - 60) / (maxY - minY + 1));
-        Vector2 P(int x, int y) => new(area.x + 30 + (x - minX) * cell, area.y + 30 + (y - minY) * cell);
+        var shadow = Art.Overlay("charactershadow_med.png");
+        var selected = Art.Overlay("selected_1.png");
+        for (int rank = 0; rank < exp.Party.Count && rank < 4; rank++)
+        {
+            string id = exp.Party[rank];
+            var hero = S.Save.Estate.Hero(id);
+            uint guid = D.Party.Guid(id);
+            var actor = Dd2Api.Actor(guid);
+            bool dead = actor == null || Dd2Api.IsDead(guid);
+            float x = HeroX[rank];
+
+            if (shadow != null) GUI.DrawTexture(new Rect(x - 85, Feet - 30, 170, 50), shadow);
+            if (!dead && id == D.SelectedHeroId && selected != null) GUI.DrawTexture(new Rect(x - 87, Feet - 196, 175, 206), selected);
+
+            var old = GUI.color;
+            if (dead) GUI.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
+            var sprite = Art.Portrait(hero?.ClassId);
+            if (sprite != null) Art.DrawSprite(new Rect(x - 80, Feet - 230, 160, 220), sprite);
+            else Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            GUI.color = old;
+
+            if (!dead)
+            {
+                // DD1: a red health bar and ten stress pips at the hero's feet.
+                Gui.Bar(new Rect(x - 55, Feet + 10, 110, 9), Dd2Api.HpFraction(actor), Gui.Dd1Health);
+                DrawStressPips(x - 50, Feet + 24, actor.Stress, actor.StressMax);
+            }
+            else Gui.Text(new Rect(x - 80, Feet + 6, 160, 30), "Dead", 22, Gui.Blood, TextAnchor.UpperCenter, heading: true);
+
+            if (!dead && Gui.Hotspot(new Rect(x - 80, Feet - 240, 160, 290))) D.SelectedHeroId = id;
+        }
+    }
+
+    private static void DrawStressPips(float x, float y, float stress, float max)
+    {
+        var full = Art.Overlay("stress_pip_full.png");
+        var over = Art.Overlay("stress_pip_full_overstressed.png");
+        var empty = Art.Overlay("stress_pip_empty.png");
+        int pips = Mathf.Max(1, Mathf.RoundToInt(max));
+        for (int i = 0; i < pips; i++)
+        {
+            var tex = i < stress ? (stress >= max ? over : full) : empty;
+            if (tex != null) GUI.DrawTexture(new Rect(x + i * 10, y, 9, 11), tex);
+        }
+    }
+
+    // ---------------- torch ----------------
+
+    private static void DrawTorch(float light)
+    {
+        var torch = Art.Overlay("torch.png");
+        Gui.At(torch, 510, 28);
+        float f = Mathf.Clamp01(light / 100f);
+        var warm = Color.Lerp(new Color(0.55f, 0.25f, 0.08f), new Color(1f, 0.82f, 0.4f), f);
+        // DD1's gauge burns down from both ends toward the flame.
+        Gui.Fill(new Rect(936 - 400 * f, 115, 400 * f, 5), warm);
+        Gui.Fill(new Rect(984, 115, 400 * f, 5), warm);
+        var flame = Art.Overlay("torch_flame.png");
+        if (flame != null)
+        {
+            float s = 26 + 22 * f;
+            var old = GUI.color;
+            GUI.color = new Color(1, 1, 1, 0.45f + 0.55f * f);
+            GUI.DrawTexture(new Rect(960 - s / 2, 98 - s / 2, s, s), flame);
+            GUI.color = old;
+        }
+        Gui.Text(new Rect(760, 148, 400, 30), CrawlRules.BandName(light), 24, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+        if (Gui.Hotspot(new Rect(910, 60, 100, 90))) D.UseTorch();   // DD1: click the torch to light a new one
+    }
+
+    // ---------------- quest info ----------------
+
+    private void DrawQuestInfo(Crawl crawl, ExpeditionState exp)
+    {
+        Gui.At(Art.Overlay("quest_log.png"), 12, 20);
+        Gui.Text(new Rect(100, 22, 420, 36), $"{exp.Quest.DifficultyName} {HamletUi.Pretty(exp.Quest.Type)}", 30, Gui.Dd1Name, heading: true);
+        Gui.Text(new Rect(100, 58, 460, 60), GoalText(exp), 21, Gui.Dd1Text);
+
+        if (exp.QuestComplete)
+        {
+            var home = Art.Panel("quest_return_to_hamlet.png");
+            var r = Gui.At(home, 16, 112);
+            if (home == null) r = new Rect(16, 112, 220, 50);
+            if (home == null ? Gui.DdButton(r, "Return home") : Gui.Hotspot(r)) D.Leave();
+            Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, Gui.Gold, heading: true);
+        }
+        else if (!crawl.IsBlocked)
+        {
+            var retreat = Art.Panel("retreat_button.png");
+            var r = Gui.At(retreat, 20, 112);
+            if (retreat == null) r = new Rect(20, 112, 64, 64);
+            if (Gui.Hotspot(r))
+            {
+                if (_confirmRetreat) { _confirmRetreat = false; D.Leave(); return; }
+                _confirmRetreat = true;
+                Gui.Announce("Retreat? Click again to abandon the quest.");
+            }
+            Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : "Retreat", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
+        }
+    }
+
+    private static string GoalText(ExpeditionState exp)
+    {
+        var map = exp.Map;
+        var goal = exp.Goal;
+        switch (exp.Quest.Type)
+        {
+            case "explore":
+                return $"Explore rooms: {map.Rooms.Count(r => r.Visited)} / {Mathf.CeilToInt(map.Rooms.Count * 0.9f)}";
+            case "cleanse":
+                return $"Clear room battles: {map.Rooms.Count(r => r.HasBattle && r.Cleared)} / {map.Rooms.Count(r => r.HasBattle)}";
+            case "kill_boss":
+                return $"Slay {HamletUi.Pretty(Core.Expedition.ZoneEncounters.BossKey(exp.Quest.BossId))}";
+            default:
+                return goal != null ? $"{HamletUi.Pretty(goal.CurioName)}: {exp.GoalProgress} / {goal.Amount}" : "";
+        }
+    }
+
+    // ---------------- bottom HUD ----------------
+
+    private void DrawHud(ExpeditionState exp)
+    {
+        Gui.Fill(new Rect(0, 720, Gui.W, 360), Color.black);
+        Gui.At(Art.Panel("panel_transition.png"), 0, 710);
+        var side = Art.Panel("side_decor.png");
+        Gui.At(side, 0, 720);
+        Gui.At(side, 1670, 720, flipX: true);
+        Gui.At(Art.Panel("panel_banner.png"), 207, 720);
+        Gui.At(Art.Panel("panel_hero.png"), 240, 856);
+        Gui.At(Art.Panel(_inventoryTab ? "panel_inventory.png" : "panel_map.png"), 960, 720);
+
+        // Tabs on the right edge of the map panel: map, then inventory.
+        if (Gui.Hotspot(new Rect(1630, 840, 50, 62))) _inventoryTab = false;
+        if (Gui.Hotspot(new Rect(1630, 906, 50, 62))) _inventoryTab = true;
+        Gui.Fill(new Rect(1630, _inventoryTab ? 906 : 840, 3, 62), Gui.Gold);
+
+        var hero = S.Save.Estate.Hero(D.SelectedHeroId);
+        var actor = Dd2Api.Actor(D.Party.Guid(D.SelectedHeroId ?? ""));
+        if (hero == null || actor == null) return;
+
+        // Banner: portrait, name, class (DD1 panel.banner.darkest).
+        var portrait = Art.Portrait(hero.ClassId);
+        if (portrait != null) Art.DrawSprite(new Rect(243, 750, 100, 100), portrait);
+        Gui.Text(new Rect(479, 744, 460, 40), hero.Name, 36, Gui.Dd1Name, heading: true);
+        Gui.Text(new Rect(479, 786, 460, 30), $"{HamletUi.Pretty(hero.ClassId)} — Resolve {hero.ResolveLevel}", 22, Gui.Dd1Class);
+
+        // Hero panel (DD1 panel.hero.darkest): health, stress, then stats.
+        Gui.Text(new Rect(370, 864, 300, 28), $"{actor.HpRounded:0} / {actor.CurrentHpMax:0}", 24, new Color(0.85f, 0.15f, 0.12f));
+        Gui.Text(new Rect(370, 893, 300, 28), $"{actor.Stress:0} / {actor.StressMax:0}", 24, Gui.Dd1Class);
+        var stats = new List<string>
+        {
+            $"SPD  {actor.GetClampedStatValue(ActorStatType.SPEED):0}",
+            $"CRIT {actor.GetClampedStatValue(ActorStatType.CRIT_CHANCE) * 100:0}%",
+            $"DD   {actor.GetClampedStatValue(ActorStatType.DEATHS_DOOR_CHANCE) * 100:0}%",
+        };
+        foreach (var res in new[] { "stun", "blight", "bleed", "burn", "move", "debuff", "disease" })
+            stats.Add($"{HamletUi.Pretty(res).Substring(0, Math.Min(5, res.Length))} {actor.GetUnclampedStatValue(ActorStatType.RESISTANCE, res) * 100:0}%");
+        for (int i = 0; i < stats.Count; i++)
+            Gui.Text(new Rect(262 + (i / 5) * 105, 928 + (i % 5) * 28, 110, 28), stats[i], 18, Gui.Dd1Text);
+
+        // Trinkets (DD1 hero_trinket at 453,0): names in the two slots.
+        for (int i = 0; i < 2; i++)
+            Gui.Text(new Rect(700 + i * 118, 888, 112, 160), i < hero.Trinkets.Count ? HamletUi.Pretty(hero.Trinkets[i]) : "", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+    }
+
+    // ---------------- map ----------------
+
+    private static Vector2 Pos(int x, int y) => new(x * MapUnit, y * MapUnit);
+
+    private void DrawMap(ExpeditionState exp)
+    {
+        var map = exp.Map;
+        var area = new Rect(976, 739, 649, 321);   // DD1 map clip region inside panel_map
+        Vector2 here;
+        if (exp.InRoom) here = Pos(map.Room(exp.RoomId).X, map.Room(exp.RoomId).Y);
+        else
+        {
+            var t = map.Corridor(exp.CorridorId).Tiles[exp.TileIndex];
+            here = HallPos(map, map.Corridor(exp.CorridorId), t.Index);
+        }
+        var offset = new Vector2(area.width / 2f, area.height / 2f) - here;
+
+        GUI.BeginGroup(area);
+        var visitedNear = new HashSet<int>(map.Rooms.Where(r => r.Visited).SelectMany(r => map.Neighbours(r.Id)));
 
         foreach (var c in map.Corridors)
+        {
+            bool known = map.Room(c.RoomA).Visited || map.Room(c.RoomB).Visited || c.Tiles.Any(t => t.Scouted);
+            if (!known) continue;
             foreach (var t in c.Tiles)
             {
-                var p = P(t.X, t.Y);
-                bool here = !exp.InRoom && exp.CorridorId == c.Id && exp.TileIndex == t.Index;
-                bool known = t.Visited || t.Scouted;
-                var col = here ? Color.white : !known ? new Color(0.25f, 0.22f, 0.2f)
-                    : t.Content switch
-                    {
-                        HallContent.Battle when !t.Resolved => Gui.Blood,
-                        HallContent.Trap when !t.Resolved => new Color(0.8f, 0.4f, 0.1f),
-                        HallContent.Obstacle when !t.Resolved => new Color(0.5f, 0.4f, 0.3f),
-                        HallContent.Curio when !t.Resolved => Gui.Gold,
-                        _ => t.Visited ? new Color(0.6f, 0.55f, 0.45f) : new Color(0.4f, 0.37f, 0.32f),
-                    };
-                Gui.Fill(new Rect(p.x + cell * 0.3f, p.y + cell * 0.3f, cell * 0.4f, cell * 0.4f), col);
+                var p = HallPos(map, c, t.Index) + offset;
+                var r = new Rect(p.x - 12, p.y - 12, 24, 24);
+                string baseIcon = t.Visited ? "hall_clear" : t.Scouted ? "hall_dim" : "hall_dark";
+                GUI.DrawTexture(r, Art.MapIcon(baseIcon) ?? Texture2D.whiteTexture);
+                string marker = (t.Visited || t.Scouted) && !t.Resolved ? t.Content switch
+                {
+                    HallContent.Battle => "marker_battle",
+                    HallContent.Curio => "marker_curio",
+                    HallContent.Trap => "marker_trap",
+                    HallContent.Obstacle => "marker_obstacle",
+                    _ => null,
+                } : null;
+                if (marker != null && Art.MapIcon(marker) is { } m) GUI.DrawTexture(r, m);
+                if (Gui.Hotspot(r)) D.WalkToTile(c.Id, t.Index);
             }
+        }
 
         foreach (var room in map.Rooms)
         {
-            var p = P(room.X, room.Y);
-            var r = new Rect(p.x, p.y, cell, cell);
-            bool here = exp.InRoom && exp.RoomId == room.Id;
-            bool neighbour = exp.InRoom && map.Neighbours(exp.RoomId).Contains(room.Id);
-            bool known = room.Visited || room.Scouted || neighbour;
-            Gui.Fill(r, here ? Color.white : !known ? new Color(0.2f, 0.18f, 0.16f)
-                : room.Content == RoomContent.Boss && !room.Cleared ? Gui.Blood
-                : room.HasBattle && !room.Cleared && room.Scouted ? new Color(0.5f, 0.15f, 0.12f)
-                : room.Visited ? new Color(0.55f, 0.5f, 0.42f) : new Color(0.35f, 0.32f, 0.28f));
-            if (room.IsQuestGoal && !room.CurioTaken) Gui.Fill(new Rect(r.x + cell * 0.35f, r.y + cell * 0.35f, cell * 0.3f, cell * 0.3f), Gui.Gold);
-            if (neighbour && !D.Crawl.IsBlocked && GUI.Button(r, GUIContent.none, GUIStyle.none))
-            {
-                D.Travel(room.Id);
-                return;
-            }
+            bool known = room.Visited || room.Scouted || visitedNear.Contains(room.Id);
+            if (!known) continue;
+            var p = Pos(room.X, room.Y) + offset;
+            var r = new Rect(p.x - 32, p.y - 32, 64, 64);
+            bool seen = room.Visited || room.Scouted;
+            string icon = !seen ? "room_unknown"
+                : room.Id == map.EntranceRoomId ? "room_entrance"
+                : room.Content == RoomContent.Boss && !room.Cleared ? "room_boss"
+                : room.HasBattle && !room.Cleared ? "room_battle"
+                : room.CurioId != null && !room.CurioTaken && room.Content is RoomContent.Treasure or RoomContent.GuardedTreasure ? "room_treasure"
+                : room.CurioId != null && !room.CurioTaken ? "room_curio"
+                : "room_empty";
+            GUI.DrawTexture(r, Art.MapIcon(icon) ?? Texture2D.whiteTexture);
+            if (room.Visited && room.Id != map.EntranceRoomId && Art.MapIcon("marker_room_visited") is { } v) GUI.DrawTexture(r, v);
+            if (Gui.Hotspot(r)) D.WalkToRoom(room.Id);
         }
-        Gui.Small(new Rect(area.x + 10, area.yMax - 30, area.width - 20, 26), "Click a neighbouring room to walk there.");
+
+        var ind = Art.MapIcon("indicator");
+        var hp = here + offset;
+        if (ind != null) GUI.DrawTexture(new Rect(hp.x - 25, hp.y - (exp.InRoom ? 70 : 52), 51, 48), ind);
+        GUI.EndGroup();
     }
 
-    private void DrawActions(Rect area, Crawl crawl, ExpeditionState exp)
+    /// <summary>Hall squares spaced evenly between the two rooms' icon edges.</summary>
+    private static Vector2 HallPos(DungeonMap map, Corridor c, int index)
     {
-        Gui.Panel(area);
-        float x = area.x + 14, y = area.y + 14, w = 300, h = 58;
-        int n = 0;
-        bool Btn(string label, bool enabled = true)
-        {
-            var r = new Rect(x + (n % 2) * (w + 12), y + (n / 2) * (h + 8), w, h);
-            n++;
-            return Gui.Button(r, label, enabled);
-        }
+        var a = Pos(map.Room(c.RoomA).X, map.Room(c.RoomA).Y);
+        var b = Pos(map.Room(c.RoomB).X, map.Room(c.RoomB).Y);
+        var dir = (b - a).normalized;
+        var start = a + dir * 32f;
+        var end = b - dir * 32f;
+        float step = (end - start).magnitude / c.Tiles.Count;
+        return start + dir * (step * (index + 0.5f));
+    }
 
-        // Every action can move the party (corridor ↔ room) or end the crawl, so after one runs this frame's
-        // drawing stops: the next OnGUI pass redraws from the new state.
+    // ---------------- inventory ----------------
+
+    private void DrawInventory(Crawl crawl, ExpeditionState exp)
+    {
+        var items = S.Content.Items;
+        var stacks = new List<(string key, int count)>();
+        foreach (var kv in exp.Pack.Items.Where(kv => kv.Value > 0).OrderBy(kv => kv.Key))
+        {
+            int limit = Math.Max(1, items.StackLimit(kv.Key));
+            for (int left = kv.Value; left > 0; left -= limit) stacks.Add((kv.Key, Math.Min(limit, left)));
+        }
+        for (int i = 0; i < stacks.Count && i < 16; i++)
+        {
+            var (key, count) = stacks[i];
+            var r = new Rect(960 + 20 + (i % 8) * 80, 720 + 28 + (i / 8) * 160, 72, 144);
+            var icon = Art.InventoryIcon(key, count, items.StackLimit(key));
+            if (icon != null) GUI.DrawTexture(r, icon);
+            else Gui.Text(r, HamletUi.Pretty(key), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 22, Color.white, TextAnchor.LowerRight);
+            if (Gui.Hotspot(r)) UseItem(key, crawl);
+        }
+    }
+
+    /// <summary>DD1 lets you use some supplies straight from the pack.</summary>
+    private static void UseItem(string key, Crawl crawl)
+    {
+        if (key == Supply.Torch) D.UseTorch();
+        else if (key == Supply.Firewood && crawl.CanCamp) D.MakeCamp();
+        else if (key == Supply.Food && D.SelectedHeroId != null && crawl.State.Pack.TryUse(Supply.Food))
+        {
+            D.Party.Heal(D.SelectedHeroId, 0.05f);
+            Gui.Announce("A meagre meal.");
+        }
+    }
+
+    // ---------------- curio / obstacle / trap prompt (DD1 "sidebar scroll" at 1348,200) ----------------
+
+    private void DrawPrompt(Crawl crawl, ExpeditionState exp)
+    {
+        if (exp.Camp != null) return;
         var tile = crawl.CurrentTile;
-        if (crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle))
-        {
-            if (Btn(Gui.Colour("<b>Fight!</b>", Gui.Blood))) { D.Fight(); return; }
-        }
-        else if (!exp.InRoom && tile != null)
-        {
-            if (Btn("Walk forward ▶")) { D.Step(true); return; }
-            if (Btn("◀ Back up")) { D.Step(false); return; }
-            if (tile.Content == HallContent.Obstacle && !tile.Resolved && Btn($"Clear obstacle ({(exp.Pack.Count(Supply.Shovel) > 0 ? "shovel" : "by hand")})")) { D.ClearObstacle(); return; }
-            if (tile.Content == HallContent.Trap && !tile.Resolved && Btn("Disarm the trap")) { D.DisarmTrap(); return; }
-        }
-
-        if (Btn($"Light a torch ({exp.Pack.Count(Supply.Torch)})", exp.Pack.Count(Supply.Torch) > 0 && exp.Light < 100)) { D.UseTorch(); return; }
-        if (crawl.CanCamp && Btn($"Make camp ({exp.Pack.Count(Supply.Firewood)} firewood)")) { D.MakeCamp(); return; }
-        if (Btn(exp.QuestComplete ? Gui.Colour("<b>Return to the Hamlet</b>", Gui.Gold) : "Retreat", exp.InRoom || exp.QuestComplete)) { D.Leave(); return; }
-
-        // Curio here: pick who touches it, and optionally an item.
         string curio = crawl.CurioHere;
+        bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
+        bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
+        bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
+        if (curio == null && !obstacle && !trap && !battleStuck) return;
+
+        var r = new Rect(1150, 170, 420, 400);
+        Gui.Fill(r, new Color(0.05f, 0.04f, 0.03f, 0.93f));
+        Gui.Fill(new Rect(r.x, r.y, r.width, 3), Gui.Gold);
+        Gui.Fill(new Rect(r.x, r.yMax - 3, r.width, 3), Gui.Gold);
+        float y = r.y + 18;
+
+        if (battleStuck)
+        {
+            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), "Enemies!", 34, Gui.Blood, TextAnchor.UpperCenter, heading: true);
+            if (Gui.DdButton(new Rect(r.x + 90, y + 80, 240, 56), "Fight")) D.Fight();
+            return;
+        }
+
+        string who = S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "";
         if (curio != null)
         {
-            float cy = area.y + 290;
-            Gui.Label(new Rect(x, cy, 600, 30), $"A curio: <b>{HamletUi.Pretty(curio)}</b>");
-            var alive = D.Party.Alive;
-            _curioHero ??= alive.FirstOrDefault();
-            for (int i = 0; i < alive.Count; i++)
-                if (Gui.Button(new Rect(x + i * 152, cy + 34, 146, 40), (alive[i] == _curioHero ? "▶" : "") + S.Save.Estate.Hero(alive[i])?.Name)) _curioHero = alive[i];
+            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 60), $"{who} will investigate. Select another hero to send them instead.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
             string needed = crawl.QuestItemNeededHere;
-            if (Gui.Button(new Rect(x, cy + 80, 200, 46), needed != null ? $"Use {HamletUi.Pretty(needed)}" : "Investigate")) { D.Investigate(_curioHero, needed); return; }
+            if (Gui.DdButton(new Rect(r.x + 30, y + 120, 170, 52), needed != null ? "Use item" : "Investigate"))
+            { D.Investigate(D.SelectedHeroId, needed); return; }
+            if (Gui.DdButton(new Rect(r.xMax - 200, y + 120, 170, 52), "Leave it")) { D.SkipCurio(); return; }
+
+            // Supplies that do something here (DD1's item slot): their inventory art as buttons.
             int k = 0;
-            foreach (var item in S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).Take(2))
-                if (Gui.Button(new Rect(x + 210 + k++ * 200, cy + 80, 194, 46), "Use " + HamletUi.Pretty(item))) { D.Investigate(_curioHero, item); return; }
-            if (Gui.Button(new Rect(x + 420, cy + 80, 190, 46), "Leave it")) { D.SkipCurio(); return; }
+            foreach (var item in S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).Take(4))
+            {
+                var ir = new Rect(r.x + 40 + k++ * 90, y + 196, 54, 108);
+                var icon = Art.InventoryIcon(item, 1, 1);
+                if (icon != null) GUI.DrawTexture(ir, icon); else Gui.Fill(ir, Gui.Dim);
+                if (Gui.Hotspot(ir)) { D.Investigate(D.SelectedHeroId, item); return; }
+            }
+            if (k > 0) Gui.Text(new Rect(r.x + 20, r.yMax - 46, r.width - 40, 30), "Or use a supply on it", 18, Gui.Dim, TextAnchor.UpperCenter);
         }
-
-        Gui.Small(new Rect(x, area.yMax - 34, 620, 30),
-            "Pack: " + string.Join(", ", exp.Pack.Items.Where(kv => kv.Value > 0).Select(kv => $"{HamletUi.Pretty(kv.Key)} {kv.Value}")));
+        else if (obstacle)
+        {
+            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+            bool shovel = exp.Pack.Count(Supply.Shovel) > 0;
+            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 70), shovel ? "A shovel will clear the way." : "Without a shovel the party must force its way through: hurt and stressed.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (Gui.DdButton(new Rect(r.x + 90, y + 130, 240, 56), shovel ? "Use a shovel" : "Clear by hand")) { D.ClearObstacle(); return; }
+        }
+        else if (trap)
+        {
+            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 70), "A trap, spotted in time. The front hero can try to disarm it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (Gui.DdButton(new Rect(r.x + 90, y + 130, 240, 56), "Disarm")) { D.DisarmTrap(); return; }
+        }
     }
 
-    private void DrawLog(Rect area)
-    {
-        Gui.Panel(area);
-        var log = D.Log;
-        _logScroll = GUI.BeginScrollView(new Rect(area.x + 10, area.y + 10, area.width - 20, area.height - 20), _logScroll,
-            new Rect(0, 0, area.width - 50, log.Count * 30));
-        for (int i = 0; i < log.Count; i++) Gui.Small(new Rect(0, i * 30, area.width - 50, 28), log[i]);
-        GUI.EndScrollView();
-        if (Event.current.type == EventType.Repaint) _logScroll.y = log.Count * 30;
-    }
+    // ---------------- camp (restyled; full DD1 camp screen comes later) ----------------
 
-    private void DrawCamp(Rect area, Crawl crawl, ExpeditionState exp)
+    private void DrawCamp(Crawl crawl, ExpeditionState exp)
     {
-        Gui.Panel(area);
+        var area = new Rect(560, 60, 800, 600);
+        Gui.Fill(area, new Color(0.05f, 0.04f, 0.03f, 0.95f));
+        Gui.Fill(new Rect(area.x, area.y, area.width, 3), Gui.Gold);
         var camp = exp.Camp;
-        Gui.Title(new Rect(area.x + 20, area.y + 10, 800, 50), $"Camp — respite {camp.RespiteLeft}");
+        Gui.Text(new Rect(area.x, area.y + 14, area.width, 44), $"Camp — Respite {camp.RespiteLeft}", 38, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+
         if (!camp.Ate)
         {
             int i = 0;
-            foreach (Meal m in System.Enum.GetValues(typeof(Meal)))
+            foreach (Meal m in Enum.GetValues(typeof(Meal)))
             {
                 int cost = crawl.MealCost(m);
-                if (Gui.Button(new Rect(area.x + 20 + i++ * 220, area.y + 70, 210, 50), $"{m} meal ({cost} food)", exp.Pack.Count(Supply.Food) >= cost))
+                if (Gui.DdButton(new Rect(area.x + 20 + i++ * 192, area.y + 72, 184, 50), $"{m} ({cost})", exp.Pack.Count(Supply.Food) >= cost, 22))
                     D.EatMeal(m);
             }
         }
         var alive = D.Party.Alive;
         for (int i = 0; i < alive.Count; i++)
-            if (Gui.Button(new Rect(area.x + 20 + i * 230, area.y + 140, 220, 44), (_campHero == alive[i] ? "▶ " : "") + S.Save.Estate.Hero(alive[i])?.Name))
+            if (Gui.DdButton(new Rect(area.x + 20 + i * 192, area.y + 140, 184, 44), (_campHero == alive[i] ? "> " : "") + S.Save.Estate.Hero(alive[i])?.Name, true, 22))
                 _campHero = alive[i];
         if (_campHero != null && exp.CampSkills.TryGetValue(_campHero, out var skills))
         {
@@ -225,18 +494,17 @@ internal sealed class CrawlUi
                 var skill = S.Content.Camping.Get(skills[i]);
                 if (skill == null) continue;
                 string why = crawl.WhyCantUseCampSkill(_campHero, skill.Id);
-                if (Gui.Button(new Rect(area.x + 20 + (i % 2) * 400, area.y + 200 + (i / 2) * 56, 390, 50),
-                        $"{HamletUi.Pretty(skill.Id)} ({skill.Cost}){(why != null ? " — " + why : "")}", why == null))
+                if (Gui.DdButton(new Rect(area.x + 20 + (i % 2) * 384, area.y + 200 + (i / 2) * 56, 376, 50), $"{HamletUi.Pretty(skill.Id)} ({skill.Cost})", why == null, 22))
                 {
-                    if (skill.NeedsTarget && _campTarget == null) D.Say("Choose a target first (below).");
+                    if (skill.NeedsTarget && _campTarget == null) Gui.Announce("Choose a target first.");
                     else D.UseCampSkill(_campHero, skill.Id, _campTarget);
                 }
             }
-            Gui.Small(new Rect(area.x + 20, area.y + 380, 300, 30), "Target:");
+            Gui.Text(new Rect(area.x + 20, area.y + 432, 120, 30), "Target", 22, Gui.Dd1Class, heading: true);
             for (int i = 0; i < alive.Count; i++)
-                if (Gui.Button(new Rect(area.x + 110 + i * 200, area.y + 376, 190, 40), (_campTarget == alive[i] ? "▶ " : "") + S.Save.Estate.Hero(alive[i])?.Name))
+                if (Gui.DdButton(new Rect(area.x + 130 + i * 162, area.y + 426, 156, 42), (_campTarget == alive[i] ? "> " : "") + S.Save.Estate.Hero(alive[i])?.Name, true, 20))
                     _campTarget = alive[i];
         }
-        if (Gui.Button(new Rect(area.xMax - 300, area.yMax - 70, 280, 56), "Break camp")) D.BreakCamp();
+        if (Gui.DdButton(new Rect(area.xMax - 260, area.yMax - 70, 240, 54), "Break camp")) D.BreakCamp();
     }
 }
