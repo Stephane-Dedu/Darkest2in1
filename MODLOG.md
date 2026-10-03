@@ -212,20 +212,44 @@ Source: DD1 `scripts/layout/screen.raid.darkest`, `panel.*.darkest`, `pannel.inv
 - Fonts: BMFont text `.fnt` + `.tga` pages in `fonts/` (`dwarvenaxe-{m,l,xl}` headings, `ubuntu{,_m,_s}` body).
   Needs a small TGA decoder + glyph renderer (draw each glyph with DrawTextureWithTexCoords).
 
-## First in-game session checklist (when DD2 is on D:)
-1. Install BepInEx 5.4.23.5 into D:, launch windowed, check LogOutput.log for "Darkest Dungeon 3 0.2.0 loaded" and
-   "[session] DD1 content loaded".
-2. Main menu: the Hamlet button shows; new estate in slot 1; screens render; DD1 art loads (town_bg.png).
-3. Embark: watch `[run]` lines. Does DRIVING start without hero select? Does the roster swap (`[party]`) work?
-4. Crawl: walk, hit a fight, `[combat]` lines; does DD2 return to DRIVING after RESULTS? Does the overlay come back?
-5. Leave: does ABANDON → MAIN_MENU work without DD2's end-of-run screens? Homecoming log right?
-6. Risky assumptions to verify: arena names, trinket rarity tags, quirk library access, IMGUI clicks not leaking.
+## DD1-look redesign, done (2026-10-02/03): crawl → Hamlet → Embark → camp/curios
+All four screens now use DD1's own art and layout files, read from the user's DD1 install at runtime.
+- **Spine 2.1** (`Core/Dd1/Spine.cs`, `SpineRaster.cs`): DD1's town buildings (`fx/town_<b>_level0N`), curios
+  (`props/shared/curios/<id>/<id>.skel`), obstacles and traps are Spine 2.1.27 binary skeletons + libgdx atlases.
+  We read the setup pose (bones → world transforms; region/mesh/skinned-mesh attachments; atlas `rotate: true` means
+  the page holds the image turned 90° CCW) and rasterize it on the CPU (bilinear, 2x2 supersampling). Tests cover all
+  190 town/curio animations. Plugin side: `Runtime/SpineArt.cs` bakes over frames (40 ms budget) with alpha hit tests.
+  Slot conventions: buildings `idle` / `active` (hover highlight) / `light_*` / `smoke*` (left out);
+  curios `closed` / `active` / `open` (after use).
+- **Town layout** (`Core/Campaign/Town/TownLayout.cs`): `town.layout.darkest` `.pos` is the projection of `.pos3d`
+  through the camera (960,322,-1251), f=1251; screen y = 862 − pos.y; draw back to front by pos3d z. The 2D town is
+  sky (`town_bg.png`) + `fx/town_ground` skeleton (1920x836, origin bottom centre at y 1082) + buildings at scale 1.
+  The loose PNGs (`town_backdrop`, `town_left_cliff` …) belong to the 3D mode: unused. Building level from upgrade
+  fraction (0.33/0.66), `_locked` before it opens.
+- **DD2 resources at the main menu** (`Dd2/ActorResources.cs`): `Singleton<ResourceDatabaseActors>` only exists in a
+  run. Outside one, load `ResourceActor` locations by DLC labels (`DLCManager.GetAllOwnedDLCLabels`) keyed by
+  `TryGetAssetName`, then `Addressables.LoadAssetAsync` the few we need. Portraits/story art work in the Hamlet.
+- Embark: `campaign/town/quest_select` (map spots in `quest_select.layout.darkest`, shifted 120 px left so cove clears
+  the roster) and `campaign/town/provision`. Camp: `props/shared/campfire.png`, `raid/camping/skill_icons`, DD1 skill
+  names from `localization/heroes.string_table.xml` (English block). Scrolls: `scrolls/*.png` at the
+  `screen.raid.darkest` positions (sidebar 1348,200; result 1342,140; meal/respite 732,60).
+- The player's locale is French: format numbers with `Gui.Num` (invariant), never `:N0`/`:0.#`.
+- 3D hero models (`Dd2/HeroStage.cs`) render black off-screen even with the main camera's renderer, fog off and
+  lights: shipped disabled (`Look.HeroModelsInDungeon`). Heroes use DD2 Story art (`Look.HeroArtInDungeon`).
+
+## Playtest tools
+- `tools/test_hamlet.sh`: rebuild, relaunch windowed 1600x900, open Estate 2's Hamlet.
+- `tools/test_enter_dungeon.sh`: same, then Embark → first Ruins quest → first four heroes → Provision → Embark.
+- `tools/walk_until_curio.sh [x y]`: walk (optionally from a map click) until a curio, winning fights on the way.
+- Debug keys: F5 make camp here (adds firewood/food), F6 cycle curio art preview, F7 dump the hero-stage render,
+  F8 state dump, F10 win the fight, F11 fight here. Window pixels = virtual × 0.8333.
+- Estate 2 is the test estate (poor: test scripts buy no supplies). Never test on Estate 1.
 
 ## Next steps
-1. After the reinstall: install BepInEx 5.4.23.5 into D:, launch windowed (`-screen-fullscreen 0 -screen-width 1600
-   -screen-height 900`), confirm `BepInEx/LogOutput.log` shows "Darkest Dungeon 3 0.2.0 loaded".
-2. Slice 1: start a normal DD2 run, press F9 on the road → a DUNGEON-source fight in `combat_arena_catacombs_cultist`
-   with the run's party; confirm it ends back on the road. Screenshot + log.
-3. Slice 2: our crawl UI (uGUI canvas, DD1 corridor PNGs from the DD1 install) driven by `Core.Expedition.Crawl`,
-   with hall/room fights going to DD2 combat and back. `IParty` implemented over DD2 `ActorInstance`s.
-4. Slice 3: Hamlet entry from the main menu; embark builds the DD2 party from `HeroRecord`s; homecoming writes back.
+1. Battle loot: DD2's results screen hands out DD2 items; give DD1 loot from the fight (monster loot tables) into the
+   expedition pack and hide/ignore DD2's.
+2. Building services still missing: Guild (skill levels), Blacksmith (weapon/armour levels → DD2 stats), Survivalist
+   (teach camping skills). Town events. Heirloom exchange.
+3. Monsters surprised → DD2 (heroes-surprised already maps to AMBUSH).
+4. Toggle upgrades once DD1 is complete: DD2 zones crawled DD1-style with bosses (Coven → Weald/Hag, Courtier →
+   Crimson Court ideas noted).
