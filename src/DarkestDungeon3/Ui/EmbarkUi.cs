@@ -313,14 +313,18 @@ internal sealed class EmbarkUi
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         int minFood = S.Provisioner.MinimumFood(length);
         bool lowFood = _cart.Count(Supply.Food) < minFood, noTorch = _cart.Count(Supply.Torch) == 0;
-        if (why == null && (lowFood || noTorch))
+        bool fewTrinkets = Embark.TrinketWarning(S.Campaign, _quest, heroes);   // DD1: under half the trinket slots filled
+        if (why == null && (lowFood || noTorch || fewTrinkets))
         {
-            string warn = lowFood ? $"Less than {minFood} food: the party may starve." : "No torches: the dark will press in.";
+            // DD1's own questions (localization: town_provision_*).
+            string warn = lowFood ? (S.Lore?.Text("town_provision_not_enough_food_confirm_format")?.Replace("%d", minFood.ToString()) ?? $"Less than {minFood} food: the party may starve.")
+                : noTorch ? "No torches: the dark will press in."
+                : S.Lore?.Text("town_provision_no_trinkets_equipped") ?? "Your party is not fully outfitted with trinkets. Really embark?";
             Gui.Text(new Rect(1080, 990, 480, 70), warn + (_confirmLow ? "\nEmbark again to go anyway." : ""), 18, Gui.Blood, TextAnchor.MiddleRight);
         }
         if (Gui.DdButton(new Rect(1580, 980, 320, 86), why ?? "Embark", why == null && cost <= gold, why == null ? 44 : 18))
         {
-            if ((lowFood || noTorch) && !_confirmLow) { _confirmLow = true; return; }
+            if ((lowFood || noTorch || fewTrinkets) && !_confirmLow) { _confirmLow = true; return; }
             _confirmLow = false;
             var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);

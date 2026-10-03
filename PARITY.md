@@ -42,7 +42,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Trinket Inventory: DD1 window (sort, unequip all, shift-sell at 15%, grid, tooltips with effects).
 - [?] Equip on the hero sheet: two slots, class-only trinkets refused.
 - [ ] Trinket retention on a party wipe: DD1 keeps/loses carried trinkets per option (`trinket_retention` log entry) — not handled.
-- [ ] Trinket-equip warning before embarking: DD1 `trinkets_equipped_warning_min_percent` / `_dungeon_min_difficulty` — missing.
+- [?] Trinket-equip warning before embarking: DD1 asks "Your party is not fully outfitted with trinkets. Really embark?" (`town_provision_no_trinkets_equipped`) when under `trinkets_equipped_warning_min_percent` 0.5 of the trinket slots are filled on quests of difficulty ≥ 3. Was: no warning. Now Embark.TrinketWarning + the provisioner's confirm (QuestGoalTests.TrinketWarningOnHarderQuestsWithFewTrinkets); the low-food warning uses DD1's `town_provision_not_enough_food_confirm_format` too. In game: a veteran quest with few trinkets asks before embarking.
 
 ## Quest board
 - [x] Quest map (`campaign/town/quest_select`): zones, quest icons, party slots, roster — round 1 screenshot; embark works.

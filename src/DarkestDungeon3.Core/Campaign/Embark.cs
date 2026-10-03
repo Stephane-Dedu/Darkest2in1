@@ -61,6 +61,20 @@ public sealed class Provisioner
 /// <summary>Turning a quest, four heroes and a pack into an expedition.</summary>
 public static class Embark
 {
+    /// <summary>
+    /// DD1's warning before a harder quest (difficulty ≥ trinkets_equipped_warning_dungeon_min_difficulty, 3) when
+    /// fewer than trinkets_equipped_warning_min_percent (50%) of the party's trinket slots (two each) are filled.
+    /// </summary>
+    public static bool TrinketWarning(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party)
+    {
+        if (quest == null || party == null || party.Count == 0) return false;
+        int minDifficulty = (int?)dd1?.Rules?["trinkets_equipped_warning_dungeon_min_difficulty"] ?? 3;
+        float minShare = (float?)dd1?.Rules?["trinkets_equipped_warning_min_percent"] ?? 0.5f;
+        if (quest.Difficulty < minDifficulty) return false;
+        int worn = party.Sum(h => System.Math.Min(2, h.Trinkets.Count));
+        return worn < minShare * 2 * party.Count;
+    }
+
     public static string WhyCantEmbark(Estate estate, QuestOffer quest, IReadOnlyList<HeroRecord> party, bool anyResolve = false)
     {
         if (quest == null) return "Choose a quest.";

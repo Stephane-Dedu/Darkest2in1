@@ -79,6 +79,20 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void TrinketWarningOnHarderQuestsWithFewTrinkets()
+    {
+        var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();
+        var veteran = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 3 };
+        var apprentice = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 };
+        Assert.True(Embark.TrinketWarning(Dd1, veteran, heroes));          // 0 of 8 slots
+        Assert.False(Embark.TrinketWarning(Dd1, apprentice, heroes));      // DD1: only from difficulty 3
+        foreach (var h in heroes) h.Trinkets.Add("t_" + h.Id);
+        Assert.False(Embark.TrinketWarning(Dd1, veteran, heroes));         // 4 of 8: 50% is enough
+        heroes[0].Trinkets.Clear();
+        Assert.True(Embark.TrinketWarning(Dd1, veteran, heroes));          // 3 of 8
+    }
+
+    [Fact]
     public void GatherQuestPlacesAndCountsRelics()
     {
         var (crawl, state) = Expedition("gather", "crypts", 11);
