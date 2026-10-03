@@ -16,6 +16,7 @@ public sealed class Dd1Bestiary
     {
         public List<string> Dd2 = new();
         public List<string> Champion = new();
+        public string Art;
     }
 
     private readonly Dictionary<string, Entry> _map = new();
@@ -33,6 +34,7 @@ public sealed class Dd1Bestiary
             {
                 Dd2 = p.Value["dd2"]?.Values<string>().ToList() ?? new List<string>(),
                 Champion = p.Value["champion"]?.Values<string>().ToList() ?? new List<string>(),
+                Art = (string)p.Value["art"],
             };
         return b;
     }
@@ -44,6 +46,9 @@ public sealed class Dd1Bestiary
         if (n > 2 && dd1Monster[n - 2] == '_' && char.IsUpper(dd1Monster[n - 1])) return (dd1Monster.Substring(0, n - 2), dd1Monster[n - 1]);
         return (dd1Monster, 'A');
     }
+
+    /// <summary>The DD1 monster folder whose animations draw this family (itself unless the map names another).</summary>
+    public string ArtFamily(string family) => family != null && _map.TryGetValue(family, out var e) && e.Art != null ? e.Art : family;
 
     public bool Knows(string dd1Monster) => _map.TryGetValue(Split(dd1Monster).Family, out var e) && e.Dd2.Count > 0;
 

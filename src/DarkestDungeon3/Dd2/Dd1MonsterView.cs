@@ -99,6 +99,7 @@ internal static class Dd1MonsterView
         for (int i = 0; i < dd1Monsters.Count && i < dd2Enemies.Count; i++)
         {
             var (family, tier) = Dd1Bestiary.Split(dd1Monsters[i]);
+            family = Session.Current?.Bestiary?.ArtFamily(family) ?? family;
             if (Load(family, "combat") == null) continue;
             var monster = new Monster { Dd1 = dd1Monsters[i], Family = family, Tier = tier, Dd2Class = dd2Enemies[i] };
             ReadArt(monster);
@@ -123,8 +124,14 @@ internal static class Dd1MonsterView
         m.Skills = new List<(string, string, string, string)>();
         try
         {
+            // The monster's own tier, else any tier DD1 has (the raider and the hunter only have "_D").
             string tierName = $"{m.Family}_{m.Tier}";
             string file = Session.Current?.Dd1.PathOf("monsters", m.Family, tierName, tierName + ".art.darkest");
+            if (file == null || !File.Exists(file))
+            {
+                string dir = Session.Current?.Dd1.PathOf("monsters", m.Family);
+                file = dir != null && Directory.Exists(dir) ? Directory.GetFiles(dir, "*.art.darkest", SearchOption.AllDirectories).OrderBy(f => f).FirstOrDefault() : null;
+            }
             if (file == null || !File.Exists(file)) return;
             foreach (var r in Core.Dd1.DarkestFile.Load(file))
             {

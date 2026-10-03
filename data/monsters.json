@@ -3,6 +3,7 @@
     "Which DD2 enemy stands in for each DD1 monster. Our own mapping (no game data), edit freely.",
     "Keys are DD1 monster classes without their tier letter (skeleton_arbalist_A -> skeleton_arbalist).",
     "'dd2' lists stand-ins (one is picked per monster); 'champion' lists the stronger DD2 '_b' forms used for",
+    "'art' names another DD1 monster's animations for one DD1 has no files of its own for (carrion_eater_large).",
     "DD1's champion tier (_C) and sometimes for veterans (_B). Matched on role (front/back line), size and theme.",
     "An encounter with any monster missing here (boss pieces) falls back to the zone's DD2 table in zones.json."
   ],
@@ -49,7 +50,7 @@
     "swinetaur":          { "dd2": ["cave_swine_brute"], "champion": ["cave_swine_brute_b"] },
     "carrion_eater":      { "dd2": ["shared_carrion_eater"] },
     "carrion_eater_big":  { "dd2": ["shared_carrion_eater_mutated"] },
-    "carrion_eater_large":{ "dd2": ["shared_carrion_eater_mutated"] },
+    "carrion_eater_large":{ "dd2": ["shared_carrion_eater_mutated"], "art": "carrion_eater_big" },
     "formless_melee":     { "dd2": ["shared_lost_soul"] },
     "formless_guard":     { "dd2": ["shared_lost_soul"] },
     "formless_weak":      { "dd2": ["shared_lost_soul"] },

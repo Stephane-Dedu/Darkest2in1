@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Assets.Code.Actor;
 using Assets.Code.Utils;
+using DarkestDungeon3.Core.Dd1;
 using UnityEngine;
 
 namespace DarkestDungeon3.Runtime;
@@ -46,37 +47,47 @@ internal static class Art
     public static Texture2D BuildingBackground(string building) =>
         Dd1("campaign", "town", "buildings", building, building + ".character_background.png");
 
-    // ---- dungeon scene ----
-    public static Texture2D CorridorBackground(string zone) => Dd1("dungeons", zone, zone + ".corridor_bg.png");
-    public static Texture2D CorridorMid(string zone) => Dd1("dungeons", zone, zone + ".corridor_mid.png");
-    public static Texture2D EndHall(string zone) => Dd1("dungeons", zone, zone + ".endhall.01.png");
+    // ---- dungeon scene: the files each zone really has (Core's ZoneArt) ----
 
-    public static Texture2D CorridorWall(string zone, int index) =>
-        Dd1("dungeons", zone, $"{zone}.corridor_wall.{((index % 7) + 7) % 7:00}.png") ?? Dd1("dungeons", zone, $"{zone}.corridor_wall.00.png");
+    private static readonly Dictionary<string, ZoneArt> Zones = new();
 
-    public static Texture2D CorridorDoor(string zone) => Dd1("dungeons", zone, $"{zone}.corridor_door.basic.png") ?? CorridorWall(zone, 0);
-
-    public static Texture2D ForegroundTop(string zone) => Dd1("dungeons", zone, $"{zone}.foreground_top.01.png");
-    public static Texture2D ForegroundBottom(string zone) => Dd1("dungeons", zone, $"{zone}.foreground_bottom.01.png");
-
-    private static readonly Dictionary<string, List<string>> RoomKinds = new();
-
-    /// <summary>The zone's room backdrops (room_wall.*.png, entrance excluded), picked stably per room.</summary>
-    public static Texture2D RoomWall(string zone, int roomId)
+    /// <summary>The zone's art; the Darkest Dungeon's is per quest (from the expedition's plot quest).</summary>
+    public static ZoneArt ZoneArtOf(string zone)
     {
-        if (!RoomKinds.TryGetValue(zone, out var kinds))
-        {
-            kinds = new List<string>();
-            var dir = Session.Current?.Dd1.ZoneDir(zone);
-            if (dir != null && Directory.Exists(dir))
-                kinds = Directory.GetFiles(dir, zone + ".room_wall.*.png").Select(Path.GetFileName)
-                                 .Where(f => !f.Contains(".entrance.")).OrderBy(f => f).ToList();
-            RoomKinds[zone] = kinds;
-        }
-        return kinds.Count == 0 ? null : Dd1("dungeons", zone, kinds[(roomId * 7 + 3) % kinds.Count]);
+        var session = Session.Current;
+        if (session == null || zone == null) return null;
+        int quest = 1;
+        string plot = Driver.Instance?.Expedition?.Quest?.PlotId;
+        if (zone == "darkestdungeon" && plot != null && plot.Length > 0 && char.IsDigit(plot[plot.Length - 1])) quest = plot[plot.Length - 1] - '0';
+        string key = zone + "/" + quest;
+        if (!Zones.TryGetValue(key, out var art)) Zones[key] = art = ZoneArt.Load(session.Dd1, zone, quest);
+        return art;
     }
 
-    public static Texture2D EntranceWall(string zone) => Dd1("dungeons", zone, $"{zone}.entrance_room_wall.png") ?? RoomWall(zone, 0);
+    /// <summary>A PNG by full path (cached).</summary>
+    public static Texture2D Png(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return null;
+        if (Cache.TryGetValue(path, out var tex)) return tex;
+        tex = null;
+        if (System.IO.File.Exists(path))
+        {
+            tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+            if (!tex.LoadImage(System.IO.File.ReadAllBytes(path), markNonReadable: true)) { Object.Destroy(tex); tex = null; }
+        }
+        Cache[path] = tex;
+        return tex;
+    }
+
+    public static Texture2D CorridorBackground(string zone) => Png(ZoneArtOf(zone)?.Background);
+    public static Texture2D CorridorMid(string zone) => Png(ZoneArtOf(zone)?.Mid);
+    public static Texture2D EndHall(string zone) => Png(ZoneArtOf(zone)?.EndHall);
+    public static Texture2D CorridorWall(string zone, int index) => Png(ZoneArtOf(zone)?.Wall(index));
+    public static Texture2D CorridorDoor(string zone) => Png(ZoneArtOf(zone)?.Door) ?? CorridorWall(zone, 0);
+    public static Texture2D ForegroundTop(string zone) => Png(ZoneArtOf(zone)?.ForegroundTop);
+    public static Texture2D ForegroundBottom(string zone) => Png(ZoneArtOf(zone)?.ForegroundBottom);
+    public static Texture2D RoomWall(string zone, int roomId) => Png(ZoneArtOf(zone)?.Room(roomId)) ?? CorridorWall(zone, roomId);
+    public static Texture2D EntranceWall(string zone) => Png(ZoneArtOf(zone)?.Entrance) ?? RoomWall(zone, 0);
 
     // ---- HUD ----
     public static Texture2D Panel(string file) => Dd1("panels", file);

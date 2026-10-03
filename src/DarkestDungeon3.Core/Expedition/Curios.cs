@@ -77,7 +77,7 @@ public sealed class CurioLibrary
                 if (Col(4) == "") continue;
                 current.Items.Add(new ItemInteraction
                 {
-                    Item = Col(4),
+                    Item = Col(4) == "provision" ? Supply.Food : Col(4),   // DD1 calls food "provision"
                     Outcome = ReadOutcome(Col(5), 1f, c, Col(17)),
                 });
                 continue;

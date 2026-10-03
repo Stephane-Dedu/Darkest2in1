@@ -97,6 +97,14 @@ internal static class Dd1Backdrop
 
             foreach (var r in scenery)
                 if (r != null && r.enabled && !r.forceRenderingOff) { r.forceRenderingOff = true; Hidden.Add(r); }
+            // The arena's ambient particles (floating specks, embers) present now; skill effects spawn later and stay.
+            foreach (var sc in scenes)
+                foreach (var r in sc.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)))
+                    if (r.GetType().Name == "ParticleSystemRenderer" && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
+                    { r.forceRenderingOff = true; Hidden.Add(r); }
+            // DD2's fog is a full-screen pass after the transparent objects: with no depth behind our backdrop it
+            // painted the fog colour over all of it (the red sky). Off while the DD1 scene is up.
+            SetDd2Fog(false);
 
             // Layers to keep culled: the scenery's, never the characters' (also "Foreground" during skills), the
             // effects' or the UI's.
@@ -177,6 +185,26 @@ internal static class Dd1Backdrop
         return type == null || Convert.ToInt32(type) == 0;
     }
 
+    private static readonly System.Reflection.FieldInfo FogPassEnabled =
+        typeof(ActorBhv).Assembly.GetType("Assets.Code.Rendering.DDFog")?.GetField("FogPassEnabled", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+    private static bool? _fogWas;
+
+    /// <summary>DD2's fog pass (DDFog.FogPassEnabled) off while our backdrop shows, back to what it was after.</summary>
+    private static void SetDd2Fog(bool restore)
+    {
+        if (FogPassEnabled == null) return;
+        if (!restore)
+        {
+            _fogWas ??= (bool)FogPassEnabled.GetValue(null);
+            FogPassEnabled.SetValue(null, false);
+        }
+        else if (_fogWas is bool was)
+        {
+            FogPassEnabled.SetValue(null, was);
+            _fogWas = null;
+        }
+    }
+
     private static void GiveUpAfter(float seconds, string why)
     {
         if (Time.unscaledTime - _startedAt < seconds) return;
@@ -190,6 +218,7 @@ internal static class Dd1Backdrop
     /// <summary>The fight is over: give DD2 its arena back.</summary>
     public static void End()
     {
+        SetDd2Fog(true);
         foreach (var r in Hidden) if (r != null) r.forceRenderingOff = false;
         Hidden.Clear();
         foreach (var kv in Masks) if (kv.Key != null) kv.Key.cullingMask = kv.Value;
