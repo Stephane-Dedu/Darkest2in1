@@ -33,6 +33,8 @@ public sealed class Dd1Campaign
     public JObject Rules { get; private set; }
     public QuestGoals Goals { get; private set; }
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
+    public Town.TownEvents TownEvents { get; private set; }
+    public Dd1Buffs Buffs { get; private set; }
 
     private readonly Dictionary<string, ZoneProps> _props = new();
 
@@ -70,6 +72,8 @@ public sealed class Dd1Campaign
         c.Rules = (JObject)ReadJson(dd1.Rules);
         c.Goals = QuestGoals.Load(dd1);
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
+        c.TownEvents = Town.TownEvents.Load(dd1);
+        c.Buffs = Dd1Buffs.Load(dd1);
         return c;
     }
 

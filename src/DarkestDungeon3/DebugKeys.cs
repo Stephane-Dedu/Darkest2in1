@@ -53,8 +53,9 @@ public class DebugKeys : MonoBehaviour
                     e.Add(Core.Campaign.Currency.Gold, 5000);
                     foreach (var u in new[] { "blacksmith.weapon:a", "blacksmith.armour:a", "guild.skill_levels:a" }) e.Upgrades.Add(u);
                     foreach (var h in e.Roster) h.ResolveLevel = System.Math.Max(h.ResolveLevel, 1);
+                    e.TownEventId ??= "free_abbey";
                     session.Persist();
-                    Plugin.Log.LogInfo("[F4] test estate: buildings open, +5000 gold, first smith/guild upgrades, resolve 1");
+                    Plugin.Log.LogInfo("[F4] test estate: buildings open, +5000 gold, first smith/guild upgrades, resolve 1, a town event");
                 }
                 else Plugin.Log.LogInfo("[F4] only works on the test estate (slot 2)");
             }

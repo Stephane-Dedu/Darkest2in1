@@ -43,6 +43,11 @@ public sealed class Estate
     public List<string> WagonStock = new();
     /// <summary>Messages for the next town screen ("Dismas went missing", ...).</summary>
     public List<string> TownLog = new();
+    /// <summary>This town visit's DD1 town event (null: none), and what the roll needs to remember.</summary>
+    public string TownEventId;
+    public int TownEventMisses;
+    public Dictionary<string, int> TownEventLastWeek = new();
+    public int TownEventFreeUpgrades;
 
     /// <summary>Optional extras the user can switch on (e.g. DD2 regions as expedition zones).</summary>
     public Dictionary<string, bool> Toggles = new();

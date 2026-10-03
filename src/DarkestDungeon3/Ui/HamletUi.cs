@@ -43,18 +43,59 @@ internal sealed class HamletUi
         var hamlet = S.Hamlet;
         _layout ??= TryLoadLayout();
 
-        bool windowOpen = _panel != Panel.Town;
+        // DD1's town crier announces the week's event once per visit.
+        bool eventOpen = E.TownEventId != null && _eventSeenWeek != E.Week;
+        bool windowOpen = _panel != Panel.Town || eventOpen;
         DrawTown(interactive: !windowOpen);
         DrawEstateTitle();
         DrawNav();
         DrawRoster();
         DrawEstateBar();
 
-        if (windowOpen)
+        if (eventOpen)
+        {
+            Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
+            DrawTownEvent(hamlet);
+        }
+        else if (windowOpen)
         {
             Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
             DrawWindow(hamlet);
         }
+    }
+
+    private int _eventSeenWeek = -1;
+    private static readonly System.Text.RegularExpressions.Regex Markup = new("\\{[^}]*\\}");
+
+    private static Texture2D EventArt(string file) => Art.Dd1("campaign", "town", "town_event", file);
+
+    private void DrawTownEvent(Hamlet hamlet)
+    {
+        var ev = hamlet.CurrentEvent;
+        if (ev == null) { _eventSeenWeek = E.Week; return; }
+        var bg = EventArt("town_event.background.png");
+        if (bg != null) GUI.DrawTexture(Window, bg); else Gui.Fill(Window, new Color(0.04f, 0.035f, 0.03f, 0.96f));
+        var crier = EventArt("town_event.character.png");
+        if (crier != null)
+        {
+            float k = Mathf.Min(1f, (Window.height - 4) / crier.height);
+            GUI.DrawTexture(new Rect(Window.x - 5, Window.yMax - crier.height * k - 2, crier.width * k, crier.height * k), crier);
+        }
+        float cx = Window.x + 1030;
+        var frame = EventArt($"town_event.tone_frame_{ev.Tone}.png");
+        if (frame != null) GUI.DrawTexture(new Rect(cx - frame.width / 2f, Window.y + 115 - 20, frame.width, frame.height), frame);
+        string title = Dd1Text.Get("miscellaneous", "town_event_title_" + ev.Id) ?? Pretty(ev.Id);
+        Gui.Text(new Rect(cx - 300, Window.y + 128, 600, 48), title, 40, ev.Tone == "bad" ? Gui.Blood : Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        var image = EventArt($"town_event.image_{ev.Id}.png");
+        if (image != null) GUI.DrawTexture(new Rect(cx - 250, Window.y + 216, 500, 240), image);
+        string text = Dd1Text.Get("miscellaneous", "town_event_description_" + ev.Id) ?? "";
+        text = Markup.Replace(text, "");
+        var ink = new Color(0.16f, 0.1f, 0.06f);   // the description sits on parchment
+        Gui.Text(new Rect(cx - 242, Window.y + 476, 485, 150), text, 21, ink, TextAnchor.UpperCenter);
+        Gui.Text(new Rect(cx - 242, Window.y + 630, 485, 30), "This week only", 18, new Color(0.3f, 0.2f, 0.12f), TextAnchor.MiddleCenter);
+        if (Gui.DdButton(new Rect(cx - 110, Window.y + 676, 220, 54), "Continue", true, 26)
+            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Escape)))
+            _eventSeenWeek = E.Week;
     }
 
     private static TownLayout TryLoadLayout()
@@ -174,6 +215,15 @@ internal sealed class HamletUi
         Gui.Text(new Rect(286 * 0.8f, 70 * 0.8f - 26, 600, 52), E.Name, 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         Gui.Text(new Rect(286 * 0.8f, 70 * 0.8f + 24, 600, 32), $"Week {E.Week + 1}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
+        if (E.TownEventId != null)
+        {
+            var crierIcon = EventArt("town_event.icon.png");
+            var ir = new Rect(722, 26, 70, 70);
+            if (crierIcon != null) GUI.DrawTexture(ir, crierIcon);
+            if (ir.Contains(Event.current.mousePosition))
+                Gui.Text(new Rect(ir.x - 60, ir.yMax, 200, 26), "The week's event", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (Gui.Hotspot(ir)) _eventSeenWeek = -1;
+        }
         var log = Art.Dd1("campaign", "town", "estate_title", "estate_activity_log_button.png");
         var r = new Rect(640, 26, 70, 70);
         if (log != null) GUI.DrawTexture(r, log);
@@ -540,7 +590,7 @@ internal sealed class HamletUi
         float y = area.y + 40 + Mathf.Max(1, (idle.Count + 7) / 8) * 88 + 10;
         foreach (var a in S.Buildings.Activities.Where(a => a.Building == building))
         {
-            var cost = a.Cost(E);
+            var cost = hamlet.ActivityCost(a);
             var (lo, hi) = a.StressHeal(E);
             var r = new Rect(area.x + 10, y, area.width - 20, 112);
             Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));

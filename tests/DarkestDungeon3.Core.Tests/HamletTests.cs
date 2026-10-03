@@ -243,4 +243,29 @@ public class HamletTests
         Assert.True(h.MasterSkill(hero.Id, "hwm_wicked_slice", known: true));
         Assert.Contains("hwm_wicked_slice", hero.MasteredSkills);
     }
+    [Fact]
+    public void Town_events_happen_and_change_the_week()
+    {
+        Assert.True(Dd1.TownEvents.Events.Count > 30);
+        var h = NewHamlet(21);
+        h.Estate.Week = 20;
+        int events = 0;
+        for (int week = 0; week < 40; week++)
+        {
+            h.EndWeek();
+            if (h.Estate.TownEventId != null) events++;
+        }
+        Assert.InRange(events, 10, 40);                 // DD1: at least every fourth visit
+
+        // A free Abbey week: meditation costs nothing.
+        h.Estate.TownEventId = "free_abbey";
+        var meditation = B.Activities.First(a => a.Id == "meditation");
+        Assert.Equal(0, h.ActivityCost(meditation).Amount);
+        // The resolve limit lifted for the week.
+        h.Estate.TownEventId = "remove_quest_hero_level_restriction";
+        Assert.True(h.AnyResolveCanEmbark);
+        var veteran = h.Estate.Roster[0];
+        veteran.ResolveLevel = 6;
+        Assert.True(Homecoming.WillEmbark(veteran, new QuestOffer { Difficulty = 1 }, h.AnyResolveCanEmbark));
+    }
 }

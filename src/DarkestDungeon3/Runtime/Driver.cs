@@ -141,14 +141,22 @@ internal sealed class Driver : MonoBehaviour
 
     public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought)
     {
-        var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party);
+        // This week's town event sets prices and who will go; it changes when the week ends below.
+        var hamlet = S.Hamlet;
+        var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party, hamlet.AnyResolveCanEmbark);
         if (why != null) return why;
-        int cost = bought.Items.Sum(kv => S.Provisioner.Price(kv.Key) * kv.Value);
+        int cost = bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
         S.Save.Estate.Add(Currency.Gold, -cost);
         var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, S.Provisioner);
         exp.ProvisionCost = cost;
+        foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
+            foreach (var hero in exp.Party)
+            {
+                if (!exp.PendingBuffs.TryGetValue(hero, out var list)) exp.PendingBuffs[hero] = list = new List<string>();
+                if (!list.Contains(buff)) list.Add(buff);
+            }
         S.Save.Expedition = exp;
         // DD1 resolves town activities while the party is away.
         S.Hamlet.EndWeek();

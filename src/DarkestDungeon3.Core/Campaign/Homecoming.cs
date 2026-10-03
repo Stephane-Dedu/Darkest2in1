@@ -25,8 +25,9 @@ public static class Homecoming
     /// <summary>The Darkest Dungeon (difficulty 6) only admits seasoned heroes.</summary>
     public static int MinResolveFor(int difficulty) => difficulty >= 6 ? 5 : 0;
 
-    public static bool WillEmbark(HeroRecord hero, QuestOffer quest) =>
-        hero.IsAvailable && hero.ResolveLevel <= MaxResolveFor(quest.Difficulty) && hero.ResolveLevel >= MinResolveFor(quest.Difficulty);
+    /// <param name="anyResolve">A town event lifted the resolve limits this week.</param>
+    public static bool WillEmbark(HeroRecord hero, QuestOffer quest, bool anyResolve = false) =>
+        hero.IsAvailable && (anyResolve || (hero.ResolveLevel <= MaxResolveFor(quest.Difficulty) && hero.ResolveLevel >= MinResolveFor(quest.Difficulty)));
 
     /// <summary>Resolve XP for a finished quest: 2 / 4 / 6 by length (DD1's values; not in its data files).</summary>
     public static int ResolveXp(QuestOffer quest) => quest.ResolveXp > 0 ? quest.ResolveXp : 2 * Math.Max(1, quest.Length);

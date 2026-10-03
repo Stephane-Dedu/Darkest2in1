@@ -87,7 +87,7 @@ internal sealed class EmbarkUi
             string note = inParty ? "In the party"
                 : h.MissingWeeks > 0 ? "Missing"
                 : !h.IsAvailable ? "Busy this week"
-                : _quest != null && !Homecoming.WillEmbark(h, _quest) ? "Refuses this quest"
+                : _quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark) ? "Refuses this quest"
                 : null;
             return new RosterColumn.Look(dim: inParty || note != null, note: inParty ? null : note, highlight: inParty);
         });
@@ -95,7 +95,7 @@ internal sealed class EmbarkUi
 
         if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the Hamlet", size: 24)) WantsBack = true;
         var heroes = Heroes();
-        string why = Embark.WhyCantEmbark(E, _quest, heroes);
+        string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         if (Gui.DdButton(new Rect(1190, 905, 330, 90), why == null ? "Provision" : why, why == null, why == null ? 40 : 18))
         {
             _provisioning = true;
@@ -107,7 +107,7 @@ internal sealed class EmbarkUi
     {
         if (_party.Remove(h.Id)) return;
         if (_party.Count >= 4 || !h.IsAvailable || h.MissingWeeks > 0) return;
-        if (_quest != null && !Homecoming.WillEmbark(h, _quest)) return;
+        if (_quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark)) return;
         _party.Add(h.Id);
     }
 
@@ -148,7 +148,7 @@ internal sealed class EmbarkUi
             if (Gui.Hotspot(r))
             {
                 _quest = q;
-                _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), q));
+                _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), q, S.Hamlet.AnyResolveCanEmbark));
                 _error = null;
             }
         }
@@ -259,7 +259,7 @@ internal sealed class EmbarkUi
         if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the quests", size: 24)) { _provisioning = false; _confirmLow = false; }
 
         var heroes = Heroes();
-        string why = Embark.WhyCantEmbark(E, _quest, heroes);
+        string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         int minFood = S.Provisioner.MinimumFood(length);
         bool lowFood = _cart.Count(Supply.Food) < minFood, noTorch = _cart.Count(Supply.Torch) == 0;
         if (why == null && (lowFood || noTorch))
@@ -283,12 +283,12 @@ internal sealed class EmbarkUi
         var at = new Vector2(814, 144);
         var grid = Prov("inventory_grid_background_store.png");
         if (grid != null) GUI.DrawTexture(new Rect(at.x, at.y, 680, 360), grid);
-        var stock = S.Provisioner.Stock(length);
+        var stock = S.Hamlet.ProvisionStock(S.Provisioner, S.Content.Items, length);
         var items = S.Content.Items;
         int i = 0;
         foreach (var id in Supply.Provisioner)
         {
-            int max = stock.TryGetValue(id, out var m) ? m : 0, have = _cart.Count(id), left = max - have, price = S.Provisioner.Price(id);
+            int max = stock.TryGetValue(id, out var m) ? m : 0, have = _cart.Count(id), left = max - have, price = S.Hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, id);
             var r = new Rect(at.x + 120 + (i % 7) * 80 - 60, at.y + 20 + (i / 7) * 170, 72, 144);
             i++;
             var old = GUI.color;
@@ -335,5 +335,5 @@ internal sealed class EmbarkUi
             Gui.Text(new Rect(at.x, at.y + 330, 720, 30), "The pack holds 16 stacks: the rest stays behind.", 18, Gui.Blood, TextAnchor.MiddleCenter);
     }
 
-    private int CartCost() => _cart.Items.Sum(kv => S.Provisioner.Price(kv.Key) * kv.Value);
+    private int CartCost() { var hamlet = S.Hamlet; return _cart.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value); }
 }

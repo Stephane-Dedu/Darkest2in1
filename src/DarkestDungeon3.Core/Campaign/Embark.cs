@@ -61,7 +61,7 @@ public sealed class Provisioner
 /// <summary>Turning a quest, four heroes and a pack into an expedition.</summary>
 public static class Embark
 {
-    public static string WhyCantEmbark(Estate estate, QuestOffer quest, IReadOnlyList<HeroRecord> party)
+    public static string WhyCantEmbark(Estate estate, QuestOffer quest, IReadOnlyList<HeroRecord> party, bool anyResolve = false)
     {
         if (quest == null) return "Choose a quest.";
         if (party.Count == 0) return "Choose your party.";
@@ -69,6 +69,7 @@ public static class Embark
         foreach (var h in party)
         {
             if (!h.IsAvailable) return $"{h.Name} is not available.";
+            if (anyResolve) continue;
             if (h.ResolveLevel > Homecoming.MaxResolveFor(quest.Difficulty)) return $"{h.Name} refuses: too experienced for this quest.";
             if (h.ResolveLevel < Homecoming.MinResolveFor(quest.Difficulty)) return $"{h.Name} is not ready for the Darkest Dungeon.";
         }

@@ -101,7 +101,8 @@ public sealed class Hamlet
         if (UsedSlots(activity.Key) >= activity.Slots(Estate)) return "No free slot.";
         var banned = activity.ForbiddenQuirks.Select(Catalog.MapDd1Quirk).Where(q => q != null);
         if (hero.Quirks.Any(banned.Contains)) return "Refuses: a quirk forbids it.";
-        var cost = activity.Cost(Estate);
+        if (EventData("activity_lock").Any(d => d.Str == activity.Id)) return "Closed this week.";
+        var cost = ActivityCost(activity);
         if (cost != null && Estate.Get(cost.Type) < cost.Amount) return "Not enough " + cost.Type + ".";
         return null;
     }
@@ -111,7 +112,7 @@ public sealed class Hamlet
         var hero = Estate.Hero(heroId);
         var activity = Buildings.Activity(activityKey);
         if (WhyCantDo(hero, activity) != null) return false;
-        var cost = activity.Cost(Estate);
+        var cost = ActivityCost(activity);
         if (cost != null) Estate.Add(cost.Type, -cost.Amount);
         hero.Activity = activityKey;
         return true;
@@ -261,8 +262,12 @@ public sealed class Hamlet
     }
 
     /// <summary>Gold for the next level, after the Blacksmith's discount upgrades.</summary>
+    /// <summary>A town event can make the Blacksmith's next weapon or armour upgrades free.</summary>
+    public bool FreeEquipment(string slot) => Estate.TownEventFreeUpgrades > 0 && EventData("upgrade_tag_free").Any(d => d.Str == slot);
+
     public int EquipmentCost(HeroUpgradeLevel level)
     {
+        if (FreeEquipment(level.TreeId.EndsWith(".weapon") ? Weapon : Armour)) return 0;
         float discount = Tiers.TotalDiscount(Buildings.Data(Buildings.Blacksmith)["equipment_cost_discount_upgrades"], Estate);
         return (int)System.Math.Round(level.Gold * System.Math.Max(0f, 1f - discount));
     }
@@ -286,6 +291,7 @@ public sealed class Hamlet
         var hero = Estate.Hero(heroId);
         if (hero == null || WhyCantUpgradeEquipment(hero, slot) != null) return false;
         Estate.Add(Currency.Gold, -EquipmentCost(NextEquipment(hero, slot)));
+        if (FreeEquipment(slot)) Estate.TownEventFreeUpgrades--;
         if (slot == Weapon) hero.WeaponRank++; else hero.ArmorRank++;
         Estate.TownLog.Add($"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
         return true;
@@ -309,7 +315,17 @@ public sealed class Hamlet
                 if (--hero.MissingWeeks == 0) log.Add($"{hero.Name} has returned to the Hamlet.");
                 continue;
             }
-            if (hero.Activity == null) continue;
+            if (hero.Activity == null)
+            {
+                int idleRelief = (int)Math.Round(EventData("idle_buff").Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f));
+                if (idleRelief > 0 && hero.Stress > 0)
+                {
+                    int was = hero.Stress;
+                    hero.Stress = Math.Max(0, hero.Stress - idleRelief);
+                    log.Add($"{hero.Name} rested in the Hamlet: stress {was} → {hero.Stress}.");
+                }
+                continue;
+            }
 
             if (hero.Activity.StartsWith("sanitarium."))
                 FinishTreatment(hero, rng, log);
@@ -334,6 +350,10 @@ public sealed class Hamlet
     {
         var (low, high) = activity.StressHeal(Estate);
         int dd1Heal = rng.Range(low, high);
+        // Town events can make an activity more (or less) restful this week.
+        float bonus = EventData("in_activity_buff").Where(d => d.Str.Contains("_in_activity_" + activity.Id + "_"))
+                                                 .Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f);
+        dd1Heal = (int)Math.Round(dd1Heal * Math.Max(0f, 1f + bonus));
         int points = ToDd2Points(dd1Heal, rng);
         int before = hero.Stress;
         hero.Stress = Math.Max(0, hero.Stress - points);
@@ -438,10 +458,70 @@ public sealed class Hamlet
         }
 
         Estate.Quests = QuestBoard.Generate(Estate, Dd1, ToggledZones());
+        RollTownEvent(rng);
     }
 
+    // ---- DD1 town events ----
+
+    public TownEvent CurrentEvent => Dd1.TownEvents?.Get(Estate.TownEventId);
+
+    public IEnumerable<(string Str, float Num)> EventData(string type) =>
+        CurrentEvent?.Data.Where(d => d.Type == type).Select(d => (d.Str, d.Num)) ?? Enumerable.Empty<(string, float)>();
+
+    private void RollTownEvent(Rng rng)
+    {
+        var ev = Dd1.TownEvents?.Roll(Estate, rng);
+        Estate.TownEventId = ev?.Id;
+        Estate.TownEventFreeUpgrades = (int)EventData("upgrade_tag_free").Sum(d => d.Num);
+        if (ev == null) return;
+        // Effects that land as the visit starts.
+        foreach (var (cls, count) in EventData("bonus_recruit"))
+            if (Catalog.RecruitableClasses.Contains(cls))
+                for (int i = 0; i < Math.Max(1, (int)count); i++) Estate.Recruits.Add(MakeHero(cls, rng, 0));
+        foreach (var (cls, levels) in EventData("idle_resolve_level"))
+            foreach (var hero in Estate.Roster.Where(h => h.ClassId == cls && h.MissingWeeks == 0))
+                hero.ResolveLevel = Math.Min(6, hero.ResolveLevel + Math.Max(1, (int)levels));
+    }
+
+    /// <summary>An activity's price this week (free or discounted by a town event).</summary>
+    public Reward ActivityCost(ActivityDef activity)
+    {
+        var cost = activity.Cost(Estate);
+        if (cost == null) return null;
+        if (EventData("free_activity").Any(d => d.Str == activity.Id)) return new Reward(cost.Type, 0);
+        float k = 1f + EventData("activity_cost_change").Where(d => d.Str == activity.Id).Sum(d => d.Num);
+        return new Reward(cost.Type, (int)Math.Round(cost.Amount * Math.Max(0f, k)));
+    }
+
+    /// <summary>Town events can lift the resolve limits on quests for the week.</summary>
+    public bool AnyResolveCanEmbark => EventData("remove_quest_hero_level_restriction").Any();
+
+    /// <summary>Buffs a town event gives the party leaving this week (zone-specific ones only for that zone).</summary>
+    public List<string> EmbarkPartyBuffs(QuestOffer quest)
+    {
+        string[] zones = { "crypts", "weald", "warrens", "cove", "darkestdungeon" };
+        return EventData("embark_party_buff").Select(d => d.Str)
+            .Where(b => !zones.Any(z => b.Contains("_" + z + "_")) || (quest != null && b.Contains("_" + quest.Dungeon + "_")))
+            .ToList();
+    }
+
+    private float ProvisionFactor(string type, string key, ItemCatalog items)
+    {
+        string itemType = items?.Get(key)?.Type;
+        return 1f + EventData(type).Where(d => d.Str == itemType).Sum(d => d.Num);
+    }
+
+    /// <summary>The provisioner's price this week.</summary>
+    public int ProvisionPrice(Provisioner provisioner, ItemCatalog items, string key) =>
+        (int)Math.Round(provisioner.Price(key) * Math.Max(0f, ProvisionFactor("provision_item_type_cost_change", key, items)));
+
+    /// <summary>The provisioner's shelf this week.</summary>
+    public Dictionary<string, int> ProvisionStock(Provisioner provisioner, ItemCatalog items, int length) =>
+        provisioner.Stock(length).ToDictionary(kv => kv.Key, kv => Math.Max(0, (int)Math.Round(kv.Value * ProvisionFactor("provision_item_type_amount_change", kv.Key, items))));
+
     public int WagonPrice(string trinketId) =>
-        (int)Math.Round(Catalog.TrinketPrice(trinketId) * (1f - Buildings.WagonDiscount(Estate)));
+        (int)Math.Round(Catalog.TrinketPrice(trinketId) * (1f - Buildings.WagonDiscount(Estate))
+                        * Math.Max(0f, 1f - EventData("upgrade_tag_discount").Where(d => d.Str == "trinket").Sum(d => d.Num)));
 
     public bool BuyTrinket(string trinketId)
     {
