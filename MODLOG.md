@@ -389,6 +389,34 @@ Feasibility notes (decomp):
         new stand-ins (cultist_evangelist/herald, shared_spider_*, shared_dog_rabid, coven_hateful_virago,
         beastmen_rot_claw, shared_lost_soul_chirurgeon) spawn and are drawn over;
       - "[patch] N patch classes applied" and no "[patch] ... not applied".
+- [ ] Play test 5 (user: corridor portraits, DD2 spells on DD1 mobs, trinkets menu, weaponsmith):
+      - corridor: "[stage] hero models: N visible samples ... shown" (combat pose via ActorBhv.Show()); if it logs
+        "trying the road pose", the combat pose failed and idle_neutral is used;
+      - DD1 monster skills: "[dd1art] X: skills: DD1's crossbow_shot on arbalist_hip_shot (3-7 x0.50, ...)" per
+        monster; the fight runs (no exception from GetResource/ActorDataSkill), banners show DD1 names, damage and
+        effects are DD1's (blight/bleed dots, stun, push/pull, stress, horror); Darkness skills dim our torch.
+        Gameplay.Dd1MonsterSkills=false restores DD2's skills under DD1 names if it breaks;
+      - Trinket Inventory: estate-bar button, DD1 layout, sorts, unequip-all, shift-click sell question, tooltips
+        with DD2 effects, drag to/from a hero sheet;
+      - Blacksmith: hero slot, verbose column, frame rows, cost frames, purchase; nameplate + upgrade button in all
+        building windows.
+
+## DD1 monster skills as DD2 data (2026-10-03)
+- DD2 data: per-element CSV texts live in ResourceDatabaseText (LibraryDataContainerCsv<T>.GetResourceDatabase(),
+  ResourceText.m_Name/m_Data = the lines inside element_start/element_end). New elements: new ActorDataStats(id,
+  text) / ActorDataEffects / ActorDataSkill, Init(id), Library<string,T>.Instance.AddLibraryElement(e, overrideCSV).
+  ActorDataSkill.InitInternal finds its stats/effects by m_ActorDataStatsId/m_ActorDataEffectsId or its own id.
+- An actor's skills: ActorInstance.m_CombatSkills (SkillInstance.m_SkillId, private, writable). Presentation is
+  looked up by skill id in ResourceDatabaseSkills (ResourceDatabaseAddressable<,>.GetResource(string resourceId,...)),
+  patched so "dd3__<base>__..." ids use the base skill's resource.
+- Enemies pick skills in ActorControllerRandom.SelectSkilIId from GetValidSkillTargetEntries (weighted by
+  m_RandomSelectChance); AI graphs (ResourceActor.m_AiGraph) exist for some (bosses).
+- DD1 effects -> DD2 (Dd1SkillToDd2.Map): dotPoison/dotBleed -> skill_dot_{small,medium,large,massive}_{blight,bleed};
+  dotStress -> dot_horror_*; stun -> add_1_stun; push/pull -> move_knockback_N/move_pull_N; stress N -> stress_damage_
+  round(N/10); shuffletarget -> move_shuffle(_50pct); stat buffs/buff_ids -> weak/vulnerable/blind/strength/dodge/
+  block/speed/crit tokens; tag -> add_1_vulnerable; heal -> heal_15/25pct; torch_decrease -> our Crawl.Darken.
+  Unmapped (no DD2 counterpart): stress-received and stun-resist debuffs, conditional "vs marked" bonuses, summons,
+  low-chance diseases.
 
 ## Next steps
 1. The audit plan above, in the order the user picks.

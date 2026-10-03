@@ -53,6 +53,8 @@ internal static class Dd1MonsterView
         public readonly Dictionary<string, int> SkillFor = new();   // stand-in's DD2 skill -> DD1 skill (index in Skills)
         public readonly Dictionary<string, string> SkillNames = new();   // stand-in's DD2 skill -> DD1 skill name
         public HashSet<string> Allowed;   // the DD2 skills it may use: those whose kind its DD1 monster has
+        public readonly Dictionary<string, int> Torch = new();          // skill -> how much it darkens the torch (DD1)
+        public readonly List<(object Instance, string Base)> Swapped = new();   // DD2 skill instances given DD1 skills
         public Vector3 Offset;      // body foot point relative to the actor's root, measured once
         public float WorldRatio;    // DD2 body height (world units) per DD1 unit, measured once
         public string DeathFx;
@@ -163,7 +165,7 @@ internal static class Dd1MonsterView
         _worldPerUnit = 0f;
         if (_quad != null) UnityEngine.Object.Destroy(_quad);
         _quad = null;
-        foreach (var m in Line) Show(m);
+        foreach (var m in Line) { Show(m); GiveBackDd2Skills(m); }
         Line.Clear();
         _bound = false;
         if (!_listening) return;
@@ -203,6 +205,11 @@ internal static class Dd1MonsterView
             if (!m.SkillFor.TryGetValue(skill, out int pick)) m.SkillFor[skill] = pick = m.SkillFor.Count % skills.Count;
             var dd1 = skills[pick % skills.Count];
             Play(m, dd1.Anim ?? "combat", loop: false);
+            if (m.Torch.TryGetValue(skill, out int darken) && Runtime.Driver.Instance?.Crawl is { } crawl)
+            {
+                crawl.Darken(darken);
+                Ui.Gui.Announce("The darkness deepens.");
+            }
             if (dd1.Fx != null && Fx(m.Family, dd1.Fx) is { } fx)
                 Effects.Add(new Effect { Rig = fx, Anchor = m.Actor, Since = Time.unscaledTime, Scale = m.Scale, Flip = true, Fixed = m.Feet });
             if (dd1.TargetFx != null && Fx(m.Family, dd1.TargetFx) is { } hit)
@@ -318,6 +325,7 @@ internal static class Dd1MonsterView
                 Note(m, "skills: no DD1 info file, paired in order");
                 return;
             }
+            if (Plugin.Dd1MonsterSkills.Value && GiveDd1Skills(m, dd2, dd1, lore)) return;
             var match = Dd1MonsterSkills.Match(dd2, dd1);
             m.Allowed = Dd1MonsterSkills.Allowed(dd2, dd1);
             foreach (var s in dd2)
@@ -335,6 +343,69 @@ internal static class Dd1MonsterView
             Note(m, "skills: " + string.Join(", ", dd2.Select(s => $"{s.Id}={(m.Allowed.Contains(s.Id) ? dd1[match[s.Id]].Id : "unused")}")));
         }
         catch (Exception e) { Plugin.Log.LogInfo($"[dd1art] {m.Dd1} skills: {e.Message}"); }
+    }
+
+    private static readonly System.Reflection.FieldInfo SkillIdField = typeof(Assets.Code.Skill.SkillInstance).GetField("m_SkillId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+    private static readonly System.Reflection.FieldInfo CombatSkillsField = typeof(Assets.Code.Actor.ActorInstance).GetField("m_CombatSkills", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+    /// <summary>
+    /// The DD1 monster fights with its DD1 skills: each one gets a DD2 skill of its own (Dd1SkillToDd2: DD1's ranks,
+    /// damage scaled to the stand-in's, crit, DD1's effects) standing on the stand-in's skill of the same kind, and the
+    /// stand-in's skill instance takes its id (put back when the fight ends). Its other DD2 skills go unused.
+    /// </summary>
+    private static bool GiveDd1Skills(Monster m, List<SkillShape> dd2, List<SkillShape> dd1, Core.Dd1.Dd1Lore lore)
+    {
+        var content = Session.Current?.Content;
+        if (content?.Effects == null || SkillIdField == null || CombatSkillsField == null) return false;
+        if (CombatSkillsField.GetValue(m.Actor.ActorInstance) is not System.Collections.IList instances) return false;
+        var pairs = Dd1SkillToDd2.Pair(dd2, dd1);
+        if (pairs.Count == 0) return false;
+        // DD1 damage at the stand-in's own level (DD2's balance), DD1's spread between the skills.
+        var dd2Attacks = new List<(float, float)>();
+        foreach (var b in pairs.Values)
+        {
+            var st = Dd1SkillToDd2.Stats(Dd1SkillData.Text<Assets.Code.Actor.ActorDataStats>(b));
+            if (st.TryGetValue("health_damage", out var lo)) dd2Attacks.Add((lo, lo + (st.TryGetValue("health_damage_range", out var r) ? r : 0f)));
+        }
+        float scale = Dd1SkillToDd2.DamageScale(dd2Attacks, dd1.Select(x => ((float)x.DamageMin, (float)x.DamageMax)));
+        var made = new Dictionary<string, string>();   // base -> generated
+        var log = new List<string>();
+        foreach (var skill in dd1.Where(x => pairs.ContainsKey(x.Id)))
+        {
+            string baseId = pairs[skill.Id];
+            string id = Dd1SkillToDd2.GeneratedId(baseId, m.Dd1, skill.Id);
+            var (target, performer) = Dd1SkillToDd2.Effects(skill, content.Effects.Get, null, content.Buffs != null ? content.Buffs.Get : null);
+            if (!Dd1SkillData.Make(id, baseId, skill, scale, target, performer)) continue;
+            made[baseId] = id;
+            int art = m.Skills.FindIndex(x => x.Id == skill.Id);
+            m.SkillFor[id] = art >= 0 ? art : 0;
+            int torch = Dd1SkillToDd2.TorchDecrease(skill, content.Effects.Get);
+            if (torch > 0) m.Torch[id] = torch;
+            if (lore != null && lore.MonsterSkillNames.TryGetValue(skill.Id, out var name))
+            {
+                m.SkillNames[id] = name;
+                Names["skill_name_" + id] = name;
+            }
+            log.Add($"{skill.Id} on {baseId} ({skill.DamageMin}-{skill.DamageMax} x{scale:0.00}{(target.Count + performer.Count > 0 ? ", " + string.Join(" ", target.Concat(performer)) : "")})");
+        }
+        if (made.Count == 0) return false;
+        foreach (var instance in instances)
+        {
+            if (instance == null || SkillIdField.GetValue(instance) is not string current || !made.TryGetValue(current, out var id)) continue;
+            SkillIdField.SetValue(instance, id);
+            m.Swapped.Add((instance, current));
+        }
+        m.Allowed = new HashSet<string>(made.Values);
+        Note(m, "skills: DD1's " + string.Join("; ", log));
+        return true;
+    }
+
+    /// <summary>The fight is over: the stand-ins' skill instances get their DD2 ids back.</summary>
+    private static void GiveBackDd2Skills(Monster m)
+    {
+        foreach (var (instance, baseId) in m.Swapped)
+            try { SkillIdField?.SetValue(instance, baseId); } catch (Exception) { }
+        m.Swapped.Clear();
     }
 
     /// <summary>A DD2 skill's shape from its runtime data.</summary>

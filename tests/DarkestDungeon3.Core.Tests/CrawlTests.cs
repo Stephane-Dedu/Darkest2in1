@@ -83,6 +83,19 @@ public class CrawlTests
     }
 
     [Fact]
+    public void MonsterDarknessLowersTheTorch()
+    {
+        var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);
+        crawl.Begin();
+        crawl.State.Light = 80f;
+        var events = crawl.Darken(10f);                       // DD1's "Darkness 2": torch_decrease 10
+        Assert.Equal(70f, crawl.State.Light, 3);
+        Assert.Contains(events, e => e.Type == CrawlEventType.LightChanged);
+        crawl.Darken(500f);
+        Assert.Equal(0f, crawl.State.Light, 3);
+    }
+
+    [Fact]
     public void LightDropsSixPerNewSquareAndOnePerVisited()
     {
         var (crawl, _) = NewCrawl("crypts", "short", "explore", 21);

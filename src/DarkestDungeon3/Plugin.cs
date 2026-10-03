@@ -25,6 +25,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> HeroModelScale;
     internal static ConfigEntry<bool> SkipDd2Results;
     internal static ConfigEntry<bool> Dd1MonsterArt;
+    internal static ConfigEntry<bool> Dd1MonsterSkills;
     internal static ConfigEntry<bool> Dd1AudioOn;
     internal static ConfigEntry<float> Dd1MusicVolume, Dd1SoundVolume;
     internal static ConfigEntry<bool> Dd1BackdropOn;
@@ -45,6 +46,7 @@ public class Plugin : BaseUnityPlugin
         HeroModelPose = Config.Bind("Look", "Dd2HeroModelPose", "combat", "Pose of the DD2 hero models in the dungeon: \"combat\" (DD2's fight stance, facing the way the party walks) or \"neutral\" (DD2's road/inn idle).");
         HeroModelBrightness = Config.Bind("Look", "HeroModelBrightness", 2.6f, "How much the DD2 hero models are brightened in the dungeon (their off-screen stage lacks DD2's arena lighting).");
         Dd1BackdropOn = Config.Bind("Look", "Dd1BackdropInFights", true, "Fights happen in front of the DD1 room or hallway the party is in (DD2's arena scenery hidden) instead of a DD2 arena.");
+        Dd1MonsterSkills = Config.Bind("Gameplay", "Dd1MonsterSkills", true, "DD1 monsters fight with their DD1 skills: DD1's ranks, targets, damage (scaled to the DD2 enemy standing in), crit and effects, built as DD2 skills on the stand-in. Off: the stand-in's own DD2 skills, shown under DD1's names.");
         Dd1MonsterArt = Config.Bind("Look", "Dd1MonstersInFights", true, "Draw DD1's own animated monsters over the DD2 enemies standing in for them (DD2 still runs the fight).");
         Dd1MonsterScale = Config.Bind("Look", "Dd1MonsterScale", 1f, "Size of the DD1 monsters in fights, relative to the DD2 model they replace.");
         SkipDd2Results = Config.Bind("Look", "SkipDd2ResultsView", true, "After a fight, go straight back to the dungeon (DD1's spoils scroll) instead of DD2's stagecoach results view.");

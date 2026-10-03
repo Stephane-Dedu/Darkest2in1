@@ -717,6 +717,14 @@ public sealed class Crawl
         Emit(CrawlEventType.QuestComplete);
     }
 
+    /// <summary>A DD1 monster skill darkened the torch (DD1's "Darkness" effects, .torch_decrease) during a fight.</summary>
+    public List<CrawlEvent> Darken(float amount)
+    {
+        _events.Clear();
+        if (amount > 0) ChangeLight(-amount);
+        return Flush();
+    }
+
     private void ChangeLight(float delta)
     {
         float before = State.Light;

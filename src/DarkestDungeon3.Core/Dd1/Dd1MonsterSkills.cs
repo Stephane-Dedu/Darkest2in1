@@ -12,6 +12,13 @@ public sealed class SkillShape
     public bool Ranged, Friendly;
     public List<int> LaunchRanks = new(), TargetRanks = new();
 
+    // DD1's numbers (info files): damage, crit, all targets at once ("~"), its effects by name, the performer's own
+    // move (.move back forward) and a heal on its target (.heal min max).
+    public int DamageMin, DamageMax, MoveBack, MoveForward, HealMin, HealMax;
+    public float Crit;
+    public bool AllTargets, CritValid = true;
+    public List<string> Effects = new();
+
     /// <summary>"friendly", "ranged" or "melee".</summary>
     public string Kind => Friendly ? "friendly" : Ranged ? "ranged" : "melee";
 
@@ -53,6 +60,9 @@ public static class Dd1MonsterSkills
         foreach (var r in records.Where(r => r.Type == "skill"))
         {
             string target = string.Concat(r.Values("target"));
+            var dmg = r.Range("dmg");
+            var heal = r.Range("heal");
+            var move = r.Values("move");
             skills.Add(new SkillShape
             {
                 Id = r.Str("id"),
@@ -60,6 +70,16 @@ public static class Dd1MonsterSkills
                 Friendly = target.Length == 0 || target.Contains('@'),
                 LaunchRanks = Ranks(string.Concat(r.Values("launch"))),
                 TargetRanks = Ranks(target),
+                AllTargets = target.Contains('~'),
+                DamageMin = dmg.Min,
+                DamageMax = dmg.Max,
+                Crit = r.Has("crit") ? r.Float("crit") : 0f,
+                CritValid = !string.Equals(r.Str("is_crit_valid"), "False", StringComparison.OrdinalIgnoreCase),
+                Effects = r.Values("effect").ToList(),
+                MoveBack = move.Count > 0 && int.TryParse(move[0], out int mb) ? mb : 0,
+                MoveForward = move.Count > 1 && int.TryParse(move[1], out int mf) ? mf : 0,
+                HealMin = heal.Min,
+                HealMax = heal.Max,
             });
         }
         return skills;
