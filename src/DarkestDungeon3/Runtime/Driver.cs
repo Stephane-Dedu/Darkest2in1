@@ -69,6 +69,8 @@ internal sealed class Driver : MonoBehaviour
 
     private void Update()
     {
+        Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null);
+        if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();
         var stage = HeroStage.Instance;
         stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
         if (Phase != Phase.Crawling || Crawl == null) return;
@@ -284,6 +286,7 @@ internal sealed class Driver : MonoBehaviour
         }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
+        if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.42f : 0.6f); }
         WalkProgress += speed * Time.unscaledDeltaTime;
         if (Mathf.Abs(WalkProgress) < 0.5f) return;
         float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
@@ -291,6 +294,7 @@ internal sealed class Driver : MonoBehaviour
         Step(forward);
         _continuousStep = false;
         WalkProgress = Expedition.InRoom ? 0 : carry;
+        if (Expedition.InRoom) Dd1Audio.Play("/general/map/room_transition");
         // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
         if (_interruptsThisStep || (IsWalking && Crawl.CurioHere != null)) { _interruptsThisStep = false; StopWalking(); }
         if (_routeTargetTile.corridor >= 0 && !Expedition.InRoom && Expedition.TileIndex == _routeTargetTile.tile) StopWalking();
@@ -334,8 +338,11 @@ internal sealed class Driver : MonoBehaviour
     private float _travelFrom, _fadeInFrom = -10f;
     private bool _wasInRoom;
 
+    private float _nextFootstep;
+
     private void BeginTravel(int roomId)
     {
+        Dd1Audio.Play("/general/map/room_transition");
         _travelTo = roomId;
         _travelFrom = Time.unscaledTime;
     }
@@ -483,6 +490,7 @@ internal sealed class Driver : MonoBehaviour
         if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised))
         {
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
+            Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
             Dd1MonsterView.Prepare(plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
             Phase = Phase.Fighting;
             S.Persist();
@@ -505,12 +513,14 @@ internal sealed class Driver : MonoBehaviour
         {
             // DD1: the fight stays where it was; the party falls back the way it came.
             Handle(Crawl.FleeBattle());
+            Dd1Audio.Play("/general/combat/retreat");
             Announce("The party retreats!");
             Phase = Phase.Crawling;
             S.Persist();
             return;
         }
         Handle(Crawl.ResolveBattle());
+        Dd1Audio.Play("/general/combat/victory");
         if (Crawl.LastSpoils is { } spoils)
             Plugin.Log.LogInfo($"[loot] {spoils.Kind} fight ({string.Join(" ", spoils.Dd1Monsters)}): " +
                                $"took {string.Join(", ", spoils.Taken)}; left {string.Join(", ", spoils.LeftBehind)}");
@@ -536,10 +546,10 @@ internal sealed class Driver : MonoBehaviour
 
     public void SkipCurio() => Crawl.SkipCurio();
 
-    public void MakeCamp() => Handle(Crawl.MakeCamp());
+    public void MakeCamp() { Dd1Audio.Play("/general/map/camp_start"); Handle(Crawl.MakeCamp()); }
     public bool EatMeal(Meal meal) => Crawl.EatMeal(meal);
     public bool UseCampSkill(string hero, string skill, string target) => Crawl.UseCampSkill(hero, skill, target);
-    public void BreakCamp() => Handle(Crawl.BreakCamp());
+    public void BreakCamp() { Dd1Audio.Play("/general/map/camp_end"); Handle(Crawl.BreakCamp()); }
 
     /// <summary>Leave the dungeon: after the quest is done, or as a retreat before it is.</summary>
     public void Leave()

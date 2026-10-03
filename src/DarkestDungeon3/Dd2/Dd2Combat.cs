@@ -122,11 +122,19 @@ internal static class Dd2Combat
         }
     }
 
-    private static float _revealedAt = -1f;
+    private static float _revealedAt = -1f, _revealStart = -1f;
 
-    /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen), then 0..1 over half a
-    /// second as the fight shows through.</summary>
-    public static float RevealProgress => _revealedAt < 0 ? 0f : UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealedAt) / 0.5f);
+    /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen, also while the DD1
+    /// backdrop is being put in place), then 0..1 over half a second as the fight shows through.</summary>
+    public static float RevealProgress
+    {
+        get
+        {
+            if (_revealedAt < 0 || Dd1Backdrop.Pending) return 0f;
+            if (_revealStart < 0) _revealStart = UnityEngine.Time.unscaledTime;
+            return UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealStart) / 0.5f);
+        }
+    }
 
     public static string RollBattle(FightPlan plan)
     {
@@ -176,6 +184,8 @@ internal static class Dd2Combat
         // DD1 starts a fight where the party stands: no DD2 stagecoach loading screen, just a fade we cover with
         // the DD1 scene until the fight is ready (see RevealProgress).
         _revealedAt = -1f;
+        _revealStart = -1f;
+        Dd1Backdrop.Reset();
         modes.OnNextGameModeEnterComplete(_ => _revealedAt = UnityEngine.Time.unscaledTime);
         modes.SetMode(GameModeType.COMBAT, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
         // The party's DD1 buffs go on once DD2 has entered the fight, and come off when it ends.
@@ -196,6 +206,7 @@ internal static class Dd2Combat
         Assets.Code.Events.EventManager.RemoveListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
         FightBuffs.Remove(_buffed);
         Dd1MonsterView.Clear();
+        Dd1Backdrop.End();
         Plugin.Log.LogInfo($"[combat] fight over, party wiped: {partyWiped}");
         Finished?.Invoke(partyWiped);
     }

@@ -361,6 +361,16 @@ Feasibility notes (decomp):
       level per region; boss tiers at levels 2/4/6.
 - [ ] Hero models in the dungeon: log "[stage] hero layer N (Characters), deferred mask 0x..." then
       "[stage] hero models: ... brightness X -> shown / too dark". If shown: lit, right size/place, bob while walking.
+- [ ] Play test 2 (fixes): walking stays where it stops, mouse-hold walks (right of 1210 / left of 200), props
+      scroll, minimap drag, DD1 stat column, right-click sheets (dungeon read-only; prep editable), no carriage
+      (fade, DD1 scene held until the fight is ready).
+- [ ] DD1 audio: log "[audio] DD1 banks loaded: master + N/19" (or the FMOD error per bank, e.g. ERR_FORMAT if
+      DD2's FMOD 2.02 can't read DD1's format-103 banks) and "[audio] N DD1 events listed in .../dd1_audio_events.txt".
+      Town/exploration/camp/battle music, zone ambience, footsteps, room transitions, combat start/victory/retreat,
+      button clicks, building doors; DD2 music/SFX VCAs down on our screens, SFX back in fights.
+- [ ] DD1 backdrop in fights: log "[backdrop] DD1 scene behind the fight: N arena renderers hidden ...". Check the
+      floor line at the heroes' feet, actors in front, nothing important hidden (markers, VFX).
+- [ ] DD1 monster effects: attack pose + its fx on the monster + targchestfx on targets; death fx.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

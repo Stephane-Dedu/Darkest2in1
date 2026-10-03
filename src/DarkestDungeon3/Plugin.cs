@@ -24,6 +24,8 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> HeroModelScale;
     internal static ConfigEntry<bool> SkipDd2Results;
     internal static ConfigEntry<bool> Dd1MonsterArt;
+    internal static ConfigEntry<bool> Dd1AudioOn;
+    internal static ConfigEntry<bool> Dd1BackdropOn;
     internal static ConfigEntry<float> Dd1MonsterScale;
 
     private void Awake()
@@ -33,6 +35,8 @@ public class Plugin : BaseUnityPlugin
             "Your Darkest Dungeon 1 install folder. Leave empty to find it in your Steam libraries.");
         DebugKeysEnabled = Config.Bind("Debug", "DebugKeys", true, "F8 dumps state, F9 test fight from the road, F10 wins a fight, F11 starts a fight in the dungeon.");
         HeroModels = Config.Bind("Look", "Dd2HeroModelsInDungeon", true, "DD2's animated hero models in the DD1 dungeon (falls back to DD2's flat hero art by itself if they render black).");
+        Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");
+        Dd1BackdropOn = Config.Bind("Look", "Dd1BackdropInFights", true, "Fights happen in front of the DD1 room or hallway the party is in (DD2's arena scenery hidden) instead of a DD2 arena.");
         Dd1MonsterArt = Config.Bind("Look", "Dd1MonstersInFights", true, "Draw DD1's own animated monsters over the DD2 enemies standing in for them (DD2 still runs the fight).");
         Dd1MonsterScale = Config.Bind("Look", "Dd1MonsterScale", 1f, "Size of the DD1 monsters in fights, relative to the DD2 model they replace.");
         SkipDd2Results = Config.Bind("Look", "SkipDd2ResultsView", true, "After a fight, go straight back to the dungeon (DD1's spoils scroll) instead of DD2's stagecoach results view.");

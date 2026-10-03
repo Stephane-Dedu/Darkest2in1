@@ -242,6 +242,8 @@ internal sealed class HamletUi
 
     private void Open(string building)
     {
+        // DD1's door sound for the building (the coach is "coach" there).
+        Dd1Audio.Play("/town/enter_" + (building == Buildings.StageCoach ? "coach" : building));
         _building = building;
         _panelScroll = Vector2.zero;
         _panel = building switch

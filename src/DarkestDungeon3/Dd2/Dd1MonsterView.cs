@@ -49,9 +49,25 @@ internal static class Dd1MonsterView
         public List<string> Attacks;
         public float NextRendererScan;
         public readonly HashSet<string> Logged = new();
+        public List<(string Anim, string Fx, string TargetFx)> Skills;   // from DD1's .art.darkest
+        public string DeathFx;
+        public float Scale = 1f;
+        public Vector3 Feet;   // last screen position of its feet (GL pixels)
     }
 
     private static readonly Dictionary<string, Rig> Rigs = new();
+
+    /// <summary>A one-shot DD1 effect (a skill's flash, a hit on a hero, a death) drawn where it happens.</summary>
+    private sealed class Effect
+    {
+        public Rig Rig;
+        public CombatActorBhv Anchor;   // follows this actor (chest), or stays at Fixed
+        public Vector3 Fixed;
+        public float Since, Scale;
+        public bool Flip;
+    }
+
+    private static readonly List<Effect> Effects = new();
     private static readonly List<Monster> Line = new();
     private static bool _bound, _listening;
     private static float _boundTimeout;
@@ -67,7 +83,9 @@ internal static class Dd1MonsterView
         {
             var (family, tier) = Dd1Bestiary.Split(dd1Monsters[i]);
             if (Load(family, "combat") == null) continue;
-            Line.Add(new Monster { Dd1 = dd1Monsters[i], Family = family, Tier = tier, Dd2Class = dd2Enemies[i] });
+            var monster = new Monster { Dd1 = dd1Monsters[i], Family = family, Tier = tier, Dd2Class = dd2Enemies[i] };
+            ReadArt(monster);
+            Line.Add(monster);
         }
         if (Line.Count == 0) return;
         _boundTimeout = Time.unscaledTime + 8f;
@@ -78,9 +96,28 @@ internal static class Dd1MonsterView
         Plugin.Log.LogInfo($"[dd1art] {Line.Count} DD1 monsters to draw: {string.Join(", ", Line.Select(m => m.Dd1 + " as " + m.Dd2Class))}");
     }
 
+    /// <summary>DD1's skill list for the monster: each skill's attack pose, its own effect and the effect on its target.</summary>
+    private static void ReadArt(Monster m)
+    {
+        m.Skills = new List<(string, string, string)>();
+        try
+        {
+            string tierName = $"{m.Family}_{m.Tier}";
+            string file = Session.Current?.Dd1.PathOf("monsters", m.Family, tierName, tierName + ".art.darkest");
+            if (file == null || !File.Exists(file)) return;
+            foreach (var r in Core.Dd1.DarkestFile.Load(file))
+            {
+                if (r.Type == "skill") m.Skills.Add((r.Str("anim", null), r.Str("fx", null), r.Str("targchestfx", null)));
+                else if (r.Type == "commonfx") m.DeathFx = r.Str("deathfx", null);
+            }
+        }
+        catch (Exception e) { Plugin.Log.LogInfo($"[dd1art] {m.Dd1} art: {e.Message}"); }
+    }
+
     /// <summary>The fight is over: give DD2 its models back.</summary>
     public static void Clear()
     {
+        Effects.Clear();
         foreach (var m in Line) Show(m);
         Line.Clear();
         _bound = false;
@@ -114,11 +151,19 @@ internal static class Dd1MonsterView
             var m = data == null ? null : ByGuid(data.PerformerGuid);
             if (m == null || m.Dead) return;
             m.Attacks ??= AttackFiles(m.Family);
-            if (m.Attacks.Count == 0) return;
+            var skills = m.Skills is { Count: > 0 } ? m.Skills : m.Attacks.Select(a => (Anim: a, Fx: (string)null, TargetFx: (string)null)).ToList();
+            if (skills.Count == 0) return;
             string skill = data.SkillId ?? "";
-            if (!m.AttackFor.TryGetValue(skill, out var attack))
-                m.AttackFor[skill] = attack = m.Attacks[m.AttackFor.Count % m.Attacks.Count];
-            Play(m, attack, loop: false);
+            // Each DD2 skill the stand-in uses gets one of the DD1 monster's skills, in order.
+            if (!m.AttackFor.TryGetValue(skill, out var pick))
+                m.AttackFor[skill] = pick = (m.AttackFor.Count % skills.Count).ToString();
+            var dd1 = skills[int.Parse(pick) % skills.Count];
+            Play(m, dd1.Anim ?? "combat", loop: false);
+            if (dd1.Fx != null && Fx(m.Family, dd1.Fx) is { } fx)
+                Effects.Add(new Effect { Rig = fx, Anchor = m.Actor, Since = Time.unscaledTime, Scale = m.Scale, Flip = true, Fixed = m.Feet });
+            if (dd1.TargetFx != null && Fx(m.Family, dd1.TargetFx) is { } hit)
+                foreach (var target in data.TargetActors ?? (IReadOnlyList<CombatActorBhv>)new CombatActorBhv[0])
+                    if (target != null) Effects.Add(new Effect { Rig = hit, Anchor = target, Since = Time.unscaledTime + 0.35f, Scale = m.Scale, Flip = true });
         }
         catch (Exception ex) { Plugin.Log.LogWarning("[dd1art] skill: " + ex.Message); }
     }
@@ -142,6 +187,8 @@ internal static class Dd1MonsterView
             if (m == null) return;
             m.Dead = true;
             Play(m, Load(m.Family, "dead") != null ? "dead" : "defend", loop: false);
+            if (m.DeathFx != null && Fx(m.Family, m.DeathFx) is { } death)
+                Effects.Add(new Effect { Rig = death, Fixed = m.Feet, Since = Time.unscaledTime, Scale = m.Scale, Flip = true });
         }
         catch (Exception ex) { Plugin.Log.LogWarning("[dd1art] death: " + ex.Message); }
     }
@@ -234,6 +281,7 @@ internal static class Dd1MonsterView
                 if (m.Actor.Equals(null)) { m.Gone = true; continue; }
                 DrawOne(m, cam, light);
             }
+            DrawEffects(cam, light);
         }
         catch (Exception e)
         {
@@ -281,9 +329,48 @@ internal static class Dd1MonsterView
 
         var idle = Load(m.Family, "combat") ?? rig;
         float scale = Mathf.Abs(head.y - feet.y) / Mathf.Max(1f, idle.Height) * Plugin.Dd1MonsterScale.Value;
+        m.Scale = scale;
+        m.Feet = feet;
         if (!DrawPieces(rig, pieces, feet.x, feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return; }
         Note(m, $"drawn over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}), {Mathf.Abs(head.y - feet.y):0} px tall");
         Hide(m);   // only once DD1's art is really on screen
+    }
+
+    private static void DrawEffects(Camera cam, float light)
+    {
+        float now = Time.unscaledTime;
+        for (int i = Effects.Count - 1; i >= 0; i--)
+        {
+            var e = Effects[i];
+            float t = now - e.Since;
+            if (t < 0) continue;
+            var anim = e.Rig.Skeleton.Animations.FirstOrDefault();
+            float duration = Mathf.Max(0.4f, anim?.Duration ?? 0.6f);
+            if (t > duration) { Effects.RemoveAt(i); continue; }
+            Vector3 at = e.Fixed;
+            if (e.Anchor != null && !e.Anchor.Equals(null))
+            {
+                var rs = e.Anchor.GetComponentsInChildren<Renderer>().Where(r => r is SkinnedMeshRenderer or MeshRenderer).ToList();
+                if (rs.Count > 0)
+                {
+                    var b = rs[0].bounds;
+                    foreach (var r in rs) b.Encapsulate(r.bounds);
+                    at = cam.WorldToScreenPoint(new Vector3(b.center.x, b.min.y, b.center.z));
+                }
+            }
+            if (at.z <= 0) continue;
+            var pieces = e.Rig.Skeleton.Pose(e.Rig.Atlas, anim?.Name, t, loop: false);
+            DrawPieces(e.Rig, pieces, at.x, at.y, e.Scale, e.Flip, light);
+        }
+    }
+
+    /// <summary>A DD1 effect: the monster's own (monsters/&lt;family&gt;/fx) or a shared one (fx/&lt;name&gt;).</summary>
+    private static Rig Fx(string family, string name)
+    {
+        var dd1 = Session.Current?.Dd1;
+        if (dd1 == null) return null;
+        return LoadFile(dd1.PathOf("monsters", family, "fx"), $"{family}.sprite.{name}")
+               ?? LoadFile(dd1.PathOf("fx", name), $"{name}.sprite");
     }
 
     private static bool DrawPieces(Rig rig, List<SpineSkeleton.Piece> pieces, float x0, float y0, float scale, bool flipX, float light)
@@ -337,14 +424,20 @@ internal static class Dd1MonsterView
 
     private static Rig Load(string family, string anim)
     {
-        string key = family + "/" + anim;
+        var dd1 = Session.Current?.Dd1;
+        return dd1 == null ? null : LoadFile(dd1.PathOf("monsters", family, "anim"), $"{family}.sprite.{anim}");
+    }
+
+    /// <summary>A DD1 Spine file (&lt;dir&gt;/&lt;stem&gt;.skel + .atlas + pages), cached.</summary>
+    private static Rig LoadFile(string dir, string stem)
+    {
+        string key = dir + "/" + stem;
         if (Rigs.TryGetValue(key, out var rig)) return rig;
         Rigs[key] = null;
         try
         {
-            string dir = Session.Current?.Dd1.PathOf("monsters", family, "anim");
             if (dir == null) return null;
-            string skel = Path.Combine(dir, $"{family}.sprite.{anim}.skel"), atlas = Path.Combine(dir, $"{family}.sprite.{anim}.atlas");
+            string skel = Path.Combine(dir, stem + ".skel"), atlas = Path.Combine(dir, stem + ".atlas");
             if (!File.Exists(skel) || !File.Exists(atlas)) return null;
             rig = new Rig { Skeleton = SpineSkeleton.Load(skel), Atlas = SpineAtlas.Parse(File.ReadAllText(atlas)) };
             foreach (var page in rig.Atlas.Pages)

@@ -130,7 +130,9 @@ internal static class Gui
         Fill(new Rect(r.x, r.y, 2, r.height), frame);
         Fill(new Rect(r.xMax - 2, r.y, 2, r.height), frame);
         Text(r, label, size, enabled ? (hover ? Color.white : Dd1Name) : Dim, TextAnchor.MiddleCenter, heading: true);
-        return enabled && GUI.Button(r, GUIContent.none, GUIStyle.none);
+        bool clicked = enabled && GUI.Button(r, GUIContent.none, GUIStyle.none);
+        if (clicked) Runtime.Dd1Audio.Play("/ui/shared/button_click");
+        return clicked;
     }
 
     /// <summary>An invisible click area (for art that acts as a button).</summary>
