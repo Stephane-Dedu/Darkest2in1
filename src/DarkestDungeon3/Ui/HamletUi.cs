@@ -1011,7 +1011,9 @@ internal sealed class HamletUi
                 var row = new Rect(x, r.y + 60 + i * 38, 360, 32);
                 var cost = hamlet.TreatmentCost(hero, q);
                 bool lockedAlready = hero.LockedQuirks.Contains(q) && S.Catalog.IsPositive(q);
-                bool can = cost != null && E.Get(cost.Type) >= cost.Amount && !lockedAlready;
+                string noLock = lockedAlready ? null : hamlet.WhyCantLock(hero, q);   // DD1: at most 3 locked
+                bool can = cost != null && E.Get(cost.Type) >= cost.Amount && !lockedAlready && noLock == null;
+                if (noLock != null && row.Contains(Event.current.mousePosition)) Gui.Tip(noLock);
                 bool hover = can && row.Contains(Event.current.mousePosition);
                 var hl = BuildingArt(Buildings.Sanitarium, highlight);
                 if (hover && hl != null) GUI.DrawTexture(new Rect(row.x - 10, row.y, 380, 32), hl);

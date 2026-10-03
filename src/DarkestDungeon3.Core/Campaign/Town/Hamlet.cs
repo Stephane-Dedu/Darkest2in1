@@ -138,10 +138,21 @@ public sealed class Hamlet
         return Buildings.QuirkTreatmentCost(Estate, hero.LockedQuirks.Contains(quirkId) ? "permanent_negative" : "negative");
     }
 
+    /// <summary>Why the Sanitarium can't lock this positive quirk in (DD1: at most quirks_max_locked_positive 3
+    /// locked), or null.</summary>
+    public string WhyCantLock(HeroRecord hero, string quirkId)
+    {
+        if (hero == null || !Catalog.IsPositive(quirkId) || Catalog.IsDisease(quirkId)) return null;
+        if (hero.LockedQuirks.Contains(quirkId)) return "Already locked in";
+        int locked = hero.LockedQuirks.Count(q => Catalog.IsPositive(q) && !Catalog.IsDisease(q));
+        return locked >= Dd1.QuirkLimits.MaxLockedPositive ? $"{hero.Name} already has {Dd1.QuirkLimits.MaxLockedPositive} locked quirks" : null;
+    }
+
     public bool StartTreatment(string heroId, string quirkId)
     {
         var hero = Estate.Hero(heroId);
         if (hero == null || !hero.IsAvailable || !hero.Quirks.Contains(quirkId)) return false;
+        if (WhyCantLock(hero, quirkId) != null) return false;
         if (!Buildings.IsOpen(Buildings.Sanitarium, Estate)) return false;
         string activity = Catalog.IsDisease(quirkId) ? "sanitarium.disease_treatment" : "sanitarium.treatment";
         if (Estate.Roster.Count(h => h.Activity == activity) >= Buildings.SanitariumSlots(Estate, activity.Split('.')[1])) return false;

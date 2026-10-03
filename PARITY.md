@@ -31,7 +31,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Roster, quirks, diseases
 - [?] Hero resolve levels from `roster.variables.json` thresholds; resolve XP per quest length.
 - [?] Quirk limits: DD1 caps 5 positive / 5 negative / 3 diseases (`rules.json` quirks_max_*); over the cap a new quirk replaces a random unlocked one of its kind (`shared/character/quirkreplaced.png`), none gained if all are locked. Was: no cap. Now QuirkLimits (Dd1Campaign.QuirkLimits) in town activities and on the DD2 actor for curio quirks (QuirkLimitTests). In game: a capped hero gaining a quirk logs "[quirks] ... replaces ... (DD1 quirk limit)".
-- [ ] Locked quirk caps: DD1 `quirks_max_locked_positive` / `_negative` 3 — check the Sanitarium lock refuses a fourth.
+- [?] Locked quirk cap: DD1 `quirks_max_locked_positive` 3. Was: the Sanitarium locked any number. Now Hamlet.WhyCantLock refuses a fourth (HamletTests.AtMostThreeLockedPositiveQuirks); the quirk row greys out with the reason on hover. In game: a hero with 3 locked quirks can't lock a fourth. (`_negative` 3 belongs to the negative auto-lock rule, still missing.)
 - [ ] Negative quirk auto-lock: DD1 `quirk_chance_to_lock_negative` / `quirk_negative_locked_after_turn_count` — not done.
 - [ ] Disease after a quest: DD1 `disease_after_quest_min_chance`, `disease_max_chance`, `disease_after_quest_min_resolve_level` — not rolled.
 - [ ] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — not applied; what "upper_level" counts (resolve? weeks? roster size?) is unclear from the data and not in the Unity port (round 6).

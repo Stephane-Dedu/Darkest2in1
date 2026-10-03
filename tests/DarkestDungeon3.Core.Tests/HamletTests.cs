@@ -51,6 +51,20 @@ public class HamletTests
     }
 
     [Fact]
+    public void AtMostThreeLockedPositiveQuirks()
+    {
+        var h = NewHamlet();
+        var hero = h.Estate.Roster[0];
+        hero.Quirks.AddRange(new[] { "pos_a", "pos_b", "pos_c", "pos_d" });
+        hero.LockedQuirks.AddRange(new[] { "pos_a", "pos_b", "pos_c" });
+        Assert.Equal(3, h.Dd1.QuirkLimits.MaxLockedPositive);                 // DD1 quirks_max_locked_positive
+        Assert.NotNull(h.WhyCantLock(hero, "pos_d"));
+        Assert.False(h.StartTreatment(hero.Id, "pos_d"));                     // the Sanitarium refuses a fourth
+        hero.LockedQuirks.Remove("pos_c");
+        Assert.Null(h.WhyCantLock(hero, "pos_d"));
+    }
+
+    [Fact]
     public void TrinketsSellForFifteenPercentAndCanAllBeUnequipped()
     {
         var h = NewHamlet();

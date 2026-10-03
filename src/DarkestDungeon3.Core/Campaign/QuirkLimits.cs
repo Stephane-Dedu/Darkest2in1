@@ -13,6 +13,8 @@ namespace DarkestDungeon3.Core.Campaign;
 public sealed class QuirkLimits
 {
     public int MaxPositive = 5, MaxNegative = 5, MaxDiseases = 3;
+    /// <summary>How many quirks of each kind can be locked (quirks_max_locked_positive / _negative).</summary>
+    public int MaxLockedPositive = 3, MaxLockedNegative = 3;
 
     public static QuirkLimits FromDd1(JObject rules)
     {
@@ -21,6 +23,8 @@ public sealed class QuirkLimits
         q.MaxPositive = (int?)rules["quirks_max_positive"] ?? q.MaxPositive;
         q.MaxNegative = (int?)rules["quirks_max_negative"] ?? q.MaxNegative;
         q.MaxDiseases = (int?)rules["quirks_max_diseases"] ?? q.MaxDiseases;
+        q.MaxLockedPositive = (int?)rules["quirks_max_locked_positive"] ?? q.MaxLockedPositive;
+        q.MaxLockedNegative = (int?)rules["quirks_max_locked_negative"] ?? q.MaxLockedNegative;
         return q;
     }
 
