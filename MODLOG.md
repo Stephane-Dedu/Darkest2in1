@@ -329,6 +329,9 @@ Feasibility notes (decomp):
 - [ ] Retreat button (top left, DD1 art) during our fights: 70% (+5%/try), one try per round; success → DD2 retreat
       (2 stress each) and the party falls back (room → corridor square it came from; hall → one square back),
       fight still there; failure → announcement. Hidden where DD2 forbids retreat.
+- [ ] Walking: hold D/→ to walk continuously (hallway scrolls, ~1.2 s per square), A/← backs up at half speed;
+      stops at fights/obstacles/curios/rooms; heroes bob; map clicks still auto-walk with the per-square slide.
+- [ ] In a room, D/A/W/S take the exit on that side of the map.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

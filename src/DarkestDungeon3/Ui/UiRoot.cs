@@ -7,6 +7,9 @@ namespace DarkestDungeon3.Ui;
 /// <summary>Draws whichever screen the current phase needs, and the way in from DD2's main menu.</summary>
 internal sealed class UiRoot : MonoBehaviour
 {
+    /// <summary>A window or prompt is up in the dungeon (keys shouldn't walk the party).</summary>
+    public static bool ModalOpen;
+
     private readonly HamletUi _hamlet = new();
     private readonly EmbarkUi _embark = new();
     private readonly CrawlUi _crawl = new();

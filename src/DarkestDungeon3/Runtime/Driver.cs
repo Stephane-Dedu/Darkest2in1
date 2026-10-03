@@ -86,11 +86,7 @@ internal sealed class Driver : MonoBehaviour
         }
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
-        if (kb != null && Expedition.Camp == null && !Expedition.InRoom)
-        {
-            if (kb.dKey.wasPressedThisFrame || kb.rightArrowKey.wasPressedThisFrame) { StopWalking(); Step(true); }
-            else if (kb.aKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame) { StopWalking(); Step(false); }
-        }
+        WalkByKeys(kb);
         if (kb != null && kb.tKey.wasPressedThisFrame) UseTorch();
 
         if (IsWalking && Time.unscaledTime >= _nextStepAt) WalkOneStep();
@@ -210,7 +206,82 @@ internal sealed class Driver : MonoBehaviour
     private void MarkStep(int dir)
     {
         LastStepDir = dir;
-        LastStepTime = Time.unscaledTime;
+        // Held-key walking scrolls continuously (WalkProgress); only discrete steps get the slide animation.
+        LastStepTime = _continuousStep ? -10f : Time.unscaledTime;
+    }
+
+    // ---- DD1 walking: hold D/→ to walk the hallway (A/← backs up at half speed); in a room the arrows pick the exit ----
+
+    private const float SecondsPerSquare = 1.2f;
+    private bool _continuousStep;
+
+    /// <summary>How far the party has walked into the next square (-1..1, + toward the heading): the hallway
+    /// scrolls by this much. A step into the next square happens when it reaches ±1.</summary>
+    public float WalkProgress { get; private set; }
+
+    /// <summary>The party is walking right now (held key or auto-walk): heroes bob.</summary>
+    public bool IsMovingNow => Mathf.Abs(_walkVelocity) > 0.01f || IsWalking || Time.unscaledTime - LastStepTime < 0.3f;
+    private float _walkVelocity;
+
+    private void WalkByKeys(UnityEngine.InputSystem.Keyboard kb)
+    {
+        _walkVelocity = 0;
+        if (kb == null || Expedition.Camp != null || Ui.UiRoot.ModalOpen) { WalkProgress = 0; return; }
+        bool right = kb.dKey.isPressed || kb.rightArrowKey.isPressed, left = kb.aKey.isPressed || kb.leftArrowKey.isPressed;
+        bool up = kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame, down = kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame;
+
+        if (Expedition.InRoom)
+        {
+            WalkProgress = 0;
+            bool rightNow = kb.dKey.wasPressedThisFrame || kb.rightArrowKey.wasPressedThisFrame;
+            bool leftNow = kb.aKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame;
+            Vector2 dir = rightNow ? Vector2.right : leftNow ? Vector2.left : up ? Vector2.down : down ? Vector2.up : Vector2.zero;
+            if (dir != Vector2.zero && !Crawl.IsBlocked && Crawl.CurioHere == null)
+            {
+                int exit = ExitToward(dir);
+                if (exit >= 0) { StopWalking(); Travel(exit); }
+            }
+            return;
+        }
+        if (!(right ^ left)) { WalkProgress = Mathf.MoveTowards(WalkProgress, 0, Time.unscaledDeltaTime * 2f); return; }
+        StopWalking();
+        // Facing: on screen, right is always the way the party is heading.
+        bool forward = right;
+        if (forward && Crawl.IsBlocked) { WalkProgress = Mathf.Min(WalkProgress, 0.3f); return; }   // an obstacle or a fight ahead
+        float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
+        _walkVelocity = speed;
+        WalkProgress += speed * Time.unscaledDeltaTime;
+        if (Mathf.Abs(WalkProgress) >= 1f)
+        {
+            float carry = WalkProgress - Mathf.Sign(WalkProgress);
+            int before = Expedition.StepsTaken;
+            _continuousStep = true;
+            Step(forward);
+            _continuousStep = false;
+            WalkProgress = Expedition.InRoom ? 0 : carry;
+            // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
+            if (_interruptsThisStep) { WalkProgress = 0; _interruptsThisStep = false; }
+        }
+    }
+
+    private bool _interruptsThisStep;
+
+    /// <summary>The room exit closest to a direction on the map (DD1 rooms are left by their doors to the map's neighbours).</summary>
+    private int ExitToward(Vector2 dir)
+    {
+        var map = Expedition.Map;
+        var here = map.Room(Expedition.RoomId);
+        int best = -1;
+        float bestScore = 0.3f;
+        foreach (int n in map.Neighbours(here.Id))
+        {
+            var r = map.Room(n);
+            var delta = new Vector2(r.X - here.X, r.Y - here.Y);
+            if (delta == Vector2.zero) continue;
+            float score = Vector2.Dot(delta.normalized, dir);
+            if (score > bestScore) { bestScore = score; best = n; }
+        }
+        return best;
     }
 
     public void UseTorch()
@@ -453,6 +524,7 @@ internal sealed class Driver : MonoBehaviour
     private void Announce(string text)
     {
         _interrupts++;
+        _interruptsThisStep = true;
         Say(text);
         Ui.Gui.Announce(text);
     }

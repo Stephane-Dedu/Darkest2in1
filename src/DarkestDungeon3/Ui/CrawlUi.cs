@@ -43,8 +43,10 @@ internal sealed class CrawlUi
         DrawQuestInfo(crawl, exp);
         DrawHud(exp);
         if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
+        UiRoot.ModalOpen = false;
         if (exp.Camp != null) DrawCamp(crawl, exp);
-        else if (!DrawSpoils(crawl) && !DrawCurioResult(exp)) DrawPrompt(crawl, exp);
+        else if (DrawSpoils(crawl) || DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
+        else DrawPrompt(crawl, exp);
         Gui.DrawAnnouncement();
     }
 
@@ -55,6 +57,7 @@ internal sealed class CrawlUi
         Gui.Fill(new Rect(0, 0, Gui.W, 720), Color.black);
         float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
         float slide = t < 1f ? D.LastStepDir * 720f * (1f - Mathf.SmoothStep(0, 1, t)) : 0f;
+        slide -= D.WalkProgress * 720f;   // held-key walking scrolls the hallway continuously
 
         if (exp.InRoom)
         {
@@ -189,7 +192,9 @@ internal sealed class CrawlUi
             bool large = sprite != null && sprite != Art.Portrait(hero?.ClassId);
             // At camp the two front ranks sit on the far side of the fire, facing back toward it.
             bool facingLeft = camping && rank < 2;
-            if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420, 240, 430) : new Rect(x - 80, Feet - 230, 160, 220), sprite, flipX: facingLeft);
+            // DD1's walk: each hero bobs a little, out of step with the others.
+            float bob = D.IsMovingNow && !camping ? Mathf.Abs(Mathf.Sin(Time.unscaledTime * 7f + rank * 1.3f)) * -9f : 0f;
+            if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420 + bob, 240, 430) : new Rect(x - 80, Feet - 230 + bob, 160, 220), sprite, flipX: facingLeft);
             else if (models == null) Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             GUI.color = old;
 
