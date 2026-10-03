@@ -90,8 +90,10 @@ internal sealed class EmbarkUi
                 : _quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark) ? "Refuses this quest"
                 : null;
             return new RosterColumn.Look(dim: inParty || note != null, note: inParty ? null : note, highlight: inParty);
-        });
+        }, draggable: true);
         if (clicked != null) Toggle(clicked);
+        // A hero dragged out of the party back onto the roster leaves it.
+        if (Drag.Drop<HeroDrag>(RosterColumn.Area, out var back) && back.FromSlot >= 0) _party.Remove(back.HeroId);
 
         if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the Hamlet", size: 24)) WantsBack = true;
         var heroes = Heroes();
@@ -101,6 +103,27 @@ internal sealed class EmbarkUi
             _provisioning = true;
             _error = null;
         }
+    }
+
+    /// <summary>A hero dropped on a rank: from the roster it joins (whoever held the rank goes back), from another
+    /// rank the two swap. Ranks stay packed from the front, as the party list has no gaps.</summary>
+    private void DropHero(HeroDrag drag, int rank)
+    {
+        var h = E.Hero(drag.HeroId);
+        if (h == null) return;
+        if (drag.FromSlot >= 0)
+        {
+            int from = _party.IndexOf(h.Id);
+            if (from < 0) return;
+            int to = Mathf.Min(rank, _party.Count - 1);
+            (_party[from], _party[to]) = (_party[to], _party[from]);
+            return;
+        }
+        if (_party.Contains(h.Id) || !h.IsAvailable || h.MissingWeeks > 0) return;
+        if (_quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark)) { _error = $"{h.Name} refuses this quest."; return; }
+        if (rank < _party.Count) _party[rank] = h.Id;          // replaces whoever stood there
+        else if (_party.Count < 4) _party.Add(h.Id);
+        _error = null;
     }
 
     private void Toggle(HeroRecord h)
@@ -215,13 +238,22 @@ internal sealed class EmbarkUi
             int rank = 3 - s;
             var r = new Rect(at.x + 22 + s * 93, at.y + 16, 80, 80);
             if (slotBg != null) GUI.DrawTexture(r, slotBg);
+            if (Drag.Hovering<HeroDrag>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
+            if (Drag.Drop<HeroDrag>(r, out var dropped)) { DropHero(dropped, rank); break; }
             if (rank >= _party.Count) continue;
             var h = E.Hero(_party[rank]);
+            string cls = h.ClassId;
+            Drag.Source(r, new HeroDrag(h.Id, rank), rect =>
+            {
+                var icon = Art.HeroIcon(cls);
+                if (icon != null) Art.DrawSprite(new Rect(rect.x + 4, rect.y + 4, 72, 72), icon);
+            });
+            bool carried = Drag.Payload is HeroDrag hd && hd.FromSlot == rank;
             var sprite = Art.HeroIcon(h.ClassId);
-            if (sprite != null) Art.DrawSprite(new Rect(r.x + 4, r.y + 4, 72, 72), sprite);
-            if (r.Contains(Event.current.mousePosition))
-                Gui.Text(new Rect(r.x - 60, r.yMax + 2, r.width + 120, 26), $"{h.Name} — click to remove", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (Gui.Hotspot(r)) { _party.RemoveAt(rank); break; }
+            if (sprite != null && !carried) Art.DrawSprite(new Rect(r.x + 4, r.y + 4, 72, 72), sprite);
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active)
+                Gui.Text(new Rect(r.x - 70, r.yMax + 2, r.width + 140, 26), $"{h.Name}: drag to move, click to remove", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (Gui.Hotspot(r) && !Drag.JustDropped) { _party.RemoveAt(rank); break; }
         }
     }
 
@@ -271,68 +303,92 @@ internal sealed class EmbarkUi
         {
             if ((lowFood || noTorch) && !_confirmLow) { _confirmLow = true; return; }
             _confirmLow = false;
-            var bought = new Inventory();
+            var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);
             _error = Driver.Instance.Embark(_quest, heroes, bought);
             if (_error == null) { _party.Clear(); _cart.Items.Clear(); _quest = null; _provisioning = false; }
         }
     }
 
+    // DD1's provisioner layout (campaign/town/provision/provision.layout.darkest).
+    private static readonly Vector2 StorePos = new(814, 144), PackPos = new(800, 532);
+    private static Rect StoreCell(int i) => new(StorePos.x + 120 + (i % 7) * 80, StorePos.y + 20 + (i / 7) * 170, 72, 144);
+    private static Rect PackCell(int i) => new(PackPos.x + 60 + (i % 8) * 80, PackPos.y + 28 + (i / 8) * 160, 72, 144);
+    private static readonly Rect StoreArea = new(814, 144, 680, 360), PackArea = new(800, 532, 720, 360);
+
     private void DrawStore(int length)
     {
-        var at = new Vector2(814, 144);
         var grid = Prov("inventory_grid_background_store.png");
-        if (grid != null) GUI.DrawTexture(new Rect(at.x, at.y, 680, 360), grid);
+        if (grid != null) GUI.DrawTexture(StoreArea, grid);
         var stock = S.Hamlet.ProvisionStock(S.Provisioner, S.Content.Items, length);
         var items = S.Content.Items;
-        int i = 0;
-        foreach (var id in Supply.Provisioner)
+        string hovered = null;
+        for (int i = 0; i < Supply.Provisioner.Length; i++)
         {
-            int max = stock.TryGetValue(id, out var m) ? m : 0, have = _cart.Count(id), left = max - have, price = S.Hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, id);
-            var r = new Rect(at.x + 120 + (i % 7) * 80 - 60, at.y + 20 + (i / 7) * 170, 72, 144);
-            i++;
-            var old = GUI.color;
-            if (left <= 0) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
-            var icon = Art.InventoryIcon(id, Mathf.Max(1, left), Mathf.Max(1, items.StackLimit(id)));
-            if (icon != null) GUI.DrawTexture(r, icon); else Gui.Text(r, HamletUi.Pretty(id), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            GUI.color = old;
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), left.ToString(), 22, Color.white, TextAnchor.LowerRight);
-            if (r.Contains(Event.current.mousePosition))
-                Gui.Text(new Rect(at.x, at.y + 340, 680, 30), $"{HamletUi.Pretty(id)}: {price} gold each. Click to buy, right-click to put one back.", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (r.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown)
+            string id = Supply.Provisioner[i];
+            int max = stock.TryGetValue(id, out var m) ? m : 0, have = _cart.Count(id), left = max - have;
+            var r = StoreCell(i);
+            if (left > 0) Drag.Source(r, new ShelfItem(id), rect => ItemArt.Stack(rect, id, 1, 1));
+            ItemArt.Stack(r, id, Mathf.Max(left, 0), Mathf.Max(1, items.StackLimit(id)), dim: left <= 0);
+            if (r.Contains(Event.current.mousePosition)) hovered = id;
+            var e = Event.current;
+            if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped)
             {
-                if (Event.current.button == 0 && left > 0) _cart.Add(id, 1);
-                else if (Event.current.button == 1 && have > 0) _cart.Add(id, -1);
-                Event.current.Use();
+                if (e.button == 0 && left > 0) _cart.Add(id, 1);
+                else if (e.button == 1 && have > 0) _cart.Add(id, -1);
+                e.Use();
             }
         }
+        // A stack dragged back from the pack goes back on the shelf.
+        if (Drag.Drop<PackStack>(StoreArea, out var back))
+        {
+            var stacks = back.Pack.Arrange(items);
+            var stack = stacks.Find(st => st.Slot == back.Slot);
+            if (stack != null) _cart.Add(stack.Key, -stack.Count);
+        }
+        if (Drag.Hovering<PackStack>(StoreArea)) Gui.Fill(new Rect(StoreArea.x, StoreArea.yMax - 6, StoreArea.width, 4), Gui.Gold);
+        string tip = hovered != null
+            ? $"{HamletUi.Pretty(hovered)}: {S.Hamlet.ProvisionPrice(S.Provisioner, items, hovered)} gold each. Click or drag to buy, right-click to put one back."
+            : "Drag supplies into your pack. Drag a stack back to the shelf to return it.";
+        Gui.Text(new Rect(StorePos.x, StorePos.y + 352, 680, 30), tip, 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
     }
 
     private void DrawPack()
     {
-        var at = new Vector2(800, 532);
         var grid = Prov("inventory_grid_background_party.png");
-        if (grid != null) GUI.DrawTexture(new Rect(at.x, at.y, 720, 360), grid);
+        if (grid != null) GUI.DrawTexture(PackArea, grid);
         var items = S.Content.Items;
-        var stacks = new List<(string id, int count)>();
-        foreach (var id in Supply.Provisioner)
+        var stacks = _cart.Arrange(items);
+        for (int i = 0; i < Inventory.Slots; i++)
         {
-            int limit = Mathf.Max(1, items.StackLimit(id));
-            for (int left = _cart.Count(id); left > 0; left -= limit) stacks.Add((id, Mathf.Min(limit, left)));
-        }
-        for (int i = 0; i < stacks.Count && i < 16; i++)
-        {
-            var (id, count) = stacks[i];
-            var r = new Rect(at.x + 60 + (i % 8) * 80 - 40, at.y + 28 + (i / 8) * 160, 72, 144);
-            var icon = Art.InventoryIcon(id, count, Mathf.Max(1, items.StackLimit(id)));
-            if (icon != null) GUI.DrawTexture(r, icon); else Gui.Text(r, HamletUi.Pretty(id), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 22, Color.white, TextAnchor.LowerRight);
-            if (Gui.Hotspot(r)) _cart.Add(id, -1);
+            var r = PackCell(i);
+            var stack = stacks.Find(st => st.Slot == i);
+            if (Drag.Hovering<ShelfItem>(r) || Drag.Hovering<PackStack>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
+            if (stack != null)
+            {
+                Drag.Source(r, new PackStack(_cart, i, stack.Key), rect => ItemArt.Stack(rect, stack.Key, stack.Count, items.StackLimit(stack.Key)));
+                if (!(Drag.Payload is PackStack carried && carried.Pack == _cart && carried.Slot == i))
+                    ItemArt.Stack(r, stack.Key, stack.Count, items.StackLimit(stack.Key));
+                var e = Event.current;
+                if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped && (e.button == 0 || e.button == 1))
+                {
+                    _cart.Add(stack.Key, -1);
+                    e.Use();
+                }
+            }
+            if (Drag.Drop<PackStack>(r, out var moved) && moved.Pack == _cart) _cart.Move(moved.Slot, i);
+            if (Drag.Drop<ShelfItem>(r, out var bought) && _cart.HasRoomFor(bought.Id, 1, items))
+            {
+                _cart.Add(bought.Id, 1);
+                // Put a brand new stack where it was dropped.
+                var placed = _cart.Arrange(items).FindLast(st => st.Key == bought.Id);
+                if (placed != null && placed.Slot != i && _cart.At(i) == null) _cart.Move(placed.Slot, i);
+            }
         }
         if (stacks.Count == 0)
-            Gui.Text(new Rect(at.x, at.y + 150, 720, 40), "The pack is empty. Buy food and torches above.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        if (stacks.Count > 16)
-            Gui.Text(new Rect(at.x, at.y + 330, 720, 30), "The pack holds 16 stacks: the rest stays behind.", 18, Gui.Blood, TextAnchor.MiddleCenter);
+            Gui.Text(new Rect(PackArea.x, PackArea.y + 150, PackArea.width, 40), "The pack is empty. Drag food and torches into it.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        if (stacks.Count > Inventory.Slots)
+            Gui.Text(new Rect(PackArea.x, PackArea.yMax - 30, PackArea.width, 30), "The pack holds 16 stacks: the rest stays behind.", 18, Gui.Blood, TextAnchor.MiddleCenter);
     }
 
     private int CartCost() { var hamlet = S.Hamlet; return _cart.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value); }

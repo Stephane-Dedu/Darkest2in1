@@ -97,4 +97,63 @@ public sealed class Inventory
     }
 
     private static int Stacks(int count, int stackLimit) => (count + stackLimit - 1) / System.Math.Max(1, stackLimit);
+
+    // ---- DD1's arranged pack: each slot holds one stack, where the player put it ----
+
+    /// <summary>The item key in each slot (null = empty). Counts stay in <see cref="Items"/>; this only remembers
+    /// where the stacks sit.</summary>
+    public List<string> Layout = new();
+
+    public sealed class Stack
+    {
+        public int Slot;
+        public string Key;
+        public int Count;
+    }
+
+    /// <summary>
+    /// The stacks slot by slot. New stacks take the first empty slots, emptied ones disappear, and each item's
+    /// count fills its slots in order (full stacks first, the remainder in its last slot).
+    /// </summary>
+    public List<Stack> Arrange(ItemCatalog catalog, int slots = Slots)
+    {
+        while (Layout.Count < slots) Layout.Add(null);
+        var need = Items.Where(kv => kv.Value > 0)
+                        .ToDictionary(kv => kv.Key, kv => Stacks(kv.Value, System.Math.Max(1, catalog?.StackLimit(kv.Key) ?? 1)));
+        for (int i = Layout.Count - 1; i >= 0; i--)
+        {
+            string k = Layout[i];
+            if (k == null) continue;
+            if (!need.TryGetValue(k, out int n) || Layout.Count(x => x == k) > n) Layout[i] = null;
+        }
+        foreach (var kv in need.OrderBy(kv => kv.Key, System.StringComparer.Ordinal))
+            for (int have = Layout.Count(x => x == kv.Key); have < kv.Value; have++)
+            {
+                int empty = Layout.IndexOf(null);
+                if (empty < 0) Layout.Add(kv.Key); else Layout[empty] = kv.Key;
+            }
+        var left = new Dictionary<string, int>(Items);
+        var stacks = new List<Stack>();
+        for (int i = 0; i < Layout.Count; i++)
+        {
+            string k = Layout[i];
+            if (k == null) continue;
+            int limit = System.Math.Max(1, catalog?.StackLimit(k) ?? 1);
+            int c = System.Math.Min(limit, left[k]);
+            left[k] -= c;
+            stacks.Add(new Stack { Slot = i, Key = k, Count = c });
+        }
+        return stacks;
+    }
+
+    /// <summary>Move the stack in one slot to another (swapping with whatever is there).</summary>
+    public void Move(int from, int to)
+    {
+        int n = System.Math.Max(from, to) + 1;
+        while (Layout.Count < n) Layout.Add(null);
+        (Layout[from], Layout[to]) = (Layout[to], Layout[from]);
+    }
+
+    /// <summary>The item in a slot, or null (after <see cref="Arrange"/>).</summary>
+    public string At(int slot) => slot >= 0 && slot < Layout.Count ? Layout[slot] : null;
 }

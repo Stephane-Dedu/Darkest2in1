@@ -224,14 +224,34 @@ public sealed class Crawl
             foreach (var id in State.PendingBuffs[hero].Distinct())
             {
                 var buff = _content.Buffs.Get(id);
-                if (buff == null || buff.Battles == 0) { keep.Add(id); continue; }
                 string key = hero + "|" + id;
+                if (buff == null || (buff.Battles == 0 && !State.BuffBattlesLeft.ContainsKey(key))) { keep.Add(id); continue; }
                 int left = (State.BuffBattlesLeft.TryGetValue(key, out var l) ? l : buff.Battles) - 1;
                 if (left > 0) { State.BuffBattlesLeft[key] = left; keep.Add(id); }
                 else State.BuffBattlesLeft.Remove(key);
             }
             State.PendingBuffs[hero] = keep;
         }
+    }
+
+    /// <summary>DD1 supplies used on a hero outside combat. Returns what happened, or null if it does nothing here
+    /// (bleed, blight and horror don't outlast a DD2 fight, so bandages, antivenom and laudanum wait for curios).</summary>
+    public string UseSupply(string heroId, string key)
+    {
+        if (heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (key == Supply.HolyWater)
+        {
+            if (!State.Pack.TryUse(Supply.HolyWater)) return null;
+            // DD1 effect "holy_water": four resistance buffs for 3 battles.
+            if (!State.PendingBuffs.TryGetValue(heroId, out var list)) State.PendingBuffs[heroId] = list = new List<string>();
+            foreach (var id in new[] { "holy_water_blight_resist", "holy_water_bleed_resist", "holy_water_disease_resist", "holy_water_debuff_resist" })
+            {
+                if (!list.Contains(id)) list.Add(id);
+                State.BuffBattlesLeft[heroId + "|" + id] = 3;
+            }
+            return "Blessed: resistances up for 3 battles.";
+        }
+        return null;
     }
 
     private BattleSpoils TakeSpoils(string kind)

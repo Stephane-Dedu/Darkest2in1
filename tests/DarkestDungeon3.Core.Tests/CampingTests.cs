@@ -107,4 +107,19 @@ public class CampingTests
         }
         Assert.DoesNotContain(crawl.FightBuffs(), b => b.Hero == "b");
     }
+    [Fact]
+    public void Holy_water_blesses_a_hero_for_three_battles()
+    {
+        var (crawl, _) = Camped();
+        crawl.State.Pack.Add(Supply.HolyWater, 1);
+        Assert.NotNull(crawl.UseSupply("c", Supply.HolyWater));
+        Assert.Equal(0, crawl.State.Pack.Count(Supply.HolyWater));
+        for (int fight = 1; fight <= 3; fight++)
+        {
+            Assert.Equal(4, crawl.FightBuffs().Count(b => b.Hero == "c"));
+            crawl.ResolveBattle();
+        }
+        Assert.DoesNotContain(crawl.FightBuffs(), b => b.Hero == "c");
+        Assert.Null(crawl.UseSupply("c", Supply.Bandage));
+    }
 }

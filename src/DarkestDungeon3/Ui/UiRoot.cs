@@ -59,6 +59,7 @@ internal sealed class UiRoot : MonoBehaviour
             // One bad frame must not kill the UI for good.
             Plugin.Log.LogError(e);
         }
+        Drag.Overlay();
     }
 
     // Estate summaries for the picker, read once each time it opens.

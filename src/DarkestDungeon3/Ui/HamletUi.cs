@@ -287,7 +287,13 @@ internal sealed class HamletUi
     private void DrawRoster()
     {
         bool service = _panel is Panel.Blacksmith or Panel.Guild or Panel.Survivalist;
-        var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: (_panel == Panel.Hero || service) && _heroId == h.Id));
+        bool slots = _panel is Panel.Abbey or Panel.Tavern or Panel.Sanitarium || service;
+        var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: (_panel == Panel.Hero || service) && _heroId == h.Id), draggable: slots);
+        if (Drag.Drop<HeroDrag>(RosterColumn.Area, out var back) && back.FromSlot >= SlotBase)
+        {
+            S.Hamlet.CancelActivity(back.HeroId);
+            S.Persist();
+        }
         if (clicked != null)
         {
             _heroId = clicked.Id;
@@ -417,6 +423,8 @@ internal sealed class HamletUi
     private void DrawBlacksmith(Rect area, Hamlet hamlet)
     {
         Frame(area);
+        if (Drag.Hovering<HeroDrag>(area)) Gui.Fill(new Rect(area.x, area.y, area.width, 4), Gui.Gold);
+        if (Drag.Drop<HeroDrag>(area, out var dropped)) _heroId = dropped.HeroId;   // DD1: drop a hero on the building
         var hero = E.Hero(_heroId);
         if (hero == null)
         {
@@ -459,6 +467,8 @@ internal sealed class HamletUi
     private void DrawGuild(Rect area, Hamlet hamlet)
     {
         Frame(area);
+        if (Drag.Hovering<HeroDrag>(area)) Gui.Fill(new Rect(area.x, area.y, area.width, 4), Gui.Gold);
+        if (Drag.Drop<HeroDrag>(area, out var dropped)) _heroId = dropped.HeroId;   // DD1: drop a hero on the building
         var hero = E.Hero(_heroId);
         if (hero == null)
         {
@@ -527,6 +537,8 @@ internal sealed class HamletUi
     private void DrawSurvivalist(Rect area, Hamlet hamlet)
     {
         Frame(area);
+        if (Drag.Hovering<HeroDrag>(area)) Gui.Fill(new Rect(area.x, area.y, area.width, 4), Gui.Gold);
+        if (Drag.Drop<HeroDrag>(area, out var dropped)) _heroId = dropped.HeroId;   // DD1: drop a hero on the building
         var hero = E.Hero(_heroId);
         if (hero == null)
         {
@@ -602,78 +614,171 @@ internal sealed class HamletUi
         }
     }
 
-    private string _assignHero;
+    // ---- DD1 activity slots (building.layout.darkest): rows 230 apart, slots 135 apart, in the painted arches ----
+
+    private const int SlotBase = 1000;          // HeroDrag.FromSlot for heroes picked up from an activity slot
+    private static readonly Vector2 ActivityBase = new(596 + 70, 102 + 50);   // body_base_pos + activity list base_pos
+    private string _treatHero, _treatKind;      // Sanitarium: the hero waiting for a quirk choice
+
+    private sealed class ActivityRow
+    {
+        public string Key, Name, Icon, Description, Building;
+        public int Slots;
+        public System.Func<HeroRecord, string> WhyNot;   // null = can take this hero
+        public System.Action<HeroRecord> Start;
+        public Reward Cost;
+    }
+
+    private static Texture2D BuildingArt(string building, string file) => Art.Dd1("campaign", "town", "buildings", building, file);
+
+    private void DrawSlotRows(Hamlet hamlet, string building, List<ActivityRow> rows)
+    {
+        var slotBg = Art.Dd1("campaign", "town", "hero_slot", "hero_slot.background.png");
+        var locked = BuildingArt(building, building + ".locked_hero_slot_overlay.png");
+        for (int ai = 0; ai < rows.Count && ai < 3; ai++)
+        {
+            var row = rows[ai];
+            var basePos = new Vector2(ActivityBase.x, ActivityBase.y + ai * 230);
+            var icon = BuildingArt(building, row.Icon);
+            if (icon != null) GUI.DrawTexture(new Rect(basePos.x + 70, basePos.y + 36, 72, 72), icon);
+            Gui.Text(new Rect(basePos.x + 170, basePos.y + 22, 270, 36), row.Name, 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(basePos.x + 170, basePos.y + 72, 260, 110), row.Description, 17, Gui.Dd1Text);
+            var inside = E.Roster.Where(h => h.Activity == row.Key).OrderBy(h => h.Name).ToList();
+            for (int j = 0; j < 3; j++)
+            {
+                var r = new Rect(basePos.x + 440 + j * 135, basePos.y + 119, 85, 85);
+                if (j >= row.Slots)
+                {
+                    if (locked != null) GUI.DrawTexture(new Rect(r.x - 42, r.y - 70, 171, 179), locked);
+                    else Gui.Fill(r, new Color(0, 0, 0, 0.7f));
+                    continue;
+                }
+                if (slotBg != null) GUI.DrawTexture(r, slotBg);
+                if (j < inside.Count)
+                {
+                    var h = inside[j];
+                    string cls = h.ClassId;
+                    int from = SlotBase + ai * 10 + j;
+                    Drag.Source(r, new HeroDrag(h.Id, from), rect => { var ic = Art.HeroIcon(cls); if (ic != null) Art.DrawSprite(new Rect(rect.x + 4, rect.y + 4, 77, 77), ic); });
+                    bool carried = Drag.Payload is HeroDrag hd && hd.FromSlot == from;
+                    var sprite = Art.HeroIcon(h.ClassId);
+                    if (sprite != null && !carried) Art.DrawSprite(new Rect(r.x + 4, r.y + 4, 77, 77), sprite);
+                    if (r.Contains(Event.current.mousePosition) && !Drag.Active)
+                        Gui.Text(new Rect(r.x - 60, r.yMax + 2, r.width + 120, 24), h.Activity == row.Key && h.ActivityTarget != null ? $"{h.Name}: {QuirkName(h.ActivityTarget)}" : $"{h.Name} — drag out to cancel", 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
+                    if (Gui.Hotspot(r) && !Drag.JustDropped && !h.ActivityLocked)
+                    {
+                        hamlet.CancelActivity(h.Id);
+                        S.Persist();
+                    }
+                    continue;
+                }
+                // An empty slot: drop a hero to send them.
+                bool hover = Drag.Hovering<HeroDrag>(r);
+                string why = null;
+                if (hover && Drag.Payload is HeroDrag over && E.Hero(over.HeroId) is { } candidate) why = row.WhyNot(candidate);
+                if (hover) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), why == null ? Gui.Gold : Gui.Blood);
+                if (hover && why != null) Gui.Text(new Rect(r.x - 80, r.yMax + 8, r.width + 160, 24), why, 16, Gui.Blood, TextAnchor.MiddleCenter);
+                if (Drag.Drop<HeroDrag>(r, out var dropped) && E.Hero(dropped.HeroId) is { } hero)
+                {
+                    if (dropped.FromSlot >= SlotBase) hamlet.CancelActivity(hero.Id);   // moved between slots
+                    if (row.WhyNot(hero) == null) row.Start(hero);
+                    S.Persist();
+                }
+            }
+        }
+    }
 
     private void DrawActivities(Rect area, Hamlet hamlet, string building)
     {
-        Frame(area);
-        var idle = E.Roster.Where(h => h.IsAvailable).ToList();
-        Gui.Text(new Rect(area.x + 20, area.y + 6, area.width - 40, 30), "Pick a hero, then an activity. Heroes stay for the week.", 18, Gui.Dd1Class);
-        for (int i = 0; i < idle.Count; i++)
-        {
-            var r = new Rect(area.x + 14 + (i % 8) * 88, area.y + 40 + (i / 8) * 88, 82, 82);
-            bool chosen = _assignHero == idle[i].Id;
-            Gui.Fill(r, chosen ? new Color(0.85f, 0.7f, 0.3f, 0.6f) : new Color(0, 0, 0, 0.6f));
-            var sprite = Art.HeroIcon(idle[i].ClassId);
-            if (sprite != null) Art.DrawSprite(new Rect(r.x + 3, r.y + 3, 76, 76), sprite);
-            Gui.Text(new Rect(r.x, r.yMax - 22, r.width, 22), $"{idle[i].Stress}", 18, idle[i].Stress >= 5 ? Gui.Dd1Health : Gui.Dd1Text, TextAnchor.MiddleRight);
-            if (r.Contains(Event.current.mousePosition))
-                Gui.Text(new Rect(r.x - 40, r.y - 26, r.width + 80, 26), idle[i].Name, 18, Gui.Dd1Name, TextAnchor.MiddleCenter);
-            if (Gui.Hotspot(r)) _assignHero = idle[i].Id;
-        }
-
-        float y = area.y + 40 + Mathf.Max(1, (idle.Count + 7) / 8) * 88 + 10;
+        var rows = new List<ActivityRow>();
         foreach (var a in S.Buildings.Activities.Where(a => a.Building == building))
         {
             var cost = hamlet.ActivityCost(a);
             var (lo, hi) = a.StressHeal(E);
-            var r = new Rect(area.x + 10, y, area.width - 20, 112);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            var icon = Art.Dd1("campaign", "town", "buildings", building, $"{building}.{a.Id}.icon.png");
-            if (icon != null) GUI.DrawTexture(new Rect(r.x + 6, r.y + 6, 100, 100), icon, ScaleMode.ScaleToFit);
-            var inside = E.Roster.Where(h => h.Activity == a.Key).Select(h => h.Name);
-            Gui.Text(new Rect(r.x + 118, r.y + 4, 400, 34), Pretty(a.Id), 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(r.x + 118, r.y + 36, 420, 74),
-                $"{cost?.Amount} {cost?.Type}  ·  {hamlet.UsedSlots(a.Key)}/{a.Slots(E)} places  ·  relieves {Gui.Num(lo / 10f)}-{Gui.Num(hi / 10f)} stress\n{string.Join(", ", inside)}", 17, Gui.Dd1Class);
-            var hero = E.Hero(_assignHero);
-            string why = hero == null ? "Pick a hero" : hamlet.WhyCantDo(hero, a);
-            if (Gui.DdButton(new Rect(r.xMax - 176, r.y + 30, 164, 52), why ?? "Send " + hero.Name, why == null, why == null ? 22 : 16))
+            var act = a;
+            rows.Add(new ActivityRow
             {
-                hamlet.StartActivity(hero.Id, a.Key);
-                _assignHero = null;
-                S.Persist();
-            }
-            y += 120;
+                Key = a.Key, Building = building, Name = Pretty(a.Id), Icon = $"{building}.{a.Id}.icon.png", Slots = a.Slots(E), Cost = cost,
+                Description = $"Relieves {Gui.Num(lo / 10f)}-{Gui.Num(hi / 10f)} stress\n{(cost == null || cost.Amount == 0 ? "Free this week" : $"{Gui.Num(cost.Amount, "#,0")} {cost.Type}")}",
+                WhyNot = h => hamlet.WhyCantDo(h, act),
+                Start = h => hamlet.StartActivity(h.Id, act.Key),
+            });
         }
+        DrawSlotRows(hamlet, building, rows);
+        Gui.Text(new Rect(Window.x + 596 + 40, Window.yMax - 40, 700, 30), "Drag a hero from the roster into a slot. They stay for the week.", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
     }
 
     private void DrawSanitarium(Rect area, Hamlet hamlet)
     {
-        Frame(area);
-        Gui.Text(new Rect(area.x + 20, area.y + 6, area.width - 40, 50), "Treat a negative quirk or disease, or lock in a positive quirk. Treatment takes the week.", 18, Gui.Dd1Class);
-        _panelScroll = GUI.BeginScrollView(new Rect(area.x + 10, area.y + 60, area.width - 20, area.height - 70), _panelScroll,
-            new Rect(0, 0, area.width - 50, E.Roster.Sum(h => 50 + h.Quirks.Count * 40)));
-        float y = 0;
-        foreach (var h in E.Roster)
+        string Why(HeroRecord h, bool disease)
         {
-            Gui.Text(new Rect(0, y, 600, 40), h.Name + (h.IsAvailable ? "" : "  (busy)"), 24, h.IsAvailable ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleLeft, heading: true);
-            y += 44;
-            foreach (var q in h.Quirks)
-            {
-                var cost = hamlet.TreatmentCost(h, q);
-                bool locked = h.LockedQuirks.Contains(q);
-                bool positive = S.Catalog.IsPositive(q);
-                Gui.Text(new Rect(20, y, 400, 36), $"{QuirkName(q)}{(locked ? " (locked)" : "")}", 19, positive ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
-                if (h.IsAvailable && cost != null && Gui.DdButton(new Rect(430, y, 290, 36), $"{(positive ? "Lock" : "Treat")} ({cost.Amount} {cost.Type})", !(locked && positive), 18))
-                {
-                    hamlet.StartTreatment(h.Id, q);
-                    S.Persist();
-                }
-                y += 40;
-            }
-            y += 6;
+            if (!h.IsAvailable) return h.MissingWeeks > 0 ? "Missing." : "Busy.";
+            bool any = disease ? h.Quirks.Any(S.Catalog.IsDisease) : h.Quirks.Any(q => !S.Catalog.IsDisease(q));
+            return any ? null : disease ? "No disease to treat." : "No quirk to treat or lock.";
         }
-        GUI.EndScrollView();
+        var rows = new List<ActivityRow>
+        {
+            new()
+            {
+                Key = "sanitarium.treatment", Building = Buildings.Sanitarium, Name = "Quirk treatment", Icon = "sanitarium.slots.icon.png",
+                Slots = S.Buildings.SanitariumSlots(E, "treatment"),
+                Description = "Treat a negative quirk, or lock in a positive one. Takes the week.",
+                WhyNot = h => Why(h, false), Start = h => { _treatHero = h.Id; _treatKind = "treatment"; },
+            },
+            new()
+            {
+                Key = "sanitarium.disease_treatment", Building = Buildings.Sanitarium, Name = "Disease treatment", Icon = "sanitarium.disease_quirk_cost.icon.png",
+                Slots = S.Buildings.SanitariumSlots(E, "disease_treatment"),
+                Description = "Cure a disease. Takes the week.",
+                WhyNot = h => Why(h, true), Start = h => { _treatHero = h.Id; _treatKind = "disease_treatment"; },
+            },
+        };
+        DrawSlotRows(hamlet, Buildings.Sanitarium, rows);
+        if (_treatHero != null) DrawTreatmentChoice(hamlet);
+        else Gui.Text(new Rect(Window.x + 596 + 40, Window.yMax - 40, 700, 30), "Drag a hero into a slot, then choose what to treat.", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
+    }
+
+    /// <summary>DD1's quirk choice: positive quirks to lock on the left, negative ones to treat on the right (diseases alone for a cure).</summary>
+    private void DrawTreatmentChoice(Hamlet hamlet)
+    {
+        var hero = E.Hero(_treatHero);
+        if (hero == null) { _treatHero = null; return; }
+        bool disease = _treatKind == "disease_treatment";
+        var backdrop = BuildingArt(Buildings.Sanitarium, disease ? "disease_treatment_backdrop.png" : "quirk_treatment_backdrop.png");
+        var header = BuildingArt(Buildings.Sanitarium, disease ? "diseaseheader.png" : "quirkheader.png");
+        var r = new Rect(960 - 420, 330, 840, 500);
+        if (backdrop != null) GUI.DrawTexture(r, backdrop); else Gui.Fill(r, new Color(0.03f, 0.025f, 0.02f, 0.96f));
+        if (header != null) GUI.DrawTexture(new Rect(960 - 225, r.y - 30, 450, 51), header);
+        Gui.Text(new Rect(r.x, r.y - 28, r.width, 46), $"{hero.Name}: {(disease ? "cure a disease" : "treat or lock a quirk")}", 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        var lists = disease
+            ? new[] { (hero.Quirks.Where(S.Catalog.IsDisease).ToList(), r.x + 210, "disease_highlight.png", "Cure") }
+            : new[]
+            {
+                (hero.Quirks.Where(q => S.Catalog.IsPositive(q) && !S.Catalog.IsDisease(q)).ToList(), r.x + 40, "posquirk_highlight.png", "Lock"),
+                (hero.Quirks.Where(q => !S.Catalog.IsPositive(q) && !S.Catalog.IsDisease(q)).ToList(), r.x + 440, "negquirk_highlight.png", "Treat"),
+            };
+        foreach (var (quirks, x, highlight, verb) in lists)
+            for (int i = 0; i < quirks.Count; i++)
+            {
+                string q = quirks[i];
+                var row = new Rect(x, r.y + 60 + i * 38, 360, 32);
+                var cost = hamlet.TreatmentCost(hero, q);
+                bool lockedAlready = hero.LockedQuirks.Contains(q) && S.Catalog.IsPositive(q);
+                bool can = cost != null && E.Get(cost.Type) >= cost.Amount && !lockedAlready;
+                bool hover = can && row.Contains(Event.current.mousePosition);
+                var hl = BuildingArt(Buildings.Sanitarium, highlight);
+                if (hover && hl != null) GUI.DrawTexture(new Rect(row.x - 10, row.y, 380, 32), hl);
+                Gui.Text(new Rect(row.x, row.y, 230, 32), QuirkName(q) + (hero.LockedQuirks.Contains(q) ? " (locked)" : ""), 19, S.Catalog.IsPositive(q) ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
+                if (cost != null) Gui.Text(new Rect(row.x + 230, row.y, 130, 32), lockedAlready ? "" : $"{verb} {Gui.Num(cost.Amount, "#,0")}", 17, can ? Gui.Dd1Text : Gui.Dim, TextAnchor.MiddleRight);
+                if (can && Gui.Hotspot(row))
+                {
+                    hamlet.StartTreatment(hero.Id, q);
+                    S.Persist();
+                    _treatHero = null;
+                    return;
+                }
+            }
+        if (Gui.DdButton(new Rect(960 - 90, r.yMax - 60, 180, 46), "Cancel", true, 22)) _treatHero = null;
     }
 
     private void DrawWagon(Rect area, Hamlet hamlet)

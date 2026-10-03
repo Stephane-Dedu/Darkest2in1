@@ -310,6 +310,20 @@ Feasibility notes (decomp):
   bundles; fal 3D conversion impractical (and the fal MCP rejected its token this session). Variety option: translate
   each rolled DD1 encounter into the closest DD2 enemy types per slot.
 
+## Needs in-game check (the user was at the PC; no launches before 10:15 on 2026-10-03)
+- [ ] Fonts at the new sizes: nothing overflows its box (Hamlet roster, building windows, quest scroll, results).
+- [ ] Provisioner: items sit in DD1's cells; click/drag to buy, right-click/click to return, drag within the pack to
+      reorder, drag a stack back to the shelf; the arrangement carries into the dungeon pack.
+- [ ] Quest select: drag a roster hero onto a party slot (replaces / fills), drag between slots (swap), drag a party
+      hero back onto the roster (leaves); clicks still toggle.
+- [ ] Abbey / Tavern: heroes dropped into DD1's painted arch slots; locked slots show DD1's overlay; red hint for a
+      refused hero; click or drag back to the roster cancels with a refund (event prices included).
+- [ ] Sanitarium: dropping a hero opens the quirk choice (lock positives left, treat negatives right / diseases);
+      cancel refunds the treatment.
+- [ ] Guild / Blacksmith / Survivalist: dropping a hero on the panel selects them.
+- [ ] Dungeon pack: arranged slots, drag to reorder, drag a supply onto a hero to use it; holy water blesses 3 fights.
+- [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

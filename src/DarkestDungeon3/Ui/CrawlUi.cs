@@ -202,6 +202,8 @@ internal sealed class CrawlUi
             else Gui.Text(new Rect(x - 80, Feet + 6, 160, 30), "Dead", 22, Gui.Blood, TextAnchor.UpperCenter, heading: true);
 
             var hit = new Rect(x - 80, Feet - 240, 160, 290);
+            if (!dead && Drag.Hovering<PackStack>(hit)) Gui.Fill(new Rect(x - 60, Feet + 40, 120, 4), Gui.Gold);
+            if (!dead && Drag.Drop<PackStack>(hit, out var supply)) UseItemOn(id, supply.Key, D.Crawl);
             if (!dead && _campSkillPending != null && hit.Contains(Event.current.mousePosition))
                 Gui.Fill(new Rect(x - 60, Feet + 40, 120, 4), Gui.Gold);   // target under the mouse
             if (!dead && Gui.Hotspot(hit))
@@ -430,30 +432,41 @@ internal sealed class CrawlUi
 
     // ---------------- inventory ----------------
 
+    private static Rect PackCell(int i) => new(960 + 20 + (i % 8) * 80, 720 + 28 + (i / 8) * 160, 72, 144);
+
     private void DrawInventory(Crawl crawl, ExpeditionState exp)
     {
         var items = S.Content.Items;
-        var stacks = new List<(string key, int count)>();
-        foreach (var kv in exp.Pack.Items.Where(kv => kv.Value > 0).OrderBy(kv => kv.Key))
+        var stacks = exp.Pack.Arrange(items);
+        for (int i = 0; i < Inventory.Slots; i++)
         {
-            int limit = Math.Max(1, items.StackLimit(kv.Key));
-            for (int left = kv.Value; left > 0; left -= limit) stacks.Add((kv.Key, Math.Min(limit, left)));
-        }
-        for (int i = 0; i < stacks.Count && i < 16; i++)
-        {
-            var (key, count) = stacks[i];
-            var r = new Rect(960 + 20 + (i % 8) * 80, 720 + 28 + (i / 8) * 160, 72, 144);
-            var icon = Art.InventoryIcon(key, count, items.StackLimit(key));
-            if (icon != null) GUI.DrawTexture(r, icon);
-            else Gui.Text(r, HamletUi.Pretty(key), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 22, Color.white, TextAnchor.LowerRight);
-            if (Gui.Hotspot(r)) UseItem(key, crawl);
+            var r = PackCell(i);
+            var stack = stacks.Find(st => st.Slot == i);
+            if (Drag.Hovering<PackStack>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
+            if (Drag.Drop<PackStack>(r, out var moved) && moved.Pack == exp.Pack) { exp.Pack.Move(moved.Slot, i); continue; }
+            if (stack == null) continue;
+            string key = stack.Key;
+            int count = stack.Count, limit = items.StackLimit(key);
+            Drag.Source(r, new PackStack(exp.Pack, i, key), rect => ItemArt.Stack(rect, key, count, limit));
+            bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == i;
+            if (!carried) ItemArt.Stack(r, key, count, limit);
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active)
+                Gui.Text(new Rect(960, 1050, 960, 26), $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, or drag onto a hero.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (Gui.Hotspot(r) && !Drag.JustDropped) UseItem(key, crawl);
         }
     }
 
-    /// <summary>DD1 lets you use some supplies straight from the pack.</summary>
+    /// <summary>A supply dropped on a hero: select them and use it on them.</summary>
+    private static void UseItemOn(string heroId, string key, Crawl crawl)
+    {
+        D.SelectedHeroId = heroId;
+        UseItem(key, crawl);
+    }
+
     private static void UseItem(string key, Crawl crawl)
     {
+        string done = crawl.UseSupply(D.SelectedHeroId, key);
+        if (done != null) { Gui.Announce(done); S.Persist(); return; }
         if (key == Supply.Torch) D.UseTorch();
         else if (key == Supply.Firewood && crawl.CanCamp) D.MakeCamp();
         else if (key == Supply.Food && D.SelectedHeroId != null && crawl.State.Pack.TryUse(Supply.Food))
@@ -461,6 +474,8 @@ internal sealed class CrawlUi
             D.Party.Heal(D.SelectedHeroId, 0.05f);
             Gui.Announce("A meagre meal.");
         }
+        else if (key is Supply.Bandage or Supply.Antivenom or Supply.Laudanum or Supply.Herbs)
+            Gui.Announce("Nothing to treat now. Keep it for curios.");
     }
 
     // ---------------- curio / obstacle / trap prompt (DD1 "sidebar scroll" at 1348,200) ----------------

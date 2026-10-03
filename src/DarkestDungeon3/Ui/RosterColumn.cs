@@ -25,8 +25,12 @@ internal static class RosterColumn
         public Look(bool dim = false, string note = null, bool highlight = false) { Dim = dim; Note = note; Highlight = highlight; }
     }
 
-    /// <summary>Draws the column; returns the hero clicked this frame, if any.</summary>
-    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null)
+    /// <summary>The list's area (a drop target for heroes dragged back out of slots).</summary>
+    public static Rect Area => new(X - 12, FirstY, 395, Spacing * Visible);
+
+    /// <summary>Draws the column; returns the hero clicked this frame, if any. With <paramref name="draggable"/>
+    /// heroes can be picked up (as <see cref="HeroDrag"/>) and dropped on slots elsewhere.</summary>
+    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false)
     {
         var grad = Art.Dd1("campaign", "town", "roster", "roster_bggrad.png");
         if (grad != null) GUI.DrawTexture(new Rect(X, 0, 373, 1080), grad);
@@ -55,6 +59,15 @@ internal static class RosterColumn
             var l = look?.Invoke(h) ?? default;
             float x = X - 12, y = FirstY + i * Spacing;
             var r = new Rect(x, y, 383, 100);
+            if (draggable && h.IsAvailable && h.MissingWeeks == 0)
+            {
+                string cls = h.ClassId;
+                Drag.Source(r, new HeroDrag(h.Id), rect =>
+                {
+                    var icon = Art.HeroIcon(cls);
+                    if (icon != null) Art.DrawSprite(new Rect(rect.x + 21, rect.y + 9, 82, 82), icon);
+                });
+            }
             bool hover = r.Contains(Event.current.mousePosition);
             if (bg != null) GUI.DrawTexture(new Rect(x, y, 395, 104), bg);
             if (hover || l.Highlight) Gui.Fill(new Rect(x + 8, y + 6, 360, 90), new Color(1f, 0.9f, 0.6f, l.Highlight ? 0.12f : 0.06f));
@@ -78,7 +91,7 @@ internal static class RosterColumn
                 var pip = p < h.Stress ? (h.Stress >= 10 ? over ?? full : full) : empty;
                 if (pip != null) GUI.DrawTexture(new Rect(x + 116 + p * 13, y + 58, 11, 18), pip, ScaleMode.ScaleToFit);
             }
-            if (Gui.Hotspot(r)) clicked = h;
+            if (Gui.Hotspot(r) && !Drag.JustDropped) clicked = h;
         }
 
         var bottom = Art.Dd1("campaign", "town", "roster", "roster_bottomframe.png");

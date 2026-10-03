@@ -122,8 +122,9 @@ public sealed class Hamlet
     {
         var hero = Estate.Hero(heroId);
         if (hero == null || hero.Activity == null || hero.ActivityLocked) return;
-        // DD1 refunds a cancelled stay.
-        if (Buildings.Activity(hero.Activity) is { } a && a.Cost(Estate) is { } cost) Estate.Add(cost.Type, cost.Amount);
+        // DD1 refunds a cancelled stay (what was paid this week) or treatment.
+        if (Buildings.Activity(hero.Activity) is { } a && ActivityCost(a) is { } cost) Estate.Add(cost.Type, cost.Amount);
+        else if (hero.Activity.StartsWith("sanitarium.") && TreatmentCost(hero, hero.ActivityTarget) is { } treatment) Estate.Add(treatment.Type, treatment.Amount);
         hero.Activity = null;
         hero.ActivityTarget = null;
     }
