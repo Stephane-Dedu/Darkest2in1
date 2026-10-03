@@ -37,6 +37,10 @@ public sealed class Dd1Campaign
     public Dd1Buffs Buffs { get; private set; }
     /// <summary>DD1's heirloom exchange (campaign/heirloom_exchange): give so many of one kind for so many of another.</summary>
     public List<(string From, int FromAmount, string To, int ToAmount)> HeirloomRates { get; } = new();
+    /// <summary>Hero resolve levels (campaign/roster/roster.variables.json), not the dungeons' table.</summary>
+    public List<int> HeroResolveThresholds { get; } = new() { 0, 2, 8, 14, 24, 36, 48 };
+    /// <summary>DD1 stress an idle hero sheds each town visit.</summary>
+    public float IdleStressHeal { get; private set; } = 5f;
 
     private readonly Dictionary<string, ZoneProps> _props = new();
 
@@ -76,6 +80,17 @@ public sealed class Dd1Campaign
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);
         c.Buffs = Dd1Buffs.Load(dd1);
+        var roster = dd1.PathOf("campaign", "roster", "roster.variables.json");
+        if (File.Exists(roster))
+        {
+            var vars = ReadJson(roster);
+            if (vars["resolve_level_thresholds"] is JArray t && t.Count > 0)
+            {
+                c.HeroResolveThresholds.Clear();
+                c.HeroResolveThresholds.AddRange(t.Select(x => (int)x));
+            }
+            c.IdleStressHeal = (float?)vars["town_visit_town_progression"]?["idle_hero_stress_heal"] ?? 5f;
+        }
         var exchange = dd1.PathOf("campaign", "heirloom_exchange", "heirloom_exchange.json");
         if (File.Exists(exchange))
             foreach (var r in ReadJson(exchange)["exchange_rates"] ?? new JArray())
@@ -88,6 +103,15 @@ public sealed class Dd1Campaign
         if (_props.TryGetValue(zone, out var p)) return p;
         var path = Install.ZoneProps(zone);
         return _props[zone] = File.Exists(path) ? ZoneProps.Load(path) : ZoneProps.Empty;
+    }
+
+    /// <summary>DD1 hero resolve level from resolve XP (0..6).</summary>
+    public int HeroResolveLevel(int xp)
+    {
+        int level = 0;
+        for (int i = 0; i < HeroResolveThresholds.Count; i++)
+            if (xp >= HeroResolveThresholds[i]) level = i;
+        return level;
     }
 
     /// <summary>DD1 zone level from XP (0..thresholds-1).</summary>

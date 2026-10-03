@@ -317,7 +317,9 @@ public sealed class Hamlet
             }
             if (hero.Activity == null)
             {
-                int idleRelief = (int)Math.Round(EventData("idle_buff").Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f));
+                // DD1: idle heroes shed a little stress each visit; a town event can multiply it.
+                float dd1Relief = Dd1.IdleStressHeal * (1f + EventData("idle_buff").Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f));
+                int idleRelief = ToDd2Points(dd1Relief, rng);
                 if (idleRelief > 0 && hero.Stress > 0)
                 {
                     int was = hero.Stress;

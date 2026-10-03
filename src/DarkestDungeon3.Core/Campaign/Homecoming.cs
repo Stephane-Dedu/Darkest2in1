@@ -79,9 +79,12 @@ public static class Homecoming
             if (o.Trinkets != null) hero.Trinkets = o.Trinkets;
             if (success)
             {
-                hero.ResolveXp += ResolveXp(quest);
+                // Town events can send a party off with a resolve bonus (DD1 resolve_xp_bonus_percent).
+                float bonus = expedition.PendingBuffs.TryGetValue(hero.Id, out var buffs)
+                    ? buffs.Select(b => dd1.Buffs?.Get(b)).Where(b => b?.Stat == "resolve_xp_bonus_percent").Sum(b => b.Amount) : 0f;
+                hero.ResolveXp += (int)Math.Round(ResolveXp(quest) * (1f + bonus));
                 int before = hero.ResolveLevel;
-                hero.ResolveLevel = Math.Min(6, dd1.ZoneLevel(hero.ResolveXp));
+                hero.ResolveLevel = Math.Max(before, Math.Min(6, dd1.HeroResolveLevel(hero.ResolveXp)));
                 if (hero.ResolveLevel > before) log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");
             }
         }
