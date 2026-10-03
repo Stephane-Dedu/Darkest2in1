@@ -167,6 +167,7 @@ public class QuestGoalTests
             if (crawl.IsBlocked)
             {
                 if (state.InRoom || crawl.CurrentTile.Content == HallContent.Battle) crawl.ResolveBattle();
+                else if (crawl.CurrentTile?.Content == HallContent.Trap) crawl.DisarmTrap();
                 else crawl.ClearObstacle();
                 continue;
             }

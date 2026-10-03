@@ -187,6 +187,7 @@ internal sealed class Driver : MonoBehaviour
         var guids = Dd2Heroes.BuildParty(heroes);
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
+        Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
         LastCurio = null;
         Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;
@@ -536,7 +537,8 @@ internal sealed class Driver : MonoBehaviour
     }
 
     public void ClearObstacle() => Handle(Crawl.ClearObstacle());
-    public void DisarmTrap() => Handle(Crawl.DisarmTrap());
+    /// <summary>DD1: the selected hero tries to disarm the spotted trap.</summary>
+    public void DisarmTrap() => Handle(Crawl.DisarmTrap(SelectedHeroId));
 
     public void Investigate(string heroId, string itemId)
     {
@@ -591,8 +593,15 @@ internal sealed class Driver : MonoBehaviour
                     surprised = true;
                     Announce(e.ContentId == "camp" ? "The camp is ambushed in the night!" : "Something stirs in the dark...");
                     break;
-                case CrawlEventType.TrapSprung: Announce("A trap is sprung!"); break;
-                case CrawlEventType.TrapDisarmed: Announce("Trap disarmed."); break;
+                case CrawlEventType.TrapSprung:
+                    Dd1Audio.Play("prop_trap_" + (e.ContentId ?? "spikes").Replace("_", ""));
+                    Announce($"{S.Save.Estate.Hero(e.HeroId)?.Name ?? "The party"} springs the trap!");
+                    break;
+                case CrawlEventType.TrapDisarmed:
+                    string zone = Core.Dungeon.ZoneBase.Of(Expedition.Quest?.Dungeon);
+                    Dd1Audio.Play(Dd1Audio.Has("prop_trap_disarm_" + zone) ? "prop_trap_disarm_" + zone : "prop_trap_disarm");
+                    Announce($"{S.Save.Estate.Hero(e.HeroId)?.Name ?? "The party"} disarms the trap.");
+                    break;
                 case CrawlEventType.Trap: Announce("A trap lies ahead."); break;
                 case CrawlEventType.Obstacle: Announce("The way is blocked."); break;
                 case CrawlEventType.ObstacleCleared: Say("The way is clear."); break;

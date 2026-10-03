@@ -116,7 +116,9 @@ public sealed class Crawl
     public bool IsBlocked =>
         State.InRoom
             ? CurrentRoom.HasBattle && !CurrentRoom.Cleared
-            : CurrentTile != null && !CurrentTile.Resolved && CurrentTile.Content is HallContent.Battle or HallContent.Obstacle;
+            : CurrentTile != null && !CurrentTile.Resolved
+              && (CurrentTile.Content is HallContent.Battle or HallContent.Obstacle
+                  || (CurrentTile.Content == HallContent.Trap && CurrentTile.Scouted));   // DD1: a spotted trap stops the party until dealt with
 
     /// <summary>Put the party in the entrance room at the start of the expedition.</summary>
     public List<CrawlEvent> Begin()
@@ -352,14 +354,27 @@ public sealed class Crawl
         return Flush();
     }
 
-    /// <summary>Try to disarm a trap the party scouted (DD1 gives a bonus for seeing it coming).</summary>
-    public List<CrawlEvent> DisarmTrap()
+    /// <summary>A spotted trap: the chosen hero (DD1: whoever is selected) tries to disarm it, with the bonus for seeing
+    /// it coming. Failing springs it on them.</summary>
+    public List<CrawlEvent> DisarmTrap(string heroId = null)
     {
         _events.Clear();
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Trap || tile.Resolved) return Blocked();
-        TriggerTrap(tile, scouted: true);
+        TriggerTrap(tile, scouted: true, heroId);
         return Flush();
+    }
+
+    /// <summary>A hero's DD1 class (for its trap disarm chance); the plugin sets this.</summary>
+    public Func<string, string> HeroDd1Class;
+
+    /// <summary>DD1's chance: the class's trap stat, +40% for a spotted trap, minus the difficulty's penalty.</summary>
+    public float TrapDisarmChance(string heroId, bool scouted)
+    {
+        int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
+        float chance = (_content?.Traps?.DisarmBase(HeroDd1Class?.Invoke(heroId)) ?? 0.4f)
+                       + (scouted ? _rules.TrapScoutDisarmBonus : 0f) - _rules.TrapDifficultyPenalty[difficulty];
+        return Math.Max(0f, Math.Min(0.95f, chance));
     }
 
     public List<CrawlEvent> UseTorch()
@@ -607,16 +622,14 @@ public sealed class Crawl
         Emit(CrawlEventType.Starving, amount: alive.Count);
     }
 
-    private void TriggerTrap(HallTile tile, bool scouted)
+    private void TriggerTrap(HallTile tile, bool scouted, string heroId = null)
     {
         var rng = NextRng();
-        int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
-        float disarm = 0.5f - _rules.TrapDifficultyPenalty[difficulty] + (scouted ? _rules.TrapScoutDisarmBonus : 0f);
         tile.Resolved = true;
         var trap = _content?.Traps?.Get(tile.ContentId, State.Quest?.Difficulty ?? 1);
-        // The front hero deals with it, as in DD1.
-        var hero = _party.Alive.FirstOrDefault();
-        if (rng.Chance(disarm))
+        // Walked into unseen: the front hero, on their own chance. Spotted: the hero who tries, with the bonus.
+        var hero = heroId != null && _party.Alive.Contains(heroId) ? heroId : _party.Alive.FirstOrDefault();
+        if (rng.Chance(TrapDisarmChance(hero, scouted)))
         {
             if (hero != null && trap != null)
                 foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);

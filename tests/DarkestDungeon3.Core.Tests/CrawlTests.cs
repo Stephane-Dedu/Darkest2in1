@@ -149,6 +149,7 @@ public class CrawlTests
                 if (crawl.IsBlocked)
                 {
                     if (crawl.State.InRoom || crawl.CurrentTile.Content == HallContent.Battle) { crawl.ResolveBattle(); battles++; }
+                    else if (crawl.CurrentTile?.Content == HallContent.Trap) crawl.DisarmTrap();
                     else crawl.ClearObstacle();
                     continue;
                 }

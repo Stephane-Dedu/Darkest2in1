@@ -209,7 +209,10 @@ internal sealed class HeroStage : MonoBehaviour
             ActorBhv actor = null;
             try
             {
-                actor = creator.CreateActorGameObject(guids[i], slot, Layer, "idle_neutral", loadSubclasses: false);
+                // In fights DD2 spawns actors with no starting state: the animator's default, the combat stance
+                // facing the enemy. "idle_neutral" is the road/inn pose, turned away from the camera.
+                string pose = Plugin.HeroModelPose.Value == "neutral" ? "idle_neutral" : null;
+                actor = creator.CreateActorGameObject(guids[i], slot, Layer, pose, loadSubclasses: false);
             }
             catch (System.Exception e) { Plugin.Log.LogWarning($"[stage] actor {guids[i]}: {e.Message}"); }
             _heroes.Add((guids[i], slot, actor));

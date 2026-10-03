@@ -19,9 +19,24 @@ public sealed class TrapLibrary
 {
     private readonly Dictionary<string, JObject> _traps = new();
 
+    /// <summary>DD1's per-class trap disarm chance (heroes/&lt;class&gt;/&lt;class&gt;.info.darkest, "resistances: .trap 40%").</summary>
+    public Dictionary<string, float> ClassDisarm { get; } = new();
+
+    /// <summary>A DD1 class's base chance to disarm a trap (40% if DD1 doesn't say).</summary>
+    public float DisarmBase(string dd1Class) => dd1Class != null && ClassDisarm.TryGetValue(dd1Class, out var c) ? c : 0.4f;
+
     public static TrapLibrary Load(Dd1Install dd1)
     {
         var lib = new TrapLibrary();
+        string heroes = dd1.PathOf("heroes");
+        if (Directory.Exists(heroes))
+            foreach (var dir in Directory.GetDirectories(heroes))
+            {
+                string cls = Path.GetFileName(dir), info = Path.Combine(dir, cls + ".info.darkest");
+                if (!File.Exists(info)) continue;
+                var m = System.Text.RegularExpressions.Regex.Match(File.ReadAllText(info), @"resistances:[^\n]*\.trap\s+(\d+(?:\.\d+)?)%");
+                if (m.Success) lib.ClassDisarm[cls] = float.Parse(m.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) / 100f;
+            }
         var path = dd1.PathOf("props", "trap_definitions.json");
         if (!File.Exists(path)) return lib;
         foreach (JObject p in JToken.Parse(File.ReadAllText(path))["props"] ?? new JArray())

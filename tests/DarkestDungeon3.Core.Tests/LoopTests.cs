@@ -60,6 +60,7 @@ public class LoopTests
             if (crawl.IsBlocked)
             {
                 if (exp.InRoom || crawl.CurrentTile.Content == HallContent.Battle) crawl.ResolveBattle();
+                else if (crawl.CurrentTile?.Content == HallContent.Trap) crawl.DisarmTrap();
                 else crawl.ClearObstacle();
             }
             else if (exp.InRoom)

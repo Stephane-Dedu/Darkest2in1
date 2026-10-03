@@ -102,3 +102,18 @@ public class CurioItemTests
         Assert.True(unknown.Count == 0, string.Join(" | ", unknown));
     }
 }
+
+public class TrapRuleTests
+{
+    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly CrawlContent Content = CrawlContent.Load(Install);
+
+    [Fact]
+    public void ClassesDisarmAsInDd1()
+    {
+        Assert.Equal(0.4f, Content.Traps.DisarmBase("highwayman"), 3);
+        Assert.True(Content.Traps.ClassDisarm.Count >= 15);
+        Assert.True(Content.Traps.ClassDisarm.Values.Max() > Content.Traps.ClassDisarm.Values.Min());   // classes differ
+        Assert.Equal(0.4f, Content.Traps.DisarmBase("not_a_class"), 3);
+    }
+}

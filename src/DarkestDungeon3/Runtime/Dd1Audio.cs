@@ -202,6 +202,9 @@ internal static class Dd1Audio
 
     private static string Pick(params string[] names) => names.FirstOrDefault(n => n != null && _index.Has(n));
 
+    /// <summary>DD1 has a sample of this name.</summary>
+    public static bool Has(string sample) => Ensure() && _index.Has(sample);
+
     /// <summary>DD1's exploration music for the zone, darker as the torch burns down.</summary>
     private static string Exploration(string zone, float light)
     {

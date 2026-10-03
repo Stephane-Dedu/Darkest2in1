@@ -213,7 +213,18 @@ internal sealed class CrawlUi
                 : hover ? SpineArt.Get(folder, "active", sl => sl.Name != "closed" && sl.Name != "open") ?? closed
                 : closed;
         }
-        else pic = SpineArt.Get(folder, "idle", sl => sl.Name != "active" && !sl.Name.StartsWith("dust") && sl.Name != "splash" && sl.Name != "foam");
+        else
+        {
+            pic = SpineArt.Get(folder, "idle", sl => sl.Name != "active" && !sl.Name.StartsWith("dust") && sl.Name != "splash" && sl.Name != "foam");
+            // A spotted trap in the party's square: click it to disarm (DD1).
+            if (kind == "traps" && hoverable && pic != null)
+            {
+                var area = pic.RectAt(feet);
+                bool hover = pic.Hit(feet, 1f, Event.current.mousePosition);
+                if (hover) Gui.Text(new Rect(area.center.x - 120, area.y - 30, 240, 26), "Click to disarm", 18, Color.white, TextAnchor.MiddleCenter);
+                if (hover && Gui.Hotspot(area)) TrapClicked = true;
+            }
+        }
 
         var shadow = Art.Overlay("charactershadow_med.png");
         if (pic != null)
@@ -235,7 +246,7 @@ internal sealed class CrawlUi
     private const float PropX = 1040;
 
     // The party's curio was clicked / had an inventory item dropped on it this frame (DD1's ways to interact).
-    private static bool CurioClicked;
+    private static bool CurioClicked, TrapClicked;
     private static string CurioDrop;
     private string _curioPanel;   // the curio whose panel is open ("where:id")
 
@@ -841,8 +852,10 @@ internal sealed class CrawlUi
         else if (trap)
         {
             Gui.Text(header, HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-            Gui.Text(body, "A trap, spotted in time. The front hero can try to disarm it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
-            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Disarm")) { D.DisarmTrap(); return; }
+            // DD1: the selected hero tries, on their class's trap skill plus the bonus for having spotted it.
+            int pct = Mathf.RoundToInt(crawl.TrapDisarmChance(D.SelectedHeroId, scouted: true) * 100f);
+            Gui.Text(body, $"{who} has {pct}% to disarm it (select another hero to send them). Failing springs it on them.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Disarm") || TrapClicked) { TrapClicked = false; D.DisarmTrap(); return; }
         }
     }
 
