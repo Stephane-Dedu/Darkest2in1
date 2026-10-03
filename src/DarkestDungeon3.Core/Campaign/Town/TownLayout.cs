@@ -12,6 +12,13 @@ namespace DarkestDungeon3.Core.Campaign.Town;
 /// </summary>
 public sealed class TownLayout
 {
+    /// <summary>A building's slots when idle: everything but the hover silhouette ("active") and smoke.</summary>
+    public static bool IdleSlot(string slot) => slot != "active" && !slot.StartsWith("smoke", System.StringComparison.Ordinal);
+
+    /// <summary>Under the mouse DD1 draws the "active" silhouette (a little larger, behind) and the building on top:
+    /// a pale outline. Everything but smoke, in the skeleton's slot order.</summary>
+    public static bool HoverSlot(string slot) => !slot.StartsWith("smoke", System.StringComparison.Ordinal);
+
     public sealed class Spot
     {
         public string Id;            // building id, also the fx folder stem: fx/town_&lt;id&gt;_level01

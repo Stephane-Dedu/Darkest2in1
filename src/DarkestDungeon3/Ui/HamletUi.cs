@@ -145,8 +145,8 @@ internal sealed class HamletUi
 
     // ---------------------------------------------------------------- the town
 
-    private static bool IdleSlot(Core.Dd1.SpineSkeleton.Slot s) => s.Name != "active" && !s.Name.StartsWith("smoke");
-    private static bool ActiveSlot(Core.Dd1.SpineSkeleton.Slot s) => s.Name != "idle" && !s.Name.StartsWith("smoke");
+    private static bool IdleSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.IdleSlot(s.Name);
+    private static bool ActiveSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.HoverSlot(s.Name);   // outline + building
 
     private float Upgraded(string building)
     {
