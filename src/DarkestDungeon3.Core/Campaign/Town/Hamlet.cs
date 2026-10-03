@@ -451,13 +451,7 @@ public sealed class Hamlet
             Estate.Recruits.Add(MakeHero(rng.Pick(Catalog.RecruitableClasses), rng, level));
         }
 
-        Estate.WagonStock.Clear();
-        string[] rarities = { "very_common", "very_common", "common", "common", "uncommon", "rare", "very_rare" };
-        for (int i = 0; i < Buildings.WagonStock(Estate); i++)
-        {
-            var t = Catalog.RandomTrinket(rng.Pick(rarities), rng);
-            if (t != null) Estate.WagonStock.Add(t);
-        }
+        RestockWagon(rng);
 
         Estate.Quests = QuestBoard.Generate(Estate, Dd1, ToggledZones());
         RollTownEvent(rng);
@@ -472,6 +466,42 @@ public sealed class Hamlet
         Estate.Add(from, -rate.FromAmount);
         Estate.Add(to, rate.ToAmount);
         return true;
+    }
+
+    public void RestockWagon(Rng rng)
+    {
+        Estate.WagonStock.Clear();
+        string[] rarities = { "very_common", "very_common", "common", "common", "uncommon", "rare", "very_rare" };
+        for (int i = 0; i < Buildings.WagonStock(Estate); i++)
+        {
+            var t = Catalog.RandomTrinket(rng.Pick(rarities), rng);
+            if (t != null && !Estate.WagonStock.Contains(t)) Estate.WagonStock.Add(t);
+        }
+    }
+
+    /// <summary>Older builds rolled heroes without quirks and let any class wear hero-only trinkets: fix once.</summary>
+    public List<string> RepairEstate()
+    {
+        var log = new List<string>();
+        var rng = Estate.NextRng();
+        if (!Estate.QuirksRepaired)
+        {
+            foreach (var hero in Estate.Roster.Concat(Estate.Recruits).Where(h => h.Quirks.Count == 0))
+            {
+                hero.Quirks.AddRange(Catalog.StartingQuirks(hero.ClassId, rng, positives: 1 + hero.ResolveLevel / 2, negatives: 1 + hero.ResolveLevel / 3));
+                if (hero.Quirks.Count > 0) log.Add($"{hero.Name}: quirks {string.Join(", ", hero.Quirks)}");
+            }
+            Estate.QuirksRepaired = true;
+        }
+        foreach (var hero in Estate.Roster)
+            foreach (var t in hero.Trinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
+            {
+                hero.Trinkets.Remove(t);
+                Estate.Trinkets.Add(t);
+                log.Add($"{hero.Name} can't wear {t}: back in the stash");
+            }
+        if (Estate.WagonStock.Count == 0) { RestockWagon(rng); log.Add($"wagon restocked: {Estate.WagonStock.Count} trinkets"); }
+        return log;
     }
 
     // ---- DD1 town events ----

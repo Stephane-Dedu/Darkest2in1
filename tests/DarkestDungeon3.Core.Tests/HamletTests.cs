@@ -10,6 +10,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class FakeCatalog : IHeroCatalog
 {
+    public bool TrinketFits(string trinketId, string classId) => true;
     public IReadOnlyList<string> RecruitableClasses { get; } =
         new[] { "highwayman", "plague_doctor", "grave_robber", "leper", "man_at_arms", "hellion", "jester", "occultist", "runaway", "flagellant", "vestal" };
 
@@ -19,7 +20,7 @@ public class FakeCatalog : IHeroCatalog
     public string MapDd1Quirk(string dd1QuirkId) => dd1QuirkId == null ? null : "dd2_" + dd1QuirkId;
     public bool IsDisease(string q) => q.StartsWith("disease_");
     public bool IsPositive(string q) => q.StartsWith("pos_");
-    public string RandomTrinket(string rarity, Rng rng) => rarity + "_trinket_" + rng.Next(3);
+    public string RandomTrinket(string rarity, Rng rng, string forClass = null) => rarity + "_trinket_" + rng.Next(3);
     public int TrinketPrice(string trinketId) => 1000;
 }
 

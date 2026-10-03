@@ -94,9 +94,15 @@ internal static class Gui
     public static readonly Color Dd1Text = new(0.82f, 0.78f, 0.68f);
 
     /// <summary>Text in DD1's fonts (DwarvenAxe for headings, Ubuntu for body), falling back to IMGUI.</summary>
+    /// <summary>DD1 draws its fonts at their native size (DwarvenAxe-m: 40 px lines at 1080p); our layouts asked for
+    /// less, so headings came out small and thin. Sizes are scaled up to DD1's proportions here.</summary>
+    public const float HeadingScale = 1.3f, BodyScale = 1.08f;
+
     public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
     {
-        var font = heading ? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Body;
+        size *= heading ? HeadingScale : BodyScale;
+        // The large DwarvenAxe page (63 px lines) stays sharp for titles.
+        var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
         if (font != null) { font.Draw(r, text, size, colour, align); return; }
         EnsureStyles();
         var style = new GUIStyle(_label) { fontSize = (int)(size * 0.8f), alignment = align, normal = { textColor = colour } };

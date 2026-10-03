@@ -111,6 +111,7 @@ internal sealed class Driver : MonoBehaviour
 
     public void EnterHamlet(int slot)
     {
+        LogDd2Libraries();
         S.LoadOrCreate(slot);
         if (S.Save.Expedition is { Started: false } stillborn)
         {
@@ -137,6 +138,14 @@ internal sealed class Driver : MonoBehaviour
     {
         S?.Persist();
         Phase = Phase.Off;
+    }
+
+    private static void LogDd2Libraries()
+    {
+        var quirks = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Quirk.QuirkDefinition>>.Instance;
+        var items = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Item.ItemDefinition>>.Instance;
+        Plugin.Log.LogInfo($"[dd2] at the Hamlet: quirk library {(quirks == null ? "missing" : quirks.GetNumberOfLibraryElements().ToString())}, " +
+                           $"item library {(items == null ? "missing" : items.GetNumberOfLibraryElements().ToString())}");
     }
 
     // ---------------- Embark ----------------

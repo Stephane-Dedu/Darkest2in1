@@ -56,63 +56,84 @@ internal sealed class Dd2Catalog : IHeroCatalog
 
     public string RandomName(string classId, Rng rng) => _lore.RandomName(rng);
 
-    private static IReadOnlyList<QuirkDefinition> AllQuirks =>
-        SingletonMonoBehaviour<Library<string, QuirkDefinition>>.Instance?.GetLibraryElements() ?? new List<QuirkDefinition>();
+    // DD2's quirk and item libraries only exist inside a run; the Hamlet reads DD2's data tables instead.
+    private static Core.Dd2Data.Dd2Tables _tables;
+    public static Core.Dd2Data.Dd2Tables Tables => _tables ??= LoadTables();
 
-    private static QuirkDefinition Quirk(string id) =>
+    private static Core.Dd2Data.Dd2Tables LoadTables()
+    {
+        var t = Core.Dd2Data.Dd2Tables.Load(System.IO.Path.Combine(UnityEngine.Application.streamingAssetsPath, "Excel"));
+        Plugin.Log.LogInfo($"[dd2] data tables: {t.Quirks.Count} quirks, {t.Trinkets.Count} trinkets");
+        return t;
+    }
+
+    private static IEnumerable<Core.Dd2Data.Dd2Quirk> AllQuirks => Tables.Quirks.Values;
+
+    /// <summary>DD2's QuirkDefinition (inside a run only), for putting a quirk on an actor.</summary>
+    public static QuirkDefinition Definition(string id) =>
         id != null && SingletonMonoBehaviour<Library<string, QuirkDefinition>>.Instance is { } lib && lib.TryGetLibraryElement(id, out var q) ? q : null;
 
     public IReadOnlyList<string> StartingQuirks(string classId, Rng rng, int positives, int negatives)
     {
-        var pos = AllQuirks.Where(q => q.IsPositive && !q.IsDisease).ToList();
-        var neg = AllQuirks.Where(q => q.IsNegative && !q.IsDisease).ToList();
+        // DD2's own starting pools (pos_start / neg_start), sorted so a seed always gives the same quirks.
+        var pos = AllQuirks.Where(q => q.IsPositive && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
+        var neg = AllQuirks.Where(q => q.IsNegative && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
         var result = new List<string>();
         for (int i = 0; i < positives && pos.Count > 0; i++) result.Add(rng.Pick(pos).Id);
         for (int i = 0; i < negatives && neg.Count > 0; i++) result.Add(rng.Pick(neg).Id);
         return result.Distinct().ToList();
     }
 
-    public QuirkDefinition QuirkFor(string dd1QuirkId)
+    /// <summary>The DD2 quirk standing in for a DD1 quirk: same id if DD2 has it, else one of the same kind.</summary>
+    public string MapDd1Quirk(string dd1QuirkId)
     {
         if (dd1QuirkId == null) return null;
-        var same = Quirk(dd1QuirkId);
-        if (same != null) return same;
+        if (Tables.Quirks.ContainsKey(dd1QuirkId)) return dd1QuirkId;
+        foreach (var guess in new[] { "quirk_" + dd1QuirkId, "quirk_" + dd1QuirkId + "_pos", "quirk_" + dd1QuirkId + "_neg" })
+            if (Tables.Quirks.ContainsKey(guess)) return guess;
         var (positive, disease) = _lore.Quirks.TryGetValue(dd1QuirkId, out var kind) ? kind : (false, false);
         var pool = AllQuirks.Where(q => disease ? q.IsDisease : positive ? q.IsPositive && !q.IsDisease : q.IsNegative && !q.IsDisease)
                             .OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
         if (pool.Count == 0) return null;
         int h = 17;
         foreach (char c in dd1QuirkId) h = unchecked(h * 31 + c);
-        return pool[(int)((uint)h % (uint)pool.Count)];
+        return pool[(int)((uint)h % (uint)pool.Count)].Id;
     }
 
-    public string MapDd1Quirk(string dd1QuirkId) => QuirkFor(dd1QuirkId)?.Id;
+    public QuirkDefinition QuirkFor(string dd1QuirkId) => Definition(MapDd1Quirk(dd1QuirkId));
 
-    public bool IsDisease(string quirkId) => Quirk(quirkId)?.IsDisease ?? false;
-    public bool IsPositive(string quirkId) => Quirk(quirkId)?.IsPositive ?? false;
+    public bool IsDisease(string quirkId) => quirkId != null && Tables.Quirks.TryGetValue(quirkId, out var q) && q.IsDisease;
+    public bool IsPositive(string quirkId) => quirkId != null && Tables.Quirks.TryGetValue(quirkId, out var q) && q.IsPositive;
 
-    private static IReadOnlyList<ItemDefinition> Trinkets =>
-        SingletonMonoBehaviour<Library<string, ItemDefinition>>.Instance?.GetLibraryElements(i => i.m_type == ItemType.TRINKET)
-        ?? new List<ItemDefinition>();
-
-    public string RandomTrinket(string rarity, Rng rng)
+    /// <summary>DD1 rarity → DD2 trinket rarities (DD2's "cultist" trinkets are the Cult's cursed ones: never sold).</summary>
+    private static readonly Dictionary<string, string[]> Dd2Rarities = new()
     {
-        var all = Trinkets;
+        ["very_common"] = new[] { "common" },
+        ["common"] = new[] { "common" },
+        ["uncommon"] = new[] { "common", "rare" },
+        ["rare"] = new[] { "rare" },
+        ["very_rare"] = new[] { "epic" },
+        ["ancestral"] = new[] { "ancestral" },
+    };
+
+    public string RandomTrinket(string rarity, Rng rng, string forClass = null)
+    {
+        var all = Tables.Trinkets.Values.Where(t => t.Rarity != "cultist" && (t.HeroClass == null || t.HeroClass == forClass))
+                                        .OrderBy(t => t.Id, StringComparer.Ordinal).ToList();
         if (all.Count == 0) return null;
-        var tags = rarity != null && RarityTags.TryGetValue(rarity, out var t) ? t : Array.Empty<string>();
-        var matching = all.Where(i => i.m_tags.Any(tags.Contains)).ToList();
-        return rng.Pick(matching.Count > 0 ? matching : all).m_id;
+        var wanted = rarity != null && Dd2Rarities.TryGetValue(rarity, out var r) ? r : new[] { "common" };
+        var matching = all.Where(t => wanted.Contains(t.Rarity)).ToList();
+        return rng.Pick(matching.Count > 0 ? matching : all).Id;
     }
+
+    public bool TrinketFits(string trinketId, string classId) =>
+        trinketId == null || !Tables.Trinkets.TryGetValue(trinketId, out var t) || t.IsForHero(classId);
 
     /// <summary>DD1 prices by rarity (the Nomad Wagon sells DD2 trinkets at DD1 prices).</summary>
     public int TrinketPrice(string trinketId)
     {
-        var item = Trinkets.FirstOrDefault(i => i.m_id == trinketId);
-        string rarity = item == null ? "common"
-            : item.m_tags.Contains("very_rare") ? "very_rare"
-            : item.m_tags.Contains("rare") ? "rare"
-            : item.m_tags.Contains("uncommon") ? "uncommon"
-            : "common";
+        string dd2 = trinketId != null && Tables.Trinkets.TryGetValue(trinketId, out var t) ? t.Rarity : "common";
+        string rarity = dd2 switch { "epic" => "very_rare", "ancestral" => "very_rare", "rare" => "rare", _ => "common" };
         return _lore.TrinketPriceByRarity.TryGetValue(rarity, out var p) ? p : 7500;
     }
 }

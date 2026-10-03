@@ -764,7 +764,7 @@ internal sealed class HamletUi
         if (h.Trinkets.Count < 2)
         {
             int x = 0;
-            foreach (var t in E.Trinkets.Distinct().Take(8).ToList())
+            foreach (var t in E.Trinkets.Distinct().Where(t => S.Catalog.TrinketFits(t, h.ClassId)).Take(8).ToList())
             {
                 if (Gui.DdButton(new Rect(area.x + 20 + (x % 2) * 350, y + (x / 2) * 48, 340, 42), "Equip " + Pretty(t), true, 18))
                 {

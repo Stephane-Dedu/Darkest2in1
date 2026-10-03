@@ -107,6 +107,9 @@ internal sealed class Session
             Plugin.Log.LogInfo("[session] migrated estate: added the tutorial's rewards");
             Persist();
         }
+        var repairs = Hamlet.RepairEstate();
+        foreach (var line in repairs) Plugin.Log.LogInfo("[session] repaired: " + line);
+        if (repairs.Count > 0) Persist();
     }
 
     public void Persist()

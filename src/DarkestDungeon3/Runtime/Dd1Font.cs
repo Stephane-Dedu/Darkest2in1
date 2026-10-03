@@ -43,9 +43,10 @@ internal static class Tga
                 for (int x = 0; x < w; x++)
                     (px[y * w + x], px[(h - 1 - y) * w + x]) = (px[(h - 1 - y) * w + x], px[y * w + x]);
 
-        var tex = new Texture2D(w, h, TextureFormat.RGBA32, false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
+        // Mipmaps: DD1 text is often drawn below the page's size, and without them glyphs alias into thin strokes.
+        var tex = new Texture2D(w, h, TextureFormat.RGBA32, true) { filterMode = FilterMode.Trilinear, wrapMode = TextureWrapMode.Clamp, anisoLevel = 2, mipMapBias = -0.3f };
         tex.SetPixels32(px);
-        tex.Apply(false, makeNoLongerReadable: true);
+        tex.Apply(true, makeNoLongerReadable: true);
         return tex;
     }
 }
@@ -180,7 +181,12 @@ internal sealed class Dd1Font
                 TextAnchor.UpperRight or TextAnchor.MiddleRight or TextAnchor.LowerRight => r.xMax - w,
                 _ => r.x,
             };
-            if (shadow) { GUI.color = new Color(0, 0, 0, 0.85f * colour.a); DrawLine(line, x + 2, y + 2, scale); }
+            if (shadow)
+            {
+                float o = Mathf.Clamp(size / 16f, 1.5f, 4f);
+                GUI.color = new Color(0, 0, 0, 0.85f * colour.a);
+                DrawLine(line, x + o, y + o, scale);
+            }
             GUI.color = colour;
             DrawLine(line, x, y, scale);
             y += size;

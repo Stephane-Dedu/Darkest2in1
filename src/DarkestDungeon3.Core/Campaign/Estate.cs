@@ -48,6 +48,8 @@ public sealed class Estate
     public int TownEventMisses;
     public Dictionary<string, int> TownEventLastWeek = new();
     public int TownEventFreeUpgrades;
+    /// <summary>Older builds rolled heroes at the main menu without DD2's quirk data: fixed once.</summary>
+    public bool QuirksRepaired;
 
     /// <summary>Optional extras the user can switch on (e.g. DD2 regions as expedition zones).</summary>
     public Dictionary<string, bool> Toggles = new();

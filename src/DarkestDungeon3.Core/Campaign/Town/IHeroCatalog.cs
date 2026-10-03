@@ -22,8 +22,12 @@ public interface IHeroCatalog
     bool IsDisease(string quirkId);
     bool IsPositive(string quirkId);
 
-    /// <summary>A random DD2 trinket of a DD1 rarity (very_common .. very_rare), or null.</summary>
-    string RandomTrinket(string rarity, Rng rng);
+    /// <summary>A random DD2 trinket of a DD1 rarity (very_common .. very_rare), or null. Hero-only trinkets are
+    /// left out unless <paramref name="forClass"/> names their class.</summary>
+    string RandomTrinket(string rarity, Rng rng, string forClass = null);
 
     int TrinketPrice(string trinketId);
+
+    /// <summary>Can a hero of this class wear the trinket (DD2's hero-only trinkets fit one class)?</summary>
+    bool TrinketFits(string trinketId, string classId);
 }
