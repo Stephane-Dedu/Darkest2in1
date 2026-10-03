@@ -418,6 +418,18 @@ Feasibility notes (decomp):
   Unmapped (no DD2 counterpart): stress-received and stun-resist debuffs, conditional "vs marked" bonuses, summons,
   low-chance diseases.
 
+## Parity loop, round 1 (2026-10-03, branch claude/practical-wright-hicri0)
+- GOTCHA: never Harmony-patch a method of a generic class instantiated over reference types (e.g.
+  `ResourceDatabaseAddressable<ResourceDatabaseSkills, ResourceSkillBase>.GetResource`): Mono shares that code across
+  every `ResourceDatabaseAddressable<X, Y>`, and the patched copy hard-wires the patched instantiation's type
+  arguments, so DD2 loaded hero ResourceActors as ResourceSkillBase ("Unable to load asset of type
+  ResourceSkillBase from .../grave_robber.asset"), EventGameTypeStarted threw and the run start hung. Patch a
+  non-generic override instead (here `ResourceDatabaseSkills.GetFallbackResourceId`).
+- The fight backdrop's setup needs the heroes' model renderers; they can take well over 3 s to load (room fights),
+  so it now waits 30 s (arena/scenery/camera 15 s) before leaving DD2's arena up.
+- DD2 keeps adding renderers to an actor after the fight starts: hiding the stand-in once wasn't enough.
+- tools/test_enter_dungeon.sh: Embark plate now at (800,770) in the 1600x900 window; arrival = "[stage] hero models".
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

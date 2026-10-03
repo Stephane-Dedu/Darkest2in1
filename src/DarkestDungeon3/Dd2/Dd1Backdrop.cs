@@ -52,12 +52,12 @@ internal static class Dd1Backdrop
         try
         {
             var arena = SingletonMonoBehaviour<ArenaBhv>.Instance;
-            if (arena == null) { GiveUpAfter(3f, "no arena"); return; }
+            if (arena == null) { GiveUpAfter(15f, "no arena"); return; }
             var heroes = Driver.Instance?.Party?.Guids?.ToHashSet() ?? new HashSet<uint>();
             var actors = UnityEngine.Object.FindObjectsOfType<CombatActorBhv>().Where(a => a != null && a.ActorInstance != null).ToList();
             var heroRenderers = actors.Where(a => heroes.Contains(a.GetActorGuid()))
                                       .SelectMany(a => a.GetComponentsInChildren<Renderer>()).Where(r => r is SkinnedMeshRenderer or MeshRenderer).ToList();
-            if (heroRenderers.Count == 0) { GiveUpAfter(3f, "no hero models yet"); return; }
+            if (heroRenderers.Count == 0) { GiveUpAfter(30f, "no hero models yet"); return; }
 
             // The arena's scenery: every renderer in its scene that isn't part of an actor or an effect.
             // DD2 loads a fight's art in scenes of its own next to the arena's logic: every loaded scene's scenery
@@ -76,11 +76,11 @@ internal static class Dd1Backdrop
                 .ToList();
             Plugin.Log.LogInfo("[backdrop] scenes: " + string.Join(", ", scenes.Select(sc =>
                 $"{sc.name} ({scenery.Count(r => r.gameObject.scene == sc)})")));
-            if (scenery.Count == 0) { GiveUpAfter(3f, "no scenery found"); return; }
+            if (scenery.Count == 0) { GiveUpAfter(15f, "no scenery found"); return; }
             int layer = scenery.GroupBy(r => r.gameObject.layer).OrderByDescending(g => g.Count()).First().Key;
             var cam = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null && (c.cullingMask & (1 << layer)) != 0)
                                        .OrderBy(c => c.depth).FirstOrDefault() ?? Camera.main;
-            if (cam == null) { GiveUpAfter(3f, "no camera"); return; }
+            if (cam == null) { GiveUpAfter(15f, "no camera"); return; }
 
             // The heroes' feet on screen (DD1's floor goes there), and how far behind the actors to hang the quad.
             float feetY = heroRenderers.Average(r => cam.WorldToScreenPoint(new Vector3(r.bounds.center.x, r.bounds.min.y, r.bounds.center.z)).y);

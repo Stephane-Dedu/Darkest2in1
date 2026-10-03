@@ -11,7 +11,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 ## Hamlet & buildings
 - [x] Hamlet opens from DD2's main menu (estate picker, saves per slot) — playtest 1.
-- [?] Town scene: `campaign/town/town.layout.darkest` positions, building Spine skeletons at their upgrade level, hover highlight — look at building art/levels.
+- [x] Town scene: `campaign/town/town.layout.darkest` positions, building Spine skeletons, roster, estate bar — round 1 screenshot (Estate 2, week 49).
 - [?] Building windows: DD1 backgrounds, keeper art, nameplate, upgrade button + panel (`building.layout`, `upgrade.layout`, `building_verbose_*`) — check text fits.
 - [?] Upgrades: trees and costs from `upgrades/buildings/*.upgrades.json`, heirloom costs, % upgraded.
 - [?] Stagecoach: recruits (`stage_coach.building.json`: recruit count, experienced recruits), roster size, drag to roster.
@@ -44,6 +44,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Trinket-equip warning before embarking: DD1 `trinkets_equipped_warning_min_percent` / `_dungeon_min_difficulty` — missing.
 
 ## Quest board
+- [x] Quest map (`campaign/town/quest_select`): zones, quest icons, party slots, roster — round 1 screenshot; embark works.
 - [?] Quests per zone from `campaign/quest/quest.generation.json` tables, lengths, difficulties, rewards.
 - [?] Every quest goal finishable (gather / activate / cleanse / explore / kill boss) — EveryDd1QuestCanBeFinished test; check in game.
 - [?] Boss plot quests at zone levels 2/4/6; the Darkest Dungeon chain from level 6.
@@ -59,7 +60,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Corridor contents (battle/trap/obstacle/curio/hunger) distribution per zone.
 
 ## Crawl
-- [x] Walking the DD1 hallway with DD1 art; hunger checks through DD2 actors — playtests 1-3.
+- [x] Walking the DD1 hallway with DD1 art; hunger checks through DD2 actors — playtests 1-3; rooms, map and HUD in round 1 screenshots.
 - [?] Light: 6 per new square / 1 per visited (`tile_light_loss`), torch +25, light bands (`darkness`): scouting, surprise, loot, stress.
 - [ ] Scouting on entering the dungeon: DD1 `scouting_enter_dungeon_scout_chance` (+ `_quest_item_scout_chance`) — missing; only room-entry scouting.
 - [ ] Scouting treasure: DD1 `scouting_chance_scout_treasure` reveals curios — check.
@@ -76,17 +77,20 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Night ambush (`ambush_camping_base_chance`); DD1 `ambush_torch_reduction` (torch drops on ambush) missing from code.
 
 ## Fights (around DD2 combat)
-- [x] Fights launch in DD2 combat with our party and DD1 encounter translations; return to the crawl — playtests.
-- [x] DD1 monsters drawn over their DD2 stand-ins (user saw them; HP bars/blight issues reported then fixed).
-- [?] DD1 monsters fight with their DD1 skills (generated DD2 skills: ranks, damage, crit, effects) — new; check fights run.
-- [?] DD1 scene behind fights (no DD2 arena, fog/DoF/blur held off).
+- [x] Fights launch in DD2 combat with our party and DD1 encounter translations; return to the crawl; DD2 results view skipped; DD1 spoils scroll — round 1 (log "straight back to the dungeon").
+- [x] DD1 monsters drawn over their DD2 stand-ins, stand-in models hidden — round 1 screenshot (Bone Militia/Defender/Arbalist/Courtier). Was broken: DD2 adds model parts after the fight starts, they stayed visible in front of the DD1 art; now re-scanned twice a second.
+- [x] DD1 monsters fight with their DD1 skills (generated DD2 skills) — round 1: Bone Courtier cast "Tempting Goblet", no exceptions, fight won. Was broken: the presentation alias patched the generic ResourceDatabaseAddressable<,>.GetResource and broke loading heroes (run start hung); now ResourceDatabaseSkills.GetFallbackResourceId.
+- [x] DD1 scene behind fights (no DD2 arena, fog/DoF/blur held off) — round 1 screenshots (room and hall). Was broken: it gave up after 3 s when hero models were slow to load ("not set up (no hero models yet)"), leaving DD2's arena: the user's "mix of DD1 and DD2"; now waits up to 30 s.
+- [ ] DD2 arena particles (red embers) still drawn over the DD1 scene in hall fights (they spawn after setup; the mid-fight scan skips particle systems).
+- [ ] DD2's colour grading tints the DD1 scene (red cast in the forest-exterior arena); DD1 shows its art untinted.
 - [?] Surprise: DD1 chances by room/corridor (`surprise_*_base_chance`); "known" (scouted) variants not used.
 - [ ] Surprise when the room/corridor was scouted: DD1 `surprise_known_*` chances — not used.
 - [?] Corpses: no corpse after a crit or DoT kill (CorpseRule).
 - [?] Combat retreat: 70% + 5% per try (`combat_retreat_chance`, `_bonus_chance_per_attempt`), one try per round.
 - [ ] Retreat stress: DD1 `combat_retreat_stress` on success — check what the retreat applies.
 - [?] Torch level carried into DD2's torch (DD2's own darkness effects stand in for DD1's monster bonuses).
-- [?] Battle loot from DD1 encounter `loot:` codes; DD2 loot skipped.
+- [x] Battle loot from DD1 encounter `loot:` codes; DD2 loot skipped — round 1 log "[loot] room fight (...): took 2 bust, very_common trinket, 1 skeleton_key, 1 portrait".
+- [ ] Spoils: a DD1 loot trinket shows as a rarity label ("Very Common") instead of a rolled trinket with its picture; check what lands in the stash.
 - [?] Camp/town buffs carried into fights as DD2 buffs.
 
 ## Afflictions, virtues, deaths
@@ -119,6 +123,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Hero sheet (`shared/character`), right-click everywhere.
 - [?] Fonts at DD1's native sizes (nothing overflows).
 - [?] Quest select / provisioner / loot scroll / camp screens.
-- [?] Corridor heroes as DD2 3D models in the combat pose (ActorBhv.Show), portrait fallback.
+- [x] Corridor heroes as DD2 3D models in the combat pose (ActorBhv.Show), portrait fallback — round 1 screenshot, log "4343 visible samples -> shown".
 - [user] DD1 game modes (Radiant / Darkest / Stygian: `modes/`, new_game_plus_* rules) — which, if any.
 - [user] DD1 DLC content (Crimson Court, Color of Madness, Shieldbreaker: `dlc/`) — in scope or not.
