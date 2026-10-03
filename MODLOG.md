@@ -332,6 +332,13 @@ Feasibility notes (decomp):
 - [ ] Walking: hold D/→ to walk continuously (hallway scrolls, ~1.2 s per square), A/← backs up at half speed;
       stops at fights/obstacles/curios/rooms; heroes bob; map clicks still auto-walk with the per-square slide.
 - [ ] In a room, D/A/W/S take the exit on that side of the map.
+- [ ] Trinket pictures load at the menu (log "[items] N item resources available"); names from DD2's localization.
+- [ ] DD1 hero sheet (roster click): layout over shared/character art, quirks, stats, equipment, trinket slots
+      (drag from the realm inventory, swap, click/drag away to unequip, class-only trinkets refused), skills with
+      DD2 icons (locked / brought / mastered), camping skills, resistances, diseases, prev/next, dismiss (2 clicks).
+- [ ] Realm inventory from the estate bar's "Trinkets" and from the sheet.
+- [ ] Nomad Wagon: DD1 grid with trinket pictures, prices, hover details, click to buy.
+- [ ] Dungeon HUD: equipped DD2 skills in the five banner slots, DD1 weapon/armour pictures, trinket pictures.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

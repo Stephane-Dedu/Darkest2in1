@@ -330,11 +330,16 @@ internal sealed class CrawlUi
         var actor = Dd2Api.Actor(D.Party.Guid(D.SelectedHeroId ?? ""));
         if (hero == null || actor == null) return;
 
-        // Banner: portrait, name, class (DD1 panel.banner.darkest).
-        var portrait = Art.Portrait(hero.ClassId);
-        if (portrait != null) Art.DrawSprite(new Rect(243, 750, 100, 100), portrait);
-        Gui.Text(new Rect(479, 744, 460, 40), hero.Name, 36, Gui.Dd1Name, heading: true);
-        Gui.Text(new Rect(479, 786, 460, 30), $"{HamletUi.Pretty(hero.ClassId)} — Resolve {hero.ResolveLevel}", 22, Gui.Dd1Class);
+        // Banner (DD1 panel.banner.darkest): portrait, name and class, then the five skill slots above "1-5".
+        var portrait = Art.HeroIcon(hero.ClassId);
+        if (portrait != null) Art.DrawSprite(new Rect(262, 738, 96, 96), portrait);
+        float nameSize = 30;
+        var font = Dd1Font.Heading;
+        while (font != null && nameSize > 18 && font.Measure(hero.Name, nameSize * Gui.HeadingScale).x > 146) nameSize -= 2;
+        Gui.Text(new Rect(366, 742, 150, 36), hero.Name, nameSize, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(366, 780, 150, 26), HamletUi.Pretty(hero.ClassId), 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        Gui.Text(new Rect(366, 804, 150, 24), $"Resolve {hero.ResolveLevel}", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        DrawSkillRow(hero, actor);
 
         // Hero panel (DD1 panel.hero.darkest): health, stress, then stats.
         Gui.Text(new Rect(370, 864, 300, 28), $"{actor.HpRounded:0} / {actor.CurrentHpMax:0}", 24, new Color(0.85f, 0.15f, 0.12f));
@@ -350,9 +355,48 @@ internal sealed class CrawlUi
         for (int i = 0; i < stats.Count; i++)
             Gui.Text(new Rect(262 + (i / 5) * 105, 928 + (i % 5) * 28, 110, 28), stats[i], 18, Gui.Dd1Text);
 
-        // Trinkets (DD1 hero_trinket at 453,0): names in the two slots.
-        for (int i = 0; i < 2; i++)
-            Gui.Text(new Rect(700 + i * 118, 888, 112, 160), i < hero.Trinkets.Count ? HamletUi.Pretty(hero.Trinkets[i]) : "", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+        // Equipment (hero_equipment 238,0) and trinkets (hero_trinket 453,0), in the panel's painted frames.
+        string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
+        var weapon = new Rect(512, 906, 72, 144);
+        var armour = new Rect(604, 906, 72, 144);
+        if (Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_weapon_{Mathf.Clamp(hero.WeaponRank, 0, 4)}.png") is { } w) GUI.DrawTexture(weapon, w);
+        if (Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_armour_{Mathf.Clamp(hero.ArmorRank, 0, 4)}.png") is { } a) GUI.DrawTexture(armour, a);
+        if (weapon.Contains(Event.current.mousePosition)) _hudTip = $"Weapon rank {hero.WeaponRank + 1}: {Dd2.Dd2Heroes.EquipmentText("weapon", hero.WeaponRank)}";
+        if (armour.Contains(Event.current.mousePosition)) _hudTip = $"Armour rank {hero.ArmorRank + 1}: {Dd2.Dd2Heroes.EquipmentText("armour", hero.ArmorRank)}";
+        for (int i = 0; i < 2 && i < hero.Trinkets.Count; i++)
+        {
+            var r = new Rect(718 + i * 92, 906, 72, 144);
+            HeroSheet.TrinketIcon(r, hero.Trinkets[i]);
+            if (r.Contains(Event.current.mousePosition)) _hudTip = HeroSheet.TrinketText(hero.Trinkets[i]);
+        }
+        if (_hudTip != null && Event.current.type == EventType.Repaint)
+        {
+            var m = Event.current.mousePosition;
+            var tr = new Rect(Mathf.Min(m.x + 16, 1500), m.y - 70, 400, 60);
+            Gui.Fill(tr, new Color(0.03f, 0.025f, 0.02f, 0.95f));
+            Gui.Text(new Rect(tr.x + 10, tr.y + 6, tr.width - 20, tr.height - 10), _hudTip, 17, Gui.Dd1Text);
+        }
+        if (Event.current.type == EventType.Repaint) _hudTip = null;
+    }
+
+    private string _hudTip;
+
+    /// <summary>The selected hero's equipped DD2 combat skills in DD1's five banner slots (upgraded ones marked +).</summary>
+    private void DrawSkillRow(Core.Campaign.HeroRecord hero, Assets.Code.Actor.ActorInstance actor)
+    {
+        var skills = Dd2.HeroSkills.ForClass(hero.ClassId);
+        if (skills == null) return;
+        var equipped = actor.GetEquippedCombatSkillIds();
+        for (int i = 0; i < 5 && i < equipped.Count; i++)
+        {
+            string id = equipped[i];
+            string baseId = id.EndsWith("_u") ? id.Substring(0, id.Length - 2) : id;
+            var skill = skills.Find(sk => sk.Id == baseId);
+            var r = new Rect(520 + i * 76, 755, 72, 72);
+            if (skill?.Icon != null) Art.DrawSprite(r, skill.Icon);
+            if (id.EndsWith("_u")) Gui.Text(new Rect(r.x + 40, r.y + 46, 30, 26), "+", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
+            if (r.Contains(Event.current.mousePosition)) _hudTip = Dd2.HeroSkills.Name(baseId) + (id.EndsWith("_u") ? " (mastered)" : "");
+        }
     }
 
     // ---------------- map ----------------

@@ -26,5 +26,10 @@ public class Dd2TablesTests
         Assert.Equal("jester", haul.HeroClass);
         Assert.False(haul.IsForHero("vestal"));
         Assert.Equal("common", t.Trinkets["trinket_tiered_anchoring_charm_minor"].Rarity);
+        var hwm = t.Classes["highwayman"];
+        Assert.Equal(35, hwm.Get("health_max"));
+        Assert.Equal(5, hwm.Get("speed"));
+        Assert.Equal(0.3f, hwm.Resistances["bleed"], 3);
+        Assert.True(t.Classes.Count >= 11);
     }
 }

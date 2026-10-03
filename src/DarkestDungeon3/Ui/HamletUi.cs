@@ -57,11 +57,36 @@ internal sealed class HamletUi
             Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
             DrawTownEvent(hamlet);
         }
+        else if (_panel == Panel.Hero && E.Hero(_heroId) is { } sheetHero)
+        {
+            Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
+            HeroSheet.Draw(sheetHero, id => _heroId = id, () => { _panel = Panel.Town; _heroId = null; });
+        }
         else if (windowOpen)
         {
             Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
             DrawWindow(hamlet);
         }
+        else if (HeroSheet.RealmOpen) DrawRealmAlone();
+    }
+
+    /// <summary>The realm inventory opened from the estate bar, without a hero: just the stash to look through.</summary>
+    private void DrawRealmAlone()
+    {
+        Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.4f));
+        var panel = new Rect(881, 128, 667, 780);
+        if (Art.Dd1("campaign", "town", "realm_inventory", "realminv_bg.png") is { } bg) GUI.DrawTexture(panel, bg); else Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
+        Gui.Text(new Rect(921, 148, 500, 46), "Trinkets", 34, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(921, 194, 580, 50), "Open a hero from the roster to equip them.", 17, Gui.Dd1Class);
+        for (int i = 0; i < E.Trinkets.Count && i < 21; i++)
+        {
+            var r = new Rect(911 + (i % 7) * 80, 323 + (i / 7) * 160, 72, 144);
+            HeroSheet.TrinketIcon(r, E.Trinkets[i]);
+            if (r.Contains(Event.current.mousePosition)) Gui.Text(new Rect(921, 248, 580, 70), HeroSheet.TrinketText(E.Trinkets[i]), 18, Gui.Dd1Text);
+        }
+        var close = new Rect(881 + 610 - 6, 128 + 22 - 6, 46, 46);
+        if (Art.Dd1("shared", "progression", "progression_close.png") is { } x) GUI.DrawTexture(close, x);
+        if (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) HeroSheet.RealmOpen = false;
     }
 
     private bool _exchangeOpen;
@@ -323,7 +348,9 @@ internal sealed class HamletUi
             if (tex != null) GUI.DrawTexture(new Rect(x, BarY + 38, 40, 40), tex);
             Gui.Text(new Rect(x + 46, BarY + 34, 70, 48), E.Get(cur).ToString(), 28, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
         }
-        Gui.Text(new Rect(960, BarY + 34, 140, 48), $"Trinkets {E.Trinkets.Count}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        var trinketsButton = new Rect(960, BarY + 30, 130, 56);
+        Gui.Text(trinketsButton, $"Trinkets {E.Trinkets.Count}", 22, trinketsButton.Contains(Event.current.mousePosition) ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (Gui.Hotspot(trinketsButton)) HeroSheet.RealmOpen = !HeroSheet.RealmOpen;
         var he = Art.Dd1("campaign", "town", "heirloom_exchange", _exchangeOpen ? "he_icon_selected.png" : "he_icon_idle.png");
         var heRect = new Rect(890, BarY + 26, 60, 60);
         if (he != null) GUI.DrawTexture(heRect, he, ScaleMode.ScaleToFit); else Gui.Fill(heRect, new Color(0.2f, 0.17f, 0.12f));
@@ -783,23 +810,32 @@ internal sealed class HamletUi
 
     private void DrawWagon(Rect area, Hamlet hamlet)
     {
-        Frame(area);
-        for (int i = 0; i < E.WagonStock.Count; i++)
+        // DD1's wagon grid (nomad_wagon.layout.darkest): background at body + (230,150), 6 columns 100 x 180 apart.
+        var origin = new Vector2(596 + 230, 102 + 150);
+        if (BuildingArt(Buildings.NomadWagon, "inventory_grid_background.png") is { } grid) GUI.DrawTexture(new Rect(origin.x, origin.y, 684, 360), grid);
+        string hovered = null;
+        for (int i = 0; i < E.WagonStock.Count && i < 12; i++)
         {
             string t = E.WagonStock[i];
             int price = hamlet.WagonPrice(t);
-            var r = new Rect(area.x + 10, area.y + 14 + i * 64, area.width - 20, 58);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            Gui.Text(new Rect(r.x + 14, r.y, 440, r.height), Pretty(t), 22, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            if (Gui.DdButton(new Rect(r.xMax - 230, r.y + 8, 220, 42), $"Buy  {price} gold", E.Get(Currency.Gold) >= price, 20))
+            var r = new Rect(origin.x + 55 + (i % 6) * 100, origin.y - 10 + (i / 6) * 180 + 20, 72, 144);
+            bool afford = E.Get(Currency.Gold) >= price;
+            var old = GUI.color;
+            if (!afford) GUI.color = new Color(0.5f, 0.5f, 0.5f, 1f);
+            HeroSheet.TrinketIcon(r, t);
+            GUI.color = old;
+            Gui.Text(new Rect(r.x - 14, r.yMax + 2, r.width + 28, 22), Gui.Num(price, "#,0"), 17, afford ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
+            if (r.Contains(Event.current.mousePosition)) hovered = t;
+            if (afford && Gui.Hotspot(r))
             {
                 hamlet.BuyTrinket(t);
                 S.Persist();
                 break;
             }
         }
-        Gui.Text(new Rect(area.x + 20, area.yMax - 110, area.width - 40, 100),
-            $"Your trinkets: {string.Join(", ", E.Trinkets.Select(Pretty))}\nEquip them from a hero's page (click a hero in the roster).", 17, Gui.Dd1Class);
+        if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        string info = hovered != null ? HeroSheet.TrinketText(hovered).Replace('\n', ' ') + "  ·  click to buy" : $"Your stash: {E.Trinkets.Count} trinkets. Equip them from a hero's sheet (click a hero in the roster).";
+        Gui.Text(new Rect(origin.x, origin.y + 380, 684, 50), info, 18, Gui.Dd1Text, TextAnchor.UpperCenter);
     }
 
     private void DrawGraveyard(Rect area)

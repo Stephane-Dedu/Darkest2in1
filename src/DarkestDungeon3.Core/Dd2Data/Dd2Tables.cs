@@ -17,6 +17,15 @@ public sealed class Dd2Quirk
     public bool IsStarting => Tags.Contains("pos_start") || Tags.Contains("neg_start");
 }
 
+/// <summary>A DD2 hero class's base numbers (its ActorDataStats block).</summary>
+public sealed class Dd2ClassStats
+{
+    public string Id;
+    public Dictionary<string, float> Stats = new();         // health_max, speed, stress_max, deaths_door_chance ...
+    public Dictionary<string, float> Resistances = new();   // stun, blight, bleed, burn, disease, move, debuff, death
+    public float Get(string key) => Stats.TryGetValue(key, out var v) ? v : 0f;
+}
+
 /// <summary>A DD2 trinket as its data table describes it.</summary>
 public sealed class Dd2Trinket
 {
@@ -37,10 +46,26 @@ public sealed class Dd2Tables
 {
     public Dictionary<string, Dd2Quirk> Quirks { get; } = new();
     public Dictionary<string, Dd2Trinket> Trinkets { get; } = new();
+    public Dictionary<string, Dd2ClassStats> Classes { get; } = new();
 
     public static Dd2Tables Load(string excelDir)
     {
         var t = new Dd2Tables();
+        foreach (var file in Directory.Exists(excelDir) ? Directory.GetFiles(excelDir, "hero_*_data_export.Group.csv") : new string[0])
+            foreach (var (id, type, _, lines) in BlockLines(file))
+            {
+                if (type != "ActorDataStats" || id.EndsWith("_corpse")) continue;
+                var c = new Dd2ClassStats { Id = id };
+                string[] keys = null;
+                foreach (var line in lines)
+                {
+                    if (line[0] == "key_map") keys = line.Skip(1).ToArray();
+                    else if (line[0] == "add_stats" && keys != null)
+                        for (int i = 0; i < keys.Length && i + 1 < line.Length; i++) c.Stats[keys[i]] = Num(line[i + 1]);
+                    else if (line[0] == "sub_stat" && line.Length >= 4 && line[1] == "resistance") c.Resistances[line[2]] = Num(line[3]);
+                }
+                if (c.Stats.ContainsKey("health_max")) t.Classes[id] = c;
+            }
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "quirk_data_export.Group.csv")))
             if (type == "Quirk") t.Quirks[id] = new Dd2Quirk { Id = id, Tags = Values(fields, "m_Tags") };
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "trinkets_data_export.Group.csv")))
@@ -61,6 +86,32 @@ public sealed class Dd2Tables
 
     private static List<string> Values(Dictionary<string, List<string>> fields, string key) =>
         fields.TryGetValue(key, out var v) ? v : new List<string>();
+
+    private static float Num(string s) => float.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var f) ? f : 0f;
+
+    /// <summary>Each element block with every line (repeated keys like sub_stat kept), cells without empties.</summary>
+    public static IEnumerable<(string Id, string Type, Dictionary<string, List<string>> Fields, List<string[]> Lines)> BlockLines(string path)
+    {
+        if (!File.Exists(path)) yield break;
+        string id = null, type = null;
+        List<string[]> lines = null;
+        foreach (var raw in File.ReadLines(path))
+        {
+            var cells = raw.Split(',');
+            if (cells[0] == "element_start" && cells.Length >= 3) { id = cells[1]; type = cells[2]; lines = new List<string[]>(); }
+            else if (cells[0] == "element_end")
+            {
+                if (id != null)
+                {
+                    var fields = new Dictionary<string, List<string>>();
+                    foreach (var l in lines) fields[l[0]] = l.Skip(1).ToList();
+                    yield return (id, type, fields, lines);
+                }
+                id = null;
+            }
+            else if (id != null && cells[0].Length > 0) lines.Add(cells.Where(c => c.Length > 0).ToArray());
+        }
+    }
 
     /// <summary>Each element block: its id, its type and its fields (key → values).</summary>
     public static IEnumerable<(string Id, string Type, Dictionary<string, List<string>> Fields)> Blocks(string path)
