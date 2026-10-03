@@ -673,6 +673,7 @@ public sealed class Crawl
     /// <summary>On entering a new room, maybe reveal what lies within two corridors (DD1 scouting).</summary>
     private void Scout(Room room)
     {
+        if (State.Quest?.ScoutingEnabled == false) return;   // DD1: no scouting in the Darkest Dungeon
         var rng = NextRng();
         float chance = _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
         if (!rng.Chance(chance)) return;
@@ -700,6 +701,7 @@ public sealed class Crawl
     /// </summary>
     public (float Heroes, float Monsters) SurpriseChances(bool corridor, bool known, bool ambush)
     {
+        if (State.Quest?.SurpriseEnabled == false && !ambush) return (0f, 0f);   // DD1: no surprise in the Darkest Dungeon
         var band = _rules.Band(State.Light);
         float heroes = ambush ? _rules.SurpriseAmbushParty
             : known ? (corridor ? _rules.SurpriseKnownCorridorParty : _rules.SurpriseKnownRoomParty)

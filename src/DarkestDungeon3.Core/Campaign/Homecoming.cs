@@ -102,6 +102,13 @@ public static class Homecoming
             }
         }
 
+        if (success && quest.ClearsRosterStress)
+        {
+            // DD1: a Darkest Dungeon win clears the stress of every hero on the roster (is_roster_stress_cleared_on_completion).
+            foreach (var h in estate.Roster) h.Stress = 0;
+            log.Add("The victory lifts every heart in the Hamlet: all stress is gone.");
+        }
+
         if (success)
         {
             foreach (var r in quest.Rewards)
@@ -140,7 +147,7 @@ public static class Homecoming
                 continue;
             }
             var quirksBefore = hero.Quirks.ToList();
-            hero.Stress = o.Stress;
+            hero.Stress = success && quest.ClearsRosterStress ? 0 : o.Stress;   // the party too, after a Darkest Dungeon win
             if (expedition.Retreated && dd1 != null && dd1.AbandonStressDd1 > 0)
             {
                 // DD1: "The heroes will suffer the stress of defeat" (20 of 100 = 2 of DD2's 10 points).

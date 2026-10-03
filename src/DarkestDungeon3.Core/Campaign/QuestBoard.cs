@@ -91,6 +91,9 @@ public static class QuestBoard
                 Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
                 CanRetreat = p.CanRetreat,
                 RetreatKillCount = p.RetreatKillCount,
+                SurpriseEnabled = p.SurpriseEnabled,
+                ScoutingEnabled = p.ScoutingEnabled,
+                ClearsRosterStress = p.ClearsRosterStress,
             };
         }
 

@@ -36,6 +36,8 @@ public sealed class PlotQuest
     /// (the Darkest Dungeon: 1; its last part can't be abandoned).</summary>
     public bool CanRetreat = true;
     public int RetreatKillCount;
+    /// <summary>DD1: no surprise / no scouting in the quest (the Darkest Dungeon), and a win clears the roster's stress.</summary>
+    public bool SurpriseEnabled = true, ScoutingEnabled = true, ClearsRosterStress;
 }
 
 public sealed class QuestGoals
@@ -92,6 +94,9 @@ public sealed class QuestGoals
                 Progression = (bool?)p["is_progression"] ?? false,
                 CanRetreat = (bool?)p["can_retreat"] ?? true,
                 RetreatKillCount = (int?)p["retreat_party_kill_count"] ?? 0,
+                SurpriseEnabled = (bool?)p["is_surprise_enabled"] ?? true,
+                ScoutingEnabled = (bool?)p["is_scouting_enabled"] ?? true,
+                ClearsRosterStress = (bool?)p["is_roster_stress_cleared_on_completion"] ?? false,
             };
             foreach (var item in (quest["completion_reward"]?["items_definition"]?["items"] as JObject)?.Properties().Select(x => x.Value) ?? Enumerable.Empty<JToken>())
             {

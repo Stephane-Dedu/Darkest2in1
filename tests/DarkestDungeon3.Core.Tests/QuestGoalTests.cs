@@ -99,6 +99,35 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void DarkestDungeonHasNoSurpriseOrScoutingAndAWinClearsStress()
+    {
+        var dd = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.False(dd.SurpriseEnabled);                       // DD1 is_surprise_enabled
+        Assert.False(dd.ScoutingEnabled);                       // is_scouting_enabled
+        Assert.True(dd.ClearsRosterStress);                     // is_roster_stress_cleared_on_completion
+        Assert.True(Dd1.Goals.Plot.Single(p => p.Id == "plot_kill_necromancer_1").SurpriseEnabled);
+
+        var (crawl, state) = Expedition("explore", "crypts", 11);
+        state.Quest.SurpriseEnabled = false;
+        Assert.Equal((0f, 0f), crawl.SurpriseChances(corridor: true, known: false, ambush: false));
+
+        var estate = new Estate { Seed = 3 };
+        var inParty = new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", Stress = 1 };
+        var atHome = new HeroRecord { Id = "h", Name = "H", ClassId = "vestal", Stress = 7 };
+        estate.Roster.Add(inParty);
+        estate.Roster.Add(atHome);
+        var exp = new ExpeditionState
+        {
+            Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, ClearsRosterStress = true },
+            Party = { "p" },
+            QuestComplete = true,
+        };
+        Homecoming.Report(estate, Dd1, exp, new[] { new HeroOutcome { HeroId = "p", Stress = 6 } });
+        Assert.Equal(0, inParty.Stress);
+        Assert.Equal(0, atHome.Stress);
+    }
+
+    [Fact]
     public void TrinketWarningOnHarderQuestsWithFewTrinkets()
     {
         var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();

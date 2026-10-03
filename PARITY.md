@@ -115,7 +115,9 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Plot quests & the Darkest Dungeon
 - [?] Boss quests per zone; DD1 bosses → DD2 boss configs (zones.json).
 - [?] Darkest Dungeon quest chain (`campaign/quest/plot`), DD art per quest folder, resolve 5 gate.
-- [ ] Heroes who finish a DD quest refuse to go again (DD1 `hero_final_dd` activity log entry) — check rule.
+- [user] Heroes who finish a Darkest Dungeon quest: DD1 `tutorial_popup_quest_restriction_darkest_dungeon_description` — "they may choose to never go back, or simply..." depending on the game mode and options (not in the data files). Goes with the game-mode question.
+- [?] Darkest Dungeon quest flags (`quest.plot_quests.json`): `is_surprise_enabled` false, `is_scouting_enabled` false, `is_roster_stress_cleared_on_completion` true. Was: none. Now on PlotQuest/QuestOffer; Crawl skips surprise (ambushes aside) and scouting, Homecoming clears every roster hero's stress after a win (QuestGoalTests.DarkestDungeonHasNoSurpriseOrScoutingAndAWinClearsStress). In game: needs a Darkest Dungeon quest.
+- [ ] Darkest Dungeon failure buff: `roster_buffs_to_apply_on_failure` darkest_dungeon_failure_roster_resolve_xp when the party's resolve ≥ `roster_buff_on_failure_minimum_party_resolve_level` 5 — not applied.
 - [ ] Town background after DD quests: `campaign/town/town_bg_post_dd_1..3.png` not used.
 
 ## Audio
