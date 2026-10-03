@@ -49,8 +49,6 @@ internal sealed class Driver : MonoBehaviour
     private readonly Queue<int> _route = new();
     private int _routeTargetRoom = -1;
     private (int corridor, int tile) _routeTargetTile = (-1, -1);
-    private float _nextStepAt;
-    private const float StepSeconds = 0.3f;
 
     private void Awake()
     {
@@ -86,10 +84,8 @@ internal sealed class Driver : MonoBehaviour
         }
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
-        WalkByKeys(kb);
+        Walk(kb);
         if (kb != null && kb.tKey.wasPressedThisFrame) UseTorch();
-
-        if (IsWalking && Time.unscaledTime >= _nextStepAt) WalkOneStep();
     }
 
     /// <summary>
@@ -223,44 +219,124 @@ internal sealed class Driver : MonoBehaviour
     public bool IsMovingNow => Mathf.Abs(_walkVelocity) > 0.01f || IsWalking || Time.unscaledTime - LastStepTime < 0.3f;
     private float _walkVelocity;
 
-    private void WalkByKeys(UnityEngine.InputSystem.Keyboard kb)
+    /// <summary>
+    /// DD1 walking. In a hallway the party walks continuously: hold D/→ (A/← backs up at half speed), or follow a
+    /// route picked on the map. Squares are entered as the party walks into them. Rooms are left through a fade, by
+    /// the arrows (the exit that way on the map) or by the route.
+    /// </summary>
+    private void Walk(UnityEngine.InputSystem.Keyboard kb)
     {
         _walkVelocity = 0;
-        if (kb == null || Expedition.Camp != null || Ui.UiRoot.ModalOpen) { WalkProgress = 0; return; }
-        bool right = kb.dKey.isPressed || kb.rightArrowKey.isPressed, left = kb.aKey.isPressed || kb.leftArrowKey.isPressed;
-        bool up = kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame, down = kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame;
+        if (Expedition.InRoom != _wasInRoom) { _wasInRoom = Expedition.InRoom; _fadeInFrom = Time.unscaledTime; }
+        if (_travelTo >= 0)
+        {
+            WalkProgress = 0;
+            if (Time.unscaledTime - _travelFrom < FadeSeconds) return;   // fading out of the room
+            int to = _travelTo;
+            _travelTo = -1;
+            Travel(to);
+            _wasInRoom = Expedition.InRoom;
+            _fadeInFrom = Time.unscaledTime;
+            if (_interruptsThisStep) { StopWalking(); _interruptsThisStep = false; }
+            return;
+        }
+        if (Expedition.Camp != null || Ui.UiRoot.ModalOpen) { WalkProgress = 0; return; }
+        bool right = kb != null && (kb.dKey.isPressed || kb.rightArrowKey.isPressed);
+        bool left = kb != null && (kb.aKey.isPressed || kb.leftArrowKey.isPressed);
 
         if (Expedition.InRoom)
         {
             WalkProgress = 0;
-            bool rightNow = kb.dKey.wasPressedThisFrame || kb.rightArrowKey.wasPressedThisFrame;
-            bool leftNow = kb.aKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame;
+            if (Crawl.IsBlocked) { StopWalking(); return; }
+            bool rightNow = kb != null && (kb.dKey.wasPressedThisFrame || kb.rightArrowKey.wasPressedThisFrame);
+            bool leftNow = kb != null && (kb.aKey.wasPressedThisFrame || kb.leftArrowKey.wasPressedThisFrame);
+            bool up = kb != null && (kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame);
+            bool down = kb != null && (kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame);
             Vector2 dir = rightNow ? Vector2.right : leftNow ? Vector2.left : up ? Vector2.down : down ? Vector2.up : Vector2.zero;
-            if (dir != Vector2.zero && !Crawl.IsBlocked && Crawl.CurioHere == null)
+            if (dir != Vector2.zero && Crawl.CurioHere == null)
             {
                 int exit = ExitToward(dir);
-                if (exit >= 0) { StopWalking(); Travel(exit); }
+                if (exit >= 0) { StopWalking(); BeginTravel(exit); }
+                return;
             }
+            if (!IsWalking) return;
+            if (_routeTargetTile.corridor >= 0) { BeginTravel(Expedition.Map.Corridor(_routeTargetTile.corridor).Other(Expedition.RoomId)); return; }
+            while (_route.Count > 0 && _route.Peek() == Expedition.RoomId) _route.Dequeue();
+            if (_route.Count == 0) { StopWalking(); return; }
+            BeginTravel(_route.Peek());
             return;
         }
-        if (!(right ^ left)) { WalkProgress = Mathf.MoveTowards(WalkProgress, 0, Time.unscaledDeltaTime * 2f); return; }
-        StopWalking();
-        // Facing: on screen, right is always the way the party is heading.
-        bool forward = right;
-        if (forward && Crawl.IsBlocked) { WalkProgress = Mathf.Min(WalkProgress, 0.3f); return; }   // an obstacle or a fight ahead
+
+        int intent = right ^ left ? (right ? 1 : -1) : 0;
+        if (intent != 0) StopWalking();
+        else if (IsWalking) intent = RouteIntent();
+        if (intent == 0) { WalkProgress = Mathf.MoveTowards(WalkProgress, 0, Time.unscaledDeltaTime * 2f); return; }
+        bool forward = intent > 0;
+        if (forward && Crawl.IsBlocked)   // an obstacle or a fight ahead
+        {
+            WalkProgress = Mathf.MoveTowards(WalkProgress, Mathf.Min(WalkProgress, 0.3f), Time.unscaledDeltaTime);
+            StopWalking();
+            return;
+        }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
         WalkProgress += speed * Time.unscaledDeltaTime;
-        if (Mathf.Abs(WalkProgress) >= 1f)
+        if (Mathf.Abs(WalkProgress) < 1f) return;
+        float carry = WalkProgress - Mathf.Sign(WalkProgress);
+        _continuousStep = true;
+        Step(forward);
+        _continuousStep = false;
+        WalkProgress = Expedition.InRoom ? 0 : carry;
+        // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
+        if (_interruptsThisStep || (IsWalking && Crawl.CurioHere != null)) { WalkProgress = 0; _interruptsThisStep = false; StopWalking(); }
+        if (_routeTargetTile.corridor >= 0 && !Expedition.InRoom && Expedition.TileIndex == _routeTargetTile.tile) StopWalking();
+    }
+
+    /// <summary>Which way the map route goes from here in the hallway: +1 ahead, -1 back, 0 arrived.</summary>
+    private int RouteIntent()
+    {
+        var c = Crawl.CurrentCorridor;
+        if (_routeTargetTile.corridor >= 0)
         {
-            float carry = WalkProgress - Mathf.Sign(WalkProgress);
-            int before = Expedition.StepsTaken;
-            _continuousStep = true;
-            Step(forward);
-            _continuousStep = false;
-            WalkProgress = Expedition.InRoom ? 0 : carry;
-            // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
-            if (_interruptsThisStep) { WalkProgress = 0; _interruptsThisStep = false; }
+            int idx = _routeTargetTile.tile;
+            if (_routeTargetTile.corridor != c.Id || Expedition.TileIndex == idx) { StopWalking(); return 0; }
+            return (idx > Expedition.TileIndex) == (Expedition.HeadingRoomId == c.RoomB) ? 1 : -1;
+        }
+        int next = _route.Count > 0 ? _route.Peek() : _routeTargetRoom;
+        if (next < 0) { StopWalking(); return 0; }
+        return Expedition.HeadingRoomId == next ? 1 : -1;
+    }
+
+    // ---- DD1's fades: out of a room into a hallway, and into a room at the end of one ----
+
+    private const float FadeSeconds = 0.3f;
+    private int _travelTo = -1;
+    private float _travelFrom, _fadeInFrom = -10f;
+    private bool _wasInRoom;
+
+    private void BeginTravel(int roomId)
+    {
+        _travelTo = roomId;
+        _travelFrom = Time.unscaledTime;
+    }
+
+    /// <summary>How dark the scene is from a transition (0 clear .. 1 black).</summary>
+    public float FadeAlpha
+    {
+        get
+        {
+            float now = Time.unscaledTime;
+            if (_travelTo >= 0) return Mathf.Clamp01((now - _travelFrom) / FadeSeconds);
+            float fadeIn = 1f - Mathf.Clamp01((now - _fadeInFrom) / (FadeSeconds * 1.4f));
+            // Walking into the last square's door: the room ahead fades in.
+            float door = 0f;
+            if (Crawl != null && !Expedition.InRoom && WalkProgress > 0.55f)
+            {
+                var c = Crawl.CurrentCorridor;
+                int last = Expedition.HeadingRoomId == c.RoomB ? c.Tiles.Count - 1 : 0;
+                if (Expedition.TileIndex == last && !Crawl.IsBlocked) door = (WalkProgress - 0.55f) / 0.45f;
+            }
+            return Mathf.Clamp01(Mathf.Max(fadeIn, door));
         }
     }
 
@@ -310,7 +386,6 @@ internal sealed class Driver : MonoBehaviour
         int from = Expedition.InRoom ? Expedition.RoomId : NearestEnd(target);
         foreach (int r in RoomPath(map, from, target)) _route.Enqueue(r);
         _routeTargetRoom = target;
-        _nextStepAt = Time.unscaledTime;
     }
 
     /// <summary>Walk to a square of the corridor the party is in, or of a corridor next to its room.</summary>
@@ -321,7 +396,6 @@ internal sealed class Driver : MonoBehaviour
         if (Expedition.InRoom && c.RoomA != Expedition.RoomId && c.RoomB != Expedition.RoomId) return;
         if (!Expedition.InRoom && Expedition.CorridorId != corridorId) return;
         _routeTargetTile = (corridorId, tileIndex);
-        _nextStepAt = Time.unscaledTime;
     }
 
     private int NearestEnd(int target)
@@ -348,43 +422,6 @@ internal sealed class Driver : MonoBehaviour
         for (int at = to; at != -1; at = prev[at]) path.Add(at);
         path.Reverse();
         return path;   // starts with `from`
-    }
-
-    private void WalkOneStep()
-    {
-        _nextStepAt = Time.unscaledTime + StepSeconds;
-        if (Crawl.IsBlocked || Crawl.CurioHere != null || Expedition.Camp != null) { StopWalking(); return; }
-        int interruptsBefore = _interrupts;
-
-        if (_routeTargetTile.corridor >= 0)
-        {
-            var (cid, idx) = _routeTargetTile;
-            var c = Expedition.Map.Corridor(cid);
-            if (Expedition.InRoom)
-            {
-                Travel(c.Other(Expedition.RoomId));
-            }
-            else if (Expedition.TileIndex == idx) { StopWalking(); return; }
-            else
-            {
-                bool towardB = idx > Expedition.TileIndex;
-                Step(forward: towardB == (Expedition.HeadingRoomId == c.RoomB));
-            }
-            if (!Expedition.InRoom && Expedition.TileIndex == idx) StopWalking();
-        }
-        else if (Expedition.InRoom)
-        {
-            while (_route.Count > 0 && _route.Peek() == Expedition.RoomId) _route.Dequeue();
-            if (_route.Count == 0) { StopWalking(); return; }
-            Travel(_route.Peek());
-        }
-        else
-        {
-            // In a corridor: keep walking toward the next room on the route.
-            int next = _route.Count > 0 ? _route.Peek() : _routeTargetRoom;
-            Step(forward: Expedition.HeadingRoomId == next);
-        }
-        if (_interrupts != interruptsBefore) StopWalking();
     }
 
     public void Fight()

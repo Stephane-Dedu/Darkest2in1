@@ -343,6 +343,9 @@ Feasibility notes (decomp):
       (custom BattleConfiguration "dd3_dd1_encounter" registered at fight start). Check: enemies appear in order,
       two-rank enemies fit, champions (_b) at champion level, loot after the win matches the DD1 monsters,
       a retreat then re-engage meets the same group, bosses still use zones.json configs.
+- [ ] DD1 hallway strip: far/mid parallax behind the walls' gaps, doors and end walls at both ends; walking by
+      keys and by map route is continuous (no 0.3 s slides); stops at fights/curios/traps; fade into a room at
+      the last door and out of a room into a hallway; room exits by arrows fade too.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

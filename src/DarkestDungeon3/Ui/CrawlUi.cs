@@ -39,6 +39,8 @@ internal sealed class CrawlUi
         DrawScene(crawl, exp, zone);
         if (exp.Camp != null) DrawCampfire();
         DrawHeroes(exp);
+        float fade = D.FadeAlpha;
+        if (fade > 0.001f) Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, fade));
         if (exp.Camp != null) DrawRespite(exp.Camp); else DrawTorch(exp.Light);
         DrawQuestInfo(crawl, exp);
         DrawHud(exp);
@@ -66,28 +68,29 @@ internal sealed class CrawlUi
         }
         else
         {
+            // DD1's hallway is one strip: [end wall][door][squares...][door][end wall], with its far and middle
+            // layers scrolling slower behind the walls' gaps. Screen-right is the way the party is heading.
             var c = crawl.CurrentCorridor;
-            int dir = exp.HeadingRoomId == c.RoomB ? 1 : -1;   // screen-right is the way the party is heading
-            for (int k = -2; k <= 2; k++)
+            int n = c.Tiles.Count;
+            bool towardB = exp.HeadingRoomId == c.RoomB;
+            int here = towardB ? exp.TileIndex : n - 1 - exp.TileIndex;   // the party's square, counted along the heading
+            float walked = (here * 720f - slide) + (towardB ? 0 : 7 * 720f);
+            Parallax(Art.CorridorBackground(zone), walked * 0.25f);
+            Parallax(Art.CorridorMid(zone), walked * 0.55f);
+            var top = Art.ForegroundTop(zone);
+            var bottom = Art.ForegroundBottom(zone);
+            for (int k = -3; k <= 3; k++)
             {
-                int i = exp.TileIndex + k * dir;
+                int h = here + k;
                 float x = 600 + k * 720 + slide;
                 if (x > 1920 || x + 720 < 0) continue;
-                bool beyond = i < 0 || i >= c.Tiles.Count;
-                if (beyond && Math.Abs(k) > 1 && (i < -1 || i > c.Tiles.Count)) continue;
-                if (beyond)
-                {
-                    // DD1's door segment has its doorway on the right: mirror it for the door behind the party.
-                    var door = Art.CorridorDoor(zone);
-                    if (door != null) GUI.DrawTextureWithTexCoords(new Rect(x, 0, 720, 720), door, k > 0 ? new Rect(0, 0, 1, 1) : new Rect(1, 0, -1, 1));
-                }
-                else
-                {
-                    var wall = Art.CorridorWall(zone, c.Id * 3 + i);
-                    if (wall != null) GUI.DrawTexture(new Rect(x, 0, 720, 720), wall);
-                }
-                var top = Art.ForegroundTop(zone);
-                var bottom = Art.ForegroundBottom(zone);
+                Texture2D tex = null;
+                bool mirror = false;
+                if (h >= 0 && h < n) tex = Art.CorridorWall(zone, c.Id * 3 + (towardB ? h : n - 1 - h));
+                else if (h == -1 || h == n) { tex = Art.CorridorDoor(zone); mirror = h == -1; }   // DD1's door art has its doorway on the right
+                else if (h == -2 || h == n + 1) { tex = Art.EndHall(zone); mirror = h == -2; }
+                if (tex != null) GUI.DrawTextureWithTexCoords(new Rect(x, 0, 720, 720), tex, mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
+                if (h < -2 || h > n + 1) continue;
                 if (top != null) GUI.DrawTexture(new Rect(x, 0, 720, top.height), top);
                 if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
             }
@@ -102,6 +105,14 @@ internal sealed class CrawlUi
             Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
             Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
         }
+    }
+
+    /// <summary>A 720-wide layer repeated across the screen, scrolled by <paramref name="offset"/> pixels.</summary>
+    private static void Parallax(Texture2D tex, float offset)
+    {
+        if (tex == null) return;
+        float x0 = -(((offset % 720f) + 720f) % 720f);
+        for (float x = x0; x < 1920; x += 720) GUI.DrawTexture(new Rect(x, 0, 720, 720), tex);
     }
 
     /// <summary>

@@ -48,6 +48,8 @@ internal static class Art
 
     // ---- dungeon scene ----
     public static Texture2D CorridorBackground(string zone) => Dd1("dungeons", zone, zone + ".corridor_bg.png");
+    public static Texture2D CorridorMid(string zone) => Dd1("dungeons", zone, zone + ".corridor_mid.png");
+    public static Texture2D EndHall(string zone) => Dd1("dungeons", zone, zone + ".endhall.01.png");
 
     public static Texture2D CorridorWall(string zone, int index) =>
         Dd1("dungeons", zone, $"{zone}.corridor_wall.{((index % 7) + 7) % 7:00}.png") ?? Dd1("dungeons", zone, $"{zone}.corridor_wall.00.png");
