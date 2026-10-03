@@ -594,6 +594,18 @@ internal static class Dd1MonsterView
         if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return false; }
         Note(m, $"drawn, over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}): {bodyPx:0} px tall, scale {scale:0.00}");
         Hide(m);   // only once DD1's art is really on screen
+        // DD2 keeps adding parts to the model after the fight starts (seen in game: the DD2 spiders stayed drawn in
+        // front of the DD1 ones): look again twice a second and hide the new ones too.
+        if (Time.unscaledTime >= m.NextRendererScan)
+        {
+            m.NextRendererScan = Time.unscaledTime + 0.5f;
+            var fresh = ModelRenderers(m.Actor);
+            int added = 0;
+            foreach (var r in fresh)
+                if (r != null && !r.forceRenderingOff) { r.forceRenderingOff = true; added++; }
+            m.Renderers = fresh;
+            if (added > 0) Note(m, $"hid {added} more stand-in parts");
+        }
         return true;
     }
 

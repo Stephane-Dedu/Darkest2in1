@@ -63,15 +63,20 @@ internal static class Dd1SkillData
     }
 }
 
-/// <summary>A DD1 skill's DD2 element borrows the presentation (animation, camera, sounds, icon) of the DD2 skill it
-/// stands on: DD2 asks its skill resources by skill id ("dd3__&lt;base&gt;__..." → base).</summary>
-[HarmonyLib.HarmonyPatch(typeof(ResourceDatabaseAddressable<ResourceDatabaseSkills, ResourceSkillBase>), "GetResource")]
+/// <summary>
+/// A DD1 skill's DD2 element borrows the presentation (animation, camera, sounds, icon) of the DD2 skill it stands
+/// on: an id the skills database doesn't hold falls back to ResourceDatabaseSkills.GetFallbackResourceId, which for
+/// "dd3__&lt;base&gt;__..." gives the base. (Not the generic ResourceDatabaseAddressable&lt;,&gt;.GetResource: patching
+/// it replaced the code every resource database shares and broke loading heroes.)
+/// </summary>
+[HarmonyLib.HarmonyPatch(typeof(ResourceDatabaseSkills), "GetFallbackResourceId")]
 internal static class Dd1SkillPresentation
 {
-    private static void Prefix(object __instance, ref string resourceId)
+    private static bool Prefix(string originalResourceId, ref string __result)
     {
-        if (resourceId == null || resourceId.Length < 5 || resourceId[0] != 'd' || !(__instance is ResourceDatabaseSkills)) return;
-        string baseSkill = Dd1SkillToDd2.BaseOf(resourceId);
-        if (baseSkill != null) resourceId = baseSkill;
+        string baseSkill = Dd1SkillToDd2.BaseOf(originalResourceId);
+        if (baseSkill == null) return true;
+        __result = baseSkill;
+        return false;
     }
 }

@@ -17,12 +17,12 @@ powershell -NoProfile -Command "\$p = Start-Process -FilePath '$GAME' -ArgumentL
 sleep 5
 for i in $(seq 1 90); do grep -q "Finished loading scene main_menu_kingdom" "$P" 2>/dev/null && break; sleep 2; done; sleep 4
 d "click 190 754"; sleep 2; d "click 800 468"; sleep 4
-d "click 1088 848"; sleep 1.5                                  # Hamlet: Embark plate
+d "click 800 770"; sleep 1.5                                   # Hamlet: Embark plate (DD1 position, 2026-10-03)
 d "click 817 260"; sleep 0.5                                   # quest map: first Ruins quest
 for y in 152 233 314 394; do d "click 1440 $y"; sleep 0.4; done # roster: first four heroes
 d "click 1129 792"; sleep 1                                    # Provision
 # (no provisions: the test estate runs out of gold over many runs)
 d "click 1450 852"; sleep 0.6; d "click 1450 852"              # Embark (twice: low-supplies confirm)
-for i in $(seq 1 60); do grep -q "Entered The Ruins" "$L" && break; sleep 2; done
+for i in $(seq 1 60); do grep -qF "[stage] hero models" "$L" && break; sleep 2; done
 sleep 8
 grep -E "Darkest Dungeon 3\]" "$L" | tail -3 | cut -c1-160
