@@ -26,6 +26,8 @@ public sealed class HeroRecord
     public List<string> EquippedSkills = new();            // empty = DD2 default kit
     public List<string> Trinkets = new();                  // DD2 trinket ids, 2 slots
     public List<string> CampingSkills = new();             // DD1-style camp skills (ours)
+    public List<string> LearnedSkills = new();             // DD2 combat skills learned at the Guild (were locked)
+    public List<string> MasteredSkills = new();            // DD2 combat skills upgraded at the Guild (base ids)
 
     // Condition carried between expeditions.
     public int Stress;                                     // DD2 scale (0..stress_max, 10 by default)

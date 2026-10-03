@@ -75,6 +75,7 @@ internal static class Dd2Heroes
                     trinkets.AddItems(t, 1, false);
 
         ApplyEquipment(hero, actor);
+        HeroSkills.Apply(hero, actor);
         if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
     }
 

@@ -316,8 +316,7 @@ internal sealed class HamletUi
             case Panel.Hero: DrawHero(area); break;
             case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
             case Panel.Survivalist: DrawSurvivalist(area, hamlet); break;
-            case Panel.Guild:
-                DrawNotYet(area); break;
+            case Panel.Guild: DrawGuild(area, hamlet); break;
         }
     }
 
@@ -370,6 +369,74 @@ internal sealed class HamletUi
             else Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), "The finest the Hamlet can make.", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
             y += 262;
         }
+    }
+
+    private void DrawGuild(Rect area, Hamlet hamlet)
+    {
+        Frame(area);
+        var hero = E.Hero(_heroId);
+        if (hero == null)
+        {
+            Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster: the Guild teaches the skills they haven't unlocked, masters the ones they know, and sets the five they bring.", 24, Gui.Dd1Text);
+            return;
+        }
+        var icon = Art.HeroIcon(hero.ClassId);
+        if (icon != null) Art.DrawSprite(new Rect(area.x + 16, area.y + 12, 90, 90), icon);
+        Gui.Text(new Rect(area.x + 120, area.y + 14, 500, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        var skills = Dd2.HeroSkills.ForClass(hero.ClassId);
+        if (skills == null) { Gui.Text(new Rect(area.x + 120, area.y + 54, 500, 30), "...", 20, Gui.Dd1Class, TextAnchor.MiddleLeft); return; }
+        string loadout = hero.EquippedSkills.Count == 0 ? "DD2 chooses the skills" : $"Brings {hero.EquippedSkills.Count}/{Dd2.HeroSkills.EquipLimit} chosen skills";
+        Gui.Text(new Rect(area.x + 120, area.y + 54, 360, 30), $"{Pretty(hero.ClassId)}  ·  {loadout}", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (hero.EquippedSkills.Count > 0 && Gui.DdButton(new Rect(area.xMax - 200, area.y + 50, 186, 38), "DD2's choice", true, 18))
+        {
+            hero.EquippedSkills.Clear();
+            S.Persist();
+        }
+
+        _panelScroll = GUI.BeginScrollView(new Rect(area.x, area.y + 110, area.width, area.height - 120), _panelScroll, new Rect(0, 0, area.width - 30, skills.Count * 86));
+        for (int i = 0; i < skills.Count; i++)
+        {
+            var skill = skills[i];
+            bool known = Dd2.HeroSkills.Knows(hero, skill), mastered = hero.MasteredSkills.Contains(skill.Id);
+            bool equipped = hero.EquippedSkills.Contains(skill.Id);
+            var r = new Rect(10, i * 86, area.width - 50, 80);
+            Gui.Fill(r, equipped ? new Color(0.16f, 0.13f, 0.08f, 0.95f) : new Color(0.08f, 0.07f, 0.06f, 0.9f));
+            var old = GUI.color;
+            if (!known) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
+            if (skill.Icon != null) Art.DrawSprite(new Rect(r.x + 8, r.y + 8, 64, 64), skill.Icon);
+            GUI.color = old;
+            Gui.Text(new Rect(r.x + 84, r.y + 6, 300, 34), Dd2.HeroSkills.Name(skill.Id) + (mastered ? " +" : ""), 24, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(r.x + 84, r.y + 40, 300, 30), mastered ? "Mastered" : known ? (skill.Starting ? "Known" : "Learned") : "Not yet learned", 17, mastered ? Gui.Gold : Gui.Dd1Class, TextAnchor.MiddleLeft);
+
+            if (!known)
+            {
+                string why = hamlet.WhyCantLearnSkill(hero, skill.Id);
+                if (Gui.DdButton(new Rect(r.xMax - 330, r.y + 16, 200, 48), why ?? $"Learn  {Gui.Num(hamlet.SkillLearnCost(hero, skill.Id), "#,0")}g", why == null, why == null ? 19 : 15))
+                {
+                    hamlet.LearnSkill(hero.Id, skill.Id);
+                    S.Persist();
+                }
+            }
+            else if (!mastered)
+            {
+                string why = hamlet.WhyCantMasterSkill(hero, skill.Id, known);
+                if (Gui.DdButton(new Rect(r.xMax - 330, r.y + 16, 200, 48), why ?? $"Master  {Gui.Num(hamlet.SkillMasterCost(hero, skill.Id), "#,0")}g", why == null, why == null ? 19 : 15))
+                {
+                    hamlet.MasterSkill(hero.Id, skill.Id, known);
+                    S.Persist();
+                }
+            }
+            if (known)
+            {
+                bool full = !equipped && hero.EquippedSkills.Count >= Dd2.HeroSkills.EquipLimit;
+                if (Gui.DdButton(new Rect(r.xMax - 120, r.y + 16, 108, 48), equipped ? "Bring" : "Leave", !full, 19))
+                {
+                    if (equipped) hero.EquippedSkills.Remove(skill.Id); else hero.EquippedSkills.Add(skill.Id);
+                    S.Persist();
+                }
+            }
+        }
+        GUI.EndScrollView();
     }
 
     private void DrawSurvivalist(Rect area, Hamlet hamlet)

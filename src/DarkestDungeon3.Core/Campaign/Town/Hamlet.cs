@@ -155,6 +155,67 @@ public sealed class Hamlet
 
     public bool BuyUpgrade(string treeId, string code) => Buildings.Trees.TryBuy(Estate, treeId, code);
 
+    // ---- Guild: learn DD2 skills a hero hasn't unlocked, master (upgrade) the ones they know ----
+    // Prices follow the DD1 skill tree that matches: learning is DD1's "code 0" (1000 gold for most), mastering
+    // is DD1's first two levels together, behind the Guild's first skill-level upgrade and resolve 1.
+
+    private float GuildDiscount => Tiers.TotalDiscount(Buildings.Data(Buildings.Guild)["combat_skill_cost_discount_upgrades"], Estate);
+    private int Discounted(int gold) => (int)System.Math.Round(gold * System.Math.Max(0f, 1f - GuildDiscount));
+
+    public int SkillLearnCost(HeroRecord hero, string skillId)
+    {
+        var tree = Dd1.HeroUpgrades?.SkillTree(hero.ClassId, skillId);
+        return Discounted(tree != null && tree.Count > 0 ? System.Math.Max(250, tree[0].Gold) : 1000);
+    }
+
+    public int SkillMasterCost(HeroRecord hero, string skillId)
+    {
+        var tree = Dd1.HeroUpgrades?.SkillTree(hero.ClassId, skillId);
+        return Discounted(tree != null && tree.Count > 2 ? tree[1].Gold + tree[2].Gold : 1000);
+    }
+
+    public string WhyCantLearnSkill(HeroRecord hero, string skillId)
+    {
+        if (!Buildings.IsOpen(Buildings.Guild, Estate)) return "The Guild is not open";
+        if (hero.MissingWeeks > 0) return "Missing";
+        if (hero.LearnedSkills.Contains(skillId)) return "Known";
+        if (Estate.Get(Currency.Gold) < SkillLearnCost(hero, skillId)) return "Not enough gold";
+        return null;
+    }
+
+    public bool LearnSkill(string heroId, string skillId)
+    {
+        var hero = Estate.Hero(heroId);
+        if (hero == null || WhyCantLearnSkill(hero, skillId) != null) return false;
+        Estate.Add(Currency.Gold, -SkillLearnCost(hero, skillId));
+        hero.LearnedSkills.Add(skillId);
+        Estate.TownLog.Add($"The Guild teaches {hero.Name} a new technique.");
+        return true;
+    }
+
+    /// <param name="known">The hero knows the skill (DD2 starting skill, or learned here).</param>
+    public string WhyCantMasterSkill(HeroRecord hero, string skillId, bool known)
+    {
+        if (!Buildings.IsOpen(Buildings.Guild, Estate)) return "The Guild is not open";
+        if (hero.MissingWeeks > 0) return "Missing";
+        if (hero.MasteredSkills.Contains(skillId)) return "Mastered";
+        if (!known) return "Learn it first";
+        if (!Estate.Upgrades.Contains("guild.skill_levels:a")) return "Needs a Guild upgrade";
+        if (hero.ResolveLevel < 1) return "Needs resolve 1";
+        if (Estate.Get(Currency.Gold) < SkillMasterCost(hero, skillId)) return "Not enough gold";
+        return null;
+    }
+
+    public bool MasterSkill(string heroId, string skillId, bool known)
+    {
+        var hero = Estate.Hero(heroId);
+        if (hero == null || WhyCantMasterSkill(hero, skillId, known) != null) return false;
+        Estate.Add(Currency.Gold, -SkillMasterCost(hero, skillId));
+        hero.MasteredSkills.Add(skillId);
+        Estate.TownLog.Add($"The Guild masters {hero.Name}'s technique.");
+        return true;
+    }
+
     // ---- Survivalist: teach the camping skills a hero doesn't know yet (DD1 starts heroes with four) ----
 
     public int CampSkillCost(CampSkill skill)

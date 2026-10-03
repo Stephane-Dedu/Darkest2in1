@@ -219,4 +219,28 @@ public class HamletTests
         Assert.Equal(finesse.Count, finesse.Distinct().Count());
         Assert.Contains("-1.5 stress (ally)", camping.DescribeAll(camping.Get("encourage")));
     }
+    [Fact]
+    public void Guild_prices_dd2_skills_like_their_dd1_trees()
+    {
+        var h = NewHamlet(11);
+        var hero = h.Estate.Roster[0];
+        hero.ClassId = "highwayman";
+        Assert.NotNull(Dd1.HeroUpgrades.SkillTree("highwayman", "hwm_wicked_slice"));
+        Assert.NotNull(Dd1.HeroUpgrades.SkillTree("highwayman", "hwm_duelists_advance"));   // DD1: duelist_advance
+        Assert.NotNull(Dd1.HeroUpgrades.SkillTree("highwayman", "hwm_grapeshot_blast"));    // DD1: grape_shot_blast
+        Assert.Null(Dd1.HeroUpgrades.SkillTree("highwayman", "hwm_highway_robbery"));       // DD2 only
+        Assert.Equal(1000, h.SkillLearnCost(hero, "hwm_wicked_slice"));
+        Assert.Equal(1000, h.SkillMasterCost(hero, "hwm_wicked_slice"));                   // 250 + 750
+        Assert.Equal(1000, h.SkillLearnCost(hero, "hwm_highway_robbery"));
+
+        h.Estate.QuestsCompleted = 10;
+        h.Estate.Add(Currency.Gold, 5000);
+        Assert.True(h.LearnSkill(hero.Id, "hwm_highway_robbery"));
+        Assert.Equal("Needs a Guild upgrade", h.WhyCantMasterSkill(hero, "hwm_wicked_slice", known: true));
+        h.Estate.Upgrades.Add("guild.skill_levels:a");
+        hero.ResolveLevel = 1;
+        Assert.Equal("Learn it first", h.WhyCantMasterSkill(hero, "hwm_open_vein", known: false));
+        Assert.True(h.MasterSkill(hero.Id, "hwm_wicked_slice", known: true));
+        Assert.Contains("hwm_wicked_slice", hero.MasteredSkills);
+    }
 }
