@@ -93,6 +93,15 @@ public sealed class Inventory
     public int SlotsUsed(ItemCatalog catalog) =>
         Items.Sum(kv => Stacks(kv.Value, catalog.StackLimit(kv.Key)));
 
+    /// <summary>Take a drop into the pack if it fits (DD1: everything, trinkets included, needs room; a trinket is
+    /// one per slot). Returns false when it stays behind.</summary>
+    public bool TryTake(LootDrop drop, ItemCatalog catalog)
+    {
+        if (drop == null || !HasRoomFor(drop.Key, drop.Amount, catalog)) return false;
+        Add(drop.Key, drop.Amount);
+        return true;
+    }
+
     public bool HasRoomFor(string id, int amount, ItemCatalog catalog)
     {
         int stack = catalog.StackLimit(id);

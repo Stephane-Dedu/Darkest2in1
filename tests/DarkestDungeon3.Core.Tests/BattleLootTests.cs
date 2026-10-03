@@ -9,6 +9,20 @@ namespace DarkestDungeon3.Core.Tests;
 public class BattleLootTests
 {
     [Fact]
+    public void TrinketsNeedAPackSlot()
+    {
+        var items = ItemCatalog.Load(Dd1Install.Find());
+        var pack = new Inventory();
+        pack.Add("food", Inventory.Slots * items.StackLimit("food"));        // every slot full of food
+        Assert.Equal(Inventory.Slots, pack.SlotsUsed(items));
+        var trinket = new LootDrop { Type = "trinket", Id = "sun_ring", Amount = 1 };
+        Assert.False(pack.TryTake(trinket, items));                      // DD1: no room, it stays behind
+        pack.Add("food", -items.StackLimit("food"));                     // free one slot
+        Assert.True(pack.TryTake(trinket, items));
+        Assert.False(pack.TryTake(new LootDrop { Type = "trinket", Id = "other_ring", Amount = 1 }, items));   // one per slot
+    }
+
+    [Fact]
     public void LootTrinketsAreRolledWhenTheyDrop()
     {
         // DD1 rolls the trinket itself at the drop (the spoils show it); a rarity token is only a fallback.

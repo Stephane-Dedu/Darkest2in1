@@ -55,8 +55,7 @@ public sealed class Crawl
 
         foreach (var drop in report.Loot)
         {
-            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items)) State.Pack.Add(drop.Key, drop.Amount);
-            else overflow.Add(drop);
+            if (!State.Pack.TryTake(drop, _content.Items)) overflow.Add(drop);
         }
         return report;
     }
@@ -327,11 +326,7 @@ public sealed class Crawl
         drops = drops.Select(d => LootDrop.ResolveTrinket(d, TrinketOfRarity, pick)).ToList();
         foreach (var drop in drops)
         {
-            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items))
-            {
-                State.Pack.Add(drop.Key, drop.Amount);
-                spoils.Taken.Add(drop);
-            }
+            if (State.Pack.TryTake(drop, _content.Items)) spoils.Taken.Add(drop);
             else spoils.LeftBehind.Add(drop);
         }
         return spoils;

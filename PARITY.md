@@ -34,7 +34,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Locked quirk caps: DD1 `quirks_max_locked_positive` / `_negative` 3 — check the Sanitarium lock refuses a fourth.
 - [ ] Negative quirk auto-lock: DD1 `quirk_chance_to_lock_negative` / `quirk_negative_locked_after_turn_count` — not done.
 - [ ] Disease after a quest: DD1 `disease_after_quest_min_chance`, `disease_max_chance`, `disease_after_quest_min_resolve_level` — not rolled.
-- [ ] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` (other heroes take stress) — not applied.
+- [ ] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — not applied; what "upper_level" counts (resolve? weeks? roster size?) is unclear from the data and not in the Unity port (round 6).
 - [?] Quirk gain/loss after quests and from curios (DD1 quirk library → DD2 quirk ids).
 - [?] Recruits arrive with DD1-style quirks (bug: DD2 quirk library empty at the menu — fixed? check new recruits have quirks).
 
@@ -93,7 +93,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Torch level carried into DD2's torch (DD2's own darkness effects stand in for DD1's monster bonuses).
 - [x] Battle loot from DD1 encounter `loot:` codes; DD2 loot skipped — round 1 log "[loot] room fight (...): took 2 bust, very_common trinket, 1 skeleton_key, 1 portrait".
 - [?] Loot trinkets: DD1 rolls the trinket when it drops (loot tables give a rarity: `loot/*.json` "trinket" + rarity) and the spoils show it; the mod carried "trinket:very_common" until homecoming (spoils showed a label). Now rolled at the drop (Crawl.TrinketOfRarity → a DD2 trinket of the mapped rarity), shown with its picture and tooltip in spoils, curio results and the pack (BattleLootTests.LootTrinketsAreRolledWhenTheyDrop). In game: no trinket dropped in 4 fights (round 2); look for a trinket picture on the spoils scroll.
-- [ ] Trinkets take a pack slot in DD1 (one per slot, no stacking); the mod lets trinket loot in even when the pack is full.
+- [?] Trinkets take a pack slot in DD1 (one per slot, no stacking). Was: trinket loot skipped the room check. Now Inventory.TryTake for curio and battle loot (BattleLootTests.TrinketsNeedAPackSlot). In game: with a full pack, a trinket on the spoils scroll is greyed and left behind.
 - [?] Camp/town buffs carried into fights as DD2 buffs.
 
 ## Afflictions, virtues, deaths
