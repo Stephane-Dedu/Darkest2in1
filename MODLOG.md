@@ -443,6 +443,13 @@ Feasibility notes (decomp):
   +25% monsters surprised. The Unity port doesn't implement surprise rolls (attributes only), so DD1's caps were read
   from rules.json; an ambush's 1.0 stays "always".
 
+## Parity loop, round 4 (2026-10-03)
+- DD1's post-quest disease roll has values (`disease_after_quest_min_chance` 0.05, `disease_max_chance` 0.32,
+  `disease_hero_disease_resist_weight` 0.33, from resolve 2) but no formula in the data or the Unity port: left as
+  [ ] until the formula is known. Quirk limits were fully specified, so done instead (QuirkLimits).
+- Curio quirks go straight onto the DD2 actor (Dd2Party.AddDd1Quirk); the cap is applied there against the actor's
+  QuirkContainer instances and the estate record's LockedQuirks.
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

@@ -383,11 +383,8 @@ public sealed class Hamlet
                 break;
             case "add_quirk":
                 var quirk = Catalog.MapDd1Quirk((string)pick?["quirk_library_name"]);
-                if (quirk != null && !hero.Quirks.Contains(quirk))
-                {
-                    hero.Quirks.Add(quirk);
-                    log.Add($"{hero.Name} gained a quirk: {quirk}.");
-                }
+                string replaced = Dd1.QuirkLimits.Apply(hero.Quirks, hero.LockedQuirks, quirk, Catalog.IsPositive, Catalog.IsDisease, rng, out bool gained);
+                if (gained) log.Add(replaced != null ? $"{hero.Name} gained a quirk: {quirk} (replacing {replaced})." : $"{hero.Name} gained a quirk: {quirk}.");
                 break;
             case "apply_buff":
                 foreach (var b in pick?["buff_library_ids"] ?? new JArray()) hero.PendingBuffs.Add((string)b);

@@ -31,6 +31,8 @@ public sealed class Dd1Campaign
     /// <summary>[difficulty][length] → gold.</summary>
     public JArray GoldTable { get; private set; }
     public JObject Rules { get; private set; }
+    /// <summary>DD1's quirk limits (quirks_max_*), with replacement over the cap.</summary>
+    public QuirkLimits QuirkLimits { get; private set; } = new();
     public QuestGoals Goals { get; private set; }
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
     public Town.TownEvents TownEvents { get; private set; }
@@ -76,6 +78,7 @@ public sealed class Dd1Campaign
         c.ZoneLevelThresholds.AddRange(progression["dungeon"]["level_threshold_table"].Select(t => (int)t));
 
         c.Rules = (JObject)ReadJson(dd1.Rules);
+        c.QuirkLimits = QuirkLimits.FromDd1(c.Rules);
         c.Goals = QuestGoals.Load(dd1);
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);
