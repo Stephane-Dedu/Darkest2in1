@@ -281,6 +281,14 @@ public sealed class Crawl
     public string UseSupply(string heroId, string key)
     {
         if (heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (key == Supply.Food)
+        {
+            // DD1: a provision eaten from the pack heals provision_hp_heal (5%) of max HP.
+            if (_party.HpFraction(heroId) >= 1f) return null;
+            if (!State.Pack.TryUse(Supply.Food)) return null;
+            _party.Heal(heroId, _rules.ProvisionHeal);
+            return $"Ate a provision: +{Math.Round(_rules.ProvisionHeal * 100)}% health.";
+        }
         if (key == Supply.HolyWater)
         {
             if (!State.Pack.TryUse(Supply.HolyWater)) return null;

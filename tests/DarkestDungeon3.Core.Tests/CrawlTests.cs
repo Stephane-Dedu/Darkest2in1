@@ -83,6 +83,21 @@ public class CrawlTests
     }
 
     [Fact]
+    public void EatingAProvisionHealsFivePercent()
+    {
+        var (crawl, party) = NewCrawl("crypts", "short", "explore", 5, food: 2);
+        crawl.Begin();
+        string hero = party.Alive[0];
+        party.Hp[hero] = 0.5f;
+        Assert.NotNull(crawl.UseSupply(hero, Supply.Food));
+        Assert.Equal(0.55f, party.Hp[hero], 3);                 // DD1 provision_hp_heal 0.05
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+        party.Hp[hero] = 1f;
+        Assert.Null(crawl.UseSupply(hero, Supply.Food));        // nothing to heal: the food stays
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+    }
+
+    [Fact]
     public void SurpriseFollowsDd1ByKnowledge()
     {
         var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);

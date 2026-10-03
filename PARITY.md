@@ -53,7 +53,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 ## Provisioning
 - [?] Provisioner stock and prices by quest length (`campaign/provision/provision.json`), class-specific free items, drag to buy.
-- [ ] `provision_hp_heal`: eating food out of combat heals 5% HP in DD1 — check the inventory "use food" heal.
+- [?] Eating from the pack: DD1 lets a hero eat a provision in the dungeon for `provision_hp_heal` 5% max HP. Was: food did nothing (UseSupply knew only holy water). Now Crawl.UseSupply eats it, not at full health (CrawlTests.EatingAProvisionHealsFivePercent). In game: click food with a wounded hero selected → "+5% health". (`max_provisions_before_full` 4: reset point unknown, not applied.)
 - [?] Low-food / no-torch embark warnings.
 
 ## Map generation
