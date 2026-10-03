@@ -234,8 +234,12 @@ All four screens now use DD1's own art and layout files, read from the user's DD
   names from `localization/heroes.string_table.xml` (English block). Scrolls: `scrolls/*.png` at the
   `screen.raid.darkest` positions (sidebar 1348,200; result 1342,140; meal/respite 732,60).
 - The player's locale is French: format numbers with `Gui.Num` (invariant), never `:N0`/`:0.#`.
-- 3D hero models (`Dd2/HeroStage.cs`) render black off-screen even with the main camera's renderer, fog off and
-  lights: shipped disabled (`Look.HeroModelsInDungeon`). Heroes use DD2 Story art (`Look.HeroArtInDungeon`).
+- 3D hero models (`Dd2/HeroStage.cs`) rendered black off-screen. Likely cause found (2026-10-03): DD2's
+  DeferredRenderPass draws `FilteringSettings(opaque, DeferredRenderFeature.layerMask)` and its lights can require
+  `cullingMask == layerMask` (exclusiveLayerMasking); HeroStage had put the heroes on private layer 31. Now they stay
+  on "Characters" (CombatActorBhv.SetForegroundCharacterLayer uses it), camera and lights use the feature's mask
+  (read by reflection), and the stage reads its picture back once loaded: too dark -> DD2 flat art (logged).
+  New option key `Look.Dd2HeroModelsInDungeon` (on).
 
 ## DD1 systems completed (2026-10-03)
 - **Battle loot** (`Core/Expedition/BattleLoot.cs`): a won fight rolls the DD1 encounter it stands for from
@@ -355,6 +359,8 @@ Feasibility notes (decomp):
       board, off removes them; quest map stacks them in a left column; a region expedition uses its DD1 zone's
       maps/curios/art, DD2 natives fight (no DD1 translation), boss room = the lair boss config; zone XP and
       level per region; boss tiers at levels 2/4/6.
+- [ ] Hero models in the dungeon: log "[stage] hero layer N (Characters), deferred mask 0x..." then
+      "[stage] hero models: ... brightness X -> shown / too dark". If shown: lit, right size/place, bob while walking.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

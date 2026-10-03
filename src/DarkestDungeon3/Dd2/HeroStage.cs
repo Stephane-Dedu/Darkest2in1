@@ -7,15 +7,39 @@ using UnityEngine;
 namespace DarkestDungeon3.Dd2;
 
 /// <summary>
-/// DD2's real, animated hero models for the DD1 corridor: the party is spawned far away from everything on a
-/// private layer and filmed by its own camera into a render texture, which the crawl screen draws where DD1
-/// stands its heroes. Same actor creation call DD2's results screen uses (ActorCreateGameObjectBhv).
+/// DD2's real, animated hero models for the DD1 corridor: the party is spawned far away from everything and filmed
+/// by its own camera into a render texture, which the crawl screen draws where DD1 stands its heroes. Same actor
+/// creation call DD2's results screen uses (ActorCreateGameObjectBhv). The heroes stay on DD2's "Characters" layer:
+/// DD2's deferred pass only lights renderers on the layers of its DeferredRenderFeature mask (a private layer came
+/// out black). If they still render black, the stage notices and the crawl falls back to DD2's flat hero art.
 /// </summary>
 internal sealed class HeroStage : MonoBehaviour
 {
     public static HeroStage Instance { get; private set; }
 
-    private const int Layer = 31;
+    private static int _layer = -1;
+    private static int Layer => _layer >= 0 ? _layer : _layer = LayerMask.NameToLayer("Characters") is var l && l >= 0 ? l : 31;
+
+    /// <summary>The layers DD2's deferred lighting draws and lights (its DeferredRenderFeature mask).</summary>
+    private static int DeferredMask()
+    {
+        int mask = 1 << Layer;
+        try
+        {
+            var type = typeof(ActorBhv).Assembly.GetType("Assets.Code.Rendering.RendererFeatures.DeferredRenderFeature");
+            var field = type?.GetField("layerMask");
+            if (type != null && field != null)
+                foreach (var f in Resources.FindObjectsOfTypeAll(type))
+                    mask |= ((LayerMask)field.GetValue(f)).value;
+        }
+        catch (System.Exception e) { Plugin.Log.LogWarning("[stage] deferred mask: " + e.Message); }
+        return mask;
+    }
+
+    /// <summary>The models came out black (checked once they loaded): the crawl uses DD2's flat art instead.</summary>
+    public static bool RendersBlack { get; private set; }
+    private float _loadedAt = -1f;
+    private bool _checked;
     private const float PixelsPerUnit = 100f;          // 1920x720 virtual pixels = 19.2 x 7.2 world units
     private static readonly Vector3 Origin = new(20000f, 20000f, 0f);
 
@@ -26,6 +50,8 @@ internal sealed class HeroStage : MonoBehaviour
     private string _partyKey;
 
     public static float HeroScale = 1f;
+    /// <summary>The party is walking: each hero bobs a little, out of step (DD1's walk).</summary>
+    public static bool Walking;
     public static float FeetY = 680f;
 
     /// <summary>The rendered party, or null while nothing has loaded.</summary>
@@ -94,7 +120,9 @@ internal sealed class HeroStage : MonoBehaviour
         _camera.orthographicSize = 7.2f / 2f;
         _camera.clearFlags = CameraClearFlags.SolidColor;
         _camera.backgroundColor = new Color(0, 0, 0, 0);
-        _camera.cullingMask = 1 << Layer;
+        int deferredMask = DeferredMask();
+        _camera.cullingMask = deferredMask;   // only the heroes are anywhere near this far-away camera
+        Plugin.Log.LogInfo($"[stage] hero layer {Layer} ({LayerMask.LayerToName(Layer)}), deferred mask 0x{deferredMask:X}");
         _camera.nearClipPlane = 0.1f;
         _camera.farClipPlane = 100f;
         _camera.targetTexture = _texture;
@@ -124,7 +152,7 @@ internal sealed class HeroStage : MonoBehaviour
         _light.transform.rotation = Quaternion.Euler(20f, -10f, 0f);
         _light.type = LightType.Directional;
         _light.color = new Color(1f, 0.93f, 0.85f);
-        _light.cullingMask = 1 << Layer;
+        _light.cullingMask = deferredMask;   // DD2 may apply a light only if its mask equals the deferred mask
     }
 
     private Light _light;
@@ -181,8 +209,11 @@ internal sealed class HeroStage : MonoBehaviour
             keyLight.range = 8f;
             keyLight.intensity = LightIntensity * 2f;
             keyLight.color = new Color(1f, 0.86f, 0.66f);
+            keyLight.cullingMask = _light != null ? _light.cullingMask : DeferredMask();
         }
         Plugin.Log.LogInfo($"[stage] spawning {_heroes.Count} hero models");
+        _loadedAt = -1f;
+        _checked = false;
     }
 
     public void Clear()
@@ -203,6 +234,15 @@ internal sealed class HeroStage : MonoBehaviour
     private void LateUpdate()
     {
         if (_light != null) _light.intensity = LightIntensity;
+        CheckNotBlack();
+        for (int i = 0; i < _heroes.Count; i++)
+        {
+            var slot = _heroes[i].slot;
+            if (slot == null) continue;
+            float bob = Walking ? Mathf.Abs(Mathf.Sin(Time.unscaledTime * 7f + i * 1.3f)) * 0.09f : 0f;
+            var p = slot.localPosition;
+            slot.localPosition = new Vector3(p.x, (720f - FeetY) / PixelsPerUnit + bob, p.z);
+        }
         // Actor parts load asynchronously and may arrive on other layers: keep everything on ours.
         if (_root == null || Time.unscaledTime < _nextLayerFix) return;
         _nextLayerFix = Time.unscaledTime + 0.5f;
@@ -210,5 +250,30 @@ internal sealed class HeroStage : MonoBehaviour
             if (slot != null)
                 foreach (var t in slot.GetComponentsInChildren<Transform>(includeInactive: true))
                     if (t.gameObject.layer != Layer) t.gameObject.layer = Layer;
+    }
+
+    /// <summary>A second after the models have loaded, read the picture back once: lit models have colour.</summary>
+    private void CheckNotBlack()
+    {
+        if (_checked || _texture == null || _camera == null || !_camera.enabled) return;
+        if (_heroes.Count == 0 || _heroes.Any(h => h.actor == null || h.actor.IsLoading)) { _loadedAt = -1f; return; }
+        if (_loadedAt < 0) { _loadedAt = Time.unscaledTime; return; }
+        if (Time.unscaledTime - _loadedAt < 1f) return;
+        _checked = true;
+        var prev = RenderTexture.active;
+        RenderTexture.active = _texture;
+        var tex = new Texture2D(_texture.width, _texture.height, TextureFormat.RGBA32, false);
+        tex.ReadPixels(new Rect(0, 0, _texture.width, _texture.height), 0, 0);
+        tex.Apply();
+        RenderTexture.active = prev;
+        var px = tex.GetPixels32();
+        Destroy(tex);
+        long sum = 0;
+        int count = 0;
+        for (int i = 0; i < px.Length; i += 7)
+            if (px[i].a > 200) { sum += px[i].r + px[i].g + px[i].b; count++; }
+        float brightness = count == 0 ? 0f : sum / (count * 3f * 255f);
+        RendersBlack = count < 200 || brightness < 0.05f;
+        Plugin.Log.LogInfo($"[stage] hero models: {count} opaque samples, brightness {brightness:0.000} -> {(RendersBlack ? "too dark, using DD2's flat art" : "shown")}");
     }
 }

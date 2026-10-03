@@ -70,7 +70,7 @@ internal sealed class Driver : MonoBehaviour
     private void Update()
     {
         var stage = HeroStage.Instance;
-        stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value);
+        stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
         if (Phase != Phase.Crawling || Crawl == null) return;
         LockRoadInput();
         if (stage != null && Plugin.HeroModels.Value)
@@ -85,6 +85,7 @@ internal sealed class Driver : MonoBehaviour
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
         Walk(kb);
+        HeroStage.Walking = IsMovingNow && Expedition.Camp == null;
         if (kb != null && kb.tKey.wasPressedThisFrame) UseTorch();
     }
 
