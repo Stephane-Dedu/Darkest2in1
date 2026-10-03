@@ -124,6 +124,37 @@ internal static class FightBuffs
         }
     }
 
+    /// <summary>The side that surprised the other gets an extra turn in round one.</summary>
+    public static void Surprise(IReadOnlyList<uint> party, bool heroesActFirst) =>
+        Runtime.Driver.Instance.StartCoroutine(SurpriseWhenReady(party.ToList(), heroesActFirst));
+
+    // Enemies spawn a little after DD2 enters combat: wait for them (up to ~10 s).
+    private static System.Collections.IEnumerator SurpriseWhenReady(List<uint> party, bool heroesActFirst)
+    {
+        var library = SingletonMonoBehaviour<Library<string, BuffDefinition>>.Instance;
+        if (library == null || !library.TryGetLibraryElement("extra_initiative_1_round_buff", out var buff)) yield break;
+        var heroes = new HashSet<uint>(party);
+        List<ActorInstance> actors = null;
+        for (int tries = 0; tries < 40 && Dd2Combat.InFight; tries++)
+        {
+            if (heroesActFirst) actors = party.Select(Dd2Api.Actor).Where(a => a != null).ToList();
+            else
+            {
+                var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
+                actors = combat?.AllActors.Select(a => a?.ActorInstance).Where(a => a != null && !heroes.Contains(a.ActorGuid)).ToList();
+            }
+            if (actors != null && actors.Count > 0) break;
+            yield return new UnityEngine.WaitForSeconds(0.25f);
+        }
+        if (actors == null || actors.Count == 0) { Plugin.Log.LogWarning("[buffs] surprise: no actors found"); yield break; }
+        foreach (var actor in actors)
+        {
+            actor.BuffContainer?.TryAdd(buff, isLockedTeamPosition: false, SourceType.STORY, Source, actor.ActorGuid);
+            actor.BuffContainer?.RefreshActiveBuffs();
+        }
+        Plugin.Log.LogInfo($"[buffs] surprise: {(heroesActFirst ? "heroes" : "monsters")} act first ({actors.Count} actors)");
+    }
+
     /// <summary>Take this fight's DD1 buffs off again (DD2 ends its own combat-length ones itself).</summary>
     public static void Remove(IEnumerable<uint> guids)
     {

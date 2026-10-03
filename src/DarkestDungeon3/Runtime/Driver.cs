@@ -316,19 +316,23 @@ internal sealed class Driver : MonoBehaviour
         StartFight(kind, heroesSurprised: false);
     }
 
-    /// <summary>Testing (F11): start a hall fight right here through the normal crawl path.</summary>
+    private int _debugFights;
+
+    /// <summary>Testing (F11): start a hall fight right here; alternately the heroes and the monsters are surprised.</summary>
     public void DebugFight()
     {
-        if (Phase == Phase.Crawling) StartFight(FightKind.Hall, heroesSurprised: false);
+        if (Phase != Phase.Crawling) return;
+        bool heroes = _debugFights++ % 2 == 0;
+        StartFight(FightKind.Hall, heroesSurprised: heroes, monstersSurprised: !heroes);
     }
 
-    private void StartFight(FightKind kind, bool heroesSurprised)
+    private void StartFight(FightKind kind, bool heroesSurprised, bool monstersSurprised = false)
     {
         var quest = Expedition.Quest;
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken), quest.BossId);
         var guids = Expedition.Party.Select(Party.Guid).Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
         var buffs = Crawl.FightBuffs().Select(b => (Party.Guid(b.Hero), b.Buff)).Where(b => b.Item1 != 0).ToList();
-        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs))
+        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised))
         {
             Phase = Phase.Fighting;
             S.Persist();
@@ -393,7 +397,7 @@ internal sealed class Driver : MonoBehaviour
     {
         Dd2Api.Torch = Expedition.Light;
         FightKind? fight = null;
-        bool surprised = false;
+        bool surprised = false, monstersSurprised = false;
         foreach (var e in events)
         {
             switch (e.Type)
@@ -403,6 +407,7 @@ internal sealed class Driver : MonoBehaviour
                     var room = e.RoomId >= 0 ? Expedition.Map.Room(e.RoomId) : null;
                     fight = room?.Content == Core.Dungeon.RoomContent.Boss ? FightKind.Boss : e.RoomId >= 0 ? FightKind.Room : FightKind.Hall;
                     surprised = e.HeroesSurprised;
+                    monstersSurprised = e.MonstersSurprised;
                     Announce(e.HeroesSurprised ? "Ambush! The heroes are surprised!" : e.MonstersSurprised ? "The enemy is caught unawares!" : "Enemies ahead!");
                     break;
                 case CrawlEventType.Ambush:
@@ -424,7 +429,7 @@ internal sealed class Driver : MonoBehaviour
             }
         }
         S.Persist();
-        if (fight != null) StartFight(fight.Value, surprised);
+        if (fight != null) StartFight(fight.Value, surprised, monstersSurprised);
     }
 
     private void Announce(string text)

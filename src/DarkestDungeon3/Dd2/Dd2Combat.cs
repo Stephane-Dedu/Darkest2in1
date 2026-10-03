@@ -61,7 +61,7 @@ internal static class Dd2Combat
     private static List<uint> _buffed = new();
 
     public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised,
-                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null)
+                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null, bool monstersSurprised = false)
     {
         var modes = Dd2Api.Modes;
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[combat] mode change in progress"); return false; }
@@ -91,6 +91,9 @@ internal static class Dd2Combat
         _buffed = party.ToList();
         if (buffs != null && buffs.Count > 0)
             modes.OnNextGameModeEnterComplete(_ => FightBuffs.Apply(buffs));
+        // DD1 surprise: whoever got the drop acts twice in the first round (DD2's own one-round initiative buff).
+        if (heroesSurprised || monstersSurprised)
+            modes.OnNextGameModeEnterComplete(_ => FightBuffs.Surprise(party, heroesActFirst: monstersSurprised));
         return true;
     }
 
