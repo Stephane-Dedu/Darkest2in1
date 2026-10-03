@@ -351,7 +351,7 @@ internal sealed class HamletUi
             if (sprite != null) Art.DrawSprite(new Rect(r.x + 6, r.y + 6, 86, 86), sprite);
             Gui.Text(new Rect(r.x + 104, r.y + 4, 400, 34), $"{h.Name}", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
             Gui.Text(new Rect(r.x + 104, r.y + 34, 480, 60),
-                $"{Pretty(h.ClassId)}, resolve {h.ResolveLevel}\n{string.Join(", ", h.Quirks.Select(Pretty))}", 17, Gui.Dd1Class);
+                $"{Pretty(h.ClassId)}, resolve {h.ResolveLevel}\n{string.Join(", ", h.Quirks.Select(QuirkName))}", 17, Gui.Dd1Class);
             if (Gui.DdButton(new Rect(r.xMax - 150, r.y + 26, 136, 46), "Recruit", hamlet.CanRecruit, 22))
             {
                 hamlet.Recruit(h.Id);
@@ -421,7 +421,7 @@ internal sealed class HamletUi
                 var cost = hamlet.TreatmentCost(h, q);
                 bool locked = h.LockedQuirks.Contains(q);
                 bool positive = S.Catalog.IsPositive(q);
-                Gui.Text(new Rect(20, y, 400, 36), $"{Pretty(q)}{(locked ? " (locked)" : "")}", 19, positive ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
+                Gui.Text(new Rect(20, y, 400, 36), $"{QuirkName(q)}{(locked ? " (locked)" : "")}", 19, positive ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
                 if (h.IsAvailable && cost != null && Gui.DdButton(new Rect(430, y, 290, 36), $"{(positive ? "Lock" : "Treat")} ({cost.Amount} {cost.Type})", !(locked && positive), 18))
                 {
                     hamlet.StartTreatment(h.Id, q);
@@ -503,7 +503,7 @@ internal sealed class HamletUi
         Gui.Text(new Rect(Window.x + 40, Window.y + 72, 900, 30), $"{Pretty(h.ClassId)}, resolve level {h.ResolveLevel}", 24, Gui.Dd1Class, TextAnchor.MiddleLeft);
         Gui.Text(new Rect(area.x + 20, area.y + 10, area.width - 40, 300),
             $"Stress {h.Stress}/10   ({h.ResolveXp} resolve xp)\n\n" +
-            $"Quirks: {string.Join(", ", h.Quirks.Select(Pretty))}\n\n" +
+            $"Quirks: {string.Join(", ", h.Quirks.Select(QuirkName))}\n\n" +
             $"Camp skills: {string.Join(", ", h.CampingSkills.Select(Pretty))}\n\n" +
             $"Trinkets: {(h.Trinkets.Count == 0 ? "none" : string.Join(", ", h.Trinkets.Select(Pretty)))}" +
             (h.Activity != null ? $"\n\nThis week: {Pretty(h.Activity)}" : ""), 19, Gui.Dd1Text);
@@ -539,6 +539,16 @@ internal sealed class HamletUi
             S.Persist();
             _panel = Panel.Town;
         }
+    }
+
+    /// <summary>A quirk for display: DD2-style ids ("quirk_braggart_neg") lose their prefix and polarity tag.</summary>
+    public static string QuirkName(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return "";
+        string s = id.StartsWith("quirk_") ? id.Substring(6) : id;
+        foreach (var tag in new[] { "_negative", "_positive", "_neg", "_pos" })
+            if (s.EndsWith(tag)) { s = s.Substring(0, s.Length - tag.Length); break; }
+        return Pretty(s);
     }
 
     public static string Pretty(string id) =>

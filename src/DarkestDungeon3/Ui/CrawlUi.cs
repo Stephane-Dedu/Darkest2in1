@@ -43,7 +43,8 @@ internal sealed class CrawlUi
         DrawQuestInfo(crawl, exp);
         DrawHud(exp);
         if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
-        if (exp.Camp != null) DrawCamp(crawl, exp); else DrawPrompt(crawl, exp);
+        if (exp.Camp != null) DrawCamp(crawl, exp);
+        else if (!DrawCurioResult(exp)) DrawPrompt(crawl, exp);
         Gui.DrawAnnouncement();
     }
 
@@ -158,7 +159,7 @@ internal sealed class CrawlUi
         GUI.DrawTexture(ir, tex, ScaleMode.ScaleToFit);
     }
 
-    private const float PropX = 1130;
+    private const float PropX = 1040;
 
     // ---------------- party ----------------
 
@@ -464,6 +465,70 @@ internal sealed class CrawlUi
 
     // ---------------- curio / obstacle / trap prompt (DD1 "sidebar scroll" at 1348,200) ----------------
 
+    // ---------------- curio result (DD1's result scroll at 1342,140) ----------------
+
+    private CurioReport _resultShown, _resultDismissed;
+
+    /// <summary>What the last investigation turned up, on DD1's loot or basic scroll, until clicked away.</summary>
+    private bool DrawCurioResult(ExpeditionState exp)
+    {
+        var report = D.LastCurio;
+        if (report == null || report == _resultDismissed) return false;
+        if (report != _resultShown) _resultShown = report;
+
+        bool loot = report.Loot.Count > 0;
+        float left = 1342 - 228, top = 140, height = loot ? 475 : 518;
+        var scroll = Scroll(loot ? "event_scroll_loot.png" : "event_scroll_basic.png");
+        if (scroll != null) GUI.DrawTexture(new Rect(left, top, 456, height), scroll);
+        else Gui.Fill(new Rect(left, top, 456, height), new Color(0.05f, 0.04f, 0.03f, 0.93f));
+
+        string who = S.Save.Estate.Hero(report.HeroId)?.Name ?? "";
+        Gui.Text(new Rect(left + 40, top + 26, 376, 48), HamletUi.Pretty(report.CurioId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        var lines = new System.Collections.Generic.List<string>();
+        lines.Add($"{who}: {report.Text ?? HamletUi.Pretty(report.OutcomeType)}");
+        if (report.ItemUsed != null) lines.Add($"Used {HamletUi.Pretty(report.ItemUsed)}.");
+        lines.AddRange(report.Effects);
+        if (report.QuirkGained != null) lines.Add($"Gained the quirk {HamletUi.QuirkName(report.QuirkGained)}.");
+        if (report.Purged != null) lines.Add($"Rid of {HamletUi.QuirkName(report.Purged)}.");
+        if (report.Scouted) lines.Add("The way ahead is revealed.");
+        Gui.Text(new Rect(left + 50, top + 104, 356, 130), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+
+        var items = S.Content.Items;
+        for (int i = 0; i < report.Loot.Count && i < 5; i++)
+        {
+            var drop = report.Loot[i];
+            var r = new Rect(left + 228 - Mathf.Min(5, report.Loot.Count) * 40 + i * 80 + 4, top + 236, 72, 144);
+            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
+            if (icon != null) GUI.DrawTexture(r, icon);
+            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
+        }
+        if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", true, 24)
+            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+            _resultDismissed = report;
+        return true;
+    }
+
+    // DD1's scrolls (scrolls/*.png) and where screen.raid.darkest puts them.
+    private static Texture2D Scroll(string file) => Art.Dd1("scrolls", file);
+    private const float SidebarX = 1348, SidebarY = 200;   // sidebar_scroll .pos (centre x, top)
+    private string _curioItem;                            // the supply in the curio's item slot
+
+    /// <summary>A round DD1 scroll button (byhand.png, pass.png ...) with its label underneath.</summary>
+    private static bool ScrollButton(float x, float y, string icon, string label, bool enabled = true)
+    {
+        var r = new Rect(x, y, 124, 69);
+        bool hover = enabled && r.Contains(Event.current.mousePosition);
+        var tex = Scroll(icon);
+        var old = GUI.color;
+        if (!enabled) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+        if (tex != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 3, r.width + 8, r.height + 6) : r, tex);
+        else Gui.Fill(r, new Color(0.15f, 0.12f, 0.1f));
+        GUI.color = old;
+        Gui.Text(new Rect(r.x - 30, r.yMax, r.width + 60, 26), label, 19, hover ? Color.white : enabled ? Gui.Dd1Name : Gui.Dim, TextAnchor.UpperCenter, heading: true);
+        return enabled && Gui.Hotspot(r);
+    }
+
     private void DrawPrompt(Crawl crawl, ExpeditionState exp)
     {
         if (exp.Camp != null) return;
@@ -472,54 +537,74 @@ internal sealed class CrawlUi
         bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
         bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
         bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
-        if (curio == null && !obstacle && !trap && !battleStuck) return;
+        if (curio == null && !obstacle && !trap && !battleStuck) { _curioItem = null; return; }
 
-        var r = new Rect(1460, 150, 420, 400);
-        Gui.Fill(r, new Color(0.05f, 0.04f, 0.03f, 0.93f));
-        Gui.Fill(new Rect(r.x, r.y, r.width, 3), Gui.Gold);
-        Gui.Fill(new Rect(r.x, r.yMax - 3, r.width, 3), Gui.Gold);
-        float y = r.y + 18;
+        float left = SidebarX - 228, top = SidebarY;
+        var scroll = Scroll(battleStuck ? "event_scroll_basic.png" : "event_scroll_sidebar.png");
+        float height = battleStuck ? 518 : 400;
+        if (scroll != null) GUI.DrawTexture(new Rect(left, top, 456, height), scroll);
+        else Gui.Fill(new Rect(left, top, 456, height), new Color(0.05f, 0.04f, 0.03f, 0.93f));
+        var header = new Rect(left + 40, top + 20, 376, 48);
+        var body = new Rect(SidebarX - 152, top + 118, 330, 110);
 
         if (battleStuck)
         {
-            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), "Enemies!", 34, Gui.Blood, TextAnchor.UpperCenter, heading: true);
-            if (Gui.DdButton(new Rect(r.x + 90, y + 80, 240, 56), "Fight")) D.Fight();
+            Gui.Text(header, "Enemies!", 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(new Rect(left + 60, top + 170, 336, 90), "The way is held. There is no going on without a fight.", 20, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (Gui.DdButton(new Rect(SidebarX - 120, top + 400, 240, 56), "Fight")) D.Fight();
             return;
         }
 
         string who = S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "";
         if (curio != null)
         {
-            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
-            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 60), $"{who} will investigate. Select another hero to send them instead.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(body, $"{who} will investigate. Select another hero to send them instead.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
             string needed = crawl.QuestItemNeededHere;
-            if (Gui.DdButton(new Rect(r.x + 30, y + 120, 170, 52), needed != null ? "Use item" : "Investigate"))
+            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", needed != null ? "Use item" : "Investigate"))
             { D.Investigate(D.SelectedHeroId, needed); return; }
-            if (Gui.DdButton(new Rect(r.xMax - 200, y + 120, 170, 52), "Leave it")) { D.SkipCurio(); return; }
+            if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { D.SkipCurio(); return; }
 
-            // Supplies that do something here (DD1's item slot): their inventory art as buttons.
-            int k = 0;
-            foreach (var item in S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).Take(4))
+            // DD1's item slot: a supply that does something here. Click the slot to use it, the arrows to change it.
+            var useful = S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).ToList();
+            if (_curioItem == null || !useful.Contains(_curioItem)) _curioItem = useful.FirstOrDefault();
+            var slot = new Rect(SidebarX - 34, top + 230, 80, 160);
+            var slotTex = Scroll("use_inventory.png");
+            if (slotTex != null) GUI.DrawTexture(new Rect(slot.x + 4, slot.y + 8, 72, 144), slotTex);
+            if (_curioItem != null)
             {
-                var ir = new Rect(r.x + 40 + k++ * 90, y + 196, 54, 108);
-                var icon = Art.InventoryIcon(item, 1, 1);
-                if (icon != null) GUI.DrawTexture(ir, icon); else Gui.Fill(ir, Gui.Dim);
-                if (Gui.Hotspot(ir)) { D.Investigate(D.SelectedHeroId, item); return; }
+                var icon = Art.InventoryIcon(_curioItem, 1, 1);
+                bool hover = slot.Contains(Event.current.mousePosition);
+                if (icon != null) GUI.DrawTexture(new Rect(slot.x + 4, slot.y + 8, 72, 144), icon);
+                if (hover) Gui.Text(new Rect(left + 20, top + 400, 416, 30), $"Use {HamletUi.Pretty(_curioItem)} on it", 20, Color.white, TextAnchor.MiddleCenter, heading: true);
+                if (Gui.Hotspot(slot)) { D.Investigate(D.SelectedHeroId, _curioItem); return; }
+                if (useful.Count > 1)
+                {
+                    int at = useful.IndexOf(_curioItem);
+                    if (Gui.DdButton(new Rect(slot.x - 6, slot.yMax + 4, 42, 30), "<", true, 18)) _curioItem = useful[(at + useful.Count - 1) % useful.Count];
+                    if (Gui.DdButton(new Rect(slot.xMax - 36, slot.yMax + 4, 42, 30), ">", true, 18)) _curioItem = useful[(at + 1) % useful.Count];
+                }
             }
-            if (k > 0) Gui.Text(new Rect(r.x + 20, r.yMax - 46, r.width - 40, 30), "Or use a supply on it", 18, Gui.Dim, TextAnchor.UpperCenter);
         }
         else if (obstacle)
         {
-            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
+            Gui.Text(header, HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             bool shovel = exp.Pack.Count(Supply.Shovel) > 0;
-            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 70), shovel ? "A shovel will clear the way." : "Without a shovel the party must force its way through: hurt and stressed.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
-            if (Gui.DdButton(new Rect(r.x + 90, y + 130, 240, 56), shovel ? "Use a shovel" : "Clear by hand")) { D.ClearObstacle(); return; }
+            Gui.Text(body, shovel ? "A shovel will clear the way." : "Without a shovel the party must force its way through: hurt and stressed.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (shovel)
+            {
+                var icon = Art.InventoryIcon(Supply.Shovel, 1, 1);
+                var slot = new Rect(SidebarX - 34, top + 230, 80, 160);
+                if (icon != null) GUI.DrawTexture(new Rect(slot.x + 4, slot.y + 8, 72, 144), icon);
+                if (Gui.Hotspot(slot)) { D.ClearObstacle(); return; }
+            }
+            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", shovel ? "Dig through" : "Clear by hand")) { D.ClearObstacle(); return; }
         }
         else if (trap)
         {
-            Gui.Text(new Rect(r.x + 20, y, r.width - 40, 40), HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.UpperCenter, heading: true);
-            Gui.Text(new Rect(r.x + 24, y + 48, r.width - 48, 70), "A trap, spotted in time. The front hero can try to disarm it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
-            if (Gui.DdButton(new Rect(r.x + 90, y + 130, 240, 56), "Disarm")) { D.DisarmTrap(); return; }
+            Gui.Text(header, HamletUi.Pretty(tile.ContentId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(body, "A trap, spotted in time. The front hero can try to disarm it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Disarm")) { D.DisarmTrap(); return; }
         }
     }
 
@@ -547,10 +632,16 @@ internal sealed class CrawlUi
         if (camp != null) GUI.DrawTexture(new Rect(960 - camp.width / 2f, Feet + 30 - camp.height, camp.width, camp.height), camp);
     }
 
+    private const float CampScrollX = 732, CampScrollY = 60;   // camp_layout .respite_scroll_pos
+
     private static void DrawRespite(CampState camp)
     {
-        Gui.Text(new Rect(660, 30, 600, 40), "Respite", 30, Gui.Dd1Class, TextAnchor.MiddleCenter, heading: true);
-        Gui.Text(new Rect(660, 64, 600, 70), camp.RespiteLeft.ToString(), 64, Gui.Gold, TextAnchor.MiddleCenter, heading: true);
+        if (!camp.Ate) return;   // the meal scroll takes this spot first
+        var scroll = Scroll("event_scroll_campingrespite.png");
+        if (scroll != null) GUI.DrawTexture(new Rect(CampScrollX, CampScrollY, 456, 237), scroll);
+        Gui.Text(new Rect(CampScrollX + 40, CampScrollY + 22, 260, 44), "Respite", 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(CampScrollX + 284, CampScrollY + 22, 80, 44), camp.RespiteLeft.ToString(), 36, Gui.Gold, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(CampScrollX + 56, CampScrollY + 96, 344, 80), "Spend respite on camping skills. Click a hero to see theirs.", 18, Gui.Dd1Text, TextAnchor.UpperLeft);
     }
 
     private static string Describe(CampEffect e)
@@ -586,14 +677,14 @@ internal sealed class CrawlUi
         string hero = D.SelectedHeroId;
         if (hero != null && exp.CampSkills.TryGetValue(hero, out var skills) && skills.Count > 0)
         {
-            Gui.Text(new Rect(560, 150, 800, 34), $"{S.Save.Estate.Hero(hero)?.Name}'s camping skills", 24, Gui.Dd1Class, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(new Rect(560, 304, 800, 30), $"{S.Save.Estate.Hero(hero)?.Name}'s camping skills", 22, Gui.Dd1Class, TextAnchor.MiddleCenter, heading: true);
             float w = skills.Count * 92 - 12, x0 = 960 - w / 2;
             string hovered = null;
             for (int i = 0; i < skills.Count; i++)
             {
                 var skill = S.Content.Camping.Get(skills[i]);
                 if (skill == null) continue;
-                var r = new Rect(x0 + i * 92, 190, 80, 80);
+                var r = new Rect(x0 + i * 92, 338, 80, 80);
                 string why = crawl.WhyCantUseCampSkill(hero, skill.Id);
                 bool hover = r.Contains(Event.current.mousePosition);
                 if (hover) hovered = skill.Id;
@@ -623,14 +714,14 @@ internal sealed class CrawlUi
             }
             if (hovered != null) DrawCampSkillTip(crawl, exp, hero, hovered);
         }
-        else Gui.Text(new Rect(560, 190, 800, 40), "Click a hero to see their camping skills.", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        else Gui.Text(new Rect(560, 330, 800, 40), "Click a hero to see their camping skills.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
 
         if (_campSkillPending != null && Event.current.type == EventType.MouseDown && Event.current.button == 1)
         {
             _campSkillPending = null;    // right-click cancels the targeting
             Event.current.Use();
         }
-        if (Gui.DdButton(new Rect(1620, 600, 270, 60), "Break camp", true, 26))
+        if (Gui.DdButton(new Rect(CampScrollX + 100, CampScrollY + 180, 256, 44), "Rest and break camp", true, 22))
         {
             _campSkillPending = null;
             D.BreakCamp();
@@ -640,26 +731,28 @@ internal sealed class CrawlUi
     private static void DrawMealChoice(Crawl crawl, ExpeditionState exp)
     {
         // DD1 starts the night with a meal: how much food to share out.
-        var r = new Rect(560, 150, 800, 230);
-        Gui.Fill(r, new Color(0.03f, 0.025f, 0.02f, 0.92f));
-        Gui.Fill(new Rect(r.x, r.y, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
-        Gui.Fill(new Rect(r.x, r.yMax - 2, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
-        Gui.Text(new Rect(r.x, r.y + 10, r.width, 44), "The meal", 36, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        var scroll = Scroll("meal_scroll.png");
+        if (scroll != null) GUI.DrawTexture(new Rect(CampScrollX, CampScrollY, 456, 333), scroll);
+        else Gui.Fill(new Rect(CampScrollX, CampScrollY, 456, 333), new Color(0.03f, 0.025f, 0.02f, 0.92f));
+        Gui.Text(new Rect(CampScrollX + 40, CampScrollY + 28, 376, 48), "The meal", 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         int i = 0, food = exp.Pack.Count(Supply.Food);
+        Gui.Text(new Rect(CampScrollX + 40, CampScrollY + 92, 376, 30), $"Food in the pack: {food}", 19, Gui.Dd1Class, TextAnchor.MiddleCenter);
         foreach (Meal m in Enum.GetValues(typeof(Meal)))
         {
             int cost = crawl.MealCost(m);
-            var b = new Rect(r.x + 30 + i * 192, r.y + 70, 180, 140);
-            i++;
             bool can = food >= cost;
-            bool hover = can && b.Contains(Event.current.mousePosition);
-            Gui.Fill(b, hover ? new Color(0.2f, 0.16f, 0.1f, 0.9f) : new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            var icon = cost > 0 ? Art.InventoryIcon(Supply.Food, Mathf.Max(1, cost), 12) : null;
-            if (icon != null) GUI.DrawTexture(new Rect(b.x + 10, b.y + 6, 64, 128), icon, ScaleMode.ScaleToFit);
+            float x = CampScrollX + 26 + i++ * 104;
+            var r = new Rect(x, CampScrollY + 148, 100, 56);
+            bool hover = can && r.Contains(Event.current.mousePosition);
+            var tex = Scroll(cost == 0 ? "starve.png" : "eat.png");
+            var old = GUI.color;
+            if (!can) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+            if (tex != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 3, r.width + 8, r.height + 6) : r, tex);
+            GUI.color = old;
             string name = cost == 0 ? "Go hungry" : m.ToString();
-            Gui.Text(new Rect(b.x + 74, b.y + 20, 104, 40), name, 26, can ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(b.x + 74, b.y + 62, 104, 60), cost == 0 ? "No food" : $"{cost} food", 20, can ? Gui.Dd1Text : Gui.Dim, TextAnchor.UpperLeft);
-            if (can && Gui.Hotspot(b)) D.EatMeal(m);
+            Gui.Text(new Rect(x - 6, r.yMax + 4, 112, 28), name, 19, hover ? Color.white : can ? Gui.Dd1Name : Gui.Dim, TextAnchor.UpperCenter, heading: true);
+            Gui.Text(new Rect(x - 6, r.yMax + 30, 112, 26), cost == 0 ? "" : $"{cost} food", 17, can ? Gui.Dd1Text : Gui.Dim, TextAnchor.UpperCenter);
+            if (can && Gui.Hotspot(r)) D.EatMeal(m);
         }
     }
 
@@ -671,7 +764,7 @@ internal sealed class CrawlUi
         var lines = skill.Effects.Select(Describe).ToList();
         if (skill.UseLimit > 0) lines.Add($"Uses: {used}/{skill.UseLimit}");
         if (why != null) lines.Add(why);
-        var tip = new Rect(660, 286, 600, 52 + 26 * lines.Count);
+        var tip = new Rect(660, 430, 600, 52 + 26 * lines.Count);
         Gui.Fill(tip, new Color(0.03f, 0.025f, 0.02f, 0.94f));
         Gui.Text(new Rect(tip.x + 14, tip.y + 6, tip.width - 28, 34), $"{Dd1Text.CampSkillName(skillId)}  ·  {skill.Cost} respite", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         for (int i = 0; i < lines.Count; i++)

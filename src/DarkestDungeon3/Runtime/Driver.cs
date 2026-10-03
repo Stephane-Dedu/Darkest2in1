@@ -166,6 +166,7 @@ internal sealed class Driver : MonoBehaviour
         var guids = Dd2Heroes.BuildParty(heroes);
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
+        LastCurio = null;
         Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
