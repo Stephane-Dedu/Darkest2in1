@@ -60,3 +60,12 @@ internal static class ItemArt
             Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 21, Color.white, TextAnchor.LowerRight);
     }
 }
+
+/// <summary>A stagecoach recruit being dragged to the roster (DD1's way of hiring).</summary>
+internal sealed class RecruitDrag
+{
+    public readonly string HeroId;
+    public RecruitDrag(string heroId) { HeroId = heroId; }
+    public override bool Equals(object o) => o is RecruitDrag r && r.HeroId == HeroId;
+    public override int GetHashCode() => HeroId?.GetHashCode() ?? 0;
+}

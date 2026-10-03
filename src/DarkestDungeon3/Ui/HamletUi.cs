@@ -520,36 +520,55 @@ internal sealed class HamletUi
             Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster to see what the Blacksmith can do for their weapon and armour.", 24, Gui.Dd1Text);
             return;
         }
+        // The hero being outfitted, under the rows (drop another hero from the roster to switch).
         var icon = Art.HeroIcon(hero.ClassId);
-        if (icon != null) Art.DrawSprite(new Rect(area.x + 16, area.y + 12, 90, 90), icon);
-        Gui.Text(new Rect(area.x + 120, area.y + 14, 500, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(area.x + 120, area.y + 54, 500, 30), $"{Pretty(hero.ClassId)}, resolve {hero.ResolveLevel}", 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (icon != null) Art.DrawSprite(new Rect(646, 640, 90, 90), icon);
+        Gui.Text(new Rect(750, 642, 600, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(750, 682, 600, 30), $"{Pretty(hero.ClassId)}, resolve {hero.ResolveLevel}  ·  drop another hero here to switch", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
+        // DD1's Blacksmith (blacksmith.layout): a row per slot from body + (50,20), 176 apart, the five equipment
+        // pictures 75 apart: owned ranks as they are, the next one highlighted with its cost, later ones dark.
         string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
-        float y = area.y + 130;
-        foreach (var slot in new[] { Hamlet.Weapon, Hamlet.Armour })
+        var highlight = UpgradeArt("requirement_highlight_overlay.png");
+        for (int s = 0; s < 2; s++)
         {
+            string slot = s == 0 ? Hamlet.Weapon : Hamlet.Armour;
             int rank = hamlet.Rank(hero, slot);
-            var r = new Rect(area.x + 10, y, area.width - 20, 250);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            var eq = Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_{slot}_{Mathf.Min(rank, 4)}.png");
-            if (eq != null) GUI.DrawTexture(new Rect(r.x + 14, r.y + 14, 110, 220), eq, ScaleMode.ScaleToFit);
-            Gui.Text(new Rect(r.x + 140, r.y + 10, 400, 40), $"{(slot == Hamlet.Weapon ? "Weapon" : "Armour")}  ·  rank {rank + 1}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(r.x + 140, r.y + 50, 470, 30), Dd2.Dd2Heroes.EquipmentText(slot, rank), 20, Gui.Dd1Text, TextAnchor.MiddleLeft);
             var next = hamlet.NextEquipment(hero, slot);
-            if (next != null)
+            string why = next == null ? null : hamlet.WhyCantUpgradeEquipment(hero, slot);
+            float x0 = 596 + 50, y0 = 102 + 20 + 120 + s * 176;
+            Gui.Text(new Rect(x0, y0 - 34, 300, 30), slot == Hamlet.Weapon ? "Weapon" : "Armour", 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            for (int k = 0; k < 5; k++)
             {
-                Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), $"Next: {Dd2.Dd2Heroes.EquipmentText(slot, rank + 1)}", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
-                Gui.Text(new Rect(r.x + 140, r.y + 126, 470, 30), $"{Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold  ·  resolve {next.Resolve}", 19, Gui.Gold, TextAnchor.MiddleLeft);
-                string why = hamlet.WhyCantUpgradeEquipment(hero, slot);
-                if (Gui.DdButton(new Rect(r.x + 140, r.y + 172, 300, 54), why ?? "Upgrade", why == null, why == null ? 26 : 18))
+                var r = new Rect(x0 + k * 75, y0, 72, 144);
+                var pic = Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_{slot}_{k}.png");
+                var old = GUI.color;
+                if (k > rank + 1 || (k == rank + 1 && next == null)) GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
+                else if (k == rank + 1) GUI.color = new Color(0.7f, 0.7f, 0.7f, 1f);
+                if (pic != null) GUI.DrawTexture(r, pic); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
+                GUI.color = old;
+                if (k <= rank) Gui.Fill(new Rect(r.x + 4, r.yMax + 3, r.width - 8, 3), Gui.Gold);
+                if (k == rank + 1 && next != null)
                 {
-                    hamlet.UpgradeEquipment(hero.Id, slot);
-                    S.Persist();
+                    Gui.Text(new Rect(r.x - 10, r.yMax + 2, r.width + 20, 22), Gui.Num(hamlet.EquipmentCost(next), "#,0"), 16, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
+                    if (r.Contains(Event.current.mousePosition) && highlight != null) GUI.DrawTexture(new Rect(r.x + 11, r.y + 47, 50, 50), highlight);
+                    if (why == null && Gui.Hotspot(r))
+                    {
+                        hamlet.UpgradeEquipment(hero.Id, slot);
+                        Runtime.Dd1Audio.Play(slot == Hamlet.Weapon ? "/town/blacksmith_purchase_wep" : "/town/blacksmith_purchase_arm");
+                        S.Persist();
+                    }
                 }
             }
-            else Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), "The finest the Hamlet can make.", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            y += 262;
+            // What it does now and next (beside the row).
+            float tx = x0 + 5 * 75 + 24;
+            Gui.Text(new Rect(tx, y0, 1500 - tx, 30), $"Rank {rank + 1}: {Dd2.Dd2Heroes.EquipmentText(slot, rank)}", 19, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            if (next != null)
+            {
+                Gui.Text(new Rect(tx, y0 + 34, 1500 - tx, 30), $"Next: {Dd2.Dd2Heroes.EquipmentText(slot, rank + 1)}", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+                Gui.Text(new Rect(tx, y0 + 64, 1500 - tx, 30), why ?? $"{Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold · needs resolve {next.Resolve} · click it", 17, why == null ? Gui.Gold : Gui.Blood, TextAnchor.MiddleLeft);
+            }
+            else Gui.Text(new Rect(tx, y0 + 34, 1500 - tx, 30), "The finest the Hamlet can make.", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
         }
     }
 
@@ -680,28 +699,56 @@ internal sealed class HamletUi
         GUI.EndScrollView();
     }
 
+    /// <summary>
+    /// DD1's stagecoach (stage_coach.layout): the recruits from body + (450,80), 100 apart, each on its dark band
+    /// (hero_background at -100,-8) with the resolve level to the left of the portrait, the name at (100,12) and the
+    /// class at (100,42). Drag a recruit onto the roster to hire them; click one to read their sheet.
+    /// </summary>
     private void DrawStageCoach(Rect area, Hamlet hamlet)
     {
-        Frame(area);
-        Gui.Text(new Rect(area.x + 20, area.y + 10, 700, 40),
-            $"New recruits arrive each week. Roster: {E.Roster.Count}/{S.Buildings.RosterSize(E)}", 22, Gui.Dd1Text);
-        for (int i = 0; i < E.Recruits.Count; i++)
+        var band = Art.Dd1("campaign", "town", "buildings", "stage_coach", "stage_coach.hero_background.png");
+        var origin = new Vector2(596 + 450, 102 + 80);
+        Gui.Text(new Rect(origin.x - 100, origin.y - 70, 600, 40),
+            hamlet.CanRecruit ? "Drag a recruit onto the roster to hire them." : $"The roster is full ({E.Roster.Count}/{S.Buildings.RosterSize(E)}).",
+            20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (E.Recruits.Count == 0)
+            Gui.Text(new Rect(origin.x - 100, origin.y + 200, 600, 40), "No one has come this week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        for (int i = 0; i < E.Recruits.Count && i < 7; i++)
         {
             var h = E.Recruits[i];
-            var r = new Rect(area.x + 10, area.y + 60 + i * 104, area.width - 20, 98);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            var sprite = Art.HeroIcon(h.ClassId);
-            if (sprite != null) Art.DrawSprite(new Rect(r.x + 6, r.y + 6, 86, 86), sprite);
-            Gui.Text(new Rect(r.x + 104, r.y + 4, 400, 34), $"{h.Name}", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(r.x + 104, r.y + 34, 480, 60),
-                $"{Pretty(h.ClassId)}, resolve {h.ResolveLevel}\n{string.Join(", ", h.Quirks.Select(QuirkName))}", 17, Gui.Dd1Class);
-            if (Gui.DdButton(new Rect(r.xMax - 150, r.y + 26, 136, 46), "Recruit", hamlet.CanRecruit, 22))
-            {
-                hamlet.Recruit(h.Id);
-                S.Persist();
-            }
+            float x = origin.x, y = origin.y + i * 100;
+            var row = new Rect(x - 100, y - 8, 600, 101);
+            if (band != null) GUI.DrawTexture(row, band); else Gui.Fill(row, new Color(0.06f, 0.05f, 0.05f, 0.95f));
+            bool hover = row.Contains(Event.current.mousePosition);
+            if (hover) Gui.Fill(new Rect(row.x + 6, row.y + 8, row.width - 12, row.height - 16), new Color(1f, 0.9f, 0.6f, 0.06f));
+            Gui.Text(new Rect(x - 70, y + 12, 60, 60), h.ResolveLevel.ToString(), 34, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+            var portrait = new Rect(x, y, 86, 86);
+            string cls = h.ClassId;
+            if (hamlet.CanRecruit)
+                Drag.Source(row, new RecruitDrag(h.Id), r => { if (Art.HeroIcon(cls) is { } ic) Art.DrawSprite(new Rect(r.x + 100, r.y + 8, 86, 86), ic); });
+            if (!(Drag.Payload is RecruitDrag carried && carried.HeroId == h.Id) && Art.HeroIcon(h.ClassId) is { } icon) Art.DrawSprite(portrait, icon);
+            Gui.Text(new Rect(x + 100, y + 4, 380, 36), h.Name, 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(x + 100, y + 38, 380, 28), Pretty(h.ClassId), 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            Gui.Text(new Rect(x + 100, y + 62, 390, 24), string.Join(", ", h.Quirks.Select(QuirkName)), 15, Gui.Dim, TextAnchor.MiddleLeft);
+            if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; }
         }
+        // Hiring: a recruit dropped on the roster.
+        if (Drag.Hovering<RecruitDrag>(RosterColumn.Area)) Gui.Fill(new Rect(RosterColumn.Area.x, RosterColumn.Area.yMax, RosterColumn.Area.width, 4), Gui.Gold);
+        if (Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired) && hamlet.CanRecruit)
+        {
+            hamlet.Recruit(hired.HeroId);
+            Runtime.Dd1Audio.Play("/ui/town/character_add");
+            S.Persist();
+        }
+        if (_recruitSheet && E.Recruits.FirstOrDefault(r => r.Id == _heroId) is { } recruit)
+        {
+            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+            HeroSheet.Draw(recruit, id => _heroId = id, () => _recruitSheet = false, readOnly: true, cycle: E.Recruits.Select(r => r.Id).ToList());
+        }
+        else _recruitSheet = false;
     }
+
+    private bool _recruitSheet;
 
     // ---- DD1 activity slots (building.layout.darkest): rows 230 apart, slots 135 apart, in the painted arches ----
 
