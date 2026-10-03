@@ -292,11 +292,32 @@ public sealed class Crawl
         return null;
     }
 
+    /// <summary>Where the party stands, as a key for the fight waiting there.</summary>
+    private string FightSpot => State.InRoom ? "room:" + State.RoomId : $"hall:{State.CorridorId}:{State.TileIndex}";
+
+    /// <summary>The DD1 monsters of the fight about to start here: DD1's encounter table for the zone and quest
+    /// difficulty (hall, room, boss). After a retreat the same group is still waiting at that spot.</summary>
+    public List<string> FightMonsters(string kind)
+    {
+        if (State.FightMonsters is { Count: > 0 } waiting && State.FightAt == FightSpot) return waiting;
+        State.FightMonsters = _content?.Battles?.RollEncounter(State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng()) ?? new List<string>();
+        State.FightAt = FightSpot;
+        return State.FightMonsters;
+    }
+
     private BattleSpoils TakeSpoils(string kind)
     {
         var spoils = new BattleSpoils { Kind = kind };
         if (_content?.Battles == null || _content.Loot == null) return spoils;
-        var drops = _content.Battles.Roll(_content.Loot, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng(), out spoils.Dd1Monsters);
+        List<LootDrop> drops;
+        if (State.FightMonsters is { Count: > 0 } fought && State.FightAt == FightSpot)
+        {
+            spoils.Dd1Monsters = new List<string>(fought);
+            drops = _content.Battles.RollFor(_content.Loot, fought, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, NextRng());
+        }
+        else drops = _content.Battles.Roll(_content.Loot, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng(), out spoils.Dd1Monsters);
+        State.FightMonsters = null;
+        State.FightAt = null;
         foreach (var drop in drops)
         {
             if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items))

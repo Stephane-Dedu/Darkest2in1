@@ -339,6 +339,10 @@ Feasibility notes (decomp):
 - [ ] Realm inventory from the estate bar's "Trinkets" and from the sheet.
 - [ ] Nomad Wagon: DD1 grid with trinket pictures, prices, hover details, click to buy.
 - [ ] Dungeon HUD: equipped DD2 skills in the five banner slots, DD1 weapon/armour pictures, trinket pictures.
+- [ ] Monster variety: log "[combat] DD1 encounter [...] -> ..." then DD2 spawns that exact line-up
+      (custom BattleConfiguration "dd3_dd1_encounter" registered at fight start). Check: enemies appear in order,
+      two-rank enemies fit, champions (_b) at champion level, loot after the win matches the DD1 monsters,
+      a retreat then re-engage meets the same group, bosses still use zones.json configs.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

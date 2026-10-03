@@ -88,6 +88,12 @@ public sealed class BattleLoot
     public List<LootDrop> Roll(LootTables tables, string zone, int difficulty, string kind, Rng rng, out List<string> monsters)
     {
         monsters = RollEncounter(zone, difficulty, kind, rng);
+        return RollFor(tables, monsters, zone, difficulty, rng);
+    }
+
+    /// <summary>What these DD1 monsters leave behind (DD1's per-monster loot codes); none rolled → a common draw.</summary>
+    public List<LootDrop> RollFor(LootTables tables, IReadOnlyList<string> monsters, string zone, int difficulty, Rng rng)
+    {
         var drops = new List<LootDrop>();
         if (monsters.Count == 0)
         {

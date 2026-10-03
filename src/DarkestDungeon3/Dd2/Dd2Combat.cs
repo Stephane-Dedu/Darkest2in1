@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Code.Actor;
 using Assets.Code.Combat;
 using Assets.Code.Combat.BattleConfiguration;
 using Assets.Code.Game;
@@ -90,8 +91,40 @@ internal static class Dd2Combat
         return _knownScenes.Count == 0 || _knownScenes.Contains(scene);
     }
 
+    private const string LineUpBattleId = "dd3_dd1_encounter";
+
+    /// <summary>How many ranks a DD2 enemy takes (1 if DD2 doesn't know it).</summary>
+    public static int EnemySize(string actorClass)
+    {
+        var lib = SingletonMonoBehaviour<Library<string, ActorDataClass>>.Instance;
+        return lib != null && lib.GetHasLibraryKey(actorClass) ? lib.GetLibraryElement(actorClass).m_Size : 1;
+    }
+
+    /// <summary>A DD2 battle with exactly these enemies (front rank first), registered in DD2's battle library under
+    /// one id that each translated DD1 encounter replaces. Null if DD2 doesn't know one of them.</summary>
+    private static string RegisterLineUp(List<string> enemies)
+    {
+        var actors = SingletonMonoBehaviour<Library<string, ActorDataClass>>.Instance;
+        var unknown = enemies.Where(e => actors == null || !actors.GetHasLibraryKey(e)).ToList();
+        if (unknown.Count > 0) { Plugin.Log.LogWarning($"[combat] DD2 has no enemy {string.Join(", ", unknown)}; using the zone table"); return null; }
+        try
+        {
+            var def = new BattleConfigurationDefinition(LineUpBattleId, "m_Chance,1,\nm_EnemyActors," + string.Join(",", enemies) + ",\n");
+            def.Init();
+            def.PostInit();
+            SingletonMonoBehaviour<Library<string, BattleConfigurationDefinition>>.Instance.AddLibraryElement(def, overrideCSV: true);
+            return LineUpBattleId;
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.LogError("[combat] could not build the DD1 line-up battle: " + e);
+            return null;
+        }
+    }
+
     public static string RollBattle(FightPlan plan)
     {
+        if (plan.Enemies is { Count: > 0 } && RegisterLineUp(plan.Enemies) is { } lineUp) return lineUp;
         if (!plan.IsTable) return plan.BattleId;
         var result = new List<string>();
         if (LibraryBattleConfigurationTables.RollBattleConfiguration(plan.BattleId, RandomIdentifier.COMBAT, result) && result.Count > 0)

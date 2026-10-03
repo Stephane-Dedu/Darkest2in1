@@ -1,0 +1,67 @@
+{
+  "_comment": [
+    "Which DD2 enemy stands in for each DD1 monster. Our own mapping (no game data), edit freely.",
+    "Keys are DD1 monster classes without their tier letter (skeleton_arbalist_A -> skeleton_arbalist).",
+    "'dd2' lists stand-ins (one is picked per monster); 'champion' lists the stronger DD2 '_b' forms used for",
+    "DD1's champion tier (_C) and sometimes for veterans (_B). Matched on role (front/back line), size and theme.",
+    "An encounter with any monster missing here (boss pieces) falls back to the zone's DD2 table in zones.json."
+  ],
+  "monsters": {
+    "skeleton_common":    { "dd2": ["lost_battalion_foot_soldier"] },
+    "skeleton_militia":   { "dd2": ["lost_battalion_foot_soldier"] },
+    "skeleton_defender":  { "dd2": ["lost_battalion_foot_soldier"] },
+    "skeleton_spear":     { "dd2": ["lost_battalion_foot_soldier"] },
+    "skeleton_captain":   { "dd2": ["lost_battalion_knight"], "champion": ["lost_battalion_knight_b"] },
+    "skeleton_arbalist":  { "dd2": ["lost_battalion_arbalist"], "champion": ["lost_battalion_arbalist_b"] },
+    "skeleton_courtier":  { "dd2": ["lost_battalion_drummer"] },
+    "skeleton_bearer":    { "dd2": ["lost_battalion_bishop"] },
+
+    "cultist_brawler":    { "dd2": ["fanatic_whipper", "fanatic_flayer"], "champion": ["fanatic_whipper_b"] },
+    "cultist_witch":      { "dd2": ["fanatic_blind_shaman"] },
+    "madman":             { "dd2": ["shared_lost_soul_widow"] },
+    "gargoyle":           { "dd2": ["fanatic_flayer"] },
+    "maggot":             { "dd2": ["shared_carrion_eater"] },
+    "spider_webber":      { "dd2": ["shared_carrion_eater"] },
+    "spider_spitter":     { "dd2": ["plague_eater_maid"] },
+    "ghoul":              { "dd2": ["shared_ghoul"] },
+    "shambler":           { "dd2": ["shared_shambler"] },
+
+    "brigand_cutthroat":  { "dd2": ["shared_pillager_melee"] },
+    "brigand_raider":     { "dd2": ["shared_pillager_melee"] },
+    "brigand_fusilier":   { "dd2": ["shared_pillager_ranged"] },
+    "brigand_hunter":     { "dd2": ["shared_pillager_firemouth"] },
+    "brigand_blood":      { "dd2": ["fanatic_pit_fighter"] },
+
+    "rabid_dog":          { "dd2": ["shared_pillager_mongrel"] },
+    "fungal_bloat":       { "dd2": ["plague_eater_livestock"], "champion": ["plague_eater_livestock_b"] },
+    "fungal_artillery":   { "dd2": ["plague_eater_maid"] },
+    "ectoplasm":          { "dd2": ["shared_lost_soul"] },
+    "ectoplasm_large":    { "dd2": ["shared_lost_soul_yeoman"] },
+    "crone":              { "dd2": ["plague_eater_lady"] },
+    "unclean_giant":      { "dd2": ["plague_eater_lord"] },
+    "virago_hateful":     { "dd2": ["fanatic_immolatist"], "champion": ["fanatic_immolatist_b"] },
+
+    "swine_reaver":       { "dd2": ["cave_swine_skulker"] },
+    "swine_slasher":      { "dd2": ["cave_swine_skulker"] },
+    "swine_wretch":       { "dd2": ["cave_swine_skiver"], "champion": ["cave_swine_skiver_b"] },
+    "swine_skiver":       { "dd2": ["cave_swine_skiver"], "champion": ["cave_swine_skiver_b"] },
+    "swine_drummer":      { "dd2": ["cave_swine_skiver_b"] },
+    "swinetaur":          { "dd2": ["cave_swine_brute"], "champion": ["cave_swine_brute_b"] },
+    "carrion_eater":      { "dd2": ["shared_carrion_eater"] },
+    "carrion_eater_big":  { "dd2": ["shared_carrion_eater_mutated"] },
+    "carrion_eater_large":{ "dd2": ["shared_carrion_eater_mutated"] },
+    "formless_melee":     { "dd2": ["shared_lost_soul"] },
+    "formless_guard":     { "dd2": ["shared_lost_soul"] },
+    "formless_weak":      { "dd2": ["shared_lost_soul"] },
+    "formless_ranged":    { "dd2": ["shared_lost_soul_widow"] },
+
+    "fishman_harpoon":    { "dd2": ["coastal_bosun", "coastal_wharf_rat"], "champion": ["coastal_bosun_b"] },
+    "fishman_shaman":     { "dd2": ["coastal_fish_monger"] },
+    "fishman_crabby":     { "dd2": ["coastal_docker"] },
+    "jellyfish":          { "dd2": ["coastal_cabin_boy"] },
+    "snail_urchin":       { "dd2": ["coastal_wharf_rat"] },
+    "octotank":           { "dd2": ["coastal_bosun"], "champion": ["coastal_bosun_b"] },
+    "bloated_corpse":     { "dd2": ["coastal_wharf_rat"] },
+    "drowned_pirate":     { "dd2": ["coastal_captain"], "champion": ["coastal_captain_b"] }
+  }
+}

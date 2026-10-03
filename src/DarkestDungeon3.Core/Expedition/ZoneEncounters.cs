@@ -14,11 +14,14 @@ public sealed class FightPlan
     public string Battle;
     public List<string> Arenas = new();
     public FightKind Kind;
+    /// <summary>DD2 enemies translated from a rolled DD1 encounter (front rank first); when set, they are the
+    /// battle and <see cref="Battle"/> is only the fallback.</summary>
+    public List<string> Enemies;
 
     public bool IsTable => Battle != null && Battle.StartsWith("table:", StringComparison.Ordinal);
     public string BattleId => Battle?.Substring(Battle.IndexOf(':') + 1);
 
-    public override string ToString() => $"{Kind}: {Battle} in [{string.Join(", ", Arenas)}]";
+    public override string ToString() => $"{Kind}: {(Enemies != null ? "[" + string.Join(", ", Enemies) + "] else " : "")}{Battle} in [{string.Join(", ", Arenas)}]";
 }
 
 /// <summary>Which DD2 encounters each DD1 zone uses (<c>data/zones.json</c>, shipped with the mod).</summary>

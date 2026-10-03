@@ -30,6 +30,7 @@ internal sealed class Session
     public Dd1Lore Lore;
     public Provisioner Provisioner;
     public ZoneEncounters Zones;
+    public Dd1Bestiary Bestiary;
 
     public SaveFile Save;
     public string SavePath;
@@ -56,6 +57,7 @@ internal sealed class Session
                 s.Lore = Dd1Lore.Load(dd1);
                 s.Provisioner = Provisioner.Load(dd1, s.Content.Items);
                 s.Zones = ZoneEncounters.Load(Path.Combine(pluginDir, "data", "zones.json"));
+                s.Bestiary = Dd1Bestiary.Load(Path.Combine(pluginDir, "data", "monsters.json"));
                 Current = s;
                 Plugin.Log.LogInfo($"[session] DD1 content loaded from {dd1.Root}: {s.Campaign.MapGen.All.Count} map configs, " +
                                    $"{s.Buildings.Activities.Count} activities, {s.Content.Camping.Skills.Count} camp skills, {s.Lore.HeroNames.Count} names");
