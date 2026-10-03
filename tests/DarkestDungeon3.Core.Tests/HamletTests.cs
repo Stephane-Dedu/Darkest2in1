@@ -192,4 +192,31 @@ public class HamletTests
         hero.ClassId = "runaway";
         Assert.NotNull(h.NextEquipment(hero, Hamlet.Armour));
     }
+    [Fact]
+    public void Survivalist_teaches_unknown_class_skills_for_gold()
+    {
+        var camping = DarkestDungeon3.Core.Expedition.CampingSkills.Load(Install);
+        var estate = Hamlet.NewEstate(9, Dd1, B, Catalog, camping);
+        var h = new Hamlet(estate, Dd1, B, Catalog, camping);
+        var hero = estate.Roster[0];
+        hero.ClassId = "highwayman";
+        hero.CampingSkills = camping.Starting("highwayman", new Rng(2));
+        string unknown = camping.ForClass("highwayman").First(id => !hero.CampingSkills.Contains(id));
+        estate.QuestsCompleted = 10;
+        estate.Add(Currency.Gold, 5000);
+        int cost = h.CampSkillCost(camping.Get(unknown));
+        Assert.True(cost > 0);
+        Assert.Null(h.WhyCantLearnCampSkill(hero, unknown));
+        Assert.True(h.LearnCampSkill(hero.Id, unknown));
+        Assert.Contains(unknown, hero.CampingSkills);
+        Assert.Equal("Known", h.WhyCantLearnCampSkill(hero, unknown));
+
+        // DD1's camping buffs read as words; damage low/high pairs merge.
+        var damageSkill = camping.ForClass("highwayman").Select(camping.Get)
+            .First(sk => sk.Effects.Any(e => e.Type == "buff" && e.SubType != null && e.SubType.Contains("DMGLow")));
+        var finesse = camping.DescribeAll(damageSkill);
+        Assert.Contains(finesse, l => l.Contains("damage") && l.Contains("(self)"));
+        Assert.Equal(finesse.Count, finesse.Distinct().Count());
+        Assert.Contains("-1.5 stress (ally)", camping.DescribeAll(camping.Get("encourage")));
+    }
 }

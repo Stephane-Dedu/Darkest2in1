@@ -317,7 +317,8 @@ internal sealed class Driver : MonoBehaviour
         var quest = Expedition.Quest;
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken), quest.BossId);
         var guids = Expedition.Party.Select(Party.Guid).Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
-        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised))
+        var buffs = Crawl.FightBuffs().Select(b => (Party.Guid(b.Hero), b.Buff)).Where(b => b.Item1 != 0).ToList();
+        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs))
         {
             Phase = Phase.Fighting;
             S.Persist();

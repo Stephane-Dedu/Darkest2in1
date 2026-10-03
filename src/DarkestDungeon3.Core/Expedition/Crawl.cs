@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Core.Dungeon;
 
 namespace DarkestDungeon3.Core.Expedition;
@@ -183,6 +184,7 @@ public sealed class Crawl
         _events.Clear();
         State.BattlesWon++;
         LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
+        CountDownBuffs();
         if (State.InRoom)
         {
             var room = CurrentRoom;
@@ -196,6 +198,40 @@ public sealed class Crawl
         }
         CheckQuest();
         return Flush();
+    }
+
+    /// <summary>The DD1 buffs (camp skills, town visits) each living hero carries into the next fight.</summary>
+    public List<(string Hero, Dd1Buff Buff)> FightBuffs()
+    {
+        var list = new List<(string, Dd1Buff)>();
+        if (_content?.Buffs == null) return list;
+        foreach (var kv in State.PendingBuffs)
+        {
+            if (!_party.Alive.Contains(kv.Key)) continue;
+            foreach (var id in kv.Value.Distinct())
+                if (_content.Buffs.Get(id) is { InDungeon: true } buff) list.Add((kv.Key, buff));
+        }
+        return list;
+    }
+
+    /// <summary>After a fight: buffs that last a number of battles (DD1 "combat_end") count down.</summary>
+    private void CountDownBuffs()
+    {
+        if (_content?.Buffs == null) return;
+        foreach (var hero in State.PendingBuffs.Keys.ToList())
+        {
+            var keep = new List<string>();
+            foreach (var id in State.PendingBuffs[hero].Distinct())
+            {
+                var buff = _content.Buffs.Get(id);
+                if (buff == null || buff.Battles == 0) { keep.Add(id); continue; }
+                string key = hero + "|" + id;
+                int left = (State.BuffBattlesLeft.TryGetValue(key, out var l) ? l : buff.Battles) - 1;
+                if (left > 0) { State.BuffBattlesLeft[key] = left; keep.Add(id); }
+                else State.BuffBattlesLeft.Remove(key);
+            }
+            State.PendingBuffs[hero] = keep;
+        }
     }
 
     private BattleSpoils TakeSpoils(string kind)
@@ -352,7 +388,8 @@ public sealed class Crawl
                 if (!string.IsNullOrEmpty(effect.SubType))
                 {
                     if (!State.PendingBuffs.TryGetValue(hero, out var list)) State.PendingBuffs[hero] = list = new List<string>();
-                    list.Add(effect.SubType);
+                    if (!list.Contains(effect.SubType)) list.Add(effect.SubType);
+                    State.BuffBattlesLeft.Remove(hero + "|" + effect.SubType);
                 }
                 break;
             case "loot":

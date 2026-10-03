@@ -155,6 +155,36 @@ public sealed class Hamlet
 
     public bool BuyUpgrade(string treeId, string code) => Buildings.Trees.TryBuy(Estate, treeId, code);
 
+    // ---- Survivalist: teach the camping skills a hero doesn't know yet (DD1 starts heroes with four) ----
+
+    public int CampSkillCost(CampSkill skill)
+    {
+        float discount = Tiers.TotalDiscount(Buildings.Data(Buildings.Survivalist)["camping_skill_cost_discount_upgrades"], Estate);
+        return (int)System.Math.Round(skill.TeachCost * System.Math.Max(0f, 1f - discount));
+    }
+
+    public string WhyCantLearnCampSkill(HeroRecord hero, string skillId)
+    {
+        var skill = Camping?.Get(skillId);
+        if (skill == null) return "Unknown skill";
+        if (!Buildings.IsOpen(Buildings.Survivalist, Estate)) return "The Survivalist is not here yet";
+        if (hero.MissingWeeks > 0) return "Missing";
+        if (hero.CampingSkills.Contains(skillId)) return "Known";
+        if (!Camping.ForClass(hero.ClassId).Contains(skillId)) return "Not for this class";
+        if (Estate.Get(Currency.Gold) < CampSkillCost(skill)) return "Not enough gold";
+        return null;
+    }
+
+    public bool LearnCampSkill(string heroId, string skillId)
+    {
+        var hero = Estate.Hero(heroId);
+        if (hero == null || WhyCantLearnCampSkill(hero, skillId) != null) return false;
+        Estate.Add(Currency.Gold, -CampSkillCost(Camping.Get(skillId)));
+        hero.CampingSkills.Add(skillId);
+        Estate.TownLog.Add($"The Survivalist teaches {hero.Name} a new camping skill.");
+        return true;
+    }
+
     // ---- Blacksmith: weapon and armour ranks (DD1 per-class trees, gated by the Blacksmith's own upgrades) ----
 
     public const string Weapon = "weapon", Armour = "armour";

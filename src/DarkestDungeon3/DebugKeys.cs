@@ -28,6 +28,20 @@ public class DebugKeys : MonoBehaviour
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
             if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f3Key.wasPressedThisFrame)
+            {
+                // Testing: walk to the nearest room with a battle still to fight (handles traps/curios on the way: press again).
+                var d = Runtime.Driver.Instance;
+                var exp = d?.Expedition;
+                if (exp != null)
+                {
+                    var here = exp.Map.Rooms.FirstOrDefault(r => r.Id == (exp.InRoom ? exp.RoomId : exp.HeadingRoomId));
+                    var target = exp.Map.Rooms.Where(r => r.HasBattle && !r.Cleared && r != here)
+                        .OrderBy(r => here == null ? 0 : System.Math.Abs(r.X - here.X) + System.Math.Abs(r.Y - here.Y)).FirstOrDefault();
+                    if (target != null) d.WalkToRoom(target.Id);
+                    Plugin.Log.LogInfo("[F3] walking to battle room " + (target?.Id.ToString() ?? "none"));
+                }
+            }
             if (kb.f4Key.wasPressedThisFrame)
             {
                 // Test estate only (slot 2): open the service buildings, add gold and the first Blacksmith upgrades.

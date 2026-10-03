@@ -315,8 +315,8 @@ internal sealed class HamletUi
             case Panel.Upgrades: DrawUpgrades(area, hamlet, _building); break;
             case Panel.Hero: DrawHero(area); break;
             case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
+            case Panel.Survivalist: DrawSurvivalist(area, hamlet); break;
             case Panel.Guild:
-            case Panel.Survivalist:
                 DrawNotYet(area); break;
         }
     }
@@ -370,6 +370,50 @@ internal sealed class HamletUi
             else Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), "The finest the Hamlet can make.", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
             y += 262;
         }
+    }
+
+    private void DrawSurvivalist(Rect area, Hamlet hamlet)
+    {
+        Frame(area);
+        var hero = E.Hero(_heroId);
+        if (hero == null)
+        {
+            Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster: the Survivalist teaches the camping skills they don't know yet.", 24, Gui.Dd1Text);
+            return;
+        }
+        var icon = Art.HeroIcon(hero.ClassId);
+        if (icon != null) Art.DrawSprite(new Rect(area.x + 16, area.y + 12, 90, 90), icon);
+        Gui.Text(new Rect(area.x + 120, area.y + 14, 500, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(area.x + 120, area.y + 54, 500, 30), $"{Pretty(hero.ClassId)}  ·  knows {hero.CampingSkills.Count} camping skills", 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+
+        var skills = S.Content.Camping.ForClass(hero.ClassId);
+        skills.Sort((a, b) => hero.CampingSkills.Contains(b).CompareTo(hero.CampingSkills.Contains(a)));
+        _panelScroll = GUI.BeginScrollView(new Rect(area.x, area.y + 120, area.width, area.height - 130), _panelScroll, new Rect(0, 0, area.width - 30, skills.Count * 98));
+        for (int i = 0; i < skills.Count; i++)
+        {
+            var skill = S.Content.Camping.Get(skills[i]);
+            bool known = hero.CampingSkills.Contains(skill.Id);
+            var r = new Rect(10, i * 98, area.width - 50, 90);
+            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
+            var tex = Art.Dd1("raid", "camping", "skill_icons", $"camp_skill_{skill.Id}.png");
+            var old = GUI.color;
+            if (!known) GUI.color = new Color(0.55f, 0.55f, 0.55f, 1f);
+            if (tex != null) GUI.DrawTexture(new Rect(r.x + 8, r.y + 9, 72, 72), tex);
+            GUI.color = old;
+            Gui.Text(new Rect(r.x + 94, r.y + 6, 330, 32), Dd1Text.CampSkillName(skill.Id), 24, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(r.x + 94, r.y + 38, 400, 48), $"{skill.Cost} respite  ·  " + string.Join(", ", S.Content.Camping.DescribeAll(skill)), 16, Gui.Dd1Text);
+            if (known) Gui.Text(new Rect(r.xMax - 170, r.y + 26, 156, 36), "Known", 22, Gui.Gold, TextAnchor.MiddleCenter, heading: true);
+            else
+            {
+                string why = hamlet.WhyCantLearnCampSkill(hero, skill.Id);
+                if (Gui.DdButton(new Rect(r.xMax - 190, r.y + 18, 176, 54), why ?? $"Learn  {Gui.Num(hamlet.CampSkillCost(skill), "#,0")}g", why == null, why == null ? 20 : 15))
+                {
+                    hamlet.LearnCampSkill(hero.Id, skill.Id);
+                    S.Persist();
+                }
+            }
+        }
+        GUI.EndScrollView();
     }
 
     private void DrawTownLog(Rect area)

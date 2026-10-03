@@ -58,7 +58,10 @@ internal static class Dd2Combat
         return null;
     }
 
-    public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised)
+    private static List<uint> _buffed = new();
+
+    public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised,
+                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null)
     {
         var modes = Dd2Api.Modes;
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[combat] mode change in progress"); return false; }
@@ -84,6 +87,10 @@ internal static class Dd2Combat
         SingletonMonoBehaviour<ScreenStackBhv>.Instance.Clear();
         modes.OnNextGameModeExitComplete(_ => Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true));
         modes.SetMode(GameModeType.COMBAT, isLoad: false);
+        // The party's DD1 buffs go on once DD2 has entered the fight, and come off when it ends.
+        _buffed = party.ToList();
+        if (buffs != null && buffs.Count > 0)
+            modes.OnNextGameModeEnterComplete(_ => FightBuffs.Apply(buffs));
         return true;
     }
 
@@ -92,6 +99,7 @@ internal static class Dd2Combat
     {
         if (!InFight) return;
         InFight = false;
+        FightBuffs.Remove(_buffed);
         Plugin.Log.LogInfo($"[combat] fight over, party wiped: {partyWiped}");
         Finished?.Invoke(partyWiped);
     }
@@ -111,6 +119,21 @@ internal static class KeepRoadSceneLoaded
         if (scene != GameModeType.DRIVING.m_sceneName) return true;
         Plugin.Log.LogWarning($"[combat] results screen object lives in {scene}; not unloading the road scene");
         return false;
+    }
+}
+
+/// <summary>
+/// The road scene's copy of the results presentation has no battle result in our host run, and its
+/// OnGameModeEnterComplete threw a NullReferenceException on every fight (which DD2 also reports as a crash).
+/// Only the combat scene's copy presents the results: the road's copy sits this one out.
+/// </summary>
+[HarmonyPatch(typeof(Assets.Code.Combat.Presentation.CombatResultsPresentationBhv), "OnGameModeEnterComplete")]
+internal static class RoadResultsCopyStaysQuiet
+{
+    private static bool Prefix(Assets.Code.Combat.Presentation.CombatResultsPresentationBhv __instance, GameModeType enter)
+    {
+        if (enter != GameModeType.RESULTS || !Dd2Combat.InFight) return true;
+        return __instance.gameObject.scene.name != GameModeType.DRIVING.m_sceneName;
     }
 }
 

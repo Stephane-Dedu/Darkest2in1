@@ -684,25 +684,6 @@ internal sealed class CrawlUi
         Gui.Text(new Rect(CampScrollX + 56, CampScrollY + 96, 344, 80), "Spend respite on camping skills. Click a hero to see theirs.", 18, Gui.Dd1Text, TextAnchor.UpperLeft);
     }
 
-    private static string Describe(CampEffect e)
-    {
-        string who = e.Selection switch { "self" => "self", "individual" => "one ally", "party" => "party", "party_other" => "the others", _ => e.Selection };
-        string what = e.Type switch
-        {
-            "stress_heal_amount" => $"-{Gui.Num(e.Amount / 10f)} stress",
-            "stress_damage_amount" => $"+{Gui.Num(e.Amount / 10f)} stress",
-            "health_heal_max_health_percent" => $"heal {Gui.Num(e.Amount * 100f, "0")}% HP",
-            "buff" => HamletUi.Pretty(e.SubType),
-            "remove_bleeding" or "remove_bleed" => "cure bleeding",
-            "remove_poison" => "cure blight",
-            "remove_disease" => "cure a disease",
-            "remove_deaths_door_recovery_buffs" => "shake off death's door",
-            "reduce_ambush_chance" => "no ambush tonight",
-            "loot" => "find supplies",
-            _ => HamletUi.Pretty(e.Type),
-        };
-        return (e.Chance < 1f ? $"{Gui.Num(e.Chance * 100f, "0")}%: " : "") + what + $" ({who})";
-    }
 
     private void DrawCamp(Crawl crawl, ExpeditionState exp)
     {
@@ -801,13 +782,13 @@ internal sealed class CrawlUi
         var skill = S.Content.Camping.Get(skillId);
         string why = crawl.WhyCantUseCampSkill(hero, skillId);
         exp.Camp.Uses.TryGetValue(hero + ":" + skillId, out int used);
-        var lines = skill.Effects.Select(Describe).ToList();
+        var lines = S.Content.Camping.DescribeAll(skill);
         if (skill.UseLimit > 0) lines.Add($"Uses: {used}/{skill.UseLimit}");
         if (why != null) lines.Add(why);
         var tip = new Rect(660, 430, 600, 52 + 26 * lines.Count);
         Gui.Fill(tip, new Color(0.03f, 0.025f, 0.02f, 0.94f));
         Gui.Text(new Rect(tip.x + 14, tip.y + 6, tip.width - 28, 34), $"{Dd1Text.CampSkillName(skillId)}  ·  {skill.Cost} respite", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         for (int i = 0; i < lines.Count; i++)
-            Gui.Text(new Rect(tip.x + 14, tip.y + 44 + i * 26, tip.width - 28, 26), lines[i], 19, i < skill.Effects.Count ? Gui.Dd1Text : Gui.Dd1Class, TextAnchor.MiddleLeft);
+            Gui.Text(new Rect(tip.x + 14, tip.y + 44 + i * 26, tip.width - 28, 26), lines[i], 19, lines[i].StartsWith("(") || lines[i].StartsWith("Uses") ? Gui.Dd1Class : Gui.Dd1Text, TextAnchor.MiddleLeft);
     }
 }

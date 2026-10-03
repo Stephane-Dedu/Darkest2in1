@@ -89,4 +89,22 @@ public class CampingTests
         _out.WriteLine($"camp ambush rate {ambushes / 300.0:P0}");
         Assert.InRange(ambushes, 60, 140); // DD1 base 33%
     }
+    [Fact]
+    public void Camp_buffs_ride_into_the_next_four_fights_then_end()
+    {
+        var (crawl, _) = Camped();
+        crawl.MakeCamp();
+        crawl.EatMeal(Meal.Full);
+        Assert.True(crawl.UseCampSkill("a", "pep_talk", "b"));            // -30% stress taken for 4 battles
+        var buffs = crawl.FightBuffs();
+        var pep = Assert.Single(buffs, b => b.Hero == "b");
+        Assert.Equal(4, pep.Buff.Battles);
+        crawl.BreakCamp();
+        for (int fight = 1; fight <= 4; fight++)
+        {
+            Assert.Contains(crawl.FightBuffs(), b => b.Hero == "b");
+            crawl.ResolveBattle();
+        }
+        Assert.DoesNotContain(crawl.FightBuffs(), b => b.Hero == "b");
+    }
 }
