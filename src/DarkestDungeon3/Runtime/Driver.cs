@@ -33,6 +33,8 @@ internal sealed class Driver : MonoBehaviour
     public List<string> Log { get; } = new();
     public List<string> HomecomingLog { get; private set; } = new();
     public CurioReport LastCurio { get; private set; }
+    /// <summary>How the last expedition ended (the results screen).</summary>
+    public HomecomingReport LastReport { get; private set; }
 
     /// <summary>The hero shown in the bottom-left banner (DD1: click a hero to select).</summary>
     public string SelectedHeroId;
@@ -442,7 +444,9 @@ internal sealed class Driver : MonoBehaviour
             .Where(x => x.hero != null)
             .Select(x => Dd2Heroes.ReadBack(x.hero, x.guid))
             .ToList();
-        HomecomingLog = Homecoming.Apply(S.Save.Estate, S.Campaign, exp, outcomes);
+        var rng = new Rng(exp.Seed * 31 + exp.StepsTaken);
+        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng));
+        HomecomingLog = LastReport.Log;
         S.Save.Expedition = null;
         S.Persist();
         Crawl = null;

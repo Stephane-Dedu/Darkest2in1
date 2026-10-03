@@ -268,4 +268,29 @@ public class HamletTests
         veteran.ResolveLevel = 6;
         Assert.True(Homecoming.WillEmbark(veteran, new QuestOffer { Difficulty = 1 }, h.AnyResolveCanEmbark));
     }
+    [Fact]
+    public void Homecoming_sells_gems_keeps_trinkets_and_reports_the_heroes()
+    {
+        var items = DarkestDungeon3.Core.Expedition.ItemCatalog.Load(Install);
+        var h = NewHamlet(31);
+        var hero = h.Estate.Roster[0];
+        var exp = new DarkestDungeon3.Core.Expedition.ExpeditionState
+        {
+            Quest = new QuestOffer { Id = "q", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 },
+            Party = { hero.Id },
+            QuestComplete = true,
+        };
+        exp.Pack.Add("gold", 500);
+        exp.Pack.Add("citrine", 2);
+        exp.Pack.Add("trinket:common", 1);
+        int gold = h.Estate.Get(Currency.Gold), trinkets = h.Estate.Trinkets.Count;
+        var report = Homecoming.Report(h.Estate, Dd1, exp, new[] { new HeroOutcome { HeroId = hero.Id, Stress = 3 } }, items, _ => "sun_ring");
+        Assert.Equal("complete", report.Result);
+        Assert.True(report.GemGold > 0);
+        Assert.Equal(gold + 500 + report.GemGold, h.Estate.Get(Currency.Gold));
+        Assert.Equal(trinkets + 1, h.Estate.Trinkets.Count);
+        var r = Assert.Single(report.Heroes);
+        Assert.Equal(2, r.XpGained);
+        Assert.Equal(3, r.Stress);
+    }
 }

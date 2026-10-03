@@ -87,12 +87,11 @@ internal sealed class UiRoot : MonoBehaviour
         if (Gui.Button(new Rect(620, 720, 200, 46), "Cancel")) _slotPicker = false;
     }
 
-    private static void DrawHomecoming(Driver d)
+    private readonly ResultsUi _results = new();
+
+    private void DrawHomecoming(Driver d)
     {
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.92f));
-        Gui.Title(new Rect(200, 120, 1500, 60), "The party returns to the Hamlet");
-        for (int i = 0; i < d.HomecomingLog.Count; i++) Gui.Label(new Rect(220, 210 + i * 36, 1500, 34), d.HomecomingLog[i]);
         bool backInMenu = GameModeMgr.CurrentMode == GameModeType.MAIN_MENU && !DarkestDungeon3.Dd2.Dd2Api.Modes.IsChangingState();
-        if (Gui.Button(new Rect(800, 900, 320, 80), backInMenu ? "Continue" : "Returning...", backInMenu)) d.BackToHamlet();
+        _results.Draw(d, backInMenu);
     }
 }
