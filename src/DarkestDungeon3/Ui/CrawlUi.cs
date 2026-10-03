@@ -416,10 +416,14 @@ internal sealed class CrawlUi
         Gui.At(Art.Panel("panel_hero.png"), 240, 856);
         Gui.At(Art.Panel(_inventoryTab ? "panel_inventory.png" : "panel_map.png"), 960, 720);
 
-        // Tabs on the right edge of the map panel: map, then inventory.
-        if (Gui.Hotspot(new Rect(1630, 840, 50, 62))) _inventoryTab = false;
-        if (Gui.Hotspot(new Rect(1630, 906, 50, 62))) _inventoryTab = true;
-        Gui.Fill(new Rect(1630, _inventoryTab ? 906 : 840, 3, 62), Gui.Gold);
+        // Tabs on the right edge of the map panel (DD1 panel.map tab_placement 672,252, 48 x 90): the map above,
+        // the inventory bag below; each panel's art lights its own tab.
+        var mapTab = new Rect(960 + 672, 720 + 162, 48, 90);
+        var bagTab = new Rect(960 + 672, 720 + 252, 48, 90);
+        if (Gui.Hotspot(mapTab)) _inventoryTab = false;
+        if (Gui.Hotspot(bagTab)) _inventoryTab = true;
+        if (mapTab.Contains(Event.current.mousePosition)) Gui.Text(new Rect(mapTab.x - 120, mapTab.y - 26, 160, 24), "Map", 17, Gui.Dd1Text, TextAnchor.MiddleRight);
+        if (bagTab.Contains(Event.current.mousePosition)) Gui.Text(new Rect(bagTab.x - 160, bagTab.y - 26, 200, 24), "Inventory", 17, Gui.Dd1Text, TextAnchor.MiddleRight);
 
         var hero = S.Save.Estate.Hero(D.SelectedHeroId);
         var actor = Dd2Api.Actor(D.Party.Guid(D.SelectedHeroId ?? ""));

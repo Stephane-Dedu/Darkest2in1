@@ -105,6 +105,9 @@ internal static class Dd1Backdrop
             // DD2's fog is a full-screen pass after the transparent objects: with no depth behind our backdrop it
             // painted the fog colour over all of it (the red sky). Off while the DD1 scene is up.
             SetDd2Fog(false);
+            SetDepthOfField(false);
+            if (UrpCameraData != null && cam.GetComponent(UrpCameraData) is { } camData)
+                Plugin.Log.LogInfo("[backdrop] fight camera anti-aliasing: " + UrpCameraData.GetProperty("antialiasing")?.GetValue(camData));
 
             // Layers to keep culled: the scenery's, never the characters' (also "Foreground" during skills), the
             // effects' or the UI's.
@@ -205,6 +208,43 @@ internal static class Dd1Backdrop
         }
     }
 
+    private static readonly List<object> DepthOfFieldOff = new();
+
+    /// <summary>
+    /// DD2's post-processing volumes blur by depth (URP DepthOfField). Our DD1 backdrop and monsters are drawn
+    /// without depth, so they counted as far background and came out blurred. Off while the DD1 scene is up (DD1 has
+    /// no depth blur), back on after. By reflection: URP isn't referenced.
+    /// </summary>
+    private static void SetDepthOfField(bool restore)
+    {
+        try
+        {
+            if (restore)
+            {
+                foreach (var c in DepthOfFieldOff) c?.GetType().GetField("active")?.SetValue(c, true);
+                DepthOfFieldOff.Clear();
+                return;
+            }
+            var volumeType = Type.GetType("UnityEngine.Rendering.Volume, Unity.RenderPipelines.Core.Runtime");
+            if (volumeType == null) return;
+            foreach (var volume in UnityEngine.Object.FindObjectsOfType(volumeType))
+            {
+                var profile = volumeType.GetField("sharedProfile")?.GetValue(volume) ?? volumeType.GetProperty("profile")?.GetValue(volume);
+                if (profile?.GetType().GetField("components")?.GetValue(profile) is not System.Collections.IEnumerable components) continue;
+                foreach (var c in components)
+                {
+                    if (c == null || c.GetType().Name != "DepthOfField") continue;
+                    var active = c.GetType().GetField("active");
+                    if (active == null || !(bool)active.GetValue(c)) continue;
+                    active.SetValue(c, false);
+                    DepthOfFieldOff.Add(c);
+                }
+            }
+            Plugin.Log.LogInfo($"[backdrop] depth of field off on {DepthOfFieldOff.Count} volume(s)");
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] depth of field: " + e.Message); }
+    }
+
     private static void GiveUpAfter(float seconds, string why)
     {
         if (Time.unscaledTime - _startedAt < seconds) return;
@@ -219,6 +259,7 @@ internal static class Dd1Backdrop
     public static void End()
     {
         SetDd2Fog(true);
+        SetDepthOfField(true);
         foreach (var r in Hidden) if (r != null) r.forceRenderingOff = false;
         Hidden.Clear();
         foreach (var kv in Masks) if (kv.Key != null) kv.Key.cullingMask = kv.Value;
