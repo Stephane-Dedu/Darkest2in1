@@ -207,12 +207,16 @@ internal sealed class HamletUi
 
     private void DrawRoster()
     {
-        var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: _panel == Panel.Hero && _heroId == h.Id));
+        bool service = _panel is Panel.Blacksmith or Panel.Guild or Panel.Survivalist;
+        var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: (_panel == Panel.Hero || service) && _heroId == h.Id));
         if (clicked != null)
         {
             _heroId = clicked.Id;
-            _panel = Panel.Hero;
-            _building = null;
+            if (!service)
+            {
+                _panel = Panel.Hero;
+                _building = null;
+            }
         }
     }
 
@@ -310,8 +314,8 @@ internal sealed class HamletUi
             case Panel.Graveyard: DrawGraveyard(area); break;
             case Panel.Upgrades: DrawUpgrades(area, hamlet, _building); break;
             case Panel.Hero: DrawHero(area); break;
+            case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
             case Panel.Guild:
-            case Panel.Blacksmith:
             case Panel.Survivalist:
                 DrawNotYet(area); break;
         }
@@ -324,6 +328,48 @@ internal sealed class HamletUi
         Frame(area);
         Gui.Text(new Rect(area.x + 20, area.y + 80, area.width - 40, 200),
             "This building's own services are coming. Its upgrades are already in effect.", 26, Gui.Dd1Text);
+    }
+
+    private void DrawBlacksmith(Rect area, Hamlet hamlet)
+    {
+        Frame(area);
+        var hero = E.Hero(_heroId);
+        if (hero == null)
+        {
+            Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster to see what the Blacksmith can do for their weapon and armour.", 24, Gui.Dd1Text);
+            return;
+        }
+        var icon = Art.HeroIcon(hero.ClassId);
+        if (icon != null) Art.DrawSprite(new Rect(area.x + 16, area.y + 12, 90, 90), icon);
+        Gui.Text(new Rect(area.x + 120, area.y + 14, 500, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(area.x + 120, area.y + 54, 500, 30), $"{Pretty(hero.ClassId)}, resolve {hero.ResolveLevel}", 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+
+        string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
+        float y = area.y + 130;
+        foreach (var slot in new[] { Hamlet.Weapon, Hamlet.Armour })
+        {
+            int rank = hamlet.Rank(hero, slot);
+            var r = new Rect(area.x + 10, y, area.width - 20, 250);
+            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
+            var eq = Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_{slot}_{Mathf.Min(rank, 4)}.png");
+            if (eq != null) GUI.DrawTexture(new Rect(r.x + 14, r.y + 14, 110, 220), eq, ScaleMode.ScaleToFit);
+            Gui.Text(new Rect(r.x + 140, r.y + 10, 400, 40), $"{(slot == Hamlet.Weapon ? "Weapon" : "Armour")}  ·  rank {rank + 1}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(r.x + 140, r.y + 50, 470, 30), Dd2.Dd2Heroes.EquipmentText(slot, rank), 20, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            var next = hamlet.NextEquipment(hero, slot);
+            if (next != null)
+            {
+                Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), $"Next: {Dd2.Dd2Heroes.EquipmentText(slot, rank + 1)}", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
+                Gui.Text(new Rect(r.x + 140, r.y + 126, 470, 30), $"{Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold  ·  resolve {next.Resolve}", 19, Gui.Gold, TextAnchor.MiddleLeft);
+                string why = hamlet.WhyCantUpgradeEquipment(hero, slot);
+                if (Gui.DdButton(new Rect(r.x + 140, r.y + 172, 300, 54), why ?? "Upgrade", why == null, why == null ? 26 : 18))
+                {
+                    hamlet.UpgradeEquipment(hero.Id, slot);
+                    S.Persist();
+                }
+            }
+            else Gui.Text(new Rect(r.x + 140, r.y + 96, 470, 30), "The finest the Hamlet can make.", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            y += 262;
+        }
     }
 
     private void DrawTownLog(Rect area)

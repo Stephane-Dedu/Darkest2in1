@@ -32,6 +32,7 @@ public sealed class Dd1Campaign
     public JArray GoldTable { get; private set; }
     public JObject Rules { get; private set; }
     public QuestGoals Goals { get; private set; }
+    public Town.HeroUpgrades HeroUpgrades { get; private set; }
 
     private readonly Dictionary<string, ZoneProps> _props = new();
 
@@ -68,6 +69,7 @@ public sealed class Dd1Campaign
 
         c.Rules = (JObject)ReadJson(dd1.Rules);
         c.Goals = QuestGoals.Load(dd1);
+        c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         return c;
     }
 

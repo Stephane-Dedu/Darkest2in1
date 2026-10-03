@@ -28,6 +28,22 @@ public class DebugKeys : MonoBehaviour
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
             if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f4Key.wasPressedThisFrame)
+            {
+                // Test estate only (slot 2): open the service buildings, add gold and the first Blacksmith upgrades.
+                var session = Runtime.Session.Current;
+                if (session?.SavePath != null && System.IO.Path.GetFileName(session.SavePath) == "estate_2.json")
+                {
+                    var e = session.Save.Estate;
+                    e.QuestsCompleted = System.Math.Max(e.QuestsCompleted, 5);
+                    e.Add(Core.Campaign.Currency.Gold, 5000);
+                    foreach (var u in new[] { "blacksmith.weapon:a", "blacksmith.armour:a", "guild.skill_levels:a" }) e.Upgrades.Add(u);
+                    foreach (var h in e.Roster) h.ResolveLevel = System.Math.Max(h.ResolveLevel, 1);
+                    session.Persist();
+                    Plugin.Log.LogInfo("[F4] test estate: buildings open, +5000 gold, first smith/guild upgrades, resolve 1");
+                }
+                else Plugin.Log.LogInfo("[F4] only works on the test estate (slot 2)");
+            }
             if (kb.f5Key.wasPressedThisFrame)
             {
                 // Make camp here: hand the party firewood and some food first (testing).

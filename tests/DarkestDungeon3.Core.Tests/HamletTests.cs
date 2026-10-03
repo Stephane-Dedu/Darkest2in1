@@ -166,4 +166,30 @@ public class HamletTests
         Assert.True(h.Dismiss(recruit.Id));
         Assert.Equal(4, h.Estate.Roster.Count);
     }
+    [Fact]
+    public void Blacksmith_sells_dd1_weapon_ranks_behind_its_own_upgrades_and_resolve()
+    {
+        var h = NewHamlet(5);
+        var hero = h.Estate.Roster[0];
+        hero.ClassId = "highwayman";
+        h.Estate.Add(Currency.Gold, 20000);
+        var next = h.NextEquipment(hero, Hamlet.Weapon);
+        Assert.Equal(750, next.Gold);                                    // DD1 highwayman.weapon level 0
+        Assert.NotNull(h.WhyCantUpgradeEquipment(hero, Hamlet.Weapon));  // the Blacksmith isn't open / upgraded yet
+
+        h.Estate.QuestsCompleted = 10;                                   // opens the Blacksmith
+        h.Estate.Upgrades.Add("blacksmith.weapon:a");
+        hero.ResolveLevel = 0;
+        Assert.Equal("Needs resolve 1", h.WhyCantUpgradeEquipment(hero, Hamlet.Weapon));
+        hero.ResolveLevel = 1;
+        int gold = h.Estate.Get(Currency.Gold);
+        Assert.True(h.UpgradeEquipment(hero.Id, Hamlet.Weapon));
+        Assert.Equal(1, hero.WeaponRank);
+        Assert.Equal(gold - 750, h.Estate.Get(Currency.Gold));
+        Assert.Equal("Needs a Blacksmith upgrade", h.WhyCantUpgradeEquipment(hero, Hamlet.Weapon));
+
+        // Classes DD1 never had use a stand-in's costs.
+        hero.ClassId = "runaway";
+        Assert.NotNull(h.NextEquipment(hero, Hamlet.Armour));
+    }
 }

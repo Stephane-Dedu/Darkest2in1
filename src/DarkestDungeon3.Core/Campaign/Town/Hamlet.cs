@@ -155,6 +155,51 @@ public sealed class Hamlet
 
     public bool BuyUpgrade(string treeId, string code) => Buildings.Trees.TryBuy(Estate, treeId, code);
 
+    // ---- Blacksmith: weapon and armour ranks (DD1 per-class trees, gated by the Blacksmith's own upgrades) ----
+
+    public const string Weapon = "weapon", Armour = "armour";
+
+    public int Rank(HeroRecord hero, string slot) => slot == Weapon ? hero.WeaponRank : hero.ArmorRank;
+
+    /// <summary>The next weapon or armour level for this hero, or null at the top.</summary>
+    public HeroUpgradeLevel NextEquipment(HeroRecord hero, string slot)
+    {
+        var levels = Dd1.HeroUpgrades?.Equipment(hero.ClassId, slot);
+        int rank = Rank(hero, slot);
+        return levels != null && rank < levels.Count ? levels[rank] : null;
+    }
+
+    /// <summary>Gold for the next level, after the Blacksmith's discount upgrades.</summary>
+    public int EquipmentCost(HeroUpgradeLevel level)
+    {
+        float discount = Tiers.TotalDiscount(Buildings.Data(Buildings.Blacksmith)["equipment_cost_discount_upgrades"], Estate);
+        return (int)System.Math.Round(level.Gold * System.Math.Max(0f, 1f - discount));
+    }
+
+    public string WhyCantUpgradeEquipment(HeroRecord hero, string slot)
+    {
+        if (!Buildings.IsOpen(Buildings.Blacksmith, Estate)) return "The Blacksmith is not open";
+        if (hero.MissingWeeks > 0) return "Missing";
+        var next = NextEquipment(hero, slot);
+        if (next == null) return "Fully upgraded";
+        // The previous level of the hero's own tree is implied by the rank; the building's level is not.
+        var missing = next.Prerequisites.Where(p => !p.StartsWith(next.TreeId + ":")).FirstOrDefault(p => !Estate.Upgrades.Contains(p));
+        if (missing != null) return "Needs a Blacksmith upgrade";
+        if (hero.ResolveLevel < next.Resolve) return $"Needs resolve {next.Resolve}";
+        if (Estate.Get(Currency.Gold) < EquipmentCost(next)) return "Not enough gold";
+        return null;
+    }
+
+    public bool UpgradeEquipment(string heroId, string slot)
+    {
+        var hero = Estate.Hero(heroId);
+        if (hero == null || WhyCantUpgradeEquipment(hero, slot) != null) return false;
+        Estate.Add(Currency.Gold, -EquipmentCost(NextEquipment(hero, slot)));
+        if (slot == Weapon) hero.WeaponRank++; else hero.ArmorRank++;
+        Estate.TownLog.Add($"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
+        return true;
+    }
+
     // ---------------- End of week ----------------
 
     /// <summary>

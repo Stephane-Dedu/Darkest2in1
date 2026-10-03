@@ -74,7 +74,54 @@ internal static class Dd2Heroes
                 if (items.TryGetLibraryElement(id, out var t))
                     trinkets.AddItems(t, 1, false);
 
+        ApplyEquipment(hero, actor);
         if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
+    }
+
+    // DD1's Blacksmith ranks as DD2's own permanent buffs, distinct ids stacked per rank (the same id doesn't stack).
+    // DD1 weapons gain damage, crit and speed; armour gains HP (DD2 has no dodge stat).
+    private static readonly string[][] WeaponBuffs =
+    {
+        new string[0],
+        new[] { "memory_buff_04", "trinket_tiered_minor_heartseeker_01" },                                  // +10% dmg, +3% crit
+        new[] { "trinket_tiered_sharpness_charm_01", "trinket_tiered_heartseeker_01", "memory_buff_02" },    // +15%, +5%, +1 speed
+        new[] { "trinket_tiered_greater_sharpness_charm_01", "memory_buff_04", "trinket_tiered_heartseeker_01",
+                "trinket_tiered_minor_heartseeker_01", "memory_buff_02" },                                   // +30%, +8%, +1
+        new[] { "trinket_tiered_greater_sharpness_charm_01", "trinket_tiered_sharpness_charm_01", "memory_buff_04",
+                "trinket_tiered_greater_heartseeker_01", "quirk_lightning_reflexes" },                       // +45%, +10%, +2
+    };
+
+    private static readonly string[][] ArmourBuffs =
+    {
+        new string[0],
+        new[] { "memory_buff_01" },                                                                         // +10% max HP
+        new[] { "trinket_tiered_hale_draught_01", "memory_buff_18_end_buff" },                              // +20%
+        new[] { "trinket_tiered_greater_hale_draught_01", "memory_buff_01" },                               // +30%
+        new[] { "trinket_tiered_greater_hale_draught_01", "trinket_tiered_hale_draught_01", "memory_buff_01" }, // +45%
+    };
+
+    /// <summary>What a Blacksmith rank gives, for the building window (rank 0 = as recruited).</summary>
+    public static string EquipmentText(string slot, int rank) => slot == "weapon"
+        ? rank switch { 0 => "Standard issue", 1 => "+10% damage, +3% crit", 2 => "+15% damage, +5% crit, +1 speed", 3 => "+30% damage, +8% crit, +1 speed", _ => "+45% damage, +10% crit, +2 speed" }
+        : rank switch { 0 => "Standard issue", 1 => "+10% max HP", 2 => "+20% max HP", 3 => "+30% max HP", _ => "+45% max HP" };
+
+    private static void ApplyEquipment(HeroRecord hero, ActorInstance actor)
+    {
+        var buffs = SingletonMonoBehaviour<Library<string, Assets.Code.Buff.BuffDefinition>>.Instance;
+        if (buffs == null || actor.BuffContainer == null) return;
+        var ids = WeaponBuffs[System.Math.Min(hero.WeaponRank, 4)].Concat(ArmourBuffs[System.Math.Min(hero.ArmorRank, 4)]).ToList();
+        if (ids.Count == 0) return;
+        foreach (var id in ids)
+        {
+            if (buffs.TryGetLibraryElement(id, out var buff))
+                actor.BuffContainer.TryAdd(buff, isLockedTeamPosition: false, SourceType.CLASS, "dd3_blacksmith", actor.ActorGuid);
+            else Plugin.Log.LogWarning($"[party] buff {id} not in DD2's library");
+        }
+        actor.BuffContainer.RefreshActiveBuffs();
+        // A bigger health pool starts full.
+        if (actor.HpRaw < actor.CurrentHpMax)
+            actor.ApplyHealthHeal(actor.CurrentHpMax - actor.HpRaw, isCrit: false, SourceType.DRIVING, hasDisplayed: false);
+        Plugin.Log.LogInfo($"[party] {hero.Name}: weapon rank {hero.WeaponRank + 1}, armour rank {hero.ArmorRank + 1} → hp {actor.HpRaw}/{actor.CurrentHpMax}");
     }
 
     /// <summary>Read an actor's condition back into a homecoming outcome.</summary>
