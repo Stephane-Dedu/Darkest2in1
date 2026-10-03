@@ -32,16 +32,16 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Hero resolve levels from `roster.variables.json` thresholds; resolve XP per quest length.
 - [?] Quirk limits: DD1 caps 5 positive / 5 negative / 3 diseases (`rules.json` quirks_max_*); over the cap a new quirk replaces a random unlocked one of its kind (`shared/character/quirkreplaced.png`), none gained if all are locked. Was: no cap. Now QuirkLimits (Dd1Campaign.QuirkLimits) in town activities and on the DD2 actor for curio quirks (QuirkLimitTests). In game: a capped hero gaining a quirk logs "[quirks] ... replaces ... (DD1 quirk limit)".
 - [?] Locked quirk cap: DD1 `quirks_max_locked_positive` 3. Was: the Sanitarium locked any number. Now Hamlet.WhyCantLock refuses a fourth (HamletTests.AtMostThreeLockedPositiveQuirks); the quirk row greys out with the reason on hover. In game: a hero with 3 locked quirks can't lock a fourth. (`_negative` 3 belongs to the negative auto-lock rule, still missing.)
-- [ ] Negative quirk auto-lock: DD1 `quirk_chance_to_lock_negative` / `quirk_negative_locked_after_turn_count` — not done.
-- [ ] Disease after a quest: DD1 `disease_after_quest_min_chance`, `disease_max_chance`, `disease_after_quest_min_resolve_level` — not rolled.
-- [ ] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — not applied; what "upper_level" counts (resolve? weeks? roster size?) is unclear from the data and not in the Unity port (round 6).
+- [blocked] Negative quirk auto-lock: DD1 `quirk_chance_to_lock_negative` 0.25 / `quirk_negative_locked_after_turn_count` 2 — when the roll happens and what the "turn" counts is in darkest.exe, not in the data or the Unity port.
+- [blocked] Disease after a quest: DD1 has the numbers (`disease_after_quest_min_chance` 0.05, `disease_max_chance` 0.32, `disease_hero_disease_resist_weight` 0.33, from resolve 2) but not the formula; it is in darkest.exe, not in the data or the Unity port.
+- [blocked] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — what "upper_level" counts (resolve? weeks? roster size?) isn't in the data or the Unity port.
 - [?] Quirk gain/loss after quests and from curios (DD1 quirk library → DD2 quirk ids).
 - [?] Recruits arrive with DD1-style quirks (bug: DD2 quirk library empty at the menu — fixed? check new recruits have quirks).
 
 ## Trinkets
 - [?] Trinket Inventory: DD1 window (sort, unequip all, shift-sell at 15%, grid, tooltips with effects).
 - [?] Equip on the hero sheet: two slots, class-only trinkets refused.
-- [ ] Trinket retention on a party wipe: DD1 keeps/loses carried trinkets per option (`trinket_retention` log entry) — not handled.
+- [user] Trinket retention on a party wipe: DD1 makes it a game option ("keep_battle_quest_fail_trinkets": "what happens to carried trinkets when you have a total party wipe") with plot quests to win them back — which behaviour to use.
 - [?] Trinket-equip warning before embarking: DD1 asks "Your party is not fully outfitted with trinkets. Really embark?" (`town_provision_no_trinkets_equipped`) when under `trinkets_equipped_warning_min_percent` 0.5 of the trinket slots are filled on quests of difficulty ≥ 3. Was: no warning. Now Embark.TrinketWarning + the provisioner's confirm (QuestGoalTests.TrinketWarningOnHarderQuestsWithFewTrinkets); the low-food warning uses DD1's `town_provision_not_enough_food_confirm_format` too. In game: a veteran quest with few trinkets asks before embarking.
 
 ## Quest board
@@ -98,7 +98,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Camp/town buffs carried into fights as DD2 buffs.
 
 ## Afflictions, virtues, deaths
-- [ ] Afflictions/virtues: DD1 resolve test at 100 stress (`affliction_*`, virtue 25%, `affliction_severity_table`) — mod uses DD2's meltdown at 10. Needs a design (DD2 has no afflictions).
+- [user] Afflictions/virtues: DD1's resolve test at 100 stress (`affliction_*`, virtue 25%, `affliction_severity_table`) vs DD2's meltdown at 10 stress (combat stays DD2's). Options: keep DD2's meltdown; or roll DD1's affliction/virtue when DD2 stress maxes and map it to DD2 quirks/buffs. Your call.
 - [?] Heart attack at 200 stress → DD2 meltdown/death's door stands in.
 - [?] Death's door and deathblow from DD2; the dead go to the graveyard with cause/week.
 - [ ] Death stress on the party: DD1 `death_party_stress_chance/damage` — DD2's own death stress applies? check.
@@ -118,7 +118,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [user] Heroes who finish a Darkest Dungeon quest: DD1 `tutorial_popup_quest_restriction_darkest_dungeon_description` — "they may choose to never go back, or simply..." depending on the game mode and options (not in the data files). Goes with the game-mode question.
 - [?] Darkest Dungeon quest flags (`quest.plot_quests.json`): `is_surprise_enabled` false, `is_scouting_enabled` false, `is_roster_stress_cleared_on_completion` true. Was: none. Now on PlotQuest/QuestOffer; Crawl skips surprise (ambushes aside) and scouting, Homecoming clears every roster hero's stress after a win (QuestGoalTests.DarkestDungeonHasNoSurpriseOrScoutingAndAWinClearsStress). In game: needs a Darkest Dungeon quest.
 - [ ] Darkest Dungeon failure buff: `roster_buffs_to_apply_on_failure` darkest_dungeon_failure_roster_resolve_xp when the party's resolve ≥ `roster_buff_on_failure_minimum_party_resolve_level` 5 — not applied.
-- [ ] Town background after DD quests: `campaign/town/town_bg_post_dd_1..3.png` not used.
+- [?] Town background by DD1's display states (`campaign/town/town_render_data.json`): after returning from Darkest Dungeon part N `town_bg_post_dd_N`, during the stress-heal town events their own. Was: always `town_bg.png`. Now TownRenderData + Estate.LastReturnPlotId (QuestGoalTests.TownBackgroundFollowsDd1DisplayStates); round 13 in game: regular sky still right. In game: after a Darkest Dungeon part, or in week with in_activity_buff_stress_heal_*. (Time-of-day tints `colours/town_screen_colour_*`: not applied.)
+- [ ] Hovering the Nomad Wagon in the town draws a flat white blob instead of DD1's highlighted building art (round 13 screenshot).
 
 ## Audio
 - [x] DD1 music/ambience/SFX play from the FSB5 banks (user commented on volumes; lowered).

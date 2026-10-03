@@ -65,6 +65,7 @@ public static class Homecoming
         var report = new HomecomingReport { Quest = expedition.Quest };
         var log = report.Log;
         var quest = expedition.Quest;
+        estate.LastReturnPlotId = quest?.PlotId;   // DD1's town background after a Darkest Dungeon part
         var outcomeList = RetreatSacrifices(quest, expedition.Retreated, outcomes, estate.NextRng());
         bool success = expedition.QuestComplete && !expedition.Retreated;
         bool wiped = outcomeList.Count > 0 && outcomeList.All(o => o.Died);

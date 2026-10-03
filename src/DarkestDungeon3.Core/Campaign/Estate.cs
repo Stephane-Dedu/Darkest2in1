@@ -45,6 +45,8 @@ public sealed class Estate
     public List<string> TownLog = new();
     /// <summary>This town visit's DD1 town event (null: none), and what the roll needs to remember.</summary>
     public string TownEventId;
+    /// <summary>The plot quest the party last came home from (DD1's town background changes after a Darkest Dungeon part).</summary>
+    public string LastReturnPlotId;
     public int TownEventMisses;
     public Dictionary<string, int> TownEventLastWeek = new();
     public int TownEventFreeUpgrades;

@@ -128,6 +128,21 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void TownBackgroundFollowsDd1DisplayStates()
+    {
+        var render = Dd1.TownRender;
+        Assert.Equal("campaign/town/town_bg.png", render.Background(null, null));
+        Assert.Equal("campaign/town/town_bg_post_dd_1.png", render.Background("plot_darkest_dungeon_1", null));
+        Assert.Equal("campaign/town/town_bg_activity_stress_heal_buff.png", render.Background(null, "in_activity_buff_stress_heal_buff"));
+        Assert.Equal("campaign/town/town_bg.png", render.Background("plot_kill_necromancer_1", "some_event"));
+
+        var estate = new Estate { Seed = 4 };
+        var exp = new ExpeditionState { Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, PlotId = "plot_darkest_dungeon_2" } };
+        Homecoming.Report(estate, Dd1, exp, new HeroOutcome[0]);
+        Assert.Equal("plot_darkest_dungeon_2", estate.LastReturnPlotId);
+    }
+
+    [Fact]
     public void TrinketWarningOnHarderQuestsWithFewTrinkets()
     {
         var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();

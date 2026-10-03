@@ -161,7 +161,9 @@ internal sealed class HamletUi
     private void DrawTown(bool interactive)
     {
         Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
-        Gui.Image(new Rect(0, 0, Gui.W, Gui.H), Art.TownBackdrop);
+        // DD1's display state: after a Darkest Dungeon part or during some town events the sky changes.
+        string sky = S.Campaign.TownRender.Background(E.LastReturnPlotId, E.TownEventId);
+        Gui.Image(new Rect(0, 0, Gui.W, Gui.H), Art.Dd1(sky.Split('/')) ?? Art.TownBackdrop);
         if (_layout == null) return;
 
         var mouse = Event.current.mousePosition;

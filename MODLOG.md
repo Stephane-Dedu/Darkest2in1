@@ -455,6 +455,16 @@ Feasibility notes (decomp):
 - Camp ambush: DD1 ambush_torch_reduction -100 after camp_restore_torch 100 → the ambush fight is in the dark; the
   Driver carries the expedition light into DD2's torch at fight start.
 
+## Parity loop, rounds 6-13 (2026-10-03)
+- Done (Core + tests): trinkets need a pack slot (Inventory.TryTake), 3 locked positive quirks (Hamlet.WhyCantLock),
+  eating provisions (provision_hp_heal), DD1's trinket warning (Embark.TrinketWarning) and provisioning questions,
+  abandon stress (quest.exit_penalty.json, verified in game: 1/10 -> 3/10), Darkest Dungeon retreat sacrifice and
+  no-abandon part 4, DD quest flags (no surprise/scouting, roster stress cleared), town display states.
+- Not in DD1's data (darkest.exe only): post-quest disease formula, negative quirk auto-lock timing, dismissal
+  penalty's "upper_level" → [blocked]. Game-option dependent → [user]: trinket retention on wipe, DD return refusal.
+- DD1 localization holds the UI wording: town_provision_*, retreat_confirm_raid_question, retreat_raid_tooltip,
+  retreat_raid_party_kill_darkestdungeon_confirm_question, realm_inventory_*, action_verbose_body_<building>_<class>.
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

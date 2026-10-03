@@ -38,6 +38,8 @@ public sealed class Dd1Campaign
     public QuestGoals Goals { get; private set; }
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
     public Town.TownEvents TownEvents { get; private set; }
+    /// <summary>DD1's town backgrounds by state (town_render_data.json).</summary>
+    public Town.TownRenderData TownRender { get; private set; } = new();
     public Dd1Buffs Buffs { get; private set; }
     /// <summary>DD1's heirloom exchange (campaign/heirloom_exchange): give so many of one kind for so many of another.</summary>
     public List<(string From, int FromAmount, string To, int ToAmount)> HeirloomRates { get; } = new();
@@ -86,6 +88,7 @@ public sealed class Dd1Campaign
         c.Goals = QuestGoals.Load(dd1);
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);
+        c.TownRender = Town.TownRenderData.Load(dd1);
         c.Buffs = Dd1Buffs.Load(dd1);
         var roster = dd1.PathOf("campaign", "roster", "roster.variables.json");
         if (File.Exists(roster))
