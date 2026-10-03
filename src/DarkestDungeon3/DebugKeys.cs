@@ -37,7 +37,8 @@ public class DebugKeys : MonoBehaviour
                 {
                     var here = exp.Map.Rooms.FirstOrDefault(r => r.Id == (exp.InRoom ? exp.RoomId : exp.HeadingRoomId));
                     var target = exp.Map.Rooms.Where(r => r.HasBattle && !r.Cleared && r != here)
-                        .OrderBy(r => here == null ? 0 : System.Math.Abs(r.X - here.X) + System.Math.Abs(r.Y - here.Y)).FirstOrDefault();
+                        .OrderBy(r => r.Content == Core.Dungeon.RoomContent.Boss ? 0 : 1)   // the boss first
+                        .ThenBy(r => here == null ? 0 : System.Math.Abs(r.X - here.X) + System.Math.Abs(r.Y - here.Y)).FirstOrDefault();
                     if (target != null) d.WalkToRoom(target.Id);
                     Plugin.Log.LogInfo("[F3] walking to battle room " + (target?.Id.ToString() ?? "none"));
                 }
@@ -54,6 +55,9 @@ public class DebugKeys : MonoBehaviour
                     foreach (var u in new[] { "blacksmith.weapon:a", "blacksmith.armour:a", "guild.skill_levels:a" }) e.Upgrades.Add(u);
                     foreach (var h in e.Roster) h.ResolveLevel = System.Math.Max(h.ResolveLevel, 1);
                     e.TownEventId ??= "free_abbey";
+                    // Ruins to zone level 2 so DD1's first boss quest (the Necromancer) is offered.
+                    if (!e.ZoneXp.TryGetValue("crypts", out var xp) || xp < 6) e.ZoneXp["crypts"] = 6;
+                    e.Quests = Core.Campaign.QuestBoard.Generate(e, session.Campaign, session.Hamlet.ToggledZones());
                     session.Persist();
                     Plugin.Log.LogInfo("[F4] test estate: buildings open, +5000 gold, first smith/guild upgrades, resolve 1, a town event");
                 }
