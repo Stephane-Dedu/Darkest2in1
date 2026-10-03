@@ -21,9 +21,15 @@ internal static class Dd1Backdrop
     private static bool _failed;
     private static float _startedAt;
     private static readonly List<Renderer> Hidden = new();
-    private static GameObject _quad;
     private static RenderTexture _texture;
     private static Material _material;
+    // One backdrop per camera drawing the scene (DD2's skill close-ups may film with another camera), and the
+    // cameras' original culling masks: the arena's scenery layers stay culled for the whole fight, so DD2 scenery
+    // that appears later (close-up backgrounds) never shows; the backdrop itself sits on a layer of its own.
+    private static readonly Dictionary<Camera, GameObject> Quads = new();
+    private static readonly Dictionary<Camera, int> Masks = new();
+    private static int _sceneryMask, _quadLayer = 31;
+    private static float _distance = 15f;
 
     /// <summary>A fight is about to start here: forget the last one.</summary>
     public static void Reset()
@@ -65,6 +71,7 @@ internal static class Dd1Backdrop
             float far = actors.SelectMany(a => a.GetComponentsInChildren<Renderer>()).Where(r => r is SkinnedMeshRenderer or MeshRenderer)
                               .Select(r => Vector3.Dot(r.bounds.center - cam.transform.position, cam.transform.forward)).DefaultIfEmpty(10f).Max();
             float distance = Mathf.Min(far + 6f, cam.farClipPlane * 0.9f);
+            _distance = distance;
 
             var material = Material();
             if (material == null) { _failed = true; return; }
@@ -72,23 +79,22 @@ internal static class Dd1Backdrop
             if (_texture == null) { _failed = true; return; }
             material.mainTexture = _texture;
 
-            _quad = new GameObject("DD3Backdrop");
-            _quad.layer = layer;
-            _quad.transform.SetParent(cam.transform, false);
-            _quad.transform.localPosition = new Vector3(0, 0, distance);
-            _quad.transform.localRotation = Quaternion.identity;
-            float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * distance * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-            _quad.transform.localScale = new Vector3(h * cam.aspect, h, 1f);
-            _quad.AddComponent<MeshFilter>().sharedMesh = QuadMesh();
-            var mr = _quad.AddComponent<MeshRenderer>();
-            mr.sharedMaterial = material;
-            mr.shadowCastingMode = ShadowCastingMode.Off;
-            mr.receiveShadows = false;
-
             foreach (var r in scenery)
                 if (r != null && r.enabled && !r.forceRenderingOff) { r.forceRenderingOff = true; Hidden.Add(r); }
+
+            // Layers to keep culled: the scenery's, never the characters' (also "Foreground" during skills), the
+            // effects' or the UI's.
+            var keep = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Deferred"), LayerMask.NameToLayer("Foreground"),
+                                          LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI"), 0 };
+            foreach (var a in actors) foreach (var r in a.GetComponentsInChildren<Renderer>(true)) keep.Add(r.gameObject.layer);
+            foreach (var p in UnityEngine.Object.FindObjectsOfType<Renderer>()) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
+            _sceneryMask = 0;
+            foreach (var l in scenery.Select(r => r.gameObject.layer).Distinct()) if (!keep.Contains(l)) _sceneryMask |= 1 << l;
+            _quadLayer = Enumerable.Range(8, 24).Reverse().FirstOrDefault(i => string.IsNullOrEmpty(LayerMask.LayerToName(i)) && (_sceneryMask & (1 << i)) == 0);
+            if (_quadLayer == 0) _quadLayer = layer;
             Ready = true;
-            Plugin.Log.LogInfo($"[backdrop] DD1 scene behind the fight: {Hidden.Count} arena renderers hidden, camera {cam.name}, layer {layer}, distance {distance:0.0}, feet at {feetY:0}px");
+            Tick();
+            Plugin.Log.LogInfo($"[backdrop] DD1 scene behind the fight: {Hidden.Count} arena renderers hidden, scenery layers 0x{_sceneryMask:X} culled, backdrop on layer {_quadLayer}, camera {cam.name}, distance {distance:0.0}, feet at {feetY:0}px");
         }
         catch (Exception e)
         {
@@ -96,6 +102,54 @@ internal static class Dd1Backdrop
             End();
             Plugin.Log.LogError("[backdrop] failed, DD2's arena stays: " + e);
         }
+    }
+
+    /// <summary>Every frame of the fight once set up: each camera drawing the scene to the screen gets the backdrop
+    /// (sized to its current view) and keeps the scenery layers culled.</summary>
+    public static void Tick()
+    {
+        if (!Ready || _material == null) return;
+        try
+        {
+            foreach (var cam in Camera.allCameras)
+            {
+                if (cam == null || !cam.enabled || cam.targetTexture != null || !IsBaseCamera(cam)) continue;
+                // Only cameras that film the fight (characters): never DD2's interface cameras.
+                int original = Masks.TryGetValue(cam, out var m0) ? m0 : cam.cullingMask;
+                int characters = LayerMask.NameToLayer("Characters");
+                if (characters >= 0 && (original & (1 << characters)) == 0) continue;
+                if (!Masks.ContainsKey(cam)) Masks[cam] = cam.cullingMask;
+                cam.cullingMask = (cam.cullingMask & ~_sceneryMask) | (1 << _quadLayer);
+                if (!Quads.TryGetValue(cam, out var quad) || quad == null)
+                {
+                    quad = new GameObject("DD3Backdrop") { layer = _quadLayer };
+                    quad.transform.SetParent(cam.transform, false);
+                    quad.AddComponent<MeshFilter>().sharedMesh = QuadMesh();
+                    var mr = quad.AddComponent<MeshRenderer>();
+                    mr.sharedMaterial = _material;
+                    mr.shadowCastingMode = ShadowCastingMode.Off;
+                    mr.receiveShadows = false;
+                    Quads[cam] = quad;
+                }
+                float d = Mathf.Min(_distance, cam.farClipPlane * 0.9f);
+                quad.transform.localPosition = new Vector3(0, 0, d);
+                quad.transform.localRotation = Quaternion.identity;
+                float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * d * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+                quad.transform.localScale = new Vector3(h * cam.aspect * 1.02f, h * 1.02f, 1f);
+            }
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] tick: " + e.Message); }
+    }
+
+    private static readonly Type UrpCameraData = Type.GetType("UnityEngine.Rendering.Universal.UniversalAdditionalCameraData, Unity.RenderPipelines.Universal.Runtime");
+
+    /// <summary>URP overlay cameras draw on top of a base camera: only base cameras get a backdrop.</summary>
+    private static bool IsBaseCamera(Camera cam)
+    {
+        if (UrpCameraData == null) return true;
+        var data = cam.GetComponent(UrpCameraData);
+        var type = data == null ? null : UrpCameraData.GetProperty("renderType")?.GetValue(data);
+        return type == null || Convert.ToInt32(type) == 0;
     }
 
     private static void GiveUpAfter(float seconds, string why)
@@ -113,8 +167,10 @@ internal static class Dd1Backdrop
     {
         foreach (var r in Hidden) if (r != null) r.forceRenderingOff = false;
         Hidden.Clear();
-        if (_quad != null) UnityEngine.Object.Destroy(_quad);
-        _quad = null;
+        foreach (var kv in Masks) if (kv.Key != null) kv.Key.cullingMask = kv.Value;
+        Masks.Clear();
+        foreach (var q in Quads.Values) if (q != null) UnityEngine.Object.Destroy(q);
+        Quads.Clear();
         if (_texture != null) { _texture.Release(); UnityEngine.Object.Destroy(_texture); }
         _texture = null;
         Ready = false;

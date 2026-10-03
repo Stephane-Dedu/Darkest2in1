@@ -123,7 +123,7 @@ internal static class Dd1Audio
             }
             if (!parent.hasHandle() || parent.getSubSound(i, out Sound sound) != RESULT.OK) return;
             core.getMasterChannelGroup(out ChannelGroup master);
-            if (core.playSound(sound, master, false, out Channel ch) == RESULT.OK) ch.setVolume(Plugin.Dd1SoundVolume.Value);
+            if (core.playSound(sound, master, false, out Channel ch) == RESULT.OK) ch.setVolume(Plugin.Dd1SoundVolume.Value * SfxGain());
         }
         catch (Exception e) { if (Missing.Add("!" + what)) Plugin.Log.LogWarning($"[audio] {what}: {e.Message}"); }
     }
@@ -149,7 +149,7 @@ internal static class Dd1Audio
             "/general/combat/retreat" => "gen_combat_retreat",
             "/general/combat/victory" => "Combat_Level2_Victory",
             "/general/combat/start" => "gen_map_com_mix",
-            "/ui/shared/button_click" => "ui_shared_button_click",
+            "/ui/shared/button_click" => _index.Has("ui_town_button_click") ? "ui_town_button_click" : "ui_shared_button_click",
             _ => what.Trim('/').Replace('/', '_'),
         };
         if (_index.Has(prefix)) return new List<string> { prefix };
@@ -238,7 +238,8 @@ internal static class Dd1Audio
             RestoreDd2();
             return;
         }
-        float mv = Plugin.Dd1MusicVolume.Value, av = Plugin.Dd1SoundVolume.Value * 0.8f;
+        // Under DD2's own volume settings (its Master/Music/SFX sliders), and mixed below the narrator.
+        float mv = Plugin.Dd1MusicVolume.Value * 0.45f * MusicGain(), av = Plugin.Dd1SoundVolume.Value * 0.35f * SfxGain();
         switch (phase)
         {
             case Phase.Hamlet:
@@ -265,6 +266,32 @@ internal static class Dd1Audio
                 break;
         }
         Fade();
+    }
+
+    private static VCA _dd2Master;
+    private static float _dd2MasterVolume = -1f;
+
+    private static float MasterGain()
+    {
+        if (_dd2MasterVolume < 0 && _ok)
+        {
+            _dd2Master = Vca(RuntimeManager.StudioSystem, "vca:/Master");
+            _dd2MasterVolume = _dd2Master.isValid() && _dd2Master.getVolume(out float v) == RESULT.OK ? v : 1f;
+        }
+        return _dd2MasterVolume < 0 ? 1f : _dd2MasterVolume;
+    }
+
+    /// <summary>DD2's own music volume setting (as it was before we turned DD2's music down) times its master.</summary>
+    private static float MusicGain()
+    {
+        float music = _dd2MusicVolume >= 0 ? _dd2MusicVolume : _dd2Music.isValid() && _dd2Music.getVolume(out float v) == RESULT.OK ? v : 1f;
+        return music * MasterGain();
+    }
+
+    private static float SfxGain()
+    {
+        float sfx = _dd2SfxVolume >= 0 ? _dd2SfxVolume : _dd2Sfx.isValid() && _dd2Sfx.getVolume(out float v) == RESULT.OK ? v : 1f;
+        return 0.8f * sfx * MasterGain();
     }
 
     private static void QuietDd2(bool sfx)

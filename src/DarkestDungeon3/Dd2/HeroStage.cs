@@ -230,7 +230,7 @@ internal sealed class HeroStage : MonoBehaviour
         _checked = false;
         _tries = 0;
         RendersBlack = false;   // a new party gets a fresh try (the exposure found so far is kept)
-        if (_best == null) StartSearch();
+
     }
 
     public void Clear()
@@ -339,10 +339,20 @@ internal sealed class HeroStage : MonoBehaviour
         var px = tex.GetPixels32();
         Destroy(tex);
         long sum = 0;
-        int count = 0;
+        int count = 0, visible = 0;
         for (int i = 0; i < px.Length; i += 7)
+        {
+            if (px[i].a > 20) visible++;
             if (px[i].a > 200) { sum += px[i].r + px[i].g + px[i].b; count++; }
+        }
         float brightness = count == 0 ? 0f : sum / (count * 3f * 255f);
+        // DD2's heroes are inked: fully opaque pixels are mostly outlines and shadows, so "dark" says nothing.
+        // Show the models as soon as they draw at all; fall back only if nothing drew.
+        _checked = true;
+        _search = null;
+        RendersBlack = visible < 200;
+        Plugin.Log.LogInfo($"[stage] hero models: {visible} visible samples (opaque brightness {brightness:0.000}) -> {(RendersBlack ? "nothing drawn, using DD2's flat art" : "shown")}");
+        return;
         if (_search != null)
         {
             var setup = _search[_results.Count];

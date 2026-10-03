@@ -51,7 +51,7 @@ internal static class Dd1MonsterView
         public readonly HashSet<string> Logged = new();
         public List<(string Anim, string Fx, string TargetFx)> Skills;   // from DD1's .art.darkest
         public string DeathFx;
-        public float Scale = 1f;
+        public float Scale = 1f, Ratio;
         public Vector3 Feet;   // last screen position of its feet (GL pixels)
     }
 
@@ -361,9 +361,14 @@ internal static class Dd1MonsterView
         if (pieces.Count == 0) { Note(m, $"empty pose ({m.Anim}/{m.Clip})"); return false; }
 
         // As tall as the DD2 body it replaces (DD1's height measured without stray far-off parts).
+        // One scale for the whole line-up (the median of DD2 body / DD1 height, a fifth smaller), so DD1's own
+        // proportions between its monsters stay.
         var idle = Load(m.Family, "combat") ?? rig;
         float bodyPx = Mathf.Abs(head.y - feet.y);
-        float scale = bodyPx / Mathf.Max(1f, idle.Height) * Plugin.Dd1MonsterScale.Value;
+        m.Ratio = bodyPx / Mathf.Max(1f, idle.Height);
+        var ratios = Line.Where(x => x.Ratio > 0).Select(x => x.Ratio).OrderBy(r => r).ToList();
+        float shared = ratios.Count > 0 ? ratios[ratios.Count / 2] : m.Ratio;
+        float scale = shared * 0.8f * Plugin.Dd1MonsterScale.Value;
         m.Scale = scale;
         m.Feet = feet;
         if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return false; }

@@ -70,7 +70,7 @@ internal sealed class Driver : MonoBehaviour
     /// <summary>After DD2 has moved its actors and camera: pose DD1's monsters for this frame.</summary>
     private void LateUpdate()
     {
-        if (Phase == Phase.Fighting) Dd1MonsterView.Render();
+        if (Phase == Phase.Fighting) { Dd1Backdrop.Tick(); Dd1MonsterView.Render(); }
     }
 
     private void Update()
