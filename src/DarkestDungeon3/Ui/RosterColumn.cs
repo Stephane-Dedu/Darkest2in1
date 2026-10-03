@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using DarkestDungeon3.Core.Campaign;
 using DarkestDungeon3.Runtime;
 using UnityEngine;
@@ -16,6 +17,39 @@ internal static class RosterColumn
     public const int Visible = 8;
 
     private static int _top;
+    private static int _sort = -1;
+    private static bool _descending;
+
+    // DD1's roster sorts (roster_sort_*.png at roster_sort_start_position 148,80, 32 px + 6 apart).
+    private static readonly (string Icon, string Tip, Func<HeroRecord, IComparable> Key)[] Sorts =
+    {
+        ("roster_sort_building", "Sort by activity", h => h.Activity ?? ""),
+        ("roster_sort_class", "Sort by class", h => h.ClassId ?? ""),
+        ("roster_sort_level", "Sort by resolve level", h => h.ResolveLevel),
+        ("roster_sort_stress", "Sort by stress", h => h.Stress),
+    };
+
+    /// <summary>DD1: a sort button reorders the roster for good; the same one again reverses it.</summary>
+    private static void DrawSortButtons(Estate estate)
+    {
+        for (int i = 0; i < Sorts.Length; i++)
+        {
+            var r = new Rect(X + 148 + i * 38, 80, 32, 32);
+            var tex = Art.Dd1("campaign", "town", "roster", Sorts[i].Icon + ".png");
+            if (tex != null) GUI.DrawTexture(r, tex); else Gui.Fill(r, new Color(0.2f, 0.17f, 0.12f));
+            if (_sort == i && Art.Dd1("campaign", "town", "roster", "roster_sort_current_overlay.png") is { } current)
+                GUI.DrawTexture(new Rect(r.x - 8, r.y + (_descending ? 24 : -8), 48, 16), current, ScaleMode.ScaleToFit);
+            if (r.Contains(Event.current.mousePosition)) Gui.Text(new Rect(r.x - 80, r.yMax + 2, 192, 24), Sorts[i].Tip, 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (!Gui.Hotspot(r)) continue;
+            _descending = _sort == i ? !_descending : i >= 2;   // level and stress: highest first
+            _sort = i;
+            var key = Sorts[i].Key;
+            var sorted = _descending ? estate.Roster.OrderByDescending(key).ToList() : estate.Roster.OrderBy(key).ToList();
+            estate.Roster.Clear();
+            estate.Roster.AddRange(sorted);
+            Session.Current?.Persist();
+        }
+    }
 
     /// <summary>How a hero shows in the list: greyed out, a short note under the name, highlighted.</summary>
     public readonly struct Look
@@ -41,7 +75,8 @@ internal static class RosterColumn
 
         var topFrame = Art.Dd1("campaign", "town", "roster", "roster_topframe.png");
         if (topFrame != null) GUI.DrawTexture(new Rect(X - 6, FirstY - 60, 383, 60), topFrame);
-        Gui.Text(new Rect(X + 20, 40, 330, 40), $"Roster  {estate.Roster.Count}/{capacity}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(X + 20, 40, 130, 40), $"{estate.Roster.Count}/{capacity}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        DrawSortButtons(estate);
 
         var area = new Rect(X, FirstY, 370, Spacing * Visible);
         if (Event.current.type == EventType.ScrollWheel && area.Contains(Event.current.mousePosition))

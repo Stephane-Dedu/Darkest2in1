@@ -267,23 +267,9 @@ internal sealed class HamletUi
     private void DrawEstateTitle()
     {
         var plate = Art.Dd1("campaign", "town", "estate_title", "estate_nameplate.png");
-        if (plate != null) GUI.DrawTexture(new Rect(0, 0, 893 * 0.8f, 281 * 0.8f), plate);
-        Gui.Text(new Rect(286 * 0.8f, 70 * 0.8f - 26, 600, 52), E.Name, 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(286 * 0.8f, 70 * 0.8f + 24, 600, 32), $"Week {E.Week + 1}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
-
-        if (E.TownEventId != null)
-        {
-            var crierIcon = EventArt("town_event.icon.png");
-            var ir = new Rect(722, 26, 70, 70);
-            if (crierIcon != null) GUI.DrawTexture(ir, crierIcon);
-            if (ir.Contains(Event.current.mousePosition))
-                Gui.Text(new Rect(ir.x - 60, ir.yMax, 200, 26), "The week's event", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (Gui.Hotspot(ir)) _eventSeenWeek = -1;
-        }
-        var log = Art.Dd1("campaign", "town", "estate_title", "estate_activity_log_button.png");
-        var r = new Rect(640, 26, 70, 70);
-        if (log != null) GUI.DrawTexture(r, log);
-        if (Gui.Hotspot(r)) _panel = _panel == Panel.Log ? Panel.Town : Panel.Log;
+        if (plate != null) GUI.DrawTexture(new Rect(0, 0, 893, 281), plate);
+        Gui.Text(new Rect(286, 70 - 30, 560, 56), E.Name, 44, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(286, 70 + 24, 560, 32), $"Week {E.Week + 1}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
     }
 
     private void DrawNav()
@@ -332,47 +318,78 @@ internal sealed class HamletUi
         }
     }
 
+    /// <summary>
+    /// DD1's estate summary (campaign/town/estate_summary + shared/estate layouts): the gold pile and amount at
+    /// currency_pos (200,42) of the bar at (0,958), the heirlooms 200 further then 74 apart with their counts beside
+    /// them, the heirloom exchange at (700,51), and the navigation buttons from (1800,45) leftwards 110 apart: realm
+    /// inventory, activity log, town event. The embark plate sits at DD1's embark_party_pos (754,871).
+    /// </summary>
     private void DrawEstateBar()
     {
-        Gui.Fill(new Rect(0, BarY, 1550, Gui.H - BarY), new Color(0, 0, 0, 0.85f));
+        Gui.Fill(new Rect(0, BarY, 1550, Gui.H - BarY), new Color(0, 0, 0, 0.8f));
         Gui.Fill(new Rect(0, BarY, 1550, 2), new Color(0.35f, 0.29f, 0.18f));
+        var anchor = new Vector2(200, BarY + 42);
 
+        // estate_large_currency_layout: icon at (0,-50), number at (90,-16).
         var gold = Art.Dd1("shared", "estate", "currency.gold.large_icon.png");
-        if (gold != null) GUI.DrawTexture(new Rect(120, BarY + 14, 88, 88), gold);
-        Gui.Text(new Rect(210, BarY + 30, 200, 56), Gui.Num(E.Get(Currency.Gold), "#,0"), 34, Gui.Gold, TextAnchor.MiddleLeft, heading: true);
+        if (gold != null) GUI.DrawTexture(new Rect(anchor.x - 30, anchor.y - 50, 88, 88), gold);
+        Gui.Text(new Rect(anchor.x + 60, anchor.y - 36, 150, 40), Gui.Num(E.Get(Currency.Gold), "#,0"), 32, Gui.Gold, TextAnchor.MiddleLeft, heading: true);
 
+        // estate_currency_heirloom_layout: icon at (0,-10), number at (38,-4); currency_spacing 74.
         var heirlooms = new[] { (Currency.Bust, "bust"), (Currency.Portrait, "portrait"), (Currency.Deed, "deed"), (Currency.Crest, "crest") };
         for (int i = 0; i < heirlooms.Length; i++)
         {
             var (cur, icon) = heirlooms[i];
-            float x = 420 + i * 120;
+            float x = anchor.x + 200 + i * 74;
             var tex = Art.Dd1("shared", "estate", $"currency.{icon}.icon.png");
-            if (tex != null) GUI.DrawTexture(new Rect(x, BarY + 38, 40, 40), tex);
-            Gui.Text(new Rect(x + 46, BarY + 34, 70, 48), E.Get(cur).ToString(), 28, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
+            if (tex != null) GUI.DrawTexture(new Rect(x - 4, anchor.y - 30, 40, 40), tex);
+            Gui.Text(new Rect(x + 34, anchor.y - 28, 44, 32), E.Get(cur).ToString(), 22, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
+            if (new Rect(x - 4, anchor.y - 30, 74, 40).Contains(Event.current.mousePosition))
+                Gui.Text(new Rect(x - 60, anchor.y - 64, 170, 26), HamletUi.Pretty(icon) + "s", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
         }
-        var regionsButton = new Rect(14, BarY + 30, 100, 56);
-        Gui.Text(regionsButton, "Regions", 22, regionsButton.Contains(Event.current.mousePosition) || _regionsOpen ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
-        if (Gui.Hotspot(regionsButton)) _regionsOpen = !_regionsOpen;
-        if (_regionsOpen) DrawRegions();
-        var trinketsButton = new Rect(960, BarY + 30, 130, 56);
-        Gui.Text(trinketsButton, $"Trinkets {E.Trinkets.Count}", 22, trinketsButton.Contains(Event.current.mousePosition) ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
-        if (Gui.Hotspot(trinketsButton)) HeroSheet.RealmOpen = !HeroSheet.RealmOpen;
+
         var he = Art.Dd1("campaign", "town", "heirloom_exchange", _exchangeOpen ? "he_icon_selected.png" : "he_icon_idle.png");
-        var heRect = new Rect(890, BarY + 26, 60, 60);
+        var heRect = new Rect(700, BarY + 22, 58, 59);
         if (he != null) GUI.DrawTexture(heRect, he, ScaleMode.ScaleToFit); else Gui.Fill(heRect, new Color(0.2f, 0.17f, 0.12f));
         if (heRect.Contains(Event.current.mousePosition)) Gui.Text(new Rect(heRect.x - 80, heRect.y - 30, 220, 28), "Heirloom exchange", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
         if (Gui.Hotspot(heRect)) _exchangeOpen = !_exchangeOpen;
         if (_exchangeOpen) DrawHeirloomExchange();
 
+        // Navigation buttons (113 px), centred from x 1800 leftwards every 110.
+        NavButton(1800, Art.Dd1("campaign", "town", "realm_inventory", "realm_inventory.icon.png"), $"Trinkets ({E.Trinkets.Count})", HeroSheet.RealmOpen,
+                  () => HeroSheet.RealmOpen = !HeroSheet.RealmOpen);
+        NavButton(1690, Art.Dd1("campaign", "town", "activity_log", "activity_log.icon.png"), "Activity log", _panel == Panel.Log,
+                  () => _panel = _panel == Panel.Log ? Panel.Town : Panel.Log);
+        if (E.TownEventId != null)
+            NavButton(1580, EventArt("town_event.icon.png"), "The week's event", false, () => _eventSeenWeek = -1);
+
         var embark = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
-        var er = new Rect(1100, BarY + 4, 412, 113);
+        var er = new Rect(754, 871, 412, 113);
         if (embark != null) GUI.DrawTexture(er, embark);
         bool hover = er.Contains(Event.current.mousePosition);
         Gui.Text(er, "Embark", 44, hover ? Color.white : Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         if (Gui.Hotspot(er)) WantsEmbark = true;
 
-        if (Gui.DdButton(new Rect(1580, 1000, 310, 60), "Leave the Hamlet", size: 24))
-            Driver.Instance.LeaveHamlet();
+        // Ours, not DD1's: the DD2 regions option and the way back to DD2's menu, small at the bar's left end.
+        var regionsButton = new Rect(14, BarY + 22, 110, 34);
+        Gui.Text(regionsButton, "Regions", 20, regionsButton.Contains(Event.current.mousePosition) || _regionsOpen ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (Gui.Hotspot(regionsButton)) _regionsOpen = !_regionsOpen;
+        if (_regionsOpen) DrawRegions();
+        var leave = new Rect(14, BarY + 62, 110, 34);
+        Gui.Text(leave, "Leave", 20, leave.Contains(Event.current.mousePosition) ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (Gui.Hotspot(leave)) Driver.Instance.LeaveHamlet();
+    }
+
+    private void NavButton(float centreX, Texture2D icon, string tip, bool selected, System.Action click)
+    {
+        var r = new Rect(centreX - 56, BarY + 45 - 56, 113, 113);
+        bool hover = r.Contains(Event.current.mousePosition);
+        if (selected || hover) r.y -= 5;   // DD1's "selected hop"
+        var overlay = Art.Dd1("campaign", "town", "estate_summary", "estate_summary.selected_overlay.png");
+        if (selected && overlay != null) GUI.DrawTexture(new Rect(r.x + 5, r.y - 13, 103, 139), overlay);
+        if (icon != null) GUI.DrawTexture(r, icon); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
+        if (hover) Gui.Text(new Rect(centreX - 120, r.y - 30, 240, 26), tip, 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
+        if (Gui.Hotspot(r)) click();
     }
 
     private bool _regionsOpen;
