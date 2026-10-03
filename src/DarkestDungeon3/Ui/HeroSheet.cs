@@ -25,9 +25,16 @@ internal static class HeroSheet
     private static Texture2D Ri(string f) => Art.Dd1("campaign", "town", "realm_inventory", f);
     private static Rect At(float x, float y, float w, float h) => new(O.x + x, O.y + y, w, h);
 
-    /// <summary>Draw the sheet. <paramref name="show"/> switches hero (previous/next), <paramref name="close"/> closes it.</summary>
-    public static void Draw(HeroRecord h, Action<string> show, Action close)
+    /// <summary>
+    /// Draw the sheet. <paramref name="show"/> switches hero (previous/next among <paramref name="cycle"/>, the roster
+    /// by default), <paramref name="close"/> closes it. <paramref name="readOnly"/> (in the dungeon): look only, as
+    /// DD1 doesn't reach the town's stash mid-expedition.
+    /// </summary>
+    public static void Draw(HeroRecord h, Action<string> show, Action close, bool readOnly = false, IReadOnlyList<string> cycle = null)
     {
+        _readOnly = readOnly;
+        // Right-click outside closes it, as in DD1.
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 1) { Event.current.Use(); RealmOpen = false; close(); return; }
         var win = At(0, 0, 1395, 776);
         var bg = Ch("characterpanel_bg.png");
         if (bg != null) GUI.DrawTexture(win, bg); else Gui.Fill(win, new Color(0.04f, 0.035f, 0.03f, 0.97f));
@@ -56,13 +63,20 @@ internal static class HeroSheet
         DrawDiseases(h);
 
         // Previous / next hero, dismiss, close.
-        int at = E.Roster.FindIndex(x => x.Id == h.Id);
+        var ids = cycle ?? E.Roster.Select(x => x.Id).ToList();
+        int at = Math.Max(0, ids.ToList().IndexOf(h.Id));
         var prev = At(1162, 772 - 50, 64, 48);
         var next = At(1246, 772 - 50, 64, 48);
         if (Ch("previous_hero.png") is { } p) GUI.DrawTexture(prev, p, ScaleMode.ScaleToFit);
         if (Ch("next_hero.png") is { } n) GUI.DrawTexture(next, n, ScaleMode.ScaleToFit);
-        if (E.Roster.Count > 1 && Gui.Hotspot(prev)) show(E.Roster[(at - 1 + E.Roster.Count) % E.Roster.Count].Id);
-        if (E.Roster.Count > 1 && Gui.Hotspot(next)) show(E.Roster[(at + 1) % E.Roster.Count].Id);
+        if (ids.Count > 1 && Gui.Hotspot(prev)) show(ids[(at - 1 + ids.Count) % ids.Count]);
+        if (ids.Count > 1 && Gui.Hotspot(next)) show(ids[(at + 1) % ids.Count]);
+
+        var closeRect = At(1344 - 6, 18 - 6, 46, 46);
+        var x = Art.Dd1("shared", "progression", "progression_close.png");
+        if (x != null) GUI.DrawTexture(closeRect, x);
+        if (Gui.Hotspot(closeRect) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) { RealmOpen = false; close(); return; }
+        if (readOnly) return;
 
         var dismiss = At(20, 70, 32, 32);
         if (Ch("icon_dismiss.png") is { } d) GUI.DrawTexture(dismiss, d);
@@ -74,11 +88,6 @@ internal static class HeroSheet
             _confirmDismiss = h.Id;
         }
 
-        var closeRect = At(1344 - 6, 18 - 6, 46, 46);
-        var x = Art.Dd1("shared", "progression", "progression_close.png");
-        if (x != null) GUI.DrawTexture(closeRect, x);
-        if (Gui.Hotspot(closeRect) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) { RealmOpen = false; close(); return; }
-
         // The realm inventory toggle (DD1 has it on the estate bar; it's handy here too).
         var toggle = At(1200, 18, 120, 40);
         if (Gui.DdButton(toggle, RealmOpen ? "Hide trinkets" : "Trinkets", true, 18)) RealmOpen = !RealmOpen;
@@ -86,6 +95,7 @@ internal static class HeroSheet
     }
 
     private static string _confirmDismiss;
+    private static bool _readOnly;
 
     private static void Title(float centreX, float y, string text) =>
         Gui.Text(At(centreX - 250, y - 2, 500, 36), text, 24, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
@@ -153,9 +163,15 @@ internal static class HeroSheet
             bool hover = Drag.Hovering<TrinketDrag>(r);
             if (hover && Drag.Payload is TrinketDrag over)
                 Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), S.Catalog.TrinketFits(over.TrinketId, h.ClassId) ? Gui.Gold : Gui.Blood);
-            if (Drag.Drop<TrinketDrag>(r, out var dropped)) { Equip(h, dropped, i); return; }
+            if (!_readOnly && Drag.Drop<TrinketDrag>(r, out var dropped)) { Equip(h, dropped, i); return; }
             if (id == null) continue;
             string tid = id;
+            if (_readOnly)
+            {
+                TrinketIcon(r, tid);
+                if (r.Contains(Event.current.mousePosition)) Tip(TrinketText(tid));
+                continue;
+            }
             Drag.Source(r, new TrinketDrag(tid, h.Id), rect => TrinketIcon(rect, tid));
             if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid)) TrinketIcon(r, tid);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active) Tip(TrinketText(tid) + "\nClick or drag away to unequip.");

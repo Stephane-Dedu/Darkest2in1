@@ -30,6 +30,9 @@ internal static class RosterColumn
 
     /// <summary>Draws the column; returns the hero clicked this frame, if any. With <paramref name="draggable"/>
     /// heroes can be picked up (as <see cref="HeroDrag"/>) and dropped on slots elsewhere.</summary>
+    /// <summary>The hero right-clicked during the last Draw (DD1 opens their sheet), or null.</summary>
+    public static HeroRecord RightClickedHero { get; private set; }
+
     public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false)
     {
         var grad = Art.Dd1("campaign", "town", "roster", "roster_bggrad.png");
@@ -53,12 +56,14 @@ internal static class RosterColumn
         var over = Art.Overlay("stress_pip_full_overstressed.png");
         var empty = Art.Overlay("stress_pip_empty.png");
         HeroRecord clicked = null;
+        RightClickedHero = null;
         for (int i = 0; i < Visible && _top + i < estate.Roster.Count; i++)
         {
             var h = estate.Roster[_top + i];
             var l = look?.Invoke(h) ?? default;
             float x = X - 12, y = FirstY + i * Spacing;
             var r = new Rect(x, y, 383, 100);
+            if (CrawlUi.RightClicked(r)) RightClickedHero = h;   // DD1: right-click for the hero's sheet
             if (draggable && h.IsAvailable && h.MissingWeeks == 0)
             {
                 string cls = h.ClassId;

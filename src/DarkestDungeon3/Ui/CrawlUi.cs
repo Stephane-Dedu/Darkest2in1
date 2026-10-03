@@ -23,6 +23,16 @@ internal sealed class CrawlUi
 
     private bool _inventoryTab;
     private bool _confirmRetreat;
+    private string _sheetHeroId;   // the hero whose DD1 sheet is open (right-click)
+
+    /// <summary>A right-click on this rect (used up, so nothing else sees it).</summary>
+    internal static bool RightClicked(Rect r)
+    {
+        var e = Event.current;
+        if (e.type != EventType.MouseDown || e.button != 1 || !r.Contains(e.mousePosition)) return false;
+        e.Use();
+        return true;
+    }
     private string _campSkillPending, _campSkillUser;   // a camp skill waiting for its target
 
     private static Session S => Session.Current;
@@ -35,6 +45,13 @@ internal sealed class CrawlUi
         if (crawl == null || exp == null) return;
         string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD2 regions use their DD1 zone's art
         if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
+        // While a hero sheet is open, the dungeon under it is only painted: clicks belong to the sheet.
+        if (_sheetHeroId != null && Event.current.type != EventType.Repaint && S.Save.Estate.Hero(_sheetHeroId) is { } open)
+        {
+            UiRoot.ModalOpen = true;
+            HeroSheet.Draw(open, id => _sheetHeroId = id, () => _sheetHeroId = null, readOnly: true, cycle: exp.Party);
+            return;
+        }
 
         DrawScene(crawl, exp, zone);
         if (exp.Camp != null) DrawCampfire();
@@ -43,13 +60,37 @@ internal sealed class CrawlUi
         if (fade > 0.001f) Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, fade));
         if (exp.Camp != null) DrawRespite(exp.Camp); else DrawTorch(exp.Light);
         DrawQuestInfo(crawl, exp);
-        DrawHud(exp);
+        try { DrawHud(exp); }
+        catch (NullReferenceException) { }   // DD2 tearing its actors down (leaving the dungeon)
         if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
         UiRoot.ModalOpen = false;
+        if (_sheetHeroId != null && S.Save.Estate.Hero(_sheetHeroId) is { } sheetHero)
+        {
+            UiRoot.ModalOpen = true;
+            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+            HeroSheet.Draw(sheetHero, id => _sheetHeroId = id, () => _sheetHeroId = null, readOnly: true, cycle: exp.Party);
+            Gui.DrawAnnouncement();
+            return;
+        }
         if (exp.Camp != null) DrawCamp(crawl, exp);
         else if (DrawSpoils(crawl) || DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
         else DrawPrompt(crawl, exp);
         Gui.DrawAnnouncement();
+    }
+
+    /// <summary>The dungeon scene and the party only (painted while DD2 sets up a fight), at this opacity.</summary>
+    public void DrawBackdrop(float alpha)
+    {
+        var crawl = D.Crawl;
+        var exp = D.Expedition;
+        if (crawl == null || exp == null) return;
+        var old = GUI.color;
+        GUI.color = new Color(1, 1, 1, alpha);
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+        DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
+        DrawHeroes(exp);
+        DrawHud(exp);
+        GUI.color = old;
     }
 
     // ---------------- scene ----------------
@@ -95,7 +136,7 @@ internal sealed class CrawlUi
                 if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
             }
         }
-        DrawProp(crawl, exp);
+        DrawProps(crawl, exp, slide);
 
         // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
         float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
@@ -122,34 +163,46 @@ internal sealed class CrawlUi
     /// <summary>Debug (F6): show this curio in front of the party instead of what's really there.</summary>
     public static string PreviewCurio;
 
-    private static void DrawProp(Crawl crawl, ExpeditionState exp)
+    /// <summary>The props along the hallway (the party's square and the seen squares next to it), scrolling with
+    /// it; in a room, the room's curio.</summary>
+    private static void DrawProps(Crawl crawl, ExpeditionState exp, float slide)
     {
-        string kind = null, id = null;
-        bool used = false;
-        if (PreviewCurio != null) { kind = "curios"; id = PreviewCurio; }
-        else if (exp.InRoom)
+        if (PreviewCurio != null) { DrawProp("curios", PreviewCurio, false, PropX, hoverable: true); return; }
+        if (exp.InRoom)
         {
             var room = crawl.CurrentRoom;
-            if (room?.CurioId != null) { kind = "curios"; id = room.CurioId; used = room.CurioTaken; }
+            if (room?.CurioId != null) DrawProp("curios", room.CurioId, room.CurioTaken, PropX + slide, hoverable: true);
+            return;
         }
-        else if (crawl.CurrentTile is { } tile)
+        var c = crawl.CurrentCorridor;
+        int dir = exp.HeadingRoomId == c.RoomB ? 1 : -1;
+        for (int k = -1; k <= 1; k++)
         {
-            switch (tile.Content)
+            int i = exp.TileIndex + k * dir;
+            if (i < 0 || i >= c.Tiles.Count) continue;
+            var tile = c.Tiles[i];
+            if (k != 0 && !tile.Visited && !tile.Scouted) continue;
+            string kind = tile.Content switch
             {
-                case HallContent.Curio: kind = "curios"; id = tile.ContentId; used = tile.Resolved; break;
-                case HallContent.Obstacle when !tile.Resolved: kind = "obstacles"; id = tile.ContentId; break;
-                case HallContent.Trap when tile.Scouted && !tile.Resolved: kind = "traps"; id = tile.ContentId; break;
-            }
+                HallContent.Curio => "curios",
+                HallContent.Obstacle when !tile.Resolved => "obstacles",
+                HallContent.Trap when tile.Scouted && !tile.Resolved => "traps",
+                _ => null,
+            };
+            if (kind != null) DrawProp(kind, tile.ContentId, kind == "curios" && tile.Resolved, PropX + k * 720 + slide, hoverable: k == 0);
         }
-        if (kind == null) return;
+    }
 
-        var feet = new Vector2(PropX, Feet + 10);
+    private static void DrawProp(string kind, string id, bool used, float x, bool hoverable)
+    {
+        if (x < -400 || x > 2320) return;
+        var feet = new Vector2(x, Feet + 10);
         string folder = S.Dd1.PathOf("props", "shared", kind, id ?? "");
         SpineArt.Picture pic;
         if (kind == "curios")
         {
             var closed = SpineArt.Get(folder, "closed", sl => sl.Name != "active" && sl.Name != "open");
-            bool hover = !used && closed != null && closed.Hit(feet, 1f, Event.current.mousePosition);
+            bool hover = hoverable && !used && closed != null && closed.Hit(feet, 1f, Event.current.mousePosition);
             pic = used ? SpineArt.Get(folder, "open", sl => sl.Name != "active" && sl.Name != "closed")
                 : hover ? SpineArt.Get(folder, "active", sl => sl.Name != "closed" && sl.Name != "open") ?? closed
                 : closed;
@@ -168,7 +221,7 @@ internal sealed class CrawlUi
         string icon = kind switch { "curios" => "marker_curio", "obstacles" => "marker_obstacle", _ => "marker_trap" };
         var tex = Art.MapIcon(icon);
         if (tex == null) return;
-        var ir = new Rect(PropX - 75, Feet - 150, 150, 150);
+        var ir = new Rect(x - 75, Feet - 150, 150, 150);
         Gui.Fill(new Rect(ir.x - 10, ir.yMax + 2, ir.width + 20, 14), new Color(0, 0, 0, 0.4f));
         GUI.DrawTexture(ir, tex, ScaleMode.ScaleToFit);
     }
@@ -218,6 +271,7 @@ internal sealed class CrawlUi
             else Gui.Text(new Rect(x - 80, Feet + 6, 160, 30), "Dead", 22, Gui.Blood, TextAnchor.UpperCenter, heading: true);
 
             var hit = new Rect(x - 80, Feet - 240, 160, 290);
+            if (RightClicked(hit)) _sheetHeroId = id;   // DD1: right-click a hero for their sheet
             if (!dead && Drag.Hovering<PackStack>(hit)) Gui.Fill(new Rect(x - 60, Feet + 40, 120, 4), Gui.Gold);
             if (!dead && Drag.Drop<PackStack>(hit, out var supply)) UseItemOn(id, supply.Key, D.Crawl);
             if (!dead && _campSkillPending != null && hit.Contains(Event.current.mousePosition))
@@ -344,6 +398,7 @@ internal sealed class CrawlUi
         // Banner (DD1 panel.banner.darkest): portrait, name and class, then the five skill slots above "1-5".
         var portrait = Art.HeroIcon(hero.ClassId);
         if (portrait != null) Art.DrawSprite(new Rect(262, 738, 96, 96), portrait);
+        if (RightClicked(new Rect(250, 728, 270, 120))) _sheetHeroId = hero.Id;
         float nameSize = 30;
         var font = Dd1Font.Heading;
         while (font != null && nameSize > 18 && font.Measure(hero.Name, nameSize * Gui.HeadingScale).x > 146) nameSize -= 2;
@@ -352,19 +407,28 @@ internal sealed class CrawlUi
         Gui.Text(new Rect(366, 804, 150, 24), $"Resolve {hero.ResolveLevel}", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
         DrawSkillRow(hero, actor);
 
-        // Hero panel (DD1 panel.hero.darkest): health, stress, then stats.
-        Gui.Text(new Rect(370, 864, 300, 28), $"{actor.HpRounded:0} / {actor.CurrentHpMax:0}", 24, new Color(0.85f, 0.15f, 0.12f));
-        Gui.Text(new Rect(370, 893, 300, 28), $"{actor.Stress:0} / {actor.StressMax:0}", 24, Gui.Dd1Class);
-        var stats = new List<string>
+        // Hero panel (DD1 panel.hero.darkest at 240,856): health at (130,11) in red, stress at (130,40) in grey,
+        // then DD1's one column of stats at (60,72) in its "stat" font (ubuntu_small): grey label, white value.
+        Gui.Text(new Rect(370, 862, 200, 28), $"{actor.HpRounded:0}/{actor.CurrentHpMax:0}", 22, new Color(0.75f, 0f, 0f), TextAnchor.MiddleLeft);
+        Gui.Text(new Rect(370, 891, 200, 28), $"{actor.Stress:0}/{actor.StressMax:0}", 22, new Color(0.59f, 0.59f, 0.59f), TextAnchor.MiddleLeft);
+        float dmg = actor.GetClampedStatValue(ActorStatType.HEALTH_DAMAGE), range = actor.GetClampedStatValue(ActorStatType.HEALTH_DAMAGE_RANGE);
+        int dodge = actor.TokenContainer.GetNumberOfTokensWithId("dodge", false) + actor.TokenContainer.GetNumberOfTokensWithId("dodge_plus", false);
+        int block = actor.TokenContainer.GetNumberOfTokensWithId("block", false) + actor.TokenContainer.GetNumberOfTokensWithId("block_plus", false);
+        var stats = new (string Label, string Value)[]
         {
-            $"SPD  {actor.GetClampedStatValue(ActorStatType.SPEED):0}",
-            $"CRIT {actor.GetClampedStatValue(ActorStatType.CRIT_CHANCE) * 100:0}%",
-            $"DD   {actor.GetClampedStatValue(ActorStatType.DEATHS_DOOR_CHANCE) * 100:0}%",
+            ("CRIT", Gui.Num(actor.GetClampedStatValue(ActorStatType.CRIT_CHANCE) * 100, "0") + "%"),
+            ("DMG", dmg > 0 ? (range > 0 ? $"{Gui.Num(dmg - range, "0")}-{Gui.Num(dmg + range, "0")}" : Gui.Num(dmg, "0")) : "-"),
+            ("DODGE", dodge > 0 ? dodge.ToString() : "0"),
+            ("PROT", block > 0 ? block.ToString() : "0"),
+            ("SPD", Gui.Num(actor.GetClampedStatValue(ActorStatType.SPEED), "0")),
+            ("DTH DR", Gui.Num(actor.GetClampedStatValue(ActorStatType.DEATHS_DOOR_CHANCE) * 100, "0") + "%"),
         };
-        foreach (var res in new[] { "stun", "blight", "bleed", "burn", "move", "debuff", "disease" })
-            stats.Add($"{HamletUi.Pretty(res).Substring(0, Math.Min(5, res.Length))} {actor.GetUnclampedStatValue(ActorStatType.RESISTANCE, res) * 100:0}%");
-        for (int i = 0; i < stats.Count; i++)
-            Gui.Text(new Rect(262 + (i / 5) * 105, 928 + (i % 5) * 28, 110, 28), stats[i], 18, Gui.Dd1Text);
+        for (int i = 0; i < stats.Length; i++)
+        {
+            float y = 928 + i * 23;
+            Gui.Text(new Rect(300, y, 90, 23), stats[i].Label, 17, new Color(0.6f, 0.6f, 0.56f), TextAnchor.MiddleLeft);
+            Gui.Text(new Rect(380, y, 80, 23), stats[i].Value, 17, new Color(0.93f, 0.9f, 0.82f), TextAnchor.MiddleRight);
+        }
 
         // Equipment (hero_equipment 238,0) and trinkets (hero_trinket 453,0), in the panel's painted frames.
         string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
@@ -414,6 +478,10 @@ internal sealed class CrawlUi
 
     private static Vector2 Pos(int x, int y) => new(x * MapUnit, y * MapUnit);
 
+    private Vector2 _mapPan, _mapPress;
+    private bool _mapDragging, _mapPressed;
+    private string _mapSpot;
+
     private void DrawMap(ExpeditionState exp)
     {
         var map = exp.Map;
@@ -425,7 +493,22 @@ internal sealed class CrawlUi
             var t = map.Corridor(exp.CorridorId).Tiles[exp.TileIndex];
             here = HallPos(map, map.Corridor(exp.CorridorId), t.Index);
         }
-        var offset = new Vector2(area.width / 2f, area.height / 2f) - here;
+        // DD1: drag the map to look around; it comes back to the party when the party moves.
+        string spot = exp.InRoom ? "r" + exp.RoomId : $"c{exp.CorridorId}:{exp.TileIndex}";
+        if (spot != _mapSpot) { _mapSpot = spot; _mapPan = Vector2.zero; }
+        var e = Event.current;
+        if (e.type == EventType.MouseDown && e.button == 0 && area.Contains(e.mousePosition)) { _mapPress = e.mousePosition; _mapDragging = false; _mapPressed = true; }
+        else if (e.type == EventType.MouseDrag && _mapPressed)
+        {
+            if (!_mapDragging && (e.mousePosition - _mapPress).magnitude > 5) _mapDragging = true;
+            if (_mapDragging) { _mapPan += e.delta; e.Use(); }
+        }
+        else if (e.rawType == EventType.MouseUp && _mapPressed)
+        {
+            _mapPressed = false;
+            if (_mapDragging) { _mapDragging = false; GUIUtility.hotControl = 0; e.Use(); }   // a drag is not a click
+        }
+        var offset = new Vector2(area.width / 2f, area.height / 2f) - here + _mapPan;
 
         GUI.BeginGroup(area);
         var visitedNear = new HashSet<int>(map.Rooms.Where(r => r.Visited).SelectMany(r => map.Neighbours(r.Id)));

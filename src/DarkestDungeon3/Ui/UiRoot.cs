@@ -53,6 +53,9 @@ internal sealed class UiRoot : MonoBehaviour
                     _crawl.Draw();
                     break;
                 case Phase.Fighting:
+                    // Until DD2's fight is ready the DD1 scene stays, then it fades into the fight (DD1's battle start).
+                    float reveal = Dd2.Dd2Combat.RevealProgress;
+                    if (reveal < 1f && Event.current.type == EventType.Repaint) _crawl.DrawBackdrop(1f - reveal);
                     Dd2.Dd1MonsterView.Draw();
                     DrawRetreatButton();
                     Gui.DrawAnnouncement();

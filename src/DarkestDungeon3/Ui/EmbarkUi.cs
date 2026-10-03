@@ -32,7 +32,12 @@ internal sealed class EmbarkUi
     public void Draw()
     {
         _party.RemoveAll(id => E.Hero(id) == null);
-        if (_provisioning) DrawProvisioner(); else DrawQuestSelect();
+        // While a hero sheet is open, the screen under it is only painted: clicks belong to the sheet.
+        if (_sheetHeroId == null || Event.current.type == EventType.Repaint)
+        {
+            if (_provisioning) DrawProvisioner(); else DrawQuestSelect();
+        }
+        DrawSheet();
         if (_error != null) Gui.Text(new Rect(560, 1040, 900, 36), _error, 22, Gui.Blood, TextAnchor.MiddleCenter);
     }
 
@@ -57,6 +62,17 @@ internal sealed class EmbarkUi
         }
         catch (System.Exception e) { Plugin.Log.LogWarning("[embark] quest map layout: " + e.Message); }
         return _mapSpots;
+    }
+
+    private string _sheetHeroId;   // DD1: right-click a hero for their sheet (trinkets can be changed here)
+
+    /// <summary>The hero sheet over the quest select, if open. True while it is.</summary>
+    private bool DrawSheet()
+    {
+        if (_sheetHeroId == null || E.Hero(_sheetHeroId) is not { } h) { _sheetHeroId = null; return false; }
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+        HeroSheet.Draw(h, id => _sheetHeroId = id, () => _sheetHeroId = null);
+        return true;
     }
 
     private void DrawQuestSelect()
@@ -93,6 +109,7 @@ internal sealed class EmbarkUi
             return new RosterColumn.Look(dim: inParty || note != null, note: inParty ? null : note, highlight: inParty);
         }, draggable: true);
         if (clicked != null) Toggle(clicked);
+        if (RosterColumn.RightClickedHero != null) _sheetHeroId = RosterColumn.RightClickedHero.Id;
         // A hero dragged out of the party back onto the roster leaves it.
         if (Drag.Drop<HeroDrag>(RosterColumn.Area, out var back) && back.FromSlot >= 0) _party.Remove(back.HeroId);
 
@@ -238,6 +255,7 @@ internal sealed class EmbarkUi
         {
             int rank = 3 - s;
             var r = new Rect(at.x + 22 + s * 93, at.y + 16, 80, 80);
+            if (s < _party.Count && CrawlUi.RightClicked(r)) _sheetHeroId = _party[s];
             if (slotBg != null) GUI.DrawTexture(r, slotBg);
             if (Drag.Hovering<HeroDrag>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
             if (Drag.Drop<HeroDrag>(r, out var dropped)) { DropHero(dropped, rank); break; }

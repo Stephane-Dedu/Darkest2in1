@@ -212,8 +212,9 @@ internal sealed class Driver : MonoBehaviour
     private const float SecondsPerSquare = 1.2f;
     private bool _continuousStep;
 
-    /// <summary>How far the party has walked into the next square (-1..1, + toward the heading): the hallway
-    /// scrolls by this much. A step into the next square happens when it reaches ±1.</summary>
+    /// <summary>Where the party stands in its square, from -0.5 (just in from behind) to +0.5 (about to leave
+    /// ahead), + toward the heading: the hallway scrolls by this much. It stays put when the party stops, as in DD1;
+    /// the next square is entered at the halfway mark.</summary>
     public float WalkProgress { get; private set; }
 
     /// <summary>The party is walking right now (held key or auto-walk): heroes bob.</summary>
@@ -236,14 +237,16 @@ internal sealed class Driver : MonoBehaviour
             int to = _travelTo;
             _travelTo = -1;
             Travel(to);
+            WalkProgress = Expedition.InRoom ? 0 : -0.45f;   // just in through the door
             _wasInRoom = Expedition.InRoom;
             _fadeInFrom = Time.unscaledTime;
             if (_interruptsThisStep) { StopWalking(); _interruptsThisStep = false; }
             return;
         }
-        if (Expedition.Camp != null || Ui.UiRoot.ModalOpen) { WalkProgress = 0; return; }
-        bool right = kb != null && (kb.dKey.isPressed || kb.rightArrowKey.isPressed);
-        bool left = kb != null && (kb.aKey.isPressed || kb.leftArrowKey.isPressed);
+        if (Expedition.Camp != null || Ui.UiRoot.ModalOpen) { _mouseWalk = 0; return; }
+        int mouse = MouseWalk();
+        bool right = mouse > 0 || (kb != null && (kb.dKey.isPressed || kb.rightArrowKey.isPressed));
+        bool left = mouse < 0 || (kb != null && (kb.aKey.isPressed || kb.leftArrowKey.isPressed));
 
         if (Expedition.InRoom)
         {
@@ -271,26 +274,42 @@ internal sealed class Driver : MonoBehaviour
         int intent = right ^ left ? (right ? 1 : -1) : 0;
         if (intent != 0) StopWalking();
         else if (IsWalking) intent = RouteIntent();
-        if (intent == 0) { WalkProgress = Mathf.MoveTowards(WalkProgress, 0, Time.unscaledDeltaTime * 2f); return; }
+        if (intent == 0) return;   // the party stays where it stopped
         bool forward = intent > 0;
-        if (forward && Crawl.IsBlocked)   // an obstacle or a fight ahead
+        if (forward && Crawl.IsBlocked)   // an obstacle or a fight in this square: no further than its middle
         {
-            WalkProgress = Mathf.MoveTowards(WalkProgress, Mathf.Min(WalkProgress, 0.3f), Time.unscaledDeltaTime);
+            WalkProgress = Mathf.Min(WalkProgress, 0f);
             StopWalking();
             return;
         }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
         WalkProgress += speed * Time.unscaledDeltaTime;
-        if (Mathf.Abs(WalkProgress) < 1f) return;
-        float carry = WalkProgress - Mathf.Sign(WalkProgress);
+        if (Mathf.Abs(WalkProgress) < 0.5f) return;
+        float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
         _continuousStep = true;
         Step(forward);
         _continuousStep = false;
         WalkProgress = Expedition.InRoom ? 0 : carry;
         // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
-        if (_interruptsThisStep || (IsWalking && Crawl.CurioHere != null)) { WalkProgress = 0; _interruptsThisStep = false; StopWalking(); }
+        if (_interruptsThisStep || (IsWalking && Crawl.CurioHere != null)) { _interruptsThisStep = false; StopWalking(); }
         if (_routeTargetTile.corridor >= 0 && !Expedition.InRoom && Expedition.TileIndex == _routeTargetTile.tile) StopWalking();
+    }
+
+    private int _mouseWalk;
+
+    /// <summary>DD1: hold the mouse button at the right of the hallway to walk on, at the left to back up.</summary>
+    private int MouseWalk()
+    {
+        var m = UnityEngine.InputSystem.Mouse.current;
+        if (m == null || !m.leftButton.isPressed || Ui.Drag.Active) return _mouseWalk = 0;
+        if (m.leftButton.wasPressedThisFrame)
+        {
+            var p = m.position.ReadValue();
+            float x = p.x * 1920f / Screen.width, y = (Screen.height - p.y) * 1080f / Screen.height;
+            _mouseWalk = y > 160 && y < 700 ? (x > 1210 ? 1 : x < 200 ? -1 : 0) : 0;
+        }
+        return _mouseWalk;
     }
 
     /// <summary>Which way the map route goes from here in the hallway: +1 ahead, -1 back, 0 arrived.</summary>
@@ -329,13 +348,15 @@ internal sealed class Driver : MonoBehaviour
             float now = Time.unscaledTime;
             if (_travelTo >= 0) return Mathf.Clamp01((now - _travelFrom) / FadeSeconds);
             float fadeIn = 1f - Mathf.Clamp01((now - _fadeInFrom) / (FadeSeconds * 1.4f));
-            // Walking into the last square's door: the room ahead fades in.
+            // Walking into a door at either end of the hallway: the room fades in.
             float door = 0f;
-            if (Crawl != null && !Expedition.InRoom && WalkProgress > 0.55f)
+            if (Crawl != null && !Expedition.InRoom && _walkVelocity != 0)
             {
                 var c = Crawl.CurrentCorridor;
-                int last = Expedition.HeadingRoomId == c.RoomB ? c.Tiles.Count - 1 : 0;
-                if (Expedition.TileIndex == last && !Crawl.IsBlocked) door = (WalkProgress - 0.55f) / 0.45f;
+                bool towardB = Expedition.HeadingRoomId == c.RoomB;
+                int last = towardB ? c.Tiles.Count - 1 : 0, first = towardB ? 0 : c.Tiles.Count - 1;
+                if (_walkVelocity > 0 && Expedition.TileIndex == last && !Crawl.IsBlocked) door = (WalkProgress - 0.1f) / 0.4f;
+                if (_walkVelocity < 0 && Expedition.TileIndex == first) door = (-WalkProgress - 0.1f) / 0.4f;
             }
             return Mathf.Clamp01(Mathf.Max(fadeIn, door));
         }

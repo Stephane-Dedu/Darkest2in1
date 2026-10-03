@@ -122,6 +122,12 @@ internal static class Dd2Combat
         }
     }
 
+    private static float _revealedAt = -1f;
+
+    /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen), then 0..1 over half a
+    /// second as the fight shows through.</summary>
+    public static float RevealProgress => _revealedAt < 0 ? 0f : UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealedAt) / 0.5f);
+
     public static string RollBattle(FightPlan plan)
     {
         if (plan.Enemies is { Count: > 0 } && RegisterLineUp(plan.Enemies) is { } lineUp) return lineUp;
@@ -167,7 +173,11 @@ internal static class Dd2Combat
 
         SingletonMonoBehaviour<ScreenStackBhv>.Instance.Clear();
         modes.OnNextGameModeExitComplete(_ => Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true));
-        modes.SetMode(GameModeType.COMBAT, isLoad: false);
+        // DD1 starts a fight where the party stands: no DD2 stagecoach loading screen, just a fade we cover with
+        // the DD1 scene until the fight is ready (see RevealProgress).
+        _revealedAt = -1f;
+        modes.OnNextGameModeEnterComplete(_ => _revealedAt = UnityEngine.Time.unscaledTime);
+        modes.SetMode(GameModeType.COMBAT, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
         // The party's DD1 buffs go on once DD2 has entered the fight, and come off when it ends.
         _buffed = party.ToList();
         if (buffs != null && buffs.Count > 0)
@@ -265,7 +275,7 @@ internal static class StraightBackToTheDungeon
             ResultsScene.SetValue(__instance, null);
         }
         Plugin.Log.LogInfo("[combat] straight back to the dungeon (DD2 results view skipped)");
-        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false);
+        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
         return false;
     }
 }

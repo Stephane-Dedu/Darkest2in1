@@ -90,8 +90,8 @@ internal sealed class HeroStage : MonoBehaviour
         _savedAmbientNoShadow = Shader.GetGlobalColor(AmbientNoShadow);
         _savedUnityFog = RenderSettings.fog;
         Shader.SetGlobalFloat(FogEnabled, 0f);
-        Shader.SetGlobalColor(Ambient, StageAmbient);
-        Shader.SetGlobalColor(AmbientNoShadow, StageAmbient);
+        Shader.SetGlobalColor(Ambient, StageAmbient * _exposure);
+        Shader.SetGlobalColor(AmbientNoShadow, StageAmbient * _exposure);
         RenderSettings.fog = false;
     }
 
@@ -210,10 +210,13 @@ internal sealed class HeroStage : MonoBehaviour
             keyLight.intensity = LightIntensity * 2f;
             keyLight.color = new Color(1f, 0.86f, 0.66f);
             keyLight.cullingMask = _light != null ? _light.cullingMask : DeferredMask();
+            _keyLights.Add(keyLight);
         }
         Plugin.Log.LogInfo($"[stage] spawning {_heroes.Count} hero models");
         _loadedAt = -1f;
         _checked = false;
+        _tries = 0;
+        RendersBlack = false;   // a new party gets a fresh try (the exposure found so far is kept)
     }
 
     public void Clear()
@@ -221,6 +224,7 @@ internal sealed class HeroStage : MonoBehaviour
         foreach (var (_, slot, _) in _heroes)
             if (slot != null) Destroy(slot.gameObject);
         _heroes.Clear();
+        _keyLights.Clear();
         _partyKey = null;
     }
 
@@ -233,7 +237,8 @@ internal sealed class HeroStage : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_light != null) _light.intensity = LightIntensity;
+        if (_light != null) _light.intensity = LightIntensity * _exposure;
+        foreach (var k in _keyLights) if (k != null) k.intensity = LightIntensity * 2f * _exposure;
         CheckNotBlack();
         for (int i = 0; i < _heroes.Count; i++)
         {
@@ -252,14 +257,23 @@ internal sealed class HeroStage : MonoBehaviour
                     if (t.gameObject.layer != Layer) t.gameObject.layer = Layer;
     }
 
-    /// <summary>A second after the models have loaded, read the picture back once: lit models have colour.</summary>
+    private readonly List<Light> _keyLights = new();
+    private float _exposure = 1f;
+    private int _tries;
+    private float _nextCheck;
+
+    /// <summary>
+    /// Once the models have loaded, read the picture back now and then and raise the stage's lights and ambient until
+    /// the heroes look lit (DD2's own lighting is set up per arena, which this far-away stage doesn't have). Only if
+    /// even that stays near black does the crawl fall back to DD2's flat hero art.
+    /// </summary>
     private void CheckNotBlack()
     {
         if (_checked || _texture == null || _camera == null || !_camera.enabled) return;
         if (_heroes.Count == 0 || _heroes.Any(h => h.actor == null || h.actor.IsLoading)) { _loadedAt = -1f; return; }
-        if (_loadedAt < 0) { _loadedAt = Time.unscaledTime; return; }
-        if (Time.unscaledTime - _loadedAt < 1f) return;
-        _checked = true;
+        if (_loadedAt < 0) { _loadedAt = Time.unscaledTime; _nextCheck = _loadedAt + 1f; return; }
+        if (Time.unscaledTime < _nextCheck) return;
+        _nextCheck = Time.unscaledTime + 0.6f;
         var prev = RenderTexture.active;
         RenderTexture.active = _texture;
         var tex = new Texture2D(_texture.width, _texture.height, TextureFormat.RGBA32, false);
@@ -273,7 +287,21 @@ internal sealed class HeroStage : MonoBehaviour
         for (int i = 0; i < px.Length; i += 7)
             if (px[i].a > 200) { sum += px[i].r + px[i].g + px[i].b; count++; }
         float brightness = count == 0 ? 0f : sum / (count * 3f * 255f);
+        _tries++;
+        if (count >= 200 && brightness >= 0.15f)
+        {
+            _checked = true;
+            Plugin.Log.LogInfo($"[stage] hero models lit: brightness {brightness:0.000} at exposure {_exposure:0.0}");
+            return;
+        }
+        if (_tries < 8 && count >= 200 && _exposure < 40f)
+        {
+            _exposure = Mathf.Min(40f, _exposure * Mathf.Clamp(0.25f / Mathf.Max(brightness, 0.01f), 1.5f, 4f));
+            Plugin.Log.LogInfo($"[stage] hero models too dark ({brightness:0.000}), exposure -> {_exposure:0.0}");
+            return;
+        }
+        _checked = true;
         RendersBlack = count < 200 || brightness < 0.05f;
-        Plugin.Log.LogInfo($"[stage] hero models: {count} opaque samples, brightness {brightness:0.000} -> {(RendersBlack ? "too dark, using DD2's flat art" : "shown")}");
+        Plugin.Log.LogInfo($"[stage] hero models: {count} opaque samples, brightness {brightness:0.000} at exposure {_exposure:0.0} -> {(RendersBlack ? "too dark, using DD2's flat art" : "shown")}");
     }
 }

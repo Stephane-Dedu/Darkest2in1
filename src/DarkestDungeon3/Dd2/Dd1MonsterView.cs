@@ -47,6 +47,8 @@ internal static class Dd1MonsterView
         public bool Loop = true, Dead, Gone;
         public readonly Dictionary<string, string> AttackFor = new();   // DD2 skill -> DD1 attack file
         public List<string> Attacks;
+        public float NextRendererScan;
+        public readonly HashSet<string> Logged = new();
     }
 
     private static readonly Dictionary<string, Rig> Rigs = new();
@@ -171,7 +173,7 @@ internal static class Dd1MonsterView
             used.Add(actor);
             m.Actor = actor;
             m.Guid = actor.GetActorGuid();
-            m.Renderers = actor.GetComponentsInChildren<Renderer>(true).Where(r => r is SkinnedMeshRenderer || r is MeshRenderer).ToArray();
+            m.Renderers = ModelRenderers(actor);
             found++;
         }
         if (found == Line.Count || Time.unscaledTime > _boundTimeout)
@@ -179,6 +181,25 @@ internal static class Dd1MonsterView
             _bound = true;
             Plugin.Log.LogInfo($"[dd1art] bound {found}/{Line.Count} DD2 enemies");
         }
+    }
+
+    /// <summary>The stand-in's model: its mesh renderers (its parts load a little after the actor appears).</summary>
+    private static Renderer[] ModelRenderers(CombatActorBhv actor) =>
+        actor.GetComponentsInChildren<Renderer>(true).Where(r => r is SkinnedMeshRenderer || r is MeshRenderer).ToArray();
+
+    private static void Note(Monster m, string reason)
+    {
+        if (m.Logged.Add(reason)) Plugin.Log.LogInfo($"[dd1art] {m.Dd1}: {reason}");
+    }
+
+    /// <summary>The camera filming the fight: the main one, else the deepest enabled camera that sees characters.</summary>
+    private static Camera FightCamera()
+    {
+        var main = Camera.main;
+        if (main != null && main.enabled) return main;
+        int characters = LayerMask.NameToLayer("Characters");
+        return Camera.allCameras.Where(c => c.enabled && c.targetTexture == null && (characters < 0 || (c.cullingMask & (1 << characters)) != 0))
+                     .OrderByDescending(c => c.depth).FirstOrDefault();
     }
 
     private static void Hide(Monster m)
@@ -203,8 +224,8 @@ internal static class Dd1MonsterView
         try
         {
             if (!_bound) Bind();
-            var cam = Camera.main;
-            if (cam == null) return;
+            var cam = FightCamera();
+            if (cam == null) { if (Line.Count > 0) Note(Line[0], "no camera to place it with"); return; }
             float torch = Mathf.Clamp01(Dd2Api.Torch / 100f);
             float light = Mathf.Lerp(0.6f, 1f, torch);
             foreach (var m in Line.OrderBy(x => x.Actor != null ? -x.Actor.ActorInstance.TeamPosition : 0))
@@ -227,29 +248,41 @@ internal static class Dd1MonsterView
         // Where DD2 draws the stand-in: the bottom and top of its model, on screen.
         var bounds = new Bounds();
         bool any = false;
-        foreach (var r in m.Renderers)
+        foreach (var r in m.Renderers ?? new Renderer[0])
         {
             if (r == null || !r.gameObject.activeInHierarchy) continue;
             if (!any) { bounds = r.bounds; any = true; } else bounds.Encapsulate(r.bounds);
         }
-        if (!any) return;
+        if (!any)
+        {
+            // Its model parts may still be loading: look again now and then.
+            if (Time.unscaledTime >= m.NextRendererScan)
+            {
+                m.NextRendererScan = Time.unscaledTime + 0.5f;
+                m.Renderers = ModelRenderers(m.Actor);
+                m.Hidden = false;
+            }
+            Note(m, $"no model renderers yet ({m.Renderers?.Length ?? 0} found)");
+            return;
+        }
         var feet = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
         var head = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.max.y, bounds.center.z));
-        if (feet.z <= 0) return;
+        if (feet.z <= 0) { Note(m, "behind the camera " + cam.name); return; }
 
         // Back to the idle loop when a held pose is done; the dead stay down until DD2 removes them.
         float t = Time.unscaledTime - m.Since;
         if (!m.Loop && !m.Dead && t > (m.Anim == "defend" ? DefendSeconds : AttackSeconds)) { Play(m, "combat", loop: true); t = 0; }
         var rig = Load(m.Family, m.Anim) ?? Load(m.Family, "combat");
-        if (rig == null) return;
+        if (rig == null) { Note(m, "no DD1 animation files"); return; }
         if (m.Clip == null) m.Clip = rig.Skeleton.Animation("combat")?.Name ?? rig.Skeleton.Animations.FirstOrDefault()?.Name;
         string skin = rig.Skeleton.Skins.Keys.FirstOrDefault(k => string.Equals(k, m.Tier.ToString(), StringComparison.OrdinalIgnoreCase));
         var pieces = rig.Skeleton.Pose(rig.Atlas, m.Clip, t, m.Loop, skin: skin);
-        if (pieces.Count == 0) return;
+        if (pieces.Count == 0) { Note(m, $"empty pose ({m.Anim}/{m.Clip})"); return; }
 
         var idle = Load(m.Family, "combat") ?? rig;
         float scale = Mathf.Abs(head.y - feet.y) / Mathf.Max(1f, idle.Height) * Plugin.Dd1MonsterScale.Value;
-        if (!DrawPieces(rig, pieces, feet.x, feet.y, scale, flipX: true, light)) return;
+        if (!DrawPieces(rig, pieces, feet.x, feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return; }
+        Note(m, $"drawn over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}), {Mathf.Abs(head.y - feet.y):0} px tall");
         Hide(m);   // only once DD1's art is really on screen
     }
 
