@@ -90,18 +90,72 @@ public class QuestGoalTests
         crawl.Begin();
         WalkUntilDone(crawl, state, null);
         Assert.True(state.QuestComplete);
-        Assert.Equal(3, state.Pack.Count("holy_relic"));
+        Assert.Equal(3, state.Pack.Count(ItemCatalog.QuestKey("holy_relic")));
     }
 
     [Fact]
     public void InventoryActivateNeedsTheQuestItem()
     {
         var (crawl, state) = Expedition("inventory_activate", "crypts", 4);
-        Assert.Equal(3, state.Pack.Count("holy_water"));            // the quest hands out its items
+        Assert.Equal(3, state.Pack.Count(ItemCatalog.QuestKey("holy_water")));   // the quest hands out its items
+        Assert.Equal(0, state.Pack.Count(Supply.HolyWater));                      // not the supply of the same name
         crawl.Begin();
         WalkUntilDone(crawl, state, null);
         Assert.True(state.QuestComplete);
-        Assert.Equal(0, state.Pack.Count("holy_water"));
+        Assert.Equal(0, state.Pack.Count(ItemCatalog.QuestKey("holy_water")));
+    }
+
+    /// <summary>Every quest DD1's tables offer in its four zones can be finished: enough quest curios and quest items,
+    /// and using each quest curio counts.</summary>
+    [Fact]
+    public void EveryDd1QuestCanBeFinished()
+    {
+        var problems = new List<string>();
+        foreach (var zone in new[] { "crypts", "weald", "warrens", "cove" })
+        {
+            var offers = Dd1.QuestTables[zone].SelectMany(t => t).Select(o => (o.Type, o.Length)).Distinct().ToList();
+            foreach (var (type, length) in offers)
+                for (int seed = 1; seed <= 12; seed++)
+                {
+                    var quest = new QuestOffer { Dungeon = zone, Type = type, Length = length, Difficulty = 1, MapSeed = seed * 7919 };
+                    var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();
+                    var state = Embark.Create(Dd1, quest, heroes, new Inventory(), Provisioner.Load(Install, Content.Items));
+                    var crawl = new Crawl(state, CrawlRules.FromDd1(Dd1.Rules), new FakeParty("a", "b", "c", "d"), Content);
+                    crawl.Begin();
+                    string where = $"{zone} {type} {length} #{seed}";
+                    var map = state.Map;
+                    switch (type)
+                    {
+                        case "kill_boss":
+                            if (map.BossRoomId < 0) problems.Add(where + ": no boss room");
+                            continue;
+                        case "cleanse":
+                            if (!map.Rooms.Any(r => r.HasBattle)) problems.Add(where + ": no battles to cleanse");
+                            continue;
+                        case "explore":
+                            continue;
+                    }
+                    var goal = state.Goal;
+                    if (goal == null || goal.Amount <= 0) { problems.Add(where + ": no goal"); continue; }
+                    var rooms = map.Rooms.Where(r => r.IsQuestGoal).ToList();
+                    var tiles = map.Corridors.SelectMany(c => c.Tiles.Where(t => t.IsQuestGoal).Select(t => (c, t))).ToList();
+                    if (rooms.Count + tiles.Count < goal.Amount) { problems.Add($"{where}: {rooms.Count + tiles.Count} quest curios for {goal.Amount}"); continue; }
+                    if (goal.NeedsItem && state.Pack.Count(ItemCatalog.QuestKey(goal.StartingItems[0].Id)) < goal.Amount)
+                        problems.Add($"{where}: {state.Pack.Count(ItemCatalog.QuestKey(goal.StartingItems[0].Id))} quest items for {goal.Amount}");
+                    foreach (var r in rooms)
+                    {
+                        state.RoomId = r.Id; state.CorridorId = -1; state.TileIndex = -1;
+                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                    }
+                    foreach (var (c, t) in tiles)
+                    {
+                        state.CorridorId = c.Id; state.TileIndex = t.Index; state.HeadingRoomId = c.RoomB;
+                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                    }
+                    if (!state.QuestComplete) problems.Add($"{where}: not complete after every quest curio ({state.GoalProgress}/{goal.Amount})");
+                }
+        }
+        Assert.True(problems.Count == 0, string.Join(" | ", problems.Take(20)));
     }
 
     private void WalkUntilDone(Crawl crawl, ExpeditionState state, string useItem)

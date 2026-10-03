@@ -18,6 +18,9 @@ namespace DarkestDungeon3.Dd2;
 internal static class Dd1Backdrop
 {
     public static bool Ready { get; private set; }
+    public static Camera SceneCamera => _sceneryCamera;
+    public static int QuadLayer => _quadLayer;
+    public static Mesh SharedQuad => QuadMesh();
     private static bool _failed;
     private static float _startedAt;
     private static readonly List<Renderer> Hidden = new();
@@ -28,7 +31,8 @@ internal static class Dd1Backdrop
     // that appears later (close-up backgrounds) never shows; the backdrop itself sits on a layer of its own.
     private static readonly Dictionary<Camera, GameObject> Quads = new();
     private static readonly Dictionary<Camera, int> Masks = new();
-    private static int _sceneryMask, _quadLayer = 31;
+    private static int _sceneryMask, _sceneryLayers, _quadLayer = 31;
+    private static Camera _sceneryCamera;
     private static float _distance = 15f;
 
     /// <summary>A fight is about to start here: forget the last one.</summary>
@@ -86,10 +90,15 @@ internal static class Dd1Backdrop
             // effects' or the UI's.
             var keep = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Deferred"), LayerMask.NameToLayer("Foreground"),
                                           LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI"), 0 };
-            foreach (var a in actors) foreach (var r in a.GetComponentsInChildren<Renderer>(true)) keep.Add(r.gameObject.layer);
             foreach (var p in UnityEngine.Object.FindObjectsOfType<Renderer>()) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
             _sceneryMask = 0;
-            foreach (var l in scenery.Select(r => r.gameObject.layer).Distinct()) if (!keep.Contains(l)) _sceneryMask |= 1 << l;
+            _sceneryLayers = 0;
+            foreach (var l in scenery.Select(r => r.gameObject.layer).Distinct())
+            {
+                _sceneryLayers |= 1 << l;
+                if (!keep.Contains(l)) _sceneryMask |= 1 << l;
+            }
+            _sceneryCamera = cam;
             _quadLayer = Enumerable.Range(8, 24).Reverse().FirstOrDefault(i => string.IsNullOrEmpty(LayerMask.LayerToName(i)) && (_sceneryMask & (1 << i)) == 0);
             if (_quadLayer == 0) _quadLayer = layer;
             Ready = true;
@@ -114,10 +123,12 @@ internal static class Dd1Backdrop
             foreach (var cam in Camera.allCameras)
             {
                 if (cam == null || !cam.enabled || cam.targetTexture != null || !IsBaseCamera(cam)) continue;
-                // Only cameras that film the fight (characters): never DD2's interface cameras.
+                // Only cameras that film the fight (the one that drew the scenery, or any drawing scenery or
+                // characters): never DD2's interface cameras.
                 int original = Masks.TryGetValue(cam, out var m0) ? m0 : cam.cullingMask;
                 int characters = LayerMask.NameToLayer("Characters");
-                if (characters >= 0 && (original & (1 << characters)) == 0) continue;
+                int filmMask = _sceneryLayers | (characters >= 0 ? 1 << characters : 0);
+                if (cam != _sceneryCamera && (original & filmMask) == 0) continue;
                 if (!Masks.ContainsKey(cam)) Masks[cam] = cam.cullingMask;
                 cam.cullingMask = (cam.cullingMask & ~_sceneryMask) | (1 << _quadLayer);
                 if (!Quads.TryGetValue(cam, out var quad) || quad == null)

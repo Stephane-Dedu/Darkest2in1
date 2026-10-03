@@ -87,6 +87,7 @@ internal static class Art
     public static Texture2D InventoryIcon(string key, int count, int stackLimit)
     {
         int fill = stackLimit <= 1 ? 3 : Mathf.Clamp((int)(4f * count / stackLimit - 0.01f), 0, 3);
+        if (key.StartsWith("quest_item+", System.StringComparison.Ordinal)) return Dd1("panels", "icons_equip", "quest_item", "inv_" + key + ".png");
         return key switch
         {
             "food" => Dd1("panels", "icons_equip", "provision", $"inv_provision+_{fill}.png"),

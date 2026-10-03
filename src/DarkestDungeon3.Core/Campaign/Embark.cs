@@ -96,7 +96,7 @@ public static class Embark
             foreach (var kv in provisioner.FreeItems(quest.Length, party.Select(h => h.ClassId)).Items)
                 state.Pack.Add(kv.Key, kv.Value);
         if (goal != null)
-            foreach (var (id, n) in goal.StartingItems) state.Pack.Add(id, n);
+            foreach (var (id, n) in goal.StartingItems) state.Pack.Add(ItemCatalog.QuestKey(id), n);
 
         foreach (var h in party)
         {

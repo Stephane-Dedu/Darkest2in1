@@ -65,7 +65,7 @@ public sealed class Crawl
         get
         {
             bool isGoal = CurioHere != null && (State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal);
-            return isGoal && State.Goal is { NeedsItem: true } g ? g.StartingItems[0].Id : null;
+            return isGoal && State.Goal is { NeedsItem: true } g ? ItemCatalog.QuestKey(g.StartingItems[0].Id) : null;
         }
     }
 
@@ -75,18 +75,18 @@ public sealed class Crawl
         var report = new CurioReport { CurioId = curio, HeroId = heroId, OutcomeType = "Quest" };
         if (goal.NeedsItem)
         {
-            string needed = goal.StartingItems[0].Id;
+            string needed = ItemCatalog.QuestKey(goal.StartingItems[0].Id);
             if (itemId != needed || !State.Pack.TryUse(needed))
             {
                 report.OutcomeType = "NeedsItem";
-                report.Text = $"Something is needed here: {needed}.";
+                report.Text = $"Something is needed here: {goal.StartingItems[0].Id.Replace('_', ' ')}.";
                 return report;   // left untouched; the party can come back with the item
             }
             report.ItemUsed = needed;
         }
         else if (goal.Type == "gather" && goal.QuestItem != null)
         {
-            State.Pack.Add(goal.QuestItem, 1);
+            State.Pack.Add(ItemCatalog.QuestKey(goal.QuestItem), 1);
             report.Loot.Add(new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 });
         }
 
@@ -101,8 +101,9 @@ public sealed class Crawl
     /// <summary>Walk past a curio without touching it.</summary>
     public void SkipCurio()
     {
-        if (State.InRoom) { if (CurrentRoom.CurioId != null) CurrentRoom.CurioTaken = true; }
-        else if (CurrentTile is { Content: HallContent.Curio } t) t.Resolved = true;
+        // A quest curio is never skipped for good: the quest needs it.
+        if (State.InRoom) { if (CurrentRoom.CurioId != null && !CurrentRoom.IsQuestGoal) CurrentRoom.CurioTaken = true; }
+        else if (CurrentTile is { Content: HallContent.Curio, IsQuestGoal: false } t) t.Resolved = true;
     }
 
     private DungeonMap Map => State.Map;

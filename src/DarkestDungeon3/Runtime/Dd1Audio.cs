@@ -123,7 +123,8 @@ internal static class Dd1Audio
             }
             if (!parent.hasHandle() || parent.getSubSound(i, out Sound sound) != RESULT.OK) return;
             core.getMasterChannelGroup(out ChannelGroup master);
-            if (core.playSound(sound, master, false, out Channel ch) == RESULT.OK) ch.setVolume(Plugin.Dd1SoundVolume.Value * SfxGain());
+            float level = what == "/general/party/hero_step" ? 0.45f : 1f;   // footsteps sit under everything
+            if (core.playSound(sound, master, false, out Channel ch) == RESULT.OK) ch.setVolume(Plugin.Dd1SoundVolume.Value * SfxGain() * level);
         }
         catch (Exception e) { if (Missing.Add("!" + what)) Plugin.Log.LogWarning($"[audio] {what}: {e.Message}"); }
     }
@@ -132,7 +133,7 @@ internal static class Dd1Audio
 
     private static readonly Dictionary<string, string> Footing = new()
     {
-        ["crypts"] = "stone", ["weald"] = "dirt", ["warrens"] = "squish", ["cove"] = "wet", ["darkestdungeon"] = "flesh",
+        ["crypts"] = "stone", ["weald"] = "dirt", ["warrens"] = "stone", ["cove"] = "dirt", ["darkestdungeon"] = "stone",
     };
 
     /// <summary>The DD1 samples for one of DD1's event names (or a sample name / prefix).</summary>

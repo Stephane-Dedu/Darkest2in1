@@ -49,13 +49,30 @@ internal static class Dd1MonsterView
         public List<string> Attacks;
         public float NextRendererScan;
         public readonly HashSet<string> Logged = new();
-        public List<(string Anim, string Fx, string TargetFx)> Skills;   // from DD1's .art.darkest
+        public List<(string Id, string Anim, string Fx, string TargetFx)> Skills;   // from DD1's .art.darkest
+        public readonly Dictionary<string, int> SkillFor = new();   // stand-in's DD2 skill -> DD1 skill (by order)
+        public Vector3 Offset;      // body foot point relative to the actor's root, measured once
+        public float WorldRatio;    // DD2 body height (world units) per DD1 unit, measured once
         public string DeathFx;
         public float Scale = 1f, Ratio;
         public Vector3 Feet;   // last screen position of its feet (GL pixels)
     }
 
     private static readonly Dictionary<string, Rig> Rigs = new();
+
+    /// <summary>What DD2's fight screens call our stand-ins and their skills: the DD1 monster's names
+    /// (localization keys: the actor class id, "skill_name_&lt;skill&gt;").</summary>
+    private static readonly Dictionary<string, string> Names = new();
+
+    public static bool TryName(string key, out string name)
+    {
+        name = null;
+        return key != null && Names.Count > 0 && Names.TryGetValue(key, out name);
+    }
+
+    private static float _worldPerUnit;
+    private static GameObject _quad;
+    private static Material _quadMaterial;
 
     /// <summary>A one-shot DD1 effect (a skill's flash, a hit on a hero, a death) drawn where it happens.</summary>
     private sealed class Effect
@@ -89,6 +106,10 @@ internal static class Dd1MonsterView
         }
         if (Line.Count == 0) return;
         _boundTimeout = Time.unscaledTime + 8f;
+        Names.Clear();
+        var lore = Session.Current?.Lore;
+        foreach (var m in Line)
+            if (lore != null && lore.MonsterNames.TryGetValue(m.Dd1, out var name) && !Names.ContainsKey(m.Dd2Class)) Names[m.Dd2Class] = name;
         EventManager.AddListener<EventCombatSkillPresentation>(OnSkill);
         EventManager.AddListener<EventCombatPresentationSkillTarget>(OnTarget);
         EventManager.AddListener<EventCombatActorDeath>(OnDeath);
@@ -99,7 +120,7 @@ internal static class Dd1MonsterView
     /// <summary>DD1's skill list for the monster: each skill's attack pose, its own effect and the effect on its target.</summary>
     private static void ReadArt(Monster m)
     {
-        m.Skills = new List<(string, string, string)>();
+        m.Skills = new List<(string, string, string, string)>();
         try
         {
             string tierName = $"{m.Family}_{m.Tier}";
@@ -107,7 +128,7 @@ internal static class Dd1MonsterView
             if (file == null || !File.Exists(file)) return;
             foreach (var r in Core.Dd1.DarkestFile.Load(file))
             {
-                if (r.Type == "skill") m.Skills.Add((r.Str("anim", null), r.Str("fx", null), r.Str("targchestfx", null)));
+                if (r.Type == "skill") m.Skills.Add((r.Str("id", null), r.Str("anim", null), r.Str("fx", null), r.Str("targchestfx", null)));
                 else if (r.Type == "commonfx") m.DeathFx = r.Str("deathfx", null);
             }
         }
@@ -118,6 +139,10 @@ internal static class Dd1MonsterView
     public static void Clear()
     {
         Effects.Clear();
+        Names.Clear();
+        _worldPerUnit = 0f;
+        if (_quad != null) UnityEngine.Object.Destroy(_quad);
+        _quad = null;
         foreach (var m in Line) Show(m);
         Line.Clear();
         _bound = false;
@@ -151,13 +176,12 @@ internal static class Dd1MonsterView
             var m = data == null ? null : ByGuid(data.PerformerGuid);
             if (m == null || m.Dead) return;
             m.Attacks ??= AttackFiles(m.Family);
-            var skills = m.Skills is { Count: > 0 } ? m.Skills : m.Attacks.Select(a => (Anim: a, Fx: (string)null, TargetFx: (string)null)).ToList();
+            var skills = m.Skills is { Count: > 0 } ? m.Skills : m.Attacks.Select(a => (Id: (string)null, Anim: a, Fx: (string)null, TargetFx: (string)null)).ToList();
             if (skills.Count == 0) return;
             string skill = data.SkillId ?? "";
-            // Each DD2 skill the stand-in uses gets one of the DD1 monster's skills, in order.
-            if (!m.AttackFor.TryGetValue(skill, out var pick))
-                m.AttackFor[skill] = pick = (m.AttackFor.Count % skills.Count).ToString();
-            var dd1 = skills[int.Parse(pick) % skills.Count];
+            // The DD1 skill this DD2 skill stands for (mapped when the fight began; new ones in order).
+            if (!m.SkillFor.TryGetValue(skill, out int pick)) m.SkillFor[skill] = pick = m.SkillFor.Count % skills.Count;
+            var dd1 = skills[pick % skills.Count];
             Play(m, dd1.Anim ?? "combat", loop: false);
             if (dd1.Fx != null && Fx(m.Family, dd1.Fx) is { } fx)
                 Effects.Add(new Effect { Rig = fx, Anchor = m.Actor, Since = Time.unscaledTime, Scale = m.Scale, Flip = true, Fixed = m.Feet });
@@ -221,6 +245,7 @@ internal static class Dd1MonsterView
             m.Actor = actor;
             m.Guid = actor.GetActorGuid();
             m.Renderers = ModelRenderers(actor);
+            MapSkills(m);
             found++;
         }
         if (found == Line.Count || Time.unscaledTime > _boundTimeout)
@@ -250,6 +275,26 @@ internal static class Dd1MonsterView
                      .OrderByDescending(c => c.depth).FirstOrDefault();
     }
 
+    /// <summary>Each of the stand-in's DD2 skills becomes one of the DD1 monster's skills, in order, named as DD1 names it.</summary>
+    private static void MapSkills(Monster m)
+    {
+        try
+        {
+            if (m.Skills == null || m.Skills.Count == 0) return;
+            var dd2 = m.Actor.ActorInstance.GetEquippedCombatSkillIds();
+            var lore = Session.Current?.Lore;
+            for (int i = 0; i < dd2.Count; i++)
+            {
+                int k = i % m.Skills.Count;
+                m.SkillFor[dd2[i]] = k;
+                string id = m.Skills[k].Id;
+                if (id != null && lore != null && lore.MonsterSkillNames.TryGetValue(id, out var name) && !Names.ContainsKey("skill_name_" + dd2[i]))
+                    Names["skill_name_" + dd2[i]] = name;
+            }
+        }
+        catch (Exception e) { Plugin.Log.LogInfo($"[dd1art] {m.Dd1} skills: {e.Message}"); }
+    }
+
     private static void Hide(Monster m)
     {
         if (m.Hidden || m.Renderers == null) return;
@@ -272,8 +317,48 @@ internal static class Dd1MonsterView
     /// <summary>OnGUI: show what <see cref="Render"/> drew this frame.</summary>
     public static void Draw()
     {
-        if (!_drawn || _screen == null || Event.current.type != EventType.Repaint) return;
+        if (!_drawn || _screen == null || _quad != null || Event.current.type != EventType.Repaint) return;
         GUI.DrawTexture(new Rect(0, 0, Ui.Gui.W, Ui.Gui.H), _screen);
+    }
+
+    /// <summary>
+    /// The monsters' picture on a screen-filling quad just behind the enemies, on the backdrop's camera and layer:
+    /// DD2's health bars, status icons and the UI draw over it, as they would over its own models.
+    /// </summary>
+    private static void PlaceInScene(Camera fallback)
+    {
+        var cam = Dd1Backdrop.SceneCamera;
+        if (!Dd1Backdrop.Ready || cam == null)
+        {
+            if (_quad != null) { UnityEngine.Object.Destroy(_quad); _quad = null; }
+            return;
+        }
+        if (_quadMaterial == null)
+        {
+            var shader = Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default");
+            if (shader == null) return;
+            _quadMaterial = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+        }
+        _quadMaterial.mainTexture = _screen;
+        if (_quad == null || _quad.transform.parent != cam.transform)
+        {
+            if (_quad != null) UnityEngine.Object.Destroy(_quad);
+            _quad = new GameObject("DD3Monsters") { layer = Dd1Backdrop.QuadLayer };
+            _quad.transform.SetParent(cam.transform, false);
+            _quad.AddComponent<MeshFilter>().sharedMesh = Dd1Backdrop.SharedQuad;
+            var mr = _quad.AddComponent<MeshRenderer>();
+            mr.sharedMaterial = _quadMaterial;
+            mr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            mr.receiveShadows = false;
+        }
+        float near = Line.Where(m => m.Actor != null && !m.Actor.Equals(null))
+                         .Select(m => Vector3.Dot(m.Actor.transform.position + m.Offset - cam.transform.position, cam.transform.forward))
+                         .Where(d => d > 0).DefaultIfEmpty(10f).Min();
+        float d = Mathf.Clamp(near + 0.5f, cam.nearClipPlane + 0.5f, cam.farClipPlane * 0.8f);
+        _quad.transform.localPosition = new Vector3(0, 0, d);
+        _quad.transform.localRotation = Quaternion.identity;
+        float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * d * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
+        _quad.transform.localScale = new Vector3(h * cam.aspect, h, 1f);
     }
 
     /// <summary>LateUpdate while fighting: pose every DD1 monster and effect into the screen texture.</summary>
@@ -286,7 +371,7 @@ internal static class Dd1MonsterView
         try
         {
             if (!_bound) Bind();
-            var cam = FightCamera();
+            var cam = Dd1Backdrop.Ready && Dd1Backdrop.SceneCamera != null ? Dd1Backdrop.SceneCamera : FightCamera();
             if (cam == null) { Note(Line[0], "no camera to place it with"); return; }
             if (_screen == null || _screen.width != Screen.width || _screen.height != Screen.height)
             {
@@ -308,6 +393,7 @@ internal static class Dd1MonsterView
                 if (DrawOne(m, cam, light)) _drawn = true;
             }
             if (DrawEffects(cam, light)) _drawn = true;
+            PlaceInScene(cam);
         }
         catch (Exception e)
         {
@@ -345,10 +431,21 @@ internal static class Dd1MonsterView
             Note(m, "no model renderers yet");
             return false;
         }
-        var bounds = body.bounds;
-        var feet = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
-        var head = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.max.y, bounds.center.z));
+        // Measured once: where the body stands relative to the actor's root, and how tall it is in the world. After
+        // that the DD1 monster follows the actor (not its animated outline) and keeps a fixed size in the world, so
+        // DD2's hit and cast motions don't make it pulse, and camera zooms enlarge it like the others.
+        var root = m.Actor.transform.position;
+        var idle = Load(m.Family, "combat");
+        if (m.WorldRatio <= 0 && idle != null)
+        {
+            var b = body.bounds;
+            m.Offset = new Vector3(b.center.x, b.min.y, b.center.z) - root;
+            m.WorldRatio = b.size.y / Mathf.Max(1f, idle.Height);
+        }
+        var anchor = root + m.Offset;
+        var feet = cam.WorldToScreenPoint(anchor);
         if (feet.z <= 0) { Note(m, "behind the camera " + cam.name); return false; }
+        float pixelsPerUnit = Mathf.Abs(cam.WorldToScreenPoint(anchor + cam.transform.up).y - feet.y);
 
         // Back to the idle loop when a held pose is done; the dead stay down until DD2 removes them.
         float t = Time.unscaledTime - m.Since;
@@ -360,19 +457,19 @@ internal static class Dd1MonsterView
         var pieces = rig.Skeleton.Pose(rig.Atlas, m.Clip, t, m.Loop, skin: skin);
         if (pieces.Count == 0) { Note(m, $"empty pose ({m.Anim}/{m.Clip})"); return false; }
 
-        // As tall as the DD2 body it replaces (DD1's height measured without stray far-off parts).
-        // One scale for the whole line-up (the median of DD2 body / DD1 height, a fifth smaller), so DD1's own
-        // proportions between its monsters stay.
-        var idle = Load(m.Family, "combat") ?? rig;
-        float bodyPx = Mathf.Abs(head.y - feet.y);
-        m.Ratio = bodyPx / Mathf.Max(1f, idle.Height);
-        var ratios = Line.Where(x => x.Ratio > 0).Select(x => x.Ratio).OrderBy(r => r).ToList();
-        float shared = ratios.Count > 0 ? ratios[ratios.Count / 2] : m.Ratio;
-        float scale = shared * 0.8f * Plugin.Dd1MonsterScale.Value;
+        // One world size per DD1 unit for the whole line-up (the median over the stand-ins, a fifth smaller), so
+        // DD1's own proportions between its monsters stay.
+        if (_worldPerUnit <= 0 || Line.Any(x => x.Actor != null && x.WorldRatio <= 0))
+        {
+            var ratios = Line.Where(x => x.WorldRatio > 0).Select(x => x.WorldRatio).OrderBy(r => r).ToList();
+            _worldPerUnit = ratios.Count > 0 ? ratios[ratios.Count / 2] * 0.8f : m.WorldRatio * 0.8f;
+        }
+        float scale = _worldPerUnit * pixelsPerUnit * Plugin.Dd1MonsterScale.Value;
+        float bodyPx = (idle?.Height ?? 0) * scale;
         m.Scale = scale;
         m.Feet = feet;
         if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return false; }
-        Note(m, $"drawn, over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}): DD2 body {bodyPx:0} px, DD1 height {idle.Height:0}, scale {scale:0.00}");
+        Note(m, $"drawn, over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}): {bodyPx:0} px tall, scale {scale:0.00}");
         Hide(m);   // only once DD1's art is really on screen
         return true;
     }
@@ -494,5 +591,28 @@ internal static class Dd1MonsterView
         }
         catch (Exception e) { Plugin.Log.LogWarning($"[dd1art] {key}: {e.Message}"); }
         return rig;
+    }
+}
+
+/// <summary>DD2's fight screens name our stand-ins and their skills as the DD1 monsters they stand in for.</summary>
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.Locale.Localization), nameof(Assets.Code.Locale.Localization.GetString))]
+internal static class Dd1NamesInFights
+{
+    private static bool Prefix(string key, ref string __result)
+    {
+        if (!Dd1MonsterView.TryName(key, out var name)) return true;
+        __result = name;
+        return false;
+    }
+}
+
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.Locale.Localization), nameof(Assets.Code.Locale.Localization.TryGetString))]
+internal static class Dd1NamesInFightsTry
+{
+    private static bool Prefix(string key, ref string __result)
+    {
+        if (!Dd1MonsterView.TryName(key, out var name)) return true;
+        __result = name;
+        return false;
     }
 }

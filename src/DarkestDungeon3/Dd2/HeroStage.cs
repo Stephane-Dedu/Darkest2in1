@@ -273,6 +273,22 @@ internal sealed class HeroStage : MonoBehaviour
 
     private (int Renderer, int Layer, bool Post)? _best;
 
+    /// <summary>DD1 heroes stand about 400 px tall in the 720 px scene: scale each model's body to that.</summary>
+    private void FitToDd1()
+    {
+        foreach (var (_, slot, actor) in _heroes)
+        {
+            if (slot == null || actor == null) continue;
+            var body = actor.GetComponentsInChildren<Renderer>().Where(r => r is SkinnedMeshRenderer)
+                            .OrderByDescending(r => r.bounds.size.x * r.bounds.size.y).FirstOrDefault();
+            if (body == null) continue;
+            float unscaled = body.bounds.size.y / Mathf.Max(0.01f, slot.lossyScale.y);
+            float fit = Mathf.Clamp(4.0f / Mathf.Max(0.1f, unscaled), 0.5f, 6f);
+            slot.localScale = Vector3.one * HeroScale * fit;
+            Plugin.Log.LogInfo($"[stage] hero {actor.GetActorGuid()}: body {unscaled:0.00} units -> scale {fit:0.00}");
+        }
+    }
+
     private static int RendererCount()
     {
         try
@@ -351,6 +367,7 @@ internal sealed class HeroStage : MonoBehaviour
         _checked = true;
         _search = null;
         RendersBlack = visible < 200;
+        if (!RendersBlack) FitToDd1();
         Plugin.Log.LogInfo($"[stage] hero models: {visible} visible samples (opaque brightness {brightness:0.000}) -> {(RendersBlack ? "nothing drawn, using DD2's flat art" : "shown")}");
         return;
         if (_search != null)

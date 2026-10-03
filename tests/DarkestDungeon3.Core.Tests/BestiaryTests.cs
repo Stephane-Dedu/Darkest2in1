@@ -86,3 +86,15 @@ public class BestiaryTests
         Assert.Null(state.FightMonsters);
     }
 }
+
+public class MonsterNameTests
+{
+    [Fact]
+    public void Dd1NamesMonstersAndTheirSkills()
+    {
+        var lore = Dd1Lore.Load(Dd1Install.Find());
+        Assert.Equal("Swine Drummer", lore.MonsterNames["swine_drummer_A"]);
+        Assert.True(lore.MonsterSkillNames.ContainsKey("crossbow_shot"));
+        Assert.True(lore.MonsterNames.Count > 100);
+    }
+}

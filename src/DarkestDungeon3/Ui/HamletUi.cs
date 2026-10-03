@@ -980,5 +980,6 @@ internal sealed class HamletUi
     }
 
     public static string Pretty(string id) =>
-        string.IsNullOrEmpty(id) ? "" : System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(id.Replace('_', ' ').Replace('.', ' '));
+        string.IsNullOrEmpty(id) ? "" : System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(
+            (id.StartsWith("quest_item+", System.StringComparison.Ordinal) ? id.Substring(11) : id).Replace('_', ' ').Replace('.', ' '));
 }

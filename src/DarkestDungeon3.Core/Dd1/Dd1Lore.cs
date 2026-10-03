@@ -13,6 +13,9 @@ public sealed class Dd1Lore
     /// <summary>DD1 quirk id → (positive, disease).</summary>
     public Dictionary<string, (bool Positive, bool Disease)> Quirks { get; } = new();
     public Dictionary<string, int> TrinketPriceByRarity { get; } = new();
+    /// <summary>DD1's English monster names ("skeleton_arbalist_A" → "Bone Arbalist") and monster skill names ("crossbow_shot").</summary>
+    public Dictionary<string, string> MonsterNames { get; } = new();
+    public Dictionary<string, string> MonsterSkillNames { get; } = new();
 
     public static Dd1Lore Load(Dd1Install dd1)
     {
@@ -29,6 +32,22 @@ public sealed class Dd1Lore
             foreach (Match m in Regex.Matches(block, "id=\"hero_name_\\d+\"><!\\[CDATA\\[([^\\]]+)\\]\\]>"))
                 if (!lore.HeroNames.Contains(m.Groups[1].Value)) lore.HeroNames.Add(m.Groups[1].Value);
         }
+
+        // Monster and monster skill names: the English block of every string table.
+        string localization = dd1.PathOf("localization");
+        if (Directory.Exists(localization))
+            foreach (var file in Directory.GetFiles(localization, "*.string_table.xml"))
+            {
+                string xml = File.ReadAllText(file);
+                if (xml.IndexOf("str_monster", System.StringComparison.Ordinal) < 0) continue;
+                int english = xml.IndexOf("<language id=\"english\"", System.StringComparison.Ordinal);
+                int end = english >= 0 ? xml.IndexOf("</language>", english, System.StringComparison.Ordinal) : -1;
+                string block = english >= 0 && end > english ? xml.Substring(english, end - english) : xml;
+                foreach (Match m in Regex.Matches(block, @"id=""str_monstername_([^""]+)""><!\[CDATA\[([^\]]*)\]\]>"))
+                    lore.MonsterNames[m.Groups[1].Value] = m.Groups[2].Value;
+                foreach (Match m in Regex.Matches(block, @"id=""str_monster_skill_([^""]+)""><!\[CDATA\[([^\]]*)\]\]>"))
+                    lore.MonsterSkillNames[m.Groups[1].Value] = m.Groups[2].Value;
+            }
 
         var quirks = dd1.PathOf("shared", "quirk", "quirk_library.json");
         if (File.Exists(quirks))

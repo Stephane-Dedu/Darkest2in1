@@ -203,6 +203,12 @@ internal sealed class CrawlUi
         {
             var closed = SpineArt.Get(folder, "closed", sl => sl.Name != "active" && sl.Name != "open");
             bool hover = hoverable && !used && closed != null && closed.Hit(feet, 1f, Event.current.mousePosition);
+            if (hoverable && !used && closed != null)
+            {
+                var area = closed.RectAt(feet);
+                if (hover && Gui.Hotspot(area)) CurioClicked = true;
+                if (Drag.Drop<PackStack>(area, out var dropped)) CurioDrop = dropped.Key;
+            }
             pic = used ? SpineArt.Get(folder, "open", sl => sl.Name != "active" && sl.Name != "closed")
                 : hover ? SpineArt.Get(folder, "active", sl => sl.Name != "closed" && sl.Name != "open") ?? closed
                 : closed;
@@ -227,6 +233,11 @@ internal sealed class CrawlUi
     }
 
     private const float PropX = 1040;
+
+    // The party's curio was clicked / had an inventory item dropped on it this frame (DD1's ways to interact).
+    private static bool CurioClicked;
+    private static string CurioDrop;
+    private string _curioPanel;   // the curio whose panel is open ("where:id")
 
     // ---------------- party ----------------
 
@@ -728,6 +739,20 @@ internal sealed class CrawlUi
         return enabled && Gui.Hotspot(r);
     }
 
+    /// <summary>An inventory item used on the party's curio: the right one does what DD1 says; any other does nothing.</summary>
+    private void UseOnCurio(Crawl crawl, string curio, string item)
+    {
+        bool works = item == crawl.QuestItemNeededHere || S.Content.Curios.UsefulItems(curio).Contains(item);
+        if (!works)
+        {
+            Gui.Announce("Nothing happens.");
+            Runtime.Dd1Audio.Play("/ui/shared/button_invalid");
+            return;
+        }
+        _curioPanel = null;
+        D.Investigate(D.SelectedHeroId, item);
+    }
+
     private void DrawPrompt(Crawl crawl, ExpeditionState exp)
     {
         if (exp.Camp != null) return;
@@ -736,6 +761,12 @@ internal sealed class CrawlUi
         bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
         bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
         bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
+        string here = curio == null ? null : (exp.InRoom ? "r" + exp.RoomId : $"c{exp.CorridorId}:{exp.TileIndex}") + ":" + curio;
+        if (CurioDrop != null && curio != null) { string item = CurioDrop; CurioDrop = null; _curioPanel = here; UseOnCurio(crawl, curio, item); return; }
+        if (CurioClicked && curio != null) _curioPanel = here;
+        CurioClicked = false;
+        CurioDrop = null;
+        if (_curioPanel != here) curio = null;   // DD1: a curio waits until it is clicked
         if (curio == null && !obstacle && !trap && !battleStuck) { _curioItem = null; return; }
 
         float left = SidebarX - 228, top = SidebarY;
@@ -758,32 +789,18 @@ internal sealed class CrawlUi
         if (curio != null)
         {
             Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-            Gui.Text(body, $"{who} will investigate. Select another hero to send them instead.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
-            string needed = crawl.QuestItemNeededHere;
-            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", needed != null ? "Use item" : "Investigate"))
-            { D.Investigate(D.SelectedHeroId, needed); return; }
-            if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { D.SkipCurio(); return; }
+            Gui.Text(body, $"{who} will investigate. Select another hero to send them instead, or drag an item from the inventory onto it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Investigate")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
+            if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { _curioPanel = null; return; }
 
-            // DD1's item slot: a supply that does something here. Click the slot to use it, the arrows to change it.
-            var useful = S.Content.Curios.UsefulItems(curio).Where(it => exp.Pack.Count(it) > 0).ToList();
-            if (_curioItem == null || !useful.Contains(_curioItem)) _curioItem = useful.FirstOrDefault();
+            // DD1's item slot: drag any item from the inventory into it (or onto the curio). The right item does
+            // something (a key on a locked chest); any other has no effect and stays in the pack.
             var slot = new Rect(SidebarX - 34, top + 230, 80, 160);
             var slotTex = Scroll("use_inventory.png");
             if (slotTex != null) GUI.DrawTexture(new Rect(slot.x + 4, slot.y + 8, 72, 144), slotTex);
-            if (_curioItem != null)
-            {
-                var icon = Art.InventoryIcon(_curioItem, 1, 1);
-                bool hover = slot.Contains(Event.current.mousePosition);
-                if (icon != null) GUI.DrawTexture(new Rect(slot.x + 4, slot.y + 8, 72, 144), icon);
-                if (hover) Gui.Text(new Rect(left + 20, top + 400, 416, 30), $"Use {HamletUi.Pretty(_curioItem)} on it", 20, Color.white, TextAnchor.MiddleCenter, heading: true);
-                if (Gui.Hotspot(slot)) { D.Investigate(D.SelectedHeroId, _curioItem); return; }
-                if (useful.Count > 1)
-                {
-                    int at = useful.IndexOf(_curioItem);
-                    if (Gui.DdButton(new Rect(slot.x - 6, slot.yMax + 4, 42, 30), "<", true, 18)) _curioItem = useful[(at + useful.Count - 1) % useful.Count];
-                    if (Gui.DdButton(new Rect(slot.xMax - 36, slot.yMax + 4, 42, 30), ">", true, 18)) _curioItem = useful[(at + 1) % useful.Count];
-                }
-            }
+            if (Drag.Hovering<PackStack>(slot)) Gui.Fill(new Rect(slot.x, slot.yMax + 2, slot.width, 4), Gui.Gold);
+            if (Drag.Drop<PackStack>(slot, out var put)) { UseOnCurio(crawl, curio, put.Key); return; }
+            if (slot.Contains(Event.current.mousePosition)) Gui.Text(new Rect(left + 20, top + 400, 416, 30), "Drag an item here to use it", 19, Color.white, TextAnchor.MiddleCenter);
         }
         else if (obstacle)
         {

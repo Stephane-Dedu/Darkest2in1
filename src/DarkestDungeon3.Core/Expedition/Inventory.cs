@@ -55,9 +55,12 @@ public sealed class ItemCatalog
         return catalog;
     }
 
-    /// <summary>Our item key: the id, except DD1's id-less types (food is "provision", gold is "gold").</summary>
+    /// <summary>Our item key: the id, except DD1's id-less types (food is "provision", gold is "gold") and quest items,
+    /// which DD1 keeps apart from supplies of the same id (the altar quest's holy water isn't a supply).</summary>
     public static string KeyOf(string type, string id) =>
-        type == "provision" ? Supply.Food : string.IsNullOrEmpty(id) ? type : id;
+        type == "provision" ? Supply.Food : type == "quest_item" ? QuestKey(id) : string.IsNullOrEmpty(id) ? type : id;
+
+    public static string QuestKey(string id) => "quest_item+" + id;
 
     public ItemDef Get(string key) => Items.TryGetValue(key, out var d) ? d : null;
 

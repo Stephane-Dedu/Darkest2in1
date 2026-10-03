@@ -45,7 +45,7 @@
     "swine_slasher":      { "dd2": ["cave_swine_skulker"] },
     "swine_wretch":       { "dd2": ["cave_swine_skiver"], "champion": ["cave_swine_skiver_b"] },
     "swine_skiver":       { "dd2": ["cave_swine_skiver"], "champion": ["cave_swine_skiver_b"] },
-    "swine_drummer":      { "dd2": ["cave_swine_skiver_b"] },
+    "swine_drummer":      { "dd2": ["lost_battalion_drummer"] },
     "swinetaur":          { "dd2": ["cave_swine_brute"], "champion": ["cave_swine_brute_b"] },
     "carrion_eater":      { "dd2": ["shared_carrion_eater"] },
     "carrion_eater_big":  { "dd2": ["shared_carrion_eater_mutated"] },

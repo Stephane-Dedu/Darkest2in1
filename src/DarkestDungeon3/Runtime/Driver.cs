@@ -293,7 +293,7 @@ internal sealed class Driver : MonoBehaviour
         }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
-        if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.42f : 0.6f); }
+        if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.55f : 0.8f); }
         WalkProgress += speed * Time.unscaledDeltaTime;
         if (Mathf.Abs(WalkProgress) < 0.5f) return;
         float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
