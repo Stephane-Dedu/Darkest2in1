@@ -67,9 +67,16 @@ internal sealed class Driver : MonoBehaviour
 
     private static readonly float[] RankX = { 788, 620, 452, 284 };
 
+    /// <summary>After DD2 has moved its actors and camera: pose DD1's monsters for this frame.</summary>
+    private void LateUpdate()
+    {
+        if (Phase == Phase.Fighting) Dd1MonsterView.Render();
+    }
+
     private void Update()
     {
-        Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null);
+        Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
+                        Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();
         var stage = HeroStage.Instance;
         stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value && !HeroStage.RendersBlack);

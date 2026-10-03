@@ -235,7 +235,8 @@ internal sealed class CrawlUi
         var shadow = Art.Overlay("charactershadow_med.png");
         var selected = Art.Overlay("selected_1.png");
         // DD2's animated hero models, rendered off-screen at DD1's rank positions (see HeroStage).
-        var models = Plugin.HeroModels.Value && !Dd2.HeroStage.RendersBlack ? Dd2.HeroStage.Instance?.Texture : null;
+        // DD2's hero models once the stage has found a way to light them; DD2's hero art until then.
+        var models = Plugin.HeroModels.Value && Dd2.HeroStage.Lit ? Dd2.HeroStage.Instance?.Texture : null;
         if (models != null) GUI.DrawTexture(new Rect(0, 0, 1920, 720), models);
         for (int rank = 0; rank < exp.Party.Count && rank < 4; rank++)
         {

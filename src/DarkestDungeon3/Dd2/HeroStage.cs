@@ -20,6 +20,16 @@ internal sealed class HeroStage : MonoBehaviour
     private static int _layer = -1;
     private static int Layer => _layer >= 0 ? _layer : _layer = LayerMask.NameToLayer("Characters") is var l && l >= 0 ? l : 31;
 
+    /// <summary>The heroes are lit and shown (the search for a camera setup that lights them succeeded).</summary>
+    public static bool Lit => Instance != null && Instance._checked && !RendersBlack && Instance._search == null;
+
+    // The camera setups to try: each URP renderer DD2 has, with DD2's character layer and its UI-character layer.
+    private List<(int Renderer, int Layer, bool Post)> _search;
+    private readonly List<(int Renderer, int Layer, bool Post, float Brightness)> _results = new();
+    private Component _urpData;
+    private System.Reflection.MethodInfo _setRenderer;
+    private int _mainRenderer = -1;
+
     /// <summary>The layers DD2's deferred lighting draws and lights (its DeferredRenderFeature mask).</summary>
     private static int DeferredMask()
     {
@@ -139,10 +149,13 @@ internal sealed class HeroStage : MonoBehaviour
             var main = Camera.main;
             var mainData = main != null ? main.GetComponent(urpData) : null;
             var indexField = urpData.GetField("m_RendererIndex", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            _urpData = data;
+            _setRenderer = urpData.GetMethod("SetRenderer");
             if (mainData != null && indexField != null)
             {
                 int index = (int)indexField.GetValue(mainData);
-                urpData.GetMethod("SetRenderer")?.Invoke(data, new object[] { index });
+                _mainRenderer = index;
+                _setRenderer?.Invoke(data, new object[] { index });
                 Plugin.Log.LogInfo($"[stage] using renderer {index} (from {main.name})");
             }
         }
@@ -217,6 +230,7 @@ internal sealed class HeroStage : MonoBehaviour
         _checked = false;
         _tries = 0;
         RendersBlack = false;   // a new party gets a fresh try (the exposure found so far is kept)
+        if (_best == null) StartSearch();
     }
 
     public void Clear()
@@ -257,6 +271,48 @@ internal sealed class HeroStage : MonoBehaviour
                     if (t.gameObject.layer != Layer) t.gameObject.layer = Layer;
     }
 
+    private (int Renderer, int Layer, bool Post)? _best;
+
+    private static int RendererCount()
+    {
+        try
+        {
+            var asset = UnityEngine.Rendering.GraphicsSettings.currentRenderPipeline;
+            var field = asset?.GetType().GetField("m_RendererDataList", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return field?.GetValue(asset) is System.Array list ? list.Length : 0;
+        }
+        catch (System.Exception) { return 0; }
+    }
+
+    private void StartSearch()
+    {
+        int count = RendererCount();
+        var renderers = new List<int>();
+        if (_mainRenderer >= 0) renderers.Add(_mainRenderer);
+        for (int i = 0; i < count; i++) if (!renderers.Contains(i)) renderers.Add(i);
+        if (renderers.Count == 0) renderers.Add(-1);
+        var layers = new List<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("ForUI") }.Where(l => l >= 0).Distinct().ToList();
+        if (layers.Count == 0) layers.Add(Layer);
+        // DD2 may rely on its post-processing (tonemapping, exposure) to bring characters up: try with and without.
+        _search = renderers.SelectMany(r => layers.SelectMany(l => new[] { (r, l, false), (r, l, true) })).ToList();
+        _results.Clear();
+        Plugin.Log.LogInfo($"[stage] looking for a camera setup that lights the heroes: {renderers.Count} renderers x {layers.Count} layers");
+        Apply(_search[0]);
+    }
+
+    /// <summary>Film the heroes with this URP renderer, on this layer (camera and lights follow).</summary>
+    private void Apply((int Renderer, int Layer, bool Post) setup)
+    {
+        if (setup.Renderer >= 0 && _urpData != null) _setRenderer?.Invoke(_urpData, new object[] { setup.Renderer });
+        _urpData?.GetType().GetProperty("renderPostProcessing")?.SetValue(_urpData, setup.Post);
+        _layer = setup.Layer;
+        int mask = DeferredMask() | (1 << setup.Layer);
+        if (_camera != null) _camera.cullingMask = mask;
+        if (_light != null) _light.cullingMask = mask;
+        foreach (var k in _keyLights) if (k != null) k.cullingMask = mask;
+        _nextLayerFix = 0f;   // re-layer the heroes now
+    }
+
     private readonly List<Light> _keyLights = new();
     private float _exposure = 1f;
     private int _tries;
@@ -287,6 +343,22 @@ internal sealed class HeroStage : MonoBehaviour
         for (int i = 0; i < px.Length; i += 7)
             if (px[i].a > 200) { sum += px[i].r + px[i].g + px[i].b; count++; }
         float brightness = count == 0 ? 0f : sum / (count * 3f * 255f);
+        if (_search != null)
+        {
+            var setup = _search[_results.Count];
+            // Post-processing may make the whole picture opaque: count only setups that keep the background clear.
+            bool clear = count < px.Length / 7 * 0.6f;
+            _results.Add((setup.Renderer, setup.Layer, setup.Post, count >= 200 && clear ? brightness : 0f));
+            Plugin.Log.LogInfo($"[stage] renderer {setup.Renderer}, layer {LayerMask.LayerToName(setup.Layer)}, post {setup.Post}: brightness {brightness:0.000} ({count} samples{(clear ? "" : ", opaque background")})");
+            if (_results.Count < _search.Count) { Apply(_search[_results.Count]); return; }
+            var best = _results.OrderByDescending(r => r.Brightness).First();
+            _search = null;
+            _best = (best.Renderer, best.Layer, best.Post);
+            Apply(_best.Value);
+            Plugin.Log.LogInfo($"[stage] best: renderer {best.Renderer}, layer {LayerMask.LayerToName(best.Layer)}, post {best.Post} ({best.Brightness:0.000})");
+            _nextCheck = Time.unscaledTime + 0.6f;
+            return;
+        }
         _tries++;
         if (count >= 200 && brightness >= 0.15f)
         {

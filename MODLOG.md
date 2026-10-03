@@ -371,6 +371,10 @@ Feasibility notes (decomp):
 - [ ] DD1 backdrop in fights: log "[backdrop] DD1 scene behind the fight: N arena renderers hidden ...". Check the
       floor line at the heroes' feet, actors in front, nothing important hidden (markers, VFX).
 - [ ] DD1 monster effects: attack pose + its fx on the monster + targchestfx on targets; death fx.
+- [ ] Play test 3 fixes: DD1 monsters upright (rendered into a texture in LateUpdate, top-left GL matrix, shown by
+      OnGUI), sized to the DD2 stand-in's body (log "drawn, ... DD2 body N px, DD1 height N, scale N"); hero
+      models: "[stage] renderer R, layer L, post P: brightness B" for each setup, then "best: ..." and "lit" or the
+      flat-art fallback; DD1 audio through FMOD core from the FSB5s ("[audio] DD1 sounds: N samples").
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

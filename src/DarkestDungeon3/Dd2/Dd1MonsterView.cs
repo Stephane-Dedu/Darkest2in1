@@ -236,7 +236,8 @@ internal static class Dd1MonsterView
 
     private static void Note(Monster m, string reason)
     {
-        if (m.Logged.Add(reason)) Plugin.Log.LogInfo($"[dd1art] {m.Dd1}: {reason}");
+        // Once per kind of note (its first word): positions change every frame.
+        if (m.Logged.Add(reason.Split(' ')[0])) Plugin.Log.LogInfo($"[dd1art] {m.Dd1}: {reason}");
     }
 
     /// <summary>The camera filming the fight: the main one, else the deepest enabled camera that sees characters.</summary>
@@ -263,25 +264,50 @@ internal static class Dd1MonsterView
         m.Hidden = false;
     }
 
-    // ---- drawing (from UiRoot.OnGUI while fighting) ----
+    // ---- drawing: posed into a screen-sized texture after DD2 has moved things (LateUpdate), shown by OnGUI ----
 
+    private static RenderTexture _screen;
+    private static bool _drawn;
+
+    /// <summary>OnGUI: show what <see cref="Render"/> drew this frame.</summary>
     public static void Draw()
     {
-        if (Line.Count == 0 || _failed || Event.current.type != EventType.Repaint) return;
+        if (!_drawn || _screen == null || Event.current.type != EventType.Repaint) return;
+        GUI.DrawTexture(new Rect(0, 0, Ui.Gui.W, Ui.Gui.H), _screen);
+    }
+
+    /// <summary>LateUpdate while fighting: pose every DD1 monster and effect into the screen texture.</summary>
+    public static void Render()
+    {
+        _drawn = false;
+        if (Line.Count == 0 || _failed) return;
+        var prev = RenderTexture.active;
+        bool pushed = false;
         try
         {
             if (!_bound) Bind();
             var cam = FightCamera();
-            if (cam == null) { if (Line.Count > 0) Note(Line[0], "no camera to place it with"); return; }
+            if (cam == null) { Note(Line[0], "no camera to place it with"); return; }
+            if (_screen == null || _screen.width != Screen.width || _screen.height != Screen.height)
+            {
+                if (_screen != null) { _screen.Release(); UnityEngine.Object.Destroy(_screen); }
+                _screen = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32) { name = "DD3Monsters" };
+                _screen.Create();
+            }
+            RenderTexture.active = _screen;
+            GL.Clear(true, true, new Color(0, 0, 0, 0));
+            GL.PushMatrix();
+            pushed = true;
+            GL.LoadPixelMatrix(0, Screen.width, Screen.height, 0);   // top-left origin, like the backdrop
             float torch = Mathf.Clamp01(Dd2Api.Torch / 100f);
             float light = Mathf.Lerp(0.6f, 1f, torch);
             foreach (var m in Line.OrderBy(x => x.Actor != null ? -x.Actor.ActorInstance.TeamPosition : 0))
             {
                 if (m.Actor == null || m.Gone) continue;
                 if (m.Actor.Equals(null)) { m.Gone = true; continue; }
-                DrawOne(m, cam, light);
+                if (DrawOne(m, cam, light)) _drawn = true;
             }
-            DrawEffects(cam, light);
+            if (DrawEffects(cam, light)) _drawn = true;
         }
         catch (Exception e)
         {
@@ -289,19 +315,25 @@ internal static class Dd1MonsterView
             foreach (var m in Line) Show(m);
             Plugin.Log.LogError("[dd1art] drawing failed, DD2 models restored: " + e);
         }
+        finally
+        {
+            if (pushed) GL.PopMatrix();
+            RenderTexture.active = prev;
+        }
     }
 
-    private static void DrawOne(Monster m, Camera cam, float light)
+    /// <summary>The stand-in's body: its biggest skinned mesh (shadows, effects and props left out).</summary>
+    private static Renderer Body(Monster m) =>
+        (m.Renderers ?? new Renderer[0]).Where(r => r != null && r.gameObject.activeInHierarchy)
+            .OrderByDescending(r => r is SkinnedMeshRenderer ? 1 : 0)
+            .ThenByDescending(r => r.bounds.size.x * r.bounds.size.y)
+            .FirstOrDefault();
+
+    private static bool DrawOne(Monster m, Camera cam, float light)
     {
-        // Where DD2 draws the stand-in: the bottom and top of its model, on screen.
-        var bounds = new Bounds();
-        bool any = false;
-        foreach (var r in m.Renderers ?? new Renderer[0])
-        {
-            if (r == null || !r.gameObject.activeInHierarchy) continue;
-            if (!any) { bounds = r.bounds; any = true; } else bounds.Encapsulate(r.bounds);
-        }
-        if (!any)
+        // Where DD2 draws the stand-in: the bottom and top of its body, on screen.
+        var body = Body(m);
+        if (body == null)
         {
             // Its model parts may still be loading: look again now and then.
             if (Time.unscaledTime >= m.NextRendererScan)
@@ -310,34 +342,39 @@ internal static class Dd1MonsterView
                 m.Renderers = ModelRenderers(m.Actor);
                 m.Hidden = false;
             }
-            Note(m, $"no model renderers yet ({m.Renderers?.Length ?? 0} found)");
-            return;
+            Note(m, "no model renderers yet");
+            return false;
         }
+        var bounds = body.bounds;
         var feet = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.min.y, bounds.center.z));
         var head = cam.WorldToScreenPoint(new Vector3(bounds.center.x, bounds.max.y, bounds.center.z));
-        if (feet.z <= 0) { Note(m, "behind the camera " + cam.name); return; }
+        if (feet.z <= 0) { Note(m, "behind the camera " + cam.name); return false; }
 
         // Back to the idle loop when a held pose is done; the dead stay down until DD2 removes them.
         float t = Time.unscaledTime - m.Since;
         if (!m.Loop && !m.Dead && t > (m.Anim == "defend" ? DefendSeconds : AttackSeconds)) { Play(m, "combat", loop: true); t = 0; }
         var rig = Load(m.Family, m.Anim) ?? Load(m.Family, "combat");
-        if (rig == null) { Note(m, "no DD1 animation files"); return; }
+        if (rig == null) { Note(m, "no DD1 animation files"); return false; }
         if (m.Clip == null) m.Clip = rig.Skeleton.Animation("combat")?.Name ?? rig.Skeleton.Animations.FirstOrDefault()?.Name;
         string skin = rig.Skeleton.Skins.Keys.FirstOrDefault(k => string.Equals(k, m.Tier.ToString(), StringComparison.OrdinalIgnoreCase));
         var pieces = rig.Skeleton.Pose(rig.Atlas, m.Clip, t, m.Loop, skin: skin);
-        if (pieces.Count == 0) { Note(m, $"empty pose ({m.Anim}/{m.Clip})"); return; }
+        if (pieces.Count == 0) { Note(m, $"empty pose ({m.Anim}/{m.Clip})"); return false; }
 
+        // As tall as the DD2 body it replaces (DD1's height measured without stray far-off parts).
         var idle = Load(m.Family, "combat") ?? rig;
-        float scale = Mathf.Abs(head.y - feet.y) / Mathf.Max(1f, idle.Height) * Plugin.Dd1MonsterScale.Value;
+        float bodyPx = Mathf.Abs(head.y - feet.y);
+        float scale = bodyPx / Mathf.Max(1f, idle.Height) * Plugin.Dd1MonsterScale.Value;
         m.Scale = scale;
         m.Feet = feet;
-        if (!DrawPieces(rig, pieces, feet.x, feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return; }
-        Note(m, $"drawn over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}), {Mathf.Abs(head.y - feet.y):0} px tall");
+        if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return false; }
+        Note(m, $"drawn, over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}): DD2 body {bodyPx:0} px, DD1 height {idle.Height:0}, scale {scale:0.00}");
         Hide(m);   // only once DD1's art is really on screen
+        return true;
     }
 
-    private static void DrawEffects(Camera cam, float light)
+    private static bool DrawEffects(Camera cam, float light)
     {
+        bool any = false;
         float now = Time.unscaledTime;
         for (int i = Effects.Count - 1; i >= 0; i--)
         {
@@ -360,8 +397,9 @@ internal static class Dd1MonsterView
             }
             if (at.z <= 0) continue;
             var pieces = e.Rig.Skeleton.Pose(e.Rig.Atlas, anim?.Name, t, loop: false);
-            DrawPieces(e.Rig, pieces, at.x, at.y, e.Scale, e.Flip, light);
+            if (DrawPieces(e.Rig, pieces, at.x, Screen.height - at.y, e.Scale, e.Flip, light)) any = true;
         }
+        return any;
     }
 
     /// <summary>A DD1 effect: the monster's own (monsters/&lt;family&gt;/fx) or a shared one (fx/&lt;name&gt;).</summary>
@@ -377,8 +415,6 @@ internal static class Dd1MonsterView
     {
         var mat = Material();
         if (mat == null) return false;
-        GL.PushMatrix();
-        GL.LoadPixelMatrix();
         Texture2D current = null;
         bool open = false;
         foreach (var p in pieces)
@@ -402,11 +438,10 @@ internal static class Dd1MonsterView
                 GL.Color(color);
                 GL.TexCoord2(p.PagePixels[v * 2] / tex.width, 1f - p.PagePixels[v * 2 + 1] / tex.height);
                 float x = p.Positions[v * 2] * scale;
-                GL.Vertex3(x0 + (flipX ? -x : x), y0 + p.Positions[v * 2 + 1] * scale, 0);
+                GL.Vertex3(x0 + (flipX ? -x : x), y0 - p.Positions[v * 2 + 1] * scale, 0);
             }
         }
         if (open) GL.End();
-        GL.PopMatrix();
         return current != null;
     }
 
@@ -447,8 +482,9 @@ internal static class Dd1MonsterView
                 var tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
                 if (tex.LoadImage(File.ReadAllBytes(png), markNonReadable: true)) rig.Pages[page] = tex;
             }
-            var b = SpineSkeleton.Bounds(rig.Skeleton.Pose(rig.Atlas, null, 0f));
-            rig.Height = b.maxY - b.minY;
+            var ys = rig.Skeleton.Pose(rig.Atlas, null, 0f).SelectMany(p => Enumerable.Range(0, p.Positions.Length / 2).Select(k => p.Positions[k * 2 + 1])).OrderBy(y => y).ToList();
+            int hi = Math.Min(ys.Count - 1, (int)(ys.Count * 0.98f)), lo = (int)(ys.Count * 0.02f);
+            rig.Height = ys.Count == 0 ? 1f : Math.Max(1f, ys[hi] - Math.Min(0f, ys[lo]));
             Rigs[key] = rig;
         }
         catch (Exception e) { Plugin.Log.LogWarning($"[dd1art] {key}: {e.Message}"); }
