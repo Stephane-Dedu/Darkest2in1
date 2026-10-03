@@ -352,3 +352,27 @@ Feasibility notes (decomp):
    the session summary; Estate.Toggles and Hamlet.ToggledZones already exist (quest board takes extra zones).
 2. Remaining DD1 bits: plot/arena/returning-dead town events; Darkest Dungeon quest chain verified in game; DD1
    afflictions/virtues vs DD2 meltdown/resolve.
+
+## Next (user request 2026-10-03 ~08:50) — top priority, before the DD2-regions toggle
+1. DD1 room-to-room travel like DD1 (user: "still image by image, no walking animation"). Port the Unity port's
+   model (C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity\Assets\Scripts\Raid):
+   - Corridor = one continuous strip: sectors 720 wide (RaidHallway: 2 border sectors each side, door sectors at the
+     ends, endhall walls at ±(ActiveSectorCount*360-80)); parallax layers `<zone>.corridor_bg.png` (far) and
+     `<zone>.corridor_mid.png` (mid) behind `corridor_wall.NN`; foreground_top/bottom in front.
+   - RaidPartyController: party has a real x position; speed 40 units/s (canvas units), walking back at half speed;
+     blocked at passage walls; hero walk animation runs while moving and stops smoothly. Sector contents trigger
+     when the party reaches them. Map-click travel should walk continuously too (no 0.3 s slides).
+   - Rooms: one `room_wall.<type>.png` with a short walkable passage; transitions fade (ScreenFader.Fade/Appear).
+   - Heroes: use DD2's combat look (HeroStage renders DD2 models off-screen but they come out black — fix that,
+     and play a walk/idle clip while moving); keep the DD2 sprite fallback.
+2. DD1 monsters inside DD2 combat (plan the user pasted): add animation playback to Core/Dd1/Spine.cs; draw each
+   monster as a camera-facing quad redrawn on the GPU every frame; attach it to the DD2 stand-in from
+   data/monsters.json and hide the stand-in's model; idle→combat, skill→attack_<skill>+fx, hit→defend, death→dead;
+   darken by torch level. Prototype: skeleton_arbalist in a test fight on Estate 2 (after 10:15 only).
+3. Then the DD2-regions toggle. Research done: region names are in DD2's .mo files as "key\x04English"
+   (biome_name_City The Sprawl, Farm The Foetor, Forest The Tangle, Cave The Sluice; the coast is the Shroud);
+   enemy display names are keyed by actor id (fanatic_librarian Librarian, plague_eater_harvest_table Harvest Child,
+   lost_battalion_boss_dreaming_general Dreaming General, cultist_exemplar Exemplar). DD1 boss quests: kill_boss,
+   length 2, at zone levels 2/4/6 with difficulty 1/3/5, resolve XP 4/8/16. Plan: a Core ZoneBase registry
+   (zones.json "dd1_zone") used by MapGen.Find, Props, QuestTables, HeirloomTypes, BattleLoot, Loot, CurioResolver,
+   QuestGoals, CrawlUi art; regions skip the bestiary (DD2 natives fight); region boss quests; estate toggle panel.
