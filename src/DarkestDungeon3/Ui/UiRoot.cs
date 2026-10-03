@@ -71,6 +71,7 @@ internal sealed class UiRoot : MonoBehaviour
             Plugin.Log.LogError(e);
         }
         Drag.Overlay();
+        Gui.DrawTip();
     }
 
     // Estate summaries for the picker, read once each time it opens.

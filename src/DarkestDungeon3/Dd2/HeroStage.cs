@@ -209,9 +209,10 @@ internal sealed class HeroStage : MonoBehaviour
             ActorBhv actor = null;
             try
             {
-                // In fights DD2 spawns actors with no starting state: the animator's default, the combat stance
-                // facing the enemy. "idle_neutral" is the road/inn pose, turned away from the camera.
-                string pose = Plugin.HeroModelPose.Value == "neutral" ? "idle_neutral" : null;
+                // In fights DD2 spawns actors with no starting state and shows them later (Show(): the art's default
+                // animator state, the combat stance facing the enemy); see ShowCombatPose. "idle_neutral" is the
+                // road/inn pose, turned away from the camera; used if asked, or if the combat pose drew nothing.
+                string pose = Plugin.HeroModelPose.Value == "neutral" || _combatPoseFailed ? "idle_neutral" : null;
                 actor = creator.CreateActorGameObject(guids[i], slot, Layer, pose, loadSubclasses: false);
             }
             catch (System.Exception e) { Plugin.Log.LogWarning($"[stage] actor {guids[i]}: {e.Message}"); }
@@ -238,6 +239,7 @@ internal sealed class HeroStage : MonoBehaviour
 
     public void Clear()
     {
+        _shown.Clear();
         foreach (var (_, slot, _) in _heroes)
             if (slot != null) Destroy(slot.gameObject);
         _heroes.Clear();
@@ -278,8 +280,26 @@ internal sealed class HeroStage : MonoBehaviour
         Graphics.Blit(_texture, _bright, _brighten);
     }
 
+    // The combat pose drew nothing once: use the road pose from then on.
+    private static bool _combatPoseFailed;
+    private readonly HashSet<ActorBhv> _shown = new();
+
+    /// <summary>Spawned with no starting state (the combat pose), a model stays hidden until shown, as DD2 does when
+    /// a fight starts: show each hero once it has loaded.</summary>
+    private void ShowCombatPose()
+    {
+        foreach (var (_, _, actor) in _heroes)
+        {
+            if (actor == null || !actor.IsInitialized || actor.IsLoading || _shown.Contains(actor)) continue;
+            try { actor.Show(); }
+            catch (System.Exception e) { Plugin.Log.LogWarning("[stage] show: " + e.Message); }
+            _shown.Add(actor);
+        }
+    }
+
     private void LateUpdate()
     {
+        ShowCombatPose();
         Brighten();
         if (_light != null) _light.intensity = LightIntensity * _exposure;
         foreach (var k in _keyLights) if (k != null) k.intensity = LightIntensity * 2f * _exposure;
@@ -397,6 +417,16 @@ internal sealed class HeroStage : MonoBehaviour
         _checked = true;
         _search = null;
         RendersBlack = visible < 200;
+        if (RendersBlack && !_combatPoseFailed && Plugin.HeroModelPose.Value != "neutral")
+        {
+            // The combat pose drew nothing: spawn the party again in the road pose before giving up on the models.
+            _combatPoseFailed = true;
+            Plugin.Log.LogInfo($"[stage] hero models: {visible} visible samples in the combat pose -> trying the road pose");
+            _partyKey = null;
+            _checked = false;
+            RendersBlack = false;
+            return;
+        }
         if (!RendersBlack) FitToDd1();
         Plugin.Log.LogInfo($"[stage] hero models: {visible} visible samples (opaque brightness {brightness:0.000}) -> {(RendersBlack ? "nothing drawn, using DD2's flat art" : "shown")}");
         return;

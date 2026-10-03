@@ -46,7 +46,7 @@ internal sealed class HamletUi
         // DD1's town crier announces the week's event once per visit.
         bool eventOpen = E.TownEventId != null && _eventSeenWeek != E.Week;
         bool windowOpen = _panel != Panel.Town || eventOpen;
-        DrawTown(interactive: !windowOpen);
+        DrawTown(interactive: !windowOpen && !(HeroSheet.RealmOpen && RealmInventory.Panel.Contains(Event.current.mousePosition)));
         DrawEstateTitle();
         DrawNav();
         DrawRoster();
@@ -57,36 +57,21 @@ internal sealed class HamletUi
             Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
             DrawTownEvent(hamlet);
         }
-        else if (_panel == Panel.Hero && E.Hero(_heroId) is { } sheetHero)
+        else
         {
-            Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
-            HeroSheet.Draw(sheetHero, id => _heroId = id, () => { _panel = Panel.Town; _heroId = null; });
+            // DD1's Trinket Inventory lies over the right of a hero sheet or building window: over it, only it
+            // takes the mouse (the window under it is still drawn).
+            bool realm = HeroSheet.RealmOpen;
+            bool overRealm = realm && Event.current.type != EventType.Repaint && RealmInventory.Panel.Contains(Event.current.mousePosition);
+            var sheetHero = _panel == Panel.Hero ? E.Hero(_heroId) : null;
+            if (sheetHero != null || windowOpen || realm) Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, sheetHero != null || windowOpen ? 0.55f : 0.4f));
+            if (!overRealm)
+            {
+                if (sheetHero != null) HeroSheet.Draw(sheetHero, id => _heroId = id, () => { _panel = Panel.Town; _heroId = null; });
+                else if (windowOpen) DrawWindow(hamlet);
+            }
+            if (realm) RealmInventory.Draw(sheetHero, () => HeroSheet.RealmOpen = false);
         }
-        else if (windowOpen)
-        {
-            Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.55f));
-            DrawWindow(hamlet);
-        }
-        else if (HeroSheet.RealmOpen) DrawRealmAlone();
-    }
-
-    /// <summary>The realm inventory opened from the estate bar, without a hero: just the stash to look through.</summary>
-    private void DrawRealmAlone()
-    {
-        Gui.Fill(new Rect(0, 0, 1550, 958), new Color(0, 0, 0, 0.4f));
-        var panel = new Rect(881, 128, 667, 780);
-        if (Art.Dd1("campaign", "town", "realm_inventory", "realminv_bg.png") is { } bg) GUI.DrawTexture(panel, bg); else Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
-        Gui.Text(new Rect(921, 148, 500, 46), "Trinkets", 34, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(921, 194, 580, 50), "Open a hero from the roster to equip them.", 17, Gui.Dd1Class);
-        for (int i = 0; i < E.Trinkets.Count && i < 21; i++)
-        {
-            var r = new Rect(911 + (i % 7) * 80, 323 + (i / 7) * 160, 72, 144);
-            HeroSheet.TrinketIcon(r, E.Trinkets[i]);
-            if (r.Contains(Event.current.mousePosition)) Gui.Text(new Rect(921, 248, 580, 70), HeroSheet.TrinketText(E.Trinkets[i]), 18, Gui.Dd1Text);
-        }
-        var close = new Rect(881 + 610 - 6, 128 + 22 - 6, 46, 46);
-        if (Art.Dd1("shared", "progression", "progression_close.png") is { } x) GUI.DrawTexture(close, x);
-        if (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) HeroSheet.RealmOpen = false;
     }
 
     private bool _exchangeOpen;
@@ -357,7 +342,11 @@ internal sealed class HamletUi
 
         // Navigation buttons (113 px), centred from x 1800 leftwards every 110.
         NavButton(1800, Art.Dd1("campaign", "town", "realm_inventory", "realm_inventory.icon.png"), $"Trinkets ({E.Trinkets.Count})", HeroSheet.RealmOpen,
-                  () => HeroSheet.RealmOpen = !HeroSheet.RealmOpen);
+                  () =>
+                  {
+                      HeroSheet.RealmOpen = !HeroSheet.RealmOpen;
+                      Runtime.Dd1Audio.Play(HeroSheet.RealmOpen ? "/ui/town/trinket_open" : "/ui/town/trinket_close");
+                  });
         NavButton(1690, Art.Dd1("campaign", "town", "activity_log", "activity_log.icon.png"), "Activity log", _panel == Panel.Log,
                   () => _panel = _panel == Panel.Log ? Panel.Town : Panel.Log);
         if (E.TownEventId != null)
@@ -456,7 +445,8 @@ internal sealed class HamletUi
                 float k = Mathf.Min(1f, (Window.height - 4) / keeper.height);
                 GUI.DrawTexture(new Rect(Window.x + 2, Window.yMax - keeper.height * k - 2, keeper.width * k, keeper.height * k), keeper);
             }
-            Gui.Text(new Rect(Window.x + 40, Window.y + 20, 520, 60), Name(building), 46, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            // DD1's nameplate: the two lines at the top left of every building's background (105..407, 30..120).
+            Gui.Text(new Rect(Window.x + 120, Window.y + 30, 290, 92), Name(building), Name(building).Length > 10 ? 32 : 38, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         }
         else if (_panel == Panel.Hero && E.Hero(_heroId) is { } hero)
         {
@@ -466,8 +456,6 @@ internal sealed class HamletUi
 
         // DD1: the building's upgrades open in a panel over the left of the window; its page stays on the right.
         bool hasTrees = building != null && S.Buildings.Trees.Trees.Keys.Any(k => k.StartsWith(building + "."));
-        if (hasTrees && IsOpen(building) && Gui.DdButton(new Rect(Window.x + 40, Window.y + 84, 200, 44), _upgradesOpen ? "Close upgrades" : "Upgrades", true, 20))
-            _upgradesOpen = !_upgradesOpen;
 
         var close = new Rect(Window.xMax - 58, Window.y + 12, 46, 46);
         var closeIcon = Art.Dd1("shared", "progression", "progression_close.png");
@@ -496,9 +484,25 @@ internal sealed class HamletUi
             case Panel.Guild: DrawGuild(area, hamlet); break;
         }
         if (building != null && hasTrees && (_upgradesOpen || _panel == Panel.Upgrades)) DrawUpgrades(hamlet, building);
+        // DD1's upgrade button at the window's top left (building layout 26,22), over the panel it opens.
+        if (hasTrees && IsOpen(building)) UpgradeToggle();
     }
 
     private bool _upgradesOpen;
+
+    private void UpgradeToggle()
+    {
+        var r = W(36, 30, 70, 70);
+        bool hover = r.Contains(Event.current.mousePosition);
+        var icon = UpgradeArt(_upgradesOpen ? "requirement_purchased_icon.png" : "requirement_purchasable_icon.png");
+        if (icon != null) GUI.DrawTexture(r, icon); else Gui.Fill(r, Gui.Gold);
+        if (hover && UpgradeArt("requirement_highlight_overlay.png") is { } hl) GUI.DrawTexture(r, hl);
+        Gui.Text(W(16, 102, 110, 24), _upgradesOpen ? "Close" : "Upgrades", 16, hover ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleCenter);
+        if (hover) Gui.Tip(_upgradesOpen ? "Close the upgrades" : $"Upgrade the {Name(_building)}");
+        if (!Gui.Hotspot(r)) return;
+        _upgradesOpen = !_upgradesOpen;
+        Runtime.Dd1Audio.Play(_upgradesOpen ? "/ui/town/button_page_open" : "/ui/town/button_page_close");
+    }
 
     private static void Frame(Rect area) => Gui.Fill(area, new Color(0, 0, 0, 0.55f));
 
@@ -509,67 +513,137 @@ internal sealed class HamletUi
             "This building's own services are coming. Its upgrades are already in effect.", 26, Gui.Dd1Text);
     }
 
-    private void DrawBlacksmith(Rect area, Hamlet hamlet)
+    /// <summary>A point of the building window (DD1's building layouts are relative to its top-left).</summary>
+    private static Rect W(float x, float y, float w, float h) => new(Window.x + x, Window.y + y, w, h);
+
+    /// <summary>DD1 text with its colour markup ({colour_start|...}...{colour_end}) taken out.</summary>
+    private static string Plain(string dd1) => dd1 == null ? null : System.Text.RegularExpressions.Regex.Replace(dd1, @"\{colour_(start\|[^}]*|end)\}", "");
+
+    /// <summary>
+    /// DD1's hero slot at the top right of the Blacksmith and Guild (hero_slot.background, 85 x 85): the hero
+    /// dropped from the roster, their name beside it, or DD1's "[DRAG] a hero..." line. Click it to clear.
+    /// Returns the hero, or null.
+    /// </summary>
+    private HeroRecord HeroSlot(string helpId, string help)
     {
-        Frame(area);
-        if (Drag.Hovering<HeroDrag>(area)) Gui.Fill(new Rect(area.x, area.y, area.width, 4), Gui.Gold);
-        if (Drag.Drop<HeroDrag>(area, out var dropped)) _heroId = dropped.HeroId;   // DD1: drop a hero on the building
+        var slot = W(698, 34, 85, 85);
+        if (Art.Dd1("campaign", "town", "hero_slot", "hero_slot.background.png") is { } bg) GUI.DrawTexture(slot, bg);
+        bool hovering = Drag.Hovering<HeroDrag>(W(560, 20, 820, 110));
+        if (hovering && Art.Dd1("campaign", "town", "hero_slot", "hero_slot.backgroundhightlight.png") is { } hl) GUI.DrawTexture(slot, hl);
+        if (Drag.Drop<HeroDrag>(W(560, 20, 820, 110), out var dropped))
+        {
+            _heroId = dropped.HeroId;
+            Runtime.Dd1Audio.Play("/ui/town/char_add");
+        }
         var hero = E.Hero(_heroId);
         if (hero == null)
         {
-            Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster to see what the Blacksmith can do for their weapon and armour.", 24, Gui.Dd1Text);
-            return;
+            Gui.Text(W(794, 40, 560, 80), Plain(S.Lore?.Text(helpId)) ?? help, 20, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            return null;
         }
-        // The hero being outfitted, under the rows (drop another hero from the roster to switch).
-        var icon = Art.HeroIcon(hero.ClassId);
-        if (icon != null) Art.DrawSprite(new Rect(646, 640, 90, 90), icon);
-        Gui.Text(new Rect(750, 642, 600, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(750, 682, 600, 30), $"{Pretty(hero.ClassId)}, resolve {hero.ResolveLevel}  ·  drop another hero here to switch", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (Art.HeroIcon(hero.ClassId) is { } icon) Art.DrawSprite(new Rect(slot.x + 4, slot.y + 4, 77, 77), icon);
+        Gui.Text(W(794, 40, 500, 56), hero.Name, 36, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(W(794, 92, 500, 26), $"Resolve level {hero.ResolveLevel}", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (slot.Contains(Event.current.mousePosition)) Gui.Tip($"{hero.Name}\nClick to take them out of the {Name(_building)}.");
+        if (Gui.Hotspot(slot))
+        {
+            _heroId = null;
+            Runtime.Dd1Audio.Play("/ui/town/char_remove");
+            return null;
+        }
+        return hero;
+    }
 
-        // DD1's Blacksmith (blacksmith.layout): a row per slot from body + (50,20), 176 apart, the five equipment
-        // pictures 75 apart: owned ranks as they are, the next one highlighted with its cost, later ones dark.
+    /// <summary>DD1's description column (hero_action verbose_frame at 669,120): the class, then DD1's own words
+    /// for this building and class (action_verbose_body_&lt;building&gt;_&lt;class&gt;).</summary>
+    private void HeroVerbose(HeroRecord hero, string building)
+    {
+        if (Art.Dd1("campaign", "town", "buildings", "hero_action", "verbose_frame.png") is { } frame) GUI.DrawTexture(W(669, 120, 236, 478), frame);
         string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
+        Gui.Text(W(698, 136, 200, 34), Pretty(hero.ClassId), 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        string body = Plain(S.Lore?.Text($"action_verbose_body_{building}_{dd1Class}"));
+        if (body != null) Gui.Text(W(698, 176, 197, 400), body, 17, Gui.Dd1Class);
+    }
+
+    /// <summary>
+    /// DD1's Blacksmith (blacksmith.layout and the DD1 Unity port's window): the hero slot and description column,
+    /// then blacksmith.frame (905,130) with a row for the weapon and one for the armour (177 apart): the equipment
+    /// the hero has (72 x 144), DD1's connector under the levels bought (75 per level), and the four next levels
+    /// 77 apart: bought, purchasable (DD1's cost frame with the gold, red if short) or locked. Hover for the
+    /// equipment's DD1 name, what it does and what it needs; click a purchasable one to buy it.
+    /// </summary>
+    private void DrawBlacksmith(Rect area, Hamlet hamlet)
+    {
+        var hero = HeroSlot("str_help_town_blacksmith_1", "[DRAG] a hero from your roster into the Blacksmith to see their weapon and armor upgrade options.");
+        if (hero == null) return;
+        HeroVerbose(hero, Buildings.Blacksmith);
+
+        if (Art.Dd1("campaign", "town", "buildings", "blacksmith", "blacksmith.frame.png") is { } frame) GUI.DrawTexture(W(905, 130, 467, 360), frame);
+        string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
+        var bought = UpgradeArt("requirement_purchased_icon.png");
+        var buyable = UpgradeArt("requirement_purchasable_icon.png");
+        var locked = UpgradeArt("requirement_locked_icon.png");
+        var boughtBg = UpgradeArt("requirement_purchased_background.png");
+        var connector = UpgradeArt("requirement_purchased_background_connector.png");
         var highlight = UpgradeArt("requirement_highlight_overlay.png");
+        var costFrame = Art.Dd1("campaign", "town", "buildings", "blg_townupgrade_costframe.png");
+        var goldIcon = Art.Dd1("shared", "estate", "currency.gold.icon.png");
         for (int s = 0; s < 2; s++)
         {
             string slot = s == 0 ? Hamlet.Weapon : Hamlet.Armour;
+            float dy = s * 177;
             int rank = hamlet.Rank(hero, slot);
             var next = hamlet.NextEquipment(hero, slot);
             string why = next == null ? null : hamlet.WhyCantUpgradeEquipment(hero, slot);
-            float x0 = 596 + 50, y0 = 102 + 20 + 120 + s * 176;
-            Gui.Text(new Rect(x0, y0 - 34, 300, 30), slot == Hamlet.Weapon ? "Weapon" : "Armour", 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            for (int k = 0; k < 5; k++)
+            bool shortOfGold = why == "Not enough gold";
+
+            // The equipment they have.
+            var have = W(926, 149 + dy, 72, 144);
+            if (Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_{slot}_{Mathf.Clamp(rank, 0, 4)}.png") is { } pic) GUI.DrawTexture(have, pic);
+            if (have.Contains(Event.current.mousePosition)) Gui.Tip(EquipmentTip(dd1Class, slot, rank) + "\nEquipped.");
+
+            // DD1's connector behind the levels bought.
+            if (rank > 0 && connector != null) GUI.DrawTexture(W(962, 211 + dy, 75 * Mathf.Min(rank, 4), 20), connector);
+            for (int k = 0; k < 4; k++)
             {
-                var r = new Rect(x0 + k * 75, y0, 72, 144);
-                var pic = Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_{slot}_{k}.png");
-                var old = GUI.color;
-                if (k > rank + 1 || (k == rank + 1 && next == null)) GUI.color = new Color(0.3f, 0.3f, 0.3f, 1f);
-                else if (k == rank + 1) GUI.color = new Color(0.7f, 0.7f, 0.7f, 1f);
-                if (pic != null) GUI.DrawTexture(r, pic); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
-                GUI.color = old;
-                if (k <= rank) Gui.Fill(new Rect(r.x + 4, r.yMax + 3, r.width - 8, 3), Gui.Gold);
-                if (k == rank + 1 && next != null)
+                int level = k + 1;   // the rank this slot gives
+                var r = W(1011 + k * 77, 185 + dy, 72, 72);
+                bool has = rank >= level;
+                bool canTry = !has && level == rank + 1 && next != null && (why == null || shortOfGold);
+                if (has && boughtBg != null) GUI.DrawTexture(r, boughtBg);
+                var icon = has ? bought : canTry ? buyable : locked;
+                var inner = new Rect(r.x + 11, r.y + 11, 50, 50);
+                if (icon != null) GUI.DrawTexture(inner, icon); else Gui.Fill(inner, has ? Gui.Gold : new Color(0.25f, 0.22f, 0.18f));
+                if (canTry)
                 {
-                    Gui.Text(new Rect(r.x - 10, r.yMax + 2, r.width + 20, 22), Gui.Num(hamlet.EquipmentCost(next), "#,0"), 16, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-                    if (r.Contains(Event.current.mousePosition) && highlight != null) GUI.DrawTexture(new Rect(r.x + 11, r.y + 47, 50, 50), highlight);
-                    if (why == null && Gui.Hotspot(r))
-                    {
-                        hamlet.UpgradeEquipment(hero.Id, slot);
-                        Runtime.Dd1Audio.Play(slot == Hamlet.Weapon ? "/town/blacksmith_purchase_wep" : "/town/blacksmith_purchase_arm");
-                        S.Persist();
-                    }
+                    if (costFrame != null) GUI.DrawTexture(new Rect(r.x - 15, r.y - 14, 103, 139), costFrame);
+                    if (goldIcon != null) GUI.DrawTexture(new Rect(r.x + 9, r.y + 72, 30, 30), goldIcon);
+                    Gui.Text(new Rect(r.x + 40, r.y + 66, 70, 40), Gui.Num(hamlet.EquipmentCost(next), "#,0"), 22,
+                             shortOfGold ? Gui.Dd1Health : Color.white, TextAnchor.MiddleLeft);
+                    if (icon != null) GUI.DrawTexture(inner, icon);   // over the cost frame
+                }
+                if (!r.Contains(Event.current.mousePosition)) continue;
+                if (highlight != null) GUI.DrawTexture(inner, highlight);
+                string needs = has ? "Purchased."
+                    : canTry ? (shortOfGold ? $"Costs {Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold: not enough." : $"Costs {Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold. Click to buy.")
+                    : level > rank + 1 ? "Buy the level before it first."
+                    : why ?? "Unavailable.";
+                Gui.Tip(EquipmentTip(dd1Class, slot, level) + "\n" + needs);
+                if (canTry && !shortOfGold && Gui.Hotspot(r))
+                {
+                    hamlet.UpgradeEquipment(hero.Id, slot);
+                    Runtime.Dd1Audio.Play(slot == Hamlet.Weapon ? "/town/blacksmith_purchase_wep" : "/town/blacksmith_purchase_arm");
+                    S.Persist();
                 }
             }
-            // What it does now and next (beside the row).
-            float tx = x0 + 5 * 75 + 24;
-            Gui.Text(new Rect(tx, y0, 1500 - tx, 30), $"Rank {rank + 1}: {Dd2.Dd2Heroes.EquipmentText(slot, rank)}", 19, Gui.Dd1Text, TextAnchor.MiddleLeft);
-            if (next != null)
-            {
-                Gui.Text(new Rect(tx, y0 + 34, 1500 - tx, 30), $"Next: {Dd2.Dd2Heroes.EquipmentText(slot, rank + 1)}", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
-                Gui.Text(new Rect(tx, y0 + 64, 1500 - tx, 30), why ?? $"{Gui.Num(hamlet.EquipmentCost(next), "#,0")} gold · needs resolve {next.Resolve} · click it", 17, why == null ? Gui.Gold : Gui.Blood, TextAnchor.MiddleLeft);
-            }
-            else Gui.Text(new Rect(tx, y0 + 34, 1500 - tx, 30), "The finest the Hamlet can make.", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
         }
+    }
+
+    /// <summary>DD1's name for a hero's weapon or armour at a rank ("crusader_weapon_1": Longsword) and what it does here.</summary>
+    private string EquipmentTip(string dd1Class, string slot, int rank)
+    {
+        string name = S.Lore?.Text($"{dd1Class}_{slot}_{Mathf.Clamp(rank, 0, 4)}")?.Trim('"') ?? $"{(slot == Hamlet.Weapon ? "Weapon" : "Armor")} level {rank + 1}";
+        return $"{name}\n{(slot == Hamlet.Weapon ? "Weapon" : "Armor")} level {rank + 1}: {Dd2.Dd2Heroes.EquipmentText(slot, rank)}";
     }
 
     private void DrawGuild(Rect area, Hamlet hamlet)
@@ -1014,9 +1088,9 @@ internal sealed class HamletUi
         int total = trees.Sum(t => S.Buildings.Trees.Trees[t].Count);
         // The plaque at the panel's top right holds the title (upgrade_title_offset 458,36) and how far the building
         // is upgraded (upgrade_percent_offset 480,62); the description sits at verbose_offset (20,30), 380 wide.
-        Gui.Text(new Rect(basePos.x + 458 - 100, basePos.y + 36 - 22, 200, 40), "Upgrades", 28, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(basePos.x + 458 - 100, basePos.y + 36 - 22, 200, 40), "Upgraded:", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
         Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{owned * 100 / total}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
-        Gui.Text(new Rect(basePos.x + 20, basePos.y + 30, 380, 110), "Spend heirlooms to improve the building. Hover a level for what it costs; click the next one when you can afford it.", 18, Gui.Dd1Class);
+        Gui.Text(new Rect(basePos.x + 20, basePos.y + 30, 380, 110), lore?.Text("building_verbose_" + building) ?? "Spend heirlooms to improve the building. Hover a level for what it costs; click the next one when you can afford it.", 18, Gui.Dd1Class);
 
         var bought = UpgradeArt("requirement_purchased_icon.png");
         var buyable = UpgradeArt("requirement_purchasable_icon.png");

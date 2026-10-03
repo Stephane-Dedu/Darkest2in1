@@ -9,20 +9,18 @@ namespace DarkestDungeon3.Ui;
 
 /// <summary>
 /// DD1's character sheet (shared/character, character.layout.darkest) for a DD2 hero: resolve, quirks, base stats,
-/// equipment with two trinket slots, combat and camping skills, resistances, diseases; and DD1's realm inventory
-/// (campaign/town/realm_inventory) beside it. Trinkets are dragged between the two.
+/// equipment with two trinket slots, combat and camping skills, resistances, diseases. DD1's Trinket Inventory
+/// (RealmInventory, opened from the estate bar) sits over its right side; trinkets are dragged between the two.
 /// </summary>
 internal static class HeroSheet
 {
     private static readonly Vector2 O = new(144, 132);          // the sheet sits where building windows do
-    private static readonly Vector2 Realm = new(881, 128);      // realm_inventory_pos
+    /// <summary>DD1's Trinket Inventory is open (from the estate bar); it stays open from hero to hero.</summary>
     public static bool RealmOpen;
-    private static int _realmTop;
 
     private static Session S => Session.Current;
     private static Estate E => S.Save.Estate;
     private static Texture2D Ch(string f) => Art.Dd1("shared", "character", f);
-    private static Texture2D Ri(string f) => Art.Dd1("campaign", "town", "realm_inventory", f);
     private static Rect At(float x, float y, float w, float h) => new(O.x + x, O.y + y, w, h);
 
     /// <summary>
@@ -34,7 +32,7 @@ internal static class HeroSheet
     {
         _readOnly = readOnly;
         // Right-click outside closes it, as in DD1.
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 1) { Event.current.Use(); RealmOpen = false; close(); return; }
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 1) { Event.current.Use(); close(); return; }
         var win = At(0, 0, 1395, 776);
         var bg = Ch("characterpanel_bg.png");
         if (bg != null) GUI.DrawTexture(win, bg); else Gui.Fill(win, new Color(0.04f, 0.035f, 0.03f, 0.97f));
@@ -75,7 +73,7 @@ internal static class HeroSheet
         var closeRect = At(1344 - 6, 18 - 6, 46, 46);
         var x = Art.Dd1("shared", "progression", "progression_close.png");
         if (x != null) GUI.DrawTexture(closeRect, x);
-        if (Gui.Hotspot(closeRect) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) { RealmOpen = false; close(); return; }
+        if (Gui.Hotspot(closeRect) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) { close(); return; }
         if (readOnly) return;
 
         var dismiss = At(20, 70, 32, 32);
@@ -87,11 +85,6 @@ internal static class HeroSheet
             if (_confirmDismiss == h.Id) { S.Hamlet.Dismiss(h.Id); S.Persist(); _confirmDismiss = null; close(); return; }
             _confirmDismiss = h.Id;
         }
-
-        // The realm inventory toggle (DD1 has it on the estate bar; it's handy here too).
-        var toggle = At(1200, 18, 120, 40);
-        if (Gui.DdButton(toggle, RealmOpen ? "Hide trinkets" : "Trinkets", true, 18)) RealmOpen = !RealmOpen;
-        if (RealmOpen) DrawRealmInventory(h);
     }
 
     private static string _confirmDismiss;
@@ -169,16 +162,17 @@ internal static class HeroSheet
             if (_readOnly)
             {
                 TrinketIcon(r, tid);
-                if (r.Contains(Event.current.mousePosition)) Tip(TrinketText(tid));
+                if (r.Contains(Event.current.mousePosition)) Gui.Tip(TrinketText(tid), RarityColour(tid));
                 continue;
             }
             Drag.Source(r, new TrinketDrag(tid, h.Id), rect => TrinketIcon(rect, tid));
             if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid)) TrinketIcon(r, tid);
-            if (r.Contains(Event.current.mousePosition) && !Drag.Active) Tip(TrinketText(tid) + "\nClick or drag away to unequip.");
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active) Gui.Tip(TrinketText(tid) + "\nClick, or drag it to the Trinket Inventory, to unequip.", RarityColour(tid));
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
                 h.Trinkets.Remove(tid);
                 E.Trinkets.Add(tid);
+                Dd1Audio.Play("/ui/dun/trink_unqeuip");
                 S.Persist();
                 return;
             }
@@ -198,6 +192,7 @@ internal static class HeroSheet
         }
         else if (h.Trinkets.Count < 2) h.Trinkets.Add(drag.TrinketId);
         else E.Trinkets.Add(drag.TrinketId);
+        Dd1Audio.Play("/ui/dun/trink_equip");
         S.Persist();
     }
 
@@ -264,50 +259,6 @@ internal static class HeroSheet
             Gui.Text(At(830, 660 + i * 28, 460, 26), HamletUi.QuirkName(diseases[i]), 18, Gui.Dd1Health, TextAnchor.MiddleCenter);
     }
 
-    // ---- the realm inventory: the estate's unworn trinkets ----
-
-    private static Rect RealmCell(int i) => new(Realm.x + 30 + (i % 7) * 80, Realm.y + 195 + (i / 7) * 160, 72, 144);
-
-    private static void DrawRealmInventory(HeroRecord h)
-    {
-        var panel = new Rect(Realm.x, Realm.y, 667, 780);
-        if (Ri("realminv_bg.png") is { } bg) GUI.DrawTexture(panel, bg); else Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
-        Gui.Text(new Rect(Realm.x + 40, Realm.y + 20, 500, 46), "Trinkets", 34, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(Realm.x + 40, Realm.y + 66, 580, 50), "Drag a trinket onto a hero's slot. Drag a worn trinket here to take it off.", 17, Gui.Dd1Class);
-
-        var trinkets = E.Trinkets;
-        int rows = Mathf.Max(1, (trinkets.Count + 6) / 7);
-        var area = new Rect(Realm.x + 30, Realm.y + 195, 560, 525);
-        if (Event.current.type == EventType.ScrollWheel && area.Contains(Event.current.mousePosition))
-        {
-            _realmTop = Mathf.Clamp(_realmTop + (Event.current.delta.y > 0 ? 1 : -1), 0, Mathf.Max(0, rows - 3));
-            Event.current.Use();
-        }
-        if (Drag.Hovering<TrinketDrag>(panel) && Drag.Payload is TrinketDrag t && t.FromHero != null) Gui.Fill(new Rect(panel.x, panel.yMax - 8, panel.width, 4), Gui.Gold);
-        if (Drag.Drop<TrinketDrag>(panel, out var back) && back.FromHero != null && E.Hero(back.FromHero) is { } wearer && wearer.Trinkets.Remove(back.TrinketId))
-        {
-            E.Trinkets.Add(back.TrinketId);
-            S.Persist();
-            return;
-        }
-        string hovered = null;
-        for (int i = 0; i < 21 && _realmTop * 7 + i < trinkets.Count; i++)
-        {
-            string id = trinkets[_realmTop * 7 + i];
-            var r = RealmCell(i);
-            bool fits = S.Catalog.TrinketFits(id, h.ClassId);
-            Drag.Source(r, new TrinketDrag(id), rect => TrinketIcon(rect, id));
-            var old = GUI.color;
-            if (!fits) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
-            TrinketIcon(r, id);
-            GUI.color = old;
-            if (r.Contains(Event.current.mousePosition)) hovered = id;
-        }
-        if (trinkets.Count == 0) Gui.Text(new Rect(Realm.x + 40, Realm.y + 300, 580, 40), "No trinkets yet. The Nomad Wagon sells them.", 20, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        if (hovered != null && !Drag.Active)
-            Gui.Text(new Rect(Realm.x + 40, Realm.y + 120, 580, 70), TrinketText(hovered), 18, Gui.Dd1Text);
-    }
-
     // ---- trinket art and words ----
 
     public static void TrinketIcon(Rect r, string id)
@@ -334,22 +285,30 @@ internal static class HeroSheet
         return HamletUi.Pretty(s.Replace("tiered_", ""));
     }
 
+    /// <summary>DD1's trinket tooltip: name, rarity, the class that can wear it, then its effects (DD2's own).</summary>
     public static string TrinketText(string id)
     {
         var t = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var tr) ? tr : null;
         string rarity = t == null ? "" : HamletUi.Pretty(t.Rarity);
         string forClass = t?.HeroClass != null ? $"  ·  {HamletUi.Pretty(t.HeroClass)} only" : "";
-        return $"{TrinketName(id)}\n{rarity}{forClass}";
+        string effects = Dd2.ItemText.Effects(id);
+        return $"{TrinketName(id)}\n{rarity}{forClass}" + (effects != null ? "\n" + effects : "");
     }
 
-    private static void Tip(string text)
+    /// <summary>The trinket's rarity colour (DD1's tiers: common grey, rare blue, epic purple, ancestral gold,
+    /// cultist crimson).</summary>
+    public static Color RarityColour(string id)
     {
-        var m = Event.current.mousePosition;
-        var size = new Vector2(380, 30 + 24 * (text.Count(c => c == '\n') + 1));
-        var r = new Rect(Mathf.Min(m.x + 18, 1900 - size.x), Mathf.Min(m.y + 18, 1060 - size.y), size.x, size.y);
-        if (Event.current.type != EventType.Repaint) return;
-        Gui.Fill(r, new Color(0.03f, 0.025f, 0.02f, 0.95f));
-        Gui.Fill(new Rect(r.x, r.y, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
-        Gui.Text(new Rect(r.x + 12, r.y + 8, r.width - 24, r.height - 12), text, 18, Gui.Dd1Text);
+        string rarity = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var t) ? t.Rarity : null;
+        return rarity switch
+        {
+            "rare" => new Color(0.38f, 0.6f, 0.95f),
+            "epic" => new Color(0.68f, 0.45f, 0.9f),
+            "ancestral" => new Color(0.86f, 0.72f, 0.36f),
+            "cultist" => new Color(0.8f, 0.2f, 0.2f),
+            _ => new Color(0.82f, 0.82f, 0.8f),
+        };
     }
+
+    private static void Tip(string text) => Gui.Tip(text);
 }

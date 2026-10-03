@@ -567,6 +567,43 @@ public sealed class Hamlet
         (int)Math.Round(Catalog.TrinketPrice(trinketId) * (1f - Buildings.WagonDiscount(Estate))
                         * Math.Max(0f, 1f - EventData("upgrade_tag_discount").Where(d => d.Str == "trinket").Sum(d => d.Num)));
 
+    /// <summary>
+    /// DD1's trinket sell value: its price less the Nomad Wagon's sell discount (stores[].data
+    /// trinket_sell_value_discount_upgrades: 0.85 always, so 15% back, plus any upgrade-gated tiers).
+    /// </summary>
+    public int TrinketSellValue(string trinketId)
+    {
+        float discount = 0f;
+        foreach (var store in Buildings.Data(Buildings.NomadWagon)["stores"] as JArray ?? new JArray())
+            foreach (JObject tier in store["data"]?["trinket_sell_value_discount_upgrades"] as JArray ?? new JArray())
+            {
+                string tree = (string)tier["upgrade_tree_id"], code = (string)tier["upgrade_requirement_code"];
+                if (tree == null || Estate.Upgrades.Contains(tree + ":" + code)) discount += (float?)tier["discount_percent"] ?? 0f;
+            }
+        return (int)Math.Round(Catalog.TrinketPrice(trinketId) * Math.Max(0f, 1f - discount));
+    }
+
+    /// <summary>Sell an unworn trinket from the estate's stash (DD1: shift-click in the trinket inventory).</summary>
+    public bool SellTrinket(string trinketId)
+    {
+        if (!Estate.Trinkets.Remove(trinketId)) return false;
+        Estate.Add(Currency.Gold, TrinketSellValue(trinketId));
+        return true;
+    }
+
+    /// <summary>DD1's "unequip all": every hero in the Hamlet (not away) puts their trinkets back in the stash.</summary>
+    public int UnequipAllTrinkets()
+    {
+        int n = 0;
+        foreach (var hero in Estate.Roster.Where(h => h.MissingWeeks == 0))
+        {
+            n += hero.Trinkets.Count;
+            Estate.Trinkets.AddRange(hero.Trinkets);
+            hero.Trinkets.Clear();
+        }
+        return n;
+    }
+
     public bool BuyTrinket(string trinketId)
     {
         if (!Estate.WagonStock.Contains(trinketId)) return false;

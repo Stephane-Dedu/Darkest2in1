@@ -51,6 +51,24 @@ public class HamletTests
     }
 
     [Fact]
+    public void TrinketsSellForFifteenPercentAndCanAllBeUnequipped()
+    {
+        var h = NewHamlet();
+        h.Estate.Trinkets.Add("t1");
+        int gold = h.Estate.Get(Currency.Gold);
+        Assert.Equal(150, h.TrinketSellValue("t1"));          // DD1: price 1000 less the wagon's 85% sell discount
+        Assert.True(h.SellTrinket("t1"));
+        Assert.Equal(gold + 150, h.Estate.Get(Currency.Gold));
+        Assert.False(h.SellTrinket("t1"));
+
+        h.Estate.Roster[0].Trinkets.Add("a");
+        h.Estate.Roster[1].Trinkets.Add("b");
+        Assert.Equal(2, h.UnequipAllTrinkets());
+        Assert.Contains("a", h.Estate.Trinkets);
+        Assert.Empty(h.Estate.Roster[0].Trinkets);
+    }
+
+    [Fact]
     public void NewEstateHasFourHeroesRecruitsAndQuests()
     {
         var h = NewHamlet();

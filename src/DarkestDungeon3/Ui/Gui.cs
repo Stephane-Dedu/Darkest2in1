@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -137,6 +138,45 @@ internal static class Gui
 
     /// <summary>An invisible click area (for art that acts as a button).</summary>
     public static bool Hotspot(Rect r) => GUI.Button(r, GUIContent.none, GUIStyle.none);
+
+    // ---- DD1 tooltips: one per frame by the mouse, drawn over everything (DrawTip at the end of the frame) ----
+
+    private static string _tip;
+    private static Color _tipTitle;
+
+    /// <summary>A DD1 tooltip by the mouse this frame. Its first line is the title (in <paramref name="title"/>).</summary>
+    public static void Tip(string text, Color? title = null)
+    {
+        if (Event.current.type != EventType.Repaint || string.IsNullOrEmpty(text)) return;
+        _tip = text;
+        _tipTitle = title ?? Dd1Name;
+    }
+
+    public static void DrawTip()
+    {
+        if (_tip == null || Event.current.type != EventType.Repaint) return;
+        string[] lines = _tip.Split('\n');
+        const float width = 420f, lineH = 25f;
+        // Roughly 9 px per character at the body size: long lines wrap.
+        int rows = lines.Sum(l => Mathf.Max(1, Mathf.CeilToInt(l.Length * 9.5f / (width - 28))));
+        var m = Event.current.mousePosition;
+        var r = new Rect(Mathf.Min(m.x + 20, W - width - 8), 0, width, 18 + rows * lineH + 8);
+        r.y = Mathf.Min(m.y + 20, H - r.height - 8);
+        Fill(r, new Color(0.02f, 0.016f, 0.012f, 0.96f));
+        var edge = new Color(0.42f, 0.36f, 0.25f);
+        Fill(new Rect(r.x, r.y, r.width, 2), edge);
+        Fill(new Rect(r.x, r.yMax - 2, r.width, 2), edge);
+        Fill(new Rect(r.x, r.y, 2, r.height), edge);
+        Fill(new Rect(r.xMax - 2, r.y, 2, r.height), edge);
+        float y = r.y + 10;
+        for (int i = 0; i < lines.Length; i++)
+        {
+            int n = Mathf.Max(1, Mathf.CeilToInt(lines[i].Length * 9.5f / (width - 28)));
+            Text(new Rect(r.x + 14, y, width - 28, n * lineH), lines[i], i == 0 ? 20 : 17, i == 0 ? _tipTitle : Dd1Text, TextAnchor.UpperLeft, heading: i == 0);
+            y += n * lineH;
+        }
+        _tip = null;
+    }
 
     // ---- announcements (DD1 shows events as a banner, not a log) ----
 
