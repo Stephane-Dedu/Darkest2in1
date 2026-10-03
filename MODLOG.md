@@ -450,6 +450,11 @@ Feasibility notes (decomp):
 - Curio quirks go straight onto the DD2 actor (Dd2Party.AddDd1Quirk); the cap is applied there against the actor's
   QuirkContainer instances and the estate record's LockedQuirks.
 
+## Parity loop, round 5 (2026-10-03)
+- Retreat stress already matched: DD1 combat_retreat_stress 20/100 = DD2's retreat penalty 2/10 per hero.
+- Camp ambush: DD1 ambush_torch_reduction -100 after camp_restore_torch 100 → the ambush fight is in the dark; the
+  Driver carries the expedition light into DD2's torch at fight start.
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

@@ -75,7 +75,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 ## Camping
 - [?] Camp with firewood: respite points (`camp_start_camping_points`), DD1 camping skills per class, meal, torch restore (`camp_restore_torch`).
-- [?] Night ambush (`ambush_camping_base_chance`); DD1 `ambush_torch_reduction` (torch drops on ambush) missing from code.
+- [?] Night ambush (`ambush_camping_base_chance` 0.33, less the camp skills' reductions).
+- [?] Ambush in the dark: DD1 `ambush_torch_reduction` -100 — a camp ambush snuffs the torch, the fight starts in darkness. Was: relit to 100, fought in full light. Now Crawl.BreakCamp applies it (CampingTests). In game: after "The camp is ambushed in the night!" the fight's torch reads 0.
 
 ## Fights (around DD2 combat)
 - [x] Fights launch in DD2 combat with our party and DD1 encounter translations; return to the crawl; DD2 results view skipped; DD1 spoils scroll — round 1 (log "straight back to the dungeon").
@@ -88,7 +89,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Surprise by knowledge: DD1 `surprise_known_*` (scouted room/corridor: party -1.0 = never, monsters 0.25), `surprise_ambush_*` (party 1.0 = always, monsters 0.0), light band added, both sides capped at `surprise_max_*_surprised_chance` 0.65 except an ambush's "always". Was: unknown 10%/10% everywhere, monsters uncapped. Now Crawl.SurpriseChances (CrawlTests.SurpriseFollowsDd1ByKnowledge). In game: battles in scouted rooms never open with "Ambush! The heroes are surprised!".
 - [?] Corpses: no corpse after a crit or DoT kill (CorpseRule).
 - [?] Combat retreat: 70% + 5% per try (`combat_retreat_chance`, `_bonus_chance_per_attempt`), one try per round.
-- [ ] Retreat stress: DD1 `combat_retreat_stress` on success — check what the retreat applies.
+- [?] Retreat stress: DD1 `combat_retreat_stress` 20 (of 100) = DD2's own retreat penalty of 2 stress each (of 10): same amount (round 5). In game: a successful retreat costs each hero 2 stress.
 - [?] Torch level carried into DD2's torch (DD2's own darkness effects stand in for DD1's monster bonuses).
 - [x] Battle loot from DD1 encounter `loot:` codes; DD2 loot skipped — round 1 log "[loot] room fight (...): took 2 bust, very_common trinket, 1 skeleton_key, 1 portrait".
 - [?] Loot trinkets: DD1 rolls the trinket when it drops (loot tables give a rarity: `loot/*.json` "trinket" + rarity) and the spoils show it; the mod carried "trinket:very_common" until homecoming (spoils showed a label). Now rolled at the drop (Crawl.TrinketOfRarity → a DD2 trinket of the mapped rarity), shown with its picture and tooltip in spoils, curio results and the pack (BattleLootTests.LootTrinketsAreRolledWhenTheyDrop). In game: no trinket dropped in 4 fights (round 2); look for a trinket picture on the spoils scroll.

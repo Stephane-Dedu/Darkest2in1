@@ -519,7 +519,11 @@ public sealed class Crawl
         State.Camp = null;
         ChangeLight(_rules.CampRestoreTorch - State.Light);
         if (rng.Chance(ambush))
+        {
+            // DD1: the night ambush snuffs the torch (ambush_torch_reduction -100); the fight starts in the dark.
+            ChangeLight(_rules.AmbushTorchChange);
             _events.Add(new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" });
+        }
         return Flush();
     }
 

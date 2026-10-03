@@ -41,6 +41,8 @@ public sealed class CrawlRules
     public float RetreatChance = 0.7f, RetreatBonusPerAttempt = 0.05f;
     public int CampPoints = 12;
     public float CampRestoreTorch = 100f;
+    /// <summary>A camp ambush changes the torch by this much (DD1 -100: the fight is in the dark).</summary>
+    public float AmbushTorchChange = -100f;
     /// <summary>DD1 meals: food per living hero, HP healed (fraction of max), DD1 stress (negative relieves).</summary>
     public Dictionary<Meal, (float RationsPer, float Heal, float StressDd1)> Meals = new()
     {
@@ -98,6 +100,7 @@ public sealed class CrawlRules
         r.RetreatBonusPerAttempt = Get(rules, "combat_retreat_bonus_chance_per_attempt", r.RetreatBonusPerAttempt);
         r.CampPoints = (int)Get(rules, "camp_start_camping_points", r.CampPoints);
         r.CampRestoreTorch = Get(rules, "camp_restore_torch", r.CampRestoreTorch);
+        r.AmbushTorchChange = Get(rules, "ambush_torch_reduction", r.AmbushTorchChange);
         foreach (var m in rules["meals_table"] ?? new JArray())
         {
             var meal = (string)m["type"] switch { "none" => Meal.None, "half" => Meal.Half, "full" => Meal.Full, _ => Meal.Feast };
