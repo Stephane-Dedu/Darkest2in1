@@ -144,6 +144,7 @@ internal static class Dd1Backdrop
     {
         if (!Ready || _material == null) return;
         HideNewScenery();
+        SetDepthOfField(false);
         try
         {
             foreach (var cam in Camera.allCameras)
@@ -206,9 +207,13 @@ internal static class Dd1Backdrop
                     {
                         if (!Seen.Add(r.GetInstanceID())) continue;
                         if (!(r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer) || !r.enabled || r.forceRenderingOff) continue;
-                        if (spared.Contains(r.gameObject.layer) || r.GetComponentInParent<ActorBhv>() != null) continue;
+                        // Only the layers the arena's scenery used (skill close-ups and props), never an actor's part.
+                        if (spared.Contains(r.gameObject.layer) || (_sceneryLayers & (1 << r.gameObject.layer)) == 0) continue;
+                        if (r.GetComponentInParent<ActorBhv>() != null) continue;
                         string n = r.gameObject.name.ToLowerInvariant();
                         if (n.Contains("vfx") || n.Contains("fx_") || n.StartsWith("fx")) continue;
+                        string shader = r.sharedMaterial != null && r.sharedMaterial.shader != null ? r.sharedMaterial.shader.name.ToLowerInvariant() : "";
+                        if (shader.Contains("vfx") || shader.Contains("particle") || shader.Contains("additive") || shader.Contains("/fx")) continue;
                         if (ParticleSystemType != null && r.GetComponentInParent(ParticleSystemType) != null) continue;
                         r.forceRenderingOff = true;
                         Hidden.Add(r);
@@ -252,41 +257,67 @@ internal static class Dd1Backdrop
         }
     }
 
-    private static readonly List<object> DepthOfFieldOff = new();
 
     /// <summary>
     /// DD2's post-processing volumes blur by depth (URP DepthOfField). Our DD1 backdrop and monsters are drawn
     /// without depth, so they counted as far background and came out blurred. Off while the DD1 scene is up (DD1 has
     /// no depth blur), back on after. By reflection: URP isn't referenced.
     /// </summary>
+    // DD2's post effects that smear flat DD1 art: off while the DD1 scene is up. DD2 switches them per skill on each
+    // volume's own profile copy (PostProcessingManager.SetEffects), so they are held off every frame, on the shared
+    // profile and on the copy, and put back as they were found when the fight ends.
+    private static readonly string[] FlatArtSpoilers =
+        { "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain" };
+    private static readonly Dictionary<object, bool> EffectsBefore = new();
+    private static readonly List<System.Reflection.FieldInfo> EffectFlags = new();
+    private static readonly List<object> EffectsHeld = new();
+    private static float _nextVolumeScan;
+    private static readonly Type VolumeType = Type.GetType("UnityEngine.Rendering.Volume, Unity.RenderPipelines.Core.Runtime");
+
     private static void SetDepthOfField(bool restore)
     {
         try
         {
             if (restore)
             {
-                foreach (var c in DepthOfFieldOff) c?.GetType().GetField("active")?.SetValue(c, true);
-                DepthOfFieldOff.Clear();
+                foreach (var kv in EffectsBefore) kv.Key?.GetType().GetField("active")?.SetValue(kv.Key, kv.Value);
+                EffectsBefore.Clear();
+                EffectsHeld.Clear();
+                EffectFlags.Clear();
+                _nextVolumeScan = 0f;
                 return;
             }
-            var volumeType = Type.GetType("UnityEngine.Rendering.Volume, Unity.RenderPipelines.Core.Runtime");
-            if (volumeType == null) return;
-            foreach (var volume in UnityEngine.Object.FindObjectsOfType(volumeType))
+            if (VolumeType == null) return;
+            if (Time.unscaledTime >= _nextVolumeScan)
             {
-                var profile = volumeType.GetField("sharedProfile")?.GetValue(volume) ?? volumeType.GetProperty("profile")?.GetValue(volume);
-                if (profile?.GetType().GetField("components")?.GetValue(profile) is not System.Collections.IEnumerable components) continue;
-                foreach (var c in components)
+                _nextVolumeScan = Time.unscaledTime + 1f;
+                int before = EffectsHeld.Count;
+                foreach (var volume in UnityEngine.Object.FindObjectsOfType(VolumeType))
                 {
-                    if (c == null || c.GetType().Name != "DepthOfField") continue;
-                    var active = c.GetType().GetField("active");
-                    if (active == null || !(bool)active.GetValue(c)) continue;
-                    active.SetValue(c, false);
-                    DepthOfFieldOff.Add(c);
+                    // The shared profile and the volume's own copy (profileRef; reading "profile" would make a copy).
+                    var profiles = new[] { VolumeType.GetField("sharedProfile")?.GetValue(volume), VolumeType.GetProperty("profileRef")?.GetValue(volume) };
+                    foreach (var profile in profiles.Where(p => p != null).Distinct())
+                    {
+                        if (profile.GetType().GetField("components")?.GetValue(profile) is not System.Collections.IEnumerable components) continue;
+                        foreach (var c in components)
+                        {
+                            if (c == null || EffectsBefore.ContainsKey(c) || !FlatArtSpoilers.Contains(c.GetType().Name)) continue;
+                            var active = c.GetType().GetField("active");
+                            if (active == null) continue;
+                            EffectsBefore[c] = (bool)active.GetValue(c);
+                            EffectsHeld.Add(c);
+                            EffectFlags.Add(active);
+                        }
+                    }
                 }
+                if (EffectsHeld.Count != before)
+                    Plugin.Log.LogInfo($"[backdrop] holding off {EffectsHeld.Count} DD2 post effect(s): " +
+                                       string.Join(", ", EffectsHeld.Select(c => c.GetType().Name).Distinct()));
             }
-            Plugin.Log.LogInfo($"[backdrop] depth of field off on {DepthOfFieldOff.Count} volume(s)");
+            for (int i = 0; i < EffectsHeld.Count; i++)
+                if (EffectsHeld[i] != null && (bool)EffectFlags[i].GetValue(EffectsHeld[i])) EffectFlags[i].SetValue(EffectsHeld[i], false);
         }
-        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] depth of field: " + e.Message); }
+        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] post effects: " + e.Message); }
     }
 
     private static void GiveUpAfter(float seconds, string why)

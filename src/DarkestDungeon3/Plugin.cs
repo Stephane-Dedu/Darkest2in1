@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using BepInEx;
 using BepInEx.Configuration;
@@ -50,7 +51,20 @@ public class Plugin : BaseUnityPlugin
         HeroModelScale = Config.Bind("Look", "HeroModelScale", 1f, "Size of the DD2 hero models in the dungeon.");
         HeroArt = Config.Bind("Look", "HeroArtInDungeon", Runtime.Art.LargeArt.Story, "Which DD2 hero picture stands in the DD1 dungeon (Altar, HeroStory, Story).");
 
-        new Harmony(Guid).PatchAll(typeof(Plugin).Assembly);
+        // Each patch class on its own: one that no longer fits the game is logged and skipped, the others still apply
+        // (PatchAll stops at the first failure).
+        var harmony = new Harmony(Guid);
+        int patched = 0;
+        foreach (var type in AccessTools.GetTypesFromAssembly(typeof(Plugin).Assembly))
+        {
+            try
+            {
+                var applied = harmony.CreateClassProcessor(type).Patch();
+                if (applied != null && applied.Count > 0) patched++;
+            }
+            catch (Exception e) { Log.LogWarning($"[patch] {type.Name} not applied: {e.InnerException?.Message ?? e.Message}"); }
+        }
+        Log.LogInfo($"[patch] {patched} patch classes applied");
 
         // BepInEx's own manager object can be destroyed by scene loads in some games; keep ours separate.
         var host = new GameObject("DarkestDungeon3");

@@ -376,6 +376,19 @@ Feasibility notes (decomp):
       models: "[stage] renderer R, layer L, post P: brightness B" for each setup, then "best: ..." and "lit" or the
       flat-art fallback; DD1 audio through FMOD core from the FSB5s ("[audio] DD1 sounds: N samples").
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
+- [ ] Play test 4 (user: blur, items tab, corridor pose, mixed background, traps, spell mismatch):
+      - fights: "[backdrop] holding off N DD2 post effect(s): DepthOfField, ..." and sharp DD1 monsters/backdrop;
+        "[backdrop] hid N more DD2 scenery renderers" when DD2 adds scenery mid-fight; DD2 skill VFX still visible;
+      - the bag tab under the map tab opens the inventory (DD1 tab_placement 672,252);
+      - corridor heroes in DD2's combat stance (animator default state), facing the walking direction
+        (Look.Dd2HeroModelPose = neutral brings back the road idle);
+      - traps: a spotted trap stops the party; the prompt shows the selected hero's chance (class trap stat + 40%
+        spotted - difficulty); click the trap or Disarm; DD1 trap and per-zone disarm sounds;
+      - DD1 monsters: "[dd1art] X: skills: dd2=dd1, ..., dd2=unused" per monster; stand-ins never use "unused"
+        skills; the banner/inspection show each DD1 monster's own skill names, the inspection its own name;
+        new stand-ins (cultist_evangelist/herald, shared_spider_*, shared_dog_rabid, coven_hateful_virago,
+        beastmen_rot_claw, shared_lost_soul_chirurgeon) spawn and are drawn over;
+      - "[patch] N patch classes applied" and no "[patch] ... not applied".
 
 ## Next steps
 1. The audit plan above, in the order the user picks.

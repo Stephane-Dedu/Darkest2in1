@@ -50,7 +50,9 @@ internal static class Dd1MonsterView
         public float NextRendererScan;
         public readonly HashSet<string> Logged = new();
         public List<(string Id, string Anim, string Fx, string TargetFx)> Skills;   // from DD1's .art.darkest
-        public readonly Dictionary<string, int> SkillFor = new();   // stand-in's DD2 skill -> DD1 skill (by order)
+        public readonly Dictionary<string, int> SkillFor = new();   // stand-in's DD2 skill -> DD1 skill (index in Skills)
+        public readonly Dictionary<string, string> SkillNames = new();   // stand-in's DD2 skill -> DD1 skill name
+        public HashSet<string> Allowed;   // the DD2 skills it may use: those whose kind its DD1 monster has
         public Vector3 Offset;      // body foot point relative to the actor's root, measured once
         public float WorldRatio;    // DD2 body height (world units) per DD1 unit, measured once
         public string DeathFx;
@@ -64,11 +66,22 @@ internal static class Dd1MonsterView
     /// (localization keys: the actor class id, "skill_name_&lt;skill&gt;").</summary>
     private static readonly Dictionary<string, string> Names = new();
 
+    /// <summary>The actor whose skill DD2's banner is naming right now (set around the banner's calls), or 0.</summary>
+    internal static uint Performer;
+
     public static bool TryName(string key, out string name)
     {
         name = null;
-        return key != null && Names.Count > 0 && Names.TryGetValue(key, out name);
+        if (key == null || Line.Count == 0) return false;
+        // A skill named for a known performer: its own DD1 monster's name for it (two DD1 monsters can share a stand-in).
+        if (Performer != 0 && key.StartsWith("skill_name_", StringComparison.Ordinal) && ByGuid(Performer) is { } m
+            && m.SkillNames.TryGetValue(key.Substring(11), out name))
+            return true;
+        return Names.Count > 0 && Names.TryGetValue(key, out name);
     }
+
+    /// <summary>The DD2 skills a DD1 monster's stand-in may use (null: no limit).</summary>
+    internal static HashSet<string> AllowedFor(uint guid) => Line.Count == 0 ? null : ByGuid(guid)?.Allowed;
 
     private static float _worldPerUnit;
     private static GameObject _quad;
@@ -282,25 +295,57 @@ internal static class Dd1MonsterView
                      .OrderByDescending(c => c.depth).FirstOrDefault();
     }
 
-    /// <summary>Each of the stand-in's DD2 skills becomes one of the DD1 monster's skills, in order, named as DD1 names it.</summary>
+    /// <summary>
+    /// Pairs each of the stand-in's DD2 skills with the DD1 skill of the same kind (an attack with an attack, melee or
+    /// ranged; a heal or buff with one) launched from the same ranks, so the DD1 pose, effect and name fit what the
+    /// skill does. DD2 skills of a kind the DD1 monster lacks are kept from its AI (see Dd1MonsterSkillChoice). The
+    /// stand-in also takes the DD1 monster's name, so two DD1 monsters on one DD2 enemy keep their own.
+    /// </summary>
     private static void MapSkills(Monster m)
     {
         try
         {
-            if (m.Skills == null || m.Skills.Count == 0) return;
-            var dd2 = m.Actor.ActorInstance.GetEquippedCombatSkillIds();
             var lore = Session.Current?.Lore;
-            for (int i = 0; i < dd2.Count; i++)
+            if (lore != null && lore.MonsterNames.TryGetValue(m.Dd1, out var monsterName)) m.Actor.ActorInstance.SetActorName(monsterName);
+            if (m.Skills == null || m.Skills.Count == 0) return;
+            var ids = m.Actor.ActorInstance.GetEquippedCombatSkillIds();
+            var library = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Skill.ActorDataSkill>>.Instance;
+            var dd2 = ids.Select(id => Shape(id, library?.GetLibraryElement(id))).ToList();
+            var dd1 = Session.Current?.Dd1 != null ? Dd1MonsterSkills.Read(Session.Current.Dd1, m.Family, m.Tier) : new List<SkillShape>();
+            if (dd1.Count == 0)
             {
-                int k = i % m.Skills.Count;
-                m.SkillFor[dd2[i]] = k;
-                string id = m.Skills[k].Id;
-                if (id != null && lore != null && lore.MonsterSkillNames.TryGetValue(id, out var name) && !Names.ContainsKey("skill_name_" + dd2[i]))
-                    Names["skill_name_" + dd2[i]] = name;
+                for (int i = 0; i < ids.Count; i++) m.SkillFor[ids[i]] = i % m.Skills.Count;
+                Note(m, "skills: no DD1 info file, paired in order");
+                return;
             }
+            var match = Dd1MonsterSkills.Match(dd2, dd1);
+            m.Allowed = Dd1MonsterSkills.Allowed(dd2, dd1);
+            foreach (var s in dd2)
+            {
+                if (!match.TryGetValue(s.Id, out int k)) continue;
+                string dd1Id = dd1[k].Id;
+                int art = m.Skills.FindIndex(x => x.Id == dd1Id);   // that skill's entry in the art file
+                m.SkillFor[s.Id] = art >= 0 ? art : k % m.Skills.Count;
+                if (lore != null && dd1Id != null && lore.MonsterSkillNames.TryGetValue(dd1Id, out var name))
+                {
+                    m.SkillNames[s.Id] = name;
+                    if (!Names.ContainsKey("skill_name_" + s.Id)) Names["skill_name_" + s.Id] = name;
+                }
+            }
+            Note(m, "skills: " + string.Join(", ", dd2.Select(s => $"{s.Id}={(m.Allowed.Contains(s.Id) ? dd1[match[s.Id]].Id : "unused")}")));
         }
         catch (Exception e) { Plugin.Log.LogInfo($"[dd1art] {m.Dd1} skills: {e.Message}"); }
     }
+
+    /// <summary>A DD2 skill's shape from its runtime data.</summary>
+    private static SkillShape Shape(string id, Assets.Code.Skill.ActorDataSkill data) => new SkillShape
+    {
+        Id = id,
+        Friendly = data?.m_IsFriendly ?? false,
+        Ranged = data?.m_Tags != null && data.m_Tags.Contains("ranged"),
+        LaunchRanks = data?.LaunchRanks?.ToList() ?? new List<int>(),
+        TargetRanks = data?.TargetRelativeRanks?.ToList() ?? new List<int>(),
+    };
 
     private static void Hide(Monster m)
     {
@@ -621,5 +666,67 @@ internal static class Dd1NamesInFightsTry
         if (!Dd1MonsterView.TryName(key, out var name)) return true;
         __result = name;
         return false;
+    }
+}
+
+/// <summary>DD2's skill banner names the performer's skill: let our names know whose (its own DD1 monster's names).</summary>
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.UI.Combat.SkillBannerBhv), nameof(Assets.Code.UI.Combat.SkillBannerBhv.OnSkillActivated))]
+internal static class Dd1SkillBannerPerformer
+{
+    private static void Prefix(Assets.Code.Combat.Presentation.SkillPresentationData skillPresentationData) =>
+        Dd1MonsterView.Performer = skillPresentationData?.PerformerGuid ?? 0u;
+
+    private static Exception Finalizer(Exception __exception)
+    {
+        Dd1MonsterView.Performer = 0;
+        return __exception;
+    }
+}
+
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.UI.Combat.SkillBannerBhv), "HandleEventSkillSelectionChanged")]
+internal static class Dd1SkillBannerSelection
+{
+    private static void Prefix(Assets.Code.Actor.Events.EventSkillSelectionChanged evt) => Dd1MonsterView.Performer = evt?.m_ActorGuid ?? 0u;
+
+    private static Exception Finalizer(Exception __exception)
+    {
+        Dd1MonsterView.Performer = 0;
+        return __exception;
+    }
+}
+
+/// <summary>
+/// A DD1 monster's stand-in only picks among the DD2 skills whose kind its DD1 monster has (no buffing its side when
+/// the DD1 monster only attacks, and the other way round). DD2's enemies choose from this list (ActorControllerRandom);
+/// if nothing would be left, DD2's own list stands.
+/// </summary>
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.Actor.ActorController.ActorControllerBase), nameof(Assets.Code.Actor.ActorController.ActorControllerBase.GetValidSkillTargetEntries))]
+internal static class Dd1MonsterSkillChoice
+{
+    private static void Postfix(Assets.Code.Actor.ActorInstance ___m_PerformerActor,
+                                ref IReadOnlyList<Assets.Code.Actor.ActorController.SkillTargetEntry> __result)
+    {
+        try
+        {
+            if (___m_PerformerActor == null || __result == null || __result.Count < 2) return;
+            var allowed = Dd1MonsterView.AllowedFor(___m_PerformerActor.ActorGuid);
+            if (allowed == null || allowed.Count == 0) return;
+            var kept = __result.Where(e => e != null && allowed.Contains(e.m_SkillId)).ToList();
+            if (kept.Count > 0 && kept.Count < __result.Count) __result = kept;
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[dd1art] skill choice: " + e.Message); }
+    }
+}
+
+/// <summary>DD2's enemy inspection lists the inspected actor's skills: name them as that actor's own DD1 monster does.</summary>
+[HarmonyLib.HarmonyPatch(typeof(Assets.Code.UI.Canvases.AcademicViewUiBhv), nameof(Assets.Code.UI.Canvases.AcademicViewUiBhv.Populate))]
+internal static class Dd1InspectedMonsterSkills
+{
+    private static void Prefix(uint actorGuid) => Dd1MonsterView.Performer = actorGuid;
+
+    private static Exception Finalizer(Exception __exception)
+    {
+        Dd1MonsterView.Performer = 0;
+        return __exception;
     }
 }

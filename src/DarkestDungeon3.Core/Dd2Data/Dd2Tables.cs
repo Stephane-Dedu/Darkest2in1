@@ -47,6 +47,17 @@ public sealed class Dd2Tables
     public Dictionary<string, Dd2Quirk> Quirks { get; } = new();
     public Dictionary<string, Dd2Trinket> Trinkets { get; } = new();
     public Dictionary<string, Dd2ClassStats> Classes { get; } = new();
+    /// <summary>Every DD2 skill (ActorDataSkill), and each actor class's skills (those defined in its data file).</summary>
+    public Dictionary<string, Dd1.SkillShape> Skills { get; } = new();
+    public Dictionary<string, List<string>> ActorSkills { get; } = new();
+    /// <summary>How many ranks each actor class takes (m_Size).</summary>
+    public Dictionary<string, int> ActorSizes { get; } = new();
+
+    /// <summary>The skills of a DD2 actor class.</summary>
+    public List<Dd1.SkillShape> SkillsOf(string actorClass) =>
+        actorClass != null && ActorSkills.TryGetValue(actorClass, out var ids)
+            ? ids.Where(Skills.ContainsKey).Select(i => Skills[i]).ToList()
+            : new List<Dd1.SkillShape>();
 
     public static Dd2Tables Load(string excelDir)
     {
@@ -66,6 +77,36 @@ public sealed class Dd2Tables
                 }
                 if (c.Stats.ContainsKey("health_max")) t.Classes[id] = c;
             }
+        // Every actor data file: its classes and skills (an enemy's skills live in the same file as the enemy).
+        foreach (var file in Directory.Exists(excelDir) ? Directory.GetFiles(excelDir, "*_data_export.Group.csv") : new string[0])
+        {
+            var classes = new List<string>();
+            var skills = new List<string>();
+            foreach (var (id, type, fields) in Blocks(file))
+            {
+                if (type == "ActorDataClass" && !id.EndsWith("_corpse", StringComparison.Ordinal))
+                {
+                    classes.Add(id);
+                    if (int.TryParse(Values(fields, "m_Size").FirstOrDefault(), out int size)) t.ActorSizes[id] = size;
+                }
+                else if (type == "ActorDataSkill")
+                {
+                    skills.Add(id);
+                    t.Skills[id] = new Dd1.SkillShape
+                    {
+                        Id = id,
+                        Ranged = Values(fields, "m_Tags").Contains("ranged"),
+                        Friendly = Values(fields, "m_IsFriendly").FirstOrDefault() == "True",
+                        LaunchRanks = Values(fields, "launch_ranks").Select(v => int.TryParse(v, out var r) ? r : 0).Where(r => r > 0).ToList(),
+                        TargetRanks = Values(fields, "target_ranks").Select(v => int.TryParse(v, out var r) ? r : 0).Where(r => r > 0).ToList(),
+                    };
+                }
+            }
+            // A class can also appear in other files (hero story fights); its own file ("lost_battalion_foot soldier_...") wins.
+            string own = Path.GetFileName(file).Replace("_data_export.Group.csv", "").Replace(' ', '_');
+            foreach (var c in classes)
+                if (c == own || !t.ActorSkills.ContainsKey(c)) t.ActorSkills[c] = skills;
+        }
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "quirk_data_export.Group.csv")))
             if (type == "Quirk") t.Quirks[id] = new Dd2Quirk { Id = id, Tags = Values(fields, "m_Tags") };
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "trinkets_data_export.Group.csv")))

@@ -48,6 +48,10 @@ public sealed class Dd1Bestiary
     }
 
     /// <summary>The DD1 monster folder whose animations draw this family (itself unless the map names another).</summary>
+    /// <summary>Each DD1 family with its DD2 stand-ins (regular and champion).</summary>
+    public IEnumerable<(string Family, IReadOnlyList<string> Dd2, IReadOnlyList<string> Champion)> Entries =>
+        _map.Select(kv => (kv.Key, (IReadOnlyList<string>)kv.Value.Dd2, (IReadOnlyList<string>)kv.Value.Champion));
+
     public string ArtFamily(string family) => family != null && _map.TryGetValue(family, out var e) && e.Art != null ? e.Art : family;
 
     public bool Knows(string dd1Monster) => _map.TryGetValue(Split(dd1Monster).Family, out var e) && e.Dd2.Count > 0;
