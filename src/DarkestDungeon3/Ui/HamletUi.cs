@@ -674,38 +674,55 @@ internal sealed class HamletUi
             return;
         }
         var icon = Art.HeroIcon(hero.ClassId);
-        if (icon != null) Art.DrawSprite(new Rect(area.x + 16, area.y + 12, 90, 90), icon);
-        Gui.Text(new Rect(area.x + 120, area.y + 14, 500, 40), hero.Name, 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(area.x + 120, area.y + 54, 500, 30), $"{Pretty(hero.ClassId)}  ·  knows {hero.CampingSkills.Count} camping skills", 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (icon != null) Art.DrawSprite(new Rect(646, 140, 72, 72), icon);
+        Gui.Text(new Rect(730, 140, 500, 40), hero.Name, 30, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(730, 178, 600, 30), $"{Pretty(hero.ClassId)}  ·  knows {hero.CampingSkills.Count} camping skills  ·  drop another hero here to switch", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
-        var skills = S.Content.Camping.ForClass(hero.ClassId);
-        skills.Sort((a, b) => hero.CampingSkills.Contains(b).CompareTo(hero.CampingSkills.Contains(a)));
-        _panelScroll = GUI.BeginScrollView(new Rect(area.x, area.y + 120, area.width, area.height - 130), _panelScroll, new Rect(0, 0, area.width - 30, skills.Count * 98));
-        for (int i = 0; i < skills.Count; i++)
+        // DD1's camping trainer (camping_trainer.layout): the class's own skills in a grid of four per row, 110 x 90
+        // apart, the shared ones in a second grid below; known ones lit, the others dark with their cost under
+        // them (32,90); click one to learn it.
+        var all = S.Content.Camping.ForClass(hero.ClassId);
+        string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(hero.ClassId);
+        var own = all.Where(id => S.Content.Camping.Get(id)?.Classes.Contains(dd1Class) == true && S.Content.Camping.Get(id).Classes.Count == 1).ToList();
+        var shared = all.Except(own).ToList();
+        string tip = null;
+        void Grid(List<string> ids, float x0, float y0, string title)
         {
-            var skill = S.Content.Camping.Get(skills[i]);
-            bool known = hero.CampingSkills.Contains(skill.Id);
-            var r = new Rect(10, i * 98, area.width - 50, 90);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            var tex = Art.Dd1("raid", "camping", "skill_icons", $"camp_skill_{skill.Id}.png");
-            var old = GUI.color;
-            if (!known) GUI.color = new Color(0.55f, 0.55f, 0.55f, 1f);
-            if (tex != null) GUI.DrawTexture(new Rect(r.x + 8, r.y + 9, 72, 72), tex);
-            GUI.color = old;
-            Gui.Text(new Rect(r.x + 94, r.y + 6, 330, 32), Dd1Text.CampSkillName(skill.Id), 24, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(r.x + 94, r.y + 38, 400, 48), $"{skill.Cost} respite  ·  " + string.Join(", ", S.Content.Camping.DescribeAll(skill)), 16, Gui.Dd1Text);
-            if (known) Gui.Text(new Rect(r.xMax - 170, r.y + 26, 156, 36), "Known", 22, Gui.Gold, TextAnchor.MiddleCenter, heading: true);
-            else
+            Gui.Text(new Rect(x0, y0 - 34, 400, 30), title, 22, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            for (int i = 0; i < ids.Count; i++)
             {
-                string why = hamlet.WhyCantLearnCampSkill(hero, skill.Id);
-                if (Gui.DdButton(new Rect(r.xMax - 190, r.y + 18, 176, 54), why ?? $"Learn  {Gui.Num(hamlet.CampSkillCost(skill), "#,0")}g", why == null, why == null ? 20 : 15))
+                var skill = S.Content.Camping.Get(ids[i]);
+                if (skill == null) continue;
+                bool known = hero.CampingSkills.Contains(skill.Id);
+                var r = new Rect(x0 + (i % 4) * 110, y0 + (i / 4) * 110, 72, 72);
+                var tex = Art.Dd1("raid", "camping", "skill_icons", $"camp_skill_{skill.Id}.png");
+                var old = GUI.color;
+                if (!known) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
+                if (tex != null) GUI.DrawTexture(r, tex); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
+                GUI.color = old;
+                string why = known ? null : hamlet.WhyCantLearnCampSkill(hero, skill.Id);
+                if (known) Gui.Fill(new Rect(r.x + 4, r.yMax + 3, r.width - 8, 3), Gui.Gold);
+                else Gui.Text(new Rect(r.x - 10, r.yMax + 2, r.width + 20, 20), Gui.Num(hamlet.CampSkillCost(skill), "#,0"), 15, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
+                if (r.Contains(Event.current.mousePosition))
+                    tip = $"{Dd1Text.CampSkillName(skill.Id)} ({skill.Cost} respite)" + (known ? " - known" : why != null ? " - " + why : " - click to learn") +
+                          " | " + string.Join(", ", S.Content.Camping.DescribeAll(skill));
+                if (!known && why == null && Gui.Hotspot(r))
                 {
                     hamlet.LearnCampSkill(hero.Id, skill.Id);
+                    Runtime.Dd1Audio.Play("/town/trainer_purchase_skill");
                     S.Persist();
                 }
             }
         }
-        GUI.EndScrollView();
+        Grid(own, 656, 270, Pretty(dd1Class) + " skills");
+        Grid(shared, 656, 270 + 110 * System.Math.Max(1, (own.Count + 3) / 4) + 60, "Skills any hero can learn");
+        if (tip != null)
+        {
+            var m = Event.current.mousePosition;
+            var tr = new Rect(Mathf.Min(m.x + 18, 1500), m.y + 10, 400, 70);
+            Gui.Fill(tr, new Color(0.03f, 0.025f, 0.02f, 0.95f));
+            Gui.Text(new Rect(tr.x + 10, tr.y + 6, tr.width - 20, tr.height - 10), tip, 16, Gui.Dd1Text);
+        }
     }
 
     private void DrawTownLog(Rect area)
