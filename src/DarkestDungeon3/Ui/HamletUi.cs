@@ -64,6 +64,35 @@ internal sealed class HamletUi
         }
     }
 
+    private bool _exchangeOpen;
+
+    private void DrawHeirloomExchange()
+    {
+        var rates = S.Campaign.HeirloomRates;
+        var r = new Rect(400, BarY - 40 - rates.Count / 3 * 64 - 70, 720, 70 + (rates.Count + 2) / 3 * 64);
+        Gui.Fill(r, new Color(0.03f, 0.025f, 0.02f, 0.95f));
+        Gui.Fill(new Rect(r.x, r.y, r.width, 2), new Color(0.45f, 0.38f, 0.24f));
+        Gui.Text(new Rect(r.x, r.y + 8, r.width, 40), "Heirloom exchange", 30, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        Texture2D Icon(string type) => Art.Dd1("shared", "estate", $"currency.{type}.icon.png");
+        for (int i = 0; i < rates.Count; i++)
+        {
+            var (from, fromAmount, to, toAmount) = rates[i];
+            var cell = new Rect(r.x + 12 + (i % 3) * 236, r.y + 56 + (i / 3) * 64, 228, 58);
+            bool can = E.Get(from) >= fromAmount;
+            bool hover = can && cell.Contains(Event.current.mousePosition);
+            Gui.Fill(cell, hover ? new Color(0.2f, 0.16f, 0.1f, 0.95f) : new Color(0.08f, 0.07f, 0.06f, 0.9f));
+            var old = GUI.color;
+            if (!can) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
+            Gui.Text(new Rect(cell.x + 6, cell.y + 12, 30, 34), fromAmount.ToString(), 24, Gui.Dd1Text, TextAnchor.MiddleRight, heading: true);
+            if (Icon(from) is { } fi) GUI.DrawTexture(new Rect(cell.x + 40, cell.y + 9, 40, 40), fi);
+            Gui.Text(new Rect(cell.x + 84, cell.y + 12, 40, 34), "→", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            Gui.Text(new Rect(cell.x + 124, cell.y + 12, 30, 34), toAmount.ToString(), 24, Gui.Dd1Text, TextAnchor.MiddleRight, heading: true);
+            if (Icon(to) is { } ti) GUI.DrawTexture(new Rect(cell.x + 158, cell.y + 9, 40, 40), ti);
+            GUI.color = old;
+            if (can && Gui.Hotspot(cell) && S.Hamlet.Exchange(from, to)) S.Persist();
+        }
+    }
+
     private int _eventSeenWeek = -1;
     private static readonly System.Text.RegularExpressions.Regex Markup = new("\\{[^}]*\\}");
 
@@ -288,7 +317,13 @@ internal sealed class HamletUi
             if (tex != null) GUI.DrawTexture(new Rect(x, BarY + 38, 40, 40), tex);
             Gui.Text(new Rect(x + 46, BarY + 34, 70, 48), E.Get(cur).ToString(), 28, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
         }
-        Gui.Text(new Rect(900, BarY + 34, 200, 48), $"Trinkets {E.Trinkets.Count}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        Gui.Text(new Rect(960, BarY + 34, 140, 48), $"Trinkets {E.Trinkets.Count}", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        var he = Art.Dd1("campaign", "town", "heirloom_exchange", _exchangeOpen ? "he_icon_selected.png" : "he_icon_idle.png");
+        var heRect = new Rect(890, BarY + 26, 60, 60);
+        if (he != null) GUI.DrawTexture(heRect, he, ScaleMode.ScaleToFit); else Gui.Fill(heRect, new Color(0.2f, 0.17f, 0.12f));
+        if (heRect.Contains(Event.current.mousePosition)) Gui.Text(new Rect(heRect.x - 80, heRect.y - 30, 220, 28), "Heirloom exchange", 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
+        if (Gui.Hotspot(heRect)) _exchangeOpen = !_exchangeOpen;
+        if (_exchangeOpen) DrawHeirloomExchange();
 
         var embark = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
         var er = new Rect(1100, BarY + 4, 412, 113);

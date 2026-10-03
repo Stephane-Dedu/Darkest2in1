@@ -461,6 +461,17 @@ public sealed class Hamlet
         RollTownEvent(rng);
     }
 
+    // ---- Heirloom exchange ----
+
+    public bool Exchange(string from, string to)
+    {
+        var rate = Dd1.HeirloomRates.FirstOrDefault(r => r.From == from && r.To == to);
+        if (rate.From == null || Estate.Get(from) < rate.FromAmount) return false;
+        Estate.Add(from, -rate.FromAmount);
+        Estate.Add(to, rate.ToAmount);
+        return true;
+    }
+
     // ---- DD1 town events ----
 
     public TownEvent CurrentEvent => Dd1.TownEvents?.Get(Estate.TownEventId);

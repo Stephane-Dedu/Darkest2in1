@@ -35,6 +35,8 @@ public sealed class Dd1Campaign
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
     public Town.TownEvents TownEvents { get; private set; }
     public Dd1Buffs Buffs { get; private set; }
+    /// <summary>DD1's heirloom exchange (campaign/heirloom_exchange): give so many of one kind for so many of another.</summary>
+    public List<(string From, int FromAmount, string To, int ToAmount)> HeirloomRates { get; } = new();
 
     private readonly Dictionary<string, ZoneProps> _props = new();
 
@@ -74,6 +76,10 @@ public sealed class Dd1Campaign
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);
         c.Buffs = Dd1Buffs.Load(dd1);
+        var exchange = dd1.PathOf("campaign", "heirloom_exchange", "heirloom_exchange.json");
+        if (File.Exists(exchange))
+            foreach (var r in ReadJson(exchange)["exchange_rates"] ?? new JArray())
+                c.HeirloomRates.Add(((string)r["exchange_from_type"], (int)r["exchange_from_amount"], (string)r["exchange_to_type"], (int)r["exchange_to_amount"]));
         return c;
     }
 
