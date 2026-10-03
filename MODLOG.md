@@ -237,19 +237,46 @@ All four screens now use DD1's own art and layout files, read from the user's DD
 - 3D hero models (`Dd2/HeroStage.cs`) render black off-screen even with the main camera's renderer, fog off and
   lights: shipped disabled (`Look.HeroModelsInDungeon`). Heroes use DD2 Story art (`Look.HeroArtInDungeon`).
 
+## DD1 systems completed (2026-10-03)
+- **Battle loot** (`Core/Expedition/BattleLoot.cs`): a won fight rolls the DD1 encounter it stands for from
+  `dungeons/<zone>/<zone>.<level>.mash.darkest` (hall/room/boss lists), then each monster's `loot:` codes from
+  `monsters/**/<class>.info.darkest` draw from DD1's loot tables. DD2's own Victory loot is skipped during our fights
+  (`NoDd2LootInOurFights` prefix on `LootManager.ShowLoot`, calls `onFinished`). Spoils show on DD1's loot scroll.
+- **Results-screen NRE**: the road scene's `CombatResultsPresentationBhv` copy threw in `OnGameModeEnterComplete` every
+  fight (DD2 uploaded a crash report each time). `RoadResultsCopyStaysQuiet` skips it for the road scene.
+- **CAMP_AMBUSH** sends DD2 to its Inn/Embark after results: camp ambushes now use `CombatSource.AMBUSH`.
+- **Buffs into DD2 combat** (`Dd2/FightBuffs.cs`): DD1 camp/town buffs (`shared/buffs/*.json`) become DD2 single-stat
+  buffs (picked from `buff_data_export`: sharpness charm = dmg, heartseeker = crit, wolfsblood = speed, hale draught =
+  max HP, banter = resists, ancestors coat = damage taken) added with `BuffContainer.TryAdd(..., SourceType.STORY,
+  "dd3_fight", ...)` when COMBAT has entered, removed with `RemoveAllInstances(i => i.SourceId == "dd3_fight", ...)`
+  when the fight ends. Core counts DD1's `combat_end` battles. DD2 has no stress-taken stat: a prefix on
+  `ActorInstance.ApplyStressDamage` scales stress (rolled to whole points) during our fights.
+- **Surprise**: DD2's AMBUSH is cosmetic. The side that got the drop gets `extra_initiative_1_round_buff`; enemies
+  spawn a little after COMBAT enters, so the buff waits for them (coroutine on Driver).
+- **Blacksmith**: DD1 per-class trees (`upgrades/heroes/<class>.upgrades.json`); ranks become DD2 permanent buffs
+  (distinct ids stacked; same id doesn't stack) with `SourceType.CLASS` at party build.
+- **Guild**: DD2 class skills from `ResourceActor.m_StartingCombatSkills` (known) / `m_AdditionalCombatSkills` (learn).
+  Learn = `SkillInstance.SetIsUnlocked()`; master = `actor.UnlockSkill(SkillUtils.GetUnlockFromSkillId(id + "_u"))`
+  (the `_u` skill's unlock lists the base id, as DD2's Inn does); loadout = `UnequipAllPossibleCombatSkills()` then
+  `SetBaseCombatSkillIdsEquipped`. Prices from the fuzzy-matched DD1 skill tree.
+- **Survivalist**, **heirloom exchange**, **town events** (`campaign/town_events`, crier panel; plot/arena/dead-recruit
+  events not rolled), **hero resolve** on `roster.variables.json` thresholds (not the dungeons' table), resolve-XP
+  bonus, idle stress relief, gems sold and dungeon trinkets kept at homecoming, DD1 **results screen**.
+- **Bosses**: the Necromancer plot quest appears at Ruins level 2; its boss room starts DD2's Dreaming General fight
+  (`config:forest_dungeon_3`). F10 cannot finish that fight (cadaver stage): fight bosses for real when testing.
+
 ## Playtest tools
 - `tools/test_hamlet.sh`: rebuild, relaunch windowed 1600x900, open Estate 2's Hamlet.
 - `tools/test_enter_dungeon.sh`: same, then Embark → first Ruins quest → first four heroes → Provision → Embark.
 - `tools/walk_until_curio.sh [x y]`: walk (optionally from a map click) until a curio, winning fights on the way.
-- Debug keys: F5 make camp here (adds firewood/food), F6 cycle curio art preview, F7 dump the hero-stage render,
-  F8 state dump, F10 win the fight, F11 fight here. Window pixels = virtual × 0.8333.
+- `tools/fight_once.sh`: head for the nearest battle room (F3), handle prompts on the way, win the fight (F10).
+- Debug keys: F3 walk to the nearest battle room (boss first), F4 test estate only (open buildings, gold, first
+  smith/guild upgrades, a town event, Ruins level 2 + new quest board), F5 make camp, F6 curio art preview, F7 hero-stage
+  dump, F8 state dump, F10 win the fight (not bosses), F11 fight here (alternating surprise). Window px = virtual × 0.8333.
 - Estate 2 is the test estate (poor: test scripts buy no supplies). Never test on Estate 1.
 
 ## Next steps
-1. Battle loot: DD2's results screen hands out DD2 items; give DD1 loot from the fight (monster loot tables) into the
-   expedition pack and hide/ignore DD2's.
-2. Building services still missing: Guild (skill levels), Blacksmith (weapon/armour levels → DD2 stats), Survivalist
-   (teach camping skills). Town events. Heirloom exchange.
-3. Monsters surprised → DD2 (heroes-surprised already maps to AMBUSH).
-4. Toggle upgrades once DD1 is complete: DD2 zones crawled DD1-style with bosses (Coven → Weald/Hag, Courtier →
-   Crimson Court ideas noted).
+1. Toggle upgrades (the user's "propose upgrades on a toggle"): DD2 zones crawled DD1-style with bosses. Proposal in
+   the session summary; Estate.Toggles and Hamlet.ToggledZones already exist (quest board takes extra zones).
+2. Remaining DD1 bits: plot/arena/returning-dead town events; Darkest Dungeon quest chain verified in game; DD1
+   afflictions/virtues vs DD2 meltdown/resolve.
