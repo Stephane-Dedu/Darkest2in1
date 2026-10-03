@@ -464,13 +464,10 @@ internal sealed class HamletUi
             if (figure != null) Art.DrawSprite(new Rect(Window.x + 20, Window.y + 90, 540, Window.height - 110), figure);
         }
 
-        // Tabs: the building itself, and its upgrades.
-        if (building != null && building != Buildings.Graveyard && building != Buildings.Memorial)
-        {
-            bool upgrades = _panel == Panel.Upgrades;
-            if (IsOpen(building) && Gui.DdButton(new Rect(Body.x, Window.y + 16, 220, 46), "The building", upgrades, 22)) Open(building);
-            if (Gui.DdButton(new Rect(Body.x + 230, Window.y + 16, 220, 46), "Upgrades", !upgrades, 22)) _panel = Panel.Upgrades;
-        }
+        // DD1: the building's upgrades open in a panel over the left of the window; its page stays on the right.
+        bool hasTrees = building != null && S.Buildings.Trees.Trees.Keys.Any(k => k.StartsWith(building + "."));
+        if (hasTrees && IsOpen(building) && Gui.DdButton(new Rect(Window.x + 40, Window.y + 84, 200, 44), _upgradesOpen ? "Close upgrades" : "Upgrades", true, 20))
+            _upgradesOpen = !_upgradesOpen;
 
         var close = new Rect(Window.xMax - 58, Window.y + 12, 46, 46);
         var closeIcon = Art.Dd1("shared", "progression", "progression_close.png");
@@ -492,13 +489,16 @@ internal sealed class HamletUi
             case Panel.Sanitarium: DrawSanitarium(area, hamlet); break;
             case Panel.Wagon: DrawWagon(area, hamlet); break;
             case Panel.Graveyard: DrawGraveyard(area); break;
-            case Panel.Upgrades: DrawUpgrades(area, hamlet, _building); break;
+            case Panel.Upgrades: break;   // a building not built yet: only its upgrades
             case Panel.Hero: DrawHero(area); break;
             case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
             case Panel.Survivalist: DrawSurvivalist(area, hamlet); break;
             case Panel.Guild: DrawGuild(area, hamlet); break;
         }
+        if (building != null && hasTrees && (_upgradesOpen || _panel == Panel.Upgrades)) DrawUpgrades(hamlet, building);
     }
+
+    private bool _upgradesOpen;
 
     private static void Frame(Rect area) => Gui.Fill(area, new Color(0, 0, 0, 0.55f));
 
@@ -912,32 +912,95 @@ internal sealed class HamletUi
         if (E.Graveyard.Count == 0) Gui.Text(new Rect(area.x + 20, area.y + 20, area.width - 40, 40), "No one rests here. Yet.", 24, Gui.Dd1Class);
     }
 
-    private void DrawUpgrades(Rect area, Hamlet hamlet, string building)
+    /// <summary>
+    /// DD1's building upgrades (campaign/town/buildings/building.layout + upgrade/upgrade.layout): blgupgradebg at
+    /// upgrade_base_pos (172,259) + frame_offset (-18,-115); each tree 160 apart from (0,195) with its DD1 name above,
+    /// the activity's icon, then one requirement per level 70 apart (purchased, purchasable or locked) joined by
+    /// connectors, its cost under it, and a divider below. Clicking a purchasable level buys it.
+    /// </summary>
+    private void DrawUpgrades(Hamlet hamlet, string building)
     {
-        Frame(area);
-        if (building == null) return;
-        var trees = S.Buildings.Trees.Trees.Keys.Where(k => k.StartsWith(building + ".")).ToList();
-        if (trees.Count == 0) Gui.Text(new Rect(area.x + 20, area.y + 20, area.width - 40, 40), "Nothing to improve here.", 24, Gui.Dd1Class);
-        _panelScroll = GUI.BeginScrollView(new Rect(area.x, area.y + 10, area.width, area.height - 20), _panelScroll, new Rect(0, 0, area.width - 30, trees.Count * 96));
+        var basePos = new Vector2(172, 259);
+        var frame = Art.Dd1("campaign", "town", "buildings", "blgupgradebg.png");
+        var panel = new Rect(basePos.x - 18, basePos.y - 115, 662, 764);
+        if (frame != null) GUI.DrawTexture(panel, frame); else Gui.Fill(panel, new Color(0.04f, 0.035f, 0.03f, 0.97f));
+        var lore = S.Lore;
+        var trees = S.Buildings.Trees.Trees.Keys.Where(k => k.StartsWith(building + ".")).OrderBy(k => k).ToList();
+        int owned = trees.Sum(t => S.Buildings.Trees.Trees[t].Count(l => E.Upgrades.Contains(l.Key)));
+        int total = trees.Sum(t => S.Buildings.Trees.Trees[t].Count);
+        // The plaque at the panel's top right holds the title (upgrade_title_offset 458,36) and how far the building
+        // is upgraded (upgrade_percent_offset 480,62); the description sits at verbose_offset (20,30), 380 wide.
+        Gui.Text(new Rect(basePos.x + 458 - 100, basePos.y + 36 - 22, 200, 40), "Upgrades", 28, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{owned * 100 / total}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(basePos.x + 20, basePos.y + 30, 380, 110), "Spend heirlooms to improve the building. Hover a level for what it costs; click the next one when you can afford it.", 18, Gui.Dd1Class);
+
+        var bought = UpgradeArt("requirement_purchased_icon.png");
+        var buyable = UpgradeArt("requirement_purchasable_icon.png");
+        var locked = UpgradeArt("requirement_locked_icon.png");
+        var boughtBg = UpgradeArt("requirement_purchased_background.png");
+        var connector = UpgradeArt("requirement_purchased_background_connector.png");
+        var highlight = UpgradeArt("requirement_highlight_overlay.png");
+        var divider = UpgradeArt("tree_divider_medium.png");
+        float firstY = basePos.y + (trees.Count > 3 ? 45 : 195);
+        string tip = null;
         for (int i = 0; i < trees.Count; i++)
         {
-            var levels = S.Buildings.Trees.Trees[trees[i]];
-            var next = S.Buildings.Trees.Next(E, trees[i]);
-            var r = new Rect(10, i * 96, area.width - 50, 88);
-            Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.9f));
-            int owned = levels.Count(l => E.Upgrades.Contains(l.Key));
-            Gui.Text(new Rect(r.x + 14, r.y + 4, 420, 36), Pretty(trees[i].Substring(trees[i].IndexOf('.') + 1)), 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            string tree = trees[i];
+            var levels = S.Buildings.Trees.Trees[tree];
+            var next = S.Buildings.Trees.Next(E, tree);
+            float y = firstY + i * 160;
+            string name = lore?.Text("upgrade_tree_name_" + tree) ?? Pretty(tree.Substring(tree.IndexOf('.') + 1));
+            Gui.Text(new Rect(basePos.x + 20, y - 35, 560, 32), name, 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            var icon = Art.Dd1("campaign", "town", "buildings", building, tree + ".icon.png") ?? Art.BuildingIcon(building);
+            if (icon != null) GUI.DrawTexture(new Rect(basePos.x + 30, y, 72, 72), icon, ScaleMode.ScaleToFit);
             for (int l = 0; l < levels.Count; l++)
-                Gui.Fill(new Rect(r.x + 14 + l * 26, r.y + 46, 20, 20), l < owned ? Gui.Gold : new Color(0.25f, 0.22f, 0.18f));
-            Gui.Text(new Rect(r.x + 14, r.y + 66, 460, 22), next == null ? "Fully upgraded" : string.Join("  ", next.Cost.Select(c => $"{c.Amount} {c.Type}")), 16, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            if (next != null && Gui.DdButton(new Rect(r.xMax - 150, r.y + 20, 136, 48), "Buy", S.Buildings.Trees.CanBuy(E, next), 22))
             {
-                hamlet.BuyUpgrade(next.TreeId, next.Code);
-                S.Persist();
+                var level = levels[l];
+                float x = basePos.x + 110 + l * 70;
+                bool has = E.Upgrades.Contains(level.Key);
+                bool can = !has && next == level && S.Buildings.Trees.CanBuy(E, level);
+                if (has && boughtBg != null) GUI.DrawTexture(new Rect(x + 30, y, 72, 72), boughtBg);
+                if (has && l > 0 && E.Upgrades.Contains(levels[l - 1].Key) && connector != null) GUI.DrawTexture(new Rect(x, y + 24, 50, 20), connector);
+                var state = has ? bought : (next == level ? buyable : locked);
+                var r = new Rect(x + 40, y + 10, 50, 50);
+                if (state != null) GUI.DrawTexture(r, state); else Gui.Fill(r, has ? Gui.Gold : new Color(0.25f, 0.22f, 0.18f));
+                if (!has)
+                {
+                    var main = level.Cost.FirstOrDefault(c => c.Type != Currency.Gold) ?? level.Cost.FirstOrDefault();
+                    if (main != null)
+                    {
+                        var cur = Art.Dd1("shared", "estate", $"currency.{main.Type}.icon.png");
+                        if (cur != null) GUI.DrawTexture(new Rect(x + 40, y + 64, 22, 22), cur);
+                        Gui.Text(new Rect(x + 62, y + 62, 40, 26), main.Amount.ToString(), 16, can ? Gui.Dd1Text : Gui.Dim, TextAnchor.MiddleLeft);
+                    }
+                }
+                if (r.Contains(Event.current.mousePosition))
+                {
+                    if (highlight != null) GUI.DrawTexture(r, highlight);
+                    string desc = lore?.Text("upgrade_tree_tooltip_description_" + tree);
+                    tip = $"{name}, level {l + 1}" + (desc != null ? $"\n{desc}" : "") +
+                          (has ? "\nBuilt." : "\nCost: " + string.Join(", ", level.Cost.Select(c => $"{Gui.Num(c.Amount, "#,0")} {(c.Type == Currency.Gold ? "gold" : Pretty(c.Type) + "s")}")) +
+                                               (next == level ? (can ? "\nClick to build." : "\nNot enough heirlooms.") : "\nBuild the levels before it first."));
+                }
+                if (can && Gui.Hotspot(r))
+                {
+                    hamlet.BuyUpgrade(level.TreeId, level.Code);
+                    Runtime.Dd1Audio.Play("/town/gen_building_upgrade");
+                    S.Persist();
+                }
             }
+            if (divider != null && i < trees.Count - 1) GUI.DrawTexture(new Rect(basePos.x, y + 118, 400, 6), divider);
         }
-        GUI.EndScrollView();
+        if (tip != null)
+        {
+            var m = Event.current.mousePosition;
+            var tr = new Rect(m.x + 18, m.y + 10, 380, 30 + 24 * (tip.Count(c => c == '\n') + 1));
+            Gui.Fill(tr, new Color(0.03f, 0.025f, 0.02f, 0.95f));
+            Gui.Text(new Rect(tr.x + 10, tr.y + 6, tr.width - 20, tr.height - 10), tip, 17, Gui.Dd1Text);
+        }
     }
+
+    private static Texture2D UpgradeArt(string file) => Art.Dd1("campaign", "town", "buildings", "upgrade", file);
 
     private void DrawHero(Rect area)
     {

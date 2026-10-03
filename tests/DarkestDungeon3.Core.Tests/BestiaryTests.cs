@@ -96,5 +96,7 @@ public class MonsterNameTests
         Assert.Equal("Swine Drummer", lore.MonsterNames["swine_drummer_A"]);
         Assert.True(lore.MonsterSkillNames.ContainsKey("crossbow_shot"));
         Assert.True(lore.MonsterNames.Count > 100);
+        Assert.Equal("Cloister", lore.Text("upgrade_tree_name_abbey.meditation"));
+        Assert.Equal("Improves the meditation facilities.", lore.Text("upgrade_tree_tooltip_description_abbey.meditation"));
     }
 }
