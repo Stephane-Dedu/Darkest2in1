@@ -97,11 +97,17 @@ internal static class Dd1Backdrop
 
             foreach (var r in scenery)
                 if (r != null && r.enabled && !r.forceRenderingOff) { r.forceRenderingOff = true; Hidden.Add(r); }
-            // The arena's ambient particles (floating specks, embers) present now; skill effects spawn later and stay.
+            // The arena's ambient particles (floating specks, embers) present now: particle systems and VFX Graph effects
+            // (DD2 draws its embers with VisualEffect / VFXRenderer). Skill effects spawn later and stay.
+            int ambient = 0;
             foreach (var sc in scenes)
                 foreach (var r in sc.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)))
-                    if (r.GetType().Name == "ParticleSystemRenderer" && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
-                    { r.forceRenderingOff = true; Hidden.Add(r); }
+                {
+                    string type = r.GetType().Name;
+                    if ((type == "ParticleSystemRenderer" || type == "VFXRenderer") && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
+                    { r.forceRenderingOff = true; Hidden.Add(r); ambient++; }
+                }
+            Plugin.Log.LogInfo($"[backdrop] {ambient} ambient particle/VFX renderers hidden");
             // DD2's fog is a full-screen pass after the transparent objects: with no depth behind our backdrop it
             // painted the fog colour over all of it (the red sky). Off while the DD1 scene is up.
             SetDd2Fog(false);

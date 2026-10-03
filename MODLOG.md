@@ -465,6 +465,12 @@ Feasibility notes (decomp):
 - DD1 localization holds the UI wording: town_provision_*, retreat_confirm_raid_question, retreat_raid_tooltip,
   retreat_raid_party_kill_darkestdungeon_confirm_question, realm_inventory_*, action_verbose_body_<building>_<class>.
 
+## Parity loop, rounds 14-15 (2026-10-03)
+- DD1 town skeletons: slot order active (flat silhouette, a few px larger) → idle → light/smoke; the hover is the
+  silhouette behind the building (an outline), never the silhouette alone.
+- DD2 draws ambient arena effects (embers) with VFX Graph: VisualEffect components rendered by "VFXRenderer"
+  (Unity.VisualEffectGraph.Runtime.dll) — hide by type name like ParticleSystemRenderer.
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).
