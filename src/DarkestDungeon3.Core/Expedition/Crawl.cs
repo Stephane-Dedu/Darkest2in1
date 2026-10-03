@@ -161,6 +161,8 @@ public sealed class Crawl
         if (next < 0 || next >= corridor.Tiles.Count)
         {
             int roomId = next < 0 ? corridor.RoomA : corridor.RoomB;
+            State.CameFromCorridorId = corridor.Id;
+            State.CameFromTileIndex = State.TileIndex;
             State.RoomId = roomId;
             State.CorridorId = -1;
             State.TileIndex = -1;
@@ -172,6 +174,42 @@ public sealed class Crawl
             State.TileIndex = next;
             EnterTile(forward);
         }
+        return Flush();
+    }
+
+    /// <summary>
+    /// DD1's retreat from a fight: the battle stays where it was and the party falls back the way it came: from a
+    /// room to the corridor square it entered from, from a hall square one square back. No events fire on the way.
+    /// </summary>
+    public List<CrawlEvent> FleeBattle()
+    {
+        _events.Clear();
+        if (State.InRoom)
+        {
+            var corridor = State.CameFromCorridorId >= 0 ? Map.Corridor(State.CameFromCorridorId) : null;
+            if (corridor == null) return Flush();            // nowhere to fall back to (shouldn't happen)
+            int fromRoom = State.RoomId;
+            State.CorridorId = corridor.Id;
+            State.TileIndex = State.CameFromTileIndex;
+            State.HeadingRoomId = corridor.RoomA == fromRoom ? corridor.RoomB : corridor.RoomA;   // facing away
+            State.RoomId = -1;
+        }
+        else if (CurrentCorridor is { } corridor)
+        {
+            int towardB = State.HeadingRoomId == corridor.RoomB ? 1 : -1;
+            int back = State.TileIndex - towardB;
+            if (back < 0 || back >= corridor.Tiles.Count)
+            {
+                State.RoomId = back < 0 ? corridor.RoomA : corridor.RoomB;
+                State.CameFromCorridorId = corridor.Id;
+                State.CameFromTileIndex = State.TileIndex;
+                State.CorridorId = -1;
+                State.TileIndex = -1;
+                State.HeadingRoomId = -1;
+            }
+            else State.TileIndex = back;
+        }
+        Emit(CrawlEventType.Retreated);
         return Flush();
     }
 

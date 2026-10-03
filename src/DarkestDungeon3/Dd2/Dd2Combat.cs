@@ -25,6 +25,48 @@ internal static class Dd2Combat
     public static event Action<bool> Finished;
 
     public static bool InFight { get; private set; }
+
+    // ---- DD1 retreat: a roll each round (70%, +5% per failed try, shared/rules.json), then DD2's own retreat ----
+
+    /// <summary>The fight ended because the party fled.</summary>
+    public static bool Retreated { get; private set; }
+    private static int _retreatTries, _round, _triedRound = -1;
+    private static readonly System.Random RetreatRng = new();
+
+    public static float RetreatChance(Core.Expedition.CrawlRules rules) =>
+        UnityEngine.Mathf.Clamp01((rules?.RetreatChance ?? 0.7f) + (rules?.RetreatBonusPerAttempt ?? 0.05f) * _retreatTries);
+
+    /// <summary>Why the party can't try to flee right now, or null.</summary>
+    public static string WhyNoRetreat()
+    {
+        if (!InFight || Retreated) return "Not now";
+        if (GameModeMgr.CurrentMode != GameModeType.COMBAT) return "Not now";
+        var combat = SingletonMonoBehaviour<CombatBhv>.Instance;
+        if (combat == null || combat.IsRetreatInvalid) return "No escape from this fight";
+        if (_triedRound == _round) return "Already tried this round";
+        return null;
+    }
+
+    /// <summary>Roll DD1's retreat. On success DD2 ends the battle as a retreat (its own penalties: 2 stress each).</summary>
+    public static bool TryRetreat(Core.Expedition.CrawlRules rules)
+    {
+        if (WhyNoRetreat() != null) return false;
+        _triedRound = _round;
+        if (RetreatRng.NextDouble() >= RetreatChance(rules))
+        {
+            _retreatTries++;
+            Assets.Code.Combat.Events.EventBattleRetreatFailed.Trigger();
+            Plugin.Log.LogInfo("[combat] retreat failed");
+            return false;
+        }
+        Retreated = true;
+        var scenario = Singleton<GameTypeMgr>.Instance.CombatScenarioData;
+        Assets.Code.Combat.Events.EventBattleRetreat.Trigger(scenario != null && scenario.BattleConfigurations.Count > 1);
+        Plugin.Log.LogInfo("[combat] the party retreats");
+        return true;
+    }
+
+    private static void OnRound(Assets.Code.Combat.Events.EventBattleStartRound e) => _round = e.m_Round;
     public static string LastBattleId { get; private set; }
 
     private static HashSet<string> _knownScenes;
@@ -82,6 +124,12 @@ internal static class Dd2Combat
         Dd2Api.Torch = torch;
         LastBattleId = battle;
         InFight = true;
+        Retreated = false;
+        _retreatTries = 0;
+        _round = 0;
+        _triedRound = -1;
+        Assets.Code.Events.EventManager.RemoveListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
+        Assets.Code.Events.EventManager.AddListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
         Plugin.Log.LogInfo($"[combat] {plan.Kind} fight {battle} in {scenario.BackgroundSceneName ?? "(default arena)"}, source {source.GetName()}, torch {torch}");
 
         SingletonMonoBehaviour<ScreenStackBhv>.Instance.Clear();
@@ -102,6 +150,7 @@ internal static class Dd2Combat
     {
         if (!InFight) return;
         InFight = false;
+        Assets.Code.Events.EventManager.RemoveListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
         FightBuffs.Remove(_buffed);
         Plugin.Log.LogInfo($"[combat] fight over, party wiped: {partyWiped}");
         Finished?.Invoke(partyWiped);
@@ -154,6 +203,35 @@ internal static class NoDd2LootInOurFights
         __instance.ClearShowToastVariables();
         Plugin.Log.LogInfo("[combat] DD2 loot window skipped (DD1 loot instead)");
         onFinished?.Invoke();
+        return false;
+    }
+}
+
+/// <summary>
+/// DD1 goes straight back to the corridor after a fight; DD2 shows its results view (the party by the stagecoach)
+/// first. During our fights, when no further wave follows, skip RESULTS: free the results scene DD2 loaded for it
+/// and head back to the road (the crawl). DD2 clears the combat scenario on leaving COMBAT whatever comes next.
+/// </summary>
+[HarmonyPatch(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "SetNextGameMode")]
+internal static class StraightBackToTheDungeon
+{
+    private static readonly System.Reflection.FieldInfo NextConfigs = AccessTools.Field(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "m_NextBattleConfigurations");
+    private static readonly System.Reflection.FieldInfo NextIndex = AccessTools.Field(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "m_NextBattleConfigurationIndex");
+    private static readonly System.Reflection.FieldInfo ResultsScene = AccessTools.Field(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "m_CurrentCombatResultsScene");
+
+    private static bool Prefix(Assets.Code.Combat.Presentation.CombatPresentationBhv __instance)
+    {
+        if (!Dd2Combat.InFight || !Plugin.SkipDd2Results.Value) return true;
+        if (NextConfigs?.GetValue(__instance) is System.Collections.ICollection next && NextIndex?.GetValue(__instance) is int i && i >= 0 && i < next.Count)
+            return true;                                   // another wave of this battle follows
+        if (Singleton<GameTypeMgr>.Instance.CombatScenarioData == null) return true;
+        if (ResultsScene?.GetValue(__instance) is string scene)
+        {
+            Assets.Code.Loading.RedHookSceneManagerBhv.UnloadAdditiveSceneByForce(scene);
+            ResultsScene.SetValue(__instance, null);
+        }
+        Plugin.Log.LogInfo("[combat] straight back to the dungeon (DD2 results view skipped)");
+        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false);
         return false;
     }
 }

@@ -322,6 +322,13 @@ Feasibility notes (decomp):
       cancel refunds the treatment.
 - [ ] Guild / Blacksmith / Survivalist: dropping a hero on the panel selects them.
 - [ ] Dungeon pack: arranged slots, drag to reorder, drag a supply onto a hero to use it; holy water blesses 3 fights.
+- [ ] Corpse rule: a monster killed by a crit or bleed/blight leaves no corpse (log line "[combat] ... no corpse");
+      other kills still leave one; boss phases untouched.
+- [ ] Results view skipped: after a win, straight to the corridor + DD1 spoils (log "straight back to the dungeon");
+      no leftover results scene, next fight starts normally. Setting Look.SkipDd2ResultsView.
+- [ ] Retreat button (top left, DD1 art) during our fights: 70% (+5%/try), one try per round; success → DD2 retreat
+      (2 stress each) and the party falls back (room → corridor square it came from; hall → one square back),
+      fight still there; failure → announcement. Hidden where DD2 forbids retreat.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

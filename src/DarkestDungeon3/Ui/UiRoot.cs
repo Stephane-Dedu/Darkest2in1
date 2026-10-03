@@ -49,6 +49,10 @@ internal sealed class UiRoot : MonoBehaviour
                 case Phase.Crawling:
                     _crawl.Draw();
                     break;
+                case Phase.Fighting:
+                    DrawRetreatButton();
+                    Gui.DrawAnnouncement();
+                    break;
                 case Phase.Homecoming:
                     DrawHomecoming(d);
                     break;
@@ -120,6 +124,25 @@ internal sealed class UiRoot : MonoBehaviour
         }
         if (Gui.DdButton(new Rect(860, 940, 200, 56), "Cancel", true, 24)
             || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) _slotPicker = false;
+    }
+
+    /// <summary>DD1's retreat during our fights (DD2 hides its own outside Kingdoms).</summary>
+    private static void DrawRetreatButton()
+    {
+        string why = DarkestDungeon3.Dd2.Dd2Combat.WhyNoRetreat();
+        if (why == "Not now") return;
+        var r = new Rect(24, 150, 64, 64);
+        var tex = Art.Panel("retreat_button.png");
+        bool hover = r.Contains(Event.current.mousePosition);
+        var old = GUI.color;
+        if (why != null) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
+        if (tex != null) GUI.DrawTexture(hover && why == null ? new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6) : r, tex);
+        else Gui.Fill(r, new Color(0.2f, 0.05f, 0.05f, 0.9f));
+        GUI.color = old;
+        var rules = Session.Current?.Rules;
+        string label = why ?? $"Retreat ({Gui.Num(DarkestDungeon3.Dd2.Dd2Combat.RetreatChance(rules) * 100f, "0")}%)";
+        if (hover || why == null) Gui.Text(new Rect(r.xMax + 10, r.y + 14, 380, 36), label, 22, why == null ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleLeft, heading: true);
+        if (why == null && Gui.Hotspot(r) && !DarkestDungeon3.Dd2.Dd2Combat.TryRetreat(rules)) Gui.Announce("The retreat fails!");
     }
 
     private readonly ResultsUi _results = new();

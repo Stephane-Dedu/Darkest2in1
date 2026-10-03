@@ -122,4 +122,23 @@ public class CampingTests
         Assert.DoesNotContain(crawl.FightBuffs(), b => b.Hero == "c");
         Assert.Null(crawl.UseSupply("c", Supply.Bandage));
     }
+    [Fact]
+    public void Retreating_falls_back_the_way_the_party_came()
+    {
+        var (crawl, _) = Camped();
+        var st = crawl.State;
+        var c = st.Map.Corridors.First(x => x.Tiles.Count >= 2);
+        // From a room entered off the corridor's last square: back onto that square, facing away.
+        st.RoomId = c.RoomB; st.CorridorId = -1; st.TileIndex = -1;
+        st.CameFromCorridorId = c.Id; st.CameFromTileIndex = c.Tiles.Count - 1;
+        crawl.FleeBattle();
+        Assert.False(st.InRoom);
+        Assert.Equal(c.Id, st.CorridorId);
+        Assert.Equal(c.Tiles.Count - 1, st.TileIndex);
+        Assert.Equal(c.RoomA, st.HeadingRoomId);
+        // From a hall square heading for RoomA: one square back toward RoomB.
+        st.TileIndex = 0;
+        crawl.FleeBattle();
+        Assert.Equal(1, st.TileIndex);
+    }
 }

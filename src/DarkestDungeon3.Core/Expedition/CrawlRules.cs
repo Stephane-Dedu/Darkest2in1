@@ -33,6 +33,8 @@ public sealed class CrawlRules
     public float[] TrapDifficultyPenalty = { 0, 0, 0, 0.2f, 0.2f, 0.4f, 0.5f };
     public float ReturnBattleChance = 0.05f, ReturnHungerChance = 0.075f;
     public float AmbushCampChance = 0.33f;
+    /// <summary>DD1 combat retreat: chance, bonus per failed attempt (shared/rules.json).</summary>
+    public float RetreatChance = 0.7f, RetreatBonusPerAttempt = 0.05f;
     public int CampPoints = 12;
     public float CampRestoreTorch = 100f;
     /// <summary>DD1 meals: food per living hero, HP healed (fraction of max), DD1 stress (negative relieves).</summary>
@@ -81,6 +83,8 @@ public sealed class CrawlRules
         r.TrapScoutDisarmBonus = Get(rules, "trap_scout_disarm_bonus", r.TrapScoutDisarmBonus);
         if (rules["difficulty_trap_base"] is JArray trap) r.TrapDifficultyPenalty = trap.Select(t => (float)t).ToArray();
         r.AmbushCampChance = Get(rules, "ambush_camping_base_chance", r.AmbushCampChance);
+        r.RetreatChance = Get(rules, "combat_retreat_chance", r.RetreatChance);
+        r.RetreatBonusPerAttempt = Get(rules, "combat_retreat_bonus_chance_per_attempt", r.RetreatBonusPerAttempt);
         r.CampPoints = (int)Get(rules, "camp_start_camping_points", r.CampPoints);
         r.CampRestoreTorch = Get(rules, "camp_restore_torch", r.CampRestoreTorch);
         foreach (var m in rules["meals_table"] ?? new JArray())

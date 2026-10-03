@@ -21,6 +21,8 @@ public sealed class ExpeditionState
     public int TileIndex = -1;
     /// <summary>Room the party is walking toward while in a corridor.</summary>
     public int HeadingRoomId = -1;
+    /// <summary>The corridor square the party last stepped off into the current room (where a retreat leads).</summary>
+    public int CameFromCorridorId = -1, CameFromTileIndex = -1;
 
     public int Seed;
     public int RandomCounter;
@@ -67,6 +69,7 @@ public enum CrawlEventType
     Scouted,
     QuestComplete,
     Blocked,
+    Retreated,         // the party fled a fight and fell back
 }
 
 public sealed class CrawlEvent

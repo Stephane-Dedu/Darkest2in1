@@ -360,6 +360,15 @@ internal sealed class Driver : MonoBehaviour
             FinishExpedition();
             return;
         }
+        if (Dd2Combat.Retreated)
+        {
+            // DD1: the fight stays where it was; the party falls back the way it came.
+            Handle(Crawl.FleeBattle());
+            Announce("The party retreats!");
+            Phase = Phase.Crawling;
+            S.Persist();
+            return;
+        }
         Handle(Crawl.ResolveBattle());
         if (Crawl.LastSpoils is { } spoils)
             Plugin.Log.LogInfo($"[loot] {spoils.Kind} fight ({string.Join(" ", spoils.Dd1Monsters)}): " +
