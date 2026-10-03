@@ -60,10 +60,22 @@ internal static class Dd1Backdrop
             if (heroRenderers.Count == 0) { GiveUpAfter(3f, "no hero models yet"); return; }
 
             // The arena's scenery: every renderer in its scene that isn't part of an actor or an effect.
-            var scenery = arena.gameObject.scene.GetRootGameObjects()
+            // DD2 loads a fight's art in scenes of its own next to the arena's logic: every loaded scene's scenery
+            // (not actors, effects, our own objects or anything on the character/UI layers).
+            // Scenery props sit on the Deferred and Foreground layers too (the black cut-outs at the screen edges); only
+            // actors' parts are spared there (they are excluded below), plus anything on the character/UI layers.
+            var spared = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI") };
+            var scenes = Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount)
+                .Select(UnityEngine.SceneManagement.SceneManager.GetSceneAt).Where(sc => sc.isLoaded).ToList();
+            var scenery = scenes.SelectMany(sc => sc.GetRootGameObjects())
+                .Where(g => !g.name.StartsWith("DD3", StringComparison.Ordinal))
                 .SelectMany(g => g.GetComponentsInChildren<Renderer>(true))
-                .Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer && r.GetComponentInParent<ActorBhv>() == null)
+                .Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
+                            && !spared.Contains(r.gameObject.layer)
+                            && r.GetComponentInParent<ActorBhv>() == null)
                 .ToList();
+            Plugin.Log.LogInfo("[backdrop] scenes: " + string.Join(", ", scenes.Select(sc =>
+                $"{sc.name} ({scenery.Count(r => r.gameObject.scene == sc)})")));
             if (scenery.Count == 0) { GiveUpAfter(3f, "no scenery found"); return; }
             int layer = scenery.GroupBy(r => r.gameObject.layer).OrderByDescending(g => g.Count()).First().Key;
             var cam = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null && (c.cullingMask & (1 << layer)) != 0)
@@ -99,8 +111,10 @@ internal static class Dd1Backdrop
                 if (!keep.Contains(l)) _sceneryMask |= 1 << l;
             }
             _sceneryCamera = cam;
-            _quadLayer = Enumerable.Range(8, 24).Reverse().FirstOrDefault(i => string.IsNullOrEmpty(LayerMask.LayerToName(i)) && (_sceneryMask & (1 << i)) == 0);
-            if (_quadLayer == 0) _quadLayer = layer;
+            // The backdrop goes on the scenery's own main layer: DD2's renderer draws that one (an unused layer was
+            // filtered out by it). That layer stays drawn; its scenery is hidden renderer by renderer.
+            _quadLayer = layer;
+            _sceneryMask &= ~(1 << layer);
             Ready = true;
             Tick();
             Plugin.Log.LogInfo($"[backdrop] DD1 scene behind the fight: {Hidden.Count} arena renderers hidden, scenery layers 0x{_sceneryMask:X} culled, backdrop on layer {_quadLayer}, camera {cam.name}, distance {distance:0.0}, feet at {feetY:0}px");

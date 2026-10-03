@@ -27,6 +27,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<bool> Dd1AudioOn;
     internal static ConfigEntry<float> Dd1MusicVolume, Dd1SoundVolume;
     internal static ConfigEntry<bool> Dd1BackdropOn;
+    internal static ConfigEntry<float> HeroModelBrightness;
     internal static ConfigEntry<float> Dd1MonsterScale;
 
     private void Awake()
@@ -39,6 +40,7 @@ public class Plugin : BaseUnityPlugin
         Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");
         Dd1MusicVolume = Config.Bind("Sound", "Dd1MusicVolume", 0.7f, "Volume of DD1's music (0-1).");
         Dd1SoundVolume = Config.Bind("Sound", "Dd1SoundVolume", 0.8f, "Volume of DD1's sounds and ambience (0-1).");
+        HeroModelBrightness = Config.Bind("Look", "HeroModelBrightness", 2.6f, "How much the DD2 hero models are brightened in the dungeon (their off-screen stage lacks DD2's arena lighting).");
         Dd1BackdropOn = Config.Bind("Look", "Dd1BackdropInFights", true, "Fights happen in front of the DD1 room or hallway the party is in (DD2's arena scenery hidden) instead of a DD2 arena.");
         Dd1MonsterArt = Config.Bind("Look", "Dd1MonstersInFights", true, "Draw DD1's own animated monsters over the DD2 enemies standing in for them (DD2 still runs the fight).");
         Dd1MonsterScale = Config.Bind("Look", "Dd1MonsterScale", 1f, "Size of the DD1 monsters in fights, relative to the DD2 model they replace.");

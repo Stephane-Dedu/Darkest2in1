@@ -248,7 +248,7 @@ internal sealed class CrawlUi
         // DD2's animated hero models, rendered off-screen at DD1's rank positions (see HeroStage).
         // DD2's hero models once the stage has found a way to light them; DD2's hero art until then.
         var models = Plugin.HeroModels.Value && Dd2.HeroStage.Lit ? Dd2.HeroStage.Instance?.Texture : null;
-        if (models != null) GUI.DrawTexture(new Rect(0, 0, 1920, 720), models);
+        if (models != null) GUI.DrawTexture(new Rect(0, 0, 1920, 720), Dd2.HeroStage.Instance.Brightened ?? models);
         for (int rank = 0; rank < exp.Party.Count && rank < 4; rank++)
         {
             string id = exp.Party[rank];
@@ -298,6 +298,24 @@ internal sealed class CrawlUi
                 else D.SelectedHeroId = id;
             }
         }
+    }
+
+    private static Material _brighten;
+
+    /// <summary>The hero models' picture, brightened: off in their far-away stage DD2's per-arena lighting doesn't
+    /// reach them, so they come out dark (in fights, lit by the arena, they look right).</summary>
+    private static void DrawBrightened(Rect r, Texture tex)
+    {
+        if (Event.current.type != EventType.Repaint) return;
+        if (_brighten == null)
+        {
+            var shader = Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default");
+            if (shader != null) _brighten = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+        }
+        if (_brighten == null) { GUI.DrawTexture(r, tex); return; }
+        float k = Plugin.HeroModelBrightness.Value;
+        _brighten.color = new Color(k, k, k, 1f);
+        Graphics.DrawTexture(r, tex, _brighten);
     }
 
     private static void DrawStressPips(float x, float y, float stress, float max)

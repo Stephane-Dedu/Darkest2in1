@@ -249,8 +249,35 @@ internal sealed class HeroStage : MonoBehaviour
 
     private float _nextLayerFix;
 
+    private RenderTexture _bright;
+    private Material _brighten;
+
+    /// <summary>The models' picture brightened (DD2's per-arena lighting doesn't reach this far-away stage, so they
+    /// come out dark; in fights, lit by the arena, they look right). Null if it can't be made.</summary>
+    public Texture Brightened => _bright != null && _bright.IsCreated() ? _bright : null;
+
+    private void Brighten()
+    {
+        if (_texture == null || _camera == null || !_camera.enabled) return;
+        if (_brighten == null)
+        {
+            var shader = Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default");
+            if (shader == null) return;
+            _brighten = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+        }
+        if (_bright == null) { _bright = new RenderTexture(_texture.width, _texture.height, 0, RenderTextureFormat.ARGB32) { name = "DD3HeroStageBright" }; _bright.Create(); }
+        float k = Plugin.HeroModelBrightness.Value;
+        _brighten.color = new Color(k, k, k, 1f);
+        var prev = RenderTexture.active;
+        RenderTexture.active = _bright;
+        GL.Clear(true, true, new Color(0, 0, 0, 0));
+        RenderTexture.active = prev;
+        Graphics.Blit(_texture, _bright, _brighten);
+    }
+
     private void LateUpdate()
     {
+        Brighten();
         if (_light != null) _light.intensity = LightIntensity * _exposure;
         foreach (var k in _keyLights) if (k != null) k.intensity = LightIntensity * 2f * _exposure;
         CheckNotBlack();
