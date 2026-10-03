@@ -143,6 +143,7 @@ internal static class Dd1Backdrop
     public static void Tick()
     {
         if (!Ready || _material == null) return;
+        HideNewScenery();
         try
         {
             foreach (var cam in Camera.allCameras)
@@ -175,6 +176,49 @@ internal static class Dd1Backdrop
             }
         }
         catch (Exception e) { Plugin.Log.LogWarning("[backdrop] tick: " + e.Message); }
+    }
+
+    private static float _nextScan;
+    private static readonly HashSet<int> Seen = new();
+    private static readonly Type ParticleSystemType = Type.GetType("UnityEngine.ParticleSystem, UnityEngine.ParticleSystemModule");
+
+    /// <summary>
+    /// DD2 adds scenery during a fight (skill close-up backgrounds, props): twice a second, hide any new scenery
+    /// renderer, so only DD1's scene shows behind the actors. Actors, effects (anything with a particle system or
+    /// named as an effect), our own objects and the character/UI layers are left alone.
+    /// </summary>
+    private static void HideNewScenery()
+    {
+        if (Time.unscaledTime < _nextScan) return;
+        _nextScan = Time.unscaledTime + 0.5f;
+        try
+        {
+            var spared = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI") };
+            int hidden = 0;
+            for (int i = 0; i < UnityEngine.SceneManagement.SceneManager.sceneCount; i++)
+            {
+                var scene = UnityEngine.SceneManagement.SceneManager.GetSceneAt(i);
+                if (!scene.isLoaded) continue;
+                foreach (var root in scene.GetRootGameObjects())
+                {
+                    if (root.name.StartsWith("DD3", StringComparison.Ordinal)) continue;
+                    foreach (var r in root.GetComponentsInChildren<Renderer>(true))
+                    {
+                        if (!Seen.Add(r.GetInstanceID())) continue;
+                        if (!(r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer) || !r.enabled || r.forceRenderingOff) continue;
+                        if (spared.Contains(r.gameObject.layer) || r.GetComponentInParent<ActorBhv>() != null) continue;
+                        string n = r.gameObject.name.ToLowerInvariant();
+                        if (n.Contains("vfx") || n.Contains("fx_") || n.StartsWith("fx")) continue;
+                        if (ParticleSystemType != null && r.GetComponentInParent(ParticleSystemType) != null) continue;
+                        r.forceRenderingOff = true;
+                        Hidden.Add(r);
+                        hidden++;
+                    }
+                }
+            }
+            if (hidden > 0) Plugin.Log.LogInfo($"[backdrop] hid {hidden} more DD2 scenery renderers");
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] scan: " + e.Message); }
     }
 
     private static readonly Type UrpCameraData = Type.GetType("UnityEngine.Rendering.Universal.UniversalAdditionalCameraData, Unity.RenderPipelines.Universal.Runtime");
@@ -258,6 +302,7 @@ internal static class Dd1Backdrop
     /// <summary>The fight is over: give DD2 its arena back.</summary>
     public static void End()
     {
+        Seen.Clear();
         SetDd2Fog(true);
         SetDepthOfField(true);
         foreach (var r in Hidden) if (r != null) r.forceRenderingOff = false;
