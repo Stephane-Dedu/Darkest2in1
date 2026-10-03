@@ -82,13 +82,13 @@ public sealed class SpineAtlas
     }
 }
 
-public sealed class SpineSkeleton
+public sealed partial class SpineSkeleton
 {
     public sealed class Bone
     {
         public string Name;
         public int Parent;
-        public float X, Y, ScaleX, ScaleY, Rotation;
+        public float X, Y, ScaleX, ScaleY, Rotation, Length;
         public bool InheritScale, InheritRotation;
         // setup-pose world transform
         public float A, B, C, D, WorldX, WorldY, WorldScaleX, WorldScaleY, WorldRotation;
@@ -151,31 +151,37 @@ public sealed class SpineSkeleton
         {
             var b = new Bone { Name = r.String(), Parent = r.VarInt() - 1 };
             b.X = r.Float(); b.Y = r.Float(); b.ScaleX = r.Float(); b.ScaleY = r.Float(); b.Rotation = r.Float();
-            r.Float();                       // length
+            b.Length = r.Float();
             r.Bool(); r.Bool();              // flipX, flipY
             b.InheritScale = r.Bool(); b.InheritRotation = r.Bool();
             if (nonessential) r.Int();       // colour
             sk.Bones.Add(b);
         }
-        for (int i = 0, n = r.VarInt(); i < n; i++)   // IK constraints: not needed for the setup pose
+        for (int i = 0, n = r.VarInt(); i < n; i++)   // IK constraints (the setup pose ignores them; animations use them)
         {
-            r.String();
-            for (int j = 0, m = r.VarInt(); j < m; j++) r.VarInt();
-            r.VarInt(); r.Float(); r.Byte();
+            var ik = new IkConstraint { Name = r.String() };
+            for (int j = 0, m = r.VarInt(); j < m; j++) ik.Bones.Add(r.VarInt());
+            ik.Target = r.VarInt();
+            ik.Mix = r.Float();
+            ik.BendPositive = (sbyte)r.Byte() >= 0;
+            sk.IkConstraints.Add(ik);
         }
         for (int i = 0, n = r.VarInt(); i < n; i++)
             sk.Slots.Add(new Slot { Name = r.String(), Bone = r.VarInt(), Color = (uint)r.Int(), Attachment = r.String(), Additive = r.Bool() });
 
         ReadSkin(r, sk.DefaultSkin, nonessential);
+        if (sk.DefaultSkin.Count > 0) sk.SkinOrder.Add(null);   // Spine lists the default skin first when it has any
         for (int i = 0, n = r.VarInt(); i < n; i++)
         {
             string name = r.String();
             var skin = new Dictionary<(int, string), Attachment>();
             ReadSkin(r, skin, nonessential);
             sk.Skins[name] = skin;
+            sk.SkinOrder.Add(name);
         }
-        // Events and animations follow; the setup pose doesn't need them.
         sk.ComputeWorld();
+        sk.ReadEventsAndAnimations(r);
+        sk.BytesRead = r.Position;
         return sk;
     }
 
@@ -477,6 +483,15 @@ public sealed class SpineSkeleton
             for (int i = 0; i < a.Length; i++) a[i] = Short();
             return a;
         }
+
+        /// <summary>Spine's varint without "optimize positive": zigzag-encoded.</summary>
+        public int SignedVarInt()
+        {
+            int v = VarInt();
+            return (v >> 1) ^ -(v & 1);
+        }
+
+        public bool AtEnd => Position >= _b.Length;
 
         public int[] Ints()
         {

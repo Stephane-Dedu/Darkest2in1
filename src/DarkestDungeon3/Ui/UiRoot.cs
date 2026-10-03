@@ -53,6 +53,7 @@ internal sealed class UiRoot : MonoBehaviour
                     _crawl.Draw();
                     break;
                 case Phase.Fighting:
+                    Dd2.Dd1MonsterView.Draw();
                     DrawRetreatButton();
                     Gui.DrawAnnouncement();
                     break;

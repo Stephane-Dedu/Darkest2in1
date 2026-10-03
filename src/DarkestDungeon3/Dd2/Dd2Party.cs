@@ -23,6 +23,9 @@ internal sealed class Dd2Party : IParty
 
     public uint Guid(string heroId) => _guids.TryGetValue(heroId, out var g) ? g : 0u;
 
+    /// <summary>Every hero's DD2 actor id.</summary>
+    public IEnumerable<uint> Guids => _guids.Values;
+
     public IReadOnlyList<string> Alive =>
         _guids.Where(kv => !Dd2Api.IsDead(kv.Value)).Select(kv => kv.Key).ToList();
 

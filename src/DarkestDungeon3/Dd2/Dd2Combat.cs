@@ -185,6 +185,7 @@ internal static class Dd2Combat
         InFight = false;
         Assets.Code.Events.EventManager.RemoveListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
         FightBuffs.Remove(_buffed);
+        Dd1MonsterView.Clear();
         Plugin.Log.LogInfo($"[combat] fight over, party wiped: {partyWiped}");
         Finished?.Invoke(partyWiped);
     }

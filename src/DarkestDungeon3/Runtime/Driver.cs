@@ -459,6 +459,8 @@ internal sealed class Driver : MonoBehaviour
         var buffs = Crawl.FightBuffs().Select(b => (Party.Guid(b.Hero), b.Buff)).Where(b => b.Item1 != 0).ToList();
         if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised))
         {
+            // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
+            Dd1MonsterView.Prepare(plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
             Phase = Phase.Fighting;
             S.Persist();
         }

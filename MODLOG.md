@@ -346,6 +346,11 @@ Feasibility notes (decomp):
 - [ ] DD1 hallway strip: far/mid parallax behind the walls' gaps, doors and end walls at both ends; walking by
       keys and by map route is continuous (no 0.3 s slides); stops at fights/curios/traps; fade into a room at
       the last door and out of a room into a hallway; room exits by arrows fade too.
+- [ ] DD1 monsters in fights (Look.Dd1MonstersInFights): log "[dd1art] N DD1 monsters to draw", "drawing with
+      UI/Default", "bound N/N". Each stand-in's 3D model hidden only once DD1's art draws; idle loop, held attack
+      pose on its skill, defend pose when hit, death animation. Check position/size on the DD2 model, facing
+      (mirrored to face the heroes), skill zoom-ins (DD2 may present skills with other objects), torch dimming,
+      UI overlap (drawn over DD2's combat UI). If anything throws, DD2's models come back (logged).
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps
