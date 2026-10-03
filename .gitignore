@@ -7,3 +7,5 @@ decomp/
 extracted/
 *.dll
 !lib/README.md
+# machine-specific build paths
+Directory.Build.local.props

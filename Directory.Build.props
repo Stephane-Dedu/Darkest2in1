@@ -1,5 +1,7 @@
 <Project>
-  <!-- Machine-specific paths. Override on the command line: dotnet build -p:GameDir=... -->
+  <!-- Machine-specific paths: put your own in Directory.Build.local.props (not committed; see README),
+       or override on the command line: dotnet build -p:GameDir=... -->
+  <Import Project="Directory.Build.local.props" Condition="Exists('$(MSBuildThisFileDirectory)Directory.Build.local.props')" />
   <PropertyGroup>
     <GameDir Condition="'$(GameDir)' == ''">C:\Users\Piral\DarkestDungeon3\game</GameDir>
     <GameManaged>$(GameDir)\Darkest Dungeon II_Data\Managed</GameManaged>
