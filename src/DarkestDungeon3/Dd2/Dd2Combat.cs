@@ -72,9 +72,8 @@ internal static class Dd2Combat
         }
         string arena = plan.Arenas.FirstOrDefault(ArenaExists);
 
-        var source = plan.Kind == FightKind.CampAmbush ? CombatSource.CAMP_AMBUSH
-                   : heroesSurprised ? CombatSource.AMBUSH
-                   : CombatSource.DUNGEON;
+        // Not CAMP_AMBUSH: after its results DD2 goes to the Inn or the Embark screen instead of back to the road.
+        var source = plan.Kind == FightKind.CampAmbush || heroesSurprised ? CombatSource.AMBUSH : CombatSource.DUNGEON;
         var scenario = new CombatScenarioData(battle, arena, source, party);
 
         Dd2Api.Torch = torch;
@@ -111,6 +110,24 @@ internal static class KeepRoadSceneLoaded
         string scene = __instance.gameObject.scene.name;
         if (scene != GameModeType.DRIVING.m_sceneName) return true;
         Plugin.Log.LogWarning($"[combat] results screen object lives in {scene}; not unloading the road scene");
+        return false;
+    }
+}
+
+/// <summary>
+/// DD2's Victory screen hands out DD2 items, hero points and torch, which mean nothing in the DD1 campaign: during
+/// our fights, skip the loot window (DD1 loot is rolled by the crawl instead) and let the results timeline go on.
+/// </summary>
+[HarmonyPatch(typeof(Assets.Code.Loot.LootManager), nameof(Assets.Code.Loot.LootManager.ShowLoot))]
+internal static class NoDd2LootInOurFights
+{
+    private static bool Prefix(Assets.Code.Loot.LootManager __instance, UnityEngine.Events.UnityAction onFinished)
+    {
+        if (!Dd2Combat.InFight) return true;
+        __instance.ClearShowWindowVariables();
+        __instance.ClearShowToastVariables();
+        Plugin.Log.LogInfo("[combat] DD2 loot window skipped (DD1 loot instead)");
+        onFinished?.Invoke();
         return false;
     }
 }

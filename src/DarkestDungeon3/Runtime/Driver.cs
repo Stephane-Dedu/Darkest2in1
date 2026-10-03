@@ -337,6 +337,9 @@ internal sealed class Driver : MonoBehaviour
             return;
         }
         Handle(Crawl.ResolveBattle());
+        if (Crawl.LastSpoils is { } spoils)
+            Plugin.Log.LogInfo($"[loot] {spoils.Kind} fight ({string.Join(" ", spoils.Dd1Monsters)}): " +
+                               $"took {string.Join(", ", spoils.Taken)}; left {string.Join(", ", spoils.LeftBehind)}");
         Phase = Phase.Crawling;
         S.Persist();
     }

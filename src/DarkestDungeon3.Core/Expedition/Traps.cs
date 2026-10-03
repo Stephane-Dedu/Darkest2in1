@@ -59,6 +59,7 @@ public sealed class CrawlContent
     public LootTables Loot;
     public ItemCatalog Items;
     public CampingSkills Camping;
+    public BattleLoot Battles;
 
     public static CrawlContent Load(Dd1Install dd1)
     {
@@ -71,6 +72,7 @@ public sealed class CrawlContent
             Traps = TrapLibrary.Load(dd1),
             Items = ItemCatalog.Load(dd1),
             Camping = CampingSkills.Load(dd1),
+            Battles = BattleLoot.Load(dd1),
             Curios = new CurioResolver(CurioLibrary.Load(dd1), effects, loot),
         };
     }

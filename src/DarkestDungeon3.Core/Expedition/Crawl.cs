@@ -175,10 +175,14 @@ public sealed class Crawl
     }
 
     /// <summary>Report a won fight at the party's current spot.</summary>
+    /// <summary>The loot of the last fight won (DD1 rules, see <see cref="BattleLoot"/>).</summary>
+    public BattleSpoils LastSpoils { get; private set; }
+
     public List<CrawlEvent> ResolveBattle()
     {
         _events.Clear();
         State.BattlesWon++;
+        LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
         if (State.InRoom)
         {
             var room = CurrentRoom;
@@ -192,6 +196,23 @@ public sealed class Crawl
         }
         CheckQuest();
         return Flush();
+    }
+
+    private BattleSpoils TakeSpoils(string kind)
+    {
+        var spoils = new BattleSpoils { Kind = kind };
+        if (_content?.Battles == null || _content.Loot == null) return spoils;
+        var drops = _content.Battles.Roll(_content.Loot, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng(), out spoils.Dd1Monsters);
+        foreach (var drop in drops)
+        {
+            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items))
+            {
+                State.Pack.Add(drop.Key, drop.Amount);
+                spoils.Taken.Add(drop);
+            }
+            else spoils.LeftBehind.Add(drop);
+        }
+        return spoils;
     }
 
     /// <summary>Clear the obstacle ahead: with a shovel, or by force (damage and stress, as in DD1).</summary>

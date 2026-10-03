@@ -44,7 +44,7 @@ internal sealed class CrawlUi
         DrawHud(exp);
         if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
         if (exp.Camp != null) DrawCamp(crawl, exp);
-        else if (!DrawCurioResult(exp)) DrawPrompt(crawl, exp);
+        else if (!DrawSpoils(crawl) && !DrawCurioResult(exp)) DrawPrompt(crawl, exp);
         Gui.DrawAnnouncement();
     }
 
@@ -464,6 +464,46 @@ internal sealed class CrawlUi
     }
 
     // ---------------- curio / obstacle / trap prompt (DD1 "sidebar scroll" at 1348,200) ----------------
+
+    // ---------------- battle spoils (DD1's loot scroll) ----------------
+
+    private BattleSpoils _spoilsDismissed;
+
+    private bool DrawSpoils(Crawl crawl)
+    {
+        var spoils = crawl.LastSpoils;
+        if (spoils == null || spoils == _spoilsDismissed) return false;
+        if (spoils.Taken.Count == 0 && spoils.LeftBehind.Count == 0) { _spoilsDismissed = spoils; return false; }
+
+        float left = 1342 - 228, top = 140;
+        var scroll = Scroll("event_scroll_loot.png");
+        if (scroll != null) GUI.DrawTexture(new Rect(left, top, 456, 475), scroll);
+        else Gui.Fill(new Rect(left, top, 456, 475), new Color(0.05f, 0.04f, 0.03f, 0.93f));
+        Gui.Text(new Rect(left + 40, top + 26, 376, 48), "Spoils", 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+
+        var all = spoils.Taken.Select(d => (d, taken: true)).Concat(spoils.LeftBehind.Select(d => (d, taken: false))).ToList();
+        var items = S.Content.Items;
+        int perRow = Mathf.Min(5, all.Count);
+        for (int i = 0; i < all.Count && i < 10; i++)
+        {
+            var (drop, taken) = all[i];
+            int row = i / 5, col = i % 5, inRow = row == 0 ? perRow : Mathf.Min(5, all.Count - 5);
+            var r = new Rect(left + 228 - inRow * 40 + col * 80 + 4, top + 96 + row * 150, 72, 144);
+            var old = GUI.color;
+            if (!taken) GUI.color = new Color(0.45f, 0.45f, 0.45f, 0.9f);
+            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
+            if (icon != null) GUI.DrawTexture(r, icon);
+            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            GUI.color = old;
+            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
+        }
+        if (spoils.LeftBehind.Count > 0)
+            Gui.Text(new Rect(left + 40, top + 400, 376, 26), "The pack is full: the greyed items stay behind.", 17, Gui.Blood, TextAnchor.MiddleCenter);
+        if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", true, 24)
+            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+            _spoilsDismissed = spoils;
+        return true;
+    }
 
     // ---------------- curio result (DD1's result scroll at 1342,140) ----------------
 
