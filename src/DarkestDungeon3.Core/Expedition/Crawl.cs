@@ -50,6 +50,8 @@ public sealed class Crawl
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
         if (State.InRoom) CurrentRoom.CurioTaken = true;
         else CurrentTile.Resolved = true;
+        var pickRng = NextRng();
+        for (int i = 0; i < report.Loot.Count; i++) report.Loot[i] = LootDrop.ResolveTrinket(report.Loot[i], TrinketOfRarity, pickRng);
 
         foreach (var drop in report.Loot)
         {
@@ -321,6 +323,8 @@ public sealed class Crawl
         else drops = _content.Battles.Roll(_content.Loot, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng(), out spoils.Dd1Monsters);
         State.FightMonsters = null;
         State.FightAt = null;
+        var pick = NextRng();
+        drops = drops.Select(d => LootDrop.ResolveTrinket(d, TrinketOfRarity, pick)).ToList();
         foreach (var drop in drops)
         {
             if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items))
@@ -364,6 +368,10 @@ public sealed class Crawl
         TriggerTrap(tile, scouted: true, heroId);
         return Flush();
     }
+
+    /// <summary>Picks a trinket of a DD1 rarity (rarity, rng → trinket id) so loot holds real trinkets; the plugin
+    /// sets this (DD2's trinkets). Without it, trinket drops stay as rarities and are picked at homecoming.</summary>
+    public Func<string, Rng, string> TrinketOfRarity;
 
     /// <summary>A hero's DD1 class (for its trap disarm chance); the plugin sets this.</summary>
     public Func<string, string> HeroDd1Class;
@@ -490,7 +498,10 @@ public sealed class Crawl
             case "loot":
                 if (_content?.Loot != null && !string.IsNullOrEmpty(effect.SubType))
                     foreach (var d in _content.Loot.Roll(effect.SubType, Math.Max(1, (int)effect.Amount), State.Quest?.Difficulty ?? 1, State.Quest?.Dungeon ?? "", rng))
-                        State.Pack.Add(d.Key, d.Amount);
+                    {
+                        var drop = LootDrop.ResolveTrinket(d, TrinketOfRarity, rng);
+                        State.Pack.Add(drop.Key, drop.Amount);
+                    }
                 break;
             // remove_bleeding / remove_poison / remove_deaths_door_recovery_buffs: DoTs already landed out of
             // combat, and DD2 owns death's door recovery, so there's nothing left to undo.

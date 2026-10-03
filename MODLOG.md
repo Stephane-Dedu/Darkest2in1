@@ -430,6 +430,12 @@ Feasibility notes (decomp):
 - DD2 keeps adding renderers to an actor after the fight starts: hiding the stand-in once wasn't enough.
 - tools/test_enter_dungeon.sh: Embark plate now at (800,770) in the 1600x900 window; arrival = "[stage] hero models".
 
+## Parity loop, round 2 (2026-10-03)
+- Loot trinkets are rolled at the drop (LootDrop.ResolveTrinket + Crawl.TrinketOfRarity, set by the Driver to
+  Dd2Catalog.RandomTrinket); the pack key is "trinket:<dd2 id>"; ItemArt.Stack draws it (DD1's unknown-trinket art
+  for an unresolved rarity). Homecoming still resolves leftover rarity tokens.
+- F11 (fight here) + F10 chain several fights in place for testing; trinket drops are rare (none in 4 fights).
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).

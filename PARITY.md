@@ -79,7 +79,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Fights (around DD2 combat)
 - [x] Fights launch in DD2 combat with our party and DD1 encounter translations; return to the crawl; DD2 results view skipped; DD1 spoils scroll — round 1 (log "straight back to the dungeon").
 - [x] DD1 monsters drawn over their DD2 stand-ins, stand-in models hidden — round 1 screenshot (Bone Militia/Defender/Arbalist/Courtier). Was broken: DD2 adds model parts after the fight starts, they stayed visible in front of the DD1 art; now re-scanned twice a second.
-- [x] DD1 monsters fight with their DD1 skills (generated DD2 skills) — round 1: Bone Courtier cast "Tempting Goblet", no exceptions, fight won. Was broken: the presentation alias patched the generic ResourceDatabaseAddressable<,>.GetResource and broke loading heroes (run start hung); now ResourceDatabaseSkills.GetFallbackResourceId.
+- [x] DD1 monsters fight with their DD1 skills (generated DD2 skills) — round 1: Bone Courtier cast "Tempting Goblet", no exceptions, fight won; round 2: 4 fights (skeletons, cultists, madman), 0 exceptions. Was broken: the presentation alias patched the generic ResourceDatabaseAddressable<,>.GetResource and broke loading heroes (run start hung); now ResourceDatabaseSkills.GetFallbackResourceId.
 - [x] DD1 scene behind fights (no DD2 arena, fog/DoF/blur held off) — round 1 screenshots (room and hall). Was broken: it gave up after 3 s when hero models were slow to load ("not set up (no hero models yet)"), leaving DD2's arena: the user's "mix of DD1 and DD2"; now waits up to 30 s.
 - [ ] DD2 arena particles (red embers) still drawn over the DD1 scene in hall fights (they spawn after setup; the mid-fight scan skips particle systems).
 - [ ] DD2's colour grading tints the DD1 scene (red cast in the forest-exterior arena); DD1 shows its art untinted.
@@ -90,7 +90,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Retreat stress: DD1 `combat_retreat_stress` on success — check what the retreat applies.
 - [?] Torch level carried into DD2's torch (DD2's own darkness effects stand in for DD1's monster bonuses).
 - [x] Battle loot from DD1 encounter `loot:` codes; DD2 loot skipped — round 1 log "[loot] room fight (...): took 2 bust, very_common trinket, 1 skeleton_key, 1 portrait".
-- [ ] Spoils: a DD1 loot trinket shows as a rarity label ("Very Common") instead of a rolled trinket with its picture; check what lands in the stash.
+- [?] Loot trinkets: DD1 rolls the trinket when it drops (loot tables give a rarity: `loot/*.json` "trinket" + rarity) and the spoils show it; the mod carried "trinket:very_common" until homecoming (spoils showed a label). Now rolled at the drop (Crawl.TrinketOfRarity → a DD2 trinket of the mapped rarity), shown with its picture and tooltip in spoils, curio results and the pack (BattleLootTests.LootTrinketsAreRolledWhenTheyDrop). In game: no trinket dropped in 4 fights (round 2); look for a trinket picture on the spoils scroll.
+- [ ] Trinkets take a pack slot in DD1 (one per slot, no stacking); the mod lets trinket loot in even when the pack is full.
 - [?] Camp/town buffs carried into fights as DD2 buffs.
 
 ## Afflictions, virtues, deaths

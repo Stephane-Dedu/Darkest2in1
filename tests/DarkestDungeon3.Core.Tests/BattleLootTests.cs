@@ -8,6 +8,21 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1 battle loot from the user's DD1 install: mash encounters and monster loot codes.</summary>
 public class BattleLootTests
 {
+    [Fact]
+    public void LootTrinketsAreRolledWhenTheyDrop()
+    {
+        // DD1 rolls the trinket itself at the drop (the spoils show it); a rarity token is only a fallback.
+        var rarity = new LootDrop { Type = "trinket", Id = "very_common", Amount = 1 };
+        var picked = LootDrop.ResolveTrinket(rarity, (r, rng) => r == "very_common" ? "sun_ring" : null, new Rng(1));
+        Assert.Equal("sun_ring", picked.Id);
+        Assert.Equal("trinket:sun_ring", picked.Key);
+        Assert.Same(rarity, LootDrop.ResolveTrinket(rarity, null, new Rng(1)));            // no picker: unchanged
+        var gold = new LootDrop { Type = "gold", Id = "gold", Amount = 250 };
+        Assert.Same(gold, LootDrop.ResolveTrinket(gold, (r, rng) => "x", new Rng(1)));       // not a trinket
+        var concrete = new LootDrop { Type = "trinket", Id = "sun_ring", Amount = 1 };
+        Assert.Same(concrete, LootDrop.ResolveTrinket(concrete, (r, rng) => "x", new Rng(1))); // already a trinket
+    }
+
     private static readonly Dd1Install Install = Dd1Install.Find();
     private static readonly BattleLoot Battles = BattleLoot.Load(Install);
     private static readonly LootTables Tables = LootTables.Load(Install);

@@ -74,7 +74,7 @@ public static class Homecoming
                 string id = kv.Key.Substring(8);
                 for (int i = 0; i < kv.Value; i++)
                 {
-                    string trinket = TrinketRarities.Contains(id) ? trinketOfRarity?.Invoke(id) : id;
+                    string trinket = LootDrop.IsTrinketRarity(id) ? trinketOfRarity?.Invoke(id) : id;
                     if (trinket == null) continue;
                     estate.Trinkets.Add(trinket);
                     report.Trinkets.Add(trinket);
@@ -89,7 +89,7 @@ public static class Homecoming
             {
                 if (r.Type == "trinket")
                 {
-                    string trinket = r.Id != null && TrinketRarities.Contains(r.Id) ? trinketOfRarity?.Invoke(r.Id) : r.Id;
+                    string trinket = LootDrop.IsTrinketRarity(r.Id) ? trinketOfRarity?.Invoke(r.Id) : r.Id;
                     if (trinket != null) { estate.Trinkets.Add(trinket); report.Trinkets.Add(trinket); }
                 }
                 else estate.Add(r.Type, r.Amount);
@@ -147,7 +147,6 @@ public static class Homecoming
         return report;
     }
 
-    private static readonly HashSet<string> TrinketRarities = new() { "very_common", "common", "uncommon", "rare", "very_rare", "ancestral", "crimson_court", "trophy", "kickstarter" };
 }
 
 /// <summary>How an expedition ended, for the results screen.</summary>

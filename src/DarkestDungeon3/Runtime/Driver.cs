@@ -188,6 +188,7 @@ internal sealed class Driver : MonoBehaviour
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
+        Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
         LastCurio = null;
         Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;

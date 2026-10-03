@@ -692,13 +692,7 @@ internal sealed class CrawlUi
             var (drop, taken) = all[i];
             int row = i / 5, col = i % 5, inRow = row == 0 ? perRow : Mathf.Min(5, all.Count - 5);
             var r = new Rect(left + 228 - inRow * 40 + col * 80 + 4, top + 96 + row * 150, 72, 144);
-            var old = GUI.color;
-            if (!taken) GUI.color = new Color(0.45f, 0.45f, 0.45f, 0.9f);
-            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
-            if (icon != null) GUI.DrawTexture(r, icon);
-            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            GUI.color = old;
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
+            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)), dim: !taken);
         }
         if (spoils.LeftBehind.Count > 0)
             Gui.Text(new Rect(left + 40, top + 400, 376, 26), "The pack is full: the greyed items stay behind.", 17, Gui.Blood, TextAnchor.MiddleCenter);
@@ -741,10 +735,7 @@ internal sealed class CrawlUi
         {
             var drop = report.Loot[i];
             var r = new Rect(left + 228 - Mathf.Min(5, report.Loot.Count) * 40 + i * 80 + 4, top + 236, 72, 144);
-            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
-            if (icon != null) GUI.DrawTexture(r, icon);
-            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
+            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
         }
         if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", true, 24)
             || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))

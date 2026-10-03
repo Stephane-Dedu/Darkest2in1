@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,23 @@ public sealed class LootDrop
     public string Key => Type == "trinket" ? "trinket:" + Id : ItemCatalog.KeyOf(Type, Id);
 
     public override string ToString() => Type == "trinket" ? $"{Id} trinket" : $"{Amount} {Key}";
+
+    /// <summary>DD1's trinket rarities (loot tables name a rarity, not a trinket).</summary>
+    public static readonly HashSet<string> TrinketRarities = new() { "very_common", "common", "uncommon", "rare", "very_rare", "ancestral", "crimson_court", "trophy", "kickstarter" };
+
+    public static bool IsTrinketRarity(string id) => id != null && TrinketRarities.Contains(id);
+
+    /// <summary>
+    /// DD1 rolls the trinket itself when loot drops (the spoils show it, and it rides in the pack as that trinket):
+    /// a "trinket of rarity X" drop becomes a concrete trinket picked by <paramref name="pick"/> (rarity, rng → id).
+    /// Anything else, or no picker, comes back unchanged.
+    /// </summary>
+    public static LootDrop ResolveTrinket(LootDrop drop, Func<string, Rng, string> pick, Rng rng)
+    {
+        if (drop?.Type != "trinket" || pick == null || !IsTrinketRarity(drop.Id)) return drop;
+        string id = pick(drop.Id, rng);
+        return id == null ? drop : new LootDrop { Type = "trinket", Id = id, Amount = 1 };
+    }
 }
 
 /// <summary>DD1's loot tables (<c>loot/*.loot.json</c>): weighted entries that nest by table id.</summary>

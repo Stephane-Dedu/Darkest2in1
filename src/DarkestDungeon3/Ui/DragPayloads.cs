@@ -53,6 +53,23 @@ internal static class ItemArt
     {
         var old = GUI.color;
         if (dim) GUI.color = new Color(0.4f, 0.4f, 0.4f, old.a);
+        // A trinket rides in the pack as itself (DD1): its picture, and its details on hover.
+        if (key != null && key.StartsWith("trinket:", System.StringComparison.Ordinal))
+        {
+            string id = key.Substring(8);
+            if (Core.Expedition.LootDrop.IsTrinketRarity(id))
+            {
+                if (Art.Dd1("panels", "icons_equip", "trinket", "inv_trinket+_unknown.png") is { } unknown) GUI.DrawTexture(r, unknown);
+                else Gui.Text(r, HamletUi.Pretty(id), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            }
+            else
+            {
+                HeroSheet.TrinketIcon(r, id);
+                if (r.Contains(Event.current.mousePosition)) Gui.Tip(HeroSheet.TrinketText(id), HeroSheet.RarityColour(id));
+            }
+            GUI.color = old;
+            return;
+        }
         var icon = Art.InventoryIcon(key, Mathf.Max(1, count), Mathf.Max(1, stackLimit));
         if (icon != null) GUI.DrawTexture(r, icon); else Gui.Text(r, HamletUi.Pretty(key), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
         GUI.color = old;
