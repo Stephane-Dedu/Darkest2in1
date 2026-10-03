@@ -103,6 +103,7 @@ public sealed class QuestGoals
     public QuestGoal For(string questType, string zone)
     {
         if (!TypeGoals.TryGetValue(questType, out var byZone)) return null;
+        zone = Core.Dungeon.ZoneBase.Of(zone);
         var ids = byZone.TryGetValue(zone, out var z) && z.Count > 0 ? z
                 : byZone.TryGetValue("all", out var all) ? all : new List<string>();
         return ids.Select(id => Goals.TryGetValue(id, out var g) ? g : null).FirstOrDefault(g => g != null);

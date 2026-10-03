@@ -67,7 +67,7 @@ public sealed class CurioResolver
         if (outcome == null) return report;
 
         int difficulty = state.Quest?.Difficulty ?? 1;
-        string zone = state.Quest?.Dungeon ?? "";
+        string zone = Core.Dungeon.ZoneBase.Of(state.Quest?.Dungeon) ?? "";
         switch (outcome.Type)
         {
             case "Loot":

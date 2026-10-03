@@ -58,7 +58,9 @@ public sealed class LootTables
     public bool Has(string id) => _tables.Any(t => t.Id == id);
 
     /// <summary>Most specific table: exact zone and difficulty, then any zone, then any difficulty.</summary>
-    private Table Find(string id, int difficulty, string dungeon) =>
+    private Table Find(string id, int difficulty, string dungeon) => FindIn(id, difficulty, Core.Dungeon.ZoneBase.Of(dungeon));
+
+    private Table FindIn(string id, int difficulty, string dungeon) =>
         _tables.FirstOrDefault(t => t.Id == id && t.Difficulty == difficulty && t.Dungeon == dungeon)
         ?? _tables.FirstOrDefault(t => t.Id == id && t.Difficulty == difficulty && t.Dungeon == "")
         ?? _tables.Where(t => t.Id == id && (t.Dungeon == "" || t.Dungeon == dungeon))

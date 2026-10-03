@@ -31,11 +31,20 @@ public sealed class ZoneEncounters
 
     public static ZoneEncounters Load(string path) => Parse(File.ReadAllText(path));
 
-    public static ZoneEncounters Parse(string json) => new() { _root = JObject.Parse(json) };
+    public static ZoneEncounters Parse(string json)
+    {
+        var z = new ZoneEncounters { _root = JObject.Parse(json) };
+        foreach (var p in (z._root["zones"] as JObject)?.Properties() ?? Enumerable.Empty<JProperty>())
+            Core.Dungeon.ZoneBase.Register(p.Name, (string)p.Value["dd1_zone"], (string)p.Value["region_boss"]);
+        return z;
+    }
 
     public IEnumerable<string> Zones => (_root["zones"] as JObject)?.Properties().Select(p => p.Name) ?? Enumerable.Empty<string>();
 
     public string ZoneName(string zone) => (string)_root["zones"]?[zone]?["name"] ?? zone;
+
+    /// <summary>One line about an extra zone, for the estate options.</summary>
+    public string Blurb(string zone) => (string)_root["zones"]?[zone]?["blurb"] ?? "";
 
     /// <summary>DD1 boss monster classes look like "necromancer_A"; strip the tier letter.</summary>
     public static string BossKey(string dd1MonsterClass)

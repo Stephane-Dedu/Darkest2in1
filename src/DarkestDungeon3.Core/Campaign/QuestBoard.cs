@@ -25,20 +25,30 @@ public static class QuestBoard
         // Deal zones round-robin from a shuffled order, so every open zone gets work before any gets a second.
         var order = new List<string>(zones);
         rng.Shuffle(order);
-        for (int i = 0; i < count; i++)
-        {
-            string zone = order[i % order.Count];
-            var table = dd1.QuestTables.TryGetValue(zone, out var t) ? t : dd1.QuestTables.Values.First();
-            var options = At(table, progress, table[table.Count - 1]);
-            var (type, length) = PickWeighted(options, rng);
-
-            int zoneLevel = dd1.ZoneLevel(estate.ZoneXp.TryGetValue(zone, out var xp) ? xp : 0);
-            int difficulty = PickDifficulty(Dd1Campaign.MaxDifficultyForZoneLevel(zoneLevel), rng);
-
-            offers.Add(Build(estate, dd1, zone, type, length, difficulty, rng));
-        }
+        for (int i = 0; i < count; i++) offers.Add(Offer(estate, dd1, order[i % order.Count], progress, rng));
         offers.AddRange(PlotOffers(estate, dd1, zones));
         return offers;
+    }
+
+    /// <summary>Quests for one zone switched on mid-week (an estate option): a couple of regular ones and its boss.</summary>
+    public static List<QuestOffer> OffersFor(Estate estate, Dd1Campaign dd1, string zone, int count = 2)
+    {
+        var rng = estate.NextRng();
+        int progress = Math.Max(0, estate.QuestsCompleted);
+        var offers = new List<QuestOffer>();
+        for (int i = 0; i < count; i++) offers.Add(Offer(estate, dd1, zone, progress, rng));
+        offers.AddRange(PlotOffers(estate, dd1, new[] { zone }).Where(o => o.Dungeon == zone));
+        return offers;
+    }
+
+    private static QuestOffer Offer(Estate estate, Dd1Campaign dd1, string zone, int progress, Rng rng)
+    {
+        var table = dd1.QuestTables.TryGetValue(Dungeon.ZoneBase.Of(zone), out var t) ? t : dd1.QuestTables.Values.First();
+        var options = At(table, progress, table[table.Count - 1]);
+        var (type, length) = PickWeighted(options, rng);
+        int zoneLevel = dd1.ZoneLevel(estate.ZoneXp.TryGetValue(zone, out var xp) ? xp : 0);
+        int difficulty = PickDifficulty(Dd1Campaign.MaxDifficultyForZoneLevel(zoneLevel), rng);
+        return Build(estate, dd1, zone, type, length, difficulty, rng);
     }
 
     public const string DarkestDungeon = "darkestdungeon";
@@ -81,6 +91,41 @@ public static class QuestBoard
                 Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
             };
         }
+
+        // Extra zones (DD2 regions): their lair boss, one tier at a time at zone levels 2, 4 and 6 like DD1's bosses,
+        // paying what the borrowed DD1 zone's boss quest of that tier pays (without its boss-only trinket).
+        foreach (var zone in open.Where(Dungeon.ZoneBase.IsExtra))
+        {
+            string boss = Dungeon.ZoneBase.BossOf(zone);
+            if (boss == null) continue;
+            int level = dd1.ZoneLevel(estate.ZoneXp.TryGetValue(zone, out var zx) ? zx : 0);
+            for (int tier = 1; tier <= 3; tier++)
+            {
+                string id = $"region_{zone}_boss_{tier}";
+                if (estate.CompletedPlotQuests.Contains(id)) continue;
+                if (level < tier * 2) break;
+                int difficulty = Difficulties[tier - 1];
+                string baseZone = Dungeon.ZoneBase.Of(zone);
+                var model = dd1.Goals.Plot.FirstOrDefault(p => p.Dungeon == baseZone && p.Type == "kill_boss" && p.Progression && p.Difficulty == difficulty);
+                yield return new QuestOffer
+                {
+                    Id = "plot:" + id,
+                    Dungeon = zone,
+                    Type = "kill_boss",
+                    Length = 2,
+                    Difficulty = difficulty,
+                    MapSeed = estate.NextSeed(),
+                    IsPlot = true,
+                    PlotId = id,
+                    BossId = boss,
+                    ResolveXp = model?.ResolveXp ?? 4 << (tier - 1),
+                    Rewards = model?.Rewards.Where(r => !(r.Type == "trinket" && r.Id != null && r.Id.StartsWith("boss_")))
+                                  .Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList()
+                              ?? new List<Reward> { new(Currency.Gold, 4500 * tier) },
+                };
+                break;
+            }
+        }
     }
 
     public static QuestOffer Build(Estate estate, Dd1Campaign dd1, string zone, string type, int length, int difficulty, Rng rng)
@@ -99,7 +144,7 @@ public static class QuestBoard
         int gold = dd1.Gold(difficulty, length);
         if (gold > 0) quest.Rewards.Add(new Reward(Currency.Gold, gold));
 
-        var heirlooms = dd1.HeirloomTypes.TryGetValue(zone, out var h) ? h : Currency.Heirlooms.ToList();
+        var heirlooms = dd1.HeirloomTypes.TryGetValue(Dungeon.ZoneBase.Of(zone), out var h) ? h : Currency.Heirlooms.ToList();
         string heirloom = rng.Pick(heirlooms);
         int amount = dd1.HeirloomAmount(heirloom, difficulty, length);
         if (amount > 0) quest.Rewards.Add(new Reward(heirloom, amount));

@@ -5,7 +5,9 @@
     "Difficulty keys are DD1's: 1 apprentice, 3 veteran, 5 champion, 6 Darkest Dungeon.",
     "Arenas are DD2 combat_arena_* scenes; the plugin checks each one exists and skips any that don't.",
     "Faction choice follows DD2's own region natives: forest = Lost Battalion, farm = Plague Eaters,",
-    "city = Fanatics, coast = Coastal crews, caves = Swine, mountain = the Cult."
+    "city = Fanatics, coast = Coastal crews, caves = Swine, mountain = the Cult.",
+    "dd2_* zones are DD2's regions as DD1-style zones (an estate option): 'dd1_zone' is the DD1 zone whose maps,",
+    "curios, quest tables and loot they borrow; 'region_boss' is the lair boss their kill-boss quests send you to."
   ],
   "zones": {
     "crypts": {
@@ -84,6 +86,96 @@
       "bosses": {
         "shuffler": { "battle": "table:cultist_guardian_biome_2_boss_cardinal", "arena": "combat_arena_caves_cultist" },
         "ancestor_heart": { "battle": "table:mountain_boss_table_body", "arena": "combat_arena_mountain_boss_body" }
+      }
+    },
+    "dd2_city": {
+      "name": "The Sprawl",
+      "blurb": "The Fanatics' burning streets, laid out like the Ruins. Lair boss: the Librarian.",
+      "dd1_zone": "crypts",
+      "region_boss": "librarian",
+      "arenas": {
+        "hall": ["combat_arena_city_dungeon_exterior"],
+        "room": ["combat_arena_city_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:fanatic_mashes_normal"], "room": ["table:fanatic_mashes_normal"] },
+        "3": { "hall": ["table:fanatic_mashes_hard"], "room": ["table:fanatic_mashes_hard", "table:fanatic_mashes_normal_champions"] },
+        "5": { "hall": ["table:fanatic_mashes_hard_champions"], "room": ["table:fanatic_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "librarian": { "battle": "config:city_dungeon_3_a", "arena": "combat_arena_city_dungeon_interior" }
+      }
+    },
+    "dd2_farm": {
+      "name": "The Foetor",
+      "blurb": "Plague Eaters on rotting farmland, laid out like the Warrens. Lair boss: the Harvest Child.",
+      "dd1_zone": "warrens",
+      "region_boss": "harvest_child",
+      "arenas": {
+        "hall": ["combat_arena_farm_dungeon_exterior"],
+        "room": ["combat_arena_farm_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:plague_eater_mashes_normal"], "room": ["table:plague_eater_mashes_normal"] },
+        "3": { "hall": ["table:plague_eater_mashes_hard"], "room": ["table:plague_eater_mashes_hard", "table:plague_eater_mashes_normal_champions"] },
+        "5": { "hall": ["table:plague_eater_mashes_hard_champions"], "room": ["table:plague_eater_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "harvest_child": { "battle": "config:farm_dungeon_3", "arena": "combat_arena_farm_dungeon_interior" }
+      }
+    },
+    "dd2_forest": {
+      "name": "The Tangle",
+      "blurb": "The Lost Battalion haunts these woods, laid out like the Weald. Lair boss: the Dreaming General.",
+      "dd1_zone": "weald",
+      "region_boss": "dreaming_general",
+      "arenas": {
+        "hall": ["combat_arena_forest_dungeon_exterior"],
+        "room": ["combat_arena_forest_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:lost_battalion_mashes_normal"], "room": ["table:lost_battalion_mashes_normal"] },
+        "3": { "hall": ["table:lost_battalion_mashes_hard"], "room": ["table:lost_battalion_mashes_hard", "table:lost_battalion_mashes_normal_champions"] },
+        "5": { "hall": ["table:lost_battalion_mashes_hard_champions"], "room": ["table:lost_battalion_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "dreaming_general": { "battle": "config:forest_dungeon_3", "arena": "combat_arena_forest_dungeon_interior" }
+      }
+    },
+    "dd2_cave": {
+      "name": "The Sluice",
+      "blurb": "Cave Swine in flooded tunnels, laid out like the Warrens. Lair boss: the Cult's Exemplar.",
+      "dd1_zone": "warrens",
+      "region_boss": "exemplar",
+      "arenas": {
+        "hall": ["combat_arena_cave_faction", "combat_arena_caves_faction"],
+        "room": ["combat_arena_cave_faction", "combat_arena_caves_faction"]
+      },
+      "battles": {
+        "1": { "hall": ["table:swine_mashes_normal"], "room": ["table:swine_mashes_normal"] },
+        "3": { "hall": ["table:swine_mashes_hard"], "room": ["table:swine_mashes_hard", "table:swine_mashes_normal_champions"] },
+        "5": { "hall": ["table:swine_mashes_hard_champions"], "room": ["table:swine_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "exemplar": { "battle": "config:cultist_guardian_biome_3_boss_1", "arena": "combat_arena_cave_cultist" }
+      }
+    },
+    "dd2_coast": {
+      "name": "The Shroud",
+      "blurb": "Coastal crews on a fog-bound shore, laid out like the Cove. Lair boss: the Leviathan.",
+      "dd1_zone": "cove",
+      "region_boss": "leviathan",
+      "arenas": {
+        "hall": ["combat_arena_coast_dungeon_exterior", "combat_arena_coast_faction"],
+        "room": ["combat_arena_coast_dungeon_interior"]
+      },
+      "battles": {
+        "1": { "hall": ["table:coastal_mashes_normal"], "room": ["table:coastal_mashes_normal"] },
+        "3": { "hall": ["table:coastal_mashes_hard"], "room": ["table:coastal_mashes_hard", "table:coastal_mashes_normal_champions"] },
+        "5": { "hall": ["table:coastal_mashes_hard_champions"], "room": ["table:coastal_mashes_brutal_champions"] }
+      },
+      "bosses": {
+        "leviathan": { "battle": "config:coast_dungeon_3", "arena": "combat_arena_coast_dungeon_interior" }
       }
     }
   },

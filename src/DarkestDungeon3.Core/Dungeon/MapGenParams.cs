@@ -85,6 +85,7 @@ public sealed class MapGenTable
     /// </summary>
     public MapGenParams Find(string dungeon, string size, string questType)
     {
+        dungeon = ZoneBase.Of(dungeon);
         var exact = _all.FirstOrDefault(p => p.Dungeon == dungeon && p.Size == size && p.QuestType == questType);
         if (exact != null) return exact;
 

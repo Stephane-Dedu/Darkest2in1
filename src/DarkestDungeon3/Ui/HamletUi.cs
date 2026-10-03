@@ -348,6 +348,10 @@ internal sealed class HamletUi
             if (tex != null) GUI.DrawTexture(new Rect(x, BarY + 38, 40, 40), tex);
             Gui.Text(new Rect(x + 46, BarY + 34, 70, 48), E.Get(cur).ToString(), 28, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
         }
+        var regionsButton = new Rect(14, BarY + 30, 100, 56);
+        Gui.Text(regionsButton, "Regions", 22, regionsButton.Contains(Event.current.mousePosition) || _regionsOpen ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (Gui.Hotspot(regionsButton)) _regionsOpen = !_regionsOpen;
+        if (_regionsOpen) DrawRegions();
         var trinketsButton = new Rect(960, BarY + 30, 130, 56);
         Gui.Text(trinketsButton, $"Trinkets {E.Trinkets.Count}", 22, trinketsButton.Contains(Event.current.mousePosition) ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
         if (Gui.Hotspot(trinketsButton)) HeroSheet.RealmOpen = !HeroSheet.RealmOpen;
@@ -367,6 +371,45 @@ internal sealed class HamletUi
 
         if (Gui.DdButton(new Rect(1580, 1000, 310, 60), "Leave the Hamlet", size: 24))
             Driver.Instance.LeaveHamlet();
+    }
+
+    private bool _regionsOpen;
+
+    /// <summary>
+    /// Estate option: DD2's regions as extra DD1-style zones. Each borrows a DD1 zone's maps, curios and loot, is
+    /// fought by its DD2 natives and has its lair boss at zone levels 2, 4 and 6. Switching one on puts its quests on
+    /// this week's board.
+    /// </summary>
+    private void DrawRegions()
+    {
+        var zones = Core.Dungeon.ZoneBase.ExtraZones.ToList();
+        var panel = new Rect(300, BarY - 120 - zones.Count * 74, 860, 110 + zones.Count * 74);
+        Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
+        Gui.Fill(new Rect(panel.x, panel.y, panel.width, 2), new Color(0.45f, 0.38f, 0.24f));
+        Gui.Text(new Rect(panel.x + 24, panel.y + 12, 600, 44), "DD2 regions", 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(panel.x + 24, panel.y + 54, panel.width - 48, 30), "Extra zones for this estate. Their quests join the board when switched on.", 18, Gui.Dd1Class);
+        for (int i = 0; i < zones.Count; i++)
+        {
+            string z = zones[i];
+            bool on = E.IsToggled("zone." + z);
+            var row = new Rect(panel.x + 24, panel.y + 96 + i * 74, panel.width - 48, 66);
+            if (row.Contains(Event.current.mousePosition)) Gui.Fill(row, new Color(1, 1, 1, 0.04f));
+            var box = new Rect(row.x + 4, row.y + 16, 32, 32);
+            Gui.Fill(box, new Color(0.12f, 0.1f, 0.07f));
+            Gui.Fill(new Rect(box.x, box.y, box.width, 2), new Color(0.45f, 0.38f, 0.24f));
+            if (on) Gui.Fill(new Rect(box.x + 7, box.y + 7, 18, 18), Gui.Gold);
+            E.ZoneXp.TryGetValue(z, out int xp);
+            Gui.Text(new Rect(row.x + 52, row.y + 2, 400, 34), S.Zones.ZoneName(z), 26, on ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(row.x + 460, row.y + 2, 300, 34), on ? $"Level {S.Campaign.ZoneLevel(xp)}" : "Off", 20, Gui.Dd1Class, TextAnchor.MiddleRight);
+            Gui.Text(new Rect(row.x + 52, row.y + 34, row.width - 60, 28), S.Zones.Blurb(z), 17, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            if (Gui.Hotspot(row))
+            {
+                S.Hamlet.SetZoneToggle(z, !on);
+                S.Persist();
+                Gui.Announce(!on ? $"{S.Zones.ZoneName(z)}: its quests are on the board." : $"{S.Zones.ZoneName(z)} is closed.");
+            }
+        }
+        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) _regionsOpen = false;
     }
 
     // ---------------------------------------------------------------- building windows

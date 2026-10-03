@@ -65,6 +65,7 @@ public sealed class BattleLoot
     /// <summary>The DD1 monsters of an encounter of this kind (hall, room, boss), for the zone and quest difficulty.</summary>
     public List<string> RollEncounter(string zone, int difficulty, string kind, Rng rng)
     {
+        zone = Core.Dungeon.ZoneBase.Of(zone);
         if (zone == null || !_mash.TryGetValue(zone, out var levels) || levels.Count == 0) return new List<string>();
         int want = difficulty >= 6 ? 5 : System.Math.Max(1, difficulty);
         int level = levels.Keys.OrderBy(l => System.Math.Abs(l - want)).ThenBy(l => l).First();

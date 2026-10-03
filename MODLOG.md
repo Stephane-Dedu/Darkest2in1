@@ -275,7 +275,7 @@ All four screens now use DD1's own art and layout files, read from the user's DD
   dump, F8 state dump, F10 win the fight (not bosses), F11 fight here (alternating surprise). Window px = virtual × 0.8333.
 - Estate 2 is the test estate (poor: test scripts buy no supplies). Never test on Estate 1.
 
-## Toggle chosen by the user (2026-10-03): DD2 regions as DD1-style zones — research done, not built
+## Toggle chosen by the user (2026-10-03): DD2 regions as DD1-style zones — built (see Needs in-game check)
 DD2 v2.04 data for five extra zones (ids proposed: dd2_city, dd2_farm, dd2_forest, dd2_cave, dd2_coast):
 - Battles (BattleConfigurationTables): `<faction>_mashes_normal` (apprentice), `_hard` / `_normal_champions`
   (veteran), `_hard_champions` / `_brutal_champions` (champion). Natives: city = fanatic, farm = plague_eater,
@@ -351,6 +351,10 @@ Feasibility notes (decomp):
       pose on its skill, defend pose when hit, death animation. Check position/size on the DD2 model, facing
       (mirrored to face the heroes), skill zoom-ins (DD2 may present skills with other objects), torch dimming,
       UI overlap (drawn over DD2's combat UI). If anything throws, DD2's models come back (logged).
+- [ ] DD2 regions (estate bar "Regions"): switching one on puts 2 quests (+ its boss when due) on this week's
+      board, off removes them; quest map stacks them in a left column; a region expedition uses its DD1 zone's
+      maps/curios/art, DD2 natives fight (no DD1 translation), boss room = the lair boss config; zone XP and
+      level per region; boss tiers at levels 2/4/6.
 - [ ] Estate 1 repair on next load (backup estate_1.json.before_repair_20261003): quirks given, wagon stocked.
 
 ## Next steps

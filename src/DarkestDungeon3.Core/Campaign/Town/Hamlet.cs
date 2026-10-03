@@ -545,7 +545,7 @@ public sealed class Hamlet
     {
         string[] zones = { "crypts", "weald", "warrens", "cove", "darkestdungeon" };
         return EventData("embark_party_buff").Select(d => d.Str)
-            .Where(b => !zones.Any(z => b.Contains("_" + z + "_")) || (quest != null && b.Contains("_" + quest.Dungeon + "_")))
+            .Where(b => !zones.Any(z => b.Contains("_" + z + "_")) || (quest != null && b.Contains("_" + Dungeon.ZoneBase.Of(quest.Dungeon) + "_")))
             .ToList();
     }
 
@@ -579,6 +579,18 @@ public sealed class Hamlet
     }
 
     /// <summary>Zones added by toggles ("zone.<id>" = true), e.g. DD2 regions crawled DD1-style.</summary>
+    /// <summary>
+    /// Switch an extra zone (a DD2 region) on or off for this estate. Its quests join this week's board at once, or
+    /// leave it; the rest of the board stays as it was.
+    /// </summary>
+    public void SetZoneToggle(string zone, bool on)
+    {
+        if (Estate.IsToggled("zone." + zone) == on) return;
+        Estate.Toggles["zone." + zone] = on;
+        Estate.Quests.RemoveAll(q => q.Dungeon == zone);
+        if (on) Estate.Quests.AddRange(QuestBoard.OffersFor(Estate, Dd1, zone));
+    }
+
     public IEnumerable<string> ToggledZones() =>
         Estate.Toggles.Where(t => t.Value && t.Key.StartsWith("zone.")).Select(t => t.Key.Substring(5));
 

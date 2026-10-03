@@ -65,14 +65,15 @@ internal sealed class EmbarkUi
         if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg); else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
         Gui.Text(new Rect(560, 24, 900, 60), "Choose a quest", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
 
-        // Dungeons with their quests. Toggled-in DD2 zones have no spot on DD1's map: they line up at the bottom.
+        // Dungeons with their quests. DD2's regions (an estate option) have no spot on DD1's map: they stack in a
+        // column on the left, where the quest scroll opens over them.
         var spots = MapSpots();
         var zones = E.Quests.Select(q => q.Dungeon).Distinct().ToList();
         int extra = 0;
         foreach (var zone in zones)
         {
             if (!spots.TryGetValue(zone, out var pos))
-                pos = new Vector2(600 + (extra++ % 2) * 460, 640 + (extra - 1) / 2 * 150);
+                pos = new Vector2(130, 150 + extra++ * 150);
             DrawDungeon(zone, pos, E.Quests.Where(q => q.Dungeon == zone).ToList());
         }
 

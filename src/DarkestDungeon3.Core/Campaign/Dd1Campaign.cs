@@ -100,6 +100,7 @@ public sealed class Dd1Campaign
 
     public ZoneProps Props(string zone)
     {
+        zone = ZoneBase.Of(zone);
         if (_props.TryGetValue(zone, out var p)) return p;
         var path = Install.ZoneProps(zone);
         return _props[zone] = File.Exists(path) ? ZoneProps.Load(path) : ZoneProps.Empty;

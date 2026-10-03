@@ -448,8 +448,9 @@ internal sealed class Driver : MonoBehaviour
         var quest = Expedition.Quest;
         var rng = new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken);
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, rng, quest.BossId);
-        // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles).
-        if (kind != FightKind.Boss && S.Bestiary != null)
+        // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles,
+        // and DD2's regions keep their own natives).
+        if (kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
         {
             var monsters = Crawl.FightMonsters(kind == FightKind.Room ? "room" : "hall");
             plan.Enemies = S.Bestiary.Translate(monsters, rng, Dd2Combat.EnemySize);

@@ -33,7 +33,7 @@ internal sealed class CrawlUi
         var crawl = D.Crawl;
         var exp = D.Expedition;
         if (crawl == null || exp == null) return;
-        string zone = exp.Quest.Dungeon;
+        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD2 regions use their DD1 zone's art
         if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
 
         DrawScene(crawl, exp, zone);
