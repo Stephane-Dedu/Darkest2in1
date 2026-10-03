@@ -295,8 +295,24 @@ Plan:
 4. Hamlet "Estate options" panel with per-region toggles (Estate.Toggles "zone.<id>"; Hamlet.ToggledZones exists,
    the quest board already accepts extra zones).
 
+## End-to-end audit (2026-10-03) and the user's list — plan awaiting the user's choices
+Bugs found: DD2 quirk/item libraries are empty at the main menu → recruits get no quirks, the Nomad Wagon sells
+nothing (all 7 heroes on Estate 2 have no quirks); hero-only trinkets go to other classes (Vestal holds the Jester's
+Busker's Haul); fonts drawn at 50-65% of DD1's native size without mipmaps (small, thin); stress pips draw as white
+blocks.
+Feasibility notes (decomp):
+- Corpses: `ActorInstance.Kill(deathType, sourceType, ...)` → `GetIsDeathClassValid` decides the death class (corpse);
+  SourceType.DOT = bleed/blight kill; crits from `ApplyHealthDamage(isCrit)`.
+- Results view: `CombatPresentationBhv.SetNextGameMode` sets RESULTS; for our fights go straight to DRIVING.
+- Combat retreat: DD2 has it: `CombatBhv.AttemptRetreat()` (can fail; `IsRetreatInvalid`), `BattleResult.m_IsRetreat`,
+  CombatRules.RetreatEffects.
+- DD2 actors are Unity Animator models (no Spine): DD1 monsters can't become real DD2 actors without Unity-built asset
+  bundles; fal 3D conversion impractical (and the fal MCP rejected its token this session). Variety option: translate
+  each rolled DD1 encounter into the closest DD2 enemy types per slot.
+
 ## Next steps
-1. Build the DD2-regions toggle (plan above).
+1. The audit plan above, in the order the user picks.
+2. Build the DD2-regions toggle (plan above).
 2. Toggle upgrades (the user's "propose upgrades on a toggle"): DD2 zones crawled DD1-style with bosses. Proposal in
    the session summary; Estate.Toggles and Hamlet.ToggledZones already exist (quest board takes extra zones).
 2. Remaining DD1 bits: plot/arena/returning-dead town events; Darkest Dungeon quest chain verified in game; DD1
