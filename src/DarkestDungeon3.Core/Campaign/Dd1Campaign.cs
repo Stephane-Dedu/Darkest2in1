@@ -33,6 +33,8 @@ public sealed class Dd1Campaign
     public JObject Rules { get; private set; }
     /// <summary>DD1's quirk limits (quirks_max_*), with replacement over the cap.</summary>
     public QuirkLimits QuirkLimits { get; private set; } = new();
+    /// <summary>DD1 stress (of 100) every hero takes when a quest is abandoned (quest.exit_penalty.json fail_penalty).</summary>
+    public float AbandonStressDd1 { get; private set; } = 20f;
     public QuestGoals Goals { get; private set; }
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
     public Town.TownEvents TownEvents { get; private set; }
@@ -79,6 +81,8 @@ public sealed class Dd1Campaign
 
         c.Rules = (JObject)ReadJson(dd1.Rules);
         c.QuirkLimits = QuirkLimits.FromDd1(c.Rules);
+        var exitPenalty = dd1.PathOf("campaign", "quest", "quest.exit_penalty.json");
+        if (File.Exists(exitPenalty)) c.AbandonStressDd1 = (float?)ReadJson(exitPenalty)["fail_penalty"]?["stress_damage"] ?? c.AbandonStressDd1;
         c.Goals = QuestGoals.Load(dd1);
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);

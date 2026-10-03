@@ -71,7 +71,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Curios: DD1 interaction (click, drag any item, right item works), results (`curios/curio_type_library.csv`), quest curios.
 - [?] Corridor fights stop the party; room fights on entry; retreating backs off one square.
 - [?] Map (minimap) drag/click travel, room exits by keys.
-- [ ] Abandoning the expedition from the map: DD1 gives every hero stress on retreat-from-quest — check rule and button.
+- [x] Abandoning a quest: DD1 `campaign/quest/quest.exit_penalty.json` fail_penalty.stress_damage 20 on every hero ("The heroes will suffer the stress of defeat..."). Was: none. Now Homecoming adds 2 DD2 points (HamletTests.AbandoningAQuestCostsTheStressOfDefeat); the retreat button uses DD1's question and "Abandon Quest". Round 10 in game: heroes left at 1/10, came back 3/10 on the Retreat results.
+- [ ] Plot quests' retreat rules: DD1 `quest.plot_quests.json` `can_retreat` false (no abandoning) and `retreat_party_kill_count` 1 (abandoning the Darkest Dungeon costs a random hero) — not applied.
 
 ## Camping
 - [?] Camp with firewood: respite points (`camp_start_camping_points`), DD1 camping skills per class, meal, torch restore (`camp_restore_torch`).

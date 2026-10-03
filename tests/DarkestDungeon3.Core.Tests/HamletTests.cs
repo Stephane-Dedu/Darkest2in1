@@ -326,4 +326,24 @@ public class HamletTests
         Assert.Equal(2, r.XpGained);
         Assert.Equal(3, r.Stress);
     }
+
+    [Fact]
+    public void AbandoningAQuestCostsTheStressOfDefeat()
+    {
+        var h = NewHamlet(32);
+        var hero = h.Estate.Roster[0];
+        var exp = new DarkestDungeon3.Core.Expedition.ExpeditionState
+        {
+            Quest = new QuestOffer { Id = "q", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 },
+            Party = { hero.Id },
+            Retreated = true,
+        };
+        Assert.Equal(20f, Dd1.AbandonStressDd1);                  // DD1 quest.exit_penalty.json fail_penalty
+        var report = Homecoming.Report(h.Estate, Dd1, exp, new[] { new HeroOutcome { HeroId = hero.Id, Stress = 3 } });
+        Assert.Equal(5, Assert.Single(report.Heroes).Stress);     // 3 + 20/10
+        Assert.Equal(5, hero.Stress);
+        var exp2 = new DarkestDungeon3.Core.Expedition.ExpeditionState { Quest = exp.Quest, Party = { hero.Id }, Retreated = true };
+        Homecoming.Report(h.Estate, Dd1, exp2, new[] { new HeroOutcome { HeroId = hero.Id, Stress = 9 } });
+        Assert.Equal(10, hero.Stress);                            // capped at DD2's 10
+    }
 }

@@ -122,6 +122,12 @@ public static class Homecoming
             }
             var quirksBefore = hero.Quirks.ToList();
             hero.Stress = o.Stress;
+            if (expedition.Retreated && dd1 != null && dd1.AbandonStressDd1 > 0)
+            {
+                // DD1: "The heroes will suffer the stress of defeat" (20 of 100 = 2 of DD2's 10 points).
+                hero.Stress = Math.Min(10, hero.Stress + (int)Math.Round(dd1.AbandonStressDd1 / 10f, MidpointRounding.AwayFromZero));
+                log.Add($"{hero.Name} suffers the stress of defeat.");
+            }
             if (o.Quirks != null) hero.Quirks = o.Quirks;
             if (o.Trinkets != null) hero.Trinkets = o.Trinkets;
             result.Stress = hero.Stress;

@@ -391,9 +391,9 @@ internal sealed class CrawlUi
             {
                 if (_confirmRetreat) { _confirmRetreat = false; D.Leave(); return; }
                 _confirmRetreat = true;
-                Gui.Announce("Retreat? Click again to abandon the quest.");
+                Gui.Announce(S.Lore?.Text("retreat_confirm_raid_question") ?? "Are you sure you want to retreat? The heroes will suffer the stress of defeat...", 3.5f);
             }
-            Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : "Retreat", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
+            Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : S.Lore?.Text("retreat_raid_tooltip") ?? "Abandon Quest", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
         }
     }
 
