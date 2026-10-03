@@ -382,7 +382,7 @@ internal sealed class CrawlUi
             if (home == null ? Gui.DdButton(r, "Return home") : Gui.Hotspot(r)) D.Leave();
             Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, Gui.Gold, heading: true);
         }
-        else if (!crawl.IsBlocked)
+        else if (!crawl.IsBlocked && exp.Quest?.CanRetreat != false)   // DD1: some plot quests can't be abandoned
         {
             var retreat = Art.Panel("retreat_button.png");
             var r = Gui.At(retreat, 20, 112);
@@ -391,7 +391,9 @@ internal sealed class CrawlUi
             {
                 if (_confirmRetreat) { _confirmRetreat = false; D.Leave(); return; }
                 _confirmRetreat = true;
-                Gui.Announce(S.Lore?.Text("retreat_confirm_raid_question") ?? "Are you sure you want to retreat? The heroes will suffer the stress of defeat...", 3.5f);
+                Gui.Announce(exp.Quest?.RetreatKillCount > 0
+                    ? S.Lore?.Text("retreat_raid_party_kill_darkestdungeon_confirm_question") ?? "The fiends are closing in and a random hero must give their life to ensure the others will escape from the Darkest Dungeon. Really abandon quest?"
+                    : S.Lore?.Text("retreat_confirm_raid_question") ?? "Are you sure you want to retreat? The heroes will suffer the stress of defeat...", 3.5f);
             }
             Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : S.Lore?.Text("retreat_raid_tooltip") ?? "Abandon Quest", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
         }

@@ -79,6 +79,26 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void DarkestDungeonRetreatCostsAHero()
+    {
+        var dd1 = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.True(dd1.CanRetreat);
+        Assert.Equal(1, dd1.RetreatKillCount);                                        // DD1 retreat_party_kill_count
+        Assert.False(Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_4").CanRetreat);
+        Assert.Equal(0, Dd1.Goals.Plot.Single(p => p.Id == "plot_kill_necromancer_1").RetreatKillCount);
+
+        var quest = new QuestOffer { Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, RetreatKillCount = 1 };
+        var outcomes = new[] { "a", "b", "c", "d" }.Select(id => new HeroOutcome { HeroId = id }).ToList();
+        var after = Homecoming.RetreatSacrifices(quest, retreated: true, outcomes, new Rng(5));
+        var dead = Assert.Single(after, o => o.Died);
+        Assert.Equal("sacrificed to cover the retreat", dead.CauseOfDeath);
+        var kept = Homecoming.RetreatSacrifices(quest, retreated: false, new[] { new HeroOutcome { HeroId = "a" } }, new Rng(5));
+        Assert.DoesNotContain(kept, o => o.Died);                                     // only when abandoning
+        var normal = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 };
+        Assert.DoesNotContain(Homecoming.RetreatSacrifices(normal, true, new[] { new HeroOutcome { HeroId = "a" } }, new Rng(5)), o => o.Died);
+    }
+
+    [Fact]
     public void TrinketWarningOnHarderQuestsWithFewTrinkets()
     {
         var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();

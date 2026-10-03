@@ -40,13 +40,32 @@ public static class Homecoming
     /// value (<paramref name="items"/>); trinkets found go to the estate (rarity-only ones are rolled with
     /// <paramref name="trinketOfRarity"/>).
     /// </summary>
+    /// <summary>
+    /// DD1: abandoning a quest with retreat_party_kill_count (the Darkest Dungeon) costs that many random living heroes,
+    /// who stay behind to hold off the fiends. Returns the outcomes with those heroes dead.
+    /// </summary>
+    public static List<HeroOutcome> RetreatSacrifices(QuestOffer quest, bool retreated, IEnumerable<HeroOutcome> outcomes, Rng rng)
+    {
+        var list = outcomes.ToList();
+        if (!retreated || quest == null || quest.RetreatKillCount <= 0) return list;
+        var living = list.Where(o => !o.Died).OrderBy(o => o.HeroId, StringComparer.Ordinal).ToList();
+        for (int i = 0; i < quest.RetreatKillCount && living.Count > 0; i++)
+        {
+            var o = rng.Pick(living);
+            living.Remove(o);
+            o.Died = true;
+            o.CauseOfDeath = "sacrificed to cover the retreat";
+        }
+        return list;
+    }
+
     public static HomecomingReport Report(Estate estate, Dd1Campaign dd1, ExpeditionState expedition, IEnumerable<HeroOutcome> outcomes,
                                           ItemCatalog items = null, Func<string, string> trinketOfRarity = null)
     {
         var report = new HomecomingReport { Quest = expedition.Quest };
         var log = report.Log;
         var quest = expedition.Quest;
-        var outcomeList = outcomes.ToList();
+        var outcomeList = RetreatSacrifices(quest, expedition.Retreated, outcomes, estate.NextRng());
         bool success = expedition.QuestComplete && !expedition.Retreated;
         bool wiped = outcomeList.Count > 0 && outcomeList.All(o => o.Died);
         report.Result = success ? "complete" : wiped ? "defeat" : "retreat";

@@ -32,6 +32,10 @@ public sealed class PlotQuest
     public int ResolveXp;
     public List<Reward> Rewards = new();
     public bool Repeatable, Progression;
+    /// <summary>DD1: whether the quest can be abandoned, and how many random heroes die covering the retreat
+    /// (the Darkest Dungeon: 1; its last part can't be abandoned).</summary>
+    public bool CanRetreat = true;
+    public int RetreatKillCount;
 }
 
 public sealed class QuestGoals
@@ -86,6 +90,8 @@ public sealed class QuestGoals
                 ResolveXp = (int?)quest["completion_reward"]?["resolve_xp"] ?? 0,
                 Repeatable = (bool?)p["is_repeatable"] ?? false,
                 Progression = (bool?)p["is_progression"] ?? false,
+                CanRetreat = (bool?)p["can_retreat"] ?? true,
+                RetreatKillCount = (int?)p["retreat_party_kill_count"] ?? 0,
             };
             foreach (var item in (quest["completion_reward"]?["items_definition"]?["items"] as JObject)?.Properties().Select(x => x.Value) ?? Enumerable.Empty<JToken>())
             {

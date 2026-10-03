@@ -89,6 +89,8 @@ public static class QuestBoard
                 BossId = goal?.MonsterClasses.FirstOrDefault(),
                 ResolveXp = p.ResolveXp,
                 Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
+                CanRetreat = p.CanRetreat,
+                RetreatKillCount = p.RetreatKillCount,
             };
         }
 

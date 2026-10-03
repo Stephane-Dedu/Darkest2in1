@@ -72,7 +72,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Corridor fights stop the party; room fights on entry; retreating backs off one square.
 - [?] Map (minimap) drag/click travel, room exits by keys.
 - [x] Abandoning a quest: DD1 `campaign/quest/quest.exit_penalty.json` fail_penalty.stress_damage 20 on every hero ("The heroes will suffer the stress of defeat..."). Was: none. Now Homecoming adds 2 DD2 points (HamletTests.AbandoningAQuestCostsTheStressOfDefeat); the retreat button uses DD1's question and "Abandon Quest". Round 10 in game: heroes left at 1/10, came back 3/10 on the Retreat results.
-- [ ] Plot quests' retreat rules: DD1 `quest.plot_quests.json` `can_retreat` false (no abandoning) and `retreat_party_kill_count` 1 (abandoning the Darkest Dungeon costs a random hero) — not applied.
+- [?] Plot quests' retreat rules: DD1 `quest.plot_quests.json` — Darkest Dungeon parts 1-3 `retreat_party_kill_count` 1 (a random hero dies covering the retreat; DD1's question "The fiends are closing in..."), part 4 `can_retreat` false (no Abandon button). Was: any quest abandoned for free. Now PlotQuest/QuestOffer carry them, Homecoming.RetreatSacrifices kills the hero, CrawlUi hides/asks (QuestGoalTests.DarkestDungeonRetreatCostsAHero). Offers already on a saved board get the fields at the next weekly board. In game: needs a Darkest Dungeon quest (zone level 6).
 
 ## Camping
 - [?] Camp with firewood: respite points (`camp_start_camping_points`), DD1 camping skills per class, meal, torch restore (`camp_restore_torch`).
