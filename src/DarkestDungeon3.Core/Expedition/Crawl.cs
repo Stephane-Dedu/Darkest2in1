@@ -686,12 +686,32 @@ public sealed class Crawl
         if (revealed > 0) Emit(CrawlEventType.Scouted, roomId: room.Id, amount: revealed);
     }
 
-    private void EmitBattle(CrawlEventType type, HallTile tile, bool corridor, Rng rng, int roomId = -1)
+    /// <summary>
+    /// DD1's surprise chances for a battle (shared/rules.json surprise_*): unknown rooms/corridors 10%/10%; scouted
+    /// ("known") ones never surprise the party and catch the monsters 25% of the time; ambushes always surprise the
+    /// party. The torch's band adds its increases; each side is capped at 65% (ambushes excepted).
+    /// </summary>
+    public (float Heroes, float Monsters) SurpriseChances(bool corridor, bool known, bool ambush)
     {
         var band = _rules.Band(State.Light);
-        float heroes = (corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty) + band.HeroesSurprisedIncrease / 100f;
-        float monsters = (corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters) + band.MonstersSurprisedIncrease / 100f;
-        bool heroesSurprised = rng.Chance(Math.Min(heroes, _rules.SurpriseMaxParty));
+        float heroes = ambush ? _rules.SurpriseAmbushParty
+            : known ? (corridor ? _rules.SurpriseKnownCorridorParty : _rules.SurpriseKnownRoomParty)
+            : corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty;
+        float monsters = ambush ? _rules.SurpriseAmbushMonsters
+            : known ? (corridor ? _rules.SurpriseKnownCorridorMonsters : _rules.SurpriseKnownRoomMonsters)
+            : corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters;
+        heroes += band.HeroesSurprisedIncrease / 100f;
+        monsters += band.MonstersSurprisedIncrease / 100f;
+        // An ambush's 1.0 means "always" (DD1's camp and corridor-return ambushes surprise the party): no cap there.
+        float heroCap = ambush ? 1f : _rules.SurpriseMaxParty;
+        return (Math.Max(0f, Math.Min(heroes, heroCap)), Math.Max(0f, Math.Min(monsters, _rules.SurpriseMaxMonsters)));
+    }
+
+    private void EmitBattle(CrawlEventType type, HallTile tile, bool corridor, Rng rng, int roomId = -1)
+    {
+        bool known = tile != null ? tile.Scouted : roomId >= 0 && Map.Room(roomId) is { Scouted: true };
+        var (heroes, monsters) = SurpriseChances(corridor, known, type == CrawlEventType.Ambush);
+        bool heroesSurprised = rng.Chance(heroes);
         bool monstersSurprised = !heroesSurprised && rng.Chance(monsters);
 
         var e = new CrawlEvent

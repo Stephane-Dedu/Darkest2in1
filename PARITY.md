@@ -62,8 +62,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Crawl
 - [x] Walking the DD1 hallway with DD1 art; hunger checks through DD2 actors — playtests 1-3; rooms, map and HUD in round 1 screenshots.
 - [?] Light: 6 per new square / 1 per visited (`tile_light_loss`), torch +25, light bands (`darkness`): scouting, surprise, loot, stress.
-- [ ] Scouting on entering the dungeon: DD1 `scouting_enter_dungeon_scout_chance` (+ `_quest_item_scout_chance`) — missing; only room-entry scouting.
-- [ ] Scouting treasure: DD1 `scouting_chance_scout_treasure` reveals curios — check.
+- [x] Scouting on entering the dungeon: DD1's `scouting_enter_dungeon_scout_chance` and `_quest_item_scout_chance` are 0.0 in `shared/rules.json` (only buffs raise them): no entry scouting, as the mod does (round 3).
+- [x] Scouting treasure: `scouting_chance_scout_treasure` is 0.0 in DD1's rules: nothing to do (round 3).
 - [?] Hallway stress per step (`hallway_stress`), starvation (`hallway_hunger_starve_HPdmg`), meals (`meals_table`).
 - [?] Traps: DD1 disarm chance (class trap stat + 40% spotted − difficulty), spotted traps block, trap effects (`props/trap_definitions.json`), sounds.
 - [?] Obstacles: shovel clears; without one, DD1 damages and stresses the party and drops light.
@@ -83,8 +83,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] DD1 scene behind fights (no DD2 arena, fog/DoF/blur held off) — round 1 screenshots (room and hall). Was broken: it gave up after 3 s when hero models were slow to load ("not set up (no hero models yet)"), leaving DD2's arena: the user's "mix of DD1 and DD2"; now waits up to 30 s.
 - [ ] DD2 arena particles (red embers) still drawn over the DD1 scene in hall fights (they spawn after setup; the mid-fight scan skips particle systems).
 - [ ] DD2's colour grading tints the DD1 scene (red cast in the forest-exterior arena); DD1 shows its art untinted.
-- [?] Surprise: DD1 chances by room/corridor (`surprise_*_base_chance`); "known" (scouted) variants not used.
-- [ ] Surprise when the room/corridor was scouted: DD1 `surprise_known_*` chances — not used.
+- [?] Surprise: DD1 chances by room/corridor (`surprise_*_base_chance` 10%/10%) plus the light band's increases.
+- [?] Surprise by knowledge: DD1 `surprise_known_*` (scouted room/corridor: party -1.0 = never, monsters 0.25), `surprise_ambush_*` (party 1.0 = always, monsters 0.0), light band added, both sides capped at `surprise_max_*_surprised_chance` 0.65 except an ambush's "always". Was: unknown 10%/10% everywhere, monsters uncapped. Now Crawl.SurpriseChances (CrawlTests.SurpriseFollowsDd1ByKnowledge). In game: battles in scouted rooms never open with "Ambush! The heroes are surprised!".
 - [?] Corpses: no corpse after a crit or DoT kill (CorpseRule).
 - [?] Combat retreat: 70% + 5% per try (`combat_retreat_chance`, `_bonus_chance_per_attempt`), one try per round.
 - [ ] Retreat stress: DD1 `combat_retreat_stress` on success — check what the retreat applies.

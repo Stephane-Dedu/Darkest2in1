@@ -83,6 +83,28 @@ public class CrawlTests
     }
 
     [Fact]
+    public void SurpriseFollowsDd1ByKnowledge()
+    {
+        var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);
+        crawl.Begin();
+        crawl.State.Light = 100f;
+        var band = Rules.Band(100f);
+        Assert.Equal(25f, band.MonstersSurprisedIncrease, 3);   // DD1's radiant band: monsters +25%, heroes +0
+        Assert.Equal(0f, band.HeroesSurprisedIncrease, 3);
+        var unknown = crawl.SurpriseChances(corridor: true, known: false, ambush: false);
+        Assert.Equal(0.1f, unknown.Heroes, 3);
+        Assert.Equal(0.35f, unknown.Monsters, 3);   // 0.1 + 0.25
+        var known = crawl.SurpriseChances(corridor: false, known: true, ambush: false);
+        Assert.Equal(0f, known.Heroes, 3);          // DD1: surprise_known_room_party_base_chance -1.0
+        Assert.Equal(0.5f, known.Monsters, 3);      // surprise_known_room_monsters_base_chance 0.25 + 0.25
+        var ambush = crawl.SurpriseChances(corridor: true, known: false, ambush: true);
+        Assert.Equal(1f, ambush.Heroes, 3);         // surprise_ambush_party_base_chance 1.0: always
+        Assert.Equal(0.25f, ambush.Monsters, 3);    // 0.0 + 0.25
+        crawl.State.Light = 0f;                     // darkness raises the party's chance, never above 65%
+        Assert.True(crawl.SurpriseChances(corridor: true, known: false, ambush: false).Heroes <= 0.65f);
+    }
+
+    [Fact]
     public void MonsterDarknessLowersTheTorch()
     {
         var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);

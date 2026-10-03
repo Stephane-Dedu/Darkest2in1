@@ -436,6 +436,13 @@ Feasibility notes (decomp):
   for an unresolved rarity). Homecoming still resolves leftover rarity tokens.
 - F11 (fight here) + F10 chain several fights in place for testing; trinket drops are rare (none in 4 fights).
 
+## Parity loop, round 3 (2026-10-03)
+- DD1's entry scouting (`scouting_enter_dungeon_scout_chance`, `_quest_item_`) and `scouting_chance_scout_treasure` are
+  0.0 in shared/rules.json: nothing to implement (only buffs raise them).
+- Surprise: DD1 has three cases (unknown / known = scouted / ambush) plus the light band; radiant light already adds
+  +25% monsters surprised. The Unity port doesn't implement surprise rolls (attributes only), so DD1's caps were read
+  from rules.json; an ambush's 1.0 stays "always".
+
 ## Next steps
 1. The audit plan above, in the order the user picks.
 2. Build the DD2-regions toggle (plan above).
