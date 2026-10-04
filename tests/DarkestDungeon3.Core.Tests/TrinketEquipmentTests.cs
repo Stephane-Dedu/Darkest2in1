@@ -60,4 +60,25 @@ public class TrinketEquipmentTests
         h.MissingWeeks = 0; h.IsDead = true; Assert.False(Move("ring", null, h, 0));
         h.IsDead = false; E.Roster.Clear(); Assert.False(Move("ring", null, h, 0)); Assert.Single(E.Trinkets);
     }
+
+    [Fact]
+    public void HomecomingPreservesARightOnlyTrinketFromDd2sCompactInventory()
+    {
+        var h = Hero("a"); h.SetTrinket(1, "charm");
+        var expedition = new Core.Expedition.ExpeditionState { Quest = new QuestOffer { Dungeon = "dd2_city", Difficulty = 1, Length = 1 } };
+        Homecoming.Apply(E, Dd1Campaign.Load(Core.Dd1.Dd1Install.Find()), expedition,
+            new[] { new HeroOutcome { HeroId = h.Id, Trinkets = new() { "charm" } } });
+        Assert.Null(h.TrinketAt(0)); Assert.Equal("charm", h.TrinketAt(1));
+        Assert.Empty(E.Trinkets);
+    }
+
+    [Fact]
+    public void ReturnedItemCountsAccountForLossesDuplicatesAndNewItems()
+    {
+        Assert.Equal(new string[] { null, "charm" }, TrinketEquipment.RestoreSlots(new[] { "ring", "charm" }, new[] { "charm" }));
+        Assert.Equal(new[] { "belt", "charm" }, TrinketEquipment.RestoreSlots(new[] { "ring", "charm" }, new[] { "charm", "belt" }));
+        Assert.Equal(new[] { "ring" }, TrinketEquipment.RestoreSlots(new[] { "ring", "ring" }, new[] { "ring" }));
+        Assert.Equal(new[] { "ring", "ring" }, TrinketEquipment.RestoreSlots(new[] { "ring" }, new[] { "ring", "ring" }));
+        Assert.Empty(TrinketEquipment.RestoreSlots(new string[] { null, "charm" }, new string[0]));
+    }
 }

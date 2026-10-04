@@ -156,7 +156,7 @@ public static class Homecoming
                 log.Add($"{hero.Name} suffers the stress of defeat.");
             }
             if (o.Quirks != null) hero.Quirks = o.Quirks;
-            if (o.Trinkets != null) hero.Trinkets = o.Trinkets;
+            if (o.Trinkets != null) hero.Trinkets = Town.TrinketEquipment.RestoreSlots(hero.Trinkets, o.Trinkets);
             result.Stress = hero.Stress;
             result.NewQuirks = hero.Quirks.Except(quirksBefore).ToList();
             result.LostQuirks = quirksBefore.Except(hero.Quirks).ToList();

@@ -726,10 +726,16 @@ Found native rich text contains non-.NET braces such as #{debuff} and {q}. Compo
 
 Actual base-game audit is 64 complete, 71 partial and 56 blank among 191 trinkets, compared with 43/46/102 before rounds 60-61. Release, 185 Core and 13 bridge/input tests pass; deployed and DLL SHA-256 verified. No launch/save write. Native cold-menu appearance and remaining complex effects remain [?]/[ ]. Next: remaining effect coverage, atlas-safe portraits, then persistent log/secret rooms/Memorial.
 
-## Status 2026-10-04: loop resumed, round 61 complete
+## Round 62: homecoming preserves trinket slot identity
+
+Read DD2 ItemInventory.GetItemIds: it returns only valid occupied entries. Dd2Heroes.ReadBack passed that compact list to Homecoming, which assigned it directly and lost a right-only layout. DD1 port CharEquipmentPanel has distinct left/right slot/drop/swap handlers. Homecoming now calls Core TrinketEquipment.RestoreSlots: retain surviving original item identities/counts in their slots, leave loss gaps, fill vacancies with returned new items, and trim only trailing empty slots. No native actor or estate state changes before the existing homecoming application.
+
+Two tests exercise actual Homecoming.Apply with a right-only item and the reconciliation of loss/new/identical-item counts. Release, 187 Core and 13 bridge/input tests pass. Deployed locally; plugin and Core DLL SHA-256 match Release. No launch/save write. Native return-cycle checks remain [?]. Current DD2 primary/pair-selector/native-arena refactor is built and pushed; remaining native validation and advanced cold-menu effects are recorded in PARITY.md.
+
+## Status 2026-10-04: loop resumed, round 62 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 185 Core and 13 bridge/input tests passed; deployed locally through round 61. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
+- Release build, 187 Core and 13 bridge/input tests passed; deployed locally through round 62. Both installed DLL hashes match Release. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Built refactor: DD2 default regions, paired map arrows/toggles, separate progress, native DD2 arenas/light, bounded setup polling and timing logs. Built trinket presentation/slot fixes. Next candidates: advanced cold-menu effect coverage (56 blank/71 partial out of 191 base trinkets), atlas-safe portraits, persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Sprawl tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm. Enable Ruins and cycle the paired map arrows; XP and contracts must remain separate.
