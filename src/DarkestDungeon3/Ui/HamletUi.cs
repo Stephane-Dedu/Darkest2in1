@@ -670,8 +670,17 @@ internal sealed class HamletUi
         // DD1's Guild (guild.layout): a row per skill 91 apart, its ranks 75 apart with the cost under each (34,70).
         // DD2 has more than DD1's seven skills, so the single skill column scrolls.
         var highlight = UpgradeArt("requirement_highlight_overlay.png");
+        var skillFrame = BuildingArt(Buildings.Guild, "skill_frame.png");
+        var purchased = UpgradeArt("requirement_purchased_icon.png");
+        var available = UpgradeArt("requirement_purchasable_icon.png");
+        var locked = UpgradeArt("requirement_locked_icon.png");
+        var purchasedBg = UpgradeArt("requirement_purchased_background.png");
+        var connector = UpgradeArt("requirement_purchased_background_connector.png");
+        var costFrame = Art.Dd1("campaign", "town", "buildings", "blg_townupgrade_costframe.png");
+        var goldIcon = Art.Dd1("shared", "estate", "currency.gold.icon.png");
         string tip = null;
         var view = W(909, 146, 453, 610);
+        bool overList = view.Contains(Event.current.mousePosition);
         _guildScroll = GUI.BeginScrollView(view, _guildScroll, new Rect(0, 0, view.width - 18, Mathf.Max(view.height, skills.Count * 91 + 8)));
         for (int i = 0; i < skills.Count; i++)
         {
@@ -681,32 +690,42 @@ internal sealed class HamletUi
             float x = 44, y = 4 + i * 91;
             string learnWhy = known ? null : hamlet.WhyCantLearnSkill(hero, skill.Id);
             string masterWhy = !known || mastered ? null : hamlet.WhyCantMasterSkill(hero, skill.Id, known);
+            if (mastered && connector != null) GUI.DrawTexture(new Rect(x + 32, y + 24, 75, 20), connector);
             for (int rank = 0; rank < 2; rank++)
             {
                 var r = new Rect(x + rank * 75, y, 64, 64);
                 bool has = rank == 0 ? known : mastered;
                 bool next = rank == 0 ? !known : known && !mastered;
                 string why = rank == 0 ? learnWhy : masterWhy;
+                bool canTry = next && (why == null || why == "Not enough gold");
+                var inner = new Rect(r.x + 7, r.y + 7, 50, 50);
+                if (has && purchasedBg != null) GUI.DrawTexture(r, purchasedBg);
+                if (canTry && costFrame != null) GUI.DrawTexture(new Rect(r.x, r.y - 3, 64, 86), costFrame);
+                if (rank == 0 && skillFrame != null) GUI.DrawTexture(new Rect(r.x - 4, r.y - 4, 72, 72), skillFrame);
                 var old = GUI.color;
-                if (!has) GUI.color = next ? new Color(0.65f, 0.65f, 0.65f, 1f) : new Color(0.3f, 0.3f, 0.3f, 1f);
-                if (skill.Icon != null) Art.DrawSprite(r, skill.Icon); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
+                if (!has) GUI.color = canTry ? new Color(0.65f, 0.65f, 0.65f, 1f) : new Color(0.3f, 0.3f, 0.3f, 1f);
+                var marker = has ? purchased : canTry ? available : locked;
+                if (rank == 0 && skill.Icon != null) Art.DrawSprite(inner, skill.Icon);
+                else if (marker != null) GUI.DrawTexture(inner, marker);
+                else Gui.Fill(inner, new Color(0.15f, 0.12f, 0.09f));
                 GUI.color = old;
-                if (rank == 1) Gui.Text(new Rect(r.x + 36, r.y + 38, 28, 26), "+", 24, has ? Gui.Gold : Gui.Dim, TextAnchor.MiddleRight, heading: true);
-                if (next)
+                if (canTry)
                 {
                     int cost = rank == 0 ? hamlet.SkillLearnCost(hero, skill.Id) : hamlet.SkillMasterCost(hero, skill.Id);
-                    Gui.Text(new Rect(r.x - 6, r.yMax + 2, r.width + 12, 18), Gui.Num(cost, "#,0"), 14, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-                    if (r.Contains(Event.current.mousePosition))
-                    {
-                        if (highlight != null) GUI.DrawTexture(new Rect(r.x + 7, r.y + 7, 50, 50), highlight);
-                        tip = $"{(rank == 0 ? "Learn" : "Master")} {Dd2.HeroSkills.Name(skill.Id)}: {Gui.Num(cost, "#,0")} gold" + (why != null ? " - " + why : " - click to buy.");
-                    }
+                    if (goldIcon != null) GUI.DrawTexture(new Rect(r.x + 5, r.y + 63, 16, 16), goldIcon);
+                    Gui.Text(new Rect(r.x + 22, r.y + 61, 45, 20), Gui.Num(cost, "#,0"), 14, why == null ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
                     if (why == null && Gui.Hotspot(r))
                     {
                         if (rank == 0) hamlet.LearnSkill(hero.Id, skill.Id); else hamlet.MasterSkill(hero.Id, skill.Id, known);
                         Runtime.Dd1Audio.Play("/town/guild_purchase_skill");
                         S.Persist();
                     }
+                }
+                if (overList && r.Contains(Event.current.mousePosition))
+                {
+                    if (highlight != null) GUI.DrawTexture(inner, highlight);
+                    string status = has ? "Purchased." : next ? why ?? "Click to buy." : "Learn the skill first.";
+                    tip = $"{Dd2.HeroSkills.Name(skill.Id)}\n{(rank == 0 ? "Learn" : "Master")}: {status}";
                 }
             }
             Gui.Text(new Rect(x + 156, y + 2, 230, 32), Dd2.HeroSkills.Name(skill.Id) + (mastered ? " +" : ""), 20, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
