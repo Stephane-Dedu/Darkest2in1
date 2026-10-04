@@ -55,10 +55,33 @@ public sealed class Crawl
 
         foreach (var drop in report.Loot)
         {
-            if (!State.Pack.TryTake(drop, _content.Items)) overflow.Add(drop);
+            if (!State.Pack.TryTake(drop, _content.Items)) { overflow.Add(drop); report.LeftBehind.Add(drop); }
         }
         return report;
     }
+
+    /// <summary>DD1's loot scroll: take one of the items the pack had no room for (once room was made).</summary>
+    public bool TakeLeftBehind(List<LootDrop> leftBehind, int index, List<LootDrop> taken = null)
+    {
+        if (leftBehind == null || index < 0 || index >= leftBehind.Count) return false;
+        var drop = leftBehind[index];
+        if (!State.Pack.TryTake(drop, _content.Items)) return false;
+        leftBehind.RemoveAt(index);
+        taken?.Add(drop);
+        return true;
+    }
+
+    /// <summary>DD1: shift+click a pack item to throw one away (quest items can't be).</summary>
+    public bool Discard(string key)
+    {
+        if (string.IsNullOrEmpty(key) || IsQuestItem(key)) return false;
+        return State.Pack.TryUse(key, 1);
+    }
+
+    /// <summary>DD1 won't close a loot scroll that still holds a quest item.</summary>
+    public static bool CanLeave(IEnumerable<LootDrop> leftBehind) => leftBehind == null || !leftBehind.Any(d => IsQuestItem(d.Key));
+
+    private static bool IsQuestItem(string key) => key != null && key.StartsWith("quest_item+", StringComparison.Ordinal);
 
     /// <summary>The item an inventory-activate quest curio needs (e.g. holy water for a corrupted altar), or null.</summary>
     public string QuestItemNeededHere

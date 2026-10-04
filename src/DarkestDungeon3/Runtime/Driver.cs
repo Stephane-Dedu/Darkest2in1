@@ -548,7 +548,7 @@ internal sealed class Driver : MonoBehaviour
         {
             Say($"{S.Save.Estate.Hero(heroId)?.Name}: {LastCurio.Text ?? LastCurio.OutcomeType}" +
                 (LastCurio.Loot.Count > 0 ? " Found " + string.Join(", ", LastCurio.Loot) + "." : ""));
-            foreach (var drop in overflow) Say($"No room for {drop}; left behind.");
+            foreach (var drop in overflow) Say($"No room for {drop}: make room in the pack to take it.");
             if (Expedition.QuestComplete) Say("The quest is complete! You may return to the Hamlet.");
         }
         S.Persist();

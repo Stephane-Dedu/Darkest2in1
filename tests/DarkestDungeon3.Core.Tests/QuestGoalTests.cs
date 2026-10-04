@@ -62,6 +62,32 @@ public class QuestGoalTests
         Assert.True(Homecoming.WillEmbark(new HeroRecord { ResolveLevel = 5 }, dd[0]));
     }
 
+    [Fact]
+    public void FullPackLootCanBeTakenAfterDroppingSomething()
+    {
+        var (crawl, state) = Expedition("explore", "crypts", 3);
+        // Fill the 16 slots with single torches' worth of stacks (DD1: 8 torches a stack).
+        state.Pack.Items.Clear();
+        state.Pack.Add(Supply.Torch, 8 * Inventory.Slots);
+        Assert.Equal(Inventory.Slots, state.Pack.SlotsUsed(Content.Items));
+        var gold = new LootDrop { Type = "gold", Id = "", Amount = 250 };
+        var left = new List<LootDrop> { gold };
+        var taken = new List<LootDrop>();
+
+        Assert.False(crawl.TakeLeftBehind(left, 0, taken));                 // no room yet
+        for (int i = 0; i < 8; i++) Assert.True(crawl.Discard(Supply.Torch));   // shift+click: drop one at a time
+        Assert.True(crawl.TakeLeftBehind(left, 0, taken));                  // a slot is free now
+        Assert.Empty(left);
+        Assert.Same(gold, Assert.Single(taken));
+        Assert.Equal(250, state.Pack.Count(gold.Key));
+
+        string quest = ItemCatalog.QuestKey("holy_water");
+        state.Pack.Add(quest, 1);
+        Assert.False(crawl.Discard(quest));                                   // quest items can't be thrown away
+        Assert.False(Crawl.CanLeave(new[] { new LootDrop { Type = "quest_item", Id = "holy_water", Amount = 1 } }));
+        Assert.True(Crawl.CanLeave(new[] { gold }));
+    }
+
     private static (Crawl, ExpeditionState) Expedition(string type, string zone, int seed)
     {
         var quest = new QuestOffer { Dungeon = zone, Type = type, Length = 2, Difficulty = 1, MapSeed = seed, GoalId = Dd1.Goals.For(type, zone).Id };

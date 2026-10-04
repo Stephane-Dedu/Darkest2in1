@@ -106,7 +106,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Loot & homecoming
 - [?] DD1 results screen (`raid_results`): quest completed/abandoned backgrounds, heroes, items.
 - [?] Gold/heirlooms home, gems sold, trinkets kept, quest rewards, resolve XP, zone XP and levels.
-- [ ] Inventory value cap: DD1 stack sizes and 16-slot pack with "drop items" when full on loot — check loot overflow prompt.
+- [x] Full pack on loot: DD1's loot scroll (port ScrollEventLoot.cs / InventoryItem.OnPointerClick) keeps what doesn't fit: click a loot slot to take it, shift+click a pack item outside a fight to drop one (never a quest item), Pass can't leave a quest item. Was: greyed and lost, no way to drop, curio overflow only a log line. Now the same on battle and curio scrolls, the pack stays in view while loot waits (Crawl.TakeLeftBehind/Discard/CanLeave, QuestGoalTests.FullPackLootCanBeTakenAfterDroppingSomething). In game (round 19, Shift+F11 full pack): 4 spoils left on the scroll, 8 shift+clicks dropped a torch stack, clicking the gold took it into the pack; 0 exceptions.
+- [?] Fight start (round 19, ambush in combat_arena_city_dungeon_exterior): one enemy showed as a DD2 3D model with a red mist (brigand_blood_A drawn over fanatic_pit_fighter) instead of DD1's Bloodletter sprite in the first screenshot. Check whether the stand-in hiding misses ambush fights' first turn.
 
 ## Town events
 - [?] Weekly town events (`campaign/town_events`): crier panel, effects on buildings/prices/recruits.

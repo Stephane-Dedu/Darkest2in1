@@ -8,6 +8,8 @@ namespace DarkestDungeon3.Core.Expedition;
 /// <summary>What happened when a hero touched a curio.</summary>
 public sealed class CurioReport
 {
+    /// <summary>The part of <see cref="Loot"/> the pack had no room for (still on DD1's loot scroll).</summary>
+    public List<LootDrop> LeftBehind = new();
     public string CurioId, HeroId, ItemUsed;
     public string OutcomeType;
     public string Text;

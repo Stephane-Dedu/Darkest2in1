@@ -62,7 +62,7 @@ internal sealed class CrawlUi
         DrawQuestInfo(crawl, exp);
         try { DrawHud(exp); }
         catch (NullReferenceException) { }   // DD2 tearing its actors down (leaving the dungeon)
-        if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
+        if (_inventoryTab || LootWaiting(crawl)) DrawInventory(crawl, exp); else DrawMap(exp);
         UiRoot.ModalOpen = false;
         if (_sheetHeroId != null && S.Save.Estate.Hero(_sheetHeroId) is { } sheetHero)
         {
@@ -641,8 +641,14 @@ internal sealed class CrawlUi
             bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == i;
             if (!carried) ItemArt.Stack(r, key, count, limit);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
-                Gui.Text(new Rect(960, 1050, 960, 26), $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, or drag onto a hero.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (Gui.Hotspot(r) && !Drag.JustDropped) UseItem(key, crawl);
+                Gui.Text(new Rect(960, 1050, 960, 26), $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            bool shift = Event.current.shift;
+            if (Gui.Hotspot(r) && !Drag.JustDropped)
+            {
+                // DD1: shift+click throws one away to make room (quest items can't be).
+                if (shift) { if (crawl.Discard(key)) { Runtime.Dd1Audio.Play("/gen/item/discard"); S.Persist(); } else Gui.Announce("That can't be left behind."); }
+                else UseItem(key, crawl);
+            }
         }
     }
 
@@ -688,18 +694,20 @@ internal sealed class CrawlUi
 
         var all = spoils.Taken.Select(d => (d, taken: true)).Concat(spoils.LeftBehind.Select(d => (d, taken: false))).ToList();
         var items = S.Content.Items;
-        int perRow = Mathf.Min(5, all.Count);
+        int perRow = Mathf.Min(5, all.Count), takenCount = spoils.Taken.Count, clicked = -1;
         for (int i = 0; i < all.Count && i < 10; i++)
         {
             var (drop, taken) = all[i];
             int row = i / 5, col = i % 5, inRow = row == 0 ? perRow : Mathf.Min(5, all.Count - 5);
             var r = new Rect(left + 228 - inRow * 40 + col * 80 + 4, top + 96 + row * 150, 72, 144);
             ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)), dim: !taken);
+            if (!taken && Gui.Hotspot(r)) clicked = i - takenCount;
         }
-        if (spoils.LeftBehind.Count > 0)
-            Gui.Text(new Rect(left + 40, top + 400, 376, 26), "The pack is full: the greyed items stay behind.", 17, Gui.Blood, TextAnchor.MiddleCenter);
-        if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", true, 24)
-            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+        if (clicked >= 0) TakeLeftBehind(crawl, spoils.LeftBehind, clicked, spoils.Taken);
+        if (spoils.LeftBehind.Count > 0) NoRoomHint(left, top + 475);
+        bool canLeave = Crawl.CanLeave(spoils.LeftBehind);
+        if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", canLeave, 24)
+            || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
             _spoilsDismissed = spoils;
         return true;
     }
@@ -733,16 +741,48 @@ internal sealed class CrawlUi
         Gui.Text(new Rect(left + 50, top + 104, 356, 130), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
 
         var items = S.Content.Items;
+        int clicked = -1;
         for (int i = 0; i < report.Loot.Count && i < 5; i++)
         {
             var drop = report.Loot[i];
             var r = new Rect(left + 228 - Mathf.Min(5, report.Loot.Count) * 40 + i * 80 + 4, top + 236, 72, 144);
-            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
+            int waiting = report.LeftBehind.IndexOf(drop);
+            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)), dim: waiting >= 0);
+            if (waiting >= 0 && Gui.Hotspot(r)) clicked = waiting;
         }
-        if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", true, 24)
-            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+        if (clicked >= 0) TakeLeftBehind(D.Crawl, report.LeftBehind, clicked);
+        if (report.LeftBehind.Count > 0) NoRoomHint(left, top + height);
+        bool canLeave = Crawl.CanLeave(report.LeftBehind);
+        if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", canLeave, 24)
+            || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
             _resultDismissed = report;
         return true;
+    }
+
+    /// <summary>Under a loot scroll: how to make room for what the pack couldn't take.</summary>
+    private static void NoRoomHint(float left, float y)
+    {
+        Gui.Fill(new Rect(left + 20, y + 4, 416, 50), new Color(0f, 0f, 0f, 0.75f));
+        Gui.Text(new Rect(left + 20, y + 4, 416, 50), "No room: shift+click a pack item to drop it,\nthen click a greyed item to take it.", 17, Gui.Blood, TextAnchor.MiddleCenter);
+    }
+
+    /// <summary>Loot the pack had no room for is waiting on a scroll (the pack stays in view to make room).</summary>
+    private bool LootWaiting(Crawl crawl) =>
+        (crawl.LastSpoils is { } sp && sp != _spoilsDismissed && sp.LeftBehind.Count > 0)
+        || (D.LastCurio is { } cr && cr != _resultDismissed && cr.LeftBehind.Count > 0);
+
+    private static void TakeLeftBehind(Crawl crawl, System.Collections.Generic.List<LootDrop> left, int index, System.Collections.Generic.List<LootDrop> taken = null)
+    {
+        if (crawl == null) return;
+        var drop = index >= 0 && index < left.Count ? left[index] : null;
+        if (crawl.TakeLeftBehind(left, index, taken))
+        {
+            // DD1's per-kind loot sounds (ui_dun_loot_take_*).
+            string kind = drop?.Type switch { "gold" => "gold", "heirloom" => "heirloom", "gem" => "jewelry", "provision" or "supply" => "provisions", _ => "all" };
+            Runtime.Dd1Audio.Play("/ui/dun/loot_take_" + kind);
+            S.Persist();
+        }
+        else { Gui.Announce("No room in the pack."); Runtime.Dd1Audio.Play("/ui/shared/button_invalid"); }
     }
 
     // DD1's scrolls (scrolls/*.png) and where screen.raid.darkest puts them.

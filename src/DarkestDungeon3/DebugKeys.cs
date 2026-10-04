@@ -86,7 +86,18 @@ public class DebugKeys : MonoBehaviour
             }
             if (kb.f7Key.wasPressedThisFrame)
                 Plugin.Log.LogInfo("[F7] " + (DarkestDungeon3.Dd2.HeroStage.Instance?.Dump(System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "DarkestDungeon3", "herostage.png")) ?? "no stage"));
-            if (kb.f11Key.wasPressedThisFrame) DarkestDungeon3.Runtime.Driver.Instance?.DebugFight();
+            if (kb.f11Key.wasPressedThisFrame)
+            {
+                // Shift+F11 (testing): fill the pack with torches first, so the spoils don't fit (DD1's full-pack loot scroll).
+                var d = DarkestDungeon3.Runtime.Driver.Instance;
+                var items = Runtime.Session.Current?.Content?.Items;
+                if (kb.shiftKey.isPressed && d?.Expedition != null && items != null)
+                {
+                    while (d.Expedition.Pack.HasRoomFor(Core.Expedition.Supply.Torch, 1, items)) d.Expedition.Pack.Add(Core.Expedition.Supply.Torch, 1);
+                    Plugin.Log.LogInfo($"[F11] pack filled: {d.Expedition.Pack.SlotsUsed(items)}/{Core.Expedition.Inventory.Slots} slots");
+                }
+                d?.DebugFight();
+            }
         }
         catch (Exception e)
         {

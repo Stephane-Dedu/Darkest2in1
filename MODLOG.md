@@ -509,4 +509,11 @@ Feasibility notes (decomp):
 - "From Beyond" (dead_recruit): rolled now. `HeroRecord.FromGraveyard` marks fallen heroes offered in `Estate.Recruits`; `Hamlet.Recruit` takes one out of the graveyard and drops the other fallen offers; `RefreshWeek` clears the flag on unclaimed ones. `Hamlet.StartTownEvent(rng)` is public (applies the current event's on-visit effects) so tests can force an event.
 - DD2 side: a hero brought back gets a fresh DD2 actor next embark (`Dd2Heroes.BuildParty` always `CreateActor`s), so no dead-actor reuse.
 - No debug key forces a town event; checking events in game needs a real week roll.
+- Round 19, full pack on loot (DD1 port ScrollEventLoot.cs + InventoryItem.OnPointerClick: shift+click a raid-inventory item when peaceful = drop one, not quest_item; loot slots click to take; Close refuses while a quest_item remains).
+  Core: `CurioReport.LeftBehind`, `Crawl.TakeLeftBehind(list, index, taken)`, `Crawl.Discard(key)`, `Crawl.CanLeave(leftBehind)`.
+  UI: greyed spoils/curio items are clickable, the pack shows instead of the map while loot waits (`CrawlUi.LootWaiting`), the hint sits under the scroll (it hid behind Continue inside it).
+- DD1 sound samples (dd1_audio_samples.txt): `gen_item_discard` (drop), `ui_dun_loot_take_{gold,heirloom,jewelry,provisions,all,...}` (take). `Dd1Audio.Play("/a/b/c")` maps to sample `a_b_c` by default.
+- Debug: Shift+F11 fills the pack with torches, then fights here (full-pack loot test).
+- Gotcha again: Git Bash heredocs eat `\\n` in Python strings; write patch scripts with the Write tool.
+- WinDrive: "key 0x10 down" + "click" + "key 0x10 up" reaches Unity IMGUI as Event.shift.
 
