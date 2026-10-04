@@ -463,15 +463,65 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
-    public void SeparateTrinketTableKeepsUnsupportedTriggerRoutingIncomplete()
+    public void SeparateTrinketTableRetainsKnownLinesAndWithholdsUnsupportedEffects()
     {
         string effects = Data.Effects("trinket_curio_grim_mask", out bool complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Each Ally On Turn End: +1 Stress (33%) when Flame is below 50", effects);
         Assert.Contains("+40% DMG when Flame is below 50", effects);
         effects = Data.Effects("trinket_general_thrilling_tablet", out complete);
         Assert.False(complete);
         Assert.Null(effects);
+    }
+
+    [Fact]
+    public void TeamTriggersRetainRandomTargetsActorCountsAndHarmfulOutcomes()
+    {
+        string effects = Data.Effects("trinket_cave_rousing_recorder", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Random Ally on Turn Start: Add 1 Positive Token (33%)", effects);
+        Assert.Contains("-10% Debuff RES when Flame is above 75", effects);
+        effects = Data.Effects("trinket_curio_obsidian_dronepipe", out complete);
+        Assert.True(complete);
+        Assert.Contains("Random Enemy on Turn Start: Stun (33%)", effects);
+        Assert.Contains("Random Ally on Turn Start: Stun (10%)", effects);
+        effects = Data.Effects("trinket_hero_maa_standard_of_the_ninth", out complete);
+        Assert.True(complete);
+        Assert.Contains("Each Hero on Combat Start: Block+", effects);
+        Assert.Contains("Apply to Attacker When Hit: Remove 1 Positive Token", effects);
+        Assert.Contains("Gain When CRIT: Weak", effects);
+    }
+
+    [Fact]
+    public void TriggerChoicesKeepBothStressOutcomesAndUseLiveTargetTitles()
+    {
+        string effects = Data.Effects("trinket_curio_astroglass_flute", out bool complete);
+        Assert.True(complete);
+        Assert.Equal("Random Ally on Turn Start: -1 Stress (70%) or +1 Stress (30%)", effects);
+        effects = Data.Effects("trinket_curio_astroglass_flute", out complete,
+            key => key == "effect_tooltip_stress_damage" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.Null(effects);
+        effects = Data.Effects("trinket_cave_rousing_recorder", out complete,
+            key => key == "effect_tooltip_skill_effect_turn_start_friendly_team_1" ? "Allie aleatoire:" : null);
+        Assert.True(complete);
+        Assert.Contains("Allie aleatoire: Add 1 Positive Token (33%)", effects);
+    }
+
+    [Fact]
+    public void TeamTriggerFallbackRetainsEventConditionAndWithholdsUnknownNeighborRouting()
+    {
+        string effects = Data.Effects("trinket_curio_grim_mask", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On CRIT: Each Ally: -1 Stress (33%) when Flame is above 50", effects);
+        Assert.Contains("Each Ally On Turn End: +1 Stress (33%) when Flame is below 50", effects);
+        effects = Data.Effects("trinket_curio_faceless_visage", out complete);
+        Assert.True(complete);
+        Assert.Contains("Each Enemy on Round Start: Shuffle", effects);
+        effects = Data.Effects("trinket_cave_sneakers_standard", out complete);
+        Assert.False(complete);
+        Assert.Contains("Combat Start: Taunt (33%) when Flame is above 75", effects);
+        Assert.DoesNotContain("Stealth", effects);
     }
 
     [Fact]

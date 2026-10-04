@@ -85,6 +85,11 @@ public sealed class TrinketDescriptions
         if (!_blocks.TryGetValue(("ActorDataEffects", id), out var groups)) return;
         foreach (var group in groups)
         {
+            if (group[0] == "actor_effect_triggers")
+            {
+                foreach (string trigger in group.Skip(1)) AddActorTrigger(trigger, lines, ref complete, localize);
+                continue;
+            }
             const string limitedSuffix = "_apply_limit_effects";
             bool limited = group[0].EndsWith(limitedSuffix, StringComparison.Ordinal);
             // This is metadata for its paired effect group, not a separate event.
@@ -94,23 +99,61 @@ public sealed class TrinketDescriptions
             bool friendly = FriendlyEffectEvents.Contains(eventId);
             string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
             if (title == null) { complete = false; continue; }
-            if (limited)
-            {
-                string separator = Plain(Text("spaced_or_label", localize));
-                var choices = group.Skip(1).Select(effect => SimpleEffect(effect, localize, friendly)).ToList();
-                // Native positive apply limits join candidates with 'or'. Only limit one is supported here.
-                // A partial choice list can misstate its outcomes, so withhold the whole list if any is unknown.
-                if (Field("ActorDataEffects", id, eventId + "_apply_limit") != "1" || separator == null || choices.Count == 0 || choices.Any(choice => choice == null))
-                    complete = false;
-                else lines.Add(title + " " + string.Join(" " + separator + " ", choices));
-                continue;
-            }
-            foreach (string effect in group.Skip(1))
-            {
-                string description = SimpleEffect(effect, localize, friendly);
-                if (description == null) complete = false;
-                else lines.Add(title + " " + description);
-            }
+            if (limited && Field("ActorDataEffects", id, eventId + "_apply_limit") != "1") { complete = false; continue; }
+            AddEffectGroup(title, friendly, group.Skip(1), limited, lines, ref complete, localize);
+        }
+    }
+
+    private static readonly HashSet<string> ActorTriggerFields = new()
+    {
+        "m_ActorEffectType", "m_ActorEffectTriggerSourceType", "m_ActorEffectTriggerTargetType",
+        "m_IncludeSourceActor", "m_ActorCount", "m_ApplyLimit", "effects",
+    };
+
+    private void AddActorTrigger(string id, List<string> lines, ref bool complete, Func<string, string> localize)
+    {
+        if (!_blocks.TryGetValue(("ActorEffectTrigger", id), out var rows) || rows.Any(row => !ActorTriggerFields.Contains(row[0])))
+        { complete = false; return; }
+        string eventId = Field("ActorEffectTrigger", id, "m_ActorEffectType")?.ToLowerInvariant();
+        string source = Field("ActorEffectTrigger", id, "m_ActorEffectTriggerSourceType");
+        string target = Field("ActorEffectTrigger", id, "m_ActorEffectTriggerTargetType");
+        string count = Field("ActorEffectTrigger", id, "m_ActorCount");
+        var effects = Values("ActorEffectTrigger", id, "effects");
+        if (eventId == null || (source != "target" && source != "performer")
+            || (target != "friendly_team" && target != "enemy_team")
+            || !int.TryParse(count, out int actorCount) || actorCount < 1 || actorCount > 4 || effects.Count == 0
+            || !bool.TryParse(Field("ActorEffectTrigger", id, "m_IncludeSourceActor") ?? "False", out _)
+            || !int.TryParse(Field("ActorEffectTrigger", id, "m_ApplyLimit") ?? "0", out int limit) || limit > 1)
+        { complete = false; return; }
+        string titleKey = "effect_tooltip_skill_effect_" + eventId + "_" + target + "_" + count;
+        string title = Plain(Text(titleKey + "_" + effects[0], localize) ?? Text(titleKey, localize));
+        if (title == null)
+        {
+            string eventTitle = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
+            string targetTitle = Plain(Text("actor_trigger_target_type_" + target + "_" + count, localize));
+            if (eventTitle != null && targetTitle != null) title = eventTitle + " " + targetTitle;
+        }
+        if (title == null) { complete = false; return; }
+        AddEffectGroup(title, FriendlyEffectEvents.Contains(eventId), effects, limit > 0, lines, ref complete, localize);
+    }
+
+    private void AddEffectGroup(string title, bool friendly, IEnumerable<string> effects, bool limited,
+        List<string> lines, ref bool complete, Func<string, string> localize)
+    {
+        if (limited)
+        {
+            string separator = Plain(Text("spaced_or_label", localize));
+            var choices = effects.Select(effect => SimpleEffect(effect, localize, friendly)).ToList();
+            // Native limit one is a choice. Withhold the whole group if any possible outcome is unknown.
+            if (separator == null || choices.Count == 0 || choices.Any(choice => choice == null)) complete = false;
+            else lines.Add(title + " " + string.Join(" " + separator + " ", choices));
+            return;
+        }
+        foreach (string effect in effects)
+        {
+            string description = SimpleEffect(effect, localize, friendly);
+            if (description == null) complete = false;
+            else lines.Add(title + " " + description);
         }
     }
 
