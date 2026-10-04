@@ -14,7 +14,33 @@ public class TrinketDescriptionTests
     {
         string effects = Data.Effects(id, out bool complete);
         Assert.Contains(expected, effects);
-        Assert.False(complete); // The miss-triggered stress effect still needs the effect reader.
+        Assert.Contains("Gain On Miss:", effects);
+        Assert.Contains("+1 Stress", effects);
+        Assert.True(complete);
+    }
+
+    [Fact]
+    public void ColdMenuTriggeredTokensKeepBothTheirEventAndTheirChance()
+    {
+        string effects = Data.Effects("trinket_general_adrenalizing_ash", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn End: Speed (15%)", effects);
+        Assert.Contains("Gain On Miss: Daze (20%)", effects);
+        effects = Data.Effects("trinket_general_bulwark_band", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Dodge (15%)", effects);
+        Assert.Contains("Gain On Miss: Blind (15%)", effects);
+        Assert.DoesNotContain("{q}", effects);
+        Assert.DoesNotContain("<sprite", effects);
+    }
+
+    [Fact]
+    public void MalformedLocalizedEffectDoesNotInventATokenOrChance()
+    {
+        string effects = Data.Effects("trinket_general_adrenalizing_ash", out bool complete,
+            key => key == "effect_tooltip_token_add_amount" ? "invalid {9}" : null);
+        Assert.Null(effects);
+        Assert.False(complete);
     }
 
     [Fact]

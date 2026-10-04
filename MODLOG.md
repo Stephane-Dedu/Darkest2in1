@@ -718,9 +718,17 @@ CSV rank values are already one-based: native initialization subtracts one and i
 
 Release, 183 Core and 13 bridge/input tests pass. Added four actual-data cases for Melee/Ranged restrictions, 33% HP, Flame units/spacing and bad localization withholding only the conditional stat. Deployed locally; no launch/save write. Native cold-menu hover checks remain [?]. Next: triggered token/effect descriptions, followed by atlas-safe drawing and remaining campaign/UI gaps.
 
-## Status 2026-10-04: loop resumed, round 60 complete
+## Round 61: direct triggered trinket effects in the cold Hamlet
+
+Read native ActorDataEffectDescription, EffectDescription and installed effect_data_export.Group.csv. Direct event groups use effect_tooltip_skill_effect_<event>; supported effects now show token additions, simple Stress/HP changes, quantities, chance suffixes and visible per-effect conditions. Localized token_name_<id> is preferred to icon identifiers. Effect-field whitelist prevents advanced target/duration/chance fields from becoming guessed simple effects; unsupported rows leave the description incomplete. ActorEffectTrigger routing, DOT/buff mutations and advanced conditions remain separate work.
+
+Found native rich text contains non-.NET braces such as #{debuff} and {q}. Composite formatting previously rejected those templates. Normalize markup before formatting, preserving comparison templates' leading separator space. Adrenalizing Ash now shows Turn End: Speed (15%) and Gain On Miss: Daze (20%); Bulwark Band shows Dodge/Blind and their triggers; Gnarly Knuckles/Raven's Reach include the skill-specific +1 Stress on miss. Two new actual-data tests cover events/chances and malformed localized effect withholding. The earlier skill-condition cases now assert their descriptions are complete.
+
+Actual base-game audit is 64 complete, 71 partial and 56 blank among 191 trinkets, compared with 43/46/102 before rounds 60-61. Release, 185 Core and 13 bridge/input tests pass; deployed and DLL SHA-256 verified. No launch/save write. Native cold-menu appearance and remaining complex effects remain [?]/[ ]. Next: remaining effect coverage, atlas-safe portraits, then persistent log/secret rooms/Memorial.
+
+## Status 2026-10-04: loop resumed, round 61 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 183 Core and 13 bridge/input tests passed; deployed locally through round 60. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Release build, 185 Core and 13 bridge/input tests passed; deployed locally through round 61. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.

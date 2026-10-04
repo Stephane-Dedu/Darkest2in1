@@ -25,7 +25,7 @@ public sealed class TrinketDescriptions
     {
         var data = new TrinketDescriptions();
         string excel = Path.Combine(streamingAssets, "Excel");
-        foreach (string file in new[] { "trinkets", "buff", "condition" })
+        foreach (string file in new[] { "trinkets", "buff", "condition", "effect" })
             foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, file + "_data_export.Group.csv")))
                 data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");
@@ -75,6 +75,7 @@ public sealed class TrinketDescriptions
                         AddStat(buffLines, row[1], row[2], row[3], row[0] == "multiply_sub_stat", localize);
                 }
             }
+            AddTriggered(buff, buffLines, ref complete, localize);
             if (buffLines.Count > 0)
             {
                 string text = string.Join("\n", buffLines);
@@ -83,14 +84,97 @@ public sealed class TrinketDescriptions
                 else lines.Add(text);
             }
             else complete = false;
-            if (_blocks.ContainsKey(("ActorDataEffects", buff))) complete = false;
         }
-        if (_blocks.ContainsKey(("ActorDataEffects", id)) || Values("Item", id, "m_effectIds").Count > 0)
-            complete = false;
+        AddTriggered(id, lines, ref complete, localize);
+        if (Values("Item", id, "m_effectIds").Count > 0) complete = false;
         string note = Text("item_description_" + id, localize);
         if (!string.IsNullOrEmpty(note)) lines.Add(Plain(note));
         return lines.Count == 0 ? null : string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
+
+    private void AddTriggered(string id, List<string> lines, ref bool complete, Func<string, string> localize)
+    {
+        if (!_blocks.TryGetValue(("ActorDataEffects", id), out var groups)) return;
+        foreach (var group in groups)
+        {
+            if (!group[0].EndsWith("_effects", StringComparison.Ordinal)) { complete = false; continue; }
+            string eventId = group[0].Substring(0, group[0].Length - "_effects".Length);
+            string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
+            if (title == null) { complete = false; continue; }
+            foreach (string effect in group.Skip(1))
+            {
+                string description = SimpleEffect(effect, localize);
+                if (description == null) complete = false;
+                else lines.Add(title + " " + description);
+            }
+        }
+    }
+
+    private static readonly HashSet<string> SimpleEffectFields = new()
+    {
+        "m_Chance", "m_ChancePerRoundSuffix", "m_ShowValue", "m_IsVisible", "m_ConditionId", "all_conditions", "any_conditions",
+        "m_TokenAddId", "m_TokenAddAmount", "m_TokenAddAmountRange", "m_StressDamage", "m_StressHeal",
+        "m_HealthDamageAmount", "m_HealthHealAmount", "m_HealthHealPercent",
+    };
+
+    private string SimpleEffect(string id, Func<string, string> localize)
+    {
+        if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
+        // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
+        if (rows.Any(row => !SimpleEffectFields.Contains(row[0]))) return null;
+        var parts = new List<string>();
+        string token = Field("Effect", id, "m_TokenAddId");
+        if (token != null)
+        {
+            float amount = Number("Effect", id, "m_TokenAddAmount");
+            float range = Number("Effect", id, "m_TokenAddAmountRange");
+            string tokenName = Plain(Text("token_name_" + token, localize) ?? Text("token_" + token, localize));
+            if (amount <= 0 || tokenName == null) return null;
+            string count = range == 0 ? amount.ToString("0.##", CultureInfo.InvariantCulture)
+                : amount.ToString("0.##", CultureInfo.InvariantCulture) + "-" + (amount + range).ToString("0.##", CultureInfo.InvariantCulture);
+            string value = amount == 1 && range == 0 ? tokenName : count + " " + tokenName;
+            string tokenText = Plain(Format(Text("effect_tooltip_token_add_amount", localize), value));
+            if (tokenText == null) return null;
+            parts.Add(tokenText);
+        }
+        foreach (var stat in new[] { ("m_StressDamage", "stress_damage"), ("m_StressHeal", "stress_heal"),
+            ("m_HealthDamageAmount", "health_damage_amount"), ("m_HealthHealAmount", "health_heal_amount"), ("m_HealthHealPercent", "health_heal_percent") })
+        {
+            float value = Number("Effect", id, stat.Item1);
+            if (value == 0) continue;
+            string statText = Plain(Format(Text("effect_tooltip_" + stat.Item2, localize),
+                (value * (stat.Item1.EndsWith("Percent", StringComparison.Ordinal) ? 100 : 1)).ToString("0.##", CultureInfo.InvariantCulture)));
+            if (statText == null) return null;
+            parts.Add(statText);
+        }
+        if (parts.Count == 0) return null;
+        float chance = Field("Effect", id, "m_Chance") == null ? 1 : Number("Effect", id, "m_Chance");
+        if (chance <= 0 || chance > 1) return null;
+        if (chance < 1)
+        {
+            string suffix = Format(Text(Field("Effect", id, "m_ChancePerRoundSuffix") == "True" ? "effect_tooltip_chance_per_round" : "effect_tooltip_pct", localize),
+                (chance * 100).ToString("0.##", CultureInfo.InvariantCulture));
+            if (suffix == null) return null;
+            parts.Add(Plain(suffix));
+        }
+        string description = string.Join(" ", parts);
+        var conditions = Values("Effect", id, "all_conditions");
+        var any = Values("Effect", id, "any_conditions");
+        if (any.Count > 1) return null;
+        conditions.AddRange(any);
+        string implicitCondition = Field("Effect", id, "m_ConditionId") ?? id;
+        if (_blocks.ContainsKey(("Condition", implicitCondition))) conditions.Add(implicitCondition);
+        else if (Field("Effect", id, "m_ConditionId") != null) return null;
+        foreach (string condition in conditions.Distinct())
+        {
+            description = WithCondition(condition, description, localize);
+            if (description == null) return null;
+        }
+        return description;
+    }
+
+    private float Number(string type, string id, string field) => float.TryParse(Field(type, id, field), NumberStyles.Float,
+        CultureInfo.InvariantCulture, out float value) ? value : 0;
 
     private string WithCondition(string id, string effect, Func<string, string> localize)
     {
@@ -174,7 +258,12 @@ public sealed class TrinketDescriptions
     private static string Format(string template, params object[] args)
     {
         if (template == null) return null;
-        try { return string.Format(CultureInfo.InvariantCulture, template, args); }
+        // Rich tags contain non-.NET substitutions such as #{debuff} and {q}. Resolve them before composite
+        // formatting, while retaining comparison templates' leading separator space.
+        string plain = Plain(template);
+        if (plain == null) return null;
+        if (template.StartsWith(" ", StringComparison.Ordinal)) plain = " " + plain;
+        try { return string.Format(CultureInfo.InvariantCulture, plain, args); }
         catch (FormatException) { return null; }
     }
 
