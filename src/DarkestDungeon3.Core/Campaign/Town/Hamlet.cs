@@ -609,6 +609,13 @@ public sealed class Hamlet
         foreach (var (cls, count) in EventData("bonus_recruit"))
             if (Catalog.RecruitableClasses.Contains(cls))
                 for (int i = 0; i < Math.Max(1, (int)count); i++) Estate.Recruits.Add(MakeHero(cls, rng, 0));
+        // DD1's plot-quest events (the crow's trinket): their quest joins the board for the week.
+        foreach (var (plotId, _) in EventData("plot_quest"))
+        {
+            var plot = Dd1.Goals?.Plot.FirstOrDefault(p => p.Id == plotId);
+            if (plot == null || (!plot.Repeatable && Estate.CompletedPlotQuests.Contains(plot.Id)) || Estate.Quests.Any(q => q.PlotId == plot.Id)) continue;
+            Estate.Quests.Add(QuestBoard.PlotOffer(Estate, Dd1, plot));
+        }
         // DD1 "From Beyond": a few fallen heroes wait at the stagecoach; only one can be brought back.
         foreach (var (_, count) in EventData("dead_recruit"))
         {

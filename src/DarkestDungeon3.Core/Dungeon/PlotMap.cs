@@ -198,6 +198,9 @@ public static class PlotMap
             map.EntranceRoomId = start.Id;
             if (start.Content == RoomContent.Empty) start.Content = RoomContent.Entrance;
         }
+        // A boss quest on a map naming no final room (the crow's lair: a single room): the room holding a set fight.
+        if (final == null && questType == "kill_boss")
+            final = roomOf.Where(r => r.Value.MashName != null).Select(r => r.Key).LastOrDefault() ?? (roomOf.Count == 1 ? roomOf.Keys.First() : null);
         if (final != null && roomOf.TryGetValue(final, out var last))
         {
             if (questType == "kill_boss")

@@ -108,6 +108,22 @@ public class HamletTests
     }
 
     [Fact]
+    public void TheCrowsEventPutsItsQuestOnTheBoard()
+    {
+        var h = NewHamlet(9);
+        Assert.NotNull(Dd1.TownEvents.Get("plot_quest_crow_trinket"));
+        Assert.Null(Dd1.TownEvents.Get("plot_quest_town_invasion_0"));        // the `town` dungeon has no zone in the mod
+        h.Estate.TownEventId = "plot_quest_crow_trinket";
+        h.StartTownEvent(new Rng(2));
+        var crow = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_crow_trinket");
+        Assert.Equal(("weald", "kill_boss", 5, "crow_map1", "crow_C"), (crow.Dungeon, crow.Type, crow.Difficulty, crow.MapName, crow.BossId));
+        Assert.False(crow.CanRetreat);
+        Assert.Contains(crow.Rewards, r => r.Type == "trinket" && r.Id == "crow");
+        h.StartTownEvent(new Rng(3));
+        Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_crow_trinket");   // once on the board
+    }
+
+    [Fact]
     public void TheWagonOffersRaritiesWithDd1sWeights()
     {
         var h = NewHamlet();

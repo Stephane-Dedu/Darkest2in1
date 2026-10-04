@@ -39,7 +39,8 @@
       },
       "bosses": {
         "hag": { "battle": "config:farm_dungeon_3", "arena": "combat_arena_farm_dungeon_interior" },
-        "brigand_cannon": { "battle": "table:pillager_mashes_antiq", "arena": "combat_arena_forest_pillager" }
+        "brigand_cannon": { "battle": "table:pillager_mashes_antiq", "arena": "combat_arena_forest_pillager" },
+        "crow":           { "battle": "config:carrion_my_wayward_son_c", "arena": "combat_arena_forest_dungeon_exterior" }
       }
     },
     "warrens": {

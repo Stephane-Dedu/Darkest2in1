@@ -77,7 +77,8 @@ public class PlotMapTests
         Assert.Empty(crow.Corridors);
         Assert.Equal(lair.Id, crow.EntranceRoomId);
         Assert.Equal("crow_1", lair.MashName);
-        Assert.Equal(RoomContent.Battle, lair.Content);
+        Assert.Equal(RoomContent.Boss, lair.Content);         // a boss quest naming no final room: the lair is the boss's room
+        Assert.Equal(lair.Id, crow.BossRoomId);
     }
 
     private static readonly CrawlContent Content = CrawlContent.Load(Install);

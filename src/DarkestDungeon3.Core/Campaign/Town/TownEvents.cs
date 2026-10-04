@@ -34,14 +34,23 @@ public sealed class TownEvents
     {
         "free_activity", "activity_cost_change", "activity_lock", "in_activity_buff", "idle_buff", "embark_party_buff",
         "bonus_recruit", "idle_resolve_level", "provision_item_type_cost_change", "provision_item_type_amount_change",
-        "upgrade_tag_discount", "upgrade_tag_free", "remove_quest_hero_level_restriction", "dead_recruit",
+        "upgrade_tag_discount", "upgrade_tag_free", "remove_quest_hero_level_restriction", "dead_recruit", "plot_quest",
     };
+
+    // Plot quests an event can bring that the mod has no dungeon for (the town invasion's `town`).
+    private static readonly HashSet<string> NoZone = new() { "town" };
 
     public static TownEvents Load(Dd1Install dd1)
     {
         var lib = new TownEvents();
         string dir = dd1.PathOf("campaign", "town_events");
         if (!Directory.Exists(dir)) return lib;
+        // Each plot quest's dungeon (quest.plot_quests.json), to leave out events whose quest can't be played.
+        var plotDungeon = new Dictionary<string, string>();
+        string plots = dd1.PathOf("campaign", "quest", "quest.plot_quests.json");
+        if (File.Exists(plots))
+            foreach (var p in JToken.Parse(File.ReadAllText(plots))["plot_quests"] ?? new JArray())
+                plotDungeon[(string)p["id"] ?? ""] = (string)p["quest"]?["dungeon"];
         foreach (var name in new[] { "base.town_events.events.json", "shared_dlc.town_events.events.json" })
         {
             string path = Path.Combine(dir, name);
@@ -63,7 +72,8 @@ public sealed class TownEvents
                     HeroLevelCounts = (req["hero_level_counts"] ?? new JArray()).Select(h => ((int)h["level"], (int)h["count"])).ToList(),
                     Data = (e["data"] ?? new JArray()).Select(d => ((string)d["type"], (string)d["string_data"] ?? "", (float?)d["number_data"] ?? 0f)).ToList(),
                 };
-                if (ev.Id != null && ev.Data.Count > 0 && ev.Data.All(d => Supported.Contains(d.Type))) lib.Events.Add(ev);
+                bool playable = ev.Data.Where(d => d.Type == "plot_quest").All(d => plotDungeon.TryGetValue(d.Str, out var z) && z != null && !NoZone.Contains(z));
+                if (ev.Id != null && ev.Data.Count > 0 && ev.Data.All(d => Supported.Contains(d.Type)) && playable) lib.Events.Add(ev);
             }
         }
         string settings = Path.Combine(dir, "town_events.settings.json");
