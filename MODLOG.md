@@ -518,4 +518,11 @@ Feasibility notes (decomp):
 - WinDrive: "key 0x10 down" + "click" + "key 0x10 up" reaches Unity IMGUI as Event.shift.
 - Round 20: DD2 stand-ins carry ambient VFX under their actor (fanatic_flayer: vfx_blood_dripping_from_face, vfx_blood_BB_Face_01/Drip_01, vfx_blade_burning_antic, vfx_fire_particle_small_on_awake, vfx_bright_spark...; every enemy: vfx_shared_death_dots_particle_01 on death). They are ParticleSystemRenderer / VFXRenderer, which the mesh-only stand-in hiding missed. Dd1MonsterView.ModelRenderers now includes them (DD1 sprites are drawn on their own DD3Monsters quad, not under actors). Dd1Backdrop still keeps effects under ActorBhv for the heroes' skills.
 - Round 19's "red mist" was this, on a live Bloodletter (brigand_blood has a dead anim; an upright sprite = alive). Last round's log was overwritten by the relaunch: grab log lines before relaunching.
+- Round 21: DD1's hand-made maps are `maps/*.dm` (DD_map1-4, crow_map1, town_invasion_0, tutorial_crypts; also NG+/bloodmoon copies under modes/ and dlc/). Format = DD1's binary save format:
+  - header 16 × u32: [0] magic 0xB101, [2] header length 64, [5] object count, [6] object table offset, [11] field count, [12] field table offset, [14] data length, [15] data offset.
+  - object table, 16 B each: parent, field index, direct children, all children. Field table, 12 B each: name hash, data offset, info (bit 0 object, bits 2-10 name length incl. null, bits 11-30 object index — bit 31 is set on some fields: mask 0xFFFFF).
+  - fields are pre-order; data = name + null, then the value: bools unaligned (1 byte), ints/floats/strings/vectors aligned to 4 in the data block; strings and nested files are length-prefixed.
+  - map: `base_root.map.{entrance_id, final_room_id (area id hashes), static_dynamic.{static_save (nested file), areas.<rooX|corX>.tiles.tileN.{content, trap, mash_name, mash_type, light, knowledge}}}`; static_save: `areas.<name>.{id, kind 0 room/1 corridor, door0-7.area_to, tiles.tileN.{type, obstacle, door_to.area_to, mappos (2 floats)}}`.
+  - crow_map1 is a single room (the crow's lair).
+- The Unity port ships its own conversion of DD_map1-4 (Assets/Resources/Data/Maps/*.bytes, its Dungeon.Write format): a cross-check only; the mod reads the user's .dm files.
 
