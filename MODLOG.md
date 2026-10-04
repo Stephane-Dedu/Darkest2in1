@@ -678,13 +678,21 @@ Migration is in memory on normal estate load: copy legacy XP only when higher th
 
 Release build and 170 Core tests pass. Four new migration/default/toggle tests pass; nine earlier assertions intentionally expected DD1 defaults and were updated to the new directive. Legacy boss tests explicitly enable the original area; map assertions check its rules template, and the endgame test progresses a native region. Presentation/quest-board UI is the next round; current changes are not yet deployed. Native migration/playthrough checks remain [?].
 
-## Status 2026-10-04: loop resumed, round 55 complete
+## Round 56: paired map areas with the existing arrow controls
+
+Owner proposed mapping two independent areas to one map position and switching with the existing arrows. The quest board now pairs Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at quest_select.layout.darkest's map positions, reusing shared/character/previous_hero.png and next_hero.png. Enabled Sluice is a third Warrens-position variant. Disabled variants disappear; enabled locked variants explain their unlock threshold. Area focus selects its first contract and retains only eligible party members. Separate map selection state never combines XP, quest identity or boss completion.
+
+Previously DD2 areas stacked at x=130 beneath the left detail scroll. Only the focused area's contracts now appear in a clipped five-column strip from 570,650 to 1550,830; the 125..525 detail panel, map labels ending at y=599, roster starting at x=1630 and party title starting at y=860 remain clear. Contract lists scroll without a hard limit. Region settings now display all primary and original choices with the correct default-on state and are painted last with underlying inputs disabled. Added a close button and consumed Escape. Updated the menu campaign label.
+
+Release build, 171 Core and 11 bridge/input tests pass. The new integration test uses the actual DD1 level thresholds and proves paired Ruins/Sprawl contracts and boss progress remain independent, including disabling a primary and adding Sluice. Local authored plugin/data deployed; no game launch or save write. Native arrow input, map fit, scrolling, toggles and provisioning remain [?]. Next is native region arena presentation, faction coherence and startup.
+
+## Status 2026-10-04: loop resumed, round 56 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Active refactor: region board layout/toggles, native DD2 arena presentation and startup responsiveness. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
+- Release build, 171 Core and 11 bridge/input tests passed; deployed locally through round 56. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
-  2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
+  2. The Sprawl tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm. Enable Ruins and cycle the paired map arrows; XP and contracts must remain separate.
   3. The crow quest from the plot_quest_crow_trinket event (week ≥ 15), its one-room lair and the carrion boss battle.
   4. A slain corpse-leaving DD1 monster lying in its dead pose (Ctrl+F10 kills the front enemy as a skill kill).
 - [user] questions still open: DLC content; game modes (heroes refusing to go back after the Darkest Dungeon); trinket retention on a party wipe.

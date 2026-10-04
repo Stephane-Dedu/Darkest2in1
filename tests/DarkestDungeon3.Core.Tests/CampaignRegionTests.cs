@@ -10,6 +10,24 @@ public class CampaignRegionTests
 {
     private static readonly Dd1Campaign Data = Dd1Campaign.Load(Dd1Install.Find());
     [Fact]
+    public void MapLocationsExposeEnabledVariantsWhileKeepingContractsAndBossesIndependent()
+    {
+        var e = new Estate { Seed = 3, QuestsCompleted = 8 };
+        e.Toggles["zone.crypts"] = true;
+        int ruinsXp = Data.ZoneLevelThresholds[3];
+        e.ZoneXp["crypts"] = ruinsXp; e.ZoneXp["dd2_city"] = 25;
+        e.CompletedPlotQuests.Add("plot_kill_necromancer_1");
+        Assert.Equal(new[] { "dd2_city", "crypts" }, CampaignRegions.AtLocation(e, "crypts"));
+        e.Quests = QuestBoard.Generate(e, Data);
+        Assert.Contains(e.Quests, q => q.Dungeon == "dd2_city" && q.BossId == "librarian");
+        Assert.Contains(e.Quests, q => q.Dungeon == "crypts" && q.BossId == "prophet_A");
+        Assert.Equal(ruinsXp, e.ZoneXp["crypts"]); Assert.Equal(25, e.ZoneXp["dd2_city"]);
+        e.Toggles["zone.dd2_city"] = false;
+        Assert.Equal(new[] { "crypts" }, CampaignRegions.AtLocation(e, "crypts"));
+        e.Toggles["zone.dd2_cave"] = true;
+        Assert.Equal(new[] { "dd2_farm", "dd2_cave" }, CampaignRegions.AtLocation(e, "warrens"));
+    }
+    [Fact]
     public void DefaultBoardUsesNativeRegionsAndLegacyAreasOnlyAppearWhenEnabled()
     {
         var e = new Estate { Seed = 8, QuestsCompleted = 5 };

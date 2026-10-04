@@ -19,6 +19,11 @@ public static class CampaignRegions
     public static bool Unlocked(Estate estate, Dd1Campaign dd1, string zone) => estate.QuestsCompleted >= UnlockAfter(dd1, zone);
     public static IEnumerable<string> Open(Estate estate, Dd1Campaign dd1) => Options.Where(z => Enabled(estate, z) && Unlocked(estate, dd1, z)).Distinct();
 
+    /// <summary>Enabled destinations sharing a map position, native first. Locked areas remain visible so their
+    /// unlock requirement can be shown. This does not merge their campaign identities or progress.</summary>
+    public static IReadOnlyList<string> AtLocation(Estate estate, string location) =>
+        Options.Where(z => ZoneBase.Of(z) == location && Enabled(estate, z)).Distinct().ToList();
+
     // The intro/crow story survives in a native region when the original area is disabled. DD1 boss chains stay optional.
     public static string StoryRegion(Estate estate, PlotQuest plot) =>
         (plot.Id == "plot_tutorial_crypts" || plot.Id == "plot_quest_crow_trinket") && !Enabled(estate, plot.Dungeon)

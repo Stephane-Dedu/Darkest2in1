@@ -121,7 +121,7 @@ internal sealed class UiRoot : MonoBehaviour
                     catch (System.Exception e) { _slots[slot] = null; Plugin.Log.LogWarning($"[session] slot {slot}: {e.Message}"); }
                 }
             }
-            if (Session.Current != null) Gui.Text(new Rect(40, 950, 380, 30), "Darkest Dungeon 1 campaign", 18, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            if (Session.Current != null) Gui.Text(new Rect(40, 950, 380, 30), "Campaign expeditions", 18, Gui.Dd1Class, TextAnchor.MiddleCenter);
             if (Session.LoadError != null) Gui.Text(new Rect(40, 986, 900, 60), Session.LoadError, 18, Gui.Blood);
             return;
         }

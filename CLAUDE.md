@@ -9,6 +9,8 @@ DD2's Sprawl, Foetor, Tangle and Shroud are the default campaign regions. Keep D
 region toggles. Retain DD1 expedition systems and DD2 combat; choose exploration/fight backgrounds for coherent,
 responsive UI and transitions. Preserve existing campaign progress and explicit region choices. This supersedes
 DD1-first region defaults; the no-launch and save-protection rules still apply.
+Owner's map design: pair Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at the same map positions.
+Use the existing previous/next arrow art to switch enabled areas. Every area's XP, quests and bosses stay independent.
 
 ## Read first, every session
 1. `MODLOG.md`: the journal (decomp facts, DD1 data formats, gotchas, click coordinates, debug keys). Append to it as you learn.
