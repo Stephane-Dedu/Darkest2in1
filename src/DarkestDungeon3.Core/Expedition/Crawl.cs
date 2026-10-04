@@ -766,12 +766,16 @@ public sealed class Crawl
         _events.Add(e);
     }
 
-    private void CheckQuest()
+    /// <summary>Mark the quest done once its goal is met (called as the party moves and fights).</summary>
+    public void CheckQuest()
     {
         if (State.QuestComplete || State.Quest == null) return;
         var goal = State.Goal;
         float explorePct = goal?.Type == "explore_room" && goal.Percentage > 0 ? goal.Percentage : 0.9f;
-        bool done = State.Quest.Type switch
+        bool done = goal?.Type == "tutorial_room"
+            // DD1's opening raid: reach the last room and win its fight.
+            ? Map.Rooms.Any(r => r.IsQuestGoal && r.Visited && (!r.HasBattle || r.Cleared))
+            : State.Quest.Type switch
         {
             "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * explorePct),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),

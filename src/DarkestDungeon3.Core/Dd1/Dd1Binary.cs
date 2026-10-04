@@ -77,6 +77,14 @@ public sealed class Dd1Binary
 
     public static Dd1Binary Load(string path) => Parse(File.ReadAllBytes(path));
 
+    /// <summary>DD1's string hash (ids in its saves and maps: h = h * 53 + byte).</summary>
+    public static uint Hash(string s)
+    {
+        uint h = 0;
+        foreach (byte b in Encoding.UTF8.GetBytes(s ?? "")) h = unchecked(h * 53 + b);
+        return h;
+    }
+
     public static Dd1Binary Parse(byte[] file)
     {
         if (file == null || file.Length < 64 || BitConverter.ToUInt32(file, 0) != Magic)

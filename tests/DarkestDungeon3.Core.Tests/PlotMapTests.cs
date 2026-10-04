@@ -1,5 +1,6 @@
 using System.Linq;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Campaign.Town;
 using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Core.Dungeon;
 using DarkestDungeon3.Core.Expedition;
@@ -138,6 +139,46 @@ public class PlotMapTests
 
         var four = Embark(parts[3]).Map;
         Assert.Equal(28, Assert.Single(four.Corridors).Tiles.Count);
+    }
+
+    [Fact]
+    public void TheOpeningRaidIsTheRoadWhereTheBanditsWait()
+    {
+        // scripts/starting_save: persist.raid.json + persist.map.json.
+        var start = StartingSave.Load(Install);
+        var quest = start.OpeningQuest(5);
+        Assert.Equal(("weald", "explore", 1, "tutorial_final_room"), (quest.Dungeon, quest.Type, quest.Difficulty, quest.GoalId));
+        Assert.Equal(5000, quest.Rewards.Single(r => r.Type == Currency.Gold).Amount);
+        Assert.Equal((100, 2), (start.Opening.Torch, start.Opening.Provisions));
+        Assert.Equal(new[] { "Reynauld", "Dismas" }, start.Opening.PartyOrder.Select(i => start.Heroes[i].Name));
+
+        var goal = Dd1.Goals.For(quest);
+        Assert.Equal(("tutorial_room", "rooB"), (goal.Type, goal.RoomId));
+        var heroes = new[] { new HeroRecord { Id = "r", Name = "Reynauld", ClassId = "man_at_arms" }, new HeroRecord { Id = "d", Name = "Dismas", ClassId = "highwayman" } };
+        var pack = new Inventory();
+        pack.Add(Supply.Food, start.Opening.Provisions);
+        var state = Campaign.Embark.Create(Dd1, quest, heroes, pack);
+        var map = state.Map;
+        Assert.Equal(2, map.Rooms.Count);
+        var road = Assert.Single(map.Corridors);
+        Assert.Equal(6, road.Tiles.Count);
+        Assert.Equal("tutorial_1", road.Tiles[2].MashName);                      // a Brigand Cutthroat on the road
+        Assert.Equal(("travellers_tent_tutorial", HallContent.Curio), (road.Tiles[4].ContentId, road.Tiles[4].Content));
+        var last = map.Room(road.RoomB);
+        Assert.Equal((RoomContent.GuardedCurio, "tutorial_2", "bandits_trapped_chest", true), (last.Content, last.MashName, last.CurioId, last.IsQuestGoal));
+        Assert.Equal(road.RoomA, map.EntranceRoomId);
+        Assert.Equal(new[] { "brigand_cutthroat_A" }, Content.Battles.NamedEncounter("weald", 1, "tutorial_1", new Rng(1)));
+        Assert.Equal(new[] { "brigand_blood_A", "brigand_fusilier_A" }, Content.Battles.NamedEncounter("weald", 1, "tutorial_2", new Rng(1)));
+
+        // Done when the party has reached the last room and won its fight.
+        var crawl = new Crawl(state, CrawlRules.FromDd1(Dd1.Rules), new FakeParty("r", "d"), Content);
+        crawl.Begin();
+        last.Visited = true;
+        crawl.CheckQuest();
+        Assert.False(state.QuestComplete);
+        last.Cleared = true;
+        crawl.CheckQuest();
+        Assert.True(state.QuestComplete);
     }
 
     [Theory]

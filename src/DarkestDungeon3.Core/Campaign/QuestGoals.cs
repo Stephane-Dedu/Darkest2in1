@@ -17,6 +17,7 @@ public sealed class QuestGoal
     public float Percentage;         // explore / battle
     public List<string> MonsterClasses = new();
     public List<(string Id, int Amount)> StartingItems = new();
+    public string RoomId;            // tutorial_room: the room to reach (the opening raid's last room)
 
     /// <summary>Inventory-activate goals hand the party the quest items to use on the curios.</summary>
     public bool NeedsItem => StartingItems.Count > 0;
@@ -69,6 +70,7 @@ public sealed class QuestGoals
                 Percentage = (float?)data["percentage"] ?? 0f,
                 MonsterClasses = (data["monster_class_ids"] as JArray ?? new JArray()).Select(m => (string)m).ToList(),
                 StartingItems = (g["starting_items"] as JArray ?? new JArray()).Select(i => ((string)i["id"], (int)i["amount"])).ToList(),
+                RoomId = (string)data["room_id"],
             };
             if (goal.Type == "gather" && goal.Amount == 0) goal.Amount = (int?)data["item"]?["amount"] ?? 3;
             q.Goals[goal.Id] = goal;

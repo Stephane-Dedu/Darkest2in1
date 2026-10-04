@@ -98,7 +98,8 @@ public static class Embark
         if (dd1.Install != null && PlotMap.Exists(dd1.Install, quest.MapName))
         {
             // DD1's hand-made map (the Darkest Dungeon's parts): its layout, set fights and the goal's curios.
-            map = PlotMap.Load(dd1.Install, quest.MapName, quest.Dungeon, quest.Type, quest.MapSeed, dd1.Props(quest.Dungeon));
+            map = PlotMap.Load(dd1.Install, quest.MapName, quest.Dungeon, quest.Type, quest.MapSeed, dd1.Props(quest.Dungeon),
+                               goalArea: goal?.Type == "tutorial_room" ? goal.RoomId : null);
             PlotMap.PlaceGoal(map, goal);
         }
         else map = MapGenerator.Generate(dd1.MapGen.Find(quest.Dungeon, quest.Size, quest.Type), quest.MapSeed, dd1.Props(quest.Dungeon), goal);
