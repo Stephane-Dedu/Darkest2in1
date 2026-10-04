@@ -139,7 +139,7 @@ public class DebugKeys : MonoBehaviour
     }
 
     /// <summary>F10 (testing): every enemy in the current fight takes lethal damage, twice to finish corpses.</summary>
-    /// <summary>F10 strikes down every enemy; Shift+F10 only the first one, with an ordinary blow (it should leave a corpse).</summary>
+    /// <summary>F10 strikes down every enemy; Shift+F10 brings the first one to 1 HP for a hero to finish (corpse checks).</summary>
     private static void WinFight(bool onlyOne = false)
     {
         var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
@@ -151,7 +151,9 @@ public class DebugKeys : MonoBehaviour
             {
                 var actor = a?.ActorInstance;
                 if (actor == null || party.Contains(actor.ActorGuid) || (onlyOne && (actor.ActorDataId ?? "").EndsWith("_corpse"))) continue;
-                actor.ApplyHealthDamage(9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
+                // Shift+F10 leaves it at 1 HP: a hero's blow then kills it through DD2's own flow (a debug kill
+                // outside a skill isn't resolved until combat moves on).
+                actor.ApplyHealthDamage(onlyOne ? System.Math.Max(0f, actor.HpRaw - 1f) : 9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
                                         Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
                 hit++;
                 if (onlyOne) { Plugin.Log.LogInfo($"[F10] struck {actor.ActorDataId} (death class {actor.DeathActorDataId})"); break; }

@@ -45,6 +45,7 @@ internal static class Dd1MonsterView
         public string Clip;         // the animation inside the file (combat, attack_x, defend, death)
         public float Since;
         public bool Loop = true, Dead, Gone;
+        public float LostAt = -1f;  // when its DD2 actor object went away (DD2 rebuilds it for a corpse)
         public readonly Dictionary<string, string> AttackFor = new();   // DD2 skill -> DD1 attack file
         public List<string> Attacks;
         public float NextRendererScan;
@@ -238,13 +239,34 @@ internal static class Dd1MonsterView
         try
         {
             var m = e.m_combatActor == null ? null : ByGuid(e.m_combatActor.GetActorGuid());
-            if (m == null) return;
-            m.Dead = true;
-            Play(m, Load(m.Family, "dead") != null ? "dead" : "defend", loop: false);
-            if (m.DeathFx != null && Fx(m.Family, m.DeathFx) is { } death)
-                Effects.Add(new Effect { Rig = death, Fixed = m.Feet, Since = Time.unscaledTime, Scale = m.Scale, Flip = true });
+            if (m == null || m.Dead) return;   // a corpse going away: it already lies in its dead pose
+            Die(m);
         }
         catch (Exception ex) { Plugin.Log.LogWarning("[dd1art] death: " + ex.Message); }
+    }
+
+    /// <summary>
+    /// A kill that leaves a corpse: DD2 keeps the actor and changes its class to its "_corpse" death class (no
+    /// EventCombatActorDeath; EventActorChangeClass is internal, so the draw loop watches the class). DD1's corpse
+    /// classes have no art of their own: the corpse is the monster's dead pose.
+    /// </summary>
+    private static void CheckCorpse(Monster m)
+    {
+        if (m.Dead || m.Guid == 0) return;
+        // DD2's actor library has the actor's current class (the actor object on screen may still hold the old one).
+        string id = Dd2Api.Actor(m.Guid)?.ActorDataId;
+        if (id != null && id != m.Dd2Class) Note(m, $"class now {id}");
+        if (id == null || !id.EndsWith("_corpse")) return;
+        Note(m, "corpse: lies in its dead pose");
+        Die(m);
+    }
+
+    private static void Die(Monster m)
+    {
+        m.Dead = true;
+        Play(m, Load(m.Family, "dead") != null ? "dead" : "defend", loop: false);
+        if (m.DeathFx != null && Fx(m.Family, m.DeathFx) is { } death)
+            Effects.Add(new Effect { Rig = death, Fixed = m.Feet, Since = Time.unscaledTime, Scale = m.Scale, Flip = true });
     }
 
     private static List<string> AttackFiles(string family)
@@ -518,7 +540,7 @@ internal static class Dd1MonsterView
             foreach (var m in Line.OrderBy(x => x.Actor != null ? -x.Actor.ActorInstance.TeamPosition : 0))
             {
                 if (m.Actor == null || m.Gone) continue;
-                if (m.Actor.Equals(null)) { m.Gone = true; continue; }
+                if (m.Actor.Equals(null) && !Rebind(m)) continue;
                 if (DrawOne(m, cam, light)) _drawn = true;
             }
             if (DrawEffects(cam, light)) _drawn = true;
@@ -538,6 +560,29 @@ internal static class Dd1MonsterView
     }
 
     /// <summary>The stand-in's body: its biggest skinned mesh (shadows, effects and props left out).</summary>
+    /// <summary>
+    /// DD2 rebuilds an actor's object when it changes class (a slain monster becoming its corpse): find it again by its
+    /// guid and keep drawing the DD1 monster there. Gone for good when nothing turns up within a moment.
+    /// </summary>
+    private static bool Rebind(Monster m)
+    {
+        if (m.LostAt < 0f) m.LostAt = Time.unscaledTime;
+        var again = UnityEngine.Object.FindObjectsOfType<CombatActorBhv>()
+            .FirstOrDefault(a => a != null && a.ActorInstance != null && a.GetActorGuid() == m.Guid);
+        if (again == null)
+        {
+            if (Time.unscaledTime - m.LostAt > 1.5f) m.Gone = true;
+            return false;
+        }
+        m.Actor = again;
+        m.LostAt = -1f;
+        m.Renderers = ModelRenderers(again);
+        foreach (var r in m.Renderers) if (r != null) r.forceRenderingOff = true;
+        m.NextRendererScan = 0f;
+        Note(m, $"rebound to DD2's new {again.ActorInstance.ActorDataId}");
+        return true;
+    }
+
     private static Renderer Body(Monster m) =>
         (m.Renderers ?? new Renderer[0]).Where(r => r != null && r.gameObject.activeInHierarchy)
             .OrderByDescending(r => r is SkinnedMeshRenderer ? 1 : 0)
@@ -546,6 +591,7 @@ internal static class Dd1MonsterView
 
     private static bool DrawOne(Monster m, Camera cam, float light)
     {
+        CheckCorpse(m);
         // Where DD2 draws the stand-in: the bottom and top of its body, on screen.
         var body = Body(m);
         if (body == null)
