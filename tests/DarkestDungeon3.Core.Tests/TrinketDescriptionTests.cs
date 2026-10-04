@@ -357,6 +357,46 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void ExtraActionsRetainTheirTriggerChanceAndCombatStateRequirement()
+    {
+        string effects = Data.Effects("trinket_city_boss_smoldering_hymnal", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Killing Blow: Extra Action (20%)", effects);
+        Assert.Contains("+6 Speed when self Burn", effects);
+        effects = Data.Effects("trinket_coast_boss_carved_bodkin", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Extra Action (20%) when self Bleed", effects);
+        Assert.Contains("-2 Bleed Received", effects);
+        Assert.Contains("Extra Action (10%) when Speed is 12 or more", Data.Effects("trinket_cultist_snap_judgement", out _));
+    }
+
+    [Fact]
+    public void ExtraActionChoicesRetainTheStunDamageAndResistancePenalties()
+    {
+        string effects = Data.Effects("trinket_curio_oversprung_pocketwatch", out bool complete);
+        Assert.True(complete);
+        Assert.Equal("Turn End: Extra Action (50%) or Stun (50%)", effects);
+        effects = Data.Effects("trinket_cultist_temptation", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Extra Action or 1 DMG", effects);
+        Assert.Contains("-100% Deathblow RES", effects);
+    }
+
+    [Fact]
+    public void MalformedExtraActionTemplateWithholdsItsEntireChoiceButKeepsOtherStats()
+    {
+        string effects = Data.Effects("trinket_curio_oversprung_pocketwatch", out bool complete,
+            key => key == "effect_tooltip_add_turn" ? "invalid {9}" : null);
+        Assert.Null(effects);
+        Assert.False(complete);
+        effects = Data.Effects("trinket_cultist_temptation", out complete,
+            key => key == "effect_tooltip_add_turn" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("1 DMG", effects);
+        Assert.Contains("-100% Deathblow RES", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

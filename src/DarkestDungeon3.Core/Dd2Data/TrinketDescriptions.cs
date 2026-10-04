@@ -122,6 +122,7 @@ public sealed class TrinketDescriptions
         "m_Priority", "m_IgnoreResist", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
         "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
         "buffs",
+        "m_AddTurn", "m_AddTurnRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize)
@@ -133,6 +134,13 @@ public sealed class TrinketDescriptions
         string ignoreResist = Field("Effect", id, "m_IgnoreResist");
         if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
         var parts = new List<string>();
+        if (Field("Effect", id, "m_AddTurn") != null)
+        {
+            if (Field("Effect", id, "m_AddTurn") != "1" || (Field("Effect", id, "m_AddTurnRange") ?? "0") != "0") return null;
+            string extraAction = Format(Text("effect_tooltip_add_turn", localize), 1);
+            if (extraAction == null) return null;
+            parts.Add(extraAction);
+        }
         foreach (string buff in Values("Effect", id, "buffs"))
         {
             string buffText = StatBuff(buff, localize);
