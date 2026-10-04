@@ -86,12 +86,14 @@ public class HamletTests
         Assert.Equal(1, reynauld.Stress);
         Assert.Equal(new[] { "dd2_warrior_of_light", "dd2_kleptomaniac", "dd2_god_fearing" }, reynauld.Quirks);
         Assert.Equal(new[] { "dd2_hard_noggin", "dd2_known_cheat", "dd2_quick_reflexes" }, h.Estate.Roster[1].Quirks);
-        // persist.estate.json wallet (10 busts, 10 portraits, 10 deeds, 20 crests), plus the skipped tutorial's pay.
-        var tutorial = Dd1.Goals.Plot.Single(p => p.Id == "plot_tutorial_crypts");
-        int Pay(string type) => tutorial.Rewards.Where(r => r.Type == type).Sum(r => r.Amount);
-        Assert.Equal(10 + Pay("bust"), h.Estate.Get("bust"));
-        Assert.Equal(20 + Pay("crest"), h.Estate.Get("crest"));
-        Assert.Equal(Pay(Currency.Gold), h.Estate.Get(Currency.Gold));
+        // persist.estate.json wallet: 10 busts, 10 portraits, 10 deeds, 20 crests, no gold (the opening raid pays 5000).
+        Assert.Equal(10, h.Estate.Get("bust"));
+        Assert.Equal(20, h.Estate.Get("crest"));
+        Assert.Equal(0, h.Estate.Get(Currency.Gold));
+        // The Ruins tutorial waits on the board (plot_tutorial_crypts, Ruins level 0) on DD1's own map.
+        var tutorial = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_tutorial_crypts");
+        Assert.Equal(("crypts", "explore", "tutorial_crypts"), (tutorial.Dungeon, tutorial.Type, tutorial.MapName));
+        Assert.DoesNotContain("plot_tutorial_crypts", h.Estate.CompletedPlotQuests);
         // The first coach: stage_coach.building.json first_hero_classes.
         Assert.Equal(new[] { "plague_doctor", "vestal" }, h.Estate.Recruits.Take(2).Select(r => r.ClassId));
 
@@ -161,9 +163,9 @@ public class HamletTests
         Assert.Equal(2, h.Estate.WagonStock.Count);
         Assert.NotEmpty(h.Estate.Quests);
         Assert.All(h.Estate.Roster, hero => Assert.NotEmpty(hero.Quirks));
-        // DD1's starting save has no gold and 20 crests; the skipped tutorial pays 3000 gold, 4 crests.
-        Assert.Equal(3000, h.Estate.Get(Currency.Gold));
-        Assert.Equal(24, h.Estate.Get(Currency.Crest));
+        // DD1's starting save has no gold and 20 crests (the opening raid and the Ruins tutorial pay later).
+        Assert.Equal(0, h.Estate.Get(Currency.Gold));
+        Assert.Equal(20, h.Estate.Get(Currency.Crest));
     }
 
     [Fact]

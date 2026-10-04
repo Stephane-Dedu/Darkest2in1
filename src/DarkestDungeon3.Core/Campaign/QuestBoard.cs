@@ -66,7 +66,8 @@ public static class QuestBoard
             bestZoneLevel = Math.Max(bestZoneLevel, dd1.ZoneLevel(estate.ZoneXp.TryGetValue(z, out var x) ? x : 0));
 
         var nextDarkest = dd1.Goals.Plot.FirstOrDefault(p => p.Dungeon == DarkestDungeon && p.Progression && !estate.CompletedPlotQuests.Contains(p.Id));
-        foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && p.Type != "explore"))
+        // Explore plot quests run on DD1's hand-made maps (the Ruins tutorial, tutorial_crypts.dm).
+        foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && (p.Type != "explore" || p.MapName != null)))
         {
             if (estate.CompletedPlotQuests.Contains(p.Id)) continue;
             bool available = p.Dungeon == DarkestDungeon

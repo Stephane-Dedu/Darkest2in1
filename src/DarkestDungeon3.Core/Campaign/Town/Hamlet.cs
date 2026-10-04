@@ -33,13 +33,7 @@ public sealed class Hamlet
         if (start != null && start.Wallet.Count > 0)
             foreach (var (type, amount) in start.Wallet.Where(w => w.Amount > 0)) estate.Add(type, amount);
         else estate.Add(Currency.Gold, 500);
-        // DD1 opens with the Ruins tutorial; we skip it but pay out what it pays (3000 gold, 4 crests).
-        var tutorial = dd1.Goals?.Plot.FirstOrDefault(p => p.Id == "plot_tutorial_crypts");
-        if (tutorial != null)
-        {
-            foreach (var r in tutorial.Rewards.Where(r => r.Type != "trinket")) estate.Add(r.Type, r.Amount);
-            estate.CompletedPlotQuests.Add(tutorial.Id);
-        }
+        // The Ruins tutorial (plot_tutorial_crypts) is DD1's first quest on the board, played like any plot quest.
         var hamlet = new Hamlet(estate, dd1, buildings, catalog, camping);
         var rng = estate.NextRng();
         if (start != null && start.Heroes.Count > 0)

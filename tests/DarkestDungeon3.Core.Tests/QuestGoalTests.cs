@@ -34,6 +34,7 @@ public class QuestGoalTests
     public void BossQuestsAppearAtZoneLevel()
     {
         var estate = new Estate { Seed = 1, QuestsCompleted = 5 };
+        estate.CompletedPlotQuests.Add("plot_tutorial_crypts");   // the Ruins tutorial is played
         Assert.DoesNotContain(QuestBoard.Generate(estate, Dd1), q => q.IsPlot);
 
         estate.ZoneXp["crypts"] = 6;  // zone level 2: the Necromancer

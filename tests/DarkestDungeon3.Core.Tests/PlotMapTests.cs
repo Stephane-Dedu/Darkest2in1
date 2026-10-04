@@ -181,6 +181,22 @@ public class PlotMapTests
         Assert.True(state.QuestComplete);
     }
 
+    [Fact]
+    public void TheRuinsTutorialIsOnTheBoardOnItsOwnMap()
+    {
+        var estate = new Estate { Seed = 3 };
+        var offer = Assert.Single(QuestBoard.Generate(estate, Dd1), q => q.PlotId == "plot_tutorial_crypts");
+        Assert.Equal(3000, offer.Rewards.Single(r => r.Type == Currency.Gold).Amount);
+        var heroes = new[] { "man_at_arms", "highwayman", "plague_doctor", "vestal" }
+            .Select((c, i) => new HeroRecord { Id = "h" + i, Name = c, ClassId = c }).ToList();
+        var map = Campaign.Embark.Create(Dd1, offer, heroes, new Inventory()).Map;
+        Assert.Equal(8, map.Rooms.Count);                              // maps/tutorial_crypts.dm, not a generated map
+        Assert.Equal(8, map.Corridors.Count);
+        Assert.Contains(map.Rooms, r => r.MashName == "tutorial_mash_05" && r.Content == RoomContent.GuardedTreasure);
+        Assert.Contains(map.AllTiles, t => t.MashName == "tutorial_mash_02" && t.Content == HallContent.Battle);
+        Assert.Equal(new[] { "skeleton_common_A", "skeleton_common_A" }, Content.Battles.NamedEncounter("crypts", 1, "tutorial_mash_01", new Rng(1)));
+    }
+
     [Theory]
     [InlineData("DD_map2", "darkestdungeon", "inventory_activate", 18, 22)]
     [InlineData("DD_map3", "darkestdungeon", "activate", 31, 43)]

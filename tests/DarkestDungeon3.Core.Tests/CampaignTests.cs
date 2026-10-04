@@ -43,7 +43,8 @@ public class CampaignTests
     {
         var estate = new Estate { Seed = 42 };
         var board = QuestBoard.Generate(estate, Dd1);
-        Assert.Equal(6, board.Count); // QuestsCompleted starts at 1 (DD1 counts the tutorial) → table index 1
+        Assert.Equal(7, board.Count); // QuestsCompleted starts at 1 (DD1 counts the tutorial) → table index 1: 6 quests
+        Assert.Single(board, q => q.PlotId == "plot_tutorial_crypts");   // + the Ruins tutorial until it's done
         Assert.All(board, q => Assert.Equal("crypts", q.Dungeon));
         Assert.All(board, q => Assert.Equal(1, q.Difficulty));
         Assert.All(board, q => Assert.Contains(q.Rewards, r => r.Type == Currency.Gold && r.Amount > 0));
