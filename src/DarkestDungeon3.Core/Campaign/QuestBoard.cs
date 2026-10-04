@@ -94,6 +94,8 @@ public static class QuestBoard
                 SurpriseEnabled = p.SurpriseEnabled,
                 ScoutingEnabled = p.ScoutingEnabled,
                 ClearsRosterStress = p.ClearsRosterStress,
+                RosterBuffsOnFailure = p.RosterBuffsOnFailure.ToList(),
+                RosterBuffMinResolve = p.RosterBuffMinResolve,
             };
         }
 

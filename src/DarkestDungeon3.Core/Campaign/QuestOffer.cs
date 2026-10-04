@@ -20,6 +20,8 @@ public sealed class QuestOffer
     public int RetreatKillCount;    // heroes who die covering a retreat (Darkest Dungeon: 1)
     public bool SurpriseEnabled = true, ScoutingEnabled = true;   // the Darkest Dungeon has neither
     public bool ClearsRosterStress; // a Darkest Dungeon win clears the whole roster's stress
+    public List<string> RosterBuffsOnFailure = new();   // a seasoned party's failure inspires the roster (DD1)
+    public int RosterBuffMinResolve;
     public List<Reward> Rewards = new();
 
     public string Size => Length switch { 1 => "short", 2 => "medium", _ => "long" };

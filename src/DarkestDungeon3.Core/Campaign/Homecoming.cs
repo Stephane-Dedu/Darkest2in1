@@ -175,6 +175,17 @@ public static class Homecoming
             result.ResolveXp = hero.ResolveXp;
         }
 
+        // DD1: when a seasoned party fails a Darkest Dungeon quest, the roster learns from it
+        // (roster_buffs_to_apply_on_failure: +100% resolve XP on the next completed quest).
+        var party = outcomeList.Select(o => estate.Hero(o.HeroId) ?? estate.Graveyard.FirstOrDefault(g => g.Id == o.HeroId)).Where(h => h != null).ToList();
+        if (!success && quest.RosterBuffsOnFailure.Count > 0 && party.Count > 0 && party.Min(h => h.ResolveLevel) >= quest.RosterBuffMinResolve)
+        {
+            foreach (var h in estate.Roster)
+                foreach (var b in quest.RosterBuffsOnFailure.Where(b => !h.PendingBuffs.Contains(b)))
+                    h.PendingBuffs.Add(b);
+            log.Add("The survivors' tales steel the Hamlet's heroes for their next quest.");
+        }
+
         estate.Quests.RemoveAll(q => q.Id == quest.Id);
         log.Add(success ? $"Quest complete: {quest}." : expedition.Retreated ? $"The party retreated from {quest}." : $"Quest failed: {quest}.");
         return report;

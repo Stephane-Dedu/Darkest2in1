@@ -143,6 +143,34 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void FailingTheDarkestDungeonWithSeasonedHeroesInspiresTheRoster()
+    {
+        var dd = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.Equal(new[] { "darkest_dungeon_failure_roster_resolve_xp" }, dd.RosterBuffsOnFailure);
+        Assert.Equal(5, dd.RosterBuffMinResolve);
+
+        HomecomingReport Fail(int partyResolve, out Estate estate)
+        {
+            estate = new Estate { Seed = 5 };
+            estate.Roster.Add(new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", ResolveLevel = partyResolve });
+            estate.Roster.Add(new HeroRecord { Id = "h", Name = "H", ClassId = "vestal" });
+            var exp = new ExpeditionState
+            {
+                Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6,
+                                         RosterBuffsOnFailure = dd.RosterBuffsOnFailure.ToList(), RosterBuffMinResolve = dd.RosterBuffMinResolve },
+                Party = { "p" },
+                Retreated = true,
+            };
+            return Homecoming.Report(estate, Dd1, exp, new[] { new HeroOutcome { HeroId = "p", Stress = 2 } });
+        }
+        Fail(5, out var seasoned);
+        Assert.All(seasoned.Roster, h => Assert.Contains("darkest_dungeon_failure_roster_resolve_xp", h.PendingBuffs));   // whole roster
+        Assert.Equal(1f, Dd1.Buffs.Get("darkest_dungeon_failure_roster_resolve_xp").Amount);                               // +100% resolve XP
+        Fail(4, out var green);
+        Assert.All(green.Roster, h => Assert.Empty(h.PendingBuffs));                                                     // below resolve 5
+    }
+
+    [Fact]
     public void TrinketWarningOnHarderQuestsWithFewTrinkets()
     {
         var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();
