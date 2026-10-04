@@ -212,6 +212,46 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void TriggeredStatBuffsKeepTheirEventAndNativeLifetime()
+    {
+        string effects = Data.Effects("trinket_cultist_cruel_intent", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Miss: +10% CRIT (1 Battle)", effects);
+        Assert.Contains("Combat Start: Blindx2", effects);
+        effects = Data.Effects("trinket_hero_pd_storage_room_key", out _);
+        Assert.Contains("Gain On Miss: -1 Speed (3 Turns)", effects);
+        Assert.Contains("+1 Speed per Medical Gear item equipped", effects);
+        Assert.Contains("When Stress Healed: +1% CRIT (1 Battle)", Data.Effects("trinket_hero_hel_empty_stein", out _));
+    }
+
+    [Fact]
+    public void TriggeredSubStatDebuffKeepsItsQuantityDurationChanceAndResistancePenalty()
+    {
+        string effects = Data.Effects("trinket_hero_flg_his_prison", out _);
+        Assert.Contains("Apply to Attacker When Hit: +1 Blight Received (3 Turns) (33%)", effects);
+        Assert.Contains("-20% Blight RES", effects);
+        string localized = Data.Effects("trinket_hero_flg_his_prison", out _,
+            key => key == "duration_display_type_turn+plural" ? "{0} tours" : null);
+        Assert.Contains("+1 Blight Received (3 tours) (33%)", localized);
+        Assert.DoesNotContain("<color", effects);
+    }
+
+    [Fact]
+    public void MalformedBuffDurationOrStatTemplateWithholdsTheBuffRatherThanInventingALifetime()
+    {
+        string effects = Data.Effects("trinket_hero_pd_storage_room_key", out bool complete,
+            key => key == "skill_effect_duration_label" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("-1 Speed", effects);
+        Assert.Contains("+1 Speed per Medical Gear item equipped", effects);
+        effects = Data.Effects("trinket_cultist_cruel_intent", out complete,
+            key => key == "actor_stat_type_formatted_crit_chance" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("CRIT (1 Battle)", effects);
+        Assert.Contains("Gain On Non-CRIT: Blind", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

@@ -62,19 +62,7 @@ public sealed class TrinketDescriptions
             string condition = Field("Buff", buff, "m_ConditionId") ?? buff;
             bool conditional = _blocks.ContainsKey(("Condition", condition));
             var buffLines = new List<string>();
-            if (_blocks.TryGetValue(("ActorDataStats", buff), out var stats))
-            {
-                string[] keys = Array.Empty<string>();
-                foreach (var row in stats)
-                {
-                    if (row[0] == "key_map") keys = row.Skip(1).ToArray();
-                    else if (row[0] == "add_stats" || row[0] == "multiply_stats")
-                        for (int i = 0; i < keys.Length && i + 1 < row.Length; i++)
-                            AddStat(buffLines, keys[i], null, row[i + 1], row[0] == "multiply_stats", localize);
-                    else if ((row[0] == "sub_stat" || row[0] == "multiply_sub_stat") && row.Length >= 4)
-                        AddStat(buffLines, row[1], row[2], row[3], row[0] == "multiply_sub_stat", localize);
-                }
-            }
+            if (!AddStats(buff, buffLines, localize)) complete = false;
             AddTriggered(buff, buffLines, ref complete, localize);
             if (buffLines.Count > 0)
             {
@@ -133,6 +121,7 @@ public sealed class TrinketDescriptions
         "m_DotAddId", "m_DotAddAmount", "m_DotAddAmountRange",
         "m_Priority", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
         "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
+        "buffs",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize)
@@ -141,6 +130,12 @@ public sealed class TrinketDescriptions
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
         if (rows.Any(row => !SimpleEffectFields.Contains(row[0]))) return null;
         var parts = new List<string>();
+        foreach (string buff in Values("Effect", id, "buffs"))
+        {
+            string buffText = StatBuff(buff, localize);
+            if (buffText == null) return null;
+            parts.Add(buffText);
+        }
         string dot = Field("Effect", id, "m_DotAddId");
         if (dot != null)
         {
@@ -226,6 +221,71 @@ public sealed class TrinketDescriptions
         if (label == null) return null;
         string suffix = range != 0 ? "range" : amount == 1 || amount >= 99 ? "singular" : "plural";
         return Format(Text("token_amount_format_" + suffix, localize), label, amount, amount + range);
+    }
+
+    private static readonly HashSet<string> StatBuffFields = new()
+    {
+        "m_DurationType", "m_DurationAmount", "m_Tags", "m_ConditionId", "m_IsVisible",
+    };
+
+    private string StatBuff(string id, Func<string, string> localize)
+    {
+        string authored = Text("buff_desc_" + id + "_override", localize);
+        if (!string.IsNullOrEmpty(authored)) return Plain(authored);
+        if (!_blocks.TryGetValue(("Buff", id), out var rows) || rows.Any(row => !StatBuffFields.Contains(row[0]))
+            || Field("Buff", id, "m_IsVisible") == "False" || _blocks.ContainsKey(("ActorDataEffects", id))
+            || _blocks.ContainsKey(("RunDataStats", id))) return null;
+        var stats = new List<string>();
+        if (!AddStats(id, stats, localize) || stats.Count == 0) return null;
+        string text = string.Join("\n", stats);
+        string condition = Field("Buff", id, "m_ConditionId") ?? id;
+        if (_blocks.ContainsKey(("Condition", condition))) text = WithCondition(condition, text, localize);
+        else if (Field("Buff", id, "m_ConditionId") != null) return null;
+        if (text == null || !int.TryParse(Field("Buff", id, "m_DurationAmount"), out int duration) || duration < 1) return null;
+        string durationType = Field("Buff", id, "m_DurationType");
+        string key;
+        switch (durationType)
+        {
+            case "combat_end":
+                if (duration == 1)
+                {
+                    string suffix = Format(Text("buff_combat_end_single_duration_label", localize));
+                    return suffix == null ? null : Format(Text("effect_tooltip_buff", localize), text + suffix);
+                }
+                key = "duration_display_type_battle"; break;
+            case "inn_start":
+                string innSuffix = Format(Text(duration == 1 ? "inn_next_biome_append_label" : "inn_next_biome_append_plural_label", localize), duration);
+                return innSuffix == null ? null : Format(Text("effect_tooltip_buff", localize), text + innSuffix);
+            case "performer_turn_start": case "performer_turn_end": case "every_turn_start": case "every_turn_end": case "round_start":
+                key = "duration_display_type_turn"; break;
+            case "round_end": key = "duration_display_type_round"; break;
+            default: return null;
+        }
+        if (duration < 99)
+        {
+            string durationText = Format(Text(key + (duration == 1 ? "" : "+plural"), localize), duration);
+            if (durationText == null) return null;
+            text = Format(Text("skill_effect_duration_label", localize), text, durationText);
+        }
+        return text == null ? null : Format(Text("effect_tooltip_buff", localize), text);
+    }
+
+    private bool AddStats(string id, List<string> lines, Func<string, string> localize)
+    {
+        if (!_blocks.TryGetValue(("ActorDataStats", id), out var stats)) return true;
+        bool supported = true;
+        string[] keys = Array.Empty<string>();
+        foreach (var row in stats)
+        {
+            if (row[0] == "key_map") keys = row.Skip(1).ToArray();
+            else if (row[0] == "add_stats" || row[0] == "multiply_stats")
+                for (int i = 0; i < keys.Length && i + 1 < row.Length; i++)
+                    supported &= AddStat(lines, keys[i], null, row[i + 1], row[0] == "multiply_stats", localize);
+            else if ((row[0] == "sub_stat" || row[0] == "multiply_sub_stat") && row.Length >= 4)
+                supported &= AddStat(lines, row[1], row[2], row[3], row[0] == "multiply_sub_stat", localize);
+            else supported = false;
+        }
+        return supported;
     }
 
     private static readonly HashSet<string> DotFields = new()
@@ -411,15 +471,19 @@ public sealed class TrinketDescriptions
         catch (FormatException) { return null; }
     }
 
-    private void AddStat(List<string> lines, string stat, string sub, string value, bool multiply, Func<string, string> localize)
+    private bool AddStat(List<string> lines, string stat, string sub, string value, bool multiply, Func<string, string> localize)
     {
-        if (!float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float number) || number == 0) return;
+        if (!float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out float number) || float.IsNaN(number) || float.IsInfinity(number)) return false;
+        if (number == 0) return true;
         bool percent = multiply || !ValueStats.Contains(stat);
         if (percent) number *= 100;
         string amount = (number > 0 ? "+" : "") + number.ToString("0.##", CultureInfo.InvariantCulture) + (percent ? "%" : "");
         string template = Text("actor_stat_type_formatted_" + stat + (sub == null ? "" : "_" + sub), localize);
         if (template == null) template = "{0} " + (Text("actor_stat_type_" + stat, localize) ?? Pretty(stat)) + (sub == null ? "" : " (" + Pretty(sub) + ")");
-        lines.Add(Plain(template.Replace("{0}", amount)));
+        string text = Format(template, amount);
+        if (text == null) return false;
+        lines.Add(text);
+        return true;
     }
 
     private List<string> Values(string type, string id, string key) => _blocks.TryGetValue((type, id), out var rows)
