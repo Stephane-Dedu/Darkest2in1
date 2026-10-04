@@ -14,7 +14,7 @@ HarmonyX plugin for DD2 v2.04 (Unity 2022.3, Mono). Repo: https://github.com/Ste
 - Work on `claude/practical-wright-hicri0`.
 - `tools/handoff_prompt.md` is the prompt to start any session or agent on this project; leave the same handoff when you stop.
 - The improvement loop prompt is in `tools/parity_loop.md`. Start it with `/loop` followed by that text, and only when the
-  owner asks: it is paused right now.
+  owner asks. The owner resumed it on 2026-10-04; the separate no-launch rule still applies.
 
 ## Owner's standing rules
 - **Don't launch DD2 until the owner says so** (asked 2026-10-04). Until then, build with `-p:Deploy=false` while the

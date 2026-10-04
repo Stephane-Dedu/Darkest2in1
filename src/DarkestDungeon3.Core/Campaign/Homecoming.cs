@@ -167,6 +167,8 @@ public static class Homecoming
                     ? buffs.Select(b => dd1.Buffs?.Get(b)).Where(b => b?.Stat == "resolve_xp_bonus_percent").Sum(b => b.Amount) : 0f;
                 result.XpGained = (int)Math.Round(ResolveXp(quest) * (1f + bonus));
                 hero.ResolveXp += result.XpGained;
+                if (buffs != null)
+                    hero.PendingBuffs.RemoveAll(b => buffs.Contains(b) && dd1.Buffs?.Get(b)?.DurationType == "quest_complete");
                 int before = hero.ResolveLevel;
                 hero.ResolveLevel = Math.Max(before, Math.Min(6, dd1.HeroResolveLevel(hero.ResolveXp)));
                 if (hero.ResolveLevel > before) log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");

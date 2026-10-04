@@ -126,7 +126,8 @@ public static class Embark
             if (h.PendingBuffs.Count > 0)
             {
                 state.PendingBuffs[h.Id] = new List<string>(h.PendingBuffs);
-                h.PendingBuffs.Clear();   // town buffs (hangovers...) last one expedition
+                // DD1 quest_complete buffs survive retreats; ordinary town buffs last one expedition.
+                h.PendingBuffs.RemoveAll(b => dd1.Buffs?.Get(b)?.DurationType != "quest_complete");
             }
         }
         return state;

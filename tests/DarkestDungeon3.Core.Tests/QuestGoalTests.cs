@@ -198,6 +198,40 @@ public class QuestGoalTests
     }
 
     [Fact]
+    public void FailureResolveBonusSurvivesRetreatsUntilThatHeroCompletesAQuest()
+    {
+        const string buff = "darkest_dungeon_failure_roster_resolve_xp";
+        Assert.Equal("quest_complete", Dd1.Buffs.Get(buff).DurationType);
+        var hero = new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", PendingBuffs = { buff, "unknown_town_buff" } };
+        var idle = new HeroRecord { Id = "h", Name = "H", ClassId = "vestal", PendingBuffs = { buff } };
+        var estate = new Estate { Seed = 7, Roster = { hero, idle } };
+        var quest = new QuestOffer { Id = "q", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1, MapSeed = 5 };
+        var outcomes = new[] { new HeroOutcome { HeroId = "p" } };
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            var exp = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+            Assert.Contains(buff, exp.PendingBuffs[hero.Id]);
+            Assert.Equal(new[] { buff }, hero.PendingBuffs);
+            exp.Retreated = true;
+            Homecoming.Report(estate, Dd1, exp, outcomes);
+            Assert.Equal(0, hero.ResolveXp);
+            Assert.Contains(buff, hero.PendingBuffs);
+        }
+        // Saving and reloading between attempts keeps the unused bonus.
+        estate = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        hero = estate.Hero("p");
+        var win = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+        win.QuestComplete = true;
+        var report = Homecoming.Report(estate, Dd1, win, outcomes);
+        Assert.Equal(4, Assert.Single(report.Heroes).XpGained);   // short quest: 2 XP, doubled
+        Assert.DoesNotContain(buff, hero.PendingBuffs);
+        Assert.Contains(buff, estate.Hero("h").PendingBuffs);    // idle hero hasn't completed a quest
+        var next = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+        next.QuestComplete = true;
+        Assert.Equal(2, Assert.Single(Homecoming.Report(estate, Dd1, next, outcomes).Heroes).XpGained);
+    }
+
+    [Fact]
     public void TrinketWarningOnHarderQuestsWithFewTrinkets()
     {
         var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();

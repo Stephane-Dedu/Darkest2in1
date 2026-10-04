@@ -562,8 +562,16 @@ Feasibility notes (decomp):
 - Round 34: plot_tutorial_crypts = progression plot quest, dungeon_level 0, explore, map tutorial_crypts.dm (8 rooms/8 corridors, entrance rooH, guarded treasures tutorial_mash_03/05/01, guarded curio tutorial_mash_04, corridor fight tutorial_mash_02, traps, curios, a hunger square, obstacles), has_statue_contents true. Offered by QuestBoard.PlotOffers now (filter: progression and (not explore or has a map)). Existing estates already list it in CompletedPlotQuests (prepaid by older builds) and won't see it again.
 - Round 35: QuestBoard.PlotOffer(estate, dd1, plotQuest) builds any plot offer (used by the board and by plot_quest town events). DD2 has no bird enemy/battle; the crow's boss stand-in is config:carrion_my_wayward_son_c (shared_carrion_eater_mutated + 2 carrion eaters + shared_dog_rabid_b) in combat_arena_forest_dungeon_exterior.
 
-## Status 2026-10-04: loop paused after round 35 (owner's request)
-- Resume only when the owner says so; no game launches until then. The loop prompt is in tools/parity_loop.md; session notes in CLAUDE.md.
+## Round 36: DD1's failure resolve bonus lasts until a completed quest
+- Reference: shared/buffs/base.buffs.json, darkest_dungeon_failure_roster_resolve_xp: resolve_xp_bonus_percent 1, duration_type quest_complete, duration 1. Embark used to clear all pending buffs, so retreating lost this bonus with no XP earned.
+- Embark copies quest-complete buffs into the expedition and keeps them on the hero. Homecoming consumes the participating survivor's copy only after successful XP calculation. Ordinary town buffs still leave the hero at embark; heroes who stayed home keep their bonus.
+- Verified: Release build with Deploy=false and all 138 Core tests pass. The regression covers two retreats, serialization, a successful short quest earning 4 XP, the next earning 2 XP, and an idle roster hero retaining the bonus. No game launch or save edits.
+- Audit gaps queued in PARITY.md for separate rounds: unseen traps incorrectly roll a disarm; scouting ignores DD1's normal/critical square budget.
+
+## Status 2026-10-04: loop resumed, round 36 complete
+- Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
+- Release build and 138 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: unseen-trap disarm, scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
