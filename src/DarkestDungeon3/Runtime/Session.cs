@@ -61,6 +61,8 @@ internal sealed class Session
                 Current = s;
                 Plugin.Log.LogInfo($"[session] DD1 content loaded from {dd1.Root}: {s.Campaign.MapGen.All.Count} map configs, " +
                                    $"{s.Buildings.Activities.Count} activities, {s.Content.Camping.Skills.Count} camp skills, {s.Lore.HeroNames.Count} names");
+                // DD1's cinematics, made playable in the background (Unity can't play their Theora video).
+                try { Ui.CinematicCache.Prepare(dd1, Dd1Cinematic.Opening); } catch (Exception e) { Plugin.Log.LogWarning("[cinematic] " + e.Message); }
             }
             catch (Exception e)
             {
@@ -92,6 +94,8 @@ internal sealed class Session
             Save = new SaveFile { Estate = Hamlet.NewEstate(Environment.TickCount, Campaign, Buildings, Catalog, Content.Camping) };
             Plugin.Log.LogInfo($"[session] new estate in slot {slot}");
             Persist();
+            // DD1 opens a new campaign with its cinematics: "House of Ruin", then "The Old Road".
+            Ui.CinematicPlayer.Play(Core.Dd1.Dd1Cinematic.Opening);
         }
         else Plugin.Log.LogInfo($"[session] loaded slot {slot}: week {Save.Estate.Week}, {Save.Estate.Roster.Count} heroes");
         Migrate(Save.Estate);

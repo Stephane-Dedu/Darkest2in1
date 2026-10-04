@@ -36,6 +36,7 @@
     <Reference Include="UnityEngine.UIModule"><HintPath>$(GameRefs)\UnityEngine.UIModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="FMODUnity"><HintPath>$(GameRefs)\FMODUnity.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.AudioModule"><HintPath>$(GameRefs)\UnityEngine.AudioModule.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="UnityEngine.VideoModule"><HintPath>$(GameRefs)\UnityEngine.VideoModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.AssetBundleModule"><HintPath>$(GameRefs)\UnityEngine.AssetBundleModule.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="netstandard"><HintPath>$(GameRefs)\netstandard.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>

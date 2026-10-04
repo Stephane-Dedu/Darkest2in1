@@ -23,7 +23,12 @@ internal sealed class UiRoot : MonoBehaviour
         GUI.depth = -1000;
 
         bool fullscreen = d.Phase is Phase.Hamlet or Phase.Crawling or Phase.Homecoming;
-        Gui.BlockInput(fullscreen || _slotPicker);
+        Gui.BlockInput(fullscreen || _slotPicker || CinematicPlayer.Active);
+        if (CinematicPlayer.Active)
+        {
+            try { CinematicPlayer.Draw(); } catch (System.Exception e) { Plugin.Log.LogError(e); }
+            return;
+        }
 
         try
         {

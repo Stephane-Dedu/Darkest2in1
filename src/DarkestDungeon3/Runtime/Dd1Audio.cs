@@ -202,6 +202,38 @@ internal static class Dd1Audio
 
     private static string Pick(params string[] names) => names.FirstOrDefault(n => n != null && _index.Has(n));
 
+    /// <summary>Music and ambience fade out (a cinematic is playing).</summary>
+    public static bool Hush;
+
+    /// <summary>A sound file streamed once (a cinematic's narration).</summary>
+    public sealed class Stream
+    {
+        internal Sound Sound;
+        internal Channel Channel;
+
+        public bool IsPlaying => Channel.isPlaying(out bool on) == RESULT.OK && on;
+
+        public void Stop()
+        {
+            try { Channel.stop(); Sound.release(); } catch (Exception) { }
+        }
+    }
+
+    public static Stream PlayStream(string file)
+    {
+        if (file == null || !File.Exists(file)) return null;
+        try
+        {
+            var core = RuntimeManager.CoreSystem;
+            if (!core.hasHandle() || core.createSound(file, MODE.CREATESTREAM | MODE._2D | MODE.LOOP_OFF, out Sound sound) != RESULT.OK) return null;
+            core.getMasterChannelGroup(out ChannelGroup master);
+            if (core.playSound(sound, master, false, out Channel ch) != RESULT.OK) { sound.release(); return null; }
+            ch.setVolume(Plugin.Dd1SoundVolume.Value * MasterGain());
+            return new Stream { Sound = sound, Channel = ch };
+        }
+        catch (Exception e) { Plugin.Log.LogWarning($"[audio] {file}: {e.Message}"); return null; }
+    }
+
     /// <summary>DD1 has a sample of this name.</summary>
     public static bool Has(string sample) => Ensure() && _index.Has(sample);
 
@@ -244,6 +276,7 @@ internal static class Dd1Audio
         }
         // Under DD2's own volume settings (its Master/Music/SFX sliders), and mixed below the narrator.
         float mv = Plugin.Dd1MusicVolume.Value * 0.45f * MusicGain(), av = Plugin.Dd1SoundVolume.Value * 0.35f * SfxGain();
+        if (Hush) { mv = 0f; av = 0f; }   // a cinematic is playing
         switch (phase)
         {
             case Phase.Hamlet:
