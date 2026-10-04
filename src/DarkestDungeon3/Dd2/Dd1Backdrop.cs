@@ -273,7 +273,12 @@ internal static class Dd1Backdrop
     // volume's own profile copy (PostProcessingManager.SetEffects), so they are held off every frame, on the shared
     // profile and on the copy, and put back as they were found when the fight ends.
     private static readonly string[] FlatArtSpoilers =
-        { "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain" };
+    {
+        "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain",
+        // DD2's per-arena colour grading (the forest exterior's red cast): DD1 shows its art as painted.
+        "ColorAdjustments", "ColorLookup", "ChannelMixer", "ColorCurves", "LiftGammaGain", "ShadowsMidtonesHighlights",
+        "SplitToning", "WhiteBalance",
+    };
     private static readonly Dictionary<object, bool> EffectsBefore = new();
     private static readonly List<System.Reflection.FieldInfo> EffectFlags = new();
     private static readonly List<object> EffectsHeld = new();
