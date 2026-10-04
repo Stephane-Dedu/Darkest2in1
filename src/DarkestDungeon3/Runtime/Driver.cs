@@ -86,6 +86,7 @@ internal sealed class Driver : MonoBehaviour
                     slot => Core.Campaign.Town.TownLayout.IdleSlot(slot.Name));
         }
         SpineArt.Update();
+        ItemText.Prime();
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();

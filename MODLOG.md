@@ -656,7 +656,13 @@ Measured the real DD1 town skeletons/atlas pages with tools/SpineTiming: Stageco
 
 The linked-source test failed against the previous commit's SpineArt.Get, which returned a baked image synchronously. It now passes with the actual DD1 Stagecoach geometry and a synthetic PNG/Unity shim, checking that texture APIs stay on the pumping thread, cached requests do not rebake, uploaded rows preserve orientation and hit tests work. This is not a native renderer/decode test. Release build, 157 Core + 10 bridge/input tests pass; the local plugin is deployed. No game launch or save/config write. Native first-entry responsiveness and appearance remain [?]. Owner added a trinket priority: absent effects and DD1 policy/UI mismatch; recorded separately for the next rounds.
 
-## Status 2026-10-04: loop resumed, round 52 complete
+## Round 53: trinket effects survive cold Hamlet lookups
+
+DD1 port Character/Trinket.ToolTip lists title, rarity, requirements and every Buff.ToolTip. Our ItemText depended on DD2's run-only Item library and cached null, preventing an item from ever acquiring effects after a cold-menu hover. A linked-source shim replay was red: no library, then a populated library, still no effects. ItemText now caches only successful native descriptions, invalidates across native library/language changes, and uses TryGet only after initialization. A worker reads authored DD2 CSV stats and source localization for cold-menu fallback, with runtime localization preferred. Common trinkets show actual resistance bonuses/penalties, HP multipliers and CRIT percentages; source {q} sprite markup becomes readable icon words. No DD2 library is initialized or modified by this fallback.
+
+Release build, 161 Core + 11 bridge/input tests pass. File tests check actual installed trinkets and both native number units, localization fallback and rich-text conversion. This closes the permanently-empty cache and common stat descriptions; cold-menu conditional/triggered effects are a separate remaining gap (withheld rather than falsely described as unconditional). Native tooltips after a run remain the complete preferred source. No launch/save/config changes. Next: validated equip transfers, tooltip fonts/colors/grid, combat startup.
+
+## Status 2026-10-04: loop resumed, round 53 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next priorities: absent trinket effects and DD1 equip/inventory policy/UI; combat startup scans/timings. Then persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.

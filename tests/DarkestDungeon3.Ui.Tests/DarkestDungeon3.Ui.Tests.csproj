@@ -4,6 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsTestProject>true</IsTestProject>
     <SpineArtSource Condition="'$(SpineArtSource)' == ''">../../src/DarkestDungeon3/Runtime/SpineArt.cs</SpineArtSource>
+    <ItemTextSource Condition="'$(ItemTextSource)' == ''">../../src/DarkestDungeon3/Dd2/ItemText.cs</ItemTextSource>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
@@ -13,5 +14,6 @@
     <Compile Include="../../src/DarkestDungeon3/Ui/Drag.cs" Link="Drag.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
     <Compile Include="$(SpineArtSource)" Link="SpineArt.cs" />
+    <Compile Include="$(ItemTextSource)" Link="ItemText.cs" />
   </ItemGroup>
 </Project>
