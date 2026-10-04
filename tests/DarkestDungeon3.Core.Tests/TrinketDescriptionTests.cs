@@ -746,7 +746,7 @@ public class TrinketDescriptionTests
     public void NestedTrinketBuffRetainsItsSkillTriggerMovementAndLifetime()
     {
         string effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Target: Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
         Assert.Contains("Target: Play Out: Remove 1 Negative Token", effects);
         Assert.DoesNotContain("Encore", effects);
@@ -801,7 +801,7 @@ public class TrinketDescriptionTests
     public void InventoryAmountRequirementRetainsLowRelicsStressChanceAndOtherSkillEffects()
     {
         string effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Turn End: +1 Stress (25%) when Relics in inventory is below 25", effects);
         Assert.Contains("Target: Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
         Assert.Contains("Target: Play Out: Remove 1 Negative Token", effects);
@@ -847,8 +847,9 @@ public class TrinketDescriptionTests
         Assert.Contains("Target: Highway Robbery: Steal Regen", effects);
         Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
         effects = Data.Effects("trinket_hero_flg_searing_scripture", out complete);
-        Assert.False(complete);
-        Assert.DoesNotContain("Steal", effects);
+        Assert.True(complete);
+        Assert.Contains("Target: Other Ally: Steal Negative Token", effects);
+        Assert.Contains("Target: Other Ally: Steal Combo Token", effects);
         Assert.Contains("-20% Burn RES", effects);
     }
 
@@ -878,6 +879,85 @@ public class TrinketDescriptionTests
         Assert.False(complete);
         Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
         Assert.Contains("+5% DMG per Positive Token", effects);
+    }
+
+    [Fact]
+    public void OtherAllyRequirementsKeepCleansingTransfersChancesAndPenalties()
+    {
+        string effects = Data.Effects("trinket_collector_junias_head", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Other Ally: Remove 1 Negative Token", effects);
+        Assert.Contains("Target: Other Ally: Remove Combo", effects);
+        Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+        effects = Data.Effects("trinket_hero_jes_buskers_haul", out complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Other Ally: Dodge (33%)", effects);
+        Assert.Contains("+1 Stress (25%) when Relics in inventory is below 25", effects);
+        Assert.Contains("Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
+        effects = Data.Effects("trinket_ancestors_mustache_cream", out complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Other Ally: Extra Action (50%)", effects);
+        Assert.Contains("Ineffective against Bosses", effects);
+        Assert.Contains("+100% Horror Received", effects);
+    }
+
+    [Fact]
+    public void OtherAllyRequirementsUseLocalizedTemplateAndWithholdMalformedQualifiers()
+    {
+        string effects = Data.Effects("trinket_collector_junias_head", out bool complete,
+            key => key == "effect_tooltip_condition_other_ally" ? "Autre allie: {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("Target: Autre allie: Remove 1 Negative Token", effects);
+        effects = Data.Effects("trinket_collector_junias_head", out complete,
+            key => key == "effect_tooltip_condition_other_ally" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Remove", effects);
+        Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+    }
+
+    [Theory]
+    [InlineData("m_SourceConditionActorType", "TARGET")]
+    [InlineData("m_ConditionActorType", "PERFORMER")]
+    [InlineData("m_ActorIsNotSource", "False")]
+    [InlineData("m_ConditionNumber", "2")]
+    [InlineData("m_IsInverse", "True")]
+    [InlineData("m_IsVisible", "False")]
+    [InlineData("m_UnknownRestriction", "True")]
+    public void UnsupportedAllyRestrictionsNeverBecomeUnconditionalExtraActions(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_ally_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var condition = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["m_ConditionType"] = "tag", ["m_ConditionString"] = "ally", ["m_ConditionActorType"] = "TARGET",
+                ["m_ConditionNumberType"] = "GREATER_THAN_OR_EQUAL", ["m_ConditionNumber"] = "1",
+                ["m_SourceConditionActorType"] = "PERFORMER", ["m_ActorIsNotSource"] = "True",
+            };
+            condition[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,ally_item,Item", "element_end",
+                "element_start,ally_item,ActorDataEffects", "target_effects,ally_action", "element_end",
+                "element_start,ally_action,Effect", "m_Chance,1", "m_AddTurn,1", "all_conditions,ally_condition", "element_end",
+                "element_start,ally_condition,Condition",
+            });
+            foreach (var row in condition) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_skill_effect_target=Target:\neffect_tooltip_add_turn=Extra Action");
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("ally_item", out bool complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
     }
 
     [Fact]
