@@ -542,4 +542,7 @@ Feasibility notes (decomp):
 - Round 26: in-game checks on the test estate (week 60): stagecoach 2 recruits / roster 9 (DD1 bases), recruits have quirks, wagon 2 trinkets. Hamlet click points (client px): Nomad Wagon (900,690), Stage Coach (262,640), building window close X (1252,137).
 - The wagon's trinkets are DD2 items (Dd2Catalog.RandomTrinket by DD1 rarity), not DD1 trinket ids; its rarity now follows nomad_wagon.building.json rarity_generation_table.
 - Flaky tests fixed: ZoneBase.Extra was a static Dictionary written by every ZoneEncounters.Load; xunit loads RegionTests and ZoneEncounterTests in parallel ("Operations that change non-concurrent collections must have exclusive access"). Now a ConcurrentDictionary.
+- Round 27: DD1 death_class rows (monsters/<family>/<class>/<class>.info.darkest): `death_class: .monster_class_id corpse_A|B|C|D|corpse_large_A|B|C .is_valid_on_crit False .type "corpse"` on 128 of 252 classes; is_valid_on_bleed/blight/burn_dot unset (= false) except the Ancestor's special classes. Ruins level 1: maggot_A, spider_spitter_A, spider_webber_A have none.
+- DD2: a killed stand-in's ActorDataId becomes its death class right away (lost_battalion_foot_soldier → ..._corpse); CorpseRule vetoes it in GetIsDeathClassValid.
+- Debug: Shift+F10 strikes only the first living enemy with an ordinary (non-crit) blow — for corpse checks. F11 at the entrance rerolls the encounter each fight.
 

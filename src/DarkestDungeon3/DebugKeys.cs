@@ -27,7 +27,7 @@ public class DebugKeys : MonoBehaviour
         {
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
-            if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f10Key.wasPressedThisFrame) WinFight(onlyOne: kb.shiftKey.isPressed);
             if (kb.f3Key.wasPressedThisFrame)
             {
                 // Testing: walk to the nearest room with a battle still to fight (handles traps/curios on the way: press again).
@@ -139,20 +139,22 @@ public class DebugKeys : MonoBehaviour
     }
 
     /// <summary>F10 (testing): every enemy in the current fight takes lethal damage, twice to finish corpses.</summary>
-    private static void WinFight()
+    /// <summary>F10 strikes down every enemy; Shift+F10 only the first one, with an ordinary blow (it should leave a corpse).</summary>
+    private static void WinFight(bool onlyOne = false)
     {
         var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
         if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
         var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
         int hit = 0;
-        for (int pass = 0; pass < 2; pass++)
+        for (int pass = 0; pass < (onlyOne ? 1 : 2); pass++)
             foreach (var a in combat.AllActors.ToList())
             {
                 var actor = a?.ActorInstance;
-                if (actor == null || party.Contains(actor.ActorGuid)) continue;
+                if (actor == null || party.Contains(actor.ActorGuid) || (onlyOne && (actor.ActorDataId ?? "").EndsWith("_corpse"))) continue;
                 actor.ApplyHealthDamage(9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
                                         Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
                 hit++;
+                if (onlyOne) { Plugin.Log.LogInfo($"[F10] struck {actor.ActorDataId} (death class {actor.DeathActorDataId})"); break; }
             }
         Plugin.Log.LogInfo($"[F10] struck {hit} enemy actors");
     }

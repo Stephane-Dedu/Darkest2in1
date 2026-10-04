@@ -85,6 +85,9 @@ internal static class Dd1MonsterView
     /// <summary>The DD2 skills a DD1 monster's stand-in may use (null: no limit).</summary>
     internal static HashSet<string> AllowedFor(uint guid) => Line.Count == 0 ? null : ByGuid(guid)?.Allowed;
 
+    /// <summary>The DD1 monster drawn over this DD2 actor (e.g. maggot_A), or null.</summary>
+    internal static string Dd1Of(uint guid) => Line.Count == 0 ? null : ByGuid(guid)?.Dd1;
+
     private static float _worldPerUnit;
     private static GameObject _quad;
     private static Material _quadMaterial;
