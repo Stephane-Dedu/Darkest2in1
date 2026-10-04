@@ -14,7 +14,7 @@ namespace DarkestDungeon3.Ui;
 /// </summary>
 internal sealed class HamletUi
 {
-    private enum Panel { Town, StageCoach, Abbey, Tavern, Sanitarium, Wagon, Graveyard, Upgrades, Hero, Log, Guild, Blacksmith, Survivalist }
+    private enum Panel { Town, StageCoach, Abbey, Tavern, Sanitarium, Wagon, Graveyard, Memorial, Upgrades, Hero, Log, Guild, Blacksmith, Survivalist }
 
     private Panel _panel = Panel.Town;
     private string _building;          // the building whose window is open
@@ -241,6 +241,7 @@ internal sealed class HamletUi
             Buildings.Sanitarium => Panel.Sanitarium,
             Buildings.NomadWagon => Panel.Wagon,
             Buildings.Graveyard => Panel.Graveyard,
+            Buildings.Memorial => Panel.Memorial,
             Buildings.Guild => Panel.Guild,
             Buildings.Blacksmith => Panel.Blacksmith,
             Buildings.Survivalist => Panel.Survivalist,
@@ -479,6 +480,7 @@ internal sealed class HamletUi
             case Panel.Sanitarium: DrawSanitarium(area, hamlet); break;
             case Panel.Wagon: DrawWagon(area, hamlet); break;
             case Panel.Graveyard: DrawGraveyard(area); break;
+            case Panel.Memorial: DrawMemorial(); break;
             case Panel.Upgrades: break;   // a building not built yet: only its upgrades
             case Panel.Hero: DrawHero(area); break;
             case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
@@ -1069,6 +1071,44 @@ internal sealed class HamletUi
             }
         }
         if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
+    }
+
+    private Memorial _memorial;
+    private Vector2 _memorialScroll;
+    private bool _epiloguePrepared;
+
+    private void DrawMemorial()
+    {
+        _memorial ??= Memorial.Load(S.Dd1);
+        Gui.Text(W(704, 74, 650, 64), Plain(S.Lore?.Text("str_statue_ancestor_quote")), 23, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        var entries = _memorial.Categories.Where(c => _memorial.Videos.Any(v => v.Category == c.Name && v.Visible())).ToList();
+        int rows = _memorial.Videos.Count(v => v.Visible());
+        var view = W(704, 170, 648, 580);
+        _memorialScroll = GUI.BeginScrollView(view, _memorialScroll, new Rect(0, 0, 620, Mathf.Max(view.height, entries.Count * 50 + rows * 130)));
+        float y = 0;
+        string play = null;
+        foreach (var category in entries)
+        {
+            if (Art.Dd1(category.LabelBackdrop) is { } titleBar) GUI.DrawTexture(new Rect(0, y, 600, 40), titleBar);
+            Gui.Text(new Rect(20, y, 560, 40), S.Lore?.Text(category.Label) ?? Pretty(category.Name), 25, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            y += 50;
+            foreach (var video in _memorial.Videos.Where(v => v.Category == category.Name && v.Visible()))
+            {
+                var row = new Rect(0, y, 600, 120);
+                if (Art.Dd1(category.EntryBackdrop) is { } bg) GUI.DrawTexture(row, bg);
+                if (BuildingArt(Buildings.Memorial, video.Name + ".png") is { } image) GUI.DrawTexture(new Rect(10, y + 10, 150, 100), image, ScaleMode.ScaleToFit);
+                bool allowed = video.CanPlay(E.CompletedPlotQuests);
+                Gui.Text(new Rect(176, y + 12, 340, 36), S.Lore?.Text("str_media_" + video.Name) ?? Pretty(video.Name), 27, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+                if (!allowed) Gui.Text(new Rect(176, y + 54, 340, 56), S.Lore?.Text("str_media_" + video.Name + "_locked") ?? "Locked", 18, Gui.Dd1Class);
+                var button = new Rect(530, y + 36, 54, 54);
+                if (BuildingArt(Buildings.Memorial, allowed ? "playmedia.png" : "lockedmedia.png") is { } marker) GUI.DrawTexture(button, marker, ScaleMode.ScaleToFit);
+                if (allowed && Gui.Hotspot(button)) play = video.VideoName;
+                if (allowed && video.Name == "epilog" && !_epiloguePrepared) { _epiloguePrepared = true; CinematicCache.Prepare(S.Dd1, new[] { video.VideoName }); }
+                y += 130;
+            }
+        }
+        GUI.EndScrollView();
+        if (play != null) CinematicPlayer.Play(play);
     }
 
     private Vector2 _graveyardScroll;

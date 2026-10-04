@@ -625,10 +625,15 @@ Feasibility notes (decomp):
 - Replaced unclipped plain text with a 600-high clipped scroll view and native record/tombstone art. Uses DD2 class portraits, DD1 resolve titles, saved cause and week, and DD1 unknown-peril text for a missing cause. Records stay in stored order.
 - Verified: Release build Deploy=false and all 155 tests pass. No game launch or save modifications; visual check remains [?].
 
-## Status 2026-10-04: loop resumed, round 47 complete
+## Round 48: Memorial video page and replay rules
+- Reference: statue_media_info.json categories sorted by sort_priority, three videos, epilog access_if_plot_finished plot_darkest_dungeon_4; statue.layout.darkest list 600x580. The statue had opened the generic town log.
+- Added Core Memorial catalog and access/visibility rules, with tests. Added a distinct Memorial panel using the runtime category/backdrop/button art and localized titles. House of Ruin/Old Road can replay; epilogue is locked until the final DD quest. Replays use existing CinematicPlayer; epilogue cache conversion queues in the background after unlock.
+- Verified: Release build Deploy=false and all 157 tests pass. No game launch or cache generation during this session. Boss narration and collected backer journals are still separate missing work, recorded in PARITY.md.
+
+## Status 2026-10-04: loop resumed, round 48 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: memorial journal page, activity-log presentation, secret-room support. Skip [user] and [blocked] items as the loop instructs.
+- Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
