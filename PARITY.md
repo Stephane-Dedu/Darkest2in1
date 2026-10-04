@@ -39,7 +39,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Recruits arrive with DD1-style quirks. In game (round 26): Bonel (Man-at-Arms) "Last Stand, Nervous", Veci (Leper) two quirks.
 
 ## Trinkets
-- [ ] Nomad Wagon hint text ("You stash N trinkets. Equip them from a hero's sheet...") is drawn over the keeper art (round 26 screenshot); DD1 has no such line there.
+- [?] Nomad Wagon hint text (round 44): nomad_wagon.layout.darkest has a stock grid, no permanent stash help line. Removed the line over the keeper art; hovered trinkets use Gui.Tip with multiline effects and rarity color, as the hero sheet does. Release build and 155 Core tests pass. In game: keeper art should have no stash text across it; hovering a stock trinket should show its tooltip.
 - [?] Trinket Inventory: DD1 window (sort, unequip all, shift-sell at 15%, grid, tooltips with effects).
 - [?] Equip on the hero sheet: two slots, class-only trinkets refused.
 - [user] Trinket retention on a party wipe: DD1 makes it a game option ("keep_battle_quest_fail_trinkets": "what happens to carried trinkets when you have a total party wipe") with plot quests to win them back — which behaviour to use.

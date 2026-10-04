@@ -1039,7 +1039,6 @@ internal sealed class HamletUi
         // DD1's wagon grid (nomad_wagon.layout.darkest): background at body + (230,150), 6 columns 100 x 180 apart.
         var origin = new Vector2(596 + 230, 102 + 150);
         if (BuildingArt(Buildings.NomadWagon, "inventory_grid_background.png") is { } grid) GUI.DrawTexture(new Rect(origin.x, origin.y, 684, 360), grid);
-        string hovered = null;
         for (int i = 0; i < E.WagonStock.Count && i < 12; i++)
         {
             string t = E.WagonStock[i];
@@ -1051,7 +1050,7 @@ internal sealed class HamletUi
             HeroSheet.TrinketIcon(r, t);
             GUI.color = old;
             Gui.Text(new Rect(r.x - 14, r.yMax + 2, r.width + 28, 22), Gui.Num(price, "#,0"), 17, afford ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-            if (r.Contains(Event.current.mousePosition)) hovered = t;
+            if (r.Contains(Event.current.mousePosition)) Gui.Tip(HeroSheet.TrinketText(t), HeroSheet.RarityColour(t));
             if (afford && Gui.Hotspot(r))
             {
                 hamlet.BuyTrinket(t);
@@ -1060,8 +1059,6 @@ internal sealed class HamletUi
             }
         }
         if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        string info = hovered != null ? HeroSheet.TrinketText(hovered).Replace('\n', ' ') + "  ·  click to buy" : $"Your stash: {E.Trinkets.Count} trinkets. Equip them from a hero's sheet (click a hero in the roster).";
-        Gui.Text(new Rect(origin.x, origin.y + 380, 684, 50), info, 18, Gui.Dd1Text, TextAnchor.UpperCenter);
     }
 
     private void DrawGraveyard(Rect area)
