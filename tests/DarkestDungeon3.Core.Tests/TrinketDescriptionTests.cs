@@ -882,6 +882,52 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void NativeAuthoredEffectBodiesRetainRestrictedChoicesAndTheirOwnChance()
+    {
+        string effects = Data.Effects("trinket_hero_pd_annotated_textbook", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Other Ally: Invert 1 Negative Token (65%) or Other Ally: +1 Stress (5%)", effects);
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(effects, @"\(65%\)").Count);
+        Assert.Contains("+50% Healing Given from Skills when Restorative item is equipped", effects);
+        Assert.Contains("Turn Start: Vulnerable (33%) when first in turn order", effects);
+        effects = Data.Effects("trinket_cave_rousing_ringer", out complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Other Ally: Remove Daze Stun", effects);
+        Assert.Contains("Apply to Attacker When Hit: Daze (66%) when Flame is below 50", effects);
+        // The earlier visibility gap is still withheld, even when other authored bodies are recovered.
+        Assert.Null(Data.Effects("trinket_curio_anatomical_map", out complete));
+        Assert.False(complete);
+    }
+
+    [Fact]
+    public void NativeAuthoredEffectBodyUsesLiveTextWithoutAppendingItsChanceAgain()
+    {
+        string effects = Data.Effects("trinket_hero_pd_annotated_textbook", out bool complete,
+            key => key == "effect_skill_invert_negative_tokens_annotated_textbook_override"
+                ? "Inverser 1 jeton negatif (65%)" : null);
+        Assert.True(complete);
+        Assert.Contains("Other Ally: Inverser 1 jeton negatif (65%) or Other Ally: +1 Stress (5%)", effects);
+        Assert.Equal(1, System.Text.RegularExpressions.Regex.Matches(effects, @"\(65%\)").Count);
+    }
+
+    [Fact]
+    public void MalformedAuthoredBodyWithholdsWholeChoiceAndKeepsSeparateRequirements()
+    {
+        string effects = Data.Effects("trinket_hero_pd_annotated_textbook", out bool complete,
+            key => key == "effect_skill_invert_negative_tokens_annotated_textbook_override" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Invert", effects);
+        Assert.DoesNotContain("+1 Stress", effects);
+        Assert.Contains("Restorative item is equipped", effects);
+        Assert.Contains("Vulnerable (33%) when first in turn order", effects);
+        effects = Data.Effects("trinket_cave_rousing_ringer", out complete,
+            key => key == "effect_tooltip_condition_other_ally" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Remove", effects);
+        Assert.Contains("Flame is below 50", effects);
+    }
+
+    [Fact]
     public void OtherAllyRequirementsKeepCleansingTransfersChancesAndPenalties()
     {
         string effects = Data.Effects("trinket_collector_junias_head", out bool complete);

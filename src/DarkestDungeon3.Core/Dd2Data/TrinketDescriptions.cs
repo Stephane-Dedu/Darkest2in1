@@ -199,6 +199,13 @@ public sealed class TrinketDescriptions
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
     {
         if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
+        // Native authored bodies already include their chances; actor conditions still wrap them afterward.
+        string authored = Text("effect_skill_" + id + "_override", localize);
+        if (authored != null)
+        {
+            string body = Format(authored);
+            return string.IsNullOrWhiteSpace(body) ? null : WithEffectConditions(id, body, localize);
+        }
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
         if (rows.Any(row => !SimpleEffectFields.Contains(row[0]))) return null;
         // DD2's formatter includes these effects; resistance bypass changes application rather than its text.
@@ -353,6 +360,11 @@ public sealed class TrinketDescriptions
             parts.Add(Plain(suffix));
         }
         string description = string.Join(" ", parts);
+        return WithEffectConditions(id, description, localize);
+    }
+
+    private string WithEffectConditions(string id, string description, Func<string, string> localize)
+    {
         var conditions = Values("Effect", id, "all_conditions");
         var any = Values("Effect", id, "any_conditions");
         if (any.Count > 1) return null;
