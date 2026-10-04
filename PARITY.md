@@ -110,7 +110,9 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 ## Town events
 - [?] Weekly town events (`campaign/town_events`): crier panel, effects on buildings/prices/recruits.
-- [ ] Plot, arena and returning-dead events not rolled.
+- [?] Returning-dead event: DD1 dead_recruit ("From Beyond", week ≥ 15, ≥ 3 dead, base.town_events.events.json): 3 fallen heroes wait at the stagecoach, only ONE can be hired back. Was: never rolled. Now rolled; the fallen are offered with their level and quirks, labelled "From Beyond" in red, and hiring one leaves the others in the graveyard (HamletTests.FromBeyondOffersThreeFallenHeroesAndOnlyOneReturns). In game: needs a week-15+ estate with 3 dead; check the stagecoach rows and that the hired hero leaves the graveyard.
+- [ ] Plot-quest events (plot_quest_town_invasion_0, plot_quest_crow_trinket, trinket_retention_add_from_storage) not rolled: they need the town-invasion / trinket-retention plot quests, which the mod doesn't have.
+- [user] Arena events and the Butcher's Circus (`arena.town_events.events.json`) are DLC content: goes with the DLC question.
 
 ## Plot quests & the Darkest Dungeon
 - [?] Boss quests per zone; DD1 bosses → DD2 boss configs (zones.json).

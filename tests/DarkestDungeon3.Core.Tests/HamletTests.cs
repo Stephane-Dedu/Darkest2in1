@@ -51,6 +51,29 @@ public class HamletTests
     }
 
     [Fact]
+    public void FromBeyondOffersThreeFallenHeroesAndOnlyOneReturns()
+    {
+        var h = NewHamlet(41);
+        Assert.NotNull(Dd1.TownEvents.Get("dead_recruit"));                    // DD1 "From Beyond" is rolled now
+        for (int i = 0; i < 4; i++)
+            h.Estate.Graveyard.Add(new HeroRecord { Id = "dead" + i, Name = "Dead " + i, ClassId = "highwayman", IsDead = true, CauseOfDeath = "a blade" });
+        int before = h.Estate.Recruits.Count;
+        h.Estate.TownEventId = "dead_recruit";
+        h.StartTownEvent(new Rng(1));
+        var fallen = h.Estate.Recruits.Where(r => r.FromGraveyard).ToList();
+        Assert.Equal(3, fallen.Count);                                          // number_data 3
+        Assert.Equal(before + 3, h.Estate.Recruits.Count);
+
+        Assert.True(h.Recruit(fallen[0].Id));
+        var back = h.Estate.Hero(fallen[0].Id);
+        Assert.NotNull(back);
+        Assert.False(back.IsDead);
+        Assert.DoesNotContain(back, h.Estate.Graveyard);
+        Assert.DoesNotContain(h.Estate.Recruits, r => r.FromGraveyard);        // only ONE returns
+        Assert.Equal(3, h.Estate.Graveyard.Count);                              // the others stay dead
+    }
+
+    [Fact]
     public void AtMostThreeLockedPositiveQuirks()
     {
         var h = NewHamlet();

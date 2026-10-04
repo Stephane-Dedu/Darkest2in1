@@ -72,6 +72,19 @@ public sealed class Hamlet
         var hero = Estate.Recruits.FirstOrDefault(h => h.Id == recruitId);
         if (hero == null || !CanRecruit) return false;
         Estate.Recruits.Remove(hero);
+        if (hero.FromGraveyard)
+        {
+            // Back from the grave; the others offered with them stay dead ("Only ONE ... can be returned").
+            foreach (var other in Estate.Recruits.Where(r => r.FromGraveyard).ToList())
+            {
+                other.FromGraveyard = false;
+                Estate.Recruits.Remove(other);
+            }
+            Estate.Graveyard.Remove(hero);
+            hero.FromGraveyard = false;
+            hero.IsDead = false;
+            hero.CauseOfDeath = null;
+        }
         hero.WeekRecruited = Estate.Week;
         Estate.Roster.Add(hero);
         return true;
@@ -450,6 +463,7 @@ public sealed class Hamlet
     {
         var rng = Estate.NextRng();
 
+        foreach (var r in Estate.Recruits) r.FromGraveyard = false;   // unclaimed fallen heroes rest again
         Estate.Recruits.Clear();
         var experienced = Buildings.ExperiencedRecruits(Estate).OrderByDescending(t => t.Level).ToList();
         for (int i = 0; i < Buildings.RecruitsPerWeek(Estate); i++)
@@ -524,12 +538,29 @@ public sealed class Hamlet
     {
         var ev = Dd1.TownEvents?.Roll(Estate, rng);
         Estate.TownEventId = ev?.Id;
+        StartTownEvent(rng);
+    }
+
+    /// <summary>The current town event's effects that land as the visit starts.</summary>
+    public void StartTownEvent(Rng rng)
+    {
         Estate.TownEventFreeUpgrades = (int)EventData("upgrade_tag_free").Sum(d => d.Num);
-        if (ev == null) return;
-        // Effects that land as the visit starts.
+        if (CurrentEvent == null) return;
         foreach (var (cls, count) in EventData("bonus_recruit"))
             if (Catalog.RecruitableClasses.Contains(cls))
                 for (int i = 0; i < Math.Max(1, (int)count); i++) Estate.Recruits.Add(MakeHero(cls, rng, 0));
+        // DD1 "From Beyond": a few fallen heroes wait at the stagecoach; only one can be brought back.
+        foreach (var (_, count) in EventData("dead_recruit"))
+        {
+            var fallen = Estate.Graveyard.Where(h => !h.FromGraveyard).OrderBy(h => h.Id, StringComparer.Ordinal).ToList();
+            for (int i = 0; i < Math.Max(1, (int)count) && fallen.Count > 0; i++)
+            {
+                var hero = rng.Pick(fallen);
+                fallen.Remove(hero);
+                hero.FromGraveyard = true;
+                Estate.Recruits.Add(hero);
+            }
+        }
         foreach (var (cls, levels) in EventData("idle_resolve_level"))
             foreach (var hero in Estate.Roster.Where(h => h.ClassId == cls && h.MissingWeeks == 0))
                 hero.ResolveLevel = Math.Min(6, hero.ResolveLevel + Math.Max(1, (int)levels));

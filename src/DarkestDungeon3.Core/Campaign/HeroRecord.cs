@@ -44,6 +44,8 @@ public sealed class HeroRecord
 
     // Death.
     public bool IsDead;
+    /// <summary>Offered at the stagecoach by DD1's "From Beyond" event: a fallen hero who can return (only one).</summary>
+    public bool FromGraveyard;
     public string CauseOfDeath;
     public int WeekDied;
 

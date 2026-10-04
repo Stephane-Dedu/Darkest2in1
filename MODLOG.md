@@ -502,3 +502,11 @@ Feasibility notes (decomp):
    length 2, at zone levels 2/4/6 with difficulty 1/3/5, resolve XP 4/8/16. Plan: a Core ZoneBase registry
    (zones.json "dd1_zone") used by MapGen.Find, Props, QuestTables, HeirloomTypes, BattleLoot, Loot, CurioResolver,
    QuestGoals, CrawlUi art; regions skip the bestiary (DD2 natives fight); region boss quests; estate toggle panel.
+
+### Loop round 17-18 (2026-10-04)
+- DD failure buff: `quest.plot_quests.json` roster_buffs_to_apply_on_failure + roster_buff_on_failure_minimum_party_resolve_level (5) now carried by PlotQuest/QuestOffer; Homecoming gives every roster hero the buff as a PendingBuff (one expedition; DD1 keeps it until a *completed* quest — noted in PARITY).
+- Death stress: DD2 `stress_triggers_data_export` on_ally_death = +1 (of 10) to each observing hero at 100%; DD1 is 0.5 × 12/100. Left to DD2's combat.
+- "From Beyond" (dead_recruit): rolled now. `HeroRecord.FromGraveyard` marks fallen heroes offered in `Estate.Recruits`; `Hamlet.Recruit` takes one out of the graveyard and drops the other fallen offers; `RefreshWeek` clears the flag on unclaimed ones. `Hamlet.StartTownEvent(rng)` is public (applies the current event's on-visit effects) so tests can force an event.
+- DD2 side: a hero brought back gets a fresh DD2 actor next embark (`Dd2Heroes.BuildParty` always `CreateActor`s), so no dead-actor reuse.
+- No debug key forces a town event; checking events in game needs a real week roll.
+

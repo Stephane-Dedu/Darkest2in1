@@ -29,12 +29,12 @@ public sealed class TownEvents
     public List<TownEvent> Events { get; } = new();
     public List<float> ChanceByMisses { get; } = new() { 0.33f, 0.67f, 0.75f, 1f };
 
-    /// <summary>Effects with no DD2-hero meaning yet (plot invasion, the dead returning, arena) are not rolled.</summary>
+    /// <summary>Effects with no DD2-hero meaning yet (plot invasion, trinket retention, arena) are not rolled.</summary>
     private static readonly HashSet<string> Supported = new()
     {
         "free_activity", "activity_cost_change", "activity_lock", "in_activity_buff", "idle_buff", "embark_party_buff",
         "bonus_recruit", "idle_resolve_level", "provision_item_type_cost_change", "provision_item_type_amount_change",
-        "upgrade_tag_discount", "upgrade_tag_free", "remove_quest_hero_level_restriction",
+        "upgrade_tag_discount", "upgrade_tag_free", "remove_quest_hero_level_restriction", "dead_recruit",
     };
 
     public static TownEvents Load(Dd1Install dd1)

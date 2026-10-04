@@ -841,7 +841,9 @@ internal sealed class HamletUi
                 Drag.Source(row, new RecruitDrag(h.Id), r => { if (Art.HeroIcon(cls) is { } ic) Art.DrawSprite(new Rect(r.x + 100, r.y + 8, 86, 86), ic); });
             if (!(Drag.Payload is RecruitDrag carried && carried.HeroId == h.Id) && Art.HeroIcon(h.ClassId) is { } icon) Art.DrawSprite(portrait, icon);
             Gui.Text(new Rect(x + 100, y + 4, 380, 36), h.Name, 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(x + 100, y + 38, 380, 28), Pretty(h.ClassId), 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            // DD1 "From Beyond": a fallen hero offered back; hiring one sends the others back to the grave.
+            Gui.Text(new Rect(x + 100, y + 38, 380, 28), h.FromGraveyard ? $"{Pretty(h.ClassId)} — {Dd1Text.Get("miscellaneous", "town_event_title_dead_recruit") ?? "From Beyond"}" : Pretty(h.ClassId),
+                20, h.FromGraveyard ? Gui.Blood : Gui.Dd1Class, TextAnchor.MiddleLeft);
             Gui.Text(new Rect(x + 100, y + 62, 390, 24), string.Join(", ", h.Quirks.Select(QuirkName)), 15, Gui.Dim, TextAnchor.MiddleLeft);
             if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; }
         }
