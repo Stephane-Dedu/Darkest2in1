@@ -525,4 +525,9 @@ Feasibility notes (decomp):
   - map: `base_root.map.{entrance_id, final_room_id (area id hashes), static_dynamic.{static_save (nested file), areas.<rooX|corX>.tiles.tileN.{content, trap, mash_name, mash_type, light, knowledge}}}`; static_save: `areas.<name>.{id, kind 0 room/1 corridor, door0-7.area_to, tiles.tileN.{type, obstacle, door_to.area_to, mappos (2 floats)}}`.
   - crow_map1 is a single room (the crow's lair).
 - The Unity port ships its own conversion of DD_map1-4 (Assets/Resources/Data/Maps/*.bytes, its Dungeon.Write format): a cross-check only; the mod reads the user's .dm files.
+- Round 22: `.dm` square content codes, matched against DD1's raid saves (Steam userdata/<id>/262060/remote/profile_N/**/persist.map.json, same binary format, tiles also carry `curio_prop`/`trap` = DD1 string hash h*53+c of the prop id): 0 empty, 1 battle, 3 trap, 4 obstacle, 6 room curio (+ battle if mash_name), 7 hall curio, 8 hunger check (no prop), 9 secret room, 10 room treasure, 13 secret door (a corridor square whose door_to is a type-1 side door into the secret room), 14 room (rare, a curio). `mash_type` 3 = has mash_name, 5 = none.
+- Static tiles: type 3 room, 2 corridor end (door to a room), 1 corridor square. A corridor's tile0 / last tile door_to = its two rooms. mappos units = the mod's X/Y units.
+- DD_map4's 3 obstacles carry a static `obstacle` hash (-697426505) that matches no prop name in props/shared; PlotMap falls back to the zone's obstacle table (rubble).
+- The port's DD_map1.bytes room6_mid = ancestors_knapsack + mash_09's four cultists = .dm rooI (code 6 + dd_quest_1_mash_09): code 6 is a guarded room curio/treasure.
+- The user's DD1 saves are read-only references: never write there.
 

@@ -36,6 +36,8 @@ public sealed class Room
     /// <summary>Curio id for Curio/GuardedCurio/Treasure/GuardedTreasure rooms (from the zone's props table).</summary>
     public string CurioId;
     public bool IsQuestGoal;
+    /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
+    public string MashName;
     public List<int> CorridorIds = new();
 
     // Expedition state.
@@ -52,6 +54,8 @@ public sealed class HallTile
     public HallContent Content;
     public string ContentId;
     public bool IsQuestGoal;
+    /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
+    public string MashName;
 
     // Expedition state.
     public bool Visited, Scouted, Resolved;
