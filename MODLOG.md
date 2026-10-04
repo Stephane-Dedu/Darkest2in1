@@ -595,7 +595,12 @@ Feasibility notes (decomp):
 - CrawlRules loads ScoutEntryChance. Begin identifies dungeon entry; room scouting uses the entry chance without adding the light bonus. Subsequent room arrivals retain ordinary and critical scouting. No arbitrary sleep or game hook needed.
 - Verified: Release build Deploy=false and all 155 Core tests pass. Regression checks 32 seeds with full light and a forced 100% normal room chance, plus an entry override. Round-40 integration tests now travel to a new room before testing normal/critical distance. No game launch.
 
-## Status 2026-10-04: loop resumed, round 41 complete
+## Round 42: the pack UI respects Core's food refusal
+- Reference: Unity port InventoryItem.cs provision-use activation requires a selected hero with HealthRatio < 1. Crawl.UseSupply already enforces a living wounded selection. CrawlUi.UseItem bypassed any refusal by directly consuming another provision and healing.
+- Removed the duplicate UI food path. Core now owns the consumption and configured heal amount; successful food use still persists and announces through the existing path.
+- Verified: Release build Deploy=false and all 155 Core tests pass. Expanded food regression checks no selection, a missing hero, a dead hero and full health without consuming food. No game launch.
+
+## Status 2026-10-04: loop resumed, round 42 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next: bent plot-map corridors, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.

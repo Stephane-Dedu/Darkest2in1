@@ -55,6 +55,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 ## Provisioning
 - [?] Provisioner stock and prices by quest length (`campaign/provision/provision.json`), class-specific free items, drag to buy.
 - [?] Eating from the pack: DD1 lets a hero eat a provision in the dungeon for `provision_hp_heal` 5% max HP. Was: food did nothing (UseSupply knew only holy water). Now Crawl.UseSupply eats it, not at full health (CrawlTests.EatingAProvisionHealsFivePercent). In game: click food with a wounded hero selected → "+5% health". (`max_provisions_before_full` 4: reset point unknown, not applied.)
+- [?] Food refusal in UI (round 42): InventoryItem's provision branch requires a selected wounded hero. Removed CrawlUi's direct consumption/heal fallback when Crawl.UseSupply refuses. CrawlTests.EatingAProvisionHealsFivePercent now also checks full health, no selection, missing hero and dead hero consume nothing. In game: click food with a full-health or dead selection; the food must remain and no healing notice appears.
 - [?] Low-food / no-torch embark warnings.
 
 ## Map generation

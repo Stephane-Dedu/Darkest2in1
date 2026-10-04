@@ -665,11 +665,6 @@ internal sealed class CrawlUi
         if (done != null) { Gui.Announce(done); S.Persist(); return; }
         if (key == Supply.Torch) D.UseTorch();
         else if (key == Supply.Firewood && crawl.CanCamp) D.MakeCamp();
-        else if (key == Supply.Food && D.SelectedHeroId != null && crawl.State.Pack.TryUse(Supply.Food))
-        {
-            D.Party.Heal(D.SelectedHeroId, 0.05f);
-            Gui.Announce("A meagre meal.");
-        }
         else if (key is Supply.Bandage or Supply.Antivenom or Supply.Laudanum or Supply.Herbs)
             Gui.Announce("Nothing to treat now. Keep it for curios.");
     }

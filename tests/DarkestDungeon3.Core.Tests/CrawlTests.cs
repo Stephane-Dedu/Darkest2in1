@@ -95,6 +95,11 @@ public class CrawlTests
         party.Hp[hero] = 1f;
         Assert.Null(crawl.UseSupply(hero, Supply.Food));        // nothing to heal: the food stays
         Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+        Assert.Null(crawl.UseSupply(null!, Supply.Food));
+        Assert.Null(crawl.UseSupply("not_in_the_party", Supply.Food));
+        party.Hp[hero] = 0f;
+        Assert.Null(crawl.UseSupply(hero, Supply.Food));        // stale selected dead hero
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
     }
 
     [Theory]
