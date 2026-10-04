@@ -62,16 +62,17 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Corridor contents (battle/trap/obstacle/curio/hunger) distribution per zone.
 
 ## Crawl
-- [ ] Spotted trap movement: Crawl.IsBlocked recognizes an unresolved scouted trap, but Crawl.Step only refuses forward movement for battles and obstacles. DD1's deliberate trap interaction must be resolved before passing it; backtracking should remain possible. Reference: the port's RaidSceneManager.InvestigateTrap handActivation path.
+- [?] Spotted trap movement (round 38): the port's RaidTrap.OnTriggerEnter2D calls ActivateTrap(false) even when spotted. Crawl.Step now springs an armed trap before forward movement, without a disarm roll; backing away leaves it armed. CrawlTests.PassingASpottedTrapSpringsItButBackingAwayDoesNot covers both paths and movement after resolution. In game: check map/keyboard movement cannot pass a spotted trap free of consequences; deliberate disarm still uses the selected hero.
 - [x] Walking the DD1 hallway with DD1 art; hunger checks through DD2 actors — playtests 1-3; rooms, map and HUD in round 1 screenshots.
 - [?] Light: 6 per new square / 1 per visited (`tile_light_loss`), torch +25, light bands (`darkness`): scouting, surprise, loot, stress.
 - [x] Scouting on entering the dungeon: DD1's `scouting_enter_dungeon_scout_chance` and `_quest_item_scout_chance` are 0.0 in `shared/rules.json` (only buffs raise them): no entry scouting, as the mod does (round 3).
 - [x] Scouting treasure: `scouting_chance_scout_treasure` is 0.0 in DD1's rules: nothing to do (round 3).
 - [?] Hallway stress per step (`hallway_stress`), starvation (`hallway_hunger_starve_HPdmg`), meals (`meals_table`).
 - [?] Traps: DD1 disarm chance (class trap stat + 40% spotted − difficulty), spotted traps block, trap effects (`props/trap_definitions.json`), sounds.
-- [?] Unseen traps (round 37): the Unity port's RaidSceneManager.InvestigateTrap only rolls a disarm for handActivation. Crawl.TriggerTrap now springs unseen traps without a roll. CrawlTests.OnlyDeliberateDisarmingCanAvoidATrap covers 32 seeds each for unseen and spotted traps, real spikes damage, and the selected disarmer. In game: an unseen spikes trap always hits the front hero; a spotted trap waits and can be disarmed by the selected hero.
+- [?] Unseen traps (round 37): the Unity port's RaidSceneManager.TrapEvent only rolls a disarm for handActivation. Crawl.TriggerTrap now springs unseen traps without a roll. CrawlTests.OnlyDeliberateDisarmingCanAvoidATrap covers 32 seeds each for unseen and spotted traps, real spikes damage, and the selected disarmer. In game: an unseen spikes trap always hits the front hero; a spotted trap waits and can be disarmed by the selected hero.
 - [ ] Scouting distance: `shared/rules.json` scouting_crit_success 0.50; the Unity port's ScoutingEvent/ScoutingHallway uses 6 squares normally, 12 on a critical scout. Crawl.Scout always reveals rooms at distance 2 and their corridors regardless of hallway length.
 - [?] Obstacles: shovel clears; without one, DD1 damages and stresses the party and drops light.
+- [ ] Obstacle costs: props/prop_definitions.json obstacle.default_data has health -0.05, fail_effects [Stress 2], torchlight -20. Crawl.ClearObstacle hardcodes 10% HP, 10 stress and no torch loss; it also ignores ancestor's zero-cost overrides in obstacle_definitions.json.
 - [?] Curios: DD1 interaction (click, drag any item, right item works), results (`curios/curio_type_library.csv`), quest curios.
 - [?] Corridor fights stop the party; room fights on entry; retreating backs off one square.
 - [?] Map (minimap) drag/click travel, room exits by keys.

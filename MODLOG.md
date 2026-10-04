@@ -569,14 +569,20 @@ Feasibility notes (decomp):
 - Audit gaps queued in PARITY.md for separate rounds: unseen traps incorrectly roll a disarm; scouting ignores DD1's normal/critical square budget.
 
 ## Round 37: unseen traps spring without a free disarm roll
-- Reference: props/trap_definitions.json spikes health -0.25; Unity port Assets/Scripts/Managers/RaidSceneManager.cs InvestigateTrap only tests disarmChance when handActivation is true. Crawl used the disarm roll even when the trap was unseen.
+- Reference: props/trap_definitions.json spikes health -0.25; Unity port Assets/Scripts/Managers/RaidSceneManager.cs TrapEvent only tests disarmChance when handActivation is true. Crawl used the disarm roll even when the trap was unseen.
 - TriggerTrap now rolls only for a deliberate spotted-trap interaction. Walked-into traps apply their damage/effects directly. Selected-hero disarming remains unchanged.
 - Verified: Release build Deploy=false, all 140 tests pass. New theory covers 32 seeds for each activation type with real DD1 trap data. No game launch. Queued spotted-trap movement bypass separately in PARITY.md.
 
-## Status 2026-10-04: loop resumed, round 37 complete
+## Round 38: passing a spotted trap springs it
+- Source correction: the port method is TrapEvent, not InvestigateTrap. RaidTrap.OnTriggerEnter2D always uses ActivateTrap(false); spotting allows a click to disarm but walking past still springs the trap.
+- Core Step now resolves an armed trap without a disarm roll before forward movement. Retreating off its square leaves it armed. This closes the bypass in direct movement calls; the UI already stops auto-walking at spotted traps.
+- Verified: Release build Deploy=false, all 142 tests pass. Regression covers backing away, springing it, and moving after resolution. No game launch.
+- Next gap found from actual data: ordinary obstacles cost 5% HP, Stress 2, and 20 torchlight without a shovel; ancestor obstacles override all costs to zero. Queued separately.
+
+## Status 2026-10-04: loop resumed, round 38 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 140 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: spotted-trap movement bypass, scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Release build and 142 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: obstacle costs, scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.

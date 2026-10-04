@@ -180,6 +180,13 @@ public sealed class Crawl
         if (!tile.Resolved && (tile.Content == HallContent.Battle || (forward && tile.Content == HallContent.Obstacle)))
             return Blocked();
 
+        // DD1: passing an armed trap springs it even when spotted. Backing away leaves it alone.
+        if (forward && !tile.Resolved && tile.Content == HallContent.Trap)
+        {
+            TriggerTrap(tile, scouted: false);
+            return Flush();
+        }
+
         var corridor = CurrentCorridor;
         int towardB = State.HeadingRoomId == corridor.RoomB ? 1 : -1;
         int dir = forward ? towardB : -towardB;

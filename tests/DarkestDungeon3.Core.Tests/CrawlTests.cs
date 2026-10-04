@@ -142,6 +142,43 @@ public class CrawlTests
         Assert.Equal(scouted, disarmed > 0);
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PassingASpottedTrapSpringsItButBackingAwayDoesNot(bool forward)
+    {
+        var tile = new HallTile { Index = 0, Content = HallContent.Trap, ContentId = "spikes", Scouted = true, Visited = true };
+        var map = new DungeonMap
+        {
+            Rooms = { new Room { Id = 0, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
+            Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles = { tile, new HallTile { Index = 1 } } } },
+        };
+        var state = new ExpeditionState
+        {
+            Quest = new QuestOffer { Dungeon = "crypts", Type = "explore", Difficulty = 1, ScoutingEnabled = false },
+            Map = map, Seed = 8, Party = { "a" }, RoomId = -1, CorridorId = 0, TileIndex = 0, HeadingRoomId = 1,
+        };
+        var party = new FakeParty("a");
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        Assert.True(crawl.IsBlocked);
+        var events = crawl.Step(forward);
+        Assert.Equal(forward, tile.Resolved);
+        Assert.Equal(forward ? 0.75f : 1f, party.Hp["a"]);
+        Assert.DoesNotContain(events, e => e.Type == CrawlEventType.TrapDisarmed);
+        if (forward)
+        {
+            Assert.Contains(events, e => e.Type == CrawlEventType.TrapSprung);
+            Assert.Equal(0, state.TileIndex);   // interaction first, then movement
+            crawl.Step(true);
+            Assert.Equal(1, state.TileIndex);
+        }
+        else
+        {
+            Assert.True(state.InRoom);
+            Assert.Equal(0, state.RoomId);
+        }
+    }
+
     [Fact]
     public void SurpriseFollowsDd1ByKnowledge()
     {
