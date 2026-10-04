@@ -82,6 +82,10 @@ public sealed class Buildings
     // ---- Stagecoach ----
     private JObject StageCoachStore => (JObject)Data(StageCoach)["stores"]?.First?["data"];
 
+    /// <summary>DD1's first recruits at the stagecoach (first_hero_classes: plague_doctor, vestal).</summary>
+    public IReadOnlyList<string> FirstHeroClasses() =>
+        (StageCoachStore?["first_hero_classes"] as JArray ?? new JArray()).Select(c => (string)c).Where(c => c != null).ToList();
+
     public int RecruitsPerWeek(Estate e) => (int?)Tiers.Current(StageCoachStore?["number_of_recruits_upgrades"], e)?["amount"] ?? 2;
     public int RosterSize(Estate e) => (int?)Tiers.Current(StageCoachStore?["roster_size_upgrades"], e)?["amount"] ?? 9;
 

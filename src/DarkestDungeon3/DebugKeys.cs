@@ -27,7 +27,8 @@ public class DebugKeys : MonoBehaviour
         {
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
-            if (kb.f10Key.wasPressedThisFrame) WinFight(onlyOne: kb.shiftKey.isPressed);
+            if (kb.f10Key.wasPressedThisFrame && kb.ctrlKey.isPressed) KillFront();
+            else if (kb.f10Key.wasPressedThisFrame) WinFight(onlyOne: kb.shiftKey.isPressed);
             if (kb.f3Key.wasPressedThisFrame)
             {
                 // Testing: walk to the nearest room with a battle still to fight (handles traps/curios on the way: press again).
@@ -171,6 +172,23 @@ public class DebugKeys : MonoBehaviour
                 if (onlyOne) { Plugin.Log.LogInfo($"[F10] struck {actor.ActorDataId} (death class {actor.DeathActorDataId})"); break; }
             }
         Plugin.Log.LogInfo($"[F10] struck {hit} enemy actors");
+    }
+
+    /// <summary>Ctrl+F10: the front enemy dies as from a skill (DD2's Kill with DeathType.SKILL), so its death class
+    /// (corpse) is applied at once — for checking how corpses are drawn.</summary>
+    private static void KillFront()
+    {
+        var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
+        if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
+        var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
+        var front = combat.AllActors.Select(a => a?.ActorInstance)
+            .Where(x => x != null && !party.Contains(x.ActorGuid) && !(x.ActorDataId ?? "").EndsWith("_corpse"))
+            .OrderBy(x => x.TeamPosition).FirstOrDefault();
+        if (front == null) { Plugin.Log.LogInfo("[F10] no living enemy"); return; }
+        string before = front.ActorDataId;
+        front.Kill(Assets.Code.Actor.DeathType.SKILL, Assets.Code.Source.SourceType.SKILL, new System.Collections.Generic.List<string>(), 0f,
+                   party.Take(1).ToList());
+        Plugin.Log.LogInfo($"[F10] killed {before} at position {front.TeamPosition}: now {front.ActorDataId}");
     }
 
     private static void StartTestCombat()

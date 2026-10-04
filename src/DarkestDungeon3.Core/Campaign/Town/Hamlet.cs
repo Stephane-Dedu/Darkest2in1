@@ -28,7 +28,11 @@ public sealed class Hamlet
     public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
         var estate = new Estate { Seed = seed };
-        estate.Add(Currency.Gold, 500);
+        // DD1's new game (scripts/starting_save): the opening's wallet (heirlooms, no gold) and heroes.
+        var start = dd1.Install != null ? StartingSave.Load(dd1.Install) : null;
+        if (start != null && start.Wallet.Count > 0)
+            foreach (var (type, amount) in start.Wallet.Where(w => w.Amount > 0)) estate.Add(type, amount);
+        else estate.Add(Currency.Gold, 500);
         // DD1 opens with the Ruins tutorial; we skip it but pay out what it pays (3000 gold, 4 crests).
         var tutorial = dd1.Goals?.Plot.FirstOrDefault(p => p.Id == "plot_tutorial_crypts");
         if (tutorial != null)
@@ -38,12 +42,39 @@ public sealed class Hamlet
         }
         var hamlet = new Hamlet(estate, dd1, buildings, catalog, camping);
         var rng = estate.NextRng();
-        // DD1's first recruits are fixed (Crusader, Highwayman, Plague Doctor, Vestal). Use the DD2 classes
-        // that share those names, falling back to whatever DD2 offers.
-        foreach (var cls in new[] { "man_at_arms", "highwayman", "plague_doctor", "vestal" })
-            estate.Roster.Add(hamlet.MakeHero(catalog.RecruitableClasses.Contains(cls) ? cls : rng.Pick(catalog.RecruitableClasses), rng, level: 0));
-        hamlet.RefreshWeek();
+        if (start != null && start.Heroes.Count > 0)
+            foreach (var h in start.Heroes) estate.Roster.Add(hamlet.StartingHero(h, rng));
+        else
+            foreach (var cls in new[] { "man_at_arms", "highwayman" })
+                estate.Roster.Add(hamlet.MakeHero(catalog.RecruitableClasses.Contains(cls) ? cls : rng.Pick(catalog.RecruitableClasses), rng, level: 0));
+        hamlet.RefreshWeek(first: true);
         return estate;
+    }
+
+    /// <summary>DD1 classes DD2 has no hero for, and the DD2 hero that plays them (the Crusader: a front-line protector).</summary>
+    public static readonly IReadOnlyDictionary<string, string> Dd2StandIn = new Dictionary<string, string>
+    {
+        ["crusader"] = "man_at_arms",
+    };
+
+    /// <summary>One of DD1's opening heroes (Reynauld, Dismas) with their own name, quirks and stress.</summary>
+    public HeroRecord StartingHero(StartingSave.Hero h, Rng rng)
+    {
+        string cls = h.Dd1Class;
+        if (!Catalog.RecruitableClasses.Contains(cls))
+            cls = Dd2StandIn.TryGetValue(cls ?? "", out var stand) && Catalog.RecruitableClasses.Contains(stand) ? stand : rng.Pick(Catalog.RecruitableClasses);
+        var hero = new HeroRecord
+        {
+            Id = Estate.NewId(),
+            ClassId = cls,
+            Name = h.Name,
+            ResolveXp = h.ResolveXp,
+            Stress = (int)Math.Round(h.Stress / 10f, MidpointRounding.AwayFromZero),   // DD1 stress (100 = full) -> DD2 pips (10)
+            WeekRecruited = Estate.Week,
+        };
+        foreach (var q in h.Quirks.Select(Catalog.MapDd1Quirk).Where(q => q != null).Distinct()) hero.Quirks.Add(q);
+        if (Camping != null) hero.CampingSkills = Camping.Starting(cls, rng);
+        return hero;
     }
 
     // ---------------- Stagecoach ----------------
@@ -459,15 +490,18 @@ public sealed class Hamlet
     }
 
     /// <summary>New recruits, a new wagon stock and a new quest board.</summary>
-    public void RefreshWeek()
+    public void RefreshWeek(bool first = false)
     {
         var rng = Estate.NextRng();
 
         foreach (var r in Estate.Recruits) r.FromGraveyard = false;   // unclaimed fallen heroes rest again
         Estate.Recruits.Clear();
         var experienced = Buildings.ExperiencedRecruits(Estate).OrderByDescending(t => t.Level).ToList();
-        for (int i = 0; i < Buildings.RecruitsPerWeek(Estate); i++)
+        // DD1: the very first coach brings its fixed classes (first_hero_classes: the Plague Doctor and the Vestal).
+        var fixedClasses = first ? Buildings.FirstHeroClasses().Where(Catalog.RecruitableClasses.Contains).ToList() : new List<string>();
+        for (int i = 0; i < Math.Max(Buildings.RecruitsPerWeek(Estate), fixedClasses.Count); i++)
         {
+            if (i < fixedClasses.Count) { Estate.Recruits.Add(MakeHero(fixedClasses[i], rng, 0)); continue; }
             int level = 0;
             foreach (var (lvl, chance) in experienced)
                 if (rng.Chance(chance)) { level = lvl; break; }

@@ -117,6 +117,11 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Plot-quest events (plot_quest_town_invasion_0, plot_quest_crow_trinket, trinket_retention_add_from_storage) not rolled: their plot quests (plot_town_invasion_0 in the `town` dungeon, plot_crow_trinket / plot_trinket_retention_N in the Weald) run on DD1's hand-made maps — after the plot-maps item.
 - [user] Arena events and the Butcher's Circus (`arena.town_events.events.json`) are DLC content: goes with the DLC question.
 
+## New game (user request: "same introduction / cinematics / characters as in DD1")
+- [x] a) Starting roster and estate (DD1 `scripts/starting_save`): Reynauld and Dismas with their DD1 quirks (mapped to DD2) and stress 10/100 (= 1 pip), the wallet 0 gold / 10 busts / 10 portraits / 10 deeds / 20 crests (+ the skipped tutorial's 3000 gold, 4 crests), and the first coach's `first_hero_classes` plague_doctor + vestal. Reynauld (DD1 Crusader) stands on DD2's Man-at-Arms (Hamlet.Dd2StandIn). Core StartingSave + Hamlet.NewEstate/StartingHero/RefreshWeek(first) (HamletTests.ANewEstateOpensWithDd1sHeroesAndWallet). In game (round 30, fresh slot 3): Week 1, roster 2/9 Reynauld (Man At Arms) + Dismas (Highwayman), 3,000 gold, 10/10/10/24 heirlooms; coach: a Plague Doctor and a Vestal; quirks warrior_of_light/hard_noggin kept as DD2's own, the rest mapped with DD1's polarity.
+- [ ] b) Cinematics: DD1 `video/house_of_ruin.ogv` (the Ancestor: "Ruin has come to our family...", subtitles = `.sub` timings × `str_vo_house_of_ruin_N`) on a new estate, `video/old_road.ogv` (`str_vo_old_road_N`) before the first expedition; "Watch Intro Cinematic" (`menu_base_element_watch_intro`).
+- [ ] c) The opening expedition: DD1 starts in its tutorial (quest.plot_quests.json plot_tutorial_crypts on maps/tutorial_crypts.dm, explore) with Reynauld and Dismas; the mod skips it and pays its rewards.
+
 ## Plot quests & the Darkest Dungeon
 - [?] Boss quests per zone; DD1 bosses → DD2 boss configs (zones.json).
 - [?] Darkest Dungeon quest chain (`campaign/quest/plot`), DD art per quest folder, resolve 5 gate.
