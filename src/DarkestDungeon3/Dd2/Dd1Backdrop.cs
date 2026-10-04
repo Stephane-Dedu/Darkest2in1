@@ -23,6 +23,7 @@ internal static class Dd1Backdrop
     public static Mesh SharedQuad => QuadMesh();
     private static bool _failed;
     private static float _startedAt;
+    private static readonly DeferredPoll SetupPoll = new(0.1f);
     private static readonly List<Renderer> Hidden = new();
     private static RenderTexture _texture;
     private static Material _material;
@@ -42,13 +43,16 @@ internal static class Dd1Backdrop
         Ready = false;
         _failed = nativeArena || !Plugin.Dd1BackdropOn.Value;
         _startedAt = -1f;
+        SetupPoll.Reset();
     }
 
     /// <summary>Called every frame of a fight until it is set up (DD2's arena and actors load over a few frames).</summary>
     public static void Update()
     {
         if (Ready || _failed) return;
+        if (!SetupPoll.Due(Time.unscaledTime, true)) return;
         if (_startedAt < 0) _startedAt = Time.unscaledTime;
+        var setupWatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             var arena = SingletonMonoBehaviour<ArenaBhv>.Instance;
@@ -67,10 +71,10 @@ internal static class Dd1Backdrop
             var spared = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI") };
             var scenes = Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount)
                 .Select(UnityEngine.SceneManagement.SceneManager.GetSceneAt).Where(sc => sc.isLoaded).ToList();
-            var scenery = scenes.SelectMany(sc => sc.GetRootGameObjects())
+            var renderers = scenes.SelectMany(sc => sc.GetRootGameObjects())
                 .Where(g => !g.name.StartsWith("DD3", StringComparison.Ordinal))
-                .SelectMany(g => g.GetComponentsInChildren<Renderer>(true))
-                .Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
+                .SelectMany(g => g.GetComponentsInChildren<Renderer>(true)).ToList();
+            var scenery = renderers.Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
                             && !spared.Contains(r.gameObject.layer)
                             && r.GetComponentInParent<ActorBhv>() == null)
                 .ToList();
@@ -100,8 +104,7 @@ internal static class Dd1Backdrop
             // The arena's ambient particles (floating specks, embers) present now: particle systems and VFX Graph effects
             // (DD2 draws its embers with VisualEffect / VFXRenderer). Skill effects spawn later and stay.
             int ambient = 0;
-            foreach (var sc in scenes)
-                foreach (var r in sc.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)))
+            foreach (var r in renderers)
                 {
                     string type = r.GetType().Name;
                     if ((type == "ParticleSystemRenderer" || type == "VFXRenderer") && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
@@ -119,7 +122,7 @@ internal static class Dd1Backdrop
             // effects' or the UI's.
             var keep = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Deferred"), LayerMask.NameToLayer("Foreground"),
                                           LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI"), 0 };
-            foreach (var p in UnityEngine.Object.FindObjectsOfType<Renderer>()) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
+            foreach (var p in renderers) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
             // Camera masks also filter lights. Keep every arena light layer while hiding its scenery per renderer.
             foreach (var light in UnityEngine.Object.FindObjectsOfType<Light>()) keep.Add(light.gameObject.layer);
             _sceneryMask = 0;
@@ -130,12 +133,15 @@ internal static class Dd1Backdrop
                 if (!keep.Contains(l)) _sceneryMask |= 1 << l;
             }
             _sceneryCamera = cam;
+            foreach (var hidden in Hidden) Seen.Add(hidden.GetInstanceID());
+            _nextScan = Time.unscaledTime + 0.5f;
             // The backdrop goes on the scenery's own main layer: DD2's renderer draws that one (an unused layer was
             // filtered out by it). That layer stays drawn; its scenery is hidden renderer by renderer.
             _quadLayer = layer;
             _sceneryMask &= ~(1 << layer);
             Ready = true;
             Tick();
+            Plugin.Log.LogInfo($"[combat timing] DD1 backdrop setup {setupWatch.ElapsedMilliseconds} ms, ready after {(Time.unscaledTime - _startedAt) * 1000f:0} ms");
             Plugin.Log.LogInfo($"[backdrop] DD1 scene behind the fight: {Hidden.Count} arena renderers hidden, scenery layers 0x{_sceneryMask:X} culled, backdrop on layer {_quadLayer}, camera {cam.name}, distance {distance:0.0}, feet at {feetY:0}px");
         }
         catch (Exception e)

@@ -694,9 +694,17 @@ Read the installed DD2 battle_configuration_data_export.Group.csv and local Comb
 
 Removed the invented Exemplar lair from newly generated Sluice boss chains. Its old explicit encounter mapping remains for saved offers. Region-option descriptions now show player-facing places/enemies/bosses rather than borrowed-template details, including DD1 variants. Release, 177 Core and 11 bridge/input tests pass, with regional ambush tests at all three difficulties plus crow/Sluice routing. Deployed locally and confirmed plugin SHA-256 matches Release. No launch or save write. Native lighting/latency/transition checks remain [?]. Next: repeated legacy setup scans and the premature monster binding deadline, then trinket presentation.
 
-## Status 2026-10-04: loop resumed, round 57 complete
+## Round 58: bounded setup polling and binding timeout after load
+
+DD1MonsterView.Prepare started its eight-second binding deadline before DD2 entered combat. A slow arena load could exhaust it on the first bind attempt. DeferredPoll now gates binding until CurrentMode is COMBAT and the mode manager is no longer changing state; its timeout begins at the first ready poll. Binding and legacy backdrop setup retry at most every 0.1 seconds. Monster rendering avoids allocating its screen texture before any enemy is bound.
+
+Backdrop setup previously traversed scene roots for scenery, again for ambient effects and again via a global renderer search for particle layers. One local renderer snapshot now feeds those steps. Already hidden renderers seed the dynamic scan's seen set, and that scan waits half a second after setup. New combat timing logs report the successful backdrop setup's synchronous cost and elapsed readiness delay. No native timings are claimed without a permitted playtest.
+
+Release, 177 Core and 13 bridge/input tests pass. Two linked helper tests prove a 60-second simulated arena load does not spend the binding timeout and polling is bounded at 120 FPS, including reset for a second fight. Deployed locally; no launch/save write. Native cold-load binding, close-up scenery and timing checks remain [?]. Next: trinket tooltip colors/fonts and clipped inventory rows.
+
+## Status 2026-10-04: loop resumed, round 58 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 177 Core and 11 bridge/input tests passed; deployed locally through round 57. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Release build, 177 Core and 13 bridge/input tests passed; deployed locally through round 58. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.

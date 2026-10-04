@@ -13,6 +13,7 @@
     <ProjectReference Include="../../src/DarkestDungeon3.Core/DarkestDungeon3.Core.csproj" />
     <Compile Include="../../src/DarkestDungeon3/Ui/Drag.cs" Link="Drag.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/DeferredPoll.cs" Link="DeferredPoll.cs" />
     <Compile Include="$(SpineArtSource)" Link="SpineArt.cs" />
     <Compile Include="$(ItemTextSource)" Link="ItemText.cs" />
   </ItemGroup>

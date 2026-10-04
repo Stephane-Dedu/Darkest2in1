@@ -106,7 +106,7 @@ internal static class Dd1MonsterView
     private static readonly List<Effect> Effects = new();
     private static readonly List<Monster> Line = new();
     private static bool _bound, _listening;
-    private static float _boundTimeout;
+    private static readonly DeferredPoll BindPoll = new(0.1f, 8f);
     private static Material _material;
     private static bool _failed;
 
@@ -125,7 +125,6 @@ internal static class Dd1MonsterView
             Line.Add(monster);
         }
         if (Line.Count == 0) return;
-        _boundTimeout = Time.unscaledTime + 8f;
         Names.Clear();
         var lore = Session.Current?.Lore;
         foreach (var m in Line)
@@ -172,6 +171,7 @@ internal static class Dd1MonsterView
         foreach (var m in Line) { Show(m); GiveBackDd2Skills(m); }
         Line.Clear();
         _bound = false;
+        BindPoll.Reset();
         if (!_listening) return;
         EventManager.RemoveListener<EventCombatSkillPresentation>(OnSkill);
         EventManager.RemoveListener<EventCombatPresentationSkillTarget>(OnTarget);
@@ -282,6 +282,9 @@ internal static class Dd1MonsterView
 
     private static void Bind()
     {
+        bool entered = Assets.Code.Game.GameModeMgr.CurrentMode == Assets.Code.Game.GameModeType.COMBAT
+            && Dd2Api.Modes != null && !Dd2Api.Modes.IsChangingState();
+        if (!BindPoll.Due(Time.unscaledTime, entered)) return;
         var party = new HashSet<uint>(Runtime.Driver.Instance?.Party?.Guids ?? Enumerable.Empty<uint>());
         var actors = UnityEngine.Object.FindObjectsOfType<CombatActorBhv>()
             .Where(a => a != null && a.ActorInstance != null && !party.Contains(a.GetActorGuid()))
@@ -300,7 +303,7 @@ internal static class Dd1MonsterView
             MapSkills(m);
             found++;
         }
-        if (found == Line.Count || Time.unscaledTime > _boundTimeout)
+        if (found == Line.Count || BindPoll.Expired(Time.unscaledTime))
         {
             _bound = true;
             Plugin.Log.LogInfo($"[dd1art] bound {found}/{Line.Count} DD2 enemies");
@@ -522,6 +525,7 @@ internal static class Dd1MonsterView
         try
         {
             if (!_bound) Bind();
+            if (Line.All(m => m.Actor == null)) return;
             var cam = Dd1Backdrop.Ready && Dd1Backdrop.SceneCamera != null ? Dd1Backdrop.SceneCamera : FightCamera();
             if (cam == null) { Note(Line[0], "no camera to place it with"); return; }
             if (_screen == null || _screen.width != Screen.width || _screen.height != Screen.height)
