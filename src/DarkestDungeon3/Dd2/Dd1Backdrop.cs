@@ -36,11 +36,11 @@ internal static class Dd1Backdrop
     private static float _distance = 15f;
 
     /// <summary>A fight is about to start here: forget the last one.</summary>
-    public static void Reset()
+    public static void Reset(bool nativeArena = false)
     {
         End();
         Ready = false;
-        _failed = !Plugin.Dd1BackdropOn.Value;
+        _failed = nativeArena || !Plugin.Dd1BackdropOn.Value;
         _startedAt = -1f;
     }
 

@@ -39,6 +39,42 @@ public class RegionTests
         var boss = Zones.Plan("dd2_city", 3, FightKind.Boss, new Rng(1), ZoneBase.BossOf("dd2_city"));
         Assert.Equal("config:city_dungeon_3_a", boss.Battle);
         Assert.Contains("combat_arena_city_dungeon_interior", boss.Arenas);
+        Assert.True(boss.NativePresentation);
+        Assert.False(Zones.Plan("crypts", 1, FightKind.Room, new Rng(1)).NativePresentation);
+    }
+
+    [Theory]
+    [InlineData("dd2_city")]
+    [InlineData("dd2_farm")]
+    [InlineData("dd2_forest")]
+    [InlineData("dd2_coast")]
+    [InlineData("dd2_cave")]
+    public void NativeCampingUsesTheSameRegionalFactionAsRoomFights(string zone)
+    {
+        for (int difficulty = 1; difficulty <= 5; difficulty += 2)
+        {
+            var room = Zones.Plan(zone, difficulty, FightKind.Room, new Rng(2));
+            var ambush = Zones.Plan(zone, difficulty, FightKind.CampAmbush, new Rng(2));
+            Assert.Equal(room.Battle, ambush.Battle); Assert.Equal(room.Arenas, ambush.Arenas);
+            Assert.Equal(FightKind.CampAmbush, ambush.Kind); Assert.True(ambush.NativePresentation);
+        }
+        Assert.Equal("table:camp_mashes_master", Zones.Plan("weald", 5, FightKind.CampAmbush, new Rng(2)).Battle);
+    }
+
+    [Fact]
+    public void MigratedCrowStoryKeepsItsSpecialFightAndSluiceHasNoNewLairChain()
+    {
+        var e = new Estate { Seed = 4, QuestsCompleted = 10 };
+        var crowPlot = Dd1.Goals.Plot.Single(p => p.Id == "plot_crow_trinket");
+        var crow = QuestBoard.PlotOffer(e, Dd1, crowPlot);
+        Assert.Equal("dd2_forest", crow.Dungeon);
+        var plan = Zones.Plan(crow.Dungeon, crow.Difficulty, FightKind.Boss, new Rng(3), crow.BossId);
+        Assert.Equal("config:carrion_my_wayward_son_c", plan.Battle); Assert.True(plan.NativePresentation);
+        e.ZoneXp["dd2_cave"] = Dd1.ZoneLevelThresholds[6];
+        Assert.Null(ZoneBase.BossOf("dd2_cave"));
+        Assert.DoesNotContain(QuestBoard.PlotOffers(e, Dd1, new[] { "dd2_cave" }), q => q.Dungeon == "dd2_cave" && q.Type == "kill_boss");
+        // Existing saved Exemplar offers still have their explicit encounter, but new Sluice boards don't create them.
+        Assert.Equal("config:cultist_guardian_biome_3_boss_1", Zones.Plan("dd2_cave", 5, FightKind.Boss, new Rng(3), "exemplar").Battle);
     }
 
     [Fact]

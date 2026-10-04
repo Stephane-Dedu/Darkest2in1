@@ -15,7 +15,7 @@ public static class ZoneBase
         {
             ["dd2_city"] = ("crypts", "librarian"), ["dd2_farm"] = ("warrens", "harvest_child"),
             ["dd2_forest"] = ("weald", "dreaming_general"), ["dd2_coast"] = ("cove", "leviathan"),
-            ["dd2_cave"] = ("warrens", "exemplar"),
+            ["dd2_cave"] = ("warrens", null),
         });
 
     public static void Register(string zone, string dd1Zone, string boss)

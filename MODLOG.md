@@ -686,9 +686,17 @@ Previously DD2 areas stacked at x=130 beneath the left detail scroll. Only the f
 
 Release build, 171 Core and 11 bridge/input tests pass. The new integration test uses the actual DD1 level thresholds and proves paired Ruins/Sprawl contracts and boss progress remain independent, including disabling a primary and adding Sluice. Local authored plugin/data deployed; no game launch or save write. Native arrow input, map fit, scrolling, toggles and provisioning remain [?]. Next is native region arena presentation, faction coherence and startup.
 
-## Status 2026-10-04: loop resumed, round 56 complete
+## Round 57: native DD2 region presentation and coherent encounter routes
+
+FightPlan now marks native presentation explicitly. Dd2Combat passes it to Dd1Backdrop.Reset, which restores previous overrides and skips backdrop setup, renderer scans/culling and post-processing overrides for DD2 regions. Existing crawl art remains the exploration fallback and the loading cover; the native fight fades through over 0.5 seconds after DD2 mode entry. Optional original areas retain flat DD1 presentation. Combat logs now report synchronous roll/scenario/setup duration, elapsed native mode entry and reveal readiness. These are instrumentation, not measured native improvements yet.
+
+Read the installed DD2 battle_configuration_data_export.Group.csv and local CombatScenarioData decomp: lair battles carry m_BackgroundSceneOverride for their native interiors, and scenario initialization honors it before additive scene loading. Existing mappings point to those native battles and scenes. Native camping now uses the same regional room faction/tier instead of global camp_mashes_master, while preserving AMBUSH source semantics. Corrected CampaignRegions.StoryRegion's event/quest ID mismatch: the event is plot_quest_crow_trinket but the actual plot is plot_crow_trinket. Tangle now has the existing carrion_my_wayward_son_c mapping so that migrated story does not become an ordinary fight.
+
+Removed the invented Exemplar lair from newly generated Sluice boss chains. Its old explicit encounter mapping remains for saved offers. Region-option descriptions now show player-facing places/enemies/bosses rather than borrowed-template details, including DD1 variants. Release, 177 Core and 11 bridge/input tests pass, with regional ambush tests at all three difficulties plus crow/Sluice routing. Deployed locally and confirmed plugin SHA-256 matches Release. No launch or save write. Native lighting/latency/transition checks remain [?]. Next: repeated legacy setup scans and the premature monster binding deadline, then trinket presentation.
+
+## Status 2026-10-04: loop resumed, round 57 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 171 Core and 11 bridge/input tests passed; deployed locally through round 56. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Release build, 177 Core and 11 bridge/input tests passed; deployed locally through round 57. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.

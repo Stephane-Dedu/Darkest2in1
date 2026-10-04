@@ -26,7 +26,7 @@ public static class CampaignRegions
 
     // The intro/crow story survives in a native region when the original area is disabled. DD1 boss chains stay optional.
     public static string StoryRegion(Estate estate, PlotQuest plot) =>
-        (plot.Id == "plot_tutorial_crypts" || plot.Id == "plot_quest_crow_trinket") && !Enabled(estate, plot.Dungeon)
+        (plot.Id == "plot_tutorial_crypts" || plot.Id == "plot_crow_trinket") && !Enabled(estate, plot.Dungeon)
             ? MainFor(plot.Dungeon) ?? plot.Dungeon : plot.Dungeon;
 
     public static bool Migrate(Estate estate, Dd1Campaign dd1)

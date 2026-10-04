@@ -117,7 +117,7 @@ public class HamletTests
         h.Estate.TownEventId = "plot_quest_crow_trinket";
         h.StartTownEvent(new Rng(2));
         var crow = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_crow_trinket");
-        Assert.Equal(("weald", "kill_boss", 5, "crow_map1", "crow_C"), (crow.Dungeon, crow.Type, crow.Difficulty, crow.MapName, crow.BossId));
+        Assert.Equal(("dd2_forest", "kill_boss", 5, "crow_map1", "crow_C"), (crow.Dungeon, crow.Type, crow.Difficulty, crow.MapName, crow.BossId));
         Assert.False(crow.CanRetreat);
         Assert.Contains(crow.Rewards, r => r.Type == "trinket" && r.Id == "crow");
         h.StartTownEvent(new Rng(3));
