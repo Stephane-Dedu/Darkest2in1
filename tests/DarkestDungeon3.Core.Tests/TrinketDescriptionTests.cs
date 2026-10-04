@@ -397,6 +397,44 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void SelfMovementRetainsDirectionDistanceAndOtherTriggeredPenalties()
+    {
+        string effects = Data.Effects("trinket_hero_lep_inevitable_end", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Forward 1", effects);
+        Assert.Contains("Turn End: +5% DMG (1 Battle) when last in turn order", effects);
+        Assert.Contains("When Moving: -1 Speed (1 Battle)", effects);
+    }
+
+    [Fact]
+    public void ShuffleAndKnockbackRetainTheirTargetAndSkillRequirement()
+    {
+        string effects = Data.Effects("trinket_hero_run_pile_of_ash", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Apply to Attacker When Missed: Shuffle", effects);
+        Assert.Contains("Gain When Hit: Knockback 1", effects);
+        Assert.Contains("When Moving: Dodge (50%) or Dodge+ (15%)", effects);
+        effects = Data.Effects("trinket_collector_barristans_head", out _);
+        Assert.Contains("Apply On Hit: Melee Skills: Knockback 1", effects);
+        Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+    }
+
+    [Fact]
+    public void MovementUsesLiveNativeTemplatesAndWithholdsMalformedMovementOnly()
+    {
+        string effects = Data.Effects("trinket_hero_run_pile_of_ash", out bool complete,
+            key => key == "effect_tooltip_target_backward" ? "Recul {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("Gain When Hit: Recul 1", effects);
+        effects = Data.Effects("trinket_hero_lep_inevitable_end", out complete,
+            key => key == "effect_tooltip_move_forward" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Turn Start:", effects);
+        Assert.Contains("+5% DMG (1 Battle) when last in turn order", effects);
+        Assert.Contains("-1 Speed (1 Battle)", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

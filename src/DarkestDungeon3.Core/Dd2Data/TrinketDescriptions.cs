@@ -91,12 +91,13 @@ public sealed class TrinketDescriptions
             if (group[0].EndsWith("_apply_limit", StringComparison.Ordinal) && groups.Any(row => row[0] == group[0] + "_effects")) continue;
             if (!group[0].EndsWith("_effects", StringComparison.Ordinal)) { complete = false; continue; }
             string eventId = group[0].Substring(0, group[0].Length - (limited ? limitedSuffix.Length : "_effects".Length));
+            bool friendly = FriendlyEffectEvents.Contains(eventId);
             string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
             if (title == null) { complete = false; continue; }
             if (limited)
             {
                 string separator = Plain(Text("spaced_or_label", localize));
-                var choices = group.Skip(1).Select(effect => SimpleEffect(effect, localize)).ToList();
+                var choices = group.Skip(1).Select(effect => SimpleEffect(effect, localize, friendly)).ToList();
                 // Native positive apply limits join candidates with 'or'. Only limit one is supported here.
                 // A partial choice list can misstate its outcomes, so withhold the whole list if any is unknown.
                 if (Field("ActorDataEffects", id, eventId + "_apply_limit") != "1" || separator == null || choices.Count == 0 || choices.Any(choice => choice == null))
@@ -106,12 +107,19 @@ public sealed class TrinketDescriptions
             }
             foreach (string effect in group.Skip(1))
             {
-                string description = SimpleEffect(effect, localize);
+                string description = SimpleEffect(effect, localize, friendly);
                 if (description == null) complete = false;
                 else lines.Add(title + " " + description);
             }
         }
     }
+
+    // ActorDataEffectDescription's friendly context when describing equipment without an active skill/actor.
+    private static readonly HashSet<string> FriendlyEffectEvents = new()
+    {
+        "target_team_member_random", "performer", "performer_after_target", "round_start", "combat_start",
+        "turn_start", "turn_end", "round_end", "combat_end",
+    };
 
     private static readonly HashSet<string> SimpleEffectFields = new()
     {
@@ -123,9 +131,10 @@ public sealed class TrinketDescriptions
         "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
         "buffs",
         "m_AddTurn", "m_AddTurnRange",
+        "m_Move", "m_MoveRange", "m_Shuffle",
     };
 
-    private string SimpleEffect(string id, Func<string, string> localize)
+    private string SimpleEffect(string id, Func<string, string> localize, bool friendly)
     {
         if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
@@ -134,6 +143,27 @@ public sealed class TrinketDescriptions
         string ignoreResist = Field("Effect", id, "m_IgnoreResist");
         if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
         var parts = new List<string>();
+        string move = Field("Effect", id, "m_Move");
+        if (move != null)
+        {
+            if (!int.TryParse(move, out int distance) || distance == 0 || distance == int.MinValue
+                || (Field("Effect", id, "m_MoveRange") ?? "0") != "0") return null;
+            string direction = distance < 0 ? "forward" : "backward";
+            string movement = Format(Text("effect_tooltip_" + (friendly ? "move_" : "target_") + direction, localize), Math.Abs(distance));
+            if (movement == null) return null;
+            parts.Add(movement);
+        }
+        string shuffle = Field("Effect", id, "m_Shuffle");
+        if (shuffle != null)
+        {
+            if (!bool.TryParse(shuffle, out bool shuffled)) return null;
+            if (shuffled)
+            {
+                string shuffledText = Plain(Text("effect_tooltip_shuffle", localize));
+                if (shuffledText == null) return null;
+                parts.Add(shuffledText);
+            }
+        }
         if (Field("Effect", id, "m_AddTurn") != null)
         {
             if (Field("Effect", id, "m_AddTurn") != "1" || (Field("Effect", id, "m_AddTurnRange") ?? "0") != "0") return null;
