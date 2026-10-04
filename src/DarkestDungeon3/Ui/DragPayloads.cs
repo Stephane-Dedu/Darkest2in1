@@ -66,7 +66,7 @@ internal static class ItemArt
             else
             {
                 HeroSheet.TrinketIcon(r, id);
-                if (r.Contains(Event.current.mousePosition)) Gui.Tip(HeroSheet.TrinketText(id), HeroSheet.RarityColour(id));
+                if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(id);
             }
             GUI.color = old;
             return;

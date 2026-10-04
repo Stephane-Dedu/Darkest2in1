@@ -490,7 +490,7 @@ internal sealed class CrawlUi
             var r = new Rect(718 + i * 92, 906, 72, 144);
             if (hero.TrinketAt(i) == null) continue;
             HeroSheet.TrinketIcon(r, hero.Trinkets[i]);
-            if (r.Contains(Event.current.mousePosition)) _hudTip = HeroSheet.TrinketText(hero.Trinkets[i]);
+            if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(hero.Trinkets[i]);
         }
         if (_hudTip != null && Event.current.type == EventType.Repaint)
         {

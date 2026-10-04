@@ -167,12 +167,12 @@ internal static class HeroSheet
             if (_readOnly)
             {
                 TrinketIcon(r, tid);
-                if (r.Contains(Event.current.mousePosition)) Gui.Tip(TrinketText(tid), RarityColour(tid));
+                if (r.Contains(Event.current.mousePosition)) TrinketTip(tid);
                 continue;
             }
             Drag.Source(r, new TrinketDrag(tid, h.Id, i), rect => TrinketIcon(rect, tid));
             if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid && c.FromSlot == i)) TrinketIcon(r, tid);
-            if (r.Contains(Event.current.mousePosition) && !Drag.Active) Gui.Tip(TrinketText(tid) + "\nClick, or drag it to the Trinket Inventory, to unequip.", RarityColour(tid));
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active) TrinketTip(tid, "Click, or drag it to the Trinket Inventory, to unequip.");
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
                 if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, i)) return;
@@ -281,29 +281,25 @@ internal static class HeroSheet
         return HamletUi.Pretty(s.Replace("tiered_", ""));
     }
 
-    /// <summary>DD1's trinket tooltip: name, rarity, the class that can wear it, then its effects (DD2's own).</summary>
-    public static string TrinketText(string id)
+    /// <summary>DD1's trinket tooltip: name, rarity, class requirement, then DD2's effects.</summary>
+    public static void TrinketTip(string id, string hint = null)
     {
         var t = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var tr) ? tr : null;
-        string rarity = t == null ? "" : HamletUi.Pretty(t.Rarity);
-        string forClass = t?.HeroClass != null ? $"  ·  {HamletUi.Pretty(t.HeroClass)} only" : "";
-        string effects = Dd2.ItemText.Effects(id);
-        return $"{TrinketName(id)}\n{rarity}{forClass}" + (effects != null ? "\n" + effects : "");
+        Gui.EquipmentTip(TrinketName(id), t == null ? "Trinket" : HamletUi.Pretty(t.Rarity), RarityColour(id),
+            t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only", Dd2.ItemText.Effects(id), hint);
     }
 
-    /// <summary>The trinket's rarity colour (DD1's tiers: common grey, rare blue, epic purple, ancestral gold,
-    /// cultist crimson).</summary>
+    /// <summary>DD2 rarity labels use the closest DD1 palette tier; the item name has its own title colour.</summary>
     public static Color RarityColour(string id)
     {
         string rarity = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var t) ? t.Rarity : null;
-        return rarity switch
+        string colour = rarity switch
         {
-            "rare" => new Color(0.38f, 0.6f, 0.95f),
-            "epic" => new Color(0.68f, 0.45f, 0.9f),
-            "ancestral" => new Color(0.86f, 0.72f, 0.36f),
-            "cultist" => new Color(0.8f, 0.2f, 0.2f),
-            _ => new Color(0.82f, 0.82f, 0.8f),
+            "epic" => "very_rare",
+            "cultist" => "harmful",
+            _ => rarity ?? "common",
         };
+        return Dd1Palette.Get(colour, Gui.Dd1Class);
     }
 
     private static void Tip(string text) => Gui.Tip(text);

@@ -702,9 +702,17 @@ Backdrop setup previously traversed scene roots for scenery, again for ambient e
 
 Release, 177 Core and 13 bridge/input tests pass. Two linked helper tests prove a 60-second simulated arena load does not spend the binding timeout and polling is bounded at 120 FPS, including reset for a second fight. Deployed locally; no launch/save write. Native cold-load binding, close-up scenery and timing checks remain [?]. Next: trinket tooltip colors/fonts and clipped inventory rows.
 
-## Status 2026-10-04: loop resumed, round 58 complete
+## Round 59: DD1 trinket typography, palette and clipped inventory rows
+
+Read installed colours/base.colours.darkest and the Unity port's Trinket.ToolTip. Equipment title resolves to notable 200/180/110; body resolves to installed neutral 174/172/162, which differs from the port's older hard-coded neutral. Dd1Colours reads numeric/hex RGBA entries and resolves shared_id safely; Dd1Palette converts that owned runtime data into Unity colors. Trinket tooltips now keep the name gold, rarity on a separate colored line, class requirements and effects neutral. DD2 labels remain; epic uses DD1 very_rare and cultist harmful colors. Two actual-file/parser tests verify colors and alias-cycle fallback.
+
+Gui equipment tooltips use Ubuntu bitmap text and measured wrapping; generic tooltips also use their actual heading/body font metrics. Found another concrete cause of apparently missing effects: CrawlUi drew trinket text in a fixed 400x60 box. That HUD path and all hero/stash/Wagon/loot paths now use the shared tooltip, measured and positioned inside the canvas. Tooltip effect availability still depends on round 53's native/cold-menu reader; complex cold-menu effects remain separately tracked.
+
+Installed realm_inventory.layout.darkest specifies 560x525 grid viewport, 80x160 cells and scroll_max_visible_rows=4. A fourth row is partly visible rather than four full rows stretched past the panel. The stash now uses that clipped viewport and pixel scrolling, retaining original grid/arrow art. Drag/hover/sell source input is restricted to the viewport so a clipped offscreen item cannot catch a click. Release, 179 Core and 13 bridge/input tests pass; deployed and SHA-256 verified. No launch/save write. Native typography, long tooltip positioning and scrolled drag checks remain [?].
+
+## Status 2026-10-04: loop resumed, round 59 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 177 Core and 13 bridge/input tests passed; deployed locally through round 58. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Release build, 179 Core and 13 bridge/input tests passed; deployed locally through round 59. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.

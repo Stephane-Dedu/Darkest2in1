@@ -1086,7 +1086,7 @@ internal sealed class HamletUi
             HeroSheet.TrinketIcon(r, t);
             GUI.color = old;
             Gui.Text(new Rect(r.x - 14, r.yMax + 2, r.width + 28, 22), Gui.Num(price, "#,0"), 17, afford ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-            if (r.Contains(Event.current.mousePosition)) Gui.Tip(HeroSheet.TrinketText(t), HeroSheet.RarityColour(t));
+            if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(t);
             if (afford && Gui.Hotspot(r))
             {
                 hamlet.BuyTrinket(t);
