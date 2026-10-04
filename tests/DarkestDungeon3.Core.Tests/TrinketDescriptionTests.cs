@@ -617,13 +617,13 @@ public class TrinketDescriptionTests
     {
         string effects = Data.Effects("trinket_city_boss_charred_litany", out bool complete);
         Assert.True(complete);
-        Assert.Contains("Gain On Resist: Burn : -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Burn: -2 Stress", effects);
         Assert.Contains("Apply to Attacker When Hit: Burn 1 (3 Turns)", effects);
         effects = Data.Effects("trinket_farm_boss_kitchen_knives", out _);
-        Assert.Contains("Gain On Resist: Blight : Extra Action (20%)", effects);
+        Assert.Contains("Gain On Resist: Blight: Extra Action (20%)", effects);
         Assert.Contains("+15% CRIT when target Blight", effects);
         effects = Data.Effects("trinket_hero_run_knitted_blanket", out _);
-        Assert.Contains("Gain On Resist: Burn : Stealth", effects);
+        Assert.Contains("Gain On Resist: Burn: Stealth", effects);
         Assert.Contains("When Stress Damaged: Burn 1 (3 Turns) (15%)", effects);
     }
 
@@ -633,14 +633,14 @@ public class TrinketDescriptionTests
         string effects = Data.Effects("trinket_cultist_hardened_heart", out bool complete);
         Assert.True(complete);
         Assert.Contains("+200% Bleed RES", effects);
-        Assert.Contains("Gain On Resist: Bleed : 2 DMG", effects);
-        Assert.Contains("Gain On Resist: Blight : 2 DMG", effects);
-        Assert.Contains("Gain On Resist: Burn : 2 DMG", effects);
+        Assert.Contains("Gain On Resist: Bleed: 2 DMG", effects);
+        Assert.Contains("Gain On Resist: Blight: 2 DMG", effects);
+        Assert.Contains("Gain On Resist: Burn: 2 DMG", effects);
         effects = Data.Effects("trinket_hoarder_skeletons_sight", out complete);
         Assert.True(complete);
-        Assert.Contains("Gain On Resist: Bleed : -2 Stress", effects);
-        Assert.Contains("Gain On Resist: Blight : -2 Stress", effects);
-        Assert.Contains("Gain On Resist: Burn : -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Bleed: -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Blight: -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Burn: -2 Stress", effects);
         effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete);
         Assert.True(complete);
         Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
@@ -667,13 +667,13 @@ public class TrinketDescriptionTests
     {
         string effects = Data.Effects("trinket_hoarder_fates_foreteller", out bool complete);
         Assert.True(complete);
-        Assert.Contains("Gain On Resist: Bleed : Healthup 20%", effects);
-        Assert.Contains("Gain On Resist: Blight : Healthup 20%", effects);
-        Assert.Contains("Gain On Resist: Burn : Healthup 20%", effects);
+        Assert.Contains("Gain On Resist: Bleed: Heal 20%", effects);
+        Assert.Contains("Gain On Resist: Blight: Heal 20%", effects);
+        Assert.Contains("Gain On Resist: Burn: Heal 20%", effects);
         Assert.DoesNotContain("5%", effects);
         effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete);
         Assert.True(complete);
-        Assert.Contains("Gain On Resist: Bleed : Healthup 10%", effects);
+        Assert.Contains("Gain On Resist: Bleed: Heal 10%", effects);
         Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
         Assert.Contains("+50% Bleed RES", effects);
         Assert.Contains("+50% Move RES", effects);
@@ -684,7 +684,7 @@ public class TrinketDescriptionTests
     {
         string effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out bool complete);
         Assert.False(complete);
-        Assert.Equal("Each Hero on Round End: Healthup 2 (33%)", effects);
+        Assert.Equal("Each Hero on Round End: Heal 2 (33%)", effects);
         effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out complete,
             key => key == "effect_tooltip_health_heal_amount" ? "Heal {0} HP" : null);
         Assert.False(complete);
@@ -706,6 +706,39 @@ public class TrinketDescriptionTests
         Assert.DoesNotContain("Gain On Resist: Bleed", effects);
         Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
         Assert.Contains("+50% Bleed RES", effects);
+    }
+
+    [Fact]
+    public void AuthoredTrinketIconsUseCanonicalTokenAndHealingNames()
+    {
+        string effects = Data.Effects("trinket_hero_lep_a_simple_flower", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Stun/Daze/Move Resist: Block+, Heal 10%", effects);
+        Assert.DoesNotContain("Deflect", effects);
+        Assert.DoesNotContain("gold", effects);
+        effects = Data.Effects("trinket_hoarder_inert_indicia", out _);
+        Assert.Contains("Gain On Stun/Daze Resist: Add 2 Positive Tokens, Regen 2", effects);
+    }
+
+    [Fact]
+    public void BothColdAndNativePlainDescriptionsResolveLocalizedTokenNames()
+    {
+        string effects = Data.Effects("trinket_hero_lep_a_simple_flower", out bool complete,
+            key => key == "token_name_block_plus" ? "Parade+" : key == "token_name_daze" ? "Etourdi" : null);
+        Assert.True(complete);
+        Assert.Contains("Gain On Stun/Etourdi/Move Resist: Parade+, Heal 10%", effects);
+        Assert.Equal("Gain Parade+, Etourdi", TrinketDescriptions.Plain(
+            "Gain <sprite name={q}token_deflect{q}>, <sprite name={q}token_daze_gold{q}>",
+            key => key == "token_name_block_plus" ? "Parade+" : key == "token_name_daze" ? "Etourdi" : null));
+    }
+
+    [Fact]
+    public void PlainGlyphIdsWithPlusAndHyphenRetainTokensQuantitiesAndNumericRanges()
+    {
+        Assert.Equal("Gain Dodge+ x2, Blind; Daze/Block+: Heal 10%, 0.5-1.5", TrinketDescriptions.Plain(
+            "Gain<sprite name={q}token_dodge+{q}>x2, <sprite name={q}token_blind-line{q}>; " +
+            "<sprite name={q}token_daze_gold{q}>/<sprite name={q}token_deflect{q}>: " +
+            "<sprite name={q}icon_healthup{q}>10%, 0.5-1.5"));
     }
 
     [Fact]

@@ -42,6 +42,12 @@ public sealed class TrinketDescriptions
 
     public string Text(string key, Func<string, string> localize = null)
     {
+        string text = RawText(key, localize);
+        return text == null ? null : ExpandSprites(text, name => RawText(name, localize));
+    }
+
+    private string RawText(string key, Func<string, string> localize)
+    {
         string live = localize?.Invoke(key);
         if (!string.IsNullOrWhiteSpace(live) && live != key) return live;
         return _english.TryGetValue(key, out var text) ? text : null;
@@ -499,10 +505,10 @@ public sealed class TrinketDescriptions
                     string skillText = Format(skillOverride, effect);
                     return skillText != null && skillText.Contains(effect) ? Plain(skillText) : null;
                 }
-                string skillName = Text("skill_name_" + value, localize);
+                string skillName = RawText("skill_name_" + value, localize);
                 if (skillName == null) return null;
                 // The mastery decoration in a skill name is not an additional trinket requirement.
-                skillName = Plain(Regex.Replace(skillName, @"<sprite[^>]*\bicon_upgraded_skill\b[^>]*>", ""));
+                skillName = Plain(Regex.Replace(skillName, @"<sprite[^>]*\bicon_upgraded_skill\b[^>]*>", ""), key => RawText(key, localize));
                 if (skillName == null) return null;
                 args = new object[] { skillName, effect };
                 break;
@@ -637,20 +643,48 @@ public sealed class TrinketDescriptions
         ? rows.Where(r => r[0] == key).SelectMany(r => r.Skip(1)).ToList() : new List<string>();
     private string Field(string type, string id, string key) => Values(type, id, key).FirstOrDefault();
 
-    public static string Plain(string rich)
+    private static readonly Dictionary<string, string> SpriteTokenAliases = new()
+    {
+        ["token_deflect"] = "block_plus", ["token_daze_gold"] = "daze", ["token_dodge+"] = "dodge_plus",
+        ["token_blind-line"] = "blind", ["token_immoblize"] = "immobilize",
+    };
+
+    private static string ExpandSprites(string rich, Func<string, string> localize)
+    {
+        if (rich.IndexOf("<sprite", StringComparison.Ordinal) < 0) return rich;
+        return Regex.Replace(rich.Replace("{q}", "\""), "<sprite[^>]*name=[\"']?([A-Za-z0-9_+\\-]+)[\"']?[^>]*>", m =>
+        {
+            string sprite = m.Groups[1].Value;
+            string token = SpriteTokenAliases.TryGetValue(sprite, out string alias) ? alias
+                : sprite.StartsWith("token_", StringComparison.Ordinal) ? sprite.Substring(6) : null;
+            string name = token == null ? null : localize?.Invoke("token_name_" + token);
+            if (string.IsNullOrWhiteSpace(name) || name == "token_name_" + token) name = null;
+            string label = name == null ? null : Plain(name);
+            return " " + (label ?? Pretty(sprite)) + " ";
+        });
+    }
+
+    public static string Plain(string rich, Func<string, string> localize = null)
     {
         if (string.IsNullOrWhiteSpace(rich)) return null;
         string s = rich.Replace("{q}", "\"").Replace("\\n", "\n");
-        s = Regex.Replace(s, "<sprite[^>]*name=[\"']?([A-Za-z0-9_]+)[\"']?[^>]*>", m => Pretty(m.Groups[1].Value) + " ");
+        s = ExpandSprites(s, localize);
         s = Regex.Replace(s, "<[^>]*>", "");
         s = Regex.Replace(s, @"[ \t]+", " ");
+        s = Regex.Replace(s, @"[ \t]+([,:;/])", "$1");
+        s = Regex.Replace(s, @"/[ \t]+", "/");
         s = Regex.Replace(s, @"\s*\n\s*", "\n").Trim();
         return s.Length == 0 ? null : s;
     }
 
     private static string Pretty(string id)
     {
-        var aliases = new Dictionary<string, string> { ["icon_health_v2"] = "HP", ["icon_death_outline"] = "Deathblow", ["token_stress"] = "Stress" };
+        var aliases = new Dictionary<string, string>
+        {
+            ["icon_health_v2"] = "HP", ["icon_death_outline"] = "Deathblow", ["token_stress"] = "Stress",
+            ["icon_healthup"] = "Heal", ["token_deflect"] = "Block+", ["token_daze_gold"] = "Daze",
+            ["token_dodge+"] = "Dodge+", ["token_blind-line"] = "Blind", ["token_immoblize"] = "Immobilize", ["token_guard"] = "Guarded",
+        };
         if (aliases.TryGetValue(id, out var alias)) return alias;
         string s = id.Replace("token_", "").Replace("icon_", "").Replace('_', ' ').Trim();
         return s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);

@@ -40,7 +40,7 @@ internal static class ItemText
             if (library != null && library.IsInitializationFinished() && library.TryGetLibraryElement(itemId, out var def) && def != null)
             {
                 string text = TrinketDescriptions.Plain(Assets.Code.Item.ItemDescription.GetDescription(def, 1, false, 0, false, false,
-                    hideTitle: true, showBlockedItems: false, showItemTag: false));
+                    hideTitle: true, showBlockedItems: false, showItemTag: false), key => loc?.TryGetString(key));
                 if (!string.IsNullOrWhiteSpace(text)) return Cache[itemId] = text;
             }
         }
