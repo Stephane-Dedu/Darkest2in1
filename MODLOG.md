@@ -710,9 +710,17 @@ Gui equipment tooltips use Ubuntu bitmap text and measured wrapping; generic too
 
 Installed realm_inventory.layout.darkest specifies 560x525 grid viewport, 80x160 cells and scroll_max_visible_rows=4. A fourth row is partly visible rather than four full rows stretched past the panel. The stash now uses that clipped viewport and pixel scrolling, retaining original grid/arrow art. Drag/hover/sell source input is restricted to the viewport so a clipped offscreen item cannot catch a click. Release, 179 Core and 13 bridge/input tests pass; deployed and SHA-256 verified. No launch/save write. Native typography, long tooltip positioning and scrolled drag checks remain [?].
 
-## Status 2026-10-04: loop resumed, round 59 complete
+## Round 60: conditional trinket stat descriptions before native libraries exist
+
+Audited the actual base tables with the built Core reader: among 191 base trinkets, 43 descriptions were complete, 46 partial and 102 blank. Read DD2 BuffDescription/ConditionDescription and installed condition CSV/localization templates. The native description wraps a whole buff in its condition. The cold reader now does that for supported visible skill tags, HP/stress thresholds, rank/round/turn, Flame/run values, biome/status and equipment conditions. Authored condition overrides are used only if they retain the bonus. Hidden/unknown conditions and malformed localized format strings withhold that conditional bonus rather than display it unconditionally.
+
+CSV rank values are already one-based: native initialization subtracts one and its formatter adds it back, so the offline reader leaves them alone. Comparison templates carry leading spaces; preserve those through intermediate formatting and normalize only the finished description, preventing 'Flameis'. HP percentage thresholds multiply by 100; Flame raw values do not. The actual audit is now 46 complete, 54 partial and 91 blank. Event-triggered effects remain the main separate gap.
+
+Release, 183 Core and 13 bridge/input tests pass. Added four actual-data cases for Melee/Ranged restrictions, 33% HP, Flame units/spacing and bad localization withholding only the conditional stat. Deployed locally; no launch/save write. Native cold-menu hover checks remain [?]. Next: triggered token/effect descriptions, followed by atlas-safe drawing and remaining campaign/UI gaps.
+
+## Status 2026-10-04: loop resumed, round 60 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 179 Core and 13 bridge/input tests passed; deployed locally through round 59. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Release build, 183 Core and 13 bridge/input tests passed; deployed locally through round 60. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Active refactor: native DD2 arena presentation and startup responsiveness. Paired region board/toggles are built. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.

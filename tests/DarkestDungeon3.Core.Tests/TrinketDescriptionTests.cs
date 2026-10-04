@@ -7,6 +7,35 @@ namespace DarkestDungeon3.Core.Tests;
 public class TrinketDescriptionTests
 {
     private static readonly TrinketDescriptions Data = TrinketDescriptions.Load(@"C:\Users\Piral\DarkestDungeon3\game\Darkest Dungeon II_Data\StreamingAssets");
+    [Theory]
+    [InlineData("trinket_general_gnarly_knuckles", "Melee Skills: +20% DMG")]
+    [InlineData("trinket_general_ravens_reach", "Ranged Skills: +20% DMG")]
+    public void ConditionalSkillBonusesKeepTheirSkillRequirement(string id, string expected)
+    {
+        string effects = Data.Effects(id, out bool complete);
+        Assert.Contains(expected, effects);
+        Assert.False(complete); // The miss-triggered stress effect still needs the effect reader.
+    }
+
+    [Fact]
+    public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
+    {
+        string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);
+        Assert.Contains("+2 Bleed Dealt when self HP is below 33%", health);
+        string torch = Data.Effects("trinket_cave_peculiar_pods", out _);
+        Assert.Contains("-2 Speed when Flame is above 75", torch);
+        Assert.Contains("+25% Debuff RES Piercing", torch);
+    }
+
+    [Fact]
+    public void UnsupportedLocalizedConditionNeverTurnsItsBonusIntoAnUnconditionalClaim()
+    {
+        string effects = Data.Effects("trinket_cave_peculiar_pods", out bool complete,
+            key => key == "effect_tooltip_condition_run_value" ? "invalid {9}" : null);
+        Assert.DoesNotContain("Speed", effects);
+        Assert.Contains("+25% Debuff RES Piercing", effects);
+        Assert.False(complete);
+    }
 
     [Fact]
     public void ColdMenuReadsBothBenefitsAndPenaltiesFromTheActualBuffTable()

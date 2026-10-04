@@ -61,9 +61,7 @@ public sealed class TrinketDescriptions
             if (!string.IsNullOrEmpty(authored)) { lines.Add(Plain(authored)); continue; }
             string condition = Field("Buff", buff, "m_ConditionId") ?? buff;
             bool conditional = _blocks.ContainsKey(("Condition", condition));
-            // Never turn a conditional bonus into an unconditional claim.
-            if (conditional) { complete = false; continue; }
-            int before = lines.Count;
+            var buffLines = new List<string>();
             if (_blocks.TryGetValue(("ActorDataStats", buff), out var stats))
             {
                 string[] keys = Array.Empty<string>();
@@ -72,18 +70,112 @@ public sealed class TrinketDescriptions
                     if (row[0] == "key_map") keys = row.Skip(1).ToArray();
                     else if (row[0] == "add_stats" || row[0] == "multiply_stats")
                         for (int i = 0; i < keys.Length && i + 1 < row.Length; i++)
-                            AddStat(lines, keys[i], null, row[i + 1], row[0] == "multiply_stats", localize);
+                            AddStat(buffLines, keys[i], null, row[i + 1], row[0] == "multiply_stats", localize);
                     else if ((row[0] == "sub_stat" || row[0] == "multiply_sub_stat") && row.Length >= 4)
-                        AddStat(lines, row[1], row[2], row[3], row[0] == "multiply_sub_stat", localize);
+                        AddStat(buffLines, row[1], row[2], row[3], row[0] == "multiply_sub_stat", localize);
                 }
             }
-            if (before == lines.Count || _blocks.ContainsKey(("ActorDataEffects", buff))) complete = false;
+            if (buffLines.Count > 0)
+            {
+                string text = string.Join("\n", buffLines);
+                if (conditional) text = WithCondition(condition, text, localize);
+                if (text == null) complete = false;
+                else lines.Add(text);
+            }
+            else complete = false;
+            if (_blocks.ContainsKey(("ActorDataEffects", buff))) complete = false;
         }
         if (_blocks.ContainsKey(("ActorDataEffects", id)) || Values("Item", id, "m_effectIds").Count > 0)
             complete = false;
         string note = Text("item_description_" + id, localize);
         if (!string.IsNullOrEmpty(note)) lines.Add(Plain(note));
         return lines.Count == 0 ? null : string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    private string WithCondition(string id, string effect, Func<string, string> localize)
+    {
+        // Invisible or unsupported conditions must never appear as unconditional bonuses.
+        if (Field("Condition", id, "m_IsVisible") == "False") return null;
+        string authored = Text("effect_condition_" + id + "_override", localize);
+        if (!string.IsNullOrEmpty(authored))
+        {
+            string overridden = Format(authored, effect);
+            return overridden != null && overridden.Contains(effect) ? Plain(overridden) : null;
+        }
+        string type = Field("Condition", id, "m_ConditionType");
+        string key = "effect_tooltip_condition_" + type;
+        if (Field("Condition", id, "m_IsInverse") == "True") key += "_inverse";
+        string value = Field("Condition", id, "m_ConditionString");
+        string numberType = Field("Condition", id, "m_ConditionNumberType");
+        string actor = Field("Condition", id, "m_ConditionActorType");
+        object[] args;
+        switch (type)
+        {
+            case "skill_tag":
+            case "biome":
+            case "biome_sub_type":
+            case "status":
+            case "trinket_equipped":
+            case "combat_item_equipped":
+            case "stage_coach_upgrade_equipped":
+            case "item_equipped_tag":
+            case "trinket_equipped_tag":
+            case "combat_item_equipped_tag":
+                string prefix = type == "skill_tag" ? "skill_tag_" : type.StartsWith("biome", StringComparison.Ordinal) ? "biome_name_"
+                    : type == "status" ? "status_" : type.EndsWith("_tag", StringComparison.Ordinal) ? "item_tag_" : "item_name_";
+                string label = Text(prefix + value, localize);
+                if (label == null) return null;
+                if (numberType == "MULTIPLE") key += "_multiple";
+                args = new object[] { label, effect };
+                break;
+            case "health_percent":
+            case "health_percent_wound_included":
+            case "wound_percent":
+            case "stress":
+            case "stress_percent":
+            case "rank":
+            case "round":
+            case "turn":
+                if (type.StartsWith("health", StringComparison.Ordinal) && (actor == "TARGET" || actor == "PARTY")) key += "_" + actor.ToLowerInvariant();
+                if (numberType == "MULTIPLE" && (type == "stress" || type == "stress_percent" || type == "round" || type == "turn"))
+                { key += "_multiple"; args = new object[] { effect }; }
+                else
+                {
+                    string comparison = Compare(id, type.Contains("percent"), localize);
+                    if (comparison == null) return null;
+                    // CSV ranks are already one-based; native initialization subtracts one and its description adds it back.
+                    args = new object[] { comparison, "", effect };
+                }
+                break;
+            case "run_value":
+            case "run_value_percent":
+                string runName = Text("run_value_" + value, localize);
+                string runComparison = Compare(id, type == "run_value_percent", localize);
+                if (runName == null || runComparison == null) return null;
+                args = new object[] { runName, runComparison, "", effect };
+                break;
+            default: return null;
+        }
+        string result = Format(Text(key, localize), args);
+        return result != null && result.Contains(effect) ? Plain(result) : null;
+    }
+
+    private string Compare(string id, bool percent, Func<string, string> localize)
+    {
+        string comparison = Field("Condition", id, "m_ConditionNumberType")?.ToLowerInvariant();
+        if (comparison == "equal") comparison = "equals";
+        if (comparison != "equals" && comparison != "greater_than" && comparison != "greater_than_or_equal"
+            && comparison != "less_than" && comparison != "less_than_or_equal") return null;
+        if (!float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float, CultureInfo.InvariantCulture, out float value)) return null;
+        return Format(Text("comparison_" + comparison + "_label" + (percent ? "_percentage" : ""), localize),
+            (value * (percent ? 100 : 1)).ToString("0.##", CultureInfo.InvariantCulture));
+    }
+
+    private static string Format(string template, params object[] args)
+    {
+        if (template == null) return null;
+        try { return string.Format(CultureInfo.InvariantCulture, template, args); }
+        catch (FormatException) { return null; }
     }
 
     private void AddStat(List<string> lines, string stat, string sub, string value, bool multiply, Func<string, string> localize)
