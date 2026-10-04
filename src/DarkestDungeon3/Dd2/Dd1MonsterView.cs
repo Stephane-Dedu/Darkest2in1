@@ -282,9 +282,12 @@ internal static class Dd1MonsterView
         }
     }
 
-    /// <summary>The stand-in's model: its mesh renderers (its parts load a little after the actor appears).</summary>
+    /// <summary>The stand-in's model (its parts load a little after the actor appears) and the DD2 effects riding on it
+    /// (auras, status clouds: particles and VFX Graph). DD1's sprite carries its own effects.</summary>
     private static Renderer[] ModelRenderers(CombatActorBhv actor) =>
-        actor.GetComponentsInChildren<Renderer>(true).Where(r => r is SkinnedMeshRenderer || r is MeshRenderer).ToArray();
+        actor.GetComponentsInChildren<Renderer>(true).Where(r => r is SkinnedMeshRenderer || r is MeshRenderer || IsEffect(r)).ToArray();
+
+    private static bool IsEffect(Renderer r) => r.GetType().Name is "ParticleSystemRenderer" or "VFXRenderer";
 
     private static void Note(Monster m, string reason)
     {
@@ -601,10 +604,17 @@ internal static class Dd1MonsterView
             m.NextRendererScan = Time.unscaledTime + 0.5f;
             var fresh = ModelRenderers(m.Actor);
             int added = 0;
+            var effects = new List<string>();
             foreach (var r in fresh)
-                if (r != null && !r.forceRenderingOff) { r.forceRenderingOff = true; added++; }
+                if (r != null && !r.forceRenderingOff)
+                {
+                    r.forceRenderingOff = true;
+                    added++;
+                    if (IsEffect(r)) effects.Add(r.name);
+                }
             m.Renderers = fresh;
             if (added > 0) Note(m, $"hid {added} more stand-in parts");
+            if (effects.Count > 0) Note(m, $"effects hidden on the stand-in: {string.Join(", ", effects.Distinct())}");
         }
         return true;
     }
