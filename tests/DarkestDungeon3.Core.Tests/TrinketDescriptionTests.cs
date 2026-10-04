@@ -642,7 +642,7 @@ public class TrinketDescriptionTests
         Assert.Contains("Gain On Resist: Blight : -2 Stress", effects);
         Assert.Contains("Gain On Resist: Burn : -2 Stress", effects);
         effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
         Assert.Contains("+50% Bleed RES", effects);
     }
@@ -660,6 +660,52 @@ public class TrinketDescriptionTests
         Assert.DoesNotContain("Gain On Resist:", effects);
         Assert.Contains("Apply to Attacker When Hit: Burn 1 (3 Turns)", effects);
         Assert.Contains("+20% Stun RES Piercing when target Burn", effects);
+    }
+
+    [Fact]
+    public void HealCritMetadataRetainsEveryResistanceHealAndExistingStats()
+    {
+        string effects = Data.Effects("trinket_hoarder_fates_foreteller", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Resist: Bleed : Healthup 20%", effects);
+        Assert.Contains("Gain On Resist: Blight : Healthup 20%", effects);
+        Assert.Contains("Gain On Resist: Burn : Healthup 20%", effects);
+        Assert.DoesNotContain("5%", effects);
+        effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Resist: Bleed : Healthup 10%", effects);
+        Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
+        Assert.Contains("+50% Bleed RES", effects);
+        Assert.Contains("+50% Move RES", effects);
+    }
+
+    [Fact]
+    public void HealCritMetadataKeepsBaseHealProcChanceAndNativeLocalization()
+    {
+        string effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out bool complete);
+        Assert.False(complete);
+        Assert.Equal("Each Hero on Round End: Healthup 2 (33%)", effects);
+        effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out complete,
+            key => key == "effect_tooltip_health_heal_amount" ? "Heal {0} HP" : null);
+        Assert.False(complete);
+        Assert.Equal("Each Hero on Round End: Heal 2 HP (33%)", effects);
+        Assert.DoesNotContain("5%", effects);
+        Assert.DoesNotContain("Heal 3", effects);
+    }
+
+    [Fact]
+    public void MalformedHealingTemplateWithholdsHealsAndRetainsOtherResistEffects()
+    {
+        string effects = Data.Effects("trinket_hoarder_fates_foreteller", out bool complete,
+            key => key == "effect_tooltip_health_heal_percent" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.Null(effects);
+        effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete,
+            key => key == "effect_tooltip_health_heal_percent" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Gain On Resist: Bleed", effects);
+        Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
+        Assert.Contains("+50% Bleed RES", effects);
     }
 
     [Fact]

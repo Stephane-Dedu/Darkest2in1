@@ -185,6 +185,7 @@ public sealed class TrinketDescriptions
         "m_AddTurn", "m_AddTurnRange",
         "m_Move", "m_MoveRange", "m_Shuffle",
         "m_TokenConvertFromTokenIds", "m_TokenConvertToId", "m_TokenConvertAmount", "m_TokenConvertAmountRange",
+        "m_CritChance", "m_CritMultiplier",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly)
@@ -195,6 +196,16 @@ public sealed class TrinketDescriptions
         // DD2's formatter includes these effects; resistance bypass changes application rather than its text.
         string ignoreResist = Field("Effect", id, "m_IgnoreResist");
         if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
+        if (Field("Effect", id, "m_CritChance") != null || Field("Effect", id, "m_CritMultiplier") != null)
+        {
+            // Native applies these to health effects but describes their base amount normally.
+            if (Field("Effect", id, "m_HealthHealAmount") == null && Field("Effect", id, "m_HealthHealPercent") == null
+                && Field("Effect", id, "m_HealthDamageAmount") == null) return null;
+            if (!float.TryParse(Field("Effect", id, "m_CritChance") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture, out float crit)
+                || float.IsNaN(crit) || float.IsInfinity(crit) || crit < 0 || crit > 1
+                || !float.TryParse(Field("Effect", id, "m_CritMultiplier") ?? "0", NumberStyles.Float, CultureInfo.InvariantCulture, out float multiplier)
+                || float.IsNaN(multiplier) || float.IsInfinity(multiplier) || multiplier < 0 || (crit > 0 && multiplier == 0)) return null;
+        }
         var parts = new List<string>();
         if (rows.Any(row => row[0].StartsWith("m_TokenConvert", StringComparison.Ordinal)))
         {
