@@ -509,7 +509,7 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
-    public void TeamTriggerFallbackRetainsEventConditionAndWithholdsUnknownNeighborRouting()
+    public void TeamTriggerFallbackRetainsEventConditionAndSeparateNeighborEffects()
     {
         string effects = Data.Effects("trinket_curio_grim_mask", out bool complete);
         Assert.True(complete);
@@ -519,9 +519,58 @@ public class TrinketDescriptionTests
         Assert.True(complete);
         Assert.Contains("Each Enemy on Round Start: Shuffle", effects);
         effects = Data.Effects("trinket_cave_sneakers_standard", out complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Combat Start: Taunt (33%) when Flame is above 75", effects);
-        Assert.DoesNotContain("Stealth", effects);
+        Assert.Contains("Combat Start: All Allies Behind: Stealth", effects);
+    }
+
+    [Fact]
+    public void NeighborTriggersDistinguishAllAlliesBehindAndTheSingleAllyAhead()
+    {
+        string effects = Data.Effects("trinket_cave_sneakers_standard", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Combat Start: All Allies Behind: Stealth", effects);
+        effects = Data.Effects("trinket_forest_unwavering_standard", out complete);
+        Assert.True(complete);
+        Assert.Contains("Combat Start: All Allies Behind: Block", effects);
+        Assert.Contains("Gain On Miss: Weak when first in turn order", effects);
+        effects = Data.Effects("trinket_city_hastening_history", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn End: Ally Ahead: Speed (33%)", effects);
+        Assert.Contains("Turn Start: Stun (10%) when Speed is 2 or less", effects);
+        effects = Data.Effects("trinket_forest_insulating_insignia", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn End: Ally Ahead: Block (33%)", effects);
+        Assert.Contains("Gain On Miss: Combo when first in turn order", effects);
+    }
+
+    [Fact]
+    public void NeighborTriggersRetainCritMissAndNamedSkillRequirements()
+    {
+        string effects = Data.Effects("trinket_hero_jes_royal_summons", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On CRIT: All Allies Behind: Add 1 Positive Token", effects);
+        effects = Data.Effects("trinket_hero_maa_undeserved_commendation", out _);
+        Assert.Contains("Apply On Miss: All Allies Behind: +1 Stress", effects);
+        effects = Data.Effects("trinket_hero_ves_profane_scroll", out complete);
+        Assert.True(complete);
+        Assert.Contains("Self: Ally Behind: Hand of Light: Guardedx2", effects);
+        Assert.Contains("Gain On Miss: +1 Stress (25%)", effects);
+    }
+
+    [Fact]
+    public void NeighborDirectionLabelsUseNativeLocalizationAndKeepOtherEffects()
+    {
+        string effects = Data.Effects("trinket_hero_lep_a_simple_flower", out bool complete,
+            key => key == "actor_trigger_target_type_neighbor_back_1" ? "Allie derriere:" : null);
+        Assert.True(complete);
+        Assert.Contains("Turn End: Allie derriere: Add 1 Positive Token", effects);
+        Assert.Contains("Gain On CRIT: Melee Skills: +1 Stress (25%)", effects);
+        effects = Data.Effects("trinket_city_hastening_history", out complete,
+            key => key == "actor_trigger_target_type_neighbor_front_1" ? "Allie devant:" : null);
+        Assert.True(complete);
+        Assert.Contains("Turn End: Allie devant: Speed (33%)", effects);
+        Assert.Contains("Stun (10%) when Speed is 2 or less", effects);
     }
 
     [Fact]

@@ -108,6 +108,7 @@ public sealed class TrinketDescriptions
     {
         "m_ActorEffectType", "m_ActorEffectTriggerSourceType", "m_ActorEffectTriggerTargetType",
         "m_IncludeSourceActor", "m_ActorCount", "m_ApplyLimit", "effects",
+        "m_NeighborBackCount", "m_NeighborFrontCount",
     };
 
     private void AddActorTrigger(string id, List<string> lines, ref bool complete, Func<string, string> localize)
@@ -120,17 +121,23 @@ public sealed class TrinketDescriptions
         string count = Field("ActorEffectTrigger", id, "m_ActorCount");
         var effects = Values("ActorEffectTrigger", id, "effects");
         if (eventId == null || (source != "target" && source != "performer")
-            || (target != "friendly_team" && target != "enemy_team")
+            || (target != "friendly_team" && target != "enemy_team" && target != "neighbor")
             || !int.TryParse(count, out int actorCount) || actorCount < 1 || actorCount > 4 || effects.Count == 0
             || !bool.TryParse(Field("ActorEffectTrigger", id, "m_IncludeSourceActor") ?? "False", out _)
             || !int.TryParse(Field("ActorEffectTrigger", id, "m_ApplyLimit") ?? "0", out int limit) || limit > 1)
+        { complete = false; return; }
+        if (!int.TryParse(Field("ActorEffectTrigger", id, "m_NeighborBackCount") ?? "0", out int back)
+            || !int.TryParse(Field("ActorEffectTrigger", id, "m_NeighborFrontCount") ?? "0", out int front)
+            || back < 0 || front < 0 || back > 3 || front > 3
+            || (target == "neighbor" ? back + front == 0 : back + front != 0))
         { complete = false; return; }
         string titleKey = "effect_tooltip_skill_effect_" + eventId + "_" + target + "_" + count;
         string title = Plain(Text(titleKey + "_" + effects[0], localize) ?? Text(titleKey, localize));
         if (title == null)
         {
             string eventTitle = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
-            string targetTitle = Plain(Text("actor_trigger_target_type_" + target + "_" + count, localize));
+            string direction = target == "neighbor" ? (back > 0 && front > 0 ? "adjacent_" : back > 0 ? "back_" : "front_") : "";
+            string targetTitle = Plain(Text("actor_trigger_target_type_" + target + "_" + direction + count, localize));
             if (eventTitle != null && targetTitle != null) title = eventTitle + " " + targetTitle;
         }
         if (title == null) { complete = false; return; }
