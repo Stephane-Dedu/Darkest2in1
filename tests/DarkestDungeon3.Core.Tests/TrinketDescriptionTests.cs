@@ -613,6 +613,56 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void ResistanceTriggersRetainBurnAndBlightRequirementsAndTheirRewards()
+    {
+        string effects = Data.Effects("trinket_city_boss_charred_litany", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Resist: Burn : -2 Stress", effects);
+        Assert.Contains("Apply to Attacker When Hit: Burn 1 (3 Turns)", effects);
+        effects = Data.Effects("trinket_farm_boss_kitchen_knives", out _);
+        Assert.Contains("Gain On Resist: Blight : Extra Action (20%)", effects);
+        Assert.Contains("+15% CRIT when target Blight", effects);
+        effects = Data.Effects("trinket_hero_run_knitted_blanket", out _);
+        Assert.Contains("Gain On Resist: Burn : Stealth", effects);
+        Assert.Contains("When Stress Damaged: Burn 1 (3 Turns) (15%)", effects);
+    }
+
+    [Fact]
+    public void ResistanceTriggersRetainEveryDotDamagePenaltyAndMoveResistanceUnits()
+    {
+        string effects = Data.Effects("trinket_cultist_hardened_heart", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+200% Bleed RES", effects);
+        Assert.Contains("Gain On Resist: Bleed : 2 DMG", effects);
+        Assert.Contains("Gain On Resist: Blight : 2 DMG", effects);
+        Assert.Contains("Gain On Resist: Burn : 2 DMG", effects);
+        effects = Data.Effects("trinket_hoarder_skeletons_sight", out complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Resist: Bleed : -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Blight : -2 Stress", effects);
+        Assert.Contains("Gain On Resist: Burn : -2 Stress", effects);
+        effects = Data.Effects("trinket_coast_boss_sodden_sweater", out complete);
+        Assert.False(complete);
+        Assert.Contains("Gain On Resist: Move RES: -1 Stress", effects);
+        Assert.Contains("+50% Bleed RES", effects);
+    }
+
+    [Fact]
+    public void ResistanceQualifiersUseNativeLocalizationAndWithholdMalformedConditions()
+    {
+        string effects = Data.Effects("trinket_city_boss_charred_litany", out bool complete,
+            key => key == "resist_tag_burn" ? "Brulure" : null);
+        Assert.True(complete);
+        Assert.Contains("Gain On Resist: Brulure: -2 Stress", effects);
+        effects = Data.Effects("trinket_city_boss_charred_litany", out complete,
+            key => key == "effect_tooltip_condition_resist_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Gain On Resist:", effects);
+        Assert.Contains("Apply to Attacker When Hit: Burn 1 (3 Turns)", effects);
+        Assert.Contains("+20% Stun RES Piercing when target Burn", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

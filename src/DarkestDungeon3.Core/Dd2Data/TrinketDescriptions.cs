@@ -120,8 +120,10 @@ public sealed class TrinketDescriptions
         string target = Field("ActorEffectTrigger", id, "m_ActorEffectTriggerTargetType");
         string count = Field("ActorEffectTrigger", id, "m_ActorCount");
         var effects = Values("ActorEffectTrigger", id, "effects");
+        bool selfResist = eventId == "on_resist" && source == "target" && target == "target"
+            && count == "1" && Field("ActorEffectTrigger", id, "m_IncludeSourceActor") == "True";
         if (eventId == null || (source != "target" && source != "performer")
-            || (target != "friendly_team" && target != "enemy_team" && target != "neighbor")
+            || (target != "friendly_team" && target != "enemy_team" && target != "neighbor" && !selfResist)
             || !int.TryParse(count, out int actorCount) || actorCount < 1 || actorCount > 4 || effects.Count == 0
             || !bool.TryParse(Field("ActorEffectTrigger", id, "m_IncludeSourceActor") ?? "False", out _)
             || !int.TryParse(Field("ActorEffectTrigger", id, "m_ApplyLimit") ?? "0", out int limit) || limit > 1)
@@ -138,7 +140,7 @@ public sealed class TrinketDescriptions
             string eventTitle = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
             string direction = target == "neighbor" ? (back > 0 && front > 0 ? "adjacent_" : back > 0 ? "back_" : "front_") : "";
             string targetTitle = Plain(Text("actor_trigger_target_type_" + target + "_" + direction + count, localize));
-            if (eventTitle != null && targetTitle != null) title = eventTitle + " " + targetTitle;
+            if (eventTitle != null && (targetTitle != null || selfResist)) title = selfResist ? eventTitle : eventTitle + " " + targetTitle;
         }
         if (title == null) { complete = false; return; }
         AddEffectGroup(title, FriendlyEffectEvents.Contains(eventId), effects, limit > 0, lines, ref complete, localize);
@@ -468,6 +470,13 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "resist":
+            case "resist_tag":
+                if (numberType != "BOOL") return null;
+                string resistName = Text((type == "resist" ? "actor_stat_type_resistance_" : "resist_tag_") + value, localize);
+                if (resistName == null) return null;
+                args = new object[] { resistName, effect };
+                break;
             case "first_initiative":
             case "last_initiative":
                 args = new object[] { effect };
