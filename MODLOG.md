@@ -760,10 +760,18 @@ Nautical Compass now shows Turn End: Block or Crit or Dodge or Strength or +1 St
 
 Audit of 191 base trinkets is 66 complete, 75 partial and 50 blank, versus 64/71/56. Release, 190 Core and 18 bridge/input tests pass. Deployed and verified both DLL hashes. No launch/save write. Native pre-run/native-run tooltip comparison remains [?]. Next: actor-stat conditions such as the missing Speed threshold.
 
-## Status 2026-10-04: loop resumed, round 66 complete
+## Round 67: actor-stat conditions in cold trinket tooltips
+
+Read installed DD1 base.entries.trinkets.json again for buff-driven equipment data and native DD2 ConditionDescription's ACTOR_STAT_VALUE path. It replaces '+' with '_' in actor_stat_type_<stat>, uses raw comparison units and fills effect_tooltip_condition_actor_stat_value. Added that exact path, preserving localized stat labels and withholding missing/malformed templates.
+
+Clenching Claws now includes Round Start: Immobilize (66%) when Speed is 2 or less and is complete. Seamen's Boots shows its separate Speed <=2 Block and Speed >=6 Dodge effects. Laden Lantern retains +25% Burn RES Piercing even when a malformed localized condition withholds its Speed-gated Blind penalty. Two actual-data tests check both comparison directions, raw Speed units, live stat localization and malformed-template withholding. Updated the earlier Claws test to include its newly supported condition.
+
+The 191-item audit is now 72 complete, 73 partial and 46 blank, versus 66/75/50. Release, 192 Core and 18 bridge/input tests pass. Deployed and verified both DLL hashes. No launch/save write. Native tooltip appearance and cold/native-library comparison remain [?].
+
+## Status 2026-10-04: loop resumed, round 67 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build, 190 Core and 18 bridge/input tests passed; deployed locally through round 66. Both installed DLL hashes match Release. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Built refactor: DD2 default regions, a single arrow beside each paired area name, DD1 quest rows directly beneath every area with local overflow scrolling, separate progress, native DD2 arenas/light, bounded setup polling and timing logs. Built trinket presentation/slot/choice-group fixes and atlas-safe portrait drawing/retries. Next candidates: actor-stat conditions and advanced cold-menu effect coverage (50 blank/75 partial out of 191 base trinkets), persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
+- Release build, 192 Core and 18 bridge/input tests passed; deployed locally through round 67. Both installed DLL hashes match Release. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Built refactor: DD2 default regions, a single arrow beside each paired area name, DD1 quest rows directly beneath every area with local overflow scrolling, separate progress, native DD2 arenas/light, bounded setup polling and timing logs. Built trinket presentation/slot/choice/actor-stat fixes and atlas-safe portrait drawing/retries. Next candidates: DOT/buff mutations and advanced cold-menu effect coverage (46 blank/73 partial out of 191 base trinkets), persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Sprawl tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm. Enable Ruins and cycle the paired map arrows; XP and contracts must remain separate.

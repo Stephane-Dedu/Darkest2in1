@@ -60,10 +60,33 @@ public class TrinketDescriptionTests
     public void LimitedHitEffectsKeepTheAttackerTargetAndEachCandidatesChance()
     {
         string effects = Data.Effects("trinket_forest_clenching_claws", out bool complete);
-        // Its separate round-start Immobilize also requires a Speed condition, still unsupported here.
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Apply to Attacker When Hit:", effects);
         Assert.Contains("Weak (20%) or Vulnerable (20%) or Stun (10%)", effects);
+        Assert.Contains("Round Start: Immobilize (66%) when Speed is 2 or less", effects);
+    }
+
+    [Fact]
+    public void StatThresholdsKeepTheirNativeNumbersAndBothComparisonDirections()
+    {
+        string effects = Data.Effects("trinket_coast_seamens_boots", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("When Moving: Block (66%) when Speed is 2 or less", effects);
+        Assert.Contains("When Moving: Dodge (66%) when Speed is 6 or more", effects);
+        Assert.DoesNotContain("200%", effects);
+        string localized = Data.Effects("trinket_coast_seamens_boots", out _,
+            key => key == "actor_stat_type_speed" ? "Vitesse" : null);
+        Assert.Contains("Vitesse is 6 or more", localized);
+    }
+
+    [Fact]
+    public void MalformedStatConditionWithholdsItsEffectButKeepsUnconditionalBonuses()
+    {
+        string effects = Data.Effects("trinket_city_laden_lantern", out bool complete,
+            key => key == "effect_tooltip_condition_actor_stat_value" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Blind", effects);
+        Assert.Contains("+25% Burn RES Piercing", effects);
     }
 
     [Fact]

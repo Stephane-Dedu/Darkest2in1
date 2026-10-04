@@ -253,6 +253,14 @@ public sealed class TrinketDescriptions
                 if (runName == null || runComparison == null) return null;
                 args = new object[] { runName, runComparison, "", effect };
                 break;
+            case "actor_stat_value":
+                if (string.IsNullOrEmpty(value)) return null;
+                string statName = Text("actor_stat_type_" + value?.Replace('+', '_'), localize);
+                string statComparison = Compare(id, false, localize);
+                if (statName == null || statComparison == null) return null;
+                // Native ConditionDescription uses raw units here, even for a resistance sub-stat.
+                args = new object[] { statName, statComparison, "", effect };
+                break;
             default: return null;
         }
         string result = Format(Text(key, localize), args);
