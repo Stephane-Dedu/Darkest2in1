@@ -32,12 +32,14 @@ internal sealed class UiRoot : MonoBehaviour
         var d = Driver.Instance;
         if (d == null) return;
         Gui.Begin();
+        Drag.Begin();
         GUI.depth = -1000;
 
         bool fullscreen = d.Phase is Phase.Hamlet or Phase.Crawling or Phase.Homecoming;
         Gui.BlockInput(fullscreen || _slotPicker || CinematicPlayer.Active);
         if (CinematicPlayer.Active)
         {
+            Drag.Cancel();
             try { CinematicPlayer.Draw(); } catch (System.Exception e) { Plugin.Log.LogError(e); }
             return;
         }

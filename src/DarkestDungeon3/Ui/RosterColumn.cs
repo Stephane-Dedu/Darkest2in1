@@ -98,7 +98,7 @@ internal static class RosterColumn
             var l = look?.Invoke(h) ?? default;
             float x = X - 12, y = FirstY + i * Spacing;
             var r = new Rect(x, y, 383, 100);
-            if (CrawlUi.RightClicked(r)) RightClickedHero = h;   // DD1: right-click for the hero's sheet
+            if (GUI.enabled && CrawlUi.RightClicked(r)) RightClickedHero = h;   // DD1: right-click for the hero's sheet
             if (draggable && h.IsAvailable && h.MissingWeeks == 0)
             {
                 string cls = h.ClassId;

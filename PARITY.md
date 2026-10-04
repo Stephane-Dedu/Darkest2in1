@@ -14,7 +14,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Town scene: `campaign/town/town.layout.darkest` positions, building Spine skeletons, roster, estate bar — round 1 screenshot (Estate 2, week 49).
 - [?] Building windows: DD1 backgrounds, keeper art, nameplate, upgrade button + panel (`building.layout`, `upgrade.layout`, `building_verbose_*`) — check text fits.
 - [?] Upgrades: trees and costs from `upgrades/buildings/*.upgrades.json`, heirloom costs, % upgraded.
-- [x] Stagecoach: recruits (`stage_coach.building.json` number_of_recruits_upgrades base 2, roster_size_upgrades base 9), drag to roster. In game (round 26, test estate, no stagecoach upgrades): 2 recruits, "The roster is full (9/9)".
+- [?] Priority Stagecoach regression, round 49: Drag.Begin promotes/reserves carried events before buttons, roster drops recruit before roster clicks, invalid drops/Escape clear capture, and recruit sheets disable underlying inputs with state restored in finally. GUIToScreenPoint keeps thresholds consistent for scroll groups. Headless replay of actual Drag.cs failed two cases before the change; six input tests (including real Hamlet.Recruit), Release build and 157 Core tests now pass. Native Unity input/rendering remains unverified. In game with a free roster slot: drag each recruit to an occupied and an empty roster area, open/close/cycle details, cancel a drag, then reopen the coach and hire again; full roster must show its limit.
 - [?] Abbey / Tavern: activities, slots, prices, side effects (`abbey.building.json`, `tavern.building.json`: gambling loss, missing, quirks).
 - [?] Sanitarium: quirk treatment / lock, disease cure (`sanitarium.building.json`).
 - [?] Blacksmith: DD1 window (port layout), per-class equipment trees (`upgrades/heroes/<class>.upgrades.json`) as DD2 buffs.
@@ -33,6 +33,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] End of week: idle stress relief, activity returns, missing heroes, new recruits/wagon/quests.
 
 ## Roster, quirks, diseases
+- [ ] Priority regression reported 2026-10-04: hero detail HUD has no bottom-left character image. Art.HeroFigure requests one configured addressable picture; Art.DrawSprite reads textureRect, which cannot represent tightly packed sprites. Check asynchronous failure retries, a loaded-art fallback, and atlas-safe drawing.
 - [?] Hero resolve levels from `roster.variables.json` thresholds; resolve XP per quest length.
 - [?] Quirk limits: DD1 caps 5 positive / 5 negative / 3 diseases (`rules.json` quirks_max_*); over the cap a new quirk replaces a random unlocked one of its kind (`shared/character/quirkreplaced.png`), none gained if all are locked. Was: no cap. Now QuirkLimits (Dd1Campaign.QuirkLimits) in town activities and on the DD2 actor for curio quirks (QuirkLimitTests). In game: a capped hero gaining a quirk logs "[quirks] ... replaces ... (DD1 quirk limit)".
 - [?] Locked quirk cap: DD1 `quirks_max_locked_positive` 3. Was: the Sanitarium locked any number. Now Hamlet.WhyCantLock refuses a fourth (HamletTests.AtMostThreeLockedPositiveQuirks); the quirk row greys out with the reason on hover. In game: a hero with 3 locked quirks can't lock a fourth. (`_negative` 3 belongs to the negative auto-lock rule, still missing.)
@@ -90,6 +91,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Ambush in the dark: DD1 `ambush_torch_reduction` -100 — a camp ambush snuffs the torch, the fight starts in darkness. Was: relit to 100, fought in full light. Now Crawl.BreakCamp applies it (CampingTests). In game: after "The camp is ambushed in the night!" the fight's torch reads 0.
 
 ## Fights (around DD2 combat)
+- [ ] Priority regression reported 2026-10-04: combat starts slowly, heroes/scene look unlit and monsters glow. Measure mod setup stages; check backdrop scene traversal, DD2 deferred lighting/global environment state, and flat sprite post-processing. No new in-game launch authorized.
 - [x] Fights launch in DD2 combat with our party and DD1 encounter translations; return to the crawl; DD2 results view skipped; DD1 spoils scroll — round 1 (log "straight back to the dungeon").
 - [x] DD1 monsters drawn over their DD2 stand-ins, stand-in models hidden — round 1 screenshot (Bone Militia/Defender/Arbalist/Courtier). Was broken: DD2 adds model parts after the fight starts, they stayed visible in front of the DD1 art; now re-scanned twice a second.
 - [x] DD1 monsters fight with their DD1 skills (generated DD2 skills) — round 1: Bone Courtier cast "Tempting Goblet", no exceptions, fight won; round 2: 4 fights (skeletons, cultists, madman), 0 exceptions. Was broken: the presentation alias patched the generic ResourceDatabaseAddressable<,>.GetResource and broke loading heroes (run start hung); now ResourceDatabaseSkills.GetFallbackResourceId.

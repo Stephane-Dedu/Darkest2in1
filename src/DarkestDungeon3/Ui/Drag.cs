@@ -22,26 +22,49 @@ internal static class Drag
     public static object Payload => _payload;
     public static bool Carrying<T>() => _payload is T;
 
+    /// <summary>Reserve a carried mouse event before any page buttons see it.</summary>
+    public static void Begin()
+    {
+        var e = Event.current;
+        if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape && (_pending != null || Active))
+        {
+            Cancel();
+            e.Use();
+            return;
+        }
+        if (e.rawType == EventType.MouseDrag && _payload == null && _pending != null
+            && (GUIUtility.GUIToScreenPoint(e.mousePosition) - _downAt).magnitude > Threshold)
+        {
+            _payload = _pending;
+            _draw = _pendingDraw;
+            _pending = null;
+            _pendingDraw = null;
+            GUIUtility.hotControl = 0;
+        }
+        // Drop targets use rawType. Ordinary buttons must never see a carried drag or release, even
+        // when they are drawn before the source/target (the Hamlet roster, for example).
+        if (Active && (e.rawType == EventType.MouseDrag || e.rawType == EventType.MouseUp)) e.Use();
+    }
+
+    public static void Cancel()
+    {
+        if (Active) GUIUtility.hotControl = 0;
+        _pending = _payload = null;
+        _pendingDraw = _draw = null;
+    }
+
     /// <summary>Something that can be picked up: <paramref name="drawIcon"/> draws it in a rect (used while carried).</summary>
     public static void Source(Rect r, object payload, Action<Rect> drawIcon)
     {
-        if (payload == null) return;
+        if (payload == null || !GUI.enabled) return;
         var e = Event.current;
         if (e.rawType == EventType.MouseDown && e.button == 0 && r.Contains(e.mousePosition) && _payload == null)
         {
             _pending = payload;
             _pendingDraw = drawIcon;
-            _downAt = e.mousePosition;
+            _downAt = GUIUtility.GUIToScreenPoint(e.mousePosition);
             _size = r.size;
             _grab = e.mousePosition - r.position;
-        }
-        else if (e.rawType == EventType.MouseDrag && _payload == null && Equals(_pending, payload)
-                 && (e.mousePosition - _downAt).magnitude > Threshold)
-        {
-            _payload = _pending;
-            _draw = _pendingDraw;
-            _pending = null;
-            GUIUtility.hotControl = 0;   // whatever button was pressed under it won't fire on release
         }
     }
 
@@ -50,11 +73,12 @@ internal static class Drag
     {
         payload = null;
         var e = Event.current;
-        if (!(_payload is T carried) || !r.Contains(e.mousePosition)) return false;
+        if (!GUI.enabled || !(_payload is T carried) || !r.Contains(e.mousePosition)) return false;
         if (e.rawType != EventType.MouseUp) return false;
         payload = carried;
         _payload = null;
         _draw = null;
+        GUIUtility.hotControl = 0;
         _droppedFrame = Time.frameCount;
         e.Use();
         return true;
@@ -72,8 +96,7 @@ internal static class Drag
         var e = Event.current;
         if (e.rawType == EventType.MouseUp)
         {
-            _pending = null;
-            if (_payload != null) { _payload = null; _draw = null; }
+            Cancel();
             return;
         }
         if (_payload == null || e.type != EventType.Repaint) return;

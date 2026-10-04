@@ -630,7 +630,13 @@ Feasibility notes (decomp):
 - Added Core Memorial catalog and access/visibility rules, with tests. Added a distinct Memorial panel using the runtime category/backdrop/button art and localized titles. House of Ruin/Old Road can replay; epilogue is locked until the final DD quest. Replays use existing CinematicPlayer; epilogue cache conversion queues in the background after unlock.
 - Verified: Release build Deploy=false and all 157 tests pass. No game launch or cache generation during this session. Boss narration and collected backer journals are still separate missing work, recorded in PARITY.md.
 
-## Status 2026-10-04: loop resumed, round 48 complete
+## Round 49: Stagecoach drag ownership and recruit-detail modal
+
+The owner interrupted general parity work with priority regressions: recruitment fails/freezes, detail portraits are missing, combat setup is slow, lighting is dark and monsters glow. The activity-log work has not been started. Earlier coach verification only showed two recruits and a full roster; it did not prove a hire.
+
+Drag activation formerly happened only inside the source draw, after other page controls had already run. Drag.Begin now promotes from the saved press before drawing controls, reserves carried drag/release events (Drop still uses rawType), and clears capture on drop/cancel/Escape. Source presses inside scroll groups use GUIToScreenPoint for the threshold. Hamlet handles RecruitDrag on the roster before its click handlers. Recruit details are now a modal: the underlying page is disabled, Drag/roster right-clicks respect it, and GUI.enabled is restored in finally. A new event-only Unity shim compiles the actual Drag.cs; it does not simulate native controls or rendering. Two replay cases were red before the fix; six now pass, including real Hamlet.Recruit. Release build and 157 Core tests pass with Deploy=false. No DD2 launch, save write or deployment. Check native dragging, details close/cycle, invalid/cancelled drops and repeated hires with capacity in game.
+
+## Status 2026-10-04: loop resumed, round 49 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next: persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.

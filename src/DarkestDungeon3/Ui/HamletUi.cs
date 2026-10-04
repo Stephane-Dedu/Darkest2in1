@@ -40,6 +40,23 @@ internal sealed class HamletUi
 
     public void Draw()
     {
+        var recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
+        bool enabled = GUI.enabled;
+        try
+        {
+            if (recruit != null) GUI.enabled = false;
+            DrawPage();
+        }
+        finally { GUI.enabled = enabled; }
+        recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
+        if (recruit == null) { _recruitSheet = false; return; }
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+        HeroSheet.Draw(recruit, id => _heroId = id, () => _recruitSheet = false, readOnly: true,
+                       cycle: E.Recruits.Select(r => r.Id).ToList());
+    }
+
+    private void DrawPage()
+    {
         var hamlet = S.Hamlet;
         _layout ??= TryLoadLayout();
 
@@ -287,6 +304,16 @@ internal sealed class HamletUi
 
     private void DrawRoster()
     {
+        // Resolve a recruit's release before the roster's click handlers can change the open page.
+        if (_panel == Panel.StageCoach && Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired))
+        {
+            if (S.Hamlet.Recruit(hired.HeroId))
+            {
+                Runtime.Dd1Audio.Play("/ui/town/character_add");
+                S.Persist();
+            }
+            else Gui.Announce($"The roster is full ({E.Roster.Count}/{S.Buildings.RosterSize(E)}).");
+        }
         bool service = _panel is Panel.Blacksmith or Panel.Guild or Panel.Survivalist;
         bool slots = _panel is Panel.Abbey or Panel.Tavern or Panel.Sanitarium || service;
         var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: (_panel == Panel.Hero || service) && _heroId == h.Id), draggable: slots);
@@ -463,7 +490,7 @@ internal sealed class HamletUi
         var close = new Rect(Window.xMax - 58, Window.y + 12, 46, 46);
         var closeIcon = Art.Dd1("shared", "progression", "progression_close.png");
         if (closeIcon != null) GUI.DrawTexture(close, closeIcon); else Gui.Text(close, "X", 30, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        if (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape))
+        if (GUI.enabled && (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)))
         {
             _panel = Panel.Town;
             _building = null;
@@ -857,22 +884,10 @@ internal sealed class HamletUi
             Gui.Text(new Rect(x + 100, y + 38, 380, 28), h.FromGraveyard ? $"{Pretty(h.ClassId)} — {Dd1Text.Get("miscellaneous", "town_event_title_dead_recruit") ?? "From Beyond"}" : Pretty(h.ClassId),
                 20, h.FromGraveyard ? Gui.Blood : Gui.Dd1Class, TextAnchor.MiddleLeft);
             Gui.Text(new Rect(x + 100, y + 62, 390, 24), string.Join(", ", h.Quirks.Select(QuirkName)), 15, Gui.Dim, TextAnchor.MiddleLeft);
-            if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; }
+            if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; Drag.Cancel(); }
         }
         // Hiring: a recruit dropped on the roster.
         if (Drag.Hovering<RecruitDrag>(RosterColumn.Area)) Gui.Fill(new Rect(RosterColumn.Area.x, RosterColumn.Area.yMax, RosterColumn.Area.width, 4), Gui.Gold);
-        if (Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired) && hamlet.CanRecruit)
-        {
-            hamlet.Recruit(hired.HeroId);
-            Runtime.Dd1Audio.Play("/ui/town/character_add");
-            S.Persist();
-        }
-        if (_recruitSheet && E.Recruits.FirstOrDefault(r => r.Id == _heroId) is { } recruit)
-        {
-            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
-            HeroSheet.Draw(recruit, id => _heroId = id, () => _recruitSheet = false, readOnly: true, cycle: E.Recruits.Select(r => r.Id).ToList());
-        }
-        else _recruitSheet = false;
     }
 
     private bool _recruitSheet;
