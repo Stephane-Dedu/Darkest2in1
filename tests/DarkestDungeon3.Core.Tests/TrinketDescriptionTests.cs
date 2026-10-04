@@ -843,7 +843,7 @@ public class TrinketDescriptionTests
         Assert.Contains("+25% DMG when self HP is below 20%", effects);
         Assert.Contains("-20% Bleed RES", effects);
         effects = Data.Effects("trinket_hero_hwy_cursed_coin", out complete);
-        Assert.False(complete);
+        Assert.True(complete);
         Assert.Contains("Target: Highway Robbery: Steal Regen", effects);
         Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
         effects = Data.Effects("trinket_hero_flg_searing_scripture", out complete);
@@ -876,7 +876,51 @@ public class TrinketDescriptionTests
         effects = Data.Effects("trinket_hero_hwy_cursed_coin", out complete,
             key => key == "effect_tooltip_dot_steal_tag" ? "invalid {9}" : null);
         Assert.False(complete);
-        Assert.Equal("-10% CRIT when Relics in inventory is above 50", effects);
+        Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
+        Assert.Contains("+5% DMG per Positive Token", effects);
+    }
+
+    [Fact]
+    public void TokenCategoryMultipliersRetainPositiveAndNegativeStacksAndPenalties()
+    {
+        string effects = Data.Effects("trinket_hero_hwy_cursed_coin", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+5% DMG per Positive Token", effects);
+        Assert.Contains("Target: Highway Robbery: Steal Regen", effects);
+        Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
+        effects = Data.Effects("trinket_cultist_selfish_motivation", out complete);
+        Assert.True(complete);
+        Assert.Contains("+50% DMG per Negative Token", effects);
+        Assert.Contains("Turn Start: Blind or Immobilize or Taunt or Vulnerable", effects);
+    }
+
+    [Fact]
+    public void TokenCategoryConditionsRetainTargetPresenceAndSelfThreshold()
+    {
+        string effects = Data.Effects("trinket_hero_run_knitted_blanket", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+1 Burn Dealt when target has Negative Token", effects);
+        Assert.Contains("Gain On Resist: Burn: Stealth", effects);
+        Assert.Contains("When Stress Damaged: Burn 1 (3 Turns) (15%)", effects);
+        effects = Data.Effects("trinket_hero_occ_scalded_skull", out complete);
+        Assert.True(complete);
+        Assert.Contains("Random Ally on Turn Start: Burn 1 (3 Turns) (33%)", effects);
+        Assert.Contains("2 or more", effects);
+    }
+
+    [Fact]
+    public void TokenCategoryConditionsUseNativeLocalizationAndWithholdMalformedMultipliers()
+    {
+        string effects = Data.Effects("trinket_hero_hwy_cursed_coin", out bool complete,
+            key => key == "token_positive" ? "Positive Stack" : null);
+        Assert.True(complete);
+        Assert.Contains("+5% DMG per Positive Stack", effects);
+        effects = Data.Effects("trinket_hero_hwy_cursed_coin", out complete,
+            key => key == "effect_tooltip_condition_token_tag_amount_multiple" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("+5% DMG", effects);
+        Assert.Contains("Target: Highway Robbery: Steal Regen", effects);
+        Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
     }
 
     [Fact]

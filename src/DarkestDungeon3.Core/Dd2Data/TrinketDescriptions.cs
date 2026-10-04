@@ -541,8 +541,11 @@ public sealed class TrinketDescriptions
                 args = new object[] { skillName, effect };
                 break;
             case "token_amount":
+            case "token_tag_amount":
             case "dot_tag_amount":
-                bool tokenCondition = type == "token_amount";
+                if (type == "token_tag_amount" && (Field("Condition", id, "m_ActorIsNotSource") == "True"
+                    || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE")) return null;
+                bool tokenCondition = type != "dot_tag_amount";
                 string stateName = Text((tokenCondition ? "token_" : "dot_") + value, localize);
                 if (stateName == null || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
                     CultureInfo.InvariantCulture, out float stateAmount) || float.IsNaN(stateAmount) || float.IsInfinity(stateAmount)) return null;
