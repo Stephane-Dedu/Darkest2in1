@@ -600,10 +600,15 @@ Feasibility notes (decomp):
 - Removed the duplicate UI food path. Core now owns the consumption and configured heal amount; successful food use still persists and announces through the existing path.
 - Verified: Release build Deploy=false and all 155 Core tests pass. Expanded food regression checks no selection, a missing hero, a dead hero and full health without consuming food. No game launch.
 
-## Status 2026-10-04: loop resumed, round 42 complete
+## Round 43: minimap preserves DD1's plot-corridor turns
+- Reference: maps/town_invasion_0.dm nested static_save.areas.<corridor>.tiles.<tile>.mappos. PlotMap.Build retains these positions in HallTile.X/Y; CrawlUi.HallPos flattened them onto the line between endpoints.
+- HallPos now projects the saved square positions for plot maps. The same helper places square icons, click targets and the party indicator. Generated maps retain existing fitted spacing.
+- Verified: Release build Deploy=false and all 155 Core tests pass, including all plot-map readers. No artificial UI test for this direct projection. Visual verification remains [?] because launches are forbidden.
+
+## Status 2026-10-04: loop resumed, round 43 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: bent plot-map corridors, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Next: Nomad Wagon overlay text, Guild layout, remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.

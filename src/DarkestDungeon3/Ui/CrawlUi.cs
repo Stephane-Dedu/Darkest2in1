@@ -608,9 +608,14 @@ internal sealed class CrawlUi
         GUI.EndGroup();
     }
 
-    /// <summary>Hall squares spaced evenly between the two rooms' icon edges.</summary>
+    /// <summary>Plot maps keep DD1's square positions and turns; generated halls fit between the room icons.</summary>
     private static Vector2 HallPos(DungeonMap map, Corridor c, int index)
     {
+        if (map.Size == "plot")
+        {
+            var tile = c.Tiles[index];
+            return Pos(tile.X, tile.Y);
+        }
         var a = Pos(map.Room(c.RoomA).X, map.Room(c.RoomA).Y);
         var b = Pos(map.Room(c.RoomB).X, map.Room(c.RoomB).Y);
         var dir = (b - a).normalized;
