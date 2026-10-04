@@ -97,6 +97,51 @@ public class CrawlTests
         Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void OnlyDeliberateDisarmingCanAvoidATrap(bool scouted)
+    {
+        var content = CrawlContent.Load(Dd1Install.Find());
+        int disarmed = 0;
+        for (int seed = 1; seed <= 32; seed++)
+        {
+            var tile = new HallTile { Index = 0, Content = HallContent.Trap, ContentId = "spikes", Scouted = scouted };
+            var map = new DungeonMap
+            {
+                Rooms = { new Room { Id = 0, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
+                Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles = { tile } } },
+            };
+            var state = new ExpeditionState
+            {
+                Quest = new QuestOffer { Dungeon = "crypts", Type = "explore", Difficulty = 1, ScoutingEnabled = false },
+                Map = map, Seed = seed, Party = { "a", "b" },
+            };
+            var party = new FakeParty("a", "b");
+            var crawl = new Crawl(state, Rules, party, content) { HeroDd1Class = _ => "highwayman" };
+            crawl.Begin();
+            var events = crawl.Travel(1);
+            if (scouted)
+            {
+                Assert.True(crawl.IsBlocked);
+                Assert.Equal(1f, party.Hp["a"]);
+                Assert.Equal(1f, party.Hp["b"]);
+                events = crawl.DisarmTrap("b");
+                Assert.All(events.Where(e => e.Type == CrawlEventType.TrapSprung || e.Type == CrawlEventType.TrapDisarmed), e => Assert.Equal("b", e.HeroId));
+            }
+            else
+            {
+                Assert.Contains(events, e => e.Type == CrawlEventType.TrapSprung);
+                Assert.DoesNotContain(events, e => e.Type == CrawlEventType.TrapDisarmed);
+                Assert.Equal(0.75f, party.Hp["a"]);   // DD1 spikes: health -0.25
+            }
+            Assert.True(tile.Resolved);
+            Assert.False(crawl.IsBlocked);
+            if (events.Any(e => e.Type == CrawlEventType.TrapDisarmed)) disarmed++;
+        }
+        Assert.Equal(scouted, disarmed > 0);
+    }
+
     [Fact]
     public void SurpriseFollowsDd1ByKnowledge()
     {

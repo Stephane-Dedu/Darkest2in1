@@ -568,10 +568,15 @@ Feasibility notes (decomp):
 - Verified: Release build with Deploy=false and all 138 Core tests pass. The regression covers two retreats, serialization, a successful short quest earning 4 XP, the next earning 2 XP, and an idle roster hero retaining the bonus. No game launch or save edits.
 - Audit gaps queued in PARITY.md for separate rounds: unseen traps incorrectly roll a disarm; scouting ignores DD1's normal/critical square budget.
 
-## Status 2026-10-04: loop resumed, round 36 complete
+## Round 37: unseen traps spring without a free disarm roll
+- Reference: props/trap_definitions.json spikes health -0.25; Unity port Assets/Scripts/Managers/RaidSceneManager.cs InvestigateTrap only tests disarmChance when handActivation is true. Crawl used the disarm roll even when the trap was unseen.
+- TriggerTrap now rolls only for a deliberate spotted-trap interaction. Walked-into traps apply their damage/effects directly. Selected-hero disarming remains unchanged.
+- Verified: Release build Deploy=false, all 140 tests pass. New theory covers 32 seeds for each activation type with real DD1 trap data. No game launch. Queued spotted-trap movement bypass separately in PARITY.md.
+
+## Status 2026-10-04: loop resumed, round 37 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 138 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: unseen-trap disarm, scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Release build and 140 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: spotted-trap movement bypass, scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.

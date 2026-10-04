@@ -672,9 +672,9 @@ public sealed class Crawl
         var rng = NextRng();
         tile.Resolved = true;
         var trap = _content?.Traps?.Get(tile.ContentId, State.Quest?.Difficulty ?? 1);
-        // Walked into unseen: the front hero, on their own chance. Spotted: the hero who tries, with the bonus.
+        // DD1: walking into an unseen trap springs it; only a deliberate disarm gets a roll.
         var hero = heroId != null && _party.Alive.Contains(heroId) ? heroId : _party.Alive.FirstOrDefault();
-        if (rng.Chance(TrapDisarmChance(hero, scouted)))
+        if (scouted && rng.Chance(TrapDisarmChance(hero, scouted)))
         {
             if (hero != null && trap != null)
                 foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
