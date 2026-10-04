@@ -118,7 +118,11 @@ internal static class Art
     {
         if (classId == null) return null;
         string key = classId + "/" + type;
-        if (Portraits.TryGetValue(key, out var s)) return s;
+        if (Portraits.TryGetValue(key, out var s))
+        {
+            if (s != null && s.texture != null) return s;
+            Portraits.Remove(key);
+        }
         // Outside a run (DD2's main menu) the portrait atlas may not be loaded yet: retry now and then.
         if (PortraitRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         try
@@ -137,6 +141,7 @@ internal static class Art
     // DD2's larger hero art lives behind addressable references; load once, asynchronously, and cache.
     private static readonly Dictionary<string, Sprite> Large = new();
     private static readonly HashSet<string> LargeRequested = new();
+    private static readonly Dictionary<string, float> LargeRetry = new();
 
     public enum LargeArt { Altar, HeroStory, Story }
 
@@ -145,7 +150,12 @@ internal static class Art
     {
         if (classId == null) return null;
         string key = classId + "/" + kind;
-        if (Large.TryGetValue(key, out var s)) return s;
+        if (Large.TryGetValue(key, out var s))
+        {
+            if (s != null && s.texture != null) return s;
+            RetryLarge(key);
+        }
+        if (LargeRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         if (LargeRequested.Add(key))
         {
             try
@@ -153,7 +163,7 @@ internal static class Art
                 var res = Dd2.ActorResources.Get(classId);
                 if (res == null)
                 {
-                    LargeRequested.Remove(key);   // still loading: ask again next time
+                    RetryLarge(key);   // native resources are still loading
                     return null;
                 }
                 var reference = kind switch
@@ -167,14 +177,23 @@ internal static class Art
                     var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(reference.RuntimeKey);
                     handle.Completed += h =>
                     {
-                        Large[key] = h.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded ? h.Result : null;
-                        var r = Large[key]?.textureRect;
-                        Plugin.Log.LogInfo($"[art] {key}: {(r.HasValue ? $"{r.Value.width}x{r.Value.height}" : "none")}");
+                        if (h.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && h.Result != null && h.Result.texture != null)
+                        {
+                            Large[key] = h.Result;
+                            LargeRetry.Remove(key);
+                            var r = h.Result.rect;
+                            Plugin.Log.LogInfo($"[art] {key}: {r.width}x{r.height}");
+                        }
+                        else
+                        {
+                            UnityEngine.AddressableAssets.Addressables.Release(h);
+                            RetryLarge(key);
+                        }
                     };
                 }
-                else Large[key] = null;
+                else RetryLarge(key);
             }
-            catch (System.Exception e) { Plugin.Log.LogWarning($"[art] {key}: {e.Message}"); Large[key] = null; }
+            catch (System.Exception e) { Plugin.Log.LogWarning($"[art] {key}: {e.Message}"); RetryLarge(key); }
         }
         return null;
     }
@@ -184,20 +203,14 @@ internal static class Art
         LargePortrait(classId, Plugin.HeroArt.Value) ?? LargePortrait(classId, LargeArt.Story)
         ?? Portrait(classId, ResourceActor.PortraitIconType.Story) ?? Portrait(classId);
 
+    private static void RetryLarge(string key)
+    {
+        Large.Remove(key);
+        LargeRequested.Remove(key);
+        LargeRetry[key] = Time.unscaledTime + 2;
+    }
+
     /// <summary>Draw a sprite (from an atlas) into a rect, keeping its aspect ratio.</summary>
     public static void DrawSprite(Rect r, Sprite s, bool fit = true, bool flipX = false)
-    {
-        if (s == null || s.texture == null) return;
-        var t = s.texture;
-        var tr = s.textureRect;
-        var uv = new Rect(tr.x / t.width, tr.y / t.height, tr.width / t.width, tr.height / t.height);
-        if (fit)
-        {
-            float k = Mathf.Min(r.width / tr.width, r.height / tr.height);
-            float w = tr.width * k, h = tr.height * k;
-            r = new Rect(r.x + (r.width - w) / 2f, r.yMax - h, w, h);   // bottom-aligned: heroes stand on the floor
-        }
-        if (flipX) uv = new Rect(uv.xMax, uv.y, -uv.width, uv.height);
-        GUI.DrawTextureWithTexCoords(r, t, uv, true);
-    }
+        => SpriteArt.Draw(r, s, fit, flipX);
 }

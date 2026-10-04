@@ -1,5 +1,6 @@
 // An event-only shim for running the actual Drag.cs outside Unity. It deliberately does not simulate
 // native GUI buttons, GUI.matrix, rendering or resource loading; those still need an in-game check.
+[assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
 namespace UnityEngine;
 
 public enum EventType { MouseDown, MouseDrag, MouseUp, MouseMove, Repaint, Layout, Used, KeyDown }
@@ -30,13 +31,18 @@ public struct Rect(float x, float y, float width, float height)
     public Vector2 size => new(width, height);
     public bool Contains(Vector2 p) => p.x >= x && p.x < x + width && p.y >= y && p.y < y + height;
 }
-public readonly struct Color(float r, float g, float b, float a) { }
+public readonly struct Color(float r, float g, float b, float a)
+{
+    public static Color white => new(1, 1, 1, 1);
+    public static Color clear => new(0, 0, 0, 0);
+}
 public static class GUI
 {
     public static Color color;
     public static bool enabled = true;
     public static void DrawTexture(Rect r, Texture2D t) { }
-    public static void DrawTextureWithTexCoords(Rect r, Texture2D t, Rect uv, bool alpha) { }
+    public static (Rect Rect, Texture Texture, Rect Uv) LastTextureDraw;
+    public static void DrawTextureWithTexCoords(Rect r, Texture t, Rect uv, bool alpha) => LastTextureDraw = (r, t, uv);
 }
 public static class GUIUtility
 {
@@ -44,7 +50,7 @@ public static class GUIUtility
     public static Vector2 clipOffset;
     public static Vector2 GUIToScreenPoint(Vector2 point) => point + clipOffset;
 }
-public static class Time { public static int frameCount; }
+public static class Time { public static int frameCount; public static float unscaledTime; }
 public enum TextureFormat { RGBA32 }
 public enum FilterMode { Bilinear }
 public enum TextureWrapMode { Clamp }
@@ -53,10 +59,10 @@ public readonly struct Color32(byte r, byte g, byte b, byte a)
 {
     public readonly byte r = r, g = g, b = b, a = a;
 }
-public sealed class Texture2D
+public class Texture { public int width, height; }
+public sealed class Texture2D : Texture
 {
     public static readonly List<int> ApiThreads = new();
-    public int width, height;
     public byte[] Raw;
     public FilterMode filterMode;
     public TextureWrapMode wrapMode;
