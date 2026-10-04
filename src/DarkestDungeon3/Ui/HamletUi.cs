@@ -185,15 +185,14 @@ internal sealed class HamletUi
 
         var mouse = Event.current.mousePosition;
         // Pictures: DD1 shows a highlighted ("active") version of the building under the mouse.
-        var pictures = new List<(TownLayout.Spot spot, SpineArt.Picture idle, SpineArt.Picture active)>();
+        var pictures = new List<(TownLayout.Spot spot, SpineArt.Picture idle, string folder)>();
         foreach (var spot in _layout.Spots)
         {
             if (spot.Id == "circus") continue;   // DLC
             bool ground = spot.Id == "ground";
             string folder = ground ? S.Dd1.PathOf("fx", "town_ground") : TownLayout.ArtFolder(S.Dd1, spot.Id, IsOpen(spot.Id), Upgraded(spot.Id));
             var idle = SpineArt.Get(folder, "idle", IdleSlot);
-            var active = ground ? null : SpineArt.Get(folder, "active", ActiveSlot);
-            pictures.Add((spot, idle, active));
+            pictures.Add((spot, idle, folder));
         }
 
         string hovered = null;
@@ -206,9 +205,9 @@ internal sealed class HamletUi
             }
         _hovered = hovered;
 
-        foreach (var (spot, idle, active) in pictures)
+        foreach (var (spot, idle, folder) in pictures)
         {
-            var pic = spot.Id == hovered && active != null ? active : idle;
+            var pic = spot.Id == hovered ? SpineArt.Get(folder, "active", ActiveSlot) ?? idle : idle;
             pic?.Draw(new Vector2(spot.X, spot.Y), spot.Scale);
         }
 

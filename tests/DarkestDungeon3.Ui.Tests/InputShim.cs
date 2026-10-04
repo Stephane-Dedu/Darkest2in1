@@ -20,15 +20,24 @@ public readonly struct Vector2(float x, float y)
     public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.x - b.x, a.y - b.y);
     public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.x + b.x, a.y + b.y);
 }
-public readonly struct Rect(float x, float y, float width, float height)
+public struct Rect(float x, float y, float width, float height)
 {
+    public float x = x, y = y, width = width, height = height;
+    public float xMax => x + width;
+    public float yMax => y + height;
     public Rect(Vector2 position, Vector2 size) : this(position.x, position.y, size.x, size.y) { }
     public Vector2 position => new(x, y);
     public Vector2 size => new(width, height);
     public bool Contains(Vector2 p) => p.x >= x && p.x < x + width && p.y >= y && p.y < y + height;
 }
 public readonly struct Color(float r, float g, float b, float a) { }
-public static class GUI { public static Color color; public static bool enabled = true; }
+public static class GUI
+{
+    public static Color color;
+    public static bool enabled = true;
+    public static void DrawTexture(Rect r, Texture2D t) { }
+    public static void DrawTextureWithTexCoords(Rect r, Texture2D t, Rect uv, bool alpha) { }
+}
 public static class GUIUtility
 {
     public static int hotControl;
@@ -36,3 +45,35 @@ public static class GUIUtility
     public static Vector2 GUIToScreenPoint(Vector2 point) => point + clipOffset;
 }
 public static class Time { public static int frameCount; }
+public enum TextureFormat { RGBA32 }
+public enum FilterMode { Bilinear }
+public enum TextureWrapMode { Clamp }
+public enum HideFlags { HideAndDontSave }
+public readonly struct Color32(byte r, byte g, byte b, byte a)
+{
+    public readonly byte r = r, g = g, b = b, a = a;
+}
+public sealed class Texture2D
+{
+    public static readonly List<int> ApiThreads = new();
+    public int width, height;
+    public byte[] Raw;
+    public FilterMode filterMode;
+    public TextureWrapMode wrapMode;
+    public HideFlags hideFlags;
+    public string name;
+    public Texture2D(int w, int h, TextureFormat format, bool mipChain)
+    { Track(); width = w; height = h; }
+    private static void Track() => ApiThreads.Add(Environment.CurrentManagedThreadId);
+    // Synthetic atlas pixels, not Unity decoding. Tests validate scheduling, row orientation, caching and hits.
+    public bool LoadImage(byte[] data) { Track(); width = height = 2; return true; }
+    public Color32[] GetPixels32()
+    {
+        Track();
+        return new[] { new Color32(200, 100, 50, 255), new Color32(100, 200, 50, 255),
+            new Color32(50, 100, 200, 255), new Color32(100, 50, 200, 255) };
+    }
+    public void LoadRawTextureData(byte[] data) { Track(); Raw = data; }
+    public void Apply(bool mipMaps, bool nonReadable) => Track();
+}
+public static class Object { public static void Destroy(object value) => Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId); }

@@ -650,10 +650,16 @@ This targets observed symptoms but cannot establish the final rendered brightnes
 
 New priority: Hamlet first-load art latency. SpineArt rasterizes each whole image synchronously on the UI thread; the 40 ms budget only gates between images. Measure actual DD1 bakes and move CPU rasterization to a worker.
 
-## Status 2026-10-04: loop resumed, round 51 complete
+## Round 52: town art bakes leave the UI thread
+
+Measured the real DD1 town skeletons/atlas pages with tools/SpineTiming: Stagecoach idle/active 9.7/13.7 ms, Blacksmith 24.8/46.7, Abbey 30.6/56.4, Tavern 29.7/49.8, ground 219.8; total 481.2 ms. These are .NET 8 CPU raster times, excluding PNG decoding and Unity upload, not a claim about the native game's exact timings. The old 40 ms budget checked only between images and could not interrupt the ground bake. SpineArt.Get now queues parsing and one CPU raster worker; Update alone decodes/uploads using Unity, with a 4 ms budget between non-preemptible operations. It retains the original supersampling, pixels, pivots and hit tests. Common art queues during menus without reading an estate; hover pictures queue only on hover. Each job owns its page snapshot, so ReleasePages cannot invalidate a running raster.
+
+The linked-source test failed against the previous commit's SpineArt.Get, which returned a baked image synchronously. It now passes with the actual DD1 Stagecoach geometry and a synthetic PNG/Unity shim, checking that texture APIs stay on the pumping thread, cached requests do not rebake, uploaded rows preserve orientation and hit tests work. This is not a native renderer/decode test. Release build, 157 Core + 10 bridge/input tests pass; the local plugin is deployed. No game launch or save/config write. Native first-entry responsiveness and appearance remain [?]. Owner added a trinket priority: absent effects and DD1 policy/UI mismatch; recorded separately for the next rounds.
+
+## Status 2026-10-04: loop resumed, round 52 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
+- Next priorities: absent trinket effects and DD1 equip/inventory policy/UI; combat startup scans/timings. Then persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
