@@ -539,4 +539,7 @@ Feasibility notes (decomp):
 - Boss fights stay DD2's (Driver.StartFight: kind Boss → Zones.Plan with quest.BossId), so the final room needs no mash.
 - Debug: Shift+F4 (test estate only) opens the Darkest Dungeon: crypts zone XP 100000 (level 6), roster resolve ≥ 5, new board. Back up estate_2.json first (LocalLow/RedHook/Darkest Dungeon II/DarkestDungeon3/estate_2.json) and restore after: the test scripts expect the usual board.
 - Quest map: the Darkest Dungeon node is at client (1082,156). Crawl map squares are 20 px client with gaps: click a square's centre (or use F3).
+- Round 26: in-game checks on the test estate (week 60): stagecoach 2 recruits / roster 9 (DD1 bases), recruits have quirks, wagon 2 trinkets. Hamlet click points (client px): Nomad Wagon (900,690), Stage Coach (262,640), building window close X (1252,137).
+- The wagon's trinkets are DD2 items (Dd2Catalog.RandomTrinket by DD1 rarity), not DD1 trinket ids; its rarity now follows nomad_wagon.building.json rarity_generation_table.
+- Flaky tests fixed: ZoneBase.Extra was a static Dictionary written by every ZoneEncounters.Load; xunit loads RegionTests and ZoneEncounterTests in parallel ("Operations that change non-concurrent collections must have exclusive access"). Now a ConcurrentDictionary.
 

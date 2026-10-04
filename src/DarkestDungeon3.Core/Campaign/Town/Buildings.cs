@@ -97,6 +97,11 @@ public sealed class Buildings
     public int WagonStock(Estate e) => (int?)Tiers.Current(WagonStore?["number_of_trinkets_upgrades"], e)?["amount"] ?? 2;
     public float WagonDiscount(Estate e) => Tiers.TotalDiscount(WagonStore?["trinket_cost_discount_upgrades"], e);
 
+    /// <summary>DD1's weights for the rarity of each trinket the wagon offers (rarity_generation_table).</summary>
+    public List<(string Rarity, float Chance)> WagonRarities() =>
+        (WagonStore?["rarity_generation_table"] as JArray ?? new JArray())
+            .Select(t => ((string)t["rarity"], (float?)t["chance"] ?? 0f)).Where(t => t.Item1 != null && t.Item2 > 0).ToList();
+
     // ---- Discounts (Guild, Blacksmith, Survivalist) ----
     public float GuildDiscount(Estate e) => Tiers.TotalDiscount(Data(Guild)["combat_skill_cost_discount_upgrades"], e);
     public float BlacksmithDiscount(Estate e) => Tiers.TotalDiscount(Data(Blacksmith)["equipment_cost_discount_upgrades"], e);

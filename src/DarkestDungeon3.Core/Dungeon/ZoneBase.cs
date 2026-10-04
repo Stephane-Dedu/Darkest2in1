@@ -9,7 +9,8 @@ namespace DarkestDungeon3.Core.Dungeon;
 /// </summary>
 public static class ZoneBase
 {
-    private static readonly Dictionary<string, (string Dd1Zone, string Boss)> Extra = new();
+    // Written by every ZoneEncounters.Load (the tests load several at once).
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string Dd1Zone, string Boss)> Extra = new();
 
     public static void Register(string zone, string dd1Zone, string boss)
     {

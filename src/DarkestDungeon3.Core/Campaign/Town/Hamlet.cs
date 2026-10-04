@@ -494,12 +494,25 @@ public sealed class Hamlet
     public void RestockWagon(Rng rng)
     {
         Estate.WagonStock.Clear();
-        string[] rarities = { "very_common", "very_common", "common", "common", "uncommon", "rare", "very_rare" };
+        var rarities = Buildings.WagonRarities();
+        if (rarities.Count == 0) rarities = new List<(string, float)> { ("common", 1f) };
         for (int i = 0; i < Buildings.WagonStock(Estate); i++)
         {
-            var t = Catalog.RandomTrinket(rng.Pick(rarities), rng);
+            var t = Catalog.RandomTrinket(WagonRarity(rarities, rng), rng);
             if (t != null && !Estate.WagonStock.Contains(t)) Estate.WagonStock.Add(t);
         }
+    }
+
+    /// <summary>A rarity drawn with DD1's wagon weights.</summary>
+    public static string WagonRarity(List<(string Rarity, float Chance)> table, Rng rng)
+    {
+        float pick = (float)rng.NextDouble() * table.Sum(t => t.Chance);
+        foreach (var (rarity, chance) in table)
+        {
+            pick -= chance;
+            if (pick <= 0) return rarity;
+        }
+        return table[table.Count - 1].Rarity;
     }
 
     /// <summary>Older builds rolled heroes without quirks and let any class wear hero-only trinkets: fix once.</summary>

@@ -14,13 +14,13 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Town scene: `campaign/town/town.layout.darkest` positions, building Spine skeletons, roster, estate bar — round 1 screenshot (Estate 2, week 49).
 - [?] Building windows: DD1 backgrounds, keeper art, nameplate, upgrade button + panel (`building.layout`, `upgrade.layout`, `building_verbose_*`) — check text fits.
 - [?] Upgrades: trees and costs from `upgrades/buildings/*.upgrades.json`, heirloom costs, % upgraded.
-- [?] Stagecoach: recruits (`stage_coach.building.json`: recruit count, experienced recruits), roster size, drag to roster.
+- [x] Stagecoach: recruits (`stage_coach.building.json` number_of_recruits_upgrades base 2, roster_size_upgrades base 9), drag to roster. In game (round 26, test estate, no stagecoach upgrades): 2 recruits, "The roster is full (9/9)".
 - [?] Abbey / Tavern: activities, slots, prices, side effects (`abbey.building.json`, `tavern.building.json`: gambling loss, missing, quirks).
 - [?] Sanitarium: quirk treatment / lock, disease cure (`sanitarium.building.json`).
 - [?] Blacksmith: DD1 window (port layout), per-class equipment trees (`upgrades/heroes/<class>.upgrades.json`) as DD2 buffs.
 - [ ] Guild window: still our own layout; DD1's (guild.layout + port's GuildHeroWindow: hero slot, verbose frame, skill rows with requirement icons/cost frames) like the new Blacksmith.
 - [?] Survivalist: camping skill purchase grid (`camping_trainer.building.json`).
-- [?] Nomad Wagon: stock by rarity table (`nomad_wagon.building.json` rarity_generation_table), prices, buy.
+- [x] Nomad Wagon: stock count from `number_of_trinkets_upgrades` (base 2; seen in game round 26). Rarity: DD1 `rarity_generation_table` weights 6/5/4/2/1 (very rare 1 in 18). Was: a fixed list giving very rare and rare 1 in 7 each. Now Buildings.WagonRarities + Hamlet.WagonRarity (HamletTests.TheWagonOffersRaritiesWithDd1sWeights; the weights can't be watched in one visit).
 - [ ] Graveyard: not DD1's look (DD1: `buildings/graveyard` list of the dead with cause of death and week, scrollable).
 - [ ] Memorial (statue): DD1's journal/portraits page (`buildings/statue`: boss portraits, backer journal) missing.
 - [?] Heirloom exchange (`campaign/heirloom_exchange`): rates, window.
@@ -36,9 +36,10 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [blocked] Disease after a quest: DD1 has the numbers (`disease_after_quest_min_chance` 0.05, `disease_max_chance` 0.32, `disease_hero_disease_resist_weight` 0.33, from resolve 2) but not the formula; it is in darkest.exe, not in the data or the Unity port.
 - [blocked] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — what "upper_level" counts (resolve? weeks? roster size?) isn't in the data or the Unity port.
 - [?] Quirk gain/loss after quests and from curios (DD1 quirk library → DD2 quirk ids).
-- [?] Recruits arrive with DD1-style quirks (bug: DD2 quirk library empty at the menu — fixed? check new recruits have quirks).
+- [x] Recruits arrive with DD1-style quirks. In game (round 26): Bonel (Man-at-Arms) "Last Stand, Nervous", Veci (Leper) two quirks.
 
 ## Trinkets
+- [ ] Nomad Wagon hint text ("You stash N trinkets. Equip them from a hero's sheet...") is drawn over the keeper art (round 26 screenshot); DD1 has no such line there.
 - [?] Trinket Inventory: DD1 window (sort, unequip all, shift-sell at 15%, grid, tooltips with effects).
 - [?] Equip on the hero sheet: two slots, class-only trinkets refused.
 - [user] Trinket retention on a party wipe: DD1 makes it a game option ("keep_battle_quest_fail_trinkets": "what happens to carried trinkets when you have a total party wipe") with plot quests to win them back — which behaviour to use.

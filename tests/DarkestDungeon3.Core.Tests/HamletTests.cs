@@ -74,6 +74,20 @@ public class HamletTests
     }
 
     [Fact]
+    public void TheWagonOffersRaritiesWithDd1sWeights()
+    {
+        var h = NewHamlet();
+        var table = h.Buildings.WagonRarities();
+        // nomad_wagon.building.json rarity_generation_table
+        Assert.Equal(new[] { ("very_common", 6f), ("common", 5f), ("uncommon", 4f), ("rare", 2f), ("very_rare", 1f) }, table);
+        var rng = new Rng(3);
+        var counts = Enumerable.Range(0, 18000).Select(_ => Hamlet.WagonRarity(table, rng)).GroupBy(r => r).ToDictionary(g => g.Key, g => g.Count());
+        Assert.InRange(counts["very_rare"], 800, 1200);    // 1 in 18 (the old list gave 1 in 7: ~2570)
+        Assert.InRange(counts["very_common"], 5600, 6400);
+        Assert.Equal(2, h.Buildings.WagonStock(h.Estate));  // number_of_trinkets_upgrades base
+    }
+
+    [Fact]
     public void AtMostThreeLockedPositiveQuirks()
     {
         var h = NewHamlet();
