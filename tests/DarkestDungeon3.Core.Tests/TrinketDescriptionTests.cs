@@ -99,6 +99,37 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void DamageOverTimeChoicesKeepTheirMagnitudeAndDurationOnBothTargets()
+    {
+        string effects = Data.Effects("trinket_curio_corrupted_bile_gland", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Apply On Hit:", effects);
+        Assert.Contains("Bleed 3 (3 Turns) or Blight 3 (3 Turns) or Burn 3 (3 Turns)", effects);
+        Assert.Contains("Gain When Hit:", effects);
+        Assert.Equal(4, System.Text.RegularExpressions.Regex.Matches(effects, " or ").Count);
+    }
+
+    [Fact]
+    public void HealingOverTimeChoicesKeepTheirChanceAndTheAlternativeBleedPenalty()
+    {
+        string effects = Data.Effects("trinket_curio_pulsing_heart", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Regen 2 (3 Turns) (33%) or Bleed 1 (3 Turns) (66%)", effects);
+        string localized = Data.Effects("trinket_curio_pulsing_heart", out _,
+            key => key == "duration_display_type_turn+plural" ? "{0} tours" : null);
+        Assert.Contains("Regen 2 (3 tours)", localized);
+    }
+
+    [Fact]
+    public void MalformedDotDurationWithholdsTheWholeChoiceIncludingItsPenalty()
+    {
+        string effects = Data.Effects("trinket_curio_pulsing_heart", out bool complete,
+            key => key == "duration_display_type_turn+plural" ? "invalid {9}" : null);
+        Assert.Null(effects);
+        Assert.False(complete);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

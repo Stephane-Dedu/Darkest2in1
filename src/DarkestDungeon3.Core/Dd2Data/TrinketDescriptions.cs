@@ -25,7 +25,7 @@ public sealed class TrinketDescriptions
     {
         var data = new TrinketDescriptions();
         string excel = Path.Combine(streamingAssets, "Excel");
-        foreach (string file in new[] { "trinkets", "buff", "condition", "effect" })
+        foreach (string file in new[] { "trinkets", "buff", "condition", "effect", "dots" })
             foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, file + "_data_export.Group.csv")))
                 data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");
@@ -130,6 +130,7 @@ public sealed class TrinketDescriptions
         "m_Chance", "m_ChancePerRoundSuffix", "m_ShowValue", "m_IsVisible", "m_ConditionId", "all_conditions", "any_conditions",
         "m_TokenAddId", "m_TokenAddAmount", "m_TokenAddAmountRange", "m_StressDamage", "m_StressHeal",
         "m_HealthDamageAmount", "m_HealthHealAmount", "m_HealthHealPercent",
+        "m_DotAddId", "m_DotAddAmount", "m_DotAddAmountRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize)
@@ -138,6 +139,15 @@ public sealed class TrinketDescriptions
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
         if (rows.Any(row => !SimpleEffectFields.Contains(row[0]))) return null;
         var parts = new List<string>();
+        string dot = Field("Effect", id, "m_DotAddId");
+        if (dot != null)
+        {
+            // Multiple/random applications need their own native quantity semantics.
+            if (Number("Effect", id, "m_DotAddAmount") != 1 || Number("Effect", id, "m_DotAddAmountRange") != 0) return null;
+            string dotText = DotEffect(dot, localize);
+            if (dotText == null) return null;
+            parts.Add(dotText);
+        }
         string token = Field("Effect", id, "m_TokenAddId");
         if (token != null)
         {
@@ -186,6 +196,55 @@ public sealed class TrinketDescriptions
             if (description == null) return null;
         }
         return description;
+    }
+
+    private static readonly HashSet<string> DotFields = new()
+    {
+        "m_Type", "m_Tags", "m_DurationAmount", "m_DurationType", "effects", "m_IgnoreBlockDotApply",
+        "m_IgnoreFriendlyDealtModifications", "m_IgnoreFriendlyReceivedModifications",
+        "m_IgnoreEnemyDealtModifications", "m_IgnoreEnemyReceivedModifications",
+    };
+    private static readonly string[] DotMagnitudeFields = { "m_HealthDamageAmount", "m_HealthHealAmount", "m_StressDamage", "m_StressHeal" };
+    private static readonly HashSet<string> DotChildFields = new(DotMagnitudeFields.Concat(new[]
+    {
+        // Native definition descriptions show base magnitude, before critical/modifier rolls.
+        "m_Chance", "m_CritChance", "m_CritMultiplier", "m_ShowValue", "m_IsVisible",
+    }));
+
+    private string DotEffect(string id, Func<string, string> localize)
+    {
+        if (!_blocks.TryGetValue(("Dot", id), out var rows) || rows.Any(row => !DotFields.Contains(row[0]))) return null;
+        var children = Values("Dot", id, "effects");
+        if (children.Count == 0) return null;
+        float magnitude = 0;
+        foreach (string child in children)
+        {
+            if (!_blocks.TryGetValue(("Effect", child), out var effects) || effects.Any(row => !DotChildFields.Contains(row[0]))) return null;
+            foreach (string field in DotMagnitudeFields)
+            {
+                string raw = Field("Effect", child, field);
+                if (raw == null) continue;
+                // All supported installed DOT magnitudes are nonnegative integers. Keep others withheld.
+                if (!float.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out float value)
+                    || float.IsNaN(value) || float.IsInfinity(value) || value < 0 || value != Math.Truncate(value)) return null;
+                magnitude += value;
+            }
+        }
+        if (magnitude <= 0 || magnitude > int.MaxValue) return null;
+        string durationType = Field("Dot", id, "m_DurationType");
+        string durationKey;
+        switch (durationType)
+        {
+            case "performer_turn_start": case "performer_turn_end": case "every_turn_start": case "every_turn_end": case "round_start":
+                durationKey = "duration_display_type_turn"; break;
+            case "round_end": durationKey = "duration_display_type_round"; break;
+            default: return null;
+        }
+        if (!int.TryParse(Field("Dot", id, "m_DurationAmount"), out int duration) || duration < 1 || duration >= 99) return null;
+        string durationText = Format(Text(durationKey + (duration == 1 ? "" : "+plural"), localize), duration);
+        string amountText = Format(Text("dot_" + Field("Dot", id, "m_Type") + "_amount", localize), (int)magnitude);
+        if (durationText == null || amountText == null) return null;
+        return Format(Text("effect_tooltip_dot_add_amount", localize), amountText + " (" + durationText + ")");
     }
 
     private float Number(string type, string id, string field) => float.TryParse(Field(type, id, field), NumberStyles.Float,
