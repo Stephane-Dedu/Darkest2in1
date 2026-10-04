@@ -131,6 +131,8 @@ public sealed class TrinketDescriptions
         "m_TokenAddId", "m_TokenAddAmount", "m_TokenAddAmountRange", "m_StressDamage", "m_StressHeal",
         "m_HealthDamageAmount", "m_HealthHealAmount", "m_HealthHealPercent",
         "m_DotAddId", "m_DotAddAmount", "m_DotAddAmountRange",
+        "m_Priority", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
+        "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize)
@@ -148,19 +150,39 @@ public sealed class TrinketDescriptions
             if (dotText == null) return null;
             parts.Add(dotText);
         }
-        string token = Field("Effect", id, "m_TokenAddId");
-        if (token != null)
+        foreach (string operation in new[] { "Add", "Remove" })
         {
-            float amount = Number("Effect", id, "m_TokenAddAmount");
-            float range = Number("Effect", id, "m_TokenAddAmountRange");
-            string tokenName = Plain(Text("token_name_" + token, localize) ?? Text("token_" + token, localize));
-            if (amount <= 0 || tokenName == null) return null;
-            string count = range == 0 ? amount.ToString("0.##", CultureInfo.InvariantCulture)
-                : amount.ToString("0.##", CultureInfo.InvariantCulture) + "-" + (amount + range).ToString("0.##", CultureInfo.InvariantCulture);
-            string value = amount == 1 && range == 0 ? tokenName : count + " " + tokenName;
-            string tokenText = Plain(Format(Text("effect_tooltip_token_add_amount", localize), value));
-            if (tokenText == null) return null;
-            parts.Add(tokenText);
+            string token = Field("Effect", id, "m_Token" + operation + "Id");
+            string tag = Field("Effect", id, "m_Token" + operation + "Tag");
+            if (token == null && tag == null) continue;
+            if (!int.TryParse(Field("Effect", id, "m_Token" + operation + "Amount"), out int amount) || amount <= 0) return null;
+            string rawRange = Field("Effect", id, "m_Token" + operation + "AmountRange");
+            int range = 0;
+            if (rawRange != null && (!int.TryParse(rawRange, out range) || range < 0 || amount > int.MaxValue - range)) return null;
+            string op = operation.ToLowerInvariant();
+            if (token != null)
+            {
+                // Native hides named-token quantities unless ShowValue is explicitly true.
+                string value = TokenAmount(token, Field("Effect", id, "m_ShowValue") == "True" ? amount : 1,
+                    Field("Effect", id, "m_ShowValue") == "True" ? range : 0, localize);
+                string tokenText = value == null ? null : Format(Text("effect_tooltip_token_" + op + "_amount", localize), value);
+                if (tokenText == null) return null;
+                parts.Add(tokenText);
+            }
+            if (tag != null)
+            {
+                // Category quantities use different native templates; ranges remain withheld until supported.
+                if (range != 0) return null;
+                string tagKey = (operation == "Add" ? "token_add_tag_" : "token_tag_") + tag;
+                if (operation == "Remove" && amount > 1) tagKey += "+plural";
+                string label = Plain(Text(tagKey, localize));
+                if (label == null) return null;
+                string categoryText = operation == "Remove" && amount >= 99
+                    ? Format(Text("effect_tooltip_token_remove_all_tag", localize), label)
+                    : Format(Text("effect_tooltip_token_" + op + "_tag" + (amount > 1 ? "+plural" : ""), localize), amount, label);
+                if (categoryText == null) return null;
+                parts.Add(categoryText);
+            }
         }
         foreach (var stat in new[] { ("m_StressDamage", "stress_damage"), ("m_StressHeal", "stress_heal"),
             ("m_HealthDamageAmount", "health_damage_amount"), ("m_HealthHealAmount", "health_heal_amount"), ("m_HealthHealPercent", "health_heal_percent") })
@@ -196,6 +218,14 @@ public sealed class TrinketDescriptions
             if (description == null) return null;
         }
         return description;
+    }
+
+    private string TokenAmount(string token, int amount, int range, Func<string, string> localize)
+    {
+        string label = Plain(Text("token_name_" + token, localize) ?? Text("token_" + token, localize));
+        if (label == null) return null;
+        string suffix = range != 0 ? "range" : amount == 1 || amount >= 99 ? "singular" : "plural";
+        return Format(Text("token_amount_format_" + suffix, localize), label, amount, amount + range);
     }
 
     private static readonly HashSet<string> DotFields = new()

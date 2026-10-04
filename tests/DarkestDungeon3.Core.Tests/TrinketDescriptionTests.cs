@@ -173,6 +173,45 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void TokenCategoriesKeepAddRemoveAndAllTokenSemanticsWithTheirPenalty()
+    {
+        string effects = Data.Effects("trinket_cultist_jealous_whisper", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("When Moving: Add 1 Positive Token", effects);
+        Assert.Contains("Gain When Moved By Ally Skill: Add 1 Positive Token", effects);
+        Assert.Contains("Gain When Moved By Enemy: Remove All Positive Tokens", effects);
+        Assert.Contains("Gain When Moved By Enemy: +1 Stress", effects);
+        Assert.DoesNotContain("99", effects);
+        Assert.DoesNotContain("<color", effects);
+        Assert.Contains("Random Ally When Healed: Add 1 Positive Token (33%)",
+            Data.Effects("trinket_curio_heart-shaped_padlock", out _));
+    }
+
+    [Fact]
+    public void NamedAndCategoryRemovalsKeepNativeQuantityVisibilityAndConditions()
+    {
+        string effects = Data.Effects("trinket_hero_flg_searing_scripture", out _);
+        Assert.Contains("Round End: Remove 1 Negative Token", effects);
+        Assert.Contains("Round End: Remove Combo", effects);
+        Assert.DoesNotContain("99", effects);
+        Assert.Contains("-20% Burn RES", effects);
+        effects = Data.Effects("trinket_hero_jes_severed_finger", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Round Start: Add 1 Positive Token when self Bleed", effects);
+    }
+
+    [Fact]
+    public void MalformedTokenCategoryTemplateWithholdsTheMutationButKeepsItsPenalty()
+    {
+        string effects = Data.Effects("trinket_cultist_jealous_whisper", out bool complete,
+            key => key == "effect_tooltip_token_remove_all_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Remove", effects);
+        Assert.Contains("Gain When Moved By Enemy: +1 Stress", effects);
+        Assert.Contains("When Moving: Add 1 Positive Token", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);
