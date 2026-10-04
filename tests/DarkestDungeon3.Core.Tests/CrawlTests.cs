@@ -179,6 +179,35 @@ public class CrawlTests
         }
     }
 
+    [Theory]
+    [InlineData("rubble", 0, 0.95f, 1, 80f, 0)]
+    [InlineData("rubble", 1, 1f, 0, 100f, 0)]
+    [InlineData("ancestor", 0, 1f, 0, 100f, 0)]
+    [InlineData("ancestor", 1, 1f, 0, 100f, 1)]
+    public void ObstaclesUseDd1sInheritedCostsAndAncestorOverrides(string id, int shovels, float hp, int stress, float light, int left)
+    {
+        var tile = new HallTile { Content = HallContent.Obstacle, ContentId = id };
+        var state = new ExpeditionState
+        {
+            Quest = new QuestOffer { Dungeon = "crypts", Difficulty = 1 },
+            Map = new DungeonMap { Corridors = { new Corridor { Tiles = { tile } } } },
+            RoomId = -1, CorridorId = 0, TileIndex = 0, Party = { "a", "b" },
+        };
+        state.Pack.Add(Supply.Shovel, shovels);
+        var party = new FakeParty("a", "b");
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        Assert.True(crawl.IsBlocked);
+        Assert.Contains(crawl.ClearObstacle(), e => e.Type == CrawlEventType.ObstacleCleared);
+        Assert.False(crawl.IsBlocked);
+        Assert.All(party.Hp.Values, v => Assert.Equal(hp, v, 3));
+        // DD1's "Stress 2" effect is 15 stress, stochastically rounded to one or two DD2 points.
+        Assert.All(party.Stress.Values, v => Assert.InRange(v, stress, stress == 0 ? 0 : 2));
+        Assert.Equal(light, state.Light);
+        Assert.Equal(left, state.Pack.Count(Supply.Shovel));
+        crawl.ClearObstacle();
+        Assert.Equal(left, state.Pack.Count(Supply.Shovel));   // already cleared: no second cost
+    }
+
     [Fact]
     public void SurpriseFollowsDd1ByKnowledge()
     {

@@ -381,13 +381,18 @@ public sealed class Crawl
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Obstacle || tile.Resolved) return Blocked();
 
-        if (!State.Pack.TryUse(Supply.Shovel))
+        var obstacle = _content?.Obstacles?.Get(tile.ContentId);
+        if (obstacle?.AncestorTalk != true && !State.Pack.TryUse(Supply.Shovel))
         {
             var rng = NextRng();
+            ChangeLight(obstacle?.TorchChange ?? -20f);
             foreach (var hero in _party.Alive)
             {
-                _party.Damage(hero, 0.1f, "obstacle");
-                StressDd1(hero, 10, rng, "obstacle");
+                float health = obstacle?.HealthFraction ?? -0.05f;
+                if (health < 0) _party.Damage(hero, -health, "obstacle");
+                if (obstacle != null)
+                    foreach (var effect in obstacle.FailEffects) _content.Curios.ApplyEffect(effect, hero, _party, rng);
+                else StressDd1(hero, 15, rng, "obstacle");
             }
         }
         tile.Resolved = true;

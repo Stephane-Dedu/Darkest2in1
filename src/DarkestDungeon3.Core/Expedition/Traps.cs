@@ -70,6 +70,7 @@ public sealed class CrawlContent
 {
     public CurioResolver Curios;
     public TrapLibrary Traps;
+    public ObstacleLibrary Obstacles;
     public EffectLibrary Effects;
     public LootTables Loot;
     public ItemCatalog Items;
@@ -86,6 +87,7 @@ public sealed class CrawlContent
             Effects = effects,
             Loot = loot,
             Traps = TrapLibrary.Load(dd1),
+            Obstacles = ObstacleLibrary.Load(dd1),
             Items = ItemCatalog.Load(dd1),
             Camping = CampingSkills.Load(dd1),
             Battles = BattleLoot.Load(dd1),
