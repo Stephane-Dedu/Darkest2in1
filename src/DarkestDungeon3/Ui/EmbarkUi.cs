@@ -22,6 +22,7 @@ internal sealed class EmbarkUi
     private string _error;
     private bool _confirmLow, _provisioning;
     private readonly Dictionary<string, string> _mapAreas = new();
+    private readonly Dictionary<string, int> _questRows = new();
     private string _focusedZone;
 
     public bool WantsBack;
@@ -48,8 +49,8 @@ internal sealed class EmbarkUi
 
     private static Dictionary<string, Vector2> _mapSpots;
 
-    /// <summary>Where DD1 draws each dungeon on the estate map (quest_select.layout.darkest), nudged left so the
-    /// rightmost quests clear the roster.</summary>
+    /// <summary>DD1's estate-map positions, nudged left to clear the roster and with twenty extra pixels above
+    /// Tangle/Weald so the preceding area's quest buttons clear its header.</summary>
     private static Dictionary<string, Vector2> MapSpots()
     {
         if (_mapSpots != null) return _mapSpots;
@@ -60,7 +61,8 @@ internal sealed class EmbarkUi
             {
                 const string prefix = "quest_select_dungeon_layout_";
                 if (!r.Type.StartsWith(prefix) || !r.Has("quest_map_pos")) continue;
-                _mapSpots[r.Type.Substring(prefix.Length)] = new Vector2(r.Float("quest_map_pos", 0) - 120, r.Float("quest_map_pos", 1));
+                string location = r.Type.Substring(prefix.Length);
+                _mapSpots[location] = new Vector2(r.Float("quest_map_pos", 0) - 120, r.Float("quest_map_pos", 1) + (location == "weald" ? 20 : 0));
             }
         }
         catch (System.Exception e) { Plugin.Log.LogWarning("[embark] quest map layout: " + e.Message); }
@@ -176,6 +178,8 @@ internal sealed class EmbarkUi
         {
             _focusedZone = quest.Dungeon;
             _mapAreas[ZoneBase.Of(quest.Dungeon)] = quest.Dungeon;
+            int index = E.Quests.Where(q => q.Dungeon == quest.Dungeon).ToList().IndexOf(quest);
+            _questRows[quest.Dungeon] = Mathf.Max(0, index / 4);
             _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), quest, S.Hamlet.AnyResolveCanEmbark));
         }
         _error = null;
@@ -219,11 +223,20 @@ internal sealed class EmbarkUi
             return;
         }
         var quests = E.Quests.Where(q => q.Dungeon == zone).ToList();
-        for (int i = 0; i < quests.Count; i++)
+        int rows = Mathf.Max(1, (quests.Count + 3) / 4);
+        _questRows.TryGetValue(zone, out int row);
+        row = Mathf.Clamp(row, 0, rows - 1);
+        var questArea = new Rect(pos.x + 68, pos.y + 52, 356, 80);
+        if (rows > 1 && questArea.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+        {
+            row = Mathf.Clamp(row + (Event.current.delta.y > 0 ? 1 : Event.current.delta.y < 0 ? -1 : 0), 0, rows - 1);
+            Event.current.Use();
+        }
+        for (int i = row * 4; i < Mathf.Min(quests.Count, (row + 1) * 4); i++)
         {
             var q = quests[i];
-            // DD1: quest_button_start_offset 160,92; spacing 76,80; four buttons per row.
-            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92 + (i / 4) * 80);
+            // Keep DD1's first-row positions. Extra rows scroll here instead of covering the next area.
+            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92);
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
             bool hover = r.Contains(Event.current.mousePosition);
             if (q == _quest)
@@ -239,6 +252,24 @@ internal sealed class EmbarkUi
             if (hover) Gui.Tip($"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}");
             if (Gui.Hotspot(r)) SelectQuest(q);
         }
+        if (rows > 1)
+        {
+            var up = new Rect(pos.x + 86, pos.y + 56, 26, 20);
+            var down = new Rect(pos.x + 86, pos.y + 108, 26, 20);
+            if (row > 0)
+            {
+                Gui.Image(up, Art.Dd1("shared", "widgets", "scrollbar_uparrow.png"), ScaleMode.ScaleToFit);
+                if (Gui.Hotspot(up)) row--;
+            }
+            if (row < rows - 1)
+            {
+                Gui.Image(down, Art.Dd1("shared", "widgets", "scrollbar_downarrow.png"), ScaleMode.ScaleToFit);
+                if (Gui.Hotspot(down)) row++;
+            }
+            Gui.Text(new Rect(pos.x + 68, pos.y + 80, 60, 20), $"{row + 1} / {rows}", 14, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (new Rect(pos.x + 68, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
+        }
+        _questRows[zone] = row;
     }
 
     private static string GoalLine(QuestOffer q)
