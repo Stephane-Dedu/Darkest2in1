@@ -146,7 +146,19 @@ public class DebugKeys : MonoBehaviour
         if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
         var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
         int hit = 0;
-        for (int pass = 0; pass < (onlyOne ? 1 : 2); pass++)
+        if (onlyOne)
+        {
+            // The enemy in front (lowest team position): the one a hero's melee blow reaches.
+            var front = combat.AllActors.Select(a => a?.ActorInstance)
+                .Where(x => x != null && !party.Contains(x.ActorGuid) && !(x.ActorDataId ?? "").EndsWith("_corpse"))
+                .OrderBy(x => x.TeamPosition).FirstOrDefault();
+            if (front == null) { Plugin.Log.LogInfo("[F10] no living enemy"); return; }
+            front.ApplyHealthDamage(System.Math.Max(0f, front.HpRaw - 1f), isCrit: false, isRiposte: false, front, Assets.Code.Actor.DeathType.DEBUG,
+                                    Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
+            Plugin.Log.LogInfo($"[F10] {front.ActorDataId} at position {front.TeamPosition} left at 1 HP");
+            return;
+        }
+        for (int pass = 0; pass < 2; pass++)
             foreach (var a in combat.AllActors.ToList())
             {
                 var actor = a?.ActorInstance;
