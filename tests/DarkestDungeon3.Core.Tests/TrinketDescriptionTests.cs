@@ -574,6 +574,45 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void TokenConversionsRetainBothTokensAndTheWholeTeamTrigger()
+    {
+        string effects = Data.Effects("trinket_forest_boss_footmans_grog", out bool complete);
+        Assert.True(complete);
+        Assert.Equal("Each Hero on Turn Start: Convert Vulnerable to Block\nEach Hero on Turn Start: Convert Weak to Strength", effects);
+        Assert.DoesNotContain("99", effects);
+    }
+
+    [Fact]
+    public void TokenConversionsKeepTurnPhasesAndBleedPenaltyWithoutResolvingBlockedVisibility()
+    {
+        string effects = Data.Effects("trinket_curio_blood_smeared_calculations", out bool complete);
+        Assert.False(complete);
+        Assert.Contains("Turn Start: Convert Dodge to Crit", effects);
+        Assert.Contains("Turn Start: Convert Block to Strength", effects);
+        Assert.Contains("Turn End: Convert Crit to Dodge+", effects);
+        Assert.Contains("Turn End: Convert Strength to Block+", effects);
+        Assert.Contains("Turn End: Bleed 1 (3 Turns)", effects);
+        effects = Data.Effects("trinket_cave_goading_gargoyle", out complete);
+        Assert.False(complete);
+        Assert.DoesNotContain("Convert", effects);
+        Assert.Contains("+4 Speed when Flame is below 50", effects);
+    }
+
+    [Fact]
+    public void TokenConversionsUseNativeLocalizationAndWithholdMalformedConversions()
+    {
+        string effects = Data.Effects("trinket_forest_boss_footmans_grog", out bool complete,
+            key => key == "effect_tooltip_token_convert_amount" ? "Transformer {0} en {1}" : null);
+        Assert.True(complete);
+        Assert.Contains("Each Hero on Turn Start: Transformer Weak en Strength", effects);
+        effects = Data.Effects("trinket_curio_blood_smeared_calculations", out complete,
+            key => key == "effect_tooltip_token_convert_amount" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Convert", effects);
+        Assert.Equal("Turn End: Bleed 1 (3 Turns)", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

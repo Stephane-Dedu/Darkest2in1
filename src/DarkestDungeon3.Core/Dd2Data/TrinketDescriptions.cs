@@ -182,6 +182,7 @@ public sealed class TrinketDescriptions
         "buffs",
         "m_AddTurn", "m_AddTurnRange",
         "m_Move", "m_MoveRange", "m_Shuffle",
+        "m_TokenConvertFromTokenIds", "m_TokenConvertToId", "m_TokenConvertAmount", "m_TokenConvertAmountRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly)
@@ -193,6 +194,23 @@ public sealed class TrinketDescriptions
         string ignoreResist = Field("Effect", id, "m_IgnoreResist");
         if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
         var parts = new List<string>();
+        if (rows.Any(row => row[0].StartsWith("m_TokenConvert", StringComparison.Ordinal)))
+        {
+            var fromTokens = Values("Effect", id, "m_TokenConvertFromTokenIds");
+            string toToken = Field("Effect", id, "m_TokenConvertToId");
+            if (fromTokens.Count == 0 || toToken == null
+                || !int.TryParse(Field("Effect", id, "m_TokenConvertAmount"), out int amount) || amount <= 0
+                || (Field("Effect", id, "m_TokenConvertAmountRange") ?? "0") != "0") return null;
+            string toText = TokenAmount(toToken, amount, 0, localize);
+            if (toText == null) return null;
+            foreach (string token in fromTokens)
+            {
+                string fromText = TokenAmount(token, amount, 0, localize);
+                string conversion = fromText == null ? null : Format(Text("effect_tooltip_token_convert_amount", localize), fromText, toText);
+                if (conversion == null) return null;
+                parts.Add(conversion);
+            }
+        }
         string move = Field("Effect", id, "m_Move");
         if (move != null)
         {
