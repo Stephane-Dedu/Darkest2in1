@@ -12,6 +12,7 @@ HarmonyX plugin for DD2 v2.04 (Unity 2022.3, Mono). Repo: https://github.com/Ste
 
 ## Working branch and the parity loop
 - Work on `claude/practical-wright-hicri0`.
+- `tools/handoff_prompt.md` is the prompt to start any session or agent on this project; leave the same handoff when you stop.
 - The improvement loop prompt is in `tools/parity_loop.md`. Start it with `/loop` followed by that text, and only when the
   owner asks: it is paused right now.
 
