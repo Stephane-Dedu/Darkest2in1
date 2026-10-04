@@ -36,10 +36,12 @@ internal static class HeroSheet
         var win = At(0, 0, 1395, 776);
         var bg = Ch("characterpanel_bg.png");
         if (bg != null) GUI.DrawTexture(win, bg); else Gui.Fill(win, new Color(0.04f, 0.035f, 0.03f, 0.97f));
-        var figure = Art.HeroFigure(h.ClassId);
-        if (figure != null) Art.DrawSprite(At(18, 250, 220, 450), figure);   // hero_pos 98,700
         var frames = Ch("characterpanel_frames.png");
         if (frames != null) GUI.DrawTexture(At(10, 10, 1395, 776), frames);
+        // The DD1 frame contains an opaque stained-glass background in the hero's entire area.
+        // Its character picture belongs above that art, otherwise the frame erases the picture.
+        var figure = Art.HeroFigure(h.ClassId);
+        if (figure != null) Art.DrawSprite(At(18, 250, 220, 450), figure);   // hero_pos 98,700
 
         // Header: name, class, resolve (campaign status).
         Gui.Text(At(76, 8, 600, 50), h.Name, 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);

@@ -636,7 +636,13 @@ The owner interrupted general parity work with priority regressions: recruitment
 
 Drag activation formerly happened only inside the source draw, after other page controls had already run. Drag.Begin now promotes from the saved press before drawing controls, reserves carried drag/release events (Drop still uses rawType), and clears capture on drop/cancel/Escape. Source presses inside scroll groups use GUIToScreenPoint for the threshold. Hamlet handles RecruitDrag on the roster before its click handlers. Recruit details are now a modal: the underlying page is disabled, Drag/roster right-clicks respect it, and GUI.enabled is restored in finally. A new event-only Unity shim compiles the actual Drag.cs; it does not simulate native controls or rendering. Two replay cases were red before the fix; six now pass, including real Hamlet.Recruit. Release build and 157 Core tests pass with Deploy=false. No DD2 launch, save write or deployment. Check native dragging, details close/cycle, invalid/cancelled drops and repeated hires with capacity in game.
 
-## Status 2026-10-04: loop resumed, round 49 complete
+## Round 50: hero detail figure above its opaque backdrop
+
+The missing lower-left character image has a confirmed draw-order cause. DD1 shared/character/character.layout.darkest puts hero_pos at 98,700. HeroSheet drew its 220x450 picture before characterpanel_frames.png. Reading that PNG alpha channel at the overlap gives 100% coverage over alpha 128 (92,550 of 99,000 pixels fully opaque), so the next draw erased the hero. tools/check_hero_sheet.py is a read-only artwork/source-order oracle: it failed before the change and passes after moving the figure above the frames. HeroFigure also falls back to painted Story, then the embedded Story and Color portraits. All checks pass (157 Core + 6 input tests, Release Deploy=false). Native details/cycling remain unverified; no launch or save write.
+
+Separate hardening gap: Sprite.textureRect throws for tight atlas packing (Unity 2022.3 docs), used in Art.DrawSprite and its addressable completion log. No corresponding exception in the currently available session log; tracked separately.
+
+## Status 2026-10-04: loop resumed, round 50 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next: persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.

@@ -181,7 +181,8 @@ internal static class Art
 
     /// <summary>The picture of a hero standing in the dungeon: the largest DD2 art available, else the portrait.</summary>
     public static Sprite HeroFigure(string classId) =>
-        LargePortrait(classId, Plugin.HeroArt.Value) ?? Portrait(classId);
+        LargePortrait(classId, Plugin.HeroArt.Value) ?? LargePortrait(classId, LargeArt.Story)
+        ?? Portrait(classId, ResourceActor.PortraitIconType.Story) ?? Portrait(classId);
 
     /// <summary>Draw a sprite (from an atlas) into a rect, keeping its aspect ratio.</summary>
     public static void DrawSprite(Rect r, Sprite s, bool fit = true, bool flipX = false)
