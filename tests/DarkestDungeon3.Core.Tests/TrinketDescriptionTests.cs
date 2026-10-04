@@ -324,6 +324,39 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void InitiativeConditionsKeepFirstTurnOrderPenaltiesAndLastTurnOrderBonuses()
+    {
+        string effects = Data.Effects("trinket_forest_blistering_bugle", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Taunt (50%)", effects);
+        Assert.Contains("Turn Start: Vulnerable (33%) when first in turn order", effects);
+        effects = Data.Effects("trinket_hero_lep_inevitable_end", out _);
+        Assert.Contains("Turn End: +5% DMG (1 Battle) when last in turn order", effects);
+        Assert.Contains("When Moving: -1 Speed (1 Battle)", effects);
+        Assert.Contains("Turn End: -6 Speed (1 Battle) when last in turn order", Data.Effects("trinket_cultist_snap_judgement", out _));
+    }
+
+    [Fact]
+    public void InitiativeConditionUsesLiveLocalization()
+    {
+        string effects = Data.Effects("trinket_forest_blistering_bugle", out bool complete,
+            key => key == "effect_tooltip_condition_first_initiative" ? "{0} en premier" : null);
+        Assert.True(complete);
+        Assert.Contains("Vulnerable (33%) en premier", effects);
+    }
+
+    [Fact]
+    public void MalformedInitiativeConditionDoesNotMakeTheBuffUnconditional()
+    {
+        string effects = Data.Effects("trinket_cultist_snap_judgement", out bool complete,
+            key => key == "effect_tooltip_condition_last_initiative" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("-6 Speed", effects);
+        Assert.Contains("Turn Start: +1 Speed (1 Battle)", effects);
+        Assert.Contains("Add 1 Positive Token when Speed is 8 or more", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

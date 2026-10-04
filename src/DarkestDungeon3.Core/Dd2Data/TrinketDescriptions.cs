@@ -362,6 +362,10 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "first_initiative":
+            case "last_initiative":
+                args = new object[] { effect };
+                break;
             case "skill":
                 string skillOverride = Text(key + "_" + value, localize);
                 if (skillOverride != null)
