@@ -2,6 +2,7 @@ using System.Linq;
 using DarkestDungeon3.Core.Campaign;
 using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Core.Dungeon;
+using DarkestDungeon3.Core.Expedition;
 using Xunit;
 
 namespace DarkestDungeon3.Core.Tests;
@@ -76,6 +77,32 @@ public class PlotMapTests
         Assert.Equal(lair.Id, crow.EntranceRoomId);
         Assert.Equal("crow_1", lair.MashName);
         Assert.Equal(RoomContent.Battle, lair.Content);
+    }
+
+    private static readonly CrawlContent Content = CrawlContent.Load(Install);
+
+    [Fact]
+    public void SetFightsAreDd1sNamedMashRows()
+    {
+        var b = Content.Battles;
+        Assert.Equal(new[] { "cultist_shrouded_D", "cultist_warlord_D", "cultist_harpy_D", "cultist_harpy_D" },
+            b.NamedEncounter("darkestdungeon", 6, "dd_quest_1_mash_07", new Rng(1)));
+        // The same name at each level of the zone: the crow's lair by quest level (weald.1/3/5.mash.darkest).
+        Assert.Equal(new[] { "nest_A", "crow_A" }, b.NamedEncounter("weald", 1, "crow_1", new Rng(1)));
+        Assert.Equal(new[] { "nest_B", "crow_B" }, b.NamedEncounter("weald", 3, "crow_1", new Rng(1)));
+        Assert.Equal(new[] { "nest_C", "crow_C" }, b.NamedEncounter("weald", 5, "crow_1", new Rng(1)));
+        Assert.Equal(new[] { "brigand_cutthroat_B", "brigand_blood_A", "brigand_fusilier_B" },
+            b.NamedEncounter("town", 6, "town_incursion_weak_07", new Rng(1)));
+        Assert.Null(b.NamedEncounter("crypts", 1, "dd_quest_1_mash_07", new Rng(1)));
+
+        // In the Darkest Dungeon's first part, the room DD1 set with mash_07 fights exactly that group.
+        var map = Load("DD_map1", "darkestdungeon");
+        var quest = new QuestOffer { Dungeon = "darkestdungeon", Type = "kill_boss", Length = 3, Difficulty = 6, MapSeed = 7 };
+        var state = new ExpeditionState { Quest = quest, Map = map, Seed = 7, Party = { "a", "b", "c", "d" } };
+        var crawl = new Crawl(state, CrawlRules.FromDd1(Dd1.Rules), new FakeParty("a", "b", "c", "d"), Content);
+        crawl.Begin();
+        state.RoomId = map.Rooms.First(r => r.MashName == "dd_quest_1_mash_07").Id;
+        Assert.Equal(new[] { "cultist_shrouded_D", "cultist_warlord_D", "cultist_harpy_D", "cultist_harpy_D" }, crawl.FightMonsters("room"));
     }
 
     [Theory]

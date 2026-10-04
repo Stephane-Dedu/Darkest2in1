@@ -330,12 +330,16 @@ public sealed class Crawl
     /// <summary>Where the party stands, as a key for the fight waiting there.</summary>
     private string FightSpot => State.InRoom ? "room:" + State.RoomId : $"hall:{State.CorridorId}:{State.TileIndex}";
 
-    /// <summary>The DD1 monsters of the fight about to start here: DD1's encounter table for the zone and quest
-    /// difficulty (hall, room, boss). After a retreat the same group is still waiting at that spot.</summary>
+    /// <summary>The DD1 monsters of the fight about to start here: a hand-made map's set fight (its named mash row), else
+    /// DD1's encounter table for the zone and quest difficulty (hall, room, boss). After a retreat the same group is still
+    /// waiting at that spot.</summary>
     public List<string> FightMonsters(string kind)
     {
         if (State.FightMonsters is { Count: > 0 } waiting && State.FightAt == FightSpot) return waiting;
-        State.FightMonsters = _content?.Battles?.RollEncounter(State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng()) ?? new List<string>();
+        string named = State.InRoom ? CurrentRoom?.MashName : CurrentTile?.MashName;
+        int difficulty = State.Quest?.Difficulty ?? 1;
+        State.FightMonsters = (named != null ? _content?.Battles?.NamedEncounter(State.Quest?.Dungeon, difficulty, named, NextRng()) : null)
+                              ?? _content?.Battles?.RollEncounter(State.Quest?.Dungeon, difficulty, kind, NextRng()) ?? new List<string>();
         State.FightAt = FightSpot;
         return State.FightMonsters;
     }

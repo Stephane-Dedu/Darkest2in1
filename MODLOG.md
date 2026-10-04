@@ -530,4 +530,7 @@ Feasibility notes (decomp):
 - DD_map4's 3 obstacles carry a static `obstacle` hash (-697426505) that matches no prop name in props/shared; PlotMap falls back to the zone's obstacle table (rubble).
 - The port's DD_map1.bytes room6_mid = ancestors_knapsack + mash_09's four cultists = .dm rooI (code 6 + dd_quest_1_mash_09): code 6 is a guarded room curio/treasure.
 - The user's DD1 saves are read-only references: never write there.
+- Round 23: DD1 `named:` mash rows (`.name X .chance N .types ...`) live in the zone level files next to hall/room/boss rows; a name can repeat per level with level-matched monsters (weald.1/3/5 crow_1 = nest_A crow_A / nest_B crow_B / nest_C crow_C) and summon_mash repeats 10× in one level (weighted pick). BattleLoot keeps them by zone → level → name.
+- Level choice (BattleLoot.Level): the exact difficulty's file when the zone has it (town.6 for the town invasion), else the nearest to min(difficulty,5). Regular quests (1/3/5) are unchanged.
+- Probe trick: a throwaway xunit test with ITestOutputHelper + `dotnet test --filter ... --logger "console;verbosity=detailed"` prints Core facts quickly (delete it after).
 
