@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using DarkestDungeon3.Core.Dd2Data;
 using Xunit;
 
@@ -739,6 +740,60 @@ public class TrinketDescriptionTests
             "Gain<sprite name={q}token_dodge+{q}>x2, <sprite name={q}token_blind-line{q}>; " +
             "<sprite name={q}token_daze_gold{q}>/<sprite name={q}token_deflect{q}>: " +
             "<sprite name={q}icon_healthup{q}>10%, 0.5-1.5"));
+    }
+
+    [Fact]
+    public void NestedTrinketBuffRetainsItsSkillTriggerMovementAndLifetime()
+    {
+        string effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete);
+        Assert.False(complete);
+        Assert.Contains("Target: Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
+        Assert.Contains("Target: Play Out: Remove 1 Negative Token", effects);
+        Assert.DoesNotContain("Encore", effects);
+    }
+
+    [Fact]
+    public void MalformedNestedBuffDurationWithholdsThatBuffAndRetainsOtherSkillEffects()
+    {
+        string effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete,
+            key => key == "duration_display_type_turn" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Battle Ballad", effects);
+        Assert.Equal("Target: Play Out: Remove 1 Negative Token", effects);
+    }
+
+    [Fact]
+    public void CyclicNestedBuffsAreWithheldWithoutUnboundedDescriptionRecursion()
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_cycle_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), string.Join("\n", new[]
+            {
+                "element_start,cyclic_item,Item", "element_end",
+                "element_start,cyclic_item,ActorDataEffects", "target_effects,apply_cycle", "element_end",
+                "element_start,apply_cycle,Effect", "m_Chance,1", "buffs,cyclic_buff", "element_end",
+                "element_start,cyclic_buff,Buff", "m_DurationType,every_turn_end", "m_DurationAmount,1", "element_end",
+                "element_start,cyclic_buff,ActorDataEffects", "turn_start_effects,apply_cycle", "element_end",
+            }));
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"), string.Join("\n", new[]
+            {
+                "effect_tooltip_skill_effect_target=Target:", "effect_tooltip_skill_effect_turn_start=Turn Start:",
+                "effect_tooltip_buff={0}", "duration_display_type_turn=1 Turn", "skill_effect_duration_label={0} ({1})",
+            }));
+            string effects = TrinketDescriptions.Load(fixture).Effects("cyclic_item", out bool complete);
+            Assert.False(complete);
+            Assert.Null(effects);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
     }
 
     [Fact]

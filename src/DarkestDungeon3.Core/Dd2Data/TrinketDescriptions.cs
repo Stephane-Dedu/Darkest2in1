@@ -86,14 +86,14 @@ public sealed class TrinketDescriptions
         return lines.Count == 0 ? null : string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 
-    private void AddTriggered(string id, List<string> lines, ref bool complete, Func<string, string> localize)
+    private void AddTriggered(string id, List<string> lines, ref bool complete, Func<string, string> localize, int depth = 0)
     {
         if (!_blocks.TryGetValue(("ActorDataEffects", id), out var groups)) return;
         foreach (var group in groups)
         {
             if (group[0] == "actor_effect_triggers")
             {
-                foreach (string trigger in group.Skip(1)) AddActorTrigger(trigger, lines, ref complete, localize);
+                foreach (string trigger in group.Skip(1)) AddActorTrigger(trigger, lines, ref complete, localize, depth);
                 continue;
             }
             const string limitedSuffix = "_apply_limit_effects";
@@ -106,7 +106,7 @@ public sealed class TrinketDescriptions
             string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
             if (title == null) { complete = false; continue; }
             if (limited && Field("ActorDataEffects", id, eventId + "_apply_limit") != "1") { complete = false; continue; }
-            AddEffectGroup(title, friendly, group.Skip(1), limited, lines, ref complete, localize);
+            AddEffectGroup(title, friendly, group.Skip(1), limited, lines, ref complete, localize, depth);
         }
     }
 
@@ -117,7 +117,7 @@ public sealed class TrinketDescriptions
         "m_NeighborBackCount", "m_NeighborFrontCount",
     };
 
-    private void AddActorTrigger(string id, List<string> lines, ref bool complete, Func<string, string> localize)
+    private void AddActorTrigger(string id, List<string> lines, ref bool complete, Func<string, string> localize, int depth)
     {
         if (!_blocks.TryGetValue(("ActorEffectTrigger", id), out var rows) || rows.Any(row => !ActorTriggerFields.Contains(row[0])))
         { complete = false; return; }
@@ -149,16 +149,16 @@ public sealed class TrinketDescriptions
             if (eventTitle != null && (targetTitle != null || selfResist)) title = selfResist ? eventTitle : eventTitle + " " + targetTitle;
         }
         if (title == null) { complete = false; return; }
-        AddEffectGroup(title, FriendlyEffectEvents.Contains(eventId), effects, limit > 0, lines, ref complete, localize);
+        AddEffectGroup(title, FriendlyEffectEvents.Contains(eventId), effects, limit > 0, lines, ref complete, localize, depth);
     }
 
     private void AddEffectGroup(string title, bool friendly, IEnumerable<string> effects, bool limited,
-        List<string> lines, ref bool complete, Func<string, string> localize)
+        List<string> lines, ref bool complete, Func<string, string> localize, int depth)
     {
         if (limited)
         {
             string separator = Plain(Text("spaced_or_label", localize));
-            var choices = effects.Select(effect => SimpleEffect(effect, localize, friendly)).ToList();
+            var choices = effects.Select(effect => SimpleEffect(effect, localize, friendly, depth)).ToList();
             // Native limit one is a choice. Withhold the whole group if any possible outcome is unknown.
             if (separator == null || choices.Count == 0 || choices.Any(choice => choice == null)) complete = false;
             else lines.Add(title + " " + string.Join(" " + separator + " ", choices));
@@ -166,7 +166,7 @@ public sealed class TrinketDescriptions
         }
         foreach (string effect in effects)
         {
-            string description = SimpleEffect(effect, localize, friendly);
+            string description = SimpleEffect(effect, localize, friendly, depth);
             if (description == null) complete = false;
             else lines.Add(title + " " + description);
         }
@@ -194,7 +194,7 @@ public sealed class TrinketDescriptions
         "m_CritChance", "m_CritMultiplier",
     };
 
-    private string SimpleEffect(string id, Func<string, string> localize, bool friendly)
+    private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
     {
         if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
@@ -260,7 +260,7 @@ public sealed class TrinketDescriptions
         }
         foreach (string buff in Values("Effect", id, "buffs"))
         {
-            string buffText = StatBuff(buff, localize);
+            string buffText = BuffEffect(buff, localize, depth);
             if (buffText == null) return null;
             parts.Add(buffText);
         }
@@ -351,20 +351,23 @@ public sealed class TrinketDescriptions
         return Format(Text("token_amount_format_" + suffix, localize), label, amount, amount + range);
     }
 
-    private static readonly HashSet<string> StatBuffFields = new()
+    private static readonly HashSet<string> BuffEffectFields = new()
     {
         "m_DurationType", "m_DurationAmount", "m_Tags", "m_ConditionId", "m_IsVisible",
     };
 
-    private string StatBuff(string id, Func<string, string> localize)
+    private string BuffEffect(string id, Func<string, string> localize, int depth)
     {
+        if (depth >= 4) return null;
         string authored = Text("buff_desc_" + id + "_override", localize);
         if (!string.IsNullOrEmpty(authored)) return Plain(authored);
-        if (!_blocks.TryGetValue(("Buff", id), out var rows) || rows.Any(row => !StatBuffFields.Contains(row[0]))
-            || Field("Buff", id, "m_IsVisible") == "False" || _blocks.ContainsKey(("ActorDataEffects", id))
+        if (!_blocks.TryGetValue(("Buff", id), out var rows) || rows.Any(row => !BuffEffectFields.Contains(row[0]))
+            || Field("Buff", id, "m_IsVisible") == "False"
             || _blocks.ContainsKey(("RunDataStats", id))) return null;
         var stats = new List<string>();
-        if (!AddStats(id, stats, localize) || stats.Count == 0) return null;
+        bool complete = AddStats(id, stats, localize);
+        AddTriggered(id, stats, ref complete, localize, depth + 1);
+        if (!complete || stats.Count == 0) return null;
         string text = string.Join("\n", stats);
         string condition = Field("Buff", id, "m_ConditionId") ?? id;
         if (_blocks.ContainsKey(("Condition", condition))) text = WithCondition(condition, text, localize);
