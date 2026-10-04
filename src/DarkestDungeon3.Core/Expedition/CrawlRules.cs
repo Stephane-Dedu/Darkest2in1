@@ -29,6 +29,7 @@ public sealed class CrawlRules
     public float ProvisionHeal = 0.05f;
     public float ScoutChanceBase = 0.25f;
     public float ScoutCriticalChance = 0.5f;
+    public float ScoutEntryChance;
     public float SurpriseCorridorParty = 0.1f, SurpriseCorridorMonsters = 0.1f;
     public float SurpriseRoomParty = 0.1f, SurpriseRoomMonsters = 0.1f;
     public float SurpriseMaxParty = 0.65f, SurpriseMaxMonsters = 0.65f;
@@ -85,6 +86,7 @@ public sealed class CrawlRules
 
         r.ScoutChanceBase = Get(rules, "scouting_chance_base", r.ScoutChanceBase);
         r.ScoutCriticalChance = Get(rules, "scouting_crit_success", r.ScoutCriticalChance);
+        r.ScoutEntryChance = Get(rules, "scouting_enter_dungeon_scout_chance", r.ScoutEntryChance);
         r.SurpriseCorridorParty = Get(rules, "surprise_corridor_party_base_chance", r.SurpriseCorridorParty);
         r.SurpriseCorridorMonsters = Get(rules, "surprise_corridor_monsters_base_chance", r.SurpriseCorridorMonsters);
         r.SurpriseRoomParty = Get(rules, "surprise_room_party_base_chance", r.SurpriseRoomParty);

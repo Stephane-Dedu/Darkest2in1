@@ -150,7 +150,7 @@ public sealed class Crawl
         _events.Clear();
         State.Started = true;
         State.RoomId = Map.EntranceRoomId;
-        EnterRoom(Map.Room(State.RoomId));
+        EnterRoom(Map.Room(State.RoomId), enteringDungeon: true);
         return Flush();
     }
 
@@ -621,13 +621,13 @@ public sealed class Crawl
         }
     }
 
-    private void EnterRoom(Room room)
+    private void EnterRoom(Room room, bool enteringDungeon = false)
     {
         bool firstVisit = !room.Visited;
         room.Visited = true;
         Emit(CrawlEventType.EnteredRoom, roomId: room.Id);
 
-        if (firstVisit) Scout(room);
+        if (firstVisit) Scout(room, enteringDungeon);
 
         if (room.HasBattle && !room.Cleared)
             EmitBattle(CrawlEventType.Battle, null, corridor: false, NextRng(), room.Id);
@@ -710,11 +710,12 @@ public sealed class Crawl
     }
 
     /// <summary>DD1 scouting reveals six hallway squares, or twelve on a critical success, along each branch.</summary>
-    private void Scout(Room room)
+    private void Scout(Room room, bool enteringDungeon = false)
     {
         if (State.Quest?.ScoutingEnabled == false) return;   // DD1: no scouting in the Darkest Dungeon
         var rng = NextRng();
-        float chance = _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
+        float chance = enteringDungeon ? _rules.ScoutEntryChance
+            : _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
         if (chance <= 1f && !rng.Chance(chance)) return;
         bool critical = rng.Chance(_rules.ScoutCriticalChance * (chance > 1f ? chance : 1f));
         int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6);

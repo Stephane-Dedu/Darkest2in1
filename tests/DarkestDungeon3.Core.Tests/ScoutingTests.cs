@@ -67,7 +67,7 @@ public class ScoutingTests
 
     [Theory]
     [InlineData(0f, 6)]
-    [InlineData(1f, 12)]
+    [InlineData(1f, 8)]
     public void CrawlUsesNormalOrCriticalScoutingDistance(float critical, int expected)
     {
         var dd1 = Dd1Campaign.Load(Dd1Install.Find());
@@ -76,14 +76,38 @@ public class ScoutingTests
         rules.ScoutChanceBase = 1f;
         rules.ScoutCriticalChance = critical;
         rules.Darkness.Clear();
-        var state = new ExpeditionState { Map = Line(), Quest = new QuestOffer { Type = "explore" }, Party = { "a" } };
+        var map = Line();
+        map.EntranceRoomId = 2;
+        var state = new ExpeditionState { Map = map, Quest = new QuestOffer { Type = "explore" }, Party = { "a" } };
         var crawl = new Crawl(state, rules, new FakeParty("a"));
-        Assert.Contains(crawl.Begin(), e => e.Type == CrawlEventType.Scouted);
-        Assert.Equal(expected, state.Map.AllTiles.Count(t => t.Scouted));
+        Assert.DoesNotContain(crawl.Begin(), e => e.Type == CrawlEventType.Scouted);
+        crawl.Travel(1);
+        for (int i = 0; i < 3; i++) crawl.Step(true);
+        Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.Scouted);
+        Assert.Equal(expected, state.Map.Corridor(0).Tiles.Count(t => t.Scouted));
         state.Map.AllTiles.ToList().ForEach(t => t.Scouted = false);
         state.Map.Rooms.ForEach(r => { r.Scouted = false; r.Visited = false; });
         state.Quest.ScoutingEnabled = false;
         Assert.DoesNotContain(crawl.Begin(), e => e.Type == CrawlEventType.Scouted);
         Assert.DoesNotContain(state.Map.AllTiles, t => t.Scouted);
+    }
+
+    [Fact]
+    public void EnteringADungeonUsesItsOwnChanceWithoutTheRadiantLightBonus()
+    {
+        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var rules = CrawlRules.FromDd1(dd1.Rules);
+        Assert.Equal(0f, rules.ScoutEntryChance);
+        rules.ScoutChanceBase = 1f;   // even a guaranteed room scout must not leak into entry scouting
+        for (int seed = 0; seed < 32; seed++)
+        {
+            var state = new ExpeditionState { Map = Line(), Quest = new QuestOffer { Type = "explore" }, Party = { "a" }, Seed = seed, Light = 100f };
+            var crawl = new Crawl(state, rules, new FakeParty("a"));
+            Assert.DoesNotContain(crawl.Begin(), e => e.Type == CrawlEventType.Scouted);
+            Assert.DoesNotContain(state.Map.AllTiles, t => t.Scouted);
+        }
+        rules.ScoutEntryChance = 1f;
+        var enabled = new ExpeditionState { Map = Line(), Quest = new QuestOffer { Type = "explore" }, Party = { "a" } };
+        Assert.Contains(new Crawl(enabled, rules, new FakeParty("a")).Begin(), e => e.Type == CrawlEventType.Scouted);
     }
 }

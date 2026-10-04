@@ -590,10 +590,15 @@ Feasibility notes (decomp):
 - Verified: Release build Deploy=false and all 154 Core tests pass. Eight new cases cover length boundaries, reverse travel, cycles and integration. No game launch.
 - Found a separate defect: Begin calls normal room scouting at the entrance despite DD1's zero entry chance. Corrected PARITY's old [x] claim and queued an entry-specific rule for the next round.
 
-## Status 2026-10-04: loop resumed, round 40 complete
+## Round 41: dungeon entry uses DD1's separate scouting chance
+- Reference: shared/rules.json scouting_enter_dungeon_scout_chance 0.0, distinct from scouting_chance_base 0.25. Begin was rolling the ordinary chance with the radiant-light bonus.
+- CrawlRules loads ScoutEntryChance. Begin identifies dungeon entry; room scouting uses the entry chance without adding the light bonus. Subsequent room arrivals retain ordinary and critical scouting. No arbitrary sleep or game hook needed.
+- Verified: Release build Deploy=false and all 155 Core tests pass. Regression checks 32 seeds with full light and a forced 100% normal room chance, plus an entry override. Round-40 integration tests now travel to a new room before testing normal/critical distance. No game launch.
+
+## Status 2026-10-04: loop resumed, round 41 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 154 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: entry scouting, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: bent plot-map corridors, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
