@@ -562,3 +562,12 @@ Feasibility notes (decomp):
 - Round 34: plot_tutorial_crypts = progression plot quest, dungeon_level 0, explore, map tutorial_crypts.dm (8 rooms/8 corridors, entrance rooH, guarded treasures tutorial_mash_03/05/01, guarded curio tutorial_mash_04, corridor fight tutorial_mash_02, traps, curios, a hunger square, obstacles), has_statue_contents true. Offered by QuestBoard.PlotOffers now (filter: progression and (not explore or has a map)). Existing estates already list it in CompletedPlotQuests (prepaid by older builds) and won't see it again.
 - Round 35: QuestBoard.PlotOffer(estate, dd1, plotQuest) builds any plot offer (used by the board and by plot_quest town events). DD2 has no bird enemy/battle; the crow's boss stand-in is config:carrion_my_wayward_son_c (shared_carrion_eater_mutated + 2 carrion eaters + shared_dog_rabid_b) in combat_arena_forest_dungeon_exterior.
 
+## Status 2026-10-04: loop paused after round 35 (owner's request)
+- Resume only when the owner says so; no game launches until then. The loop prompt is in tools/parity_loop.md; session notes in CLAUDE.md.
+- Built but not seen in game yet, check these first once launching is allowed:
+  1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
+  2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
+  3. The crow quest from the plot_quest_crow_trinket event (week ≥ 15), its one-room lair and the carrion boss battle.
+  4. A slain corpse-leaving DD1 monster lying in its dead pose (Ctrl+F10 kills the front enemy as a skill kill).
+- [user] questions still open: DLC content; game modes (heroes refusing to go back after the Darkest Dungeon); trinket retention on a party wipe.
+
