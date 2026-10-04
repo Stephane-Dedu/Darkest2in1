@@ -684,6 +684,7 @@ public sealed class TrinketDescriptions
     {
         ["token_deflect"] = "block_plus", ["token_daze_gold"] = "daze", ["token_dodge+"] = "dodge_plus",
         ["token_blind-line"] = "blind", ["token_immoblize"] = "immobilize",
+        ["token_uc_power"] = "unchecked_power",
     };
 
     private static string ExpandSprites(string rich, Func<string, string> localize)
@@ -710,6 +711,8 @@ public sealed class TrinketDescriptions
         s = Regex.Replace(s, @"[ \t]+", " ");
         s = Regex.Replace(s, @"[ \t]+([,:;/])", "$1");
         s = Regex.Replace(s, @"/[ \t]+", "/");
+        // Stock English token comparison templates join 'has' to labels already starting with 'is'.
+        s = Regex.Replace(s, @"\bhas is\b", "is");
         s = Regex.Replace(s, @"\s*\n\s*", "\n").Trim();
         return s.Length == 0 ? null : s;
     }
@@ -721,6 +724,7 @@ public sealed class TrinketDescriptions
             ["icon_health_v2"] = "HP", ["icon_death_outline"] = "Deathblow", ["token_stress"] = "Stress",
             ["icon_healthup"] = "Heal", ["token_deflect"] = "Block+", ["token_daze_gold"] = "Daze",
             ["token_dodge+"] = "Dodge+", ["token_blind-line"] = "Blind", ["token_immoblize"] = "Immobilize", ["token_guard"] = "Guarded",
+            ["token_uc_power"] = "Unchecked Power",
         };
         if (aliases.TryGetValue(id, out var alias)) return alias;
         string s = id.Replace("token_", "").Replace("icon_", "").Replace('_', ' ').Trim();

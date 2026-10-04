@@ -924,6 +924,44 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void CategoryThresholdTextUsesUncheckedPowerNameAndOneComparisonVerb()
+    {
+        string effects = Data.Effects("trinket_hero_occ_scalded_skull", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Random Ally on Turn Start: Burn 1 (3 Turns) (33%) when Unchecked Power is 2 or more", effects);
+        Assert.DoesNotContain("has is", effects);
+        Assert.DoesNotContain("Uc power", effects);
+        Assert.Contains("Target: Burn 1 (3 Turns) when target has Combo", effects);
+    }
+
+    [Fact]
+    public void NativePlainThresholdTextUsesTheSameCanonicalNameAndKeepsQuantities()
+    {
+        Assert.Equal("Unchecked Power is 2 or more", TrinketDescriptions.Plain(
+            "<sprite name={q}token_uc_power{q}> has is 2 or more"));
+        Assert.Equal("Puissance is 2 or more", TrinketDescriptions.Plain(
+            "<sprite name={q}token_uc_power{q}> has is 2 or more",
+            key => key == "token_name_unchecked_power" ? "<color=#{notable}>Puissance</color>" : null));
+        Assert.Equal("target has Combo", TrinketDescriptions.Plain("target has <sprite name={q}token_combo{q}>"));
+    }
+
+    [Fact]
+    public void CategoryThresholdCleanupPreservesExplicitLocalizedTemplateAndWithholding()
+    {
+        string effects = Data.Effects("trinket_hero_occ_scalded_skull", out bool complete,
+            key => key == "effect_tooltip_condition_token_tag_amount" ? "Bonus {3} si {0}{1}{2}"
+                : key == "comparison_greater_than_or_equal_label" ? " au moins {0}"
+                : key == "token_name_unchecked_power" ? "Puissance" : null);
+        Assert.True(complete);
+        Assert.Contains("Bonus Burn 1 (3 Turns) (33%) si Puissance au moins 2", effects);
+        effects = Data.Effects("trinket_hero_occ_scalded_skull", out complete,
+            key => key == "effect_tooltip_condition_token_tag_amount" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Random Ally on Turn Start:", effects);
+        Assert.Contains("Adjacent Allies on Turn Start: Add 1 Positive Token when self Burn", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);
