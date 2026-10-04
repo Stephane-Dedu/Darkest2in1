@@ -1071,16 +1071,33 @@ internal sealed class HamletUi
         if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
     }
 
+    private Vector2 _graveyardScroll;
+
     private void DrawGraveyard(Rect area)
     {
-        Frame(area);
+        // DD1's list uses its 600x118 record backdrop and 20 px between records.
+        var view = W(704, 148, 648, 600);
+        var backdrop = BuildingArt(Buildings.Graveyard, "dead_hero_backdrop.png");
+        _graveyardScroll = GUI.BeginScrollView(view, _graveyardScroll, new Rect(0, 0, 620, Mathf.Max(view.height, E.Graveyard.Count * 138)));
         for (int i = 0; i < E.Graveyard.Count; i++)
         {
             var h = E.Graveyard[i];
-            Gui.Text(new Rect(area.x + 20, area.y + 14 + i * 40, area.width - 40, 38),
-                $"{h.Name} the {Pretty(h.ClassId)}, resolve {h.ResolveLevel}: {h.CauseOfDeath} (week {h.WeekDied + 1})", 19, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            float y = i * 138;
+            var row = new Rect(0, y, 600, 118);
+            if (backdrop != null) GUI.DrawTexture(row, backdrop);
+            else Gui.Fill(row, new Color(0.08f, 0.07f, 0.06f, 0.95f));
+            int resolve = Mathf.Clamp(h.ResolveLevel, 0, 6);
+            if (BuildingArt(Buildings.Graveyard, resolve <= 1 ? "0_1.png" : resolve + ".png") is { } tombstone)
+                GUI.DrawTexture(new Rect(0, y, 118, 118), tombstone);
+            if (Art.HeroIcon(h.ClassId) is { } portrait) Art.DrawSprite(new Rect(28, y + 18, 62, 62), portrait);
+            Gui.Text(new Rect(130, y + 8, 456, 30), h.Name, 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            string rank = S.Lore?.Text("str_resolve_" + resolve) ?? $"Resolve {resolve}";
+            Gui.Text(new Rect(130, y + 40, 456, 24), $"{rank} · {Pretty(h.ClassId)}", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            string cause = h.CauseOfDeath ?? S.Lore?.Text("str_death_unknown_unknown") ?? "An unknown peril";
+            Gui.Text(new Rect(130, y + 67, 456, 43), $"Week {h.WeekDied + 1}: {cause}", 17, Gui.Dd1Text);
         }
-        if (E.Graveyard.Count == 0) Gui.Text(new Rect(area.x + 20, area.y + 20, area.width - 40, 40), "No one rests here. Yet.", 24, Gui.Dd1Class);
+        if (E.Graveyard.Count == 0) Gui.Text(new Rect(20, 20, 580, 40), "No one rests here.", 24, Gui.Dd1Class);
+        GUI.EndScrollView();
     }
 
     /// <summary>

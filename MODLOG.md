@@ -620,10 +620,15 @@ Feasibility notes (decomp):
 - Added the skill frame, purchased connector, purchased/available/locked mastery markers and a compact 64x86 cost frame within each 91-pixel row. Missing gold keeps the available marker with red price; actual resolve/building prerequisites show locked. Hover explanations cover purchased and locked states as well as buying.
 - Verified: Release build Deploy=false and all 155 Core tests pass. UI art is unverified in game; no launch.
 
-## Status 2026-10-04: loop resumed, round 46 complete
+## Round 47: DD1 graveyard records and scrolling
+- Reference: graveyard.layout.darkest list height 600, entry_spacing 20. Native assets inspected: dead_hero_backdrop.png 600x118; 0_1/2..6.png 118x118 tombstones. Port GraveyardWindow/DeathRecordSlot creates scrollable records with resolve icon, portrait, name and cause.
+- Replaced unclipped plain text with a 600-high clipped scroll view and native record/tombstone art. Uses DD2 class portraits, DD1 resolve titles, saved cause and week, and DD1 unknown-peril text for a missing cause. Records stay in stored order.
+- Verified: Release build Deploy=false and all 155 tests pass. No game launch or save modifications; visual check remains [?].
+
+## Status 2026-10-04: loop resumed, round 47 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: graveyard, remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Next: memorial journal page, activity-log presentation, secret-room support. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
