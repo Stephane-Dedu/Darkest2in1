@@ -835,6 +835,51 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void StealEffectsRetainNamedSkillsBonusesAndPenalties()
+    {
+        string effects = Data.Effects("trinket_hero_flg_emancipation", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Punish: Steal Positive Token", effects);
+        Assert.Contains("+25% DMG when self HP is below 20%", effects);
+        Assert.Contains("-20% Bleed RES", effects);
+        effects = Data.Effects("trinket_hero_hwy_cursed_coin", out complete);
+        Assert.False(complete);
+        Assert.Contains("Target: Highway Robbery: Steal Regen", effects);
+        Assert.Contains("-10% CRIT when Relics in inventory is above 50", effects);
+        effects = Data.Effects("trinket_hero_flg_searing_scripture", out complete);
+        Assert.False(complete);
+        Assert.DoesNotContain("Steal", effects);
+        Assert.Contains("-20% Burn RES", effects);
+    }
+
+    [Fact]
+    public void StealEffectsUseNativeCategoryAndDotLocalization()
+    {
+        string effects = Data.Effects("trinket_hero_flg_emancipation", out bool complete,
+            key => key == "effect_tooltip_token_steal_tag" ? "Voler {0}" : key == "token_tag_pos_copy_steal" ? "Positif" : null);
+        Assert.True(complete);
+        Assert.Contains("Target: Punish: Voler Positif", effects);
+        effects = Data.Effects("trinket_hero_hwy_cursed_coin", out _,
+            key => key == "effect_tooltip_dot_steal_tag" ? "Voler {0}" : key == "dot_hot" ? "Regeneration" : null);
+        Assert.Contains("Target: Highway Robbery: Voler Regeneration", effects);
+    }
+
+    [Fact]
+    public void MalformedStealTemplatesWithholdTransfersAndKeepOtherEffects()
+    {
+        string effects = Data.Effects("trinket_hero_flg_emancipation", out bool complete,
+            key => key == "effect_tooltip_token_steal_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Punish", effects);
+        Assert.Contains("+25% DMG when self HP is below 20%", effects);
+        Assert.Contains("-20% Bleed RES", effects);
+        effects = Data.Effects("trinket_hero_hwy_cursed_coin", out complete,
+            key => key == "effect_tooltip_dot_steal_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.Equal("-10% CRIT when Relics in inventory is above 50", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

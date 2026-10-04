@@ -192,6 +192,8 @@ public sealed class TrinketDescriptions
         "m_Move", "m_MoveRange", "m_Shuffle",
         "m_TokenConvertFromTokenIds", "m_TokenConvertToId", "m_TokenConvertAmount", "m_TokenConvertAmountRange",
         "m_CritChance", "m_CritMultiplier",
+        "m_TokenStealTags", "m_TokenStealAmount", "m_TokenStealAmountRange",
+        "m_DotStealTags", "m_DotStealAmount", "m_DotStealAmountRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
@@ -213,6 +215,29 @@ public sealed class TrinketDescriptions
                 || float.IsNaN(multiplier) || float.IsInfinity(multiplier) || multiplier < 0 || (crit > 0 && multiplier == 0)) return null;
         }
         var parts = new List<string>();
+        foreach (string family in new[] { "Token", "Dot" })
+        {
+            var tags = Values("Effect", id, "m_" + family + "StealTags");
+            if (tags.Count == 0)
+            {
+                if (rows.Any(row => row[0].StartsWith("m_" + family + "Steal", StringComparison.Ordinal))) return null;
+                continue;
+            }
+            if (!int.TryParse(Field("Effect", id, "m_" + family + "StealAmount"), out int amount) || amount <= 0
+                || (Field("Effect", id, "m_" + family + "StealAmountRange") ?? "0") != "0") return null;
+            bool token = family == "Token";
+            string key = token ? amount >= 99 ? "effect_tooltip_token_steal_all_tag"
+                : "effect_tooltip_token_steal_tag" + (amount > 1 ? "+plural" : "") : "effect_tooltip_dot_steal_tag";
+            foreach (string tag in tags)
+            {
+                string label = Plain(Text((token ? "token_tag_" : "dot_") + tag, localize));
+                if (label == null) return null;
+                string transfer = token && amount > 1 && amount < 99 ? Format(Text(key, localize), amount, label)
+                    : Format(Text(key, localize), label);
+                if (transfer == null) return null;
+                parts.Add(transfer);
+            }
+        }
         if (rows.Any(row => row[0].StartsWith("m_TokenConvert", StringComparison.Ordinal)))
         {
             var fromTokens = Values("Effect", id, "m_TokenConvertFromTokenIds");
