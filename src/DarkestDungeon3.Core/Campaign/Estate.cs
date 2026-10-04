@@ -47,6 +47,8 @@ public sealed class Estate
     public string TownEventId;
     /// <summary>The plot quest the party last came home from (DD1's town background changes after a Darkest Dungeon part).</summary>
     public string LastReturnPlotId;
+    /// <summary>A new estate's first act: DD1's opening raid on the road (the bandits), before the first week.</summary>
+    public bool OpeningRaidPending;
     public int TownEventMisses;
     public Dictionary<string, int> TownEventLastWeek = new();
     public int TownEventFreeUpgrades;

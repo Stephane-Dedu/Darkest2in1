@@ -47,8 +47,27 @@ public sealed class Hamlet
         else
             foreach (var cls in new[] { "man_at_arms", "highwayman" })
                 estate.Roster.Add(hamlet.MakeHero(catalog.RecruitableClasses.Contains(cls) ? cls : rng.Pick(catalog.RecruitableClasses), rng, level: 0));
+        estate.OpeningRaidPending = start?.Opening != null && estate.Roster.Count > 0;
         hamlet.RefreshWeek(first: true);
         return estate;
+    }
+
+    /// <summary>
+    /// DD1's opening raid for this new estate (scripts/starting_save): the quest, its party in DD1's order (Reynauld in
+    /// front, then Dismas) and its pack (2 provisions). Null once it has been played.
+    /// </summary>
+    public (QuestOffer Quest, List<HeroRecord> Party, Expedition.Inventory Pack)? OpeningRaid()
+    {
+        if (!Estate.OpeningRaidPending || Dd1.Install == null) return null;
+        var start = StartingSave.Load(Dd1.Install);
+        var quest = start.OpeningQuest(Estate.NextSeed());
+        if (quest == null) return null;
+        var party = start.Opening.PartyOrder.Select(i => i < start.Heroes.Count ? Estate.Roster.FirstOrDefault(h => h.Name == start.Heroes[i].Name) : null)
+                         .Where(h => h != null).ToList();
+        if (party.Count == 0) party = Estate.Roster.Take(4).ToList();
+        var pack = new Expedition.Inventory();
+        if (start.Opening.Provisions > 0) pack.Add(Expedition.Supply.Food, start.Opening.Provisions);
+        return (quest, party, pack);
     }
 
     /// <summary>DD1 classes DD2 has no hero for, and the DD2 hero that plays them (the Crusader: a front-line protector).</summary>

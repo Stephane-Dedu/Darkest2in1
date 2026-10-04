@@ -152,33 +152,54 @@ internal sealed class Driver : MonoBehaviour
 
     // ---------------- Embark ----------------
 
-    public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought)
+    public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought, bool opening = false)
     {
         // This week's town event sets prices and who will go; it changes when the week ends below.
         var hamlet = S.Hamlet;
         var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party, hamlet.AnyResolveCanEmbark);
         if (why != null) return why;
-        int cost = bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);
+        int cost = opening ? 0 : bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);   // the opening's pack is DD1's, free
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
         S.Save.Estate.Add(Currency.Gold, -cost);
-        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, S.Provisioner);
+        // DD1's opening raid comes before the first week: no free supplies, no town event buffs, no week passing.
+        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner);
         exp.ProvisionCost = cost;
-        foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
-            foreach (var hero in exp.Party)
-            {
-                if (!exp.PendingBuffs.TryGetValue(hero, out var list)) exp.PendingBuffs[hero] = list = new List<string>();
-                if (!list.Contains(buff)) list.Add(buff);
-            }
+        if (!opening)
+            foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
+                foreach (var hero in exp.Party)
+                {
+                    if (!exp.PendingBuffs.TryGetValue(hero, out var list)) exp.PendingBuffs[hero] = list = new List<string>();
+                    if (!list.Contains(buff)) list.Add(buff);
+                }
         S.Save.Expedition = exp;
+        if (opening) S.Save.Estate.OpeningRaidPending = false;
         // DD1 resolves town activities while the party is away.
-        S.Hamlet.EndWeek();
+        else S.Hamlet.EndWeek();
         S.Persist();
 
         Phase = Phase.Embarking;
         Say($"The party sets out: {quest}.");
         Dd2Run.Start(OnRoadReady);
         return null;
+    }
+
+    /// <summary>A new estate still has DD1's opening raid to play (the road and its bandits).</summary>
+    public bool OpeningDue => Phase == Phase.Hamlet && S?.Save?.Estate is { OpeningRaidPending: true } && S.Save.Expedition == null;
+
+    /// <summary>
+    /// A new estate's opening, called by the UI once the cinematics are over and the Old Road's loading screen has been
+    /// up a moment: the party sets out exactly like any embark (it froze when started from Update right after the
+    /// cinematics), before the first week begins.
+    /// </summary>
+    public void EmbarkOpening()
+    {
+        if (!OpeningDue) return;
+        var opening = S.Hamlet.OpeningRaid();
+        if (opening is not { } o) { S.Save.Estate.OpeningRaidPending = false; S.Persist(); return; }
+        Plugin.Log.LogInfo($"[opening] {string.Join(" and ", o.Party.Select(h => h.Name))} set out on DD1's opening raid ({o.Quest.Dungeon}, {o.Quest.GoalId})");
+        string why = Embark(o.Quest, o.Party, o.Pack, opening: true);
+        if (why != null) { Plugin.Log.LogWarning("[opening] " + why); S.Save.Estate.OpeningRaidPending = false; S.Persist(); }
     }
 
     private void OnRoadReady()

@@ -15,6 +15,18 @@ internal sealed class UiRoot : MonoBehaviour
     private readonly CrawlUi _crawl = new();
     private bool _embarking, _slotPicker;
 
+    private float? _openingSince;
+
+    /// <summary>DD1's loading screen for the opening raid (starting_save/persist.loading_screen.json: loading_screen.old_road.png).</summary>
+    private static void DrawOldRoad()
+    {
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+        if (Art.Dd1("loading_screen", "loading_screen.old_road.png") is { } art) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), art, ScaleMode.ScaleAndCrop);
+        Gui.Text(new Rect(0, 60, Gui.W, 80), Dd1Text.Get("PSN", "dungeon_name_old_road") ?? "The Old Road", 56, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        if (Dd1Text.Get("PSN", "str_old_road_tip") is { } tip)
+            Gui.Text(new Rect(260, Gui.H - 170, Gui.W - 520, 110), tip, 24, Gui.Dd1Text, TextAnchor.MiddleCenter);
+    }
+
     private void OnGUI()
     {
         var d = Driver.Instance;
@@ -37,6 +49,12 @@ internal sealed class UiRoot : MonoBehaviour
                 case Phase.Off:
                     if (GameModeMgr.CurrentMode == GameModeType.MAIN_MENU) DrawMainMenuEntry(d);
                     break;
+                case Phase.Hamlet when d.OpeningDue:
+                    // DD1's opening: the Old Road's loading screen, then the raid (the same embark as any quest).
+                    _openingSince ??= Time.unscaledTime;
+                    DrawOldRoad();
+                    if (Time.unscaledTime - _openingSince.Value > 3f && Event.current.type == EventType.Repaint) { _openingSince = null; d.EmbarkOpening(); }
+                    break;
                 case Phase.Hamlet:
                     if (_embarking)
                     {
@@ -48,6 +66,9 @@ internal sealed class UiRoot : MonoBehaviour
                         _hamlet.Draw();
                         if (_hamlet.WantsEmbark) { _hamlet.WantsEmbark = false; _embarking = true; }
                     }
+                    break;
+                case Phase.Embarking when d.Expedition?.Quest?.MapName == Core.Dungeon.PlotMap.Opening:
+                    DrawOldRoad();
                     break;
                 case Phase.Embarking:
                     Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);

@@ -3,6 +3,7 @@ using System.Linq;
 using DarkestDungeon3.Core.Campaign;
 using DarkestDungeon3.Core.Campaign.Town;
 using DarkestDungeon3.Core.Dd1;
+using DarkestDungeon3.Core.Expedition;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -93,6 +94,15 @@ public class HamletTests
         Assert.Equal(Pay(Currency.Gold), h.Estate.Get(Currency.Gold));
         // The first coach: stage_coach.building.json first_hero_classes.
         Assert.Equal(new[] { "plague_doctor", "vestal" }, h.Estate.Recruits.Take(2).Select(r => r.ClassId));
+
+        // Then the opening raid on the road (persist.raid.json): Reynauld in front, Dismas behind, 2 provisions.
+        Assert.True(h.Estate.OpeningRaidPending);
+        var opening = h.OpeningRaid().Value;
+        Assert.Equal(("weald", "tutorial_final_room"), (opening.Quest.Dungeon, opening.Quest.GoalId));
+        Assert.Equal(new[] { "Reynauld", "Dismas" }, opening.Party.Select(p => p.Name));
+        Assert.Equal(2, opening.Pack.Count(Supply.Food));
+        h.Estate.OpeningRaidPending = false;
+        Assert.Null(h.OpeningRaid());
     }
 
     [Fact]
