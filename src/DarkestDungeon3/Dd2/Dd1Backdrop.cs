@@ -120,6 +120,8 @@ internal static class Dd1Backdrop
             var keep = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Deferred"), LayerMask.NameToLayer("Foreground"),
                                           LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI"), 0 };
             foreach (var p in UnityEngine.Object.FindObjectsOfType<Renderer>()) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
+            // Camera masks also filter lights. Keep every arena light layer while hiding its scenery per renderer.
+            foreach (var light in UnityEngine.Object.FindObjectsOfType<Light>()) keep.Add(light.gameObject.layer);
             _sceneryMask = 0;
             _sceneryLayers = 0;
             foreach (var l in scenery.Select(r => r.gameObject.layer).Distinct())
@@ -276,12 +278,10 @@ internal static class Dd1Backdrop
     {
         "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain",
         // DD2's per-arena colour grading (the forest exterior's red cast): DD1 shows its art as painted.
-        "ColorAdjustments", "ColorLookup", "ChannelMixer", "ColorCurves", "LiftGammaGain", "ShadowsMidtonesHighlights",
-        "SplitToning", "WhiteBalance",
+        "ColorLookup", "ChannelMixer", "ColorCurves", "LiftGammaGain", "ShadowsMidtonesHighlights",
+        "SplitToning", "WhiteBalance", "Bloom", "Vignette",
     };
-    private static readonly Dictionary<object, bool> EffectsBefore = new();
-    private static readonly List<System.Reflection.FieldInfo> EffectFlags = new();
-    private static readonly List<object> EffectsHeld = new();
+    private static readonly PostEffectGuard Effects = new();
     private static float _nextVolumeScan;
     private static readonly Type VolumeType = Type.GetType("UnityEngine.Rendering.Volume, Unity.RenderPipelines.Core.Runtime");
 
@@ -291,10 +291,7 @@ internal static class Dd1Backdrop
         {
             if (restore)
             {
-                foreach (var kv in EffectsBefore) kv.Key?.GetType().GetField("active")?.SetValue(kv.Key, kv.Value);
-                EffectsBefore.Clear();
-                EffectsHeld.Clear();
-                EffectFlags.Clear();
+                Effects.Restore();
                 _nextVolumeScan = 0f;
                 return;
             }
@@ -302,7 +299,7 @@ internal static class Dd1Backdrop
             if (Time.unscaledTime >= _nextVolumeScan)
             {
                 _nextVolumeScan = Time.unscaledTime + 1f;
-                int before = EffectsHeld.Count;
+                int before = Effects.Count;
                 foreach (var volume in UnityEngine.Object.FindObjectsOfType(VolumeType))
                 {
                     // The shared profile and the volume's own copy (profileRef; reading "profile" would make a copy).
@@ -312,21 +309,23 @@ internal static class Dd1Backdrop
                         if (profile.GetType().GetField("components")?.GetValue(profile) is not System.Collections.IEnumerable components) continue;
                         foreach (var c in components)
                         {
-                            if (c == null || EffectsBefore.ContainsKey(c) || !FlatArtSpoilers.Contains(c.GetType().Name)) continue;
-                            var active = c.GetType().GetField("active");
-                            if (active == null) continue;
-                            EffectsBefore[c] = (bool)active.GetValue(c);
-                            EffectsHeld.Add(c);
-                            EffectFlags.Add(active);
+                            if (c == null) continue;
+                            if (c.GetType().Name == "ColorAdjustments")
+                            {
+                                // Keep native postExposure and active state: DD2 hero materials depend on them.
+                                Effects.NeutralParameter(c, "colorFilter", Color.white);
+                                Effects.NeutralParameter(c, "contrast", 0f);
+                                Effects.NeutralParameter(c, "hueShift", 0f);
+                                Effects.NeutralParameter(c, "saturation", 0f);
+                            }
+                            else if (FlatArtSpoilers.Contains(c.GetType().Name)) Effects.Disable(c);
                         }
                     }
                 }
-                if (EffectsHeld.Count != before)
-                    Plugin.Log.LogInfo($"[backdrop] holding off {EffectsHeld.Count} DD2 post effect(s): " +
-                                       string.Join(", ", EffectsHeld.Select(c => c.GetType().Name).Distinct()));
+                if (Effects.Count != before)
+                    Plugin.Log.LogInfo($"[backdrop] holding {Effects.Count} post-effect fields; native exposure preserved, bloom/vignette off");
             }
-            for (int i = 0; i < EffectsHeld.Count; i++)
-                if (EffectsHeld[i] != null && (bool)EffectFlags[i].GetValue(EffectsHeld[i])) EffectFlags[i].SetValue(EffectsHeld[i], false);
+            Effects.Apply();
         }
         catch (Exception e) { Plugin.Log.LogWarning("[backdrop] post effects: " + e.Message); }
     }

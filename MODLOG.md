@@ -642,7 +642,15 @@ The missing lower-left character image has a confirmed draw-order cause. DD1 sha
 
 Separate hardening gap: Sprite.textureRect throws for tight atlas packing (Unity 2022.3 docs), used in Art.DrawSprite and its addressable completion log. No corresponding exception in the currently available session log; tracked separately.
 
-## Status 2026-10-04: loop resumed, round 50 complete
+## Round 51: preserve hero exposure and suppress flat-art bloom
+
+DD2 PostProcessingManager.SetEffects toggles volume active flags per camera. The backdrop previously disabled ColorAdjustments as a whole, which removes postExposure along with arena tint, but left Bloom and Vignette active. It now keeps ColorAdjustments active/exposure under native control and neutralizes its colorFilter, contrast, hueShift and saturation only. PostEffectGuard tracks original field/parameter values, re-applies held values after native skill toggles, and restores them at End. Bloom and Vignette are suppressed alongside the existing flat-art blur filters. Camera scenery masks explicitly preserve all active Light layers (DeferredRenderPass filters visible lights and has exclusive light masks).
+
+This targets observed symptoms but cannot establish the final rendered brightness without the game. Three bridge tests exercise actual guard reflection: preserve changing exposure, hold shared/per-camera bloom despite native toggles, restore distinct originals, ignore absent parameters. Release build, 157 Core and 9 bridge/input tests pass. The owner asked about local versus remote work: fixes are now deployed locally as well as pushed; DLL SHA-256 matches the Release output. Before deployment, um backup snapshot saved the seven installed mod files at C:\Users\Piral\.universal-modder\backups\darkest2in1-plugin\20261004-133811.zip. No game/config/save files changed beyond the installed authored plugin/data; no game launch.
+
+New priority: Hamlet first-load art latency. SpineArt rasterizes each whole image synchronously on the UI thread; the 40 ms budget only gates between images. Measure actual DD1 bakes and move CPU rasterization to a worker.
+
+## Status 2026-10-04: loop resumed, round 51 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next: persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
