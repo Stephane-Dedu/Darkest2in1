@@ -533,4 +533,6 @@ Feasibility notes (decomp):
 - Round 23: DD1 `named:` mash rows (`.name X .chance N .types ...`) live in the zone level files next to hall/room/boss rows; a name can repeat per level with level-matched monsters (weald.1/3/5 crow_1 = nest_A crow_A / nest_B crow_B / nest_C crow_C) and summon_mash repeats 10× in one level (weighted pick). BattleLoot keeps them by zone → level → name.
 - Level choice (BattleLoot.Level): the exact difficulty's file when the zone has it (town.6 for the town invasion), else the nearest to min(difficulty,5). Regular quests (1/3/5) are unchanged.
 - Probe trick: a throwaway xunit test with ITestOutputHelper + `dotnet test --filter ... --logger "console;verbosity=detailed"` prints Core facts quickly (delete it after).
+- Round 24: Darkest Dungeon monster families (cultist_orgiastic/shrouded/warlord/harpy, totem_attack/guard, templar_melee/ranged + _mb minibosses in their own folders, errant_flesh_bat/dog, cyst, cell_white/battle) and crow got stand-ins. Picked from a probe listing every DD2 enemy with the same size whose usable skills fit the DD1 role (Dd1MonsterSkills.Role/Compatible/Allowed), then by theme. nest_A-C: no skills, 0 turns/round, life_link crow, tag boss.
+- monsters.json is hand-formatted (one aligned line per family): edit it as text, not with json.dump (that rewrote 365 lines).
 

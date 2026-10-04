@@ -65,6 +65,22 @@
     "snail_urchin":       { "dd2": ["coastal_wharf_rat"] },
     "octotank":           { "dd2": ["coastal_bosun"], "champion": ["coastal_bosun_b"] },
     "bloated_corpse":     { "dd2": ["coastal_wharf_rat"] },
-    "drowned_pirate":     { "dd2": ["coastal_captain"], "champion": ["coastal_captain_b"] }
+    "drowned_pirate":     { "dd2": ["coastal_captain"], "champion": ["coastal_captain_b"] },
+    "cultist_orgiastic":  { "dd2": ["cultist_herald", "fanatic_blind_shaman"] },
+    "cultist_shrouded":   { "dd2": ["cultist_evangelist"] },
+    "cultist_warlord":    { "dd2": ["fanatic_flayer"] },
+    "cultist_harpy":      { "dd2": ["cultist_cherub"] },
+    "totem_attack":       { "dd2": ["coven_cauldron"] },
+    "totem_guard":        { "dd2": ["coven_cauldron"] },
+    "templar_melee":      { "dd2": ["coven_custode"] },
+    "templar_ranged":     { "dd2": ["lost_battalion_knight"] },
+    "templar_melee_mb":   { "dd2": ["coven_custode"] },
+    "templar_ranged_mb":  { "dd2": ["lost_battalion_knight"] },
+    "errant_flesh_bat":   { "dd2": ["courtier_swarm"] },
+    "errant_flesh_dog":   { "dd2": ["shared_dog_rabid"] },
+    "cyst":               { "dd2": ["coven_matres_sequelae"] },
+    "cell_white":         { "dd2": ["shared_lost_soul"] },
+    "cell_battle":        { "dd2": ["coven_mothers_spitter"] },
+    "crow":               { "dd2": ["beastmen_rot_claw"] }
   }
 }
