@@ -359,6 +359,20 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "skill":
+                string skillOverride = Text(key + "_" + value, localize);
+                if (skillOverride != null)
+                {
+                    string skillText = Format(skillOverride, effect);
+                    return skillText != null && skillText.Contains(effect) ? Plain(skillText) : null;
+                }
+                string skillName = Text("skill_name_" + value, localize);
+                if (skillName == null) return null;
+                // The mastery decoration in a skill name is not an additional trinket requirement.
+                skillName = Plain(Regex.Replace(skillName, @"<sprite[^>]*\bicon_upgraded_skill\b[^>]*>", ""));
+                if (skillName == null) return null;
+                args = new object[] { skillName, effect };
+                break;
             case "token_amount":
             case "dot_tag_amount":
                 bool tokenCondition = type == "token_amount";

@@ -252,6 +252,42 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void NamedSkillRequirementsKeepEachStatAndTriggeredEffectWithItsSkill()
+    {
+        string effects = Data.Effects("trinket_hero_bh_utility_belt", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Caltrops: +25% Debuff RES Piercing", effects);
+        Assert.Contains("Apply On Hit: Flashbang: Blind", effects);
+        Assert.Contains("Apply On Hit: Hurlbat: Weak", effects);
+        Assert.DoesNotContain("Upgraded skill", effects);
+        Assert.Contains("Self: Raucous Revelry: Strength (95%) or Raucous Revelry: Daze (5%)",
+            Data.Effects("trinket_hero_hel_empty_stein", out _));
+        Assert.Contains("Target: Play Out: Remove 1 Negative Token", Data.Effects("trinket_hero_jes_buskers_haul", out _));
+    }
+
+    [Fact]
+    public void NamedSkillLocalizationAndNativeSpecificOverridesAreUsed()
+    {
+        string effects = Data.Effects("trinket_hero_bh_utility_belt", out _,
+            key => key == "skill_name_bh_caltrops" ? "Chausse-trappes" : null);
+        Assert.Contains("Chausse-trappes: +25% Debuff RES Piercing", effects);
+        effects = Data.Effects("trinket_hero_bh_utility_belt", out _,
+            key => key == "effect_tooltip_condition_skill_bh_flashbang" ? "Flashbang only: {0}" : null);
+        Assert.Contains("Apply On Hit: Flashbang only: Blind", effects);
+    }
+
+    [Fact]
+    public void MalformedNamedSkillConditionWithholdsItsEffectsAndPreservesOtherTriggers()
+    {
+        string effects = Data.Effects("trinket_hero_hel_empty_stein", out bool complete,
+            key => key == "effect_tooltip_condition_skill" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Strength", effects);
+        Assert.DoesNotContain("Daze", effects);
+        Assert.Contains("When Stress Healed: +1% CRIT (1 Battle)", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);
