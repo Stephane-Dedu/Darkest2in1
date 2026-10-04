@@ -288,6 +288,42 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void ResistanceBypassDoesNotHideNativeSelfEffectsOrSkillDebuffs()
+    {
+        string effects = Data.Effects("trinket_general_strong_shackles", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Apply On Hit: Immobilize", effects);
+        Assert.Contains("Gain On Hit: Immobilize", effects);
+        effects = Data.Effects("trinket_hero_hel_empty_stein", out complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Barbaric YAWP!: -20% Debuff RES (3 Turns)", effects);
+        Assert.Contains("Raucous Revelry: Strength (95%) or Raucous Revelry: Daze (5%)", effects);
+    }
+
+    [Fact]
+    public void ResistanceBypassChoicesKeepSeparateQuantitiesAndTheirMissPenalty()
+    {
+        string effects = Data.Effects("trinket_coast_pristine_lure", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On Hit: Taunt (50%) or Tauntx2 (25%)", effects);
+        Assert.Contains("Gain On Miss: Bleed 2 (3 Turns)", effects);
+    }
+
+    [Fact]
+    public void ResistanceBypassStatPenaltyRetainsLifetimeAndSafeMalformedFallback()
+    {
+        string effects = Data.Effects("trinket_cultist_idle_thought", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+100% DMG", effects);
+        Assert.Contains("Round End: -30% DMG (1 Battle)", effects);
+        effects = Data.Effects("trinket_cultist_idle_thought", out complete,
+            key => key == "buff_combat_end_single_duration_label" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("-30%", effects);
+        Assert.Contains("+100% DMG", effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

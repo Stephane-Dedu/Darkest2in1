@@ -119,7 +119,7 @@ public sealed class TrinketDescriptions
         "m_TokenAddId", "m_TokenAddAmount", "m_TokenAddAmountRange", "m_StressDamage", "m_StressHeal",
         "m_HealthDamageAmount", "m_HealthHealAmount", "m_HealthHealPercent",
         "m_DotAddId", "m_DotAddAmount", "m_DotAddAmountRange",
-        "m_Priority", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
+        "m_Priority", "m_IgnoreResist", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
         "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
         "buffs",
     };
@@ -129,6 +129,9 @@ public sealed class TrinketDescriptions
         if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
         // An unhandled field may change a target, quantity, duration or chance. Withhold the whole effect.
         if (rows.Any(row => !SimpleEffectFields.Contains(row[0]))) return null;
+        // DD2's formatter includes these effects; resistance bypass changes application rather than its text.
+        string ignoreResist = Field("Effect", id, "m_IgnoreResist");
+        if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
         var parts = new List<string>();
         foreach (string buff in Values("Effect", id, "buffs"))
         {
