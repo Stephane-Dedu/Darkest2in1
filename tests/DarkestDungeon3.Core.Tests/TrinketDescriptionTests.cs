@@ -130,6 +130,49 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void TokenRequirementsKeepTheirActorAndPresenceOrAbsence()
+    {
+        string stealth = Data.Effects("trinket_hero_gr_foreclosure_notice", out _);
+        Assert.Contains("+20% DMG when self has Stealth", stealth);
+        Assert.Contains("-25% Healing Received from Skills when self has no Stealth", stealth);
+        string target = Data.Effects("trinket_cave_bone_mallet", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+25% DMG when target has Daze", target);
+        Assert.Contains("+50% DMG when target has Stun", target);
+        Assert.Contains("+10% CRIT when target has Combo", Data.Effects("trinket_cave_pig_sticker", out _));
+    }
+
+    [Fact]
+    public void DotRequirementsWrapBothStatBonusesAndTriggeredPenalties()
+    {
+        string effects = Data.Effects("trinket_hero_run_carved_toy", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+25% Debuff RES Piercing when target Burn", effects);
+        effects = Data.Effects("trinket_cultist_key_dark_impulse_bleed_res", out complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: +1 Stress when self Bleed", effects);
+        Assert.Contains("+50% Bleed RES", effects);
+        string localized = Data.Effects("trinket_cultist_key_dark_impulse_bleed_res", out _,
+            key => key == "effect_tooltip_actor_type_performer" ? "soi" : null);
+        Assert.Contains("when soi Bleed", localized);
+    }
+
+    [Fact]
+    public void MalformedCombatStateConditionsWithholdOnlyTheirConditionalLines()
+    {
+        string token = Data.Effects("trinket_cave_pig_sticker", out bool complete,
+            key => key == "effect_tooltip_condition_token_amount_nonzero" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("CRIT when", token);
+        Assert.Contains("Stealth when Flame is below 50", token);
+        string dot = Data.Effects("trinket_cultist_key_dark_impulse_bleed_res", out complete,
+            key => key == "effect_tooltip_condition_dot_tag_amount_nonzero" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Stress", dot);
+        Assert.Contains("+50% Bleed RES", dot);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

@@ -269,6 +269,38 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "token_amount":
+            case "dot_tag_amount":
+                bool tokenCondition = type == "token_amount";
+                string stateName = Text((tokenCondition ? "token_" : "dot_") + value, localize);
+                if (stateName == null || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
+                    CultureInfo.InvariantCulture, out float stateAmount) || float.IsNaN(stateAmount) || float.IsInfinity(stateAmount)) return null;
+                bool nonzero = (numberType == "GREATER_THAN" && stateAmount == 0) || (numberType == "GREATER_THAN_OR_EQUAL" && stateAmount == 1);
+                bool one = tokenCondition && (numberType == "EQUAL" || numberType == "MULTIPLE") && stateAmount == 1;
+                if (nonzero || one || (tokenCondition && numberType == "EQUAL" && stateAmount == 0))
+                {
+                    string actorName = Text("effect_tooltip_actor_type_" + actor?.ToLowerInvariant(), localize);
+                    if (actorName == null) return null;
+                    if (numberType == "MULTIPLE")
+                    { key += "_multiple"; args = new object[] { stateName, effect }; }
+                    else
+                    {
+                        key += stateAmount == 0 && numberType == "EQUAL" ? "_zero" : "_nonzero";
+                        // Native DOT presence and token absence can provide actor-specific templates.
+                        if ((!tokenCondition || key.EndsWith("_zero", StringComparison.Ordinal))
+                            && Text(key + "_" + actor?.ToLowerInvariant(), localize) != null) key += "_" + actor.ToLowerInvariant();
+                        args = new object[] { actorName, stateName, effect };
+                    }
+                }
+                else if (!tokenCondition && numberType == "EQUAL" && stateAmount == 0)
+                { key += "_zero"; args = new object[] { stateName, effect }; }
+                else
+                {
+                    string stateComparison = Compare(id, false, localize);
+                    if (stateComparison == null) return null;
+                    args = new object[] { stateName, stateComparison, "", effect };
+                }
+                break;
             case "skill_tag":
             case "biome":
             case "biome_sub_type":
