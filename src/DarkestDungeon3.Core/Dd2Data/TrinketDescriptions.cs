@@ -25,7 +25,7 @@ public sealed class TrinketDescriptions
     {
         var data = new TrinketDescriptions();
         string excel = Path.Combine(streamingAssets, "Excel");
-        foreach (string file in new[] { "trinkets", "buff", "condition", "effect", "dots" })
+        foreach (string file in new[] { "trinkets", "buff", "condition", "effect", "dots", "trinkets_actor_effect_trigger" })
             foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, file + "_data_export.Group.csv")))
                 data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");

@@ -435,6 +435,46 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void SeparateTrinketTableProvidesBothStorageRoomKeySkillEffects()
+    {
+        string effects = Data.Effects("trinket_hero_pd_storage_room_key", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Target: Ounce of Prevention: Block", effects);
+        Assert.Contains("Target: Emboldening Vapours: Regen 2 (3 Turns)", effects);
+        Assert.Contains("+1 Speed per Medical Gear item equipped", effects);
+        Assert.Contains("Gain On Miss: -1 Speed (3 Turns)", effects);
+    }
+
+    [Fact]
+    public void SeparateTrinketTableRetainsSkillRequirementsAndExistingPenalties()
+    {
+        string effects = Data.Effects("trinket_hero_flg_his_prison", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Self: More! MORE!: Strength", effects);
+        Assert.Contains("-20% Blight RES", effects);
+        effects = Data.Effects("trinket_collector_barristans_head", out complete);
+        Assert.True(complete);
+        Assert.Contains("Self: Melee Skills: Block", effects);
+        Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+        effects = Data.Effects("trinket_hero_gr_foreclosure_notice", out complete);
+        Assert.True(complete);
+        Assert.Contains("Self: Shadow Fade: Remove All Negative Tokens", effects);
+        Assert.Contains("-25% Healing Received from Skills when self has no Stealth", effects);
+    }
+
+    [Fact]
+    public void SeparateTrinketTableKeepsUnsupportedTriggerRoutingIncomplete()
+    {
+        string effects = Data.Effects("trinket_curio_grim_mask", out bool complete);
+        Assert.False(complete);
+        Assert.Contains("Each Ally On Turn End: +1 Stress (33%) when Flame is below 50", effects);
+        Assert.Contains("+40% DMG when Flame is below 50", effects);
+        effects = Data.Effects("trinket_general_thrilling_tablet", out complete);
+        Assert.False(complete);
+        Assert.Null(effects);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);
