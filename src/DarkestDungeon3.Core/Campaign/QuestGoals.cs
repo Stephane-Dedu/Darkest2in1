@@ -41,6 +41,8 @@ public sealed class PlotQuest
     /// <summary>DD1: buffs the whole roster gets when a party of at least this resolve fails the quest.</summary>
     public List<string> RosterBuffsOnFailure = new();
     public int RosterBuffMinResolve;
+    /// <summary>DD1's hand-made map for the quest (maps/&lt;name&gt;.dm), e.g. the Darkest Dungeon's DD_map1; null = generated.</summary>
+    public string MapName;
 }
 
 public sealed class QuestGoals
@@ -102,6 +104,7 @@ public sealed class QuestGoals
                 ClearsRosterStress = (bool?)p["is_roster_stress_cleared_on_completion"] ?? false,
                 RosterBuffsOnFailure = (p["roster_buffs_to_apply_on_failure"] as JArray ?? new JArray()).Select(x => (string)x).ToList(),
                 RosterBuffMinResolve = (int?)p["roster_buff_on_failure_minimum_party_resolve_level"] ?? 0,
+                MapName = string.IsNullOrEmpty((string)quest["map_name"]) ? null : (string)quest["map_name"],
             };
             foreach (var item in (quest["completion_reward"]?["items_definition"]?["items"] as JObject)?.Properties().Select(x => x.Value) ?? Enumerable.Empty<JToken>())
             {

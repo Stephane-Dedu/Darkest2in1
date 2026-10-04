@@ -105,6 +105,41 @@ public class PlotMapTests
         Assert.Equal(new[] { "cultist_shrouded_D", "cultist_warlord_D", "cultist_harpy_D", "cultist_harpy_D" }, crawl.FightMonsters("room"));
     }
 
+    [Fact]
+    public void TheDarkestDungeonEmbarksOnDd1sOwnMaps()
+    {
+        var parts = Dd1.Goals.Plot.Where(p => p.Id.StartsWith("plot_darkest_dungeon_")).OrderBy(p => p.Id).ToList();
+        Assert.Equal(new[] { "DD_map1", "DD_map2", "DD_map3", "DD_map4" }, parts.Select(p => p.MapName));
+        Assert.Null(Dd1.Goals.Plot.First(p => p.Id == "plot_kill_necromancer_1").MapName);   // boss quests stay generated
+
+        var heroes = new[] { "crusader", "vestal", "highwayman", "plague_doctor" }
+            .Select((c, i) => new HeroRecord { Id = "h" + i, Name = c, ClassId = c, ResolveLevel = 5 }).ToList();
+        ExpeditionState Embark(PlotQuest p) => Campaign.Embark.Create(Dd1, new QuestOffer
+        {
+            Id = p.Id, PlotId = p.Id, Dungeon = p.Dungeon, Type = p.Type, Length = p.Length, Difficulty = p.Difficulty,
+            MapSeed = 3, GoalId = p.GoalIds.FirstOrDefault(), MapName = p.MapName,
+        }, heroes, new Inventory());
+
+        var one = Embark(parts[0]).Map;
+        Assert.Equal(15, one.Rooms.Count);                        // DD_map1, not a generated map
+        Assert.Equal(RoomContent.Boss, one.Room(one.BossRoomId).Content);
+
+        var two = Embark(parts[1]);                                // three beacons, each behind a miniboss
+        var beacons = two.Map.Rooms.Where(r => r.IsQuestGoal).ToList();
+        Assert.Equal(3, beacons.Count);
+        Assert.All(beacons, r => Assert.Equal("beacon", r.CurioId));
+        Assert.All(beacons, r => Assert.StartsWith("dd_quest_2_miniboss_", r.MashName));
+        Assert.Equal(3, two.Pack.Count(ItemCatalog.QuestKey("beacon_light")));
+
+        var three = Embark(parts[2]).Map;                          // the teleporter behind its guards
+        var teleporter = Assert.Single(three.Rooms, r => r.IsQuestGoal);
+        Assert.Equal("teleporter", teleporter.CurioId);
+        Assert.Equal("dd_quest_3_teleport", teleporter.MashName);
+
+        var four = Embark(parts[3]).Map;
+        Assert.Equal(28, Assert.Single(four.Corridors).Tiles.Count);
+    }
+
     [Theory]
     [InlineData("DD_map2", "darkestdungeon", "inventory_activate", 18, 22)]
     [InlineData("DD_map3", "darkestdungeon", "activate", 31, 43)]

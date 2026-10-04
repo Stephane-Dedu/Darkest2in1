@@ -22,6 +22,7 @@ public sealed class QuestOffer
     public bool ClearsRosterStress; // a Darkest Dungeon win clears the whole roster's stress
     public List<string> RosterBuffsOnFailure = new();   // a seasoned party's failure inspires the roster (DD1)
     public int RosterBuffMinResolve;
+    public string MapName;          // DD1's hand-made map (the Darkest Dungeon), else null: generated
     public List<Reward> Rewards = new();
 
     public string Size => Length switch { 1 => "short", 2 => "medium", _ => "long" };

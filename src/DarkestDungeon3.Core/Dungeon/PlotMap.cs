@@ -113,6 +113,34 @@ public static class PlotMap
         return map;
     }
 
+    /// <summary>
+    /// An activate/gather goal's curios on a hand-made map (DD_map2's three beacons, DD_map3's teleporter). The map file
+    /// doesn't mark them: they go in the curio rooms (code 6) held by a set fight of their own (a miniboss or the
+    /// teleporter's guards, not one of the quest's numbered <c>_mash_NN</c> rows), as the Unity port's copies of these maps
+    /// have them; then the curio rooms farthest from the entrance.
+    /// </summary>
+    public static void PlaceGoal(DungeonMap map, Campaign.QuestGoal goal)
+    {
+        if (goal == null || string.IsNullOrEmpty(goal.CurioName) || goal.Amount <= 0) return;
+        var dist = map.Distances(map.EntranceRoomId);
+        var rooms = map.Rooms.Where(r => r.Content is RoomContent.Curio or RoomContent.GuardedCurio && r.Id != map.EntranceRoomId)
+                             .OrderBy(r => r.MashName != null && !NumberedMash(r.MashName) ? 0 : 1)
+                             .ThenByDescending(r => dist[r.Id])
+                             .ThenBy(r => r.Id)
+                             .Take(goal.Amount);
+        foreach (var r in rooms)
+        {
+            r.CurioId = goal.CurioName;
+            r.IsQuestGoal = true;
+        }
+    }
+
+    private static bool NumberedMash(string name)
+    {
+        int i = name.LastIndexOf("_mash_", StringComparison.Ordinal);
+        return i >= 0 && name.Substring(i + 6).All(char.IsDigit);
+    }
+
     private static string Mash(Dd1Binary.Node tile)
     {
         var name = tile?["mash_name"]?.String;

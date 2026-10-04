@@ -96,6 +96,7 @@ public static class QuestBoard
                 ClearsRosterStress = p.ClearsRosterStress,
                 RosterBuffsOnFailure = p.RosterBuffsOnFailure.ToList(),
                 RosterBuffMinResolve = p.RosterBuffMinResolve,
+                MapName = p.MapName,
             };
         }
 

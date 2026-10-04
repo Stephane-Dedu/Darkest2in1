@@ -94,8 +94,14 @@ public static class Embark
                                          Provisioner provisioner = null)
     {
         var goal = dd1.Goals?.For(quest);
-        var p = dd1.MapGen.Find(quest.Dungeon, quest.Size, quest.Type);
-        var map = MapGenerator.Generate(p, quest.MapSeed, dd1.Props(quest.Dungeon), goal);
+        DungeonMap map;
+        if (dd1.Install != null && PlotMap.Exists(dd1.Install, quest.MapName))
+        {
+            // DD1's hand-made map (the Darkest Dungeon's parts): its layout, set fights and the goal's curios.
+            map = PlotMap.Load(dd1.Install, quest.MapName, quest.Dungeon, quest.Type, quest.MapSeed, dd1.Props(quest.Dungeon));
+            PlotMap.PlaceGoal(map, goal);
+        }
+        else map = MapGenerator.Generate(dd1.MapGen.Find(quest.Dungeon, quest.Size, quest.Type), quest.MapSeed, dd1.Props(quest.Dungeon), goal);
 
         var state = new ExpeditionState
         {

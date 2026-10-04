@@ -43,7 +43,23 @@ public class DebugKeys : MonoBehaviour
                     Plugin.Log.LogInfo("[F3] walking to battle room " + (target?.Id.ToString() ?? "none"));
                 }
             }
-            if (kb.f4Key.wasPressedThisFrame)
+            if (kb.f4Key.wasPressedThisFrame && kb.shiftKey.isPressed)
+            {
+                // Shift+F4, test estate only: open the Darkest Dungeon (a zone at level 6, the roster at resolve 5).
+                var session = Runtime.Session.Current;
+                if (session?.SavePath != null && System.IO.Path.GetFileName(session.SavePath) == "estate_2.json")
+                {
+                    var e = session.Save.Estate;
+                    e.ZoneXp["crypts"] = System.Math.Max(e.ZoneXp.TryGetValue("crypts", out var zx) ? zx : 0, 100000);
+                    foreach (var h in e.Roster) h.ResolveLevel = System.Math.Max(h.ResolveLevel, 5);
+                    e.Quests = Core.Campaign.QuestBoard.Generate(e, session.Campaign, session.Hamlet.ToggledZones());
+                    session.Persist();
+                    var dd = e.Quests.FirstOrDefault(q => q.Dungeon == "darkestdungeon");
+                    Plugin.Log.LogInfo($"[F4] Darkest Dungeon open: {dd?.PlotId ?? "no offer"} map {dd?.MapName ?? "-"}");
+                }
+                else Plugin.Log.LogInfo("[F4] only works on the test estate (slot 2)");
+            }
+            else if (kb.f4Key.wasPressedThisFrame)
             {
                 // Test estate only (slot 2): open the service buildings, add gold and the first Blacksmith upgrades.
                 var session = Runtime.Session.Current;
