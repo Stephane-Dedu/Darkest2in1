@@ -93,7 +93,7 @@ public class HamletTests
         Assert.Equal(0, h.Estate.Get(Currency.Gold));
         // The Ruins tutorial waits on the board (plot_tutorial_crypts, Ruins level 0) on DD1's own map.
         var tutorial = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_tutorial_crypts");
-        Assert.Equal(("crypts", "explore", "tutorial_crypts"), (tutorial.Dungeon, tutorial.Type, tutorial.MapName));
+        Assert.Equal(("dd2_city", "explore", "tutorial_crypts"), (tutorial.Dungeon, tutorial.Type, tutorial.MapName));
         Assert.DoesNotContain("plot_tutorial_crypts", h.Estate.CompletedPlotQuests);
         // The first coach: stage_coach.building.json first_hero_classes.
         Assert.Equal(new[] { "plague_doctor", "vestal" }, h.Estate.Recruits.Take(2).Select(r => r.ClassId));

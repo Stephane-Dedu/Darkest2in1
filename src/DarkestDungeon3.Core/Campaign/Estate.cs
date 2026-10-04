@@ -41,6 +41,7 @@ public sealed class Estate
     public List<QuestOffer> Quests = new();
     public List<string> Trinkets = new();
     public List<string> WagonStock = new();
+    public int RegionLayoutVersion;
     /// <summary>Messages for the next town screen ("Dismas went missing", ...).</summary>
     public List<string> TownLog = new();
     /// <summary>This town visit's DD1 town event (null: none), and what the roll needs to remember.</summary>

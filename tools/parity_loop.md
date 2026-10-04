@@ -1,5 +1,9 @@
 You are iterating on Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. Each round, close ONE gap between this mod and real DD1. Work only on branch claude/practical-wright-hicri0.
 
+Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
+region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
+preserve campaign progress. CLAUDE.md is authoritative for this direction and the separate no-launch rule.
+
 ## Ground rules (never break these)
 - Read MODLOG.md and PARITY.md before doing anything. Anything not written in them is lost at the next compaction.
 - DD1 is the reference, not memory. Check behavior against the DD1 install's data (campaign/, dungeons/, monsters/, shared/, upgrades/, localization) and the Unity port at C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity. For DD2 internals, use the local decomp. Never read C:\Users\Piral\Documents\DD1inDD2.

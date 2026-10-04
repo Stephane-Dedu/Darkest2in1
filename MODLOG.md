@@ -668,10 +668,20 @@ DD1 base.entries.trinkets.json limits are not all one: 330 entries limit 1, 159 
 
 Release build, 166 Core + 11 bridge/input tests pass. Five new rule tests verify conservation/refusal, unlimited versus limited copies, source/destination swaps, same-hero moves, right-only JSON roundtrip and unavailable/unrecruited heroes. One concurrent test run hit a shared MSBuild obj-file lock; its sequential rerun passed (not a code/test failure). No launch or save write; native mouse checks remain [?]. Next: DD1 tooltip fonts/colors and inventory presentation, remaining cold-menu effects and combat startup.
 
-## Status 2026-10-04: loop resumed, round 54 complete
+## Round 55: DD2 becomes the main campaign geography
+
+Owner requested a larger refactor after round 54: DD2 areas become primary, DD1 areas remain optional through current toggles; choose backgrounds for coherent, fluid UI/UX. Updated CLAUDE.md and the loop/handoff pointers so later sessions retain this superseding direction. DD1 remains the source for expedition rules, maps, camping, loot and economy; combat remains native DD2.
+
+Core CampaignRegions owns the four default destinations (Sprawl/Foetor/Tangle/Shroud), optional original areas and Sluice, toggle defaults, mapped unlock thresholds and versioned migration. QuestBoard now offers only enabled/unlocked regions and guarantees each open area a regular contract. Native lair tiers still use DD1's level/difficulty/reward cadence; the Darkest Dungeon chain still reads the strongest open region. The introduction and crow event can retain their DD1 story maps/objectives in a native region; legacy boss chains stay with optional original areas. Toggling does not reset XP, and duplicate story offers are filtered.
+
+Migration is in memory on normal estate load: copy legacy XP only when higher than the native region's current XP, preserve originals, explicit toggles, completed plots and quest seeds/rewards; translate ordinary destinations, remove disabled board entries, and add reachable plot offers once. Active expedition state is outside this migration. New estates start at the current layout version. Found and removed Session.Migrate's stale automatic tutorial payout/completion, which defeated round 41's playable tutorial at the integration layer. No actual saves were touched for these tests.
+
+Release build and 170 Core tests pass. Four new migration/default/toggle tests pass; nine earlier assertions intentionally expected DD1 defaults and were updated to the new directive. Legacy boss tests explicitly enable the original area; map assertions check its rules template, and the endgame test progresses a native region. Presentation/quest-board UI is the next round; current changes are not yet deployed. Native migration/playthrough checks remain [?].
+
+## Status 2026-10-04: loop resumed, round 55 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next priorities: absent trinket effects and DD1 equip/inventory policy/UI; combat startup scans/timings. Then persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
+- Active refactor: region board layout/toggles, native DD2 arena presentation and startup responsiveness. Retain pending trinket typography/complex cold-menu effects. Then persistent activity-log weeks/art, secret rooms and Memorial collection/narration. Skip [user] and [blocked] items.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.

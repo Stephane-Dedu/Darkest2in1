@@ -15,11 +15,11 @@ public static class QuestBoard
         var rng = estate.NextRng();
         int progress = Math.Max(0, estate.QuestsCompleted);
 
-        var zones = dd1.ZoneUnlocks.Where(z => estate.QuestsCompleted >= z.Value).Select(z => z.Key).ToList();
-        if (extraZones != null) zones.AddRange(extraZones.Where(z => !zones.Contains(z)));
+        var zones = CampaignRegions.Open(estate, dd1).ToList();
+        if (extraZones != null) zones.AddRange(extraZones.Where(z => !zones.Contains(z) && CampaignRegions.Enabled(estate, z) && CampaignRegions.Unlocked(estate, dd1, z)));
         if (zones.Count == 0) return new List<QuestOffer>();
 
-        int count = At(dd1.QuestsPerVisit, progress, 2);
+        int count = Math.Max(zones.Count, At(dd1.QuestsPerVisit, progress, 2));
         var offers = new List<QuestOffer>();
 
         // Deal zones round-robin from a shuffled order, so every open zone gets work before any gets a second.
@@ -33,6 +33,7 @@ public static class QuestBoard
     /// <summary>Quests for one zone switched on mid-week (an estate option): a couple of regular ones and its boss.</summary>
     public static List<QuestOffer> OffersFor(Estate estate, Dd1Campaign dd1, string zone, int count = 2)
     {
+        if (!CampaignRegions.Enabled(estate, zone) || !CampaignRegions.Unlocked(estate, dd1, zone)) return new List<QuestOffer>();
         var rng = estate.NextRng();
         int progress = Math.Max(0, estate.QuestsCompleted);
         var offers = new List<QuestOffer>();
@@ -60,7 +61,7 @@ public static class QuestBoard
         return new QuestOffer
         {
             Id = "plot:" + p.Id,
-            Dungeon = p.Dungeon,
+            Dungeon = CampaignRegions.StoryRegion(estate, p),
             Type = p.Type,
             Length = Math.Min(3, p.Length),
             Difficulty = p.Difficulty,
@@ -99,9 +100,10 @@ public static class QuestBoard
         foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && (p.Type != "explore" || p.MapName != null)))
         {
             if (estate.CompletedPlotQuests.Contains(p.Id)) continue;
+            string destination = CampaignRegions.StoryRegion(estate, p);
             bool available = p.Dungeon == DarkestDungeon
                 ? p == nextDarkest && bestZoneLevel >= 6
-                : open.Contains(p.Dungeon) && dd1.ZoneLevel(estate.ZoneXp.TryGetValue(p.Dungeon, out var xp) ? xp : 0) >= p.ZoneLevel;
+                : open.Contains(destination) && dd1.ZoneLevel(estate.ZoneXp.TryGetValue(destination, out var xp) ? xp : 0) >= p.ZoneLevel;
             if (!available) continue;
             yield return PlotOffer(estate, dd1, p);
         }

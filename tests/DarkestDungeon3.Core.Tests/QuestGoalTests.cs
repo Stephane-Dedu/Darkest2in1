@@ -34,7 +34,8 @@ public class QuestGoalTests
     public void BossQuestsAppearAtZoneLevel()
     {
         var estate = new Estate { Seed = 1, QuestsCompleted = 5 };
-        estate.CompletedPlotQuests.Add("plot_tutorial_crypts");   // the Ruins tutorial is played
+        estate.Toggles["zone.crypts"] = true;  // DD1 boss chains remain playable when the original area is enabled.
+        estate.CompletedPlotQuests.Add("plot_tutorial_crypts");   // the tutorial is played
         Assert.DoesNotContain(QuestBoard.Generate(estate, Dd1), q => q.IsPlot);
 
         estate.ZoneXp["crypts"] = 6;  // zone level 2: the Necromancer
@@ -53,7 +54,7 @@ public class QuestGoalTests
     public void DarkestDungeonOpensAtZoneLevelSixOnePartAtATime()
     {
         var estate = new Estate { Seed = 2, QuestsCompleted = 9 };
-        estate.ZoneXp["weald"] = 32;  // level 6
+        estate.ZoneXp["dd2_forest"] = 32;  // level 6
         var dd = QuestBoard.Generate(estate, Dd1).Where(q => q.Dungeon == QuestBoard.DarkestDungeon).ToList();
         Assert.Equal("plot_darkest_dungeon_1", Assert.Single(dd).PlotId);
         estate.CompletedPlotQuests.Add("plot_darkest_dungeon_1");

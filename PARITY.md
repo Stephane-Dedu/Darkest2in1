@@ -1,4 +1,10 @@
-# DD1 parity checklist
+# Campaign parity and refactor checklist
+
+Owner directive 2026-10-04 after round 54: DD2 regions become the main campaign destinations; DD1 regions remain optional through region toggles. Retain DD1 expedition systems and DD2 combat. Choose backgrounds and transitions for coherence and responsiveness. This overrides the old DD1-first destination order; historical [x] entries remain historical evidence.
+
+- [?] Refactor campaign, round 55: Sprawl/Foetor/Tangle/Shroud default; DD1 areas and Sluice optional, using the same zone toggles and mapped DD1 unlock thresholds. Versioned Core migration carries XP with max(existing, legacy), translates regular quest destinations without changing seeds/rewards, preserves explicit toggles/completed plots, and runs once. It does not touch active expedition state. Native lair tiers and Darkest Dungeon progression remain reachable; intro/crow stories use a native region when the original is off. Removed Session's stale automatic tutorial payout/completion. Release + 170 Core tests pass. Native estate load, toggles, tutorial and return cycle remain unverified; no save files were read/written for migration tests.
+- [ ] Refactor quest board: clear region selection and quest list with no overlap under the detail scroll; optional regions fit without stacking over each other.
+- [ ] Refactor presentation: DD2 areas use native arenas/enemies/light; optional DD1 areas keep the flat DD1 scene. Preserve the exploration scene during loading and fade smoothly once combat is ready. Measure startup; retain coherent DD1 exploration art as fallback.
 
 One line per DD1 system or behaviour. Combat itself stays DD2's by design: "parity" means DD1's systems around it.
 DD1 paths are relative to `C:\Program Files (x86)\Steam\steamapps\common\DarkestDungeon`.

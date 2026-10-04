@@ -4,6 +4,12 @@ Darkest Dungeon 1's game loop (Hamlet, quests, provisioning, room/corridor dunge
 plot quests, the Darkest Dungeon) played inside Darkest Dungeon II with DD2's heroes and DD2's combat. BepInEx 5 +
 HarmonyX plugin for DD2 v2.04 (Unity 2022.3, Mono). Repo: https://github.com/Stephane-Dedu/Darkest2in1.
 
+## Current direction (owner, 2026-10-04)
+DD2's Sprawl, Foetor, Tangle and Shroud are the default campaign regions. Keep DD1 destinations available through
+region toggles. Retain DD1 expedition systems and DD2 combat; choose exploration/fight backgrounds for coherent,
+responsive UI and transitions. Preserve existing campaign progress and explicit region choices. This supersedes
+DD1-first region defaults; the no-launch and save-protection rules still apply.
+
 ## Read first, every session
 1. `MODLOG.md`: the journal (decomp facts, DD1 data formats, gotchas, click coordinates, debug keys). Append to it as you learn.
 2. `PARITY.md`: the checklist against real DD1 (`[x]` verified in game, `[ ]` missing/wrong, `[?]` built but not seen in
@@ -21,7 +27,7 @@ HarmonyX plugin for DD2 v2.04 (Unity 2022.3, Mono). Repo: https://github.com/Ste
   game runs, and mark game-facing changes `[?]` with what to check.
 - Decide and act on the project without asking (this machine and this repo only). Commit and push to the working branch
   after each change.
-- DD1 is the reference: its data files, plus the Unity port as a reference and parts bin. Combat stays DD2's.
+- DD1 data and the Unity port define expedition systems; DD2 data defines the default regions and native combat.
 - Never read or reuse `C:\Users\Piral\Documents\DD1inDD2` (an older, abandoned attempt).
 - The Unity port (`C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity`, GPL, personal use) may be used completely, except its
   bundled Spine runtime.

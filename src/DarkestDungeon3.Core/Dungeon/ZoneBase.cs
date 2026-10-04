@@ -10,7 +10,13 @@ namespace DarkestDungeon3.Core.Dungeon;
 public static class ZoneBase
 {
     // Written by every ZoneEncounters.Load (the tests load several at once).
-    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string Dd1Zone, string Boss)> Extra = new();
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, (string Dd1Zone, string Boss)> Extra = new(
+        new Dictionary<string, (string, string)>
+        {
+            ["dd2_city"] = ("crypts", "librarian"), ["dd2_farm"] = ("warrens", "harvest_child"),
+            ["dd2_forest"] = ("weald", "dreaming_general"), ["dd2_coast"] = ("cove", "leviathan"),
+            ["dd2_cave"] = ("warrens", "exemplar"),
+        });
 
     public static void Register(string zone, string dd1Zone, string boss)
     {

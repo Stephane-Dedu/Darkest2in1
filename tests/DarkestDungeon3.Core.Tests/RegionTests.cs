@@ -54,7 +54,7 @@ public class RegionTests
     [Fact]
     public void ToggledRegionsJoinTheBoard()
     {
-        var estate = new Estate { Seed = 5 };
+        var estate = new Estate { Seed = 5, QuestsCompleted = 4 };
         estate.Toggles["zone.dd2_farm"] = true;
         var board = QuestBoard.Generate(estate, Dd1, new[] { "dd2_farm" });
         Assert.Contains(board, q => q.Dungeon == "dd2_farm");
@@ -68,10 +68,10 @@ public class RegionTests
     public void LairBossTiersOpenAtZoneLevelsTwoFourAndSix()
     {
         var estate = new Estate { Seed = 3 };
-        Assert.DoesNotContain(QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }), q => q.Dungeon == "dd2_city");
+        Assert.DoesNotContain(QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }), q => q.Dungeon == "dd2_city" && q.Type == "kill_boss");
 
         estate.ZoneXp["dd2_city"] = Dd1.ZoneLevelThresholds[2];
-        var first = QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }).Single(q => q.Dungeon == "dd2_city");
+        var first = QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }).Single(q => q.Dungeon == "dd2_city" && q.Type == "kill_boss");
         Assert.Equal("kill_boss", first.Type);
         Assert.Equal("librarian", first.BossId);
         Assert.Equal(1, first.Difficulty);
@@ -81,9 +81,9 @@ public class RegionTests
 
         // Beaten: the next tier waits for zone level 4.
         estate.CompletedPlotQuests.Add(first.PlotId);
-        Assert.DoesNotContain(QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }), q => q.Dungeon == "dd2_city");
+        Assert.DoesNotContain(QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }), q => q.Dungeon == "dd2_city" && q.Type == "kill_boss");
         estate.ZoneXp["dd2_city"] = Dd1.ZoneLevelThresholds[4];
-        var second = QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }).Single(q => q.Dungeon == "dd2_city");
+        var second = QuestBoard.PlotOffers(estate, Dd1, new[] { "dd2_city" }).Single(q => q.Dungeon == "dd2_city" && q.Type == "kill_boss");
         Assert.Equal(3, second.Difficulty);
     }
 }

@@ -104,15 +104,7 @@ internal sealed class Session
     /// <summary>One-time fixes for estates saved by older builds of the mod.</summary>
     private void Migrate(Estate estate)
     {
-        // 0.2.0 started estates without the skipped tutorial's payout.
-        var tutorial = Campaign.Goals?.Plot.Find(p => p.Id == "plot_tutorial_crypts");
-        if (tutorial != null && !estate.CompletedPlotQuests.Contains(tutorial.Id))
-        {
-            foreach (var r in tutorial.Rewards) if (r.Type != "trinket") estate.Add(r.Type, r.Amount);
-            estate.CompletedPlotQuests.Add(tutorial.Id);
-            Plugin.Log.LogInfo("[session] migrated estate: added the tutorial's rewards");
-            Persist();
-        }
+        // Campaign/layout migration is owned by Core. Loading must not complete or pay the tutorial.
         var repairs = Hamlet.RepairEstate();
         foreach (var line in repairs) Plugin.Log.LogInfo("[session] repaired: " + line);
         if (repairs.Count > 0) Persist();

@@ -27,7 +27,7 @@ public sealed class Hamlet
     /// <summary>A brand-new estate: DD1 starts you with two heroes, some gold, and the Ruins open.</summary>
     public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
-        var estate = new Estate { Seed = seed };
+        var estate = new Estate { Seed = seed, RegionLayoutVersion = CampaignRegions.LayoutVersion };
         // DD1's new game (scripts/starting_save): the opening's wallet (heirlooms, no gold) and heroes.
         var start = dd1.Install != null ? StartingSave.Load(dd1.Install) : null;
         if (start != null && start.Wallet.Count > 0)
@@ -566,6 +566,7 @@ public sealed class Hamlet
     public List<string> RepairEstate()
     {
         var log = new List<string>();
+        if (CampaignRegions.Migrate(Estate, Dd1)) log.Add("campaign regions updated; existing progress retained");
         var rng = Estate.NextRng();
         if (!Estate.QuirksRepaired)
         {
@@ -579,7 +580,7 @@ public sealed class Hamlet
         foreach (var hero in Estate.Roster)
             foreach (var t in hero.WornTrinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
             {
-                hero.Trinkets.Remove(t);
+                hero.SetTrinket(hero.Trinkets.IndexOf(t), null);
                 Estate.Trinkets.Add(t);
                 log.Add($"{hero.Name} can't wear {t}: back in the stash");
             }
@@ -728,14 +729,15 @@ public sealed class Hamlet
     /// </summary>
     public void SetZoneToggle(string zone, bool on)
     {
-        if (Estate.IsToggled("zone." + zone) == on) return;
+        if (!CampaignRegions.Options.Contains(zone) || CampaignRegions.Enabled(Estate, zone) == on) return;
         Estate.Toggles["zone." + zone] = on;
         Estate.Quests.RemoveAll(q => q.Dungeon == zone);
-        if (on) Estate.Quests.AddRange(QuestBoard.OffersFor(Estate, Dd1, zone));
+        if (on) Estate.Quests.AddRange(QuestBoard.OffersFor(Estate, Dd1, zone)
+            .Where(q => q.PlotId == null || !Estate.Quests.Any(old => old.PlotId == q.PlotId)));
     }
 
     public IEnumerable<string> ToggledZones() =>
-        Estate.Toggles.Where(t => t.Value && t.Key.StartsWith("zone.")).Select(t => t.Key.Substring(5));
+        CampaignRegions.Options.Where(z => CampaignRegions.Enabled(Estate, z));
 
     // ---------------- helpers ----------------
 
