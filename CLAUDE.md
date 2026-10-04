@@ -10,7 +10,9 @@ region toggles. Retain DD1 expedition systems and DD2 combat; choose exploration
 responsive UI and transitions. Preserve existing campaign progress and explicit region choices. This supersedes
 DD1-first region defaults; the no-launch and save-protection rules still apply.
 Owner's map design: pair Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at the same map positions.
-Use the existing previous/next arrow art to switch enabled areas. Every area's XP, quests and bosses stay independent.
+Keep DD1's area names with their quests directly beneath each area. A single existing next-arrow beside the name on
+its right switches enabled areas at that position, such as Foetor/Warrens. Every area's XP, quests and bosses stay
+independent. Do not move contracts into a separate strip below the map.
 
 ## Read first, every session
 1. `MODLOG.md`: the journal (decomp facts, DD1 data formats, gotchas, click coordinates, debug keys). Append to it as you learn.

@@ -23,7 +23,6 @@ internal sealed class EmbarkUi
     private bool _confirmLow, _provisioning;
     private readonly Dictionary<string, string> _mapAreas = new();
     private string _focusedZone;
-    private Vector2 _questListScroll;
 
     public bool WantsBack;
 
@@ -89,8 +88,7 @@ internal sealed class EmbarkUi
         if (_focusedZone == null || (_focusedZone != QuestBoard.DarkestDungeon && !CampaignRegions.Enabled(E, _focusedZone)))
             FocusArea(_quest?.Dungeon ?? E.Quests.FirstOrDefault()?.Dungeon);
 
-        // Each pair shares the original estate-map position. Only the focused area's contracts are drawn below
-        // the map, so enabling optional regions never puts their controls under the quest-detail scroll.
+        // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
         var spots = MapSpots();
         foreach (var location in CampaignRegions.Legacy)
         {
@@ -103,7 +101,6 @@ internal sealed class EmbarkUi
         if (E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
             DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
 
-        DrawAreaQuests();
         if (_quest != null) DrawQuestScroll(_quest);
 
         DrawPartySlots(new Vector2(754, 900));
@@ -166,7 +163,6 @@ internal sealed class EmbarkUi
 
     private void FocusArea(string zone)
     {
-        if (_focusedZone != zone) _questListScroll = Vector2.zero;
         _focusedZone = zone;
         if (zone != null) _mapAreas[ZoneBase.Of(zone)] = zone;
         if (_quest?.Dungeon != zone || !E.Quests.Contains(_quest))
@@ -176,7 +172,12 @@ internal sealed class EmbarkUi
     private void SelectQuest(QuestOffer quest)
     {
         _quest = quest;
-        if (quest != null) _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), quest, S.Hamlet.AnyResolveCanEmbark));
+        if (quest != null)
+        {
+            _focusedZone = quest.Dungeon;
+            _mapAreas[ZoneBase.Of(quest.Dungeon)] = quest.Dungeon;
+            _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), quest, S.Hamlet.AnyResolveCanEmbark));
+        }
         _error = null;
     }
 
@@ -185,7 +186,9 @@ internal sealed class EmbarkUi
         var plate = Qs("dungeon_progressionbar.png");
         if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
         else Gui.Fill(new Rect(pos.x - 5, pos.y - 10, 282, 84), new Color(0, 0, 0, 0.8f));
-        Gui.Text(new Rect(pos.x + 4, pos.y - 6, 190, 30), S.Zones.ZoneName(zone), 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        string name = S.Zones.ZoneName(zone);
+        bool canSwitch = areas.Count > 1;
+        Gui.Text(new Rect(pos.x + 4, pos.y - 6, canSwitch ? 156 : 190, 30), name, 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
 
         E.ZoneXp.TryGetValue(zone, out int xp);
         int level = S.Campaign.ZoneLevel(xp);
@@ -197,62 +200,45 @@ internal sealed class EmbarkUi
             Gui.Fill(new Rect(pos.x + 14, pos.y + 32, 194 * Mathf.Clamp01((xp - from) / Mathf.Max(1, to - from)), 6), new Color(0.75f, 0.62f, 0.3f));
         }
         bool unlocked = zone == QuestBoard.DarkestDungeon || CampaignRegions.Unlocked(E, S.Campaign, zone);
-        int count = E.Quests.Count(q => q.Dungeon == zone);
-        string status = unlocked ? $"{count} quest{(count == 1 ? "" : "s")}" : $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests";
-        Gui.Text(new Rect(pos.x + 8, pos.y + 44, 258, 26), status, 16, unlocked ? Gui.Dd1Text : Gui.Dim, TextAnchor.MiddleLeft);
-        if (_focusedZone == zone) Gui.Fill(new Rect(pos.x + 8, pos.y + 72, 258, 2), Gui.Gold);
-        if (Gui.Hotspot(new Rect(pos.x - 5, pos.y - 10, 282, 84))) FocusArea(zone);
-
-        if (areas.Count > 1)
+        if (canSwitch)
         {
             int at = areas.ToList().IndexOf(zone);
-            var prev = new Rect(pos.x - 44, pos.y + 8, 32, 40);
-            var next = new Rect(pos.x + 284, pos.y + 8, 32, 40);
-            Gui.Image(prev, Art.Dd1("shared", "character", "previous_hero.png"), ScaleMode.ScaleToFit);
+            string nextZone = areas[(at + 1) % areas.Count];
+            float nameWidth = Dd1Font.Heading?.Measure(name, 24 * Gui.HeadingScale).x ?? 156;
+            var next = new Rect(pos.x + 4 + Mathf.Min(nameWidth + 8, 164), pos.y - 6, 24, 30);
             Gui.Image(next, Art.Dd1("shared", "character", "next_hero.png"), ScaleMode.ScaleToFit);
-            if (prev.Contains(Event.current.mousePosition)) Gui.Tip("Previous area");
-            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Next area");
-            if (Gui.Hotspot(prev)) FocusArea(areas[(at - 1 + areas.Count) % areas.Count]);
-            if (Gui.Hotspot(next)) FocusArea(areas[(at + 1) % areas.Count]);
+            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Switch to " + S.Zones.ZoneName(nextZone));
+            if (Gui.Hotspot(next)) FocusArea(nextZone);
         }
-    }
 
-    private void DrawAreaQuests()
-    {
-        var strip = new Rect(570, 650, 980, 180);
-        Gui.Fill(strip, new Color(0.025f, 0.02f, 0.025f, 0.9f));
-        Gui.Fill(new Rect(strip.x, strip.y, strip.width, 2), Gui.Dd1Name);
-        string title = _focusedZone == null ? "Select an area on the map" : S.Zones.ZoneName(_focusedZone);
-        Gui.Text(new Rect(strip.x + 18, strip.y + 8, strip.width - 36, 34), title, 25, Gui.Dd1Name, heading: true);
-        var quests = E.Quests.Where(q => q.Dungeon == _focusedZone).ToList();
-        if (quests.Count == 0)
+        // The header stops above the quest buttons and is registered after the arrow so it cannot steal its clicks.
+        if (Gui.Hotspot(new Rect(pos.x - 5, pos.y - 10, 282, 56))) FocusArea(zone);
+        if (!unlocked)
         {
-            string why = _focusedZone != null && !CampaignRegions.Unlocked(E, S.Campaign, _focusedZone)
-                ? $"Complete {CampaignRegions.UnlockAfter(S.Campaign, _focusedZone)} expeditions to open this area."
-                : "No contracts available here this week.";
-            Gui.Text(new Rect(strip.x + 24, strip.y + 60, strip.width - 48, 56), why, 22, Gui.Dd1Class);
+            Gui.Text(new Rect(pos.x + 8, pos.y + 52, 270, 32), $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests", 16, Gui.Dim);
             return;
         }
-        var view = new Rect(strip.x + 8, strip.y + 48, strip.width - 16, 124);
-        _questListScroll = GUI.BeginScrollView(view, _questListScroll,
-            new Rect(0, 0, view.width - 20, Mathf.Max(view.height, ((quests.Count + 4) / 5) * 114)));
+        var quests = E.Quests.Where(q => q.Dungeon == zone).ToList();
         for (int i = 0; i < quests.Count; i++)
         {
             var q = quests[i];
-            var cell = new Rect(4 + (i % 5) * 188, 4 + (i / 5) * 114, 180, 106);
-            if (q == _quest) Gui.Fill(cell, new Color(0.35f, 0.28f, 0.12f, 0.4f));
-            var c = new Vector2(cell.x + 40, cell.y + 48);
+            // DD1: quest_button_start_offset 160,92; spacing 76,80; four buttons per row.
+            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92 + (i / 4) * 80);
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
-            bool hover = cell.Contains(Event.current.mousePosition);
+            bool hover = r.Contains(Event.current.mousePosition);
+            if (q == _quest)
+            {
+                var selected = Qs("quest_select_selected.png");
+                if (selected != null) GUI.DrawTexture(new Rect(c.x - 72, c.y - 72, 144, 144), selected);
+            }
             var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png") ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
             if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8) : r, ring);
             int tier = q.Difficulty >= 6 ? 6 : q.Difficulty >= 5 ? 5 : q.Difficulty >= 3 ? 3 : 1;
             var badge = Qs($"quest_select_{q.Type}_{tier}.png") ?? Qs($"quest_select_explore_{tier}.png");
             if (badge != null) GUI.DrawTexture(new Rect(c.x - 20, c.y - 20, 40, 40), badge);
-            Gui.Text(new Rect(cell.x + 82, cell.y + 7, 94, 91), $"{q.DifficultyName}\n{Cap(q.Size)}\n{HamletUi.Pretty(q.Type)}", 15, Gui.Dd1Text);
-            if (Gui.Hotspot(cell)) SelectQuest(q);
+            if (hover) Gui.Tip($"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}");
+            if (Gui.Hotspot(r)) SelectQuest(q);
         }
-        GUI.EndScrollView();
     }
 
     private static string GoalLine(QuestOffer q)
