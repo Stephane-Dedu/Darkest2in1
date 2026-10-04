@@ -44,6 +44,38 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void LimitedEffectsRetainEveryAlternativeIncludingThePenalty()
+    {
+        string effects = Data.Effects("trinket_coast_nautical_compass", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn End:", effects);
+        Assert.Contains("Block", effects);
+        Assert.Contains("Dodge", effects);
+        Assert.Contains("Strength", effects);
+        Assert.Contains("+1 Stress", effects);
+        Assert.Equal(4, System.Text.RegularExpressions.Regex.Matches(effects, " or ").Count);
+    }
+
+    [Fact]
+    public void LimitedHitEffectsKeepTheAttackerTargetAndEachCandidatesChance()
+    {
+        string effects = Data.Effects("trinket_forest_clenching_claws", out bool complete);
+        // Its separate round-start Immobilize also requires a Speed condition, still unsupported here.
+        Assert.False(complete);
+        Assert.Contains("Apply to Attacker When Hit:", effects);
+        Assert.Contains("Weak (20%) or Vulnerable (20%) or Stun (10%)", effects);
+    }
+
+    [Fact]
+    public void AnUnknownCandidateWithholdsTheWholeChoiceRatherThanClaimingOnlyItsPenalty()
+    {
+        string effects = Data.Effects("trinket_coast_nautical_compass", out bool complete,
+            key => key == "effect_tooltip_token_add_amount" ? "invalid {9}" : null);
+        Assert.Null(effects);
+        Assert.False(complete);
+    }
+
+    [Fact]
     public void ConditionalHealthAndFlameThresholdsKeepNativeUnitsAndQualifierSpacing()
     {
         string health = Data.Effects("trinket_hero_hel_bloodied_branch", out _);

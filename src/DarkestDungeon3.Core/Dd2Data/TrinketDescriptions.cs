@@ -97,10 +97,25 @@ public sealed class TrinketDescriptions
         if (!_blocks.TryGetValue(("ActorDataEffects", id), out var groups)) return;
         foreach (var group in groups)
         {
+            const string limitedSuffix = "_apply_limit_effects";
+            bool limited = group[0].EndsWith(limitedSuffix, StringComparison.Ordinal);
+            // This is metadata for its paired effect group, not a separate event.
+            if (group[0].EndsWith("_apply_limit", StringComparison.Ordinal) && groups.Any(row => row[0] == group[0] + "_effects")) continue;
             if (!group[0].EndsWith("_effects", StringComparison.Ordinal)) { complete = false; continue; }
-            string eventId = group[0].Substring(0, group[0].Length - "_effects".Length);
+            string eventId = group[0].Substring(0, group[0].Length - (limited ? limitedSuffix.Length : "_effects".Length));
             string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
             if (title == null) { complete = false; continue; }
+            if (limited)
+            {
+                string separator = Plain(Text("spaced_or_label", localize));
+                var choices = group.Skip(1).Select(effect => SimpleEffect(effect, localize)).ToList();
+                // Native positive apply limits join candidates with 'or'. Only limit one is supported here.
+                // A partial choice list can misstate its outcomes, so withhold the whole list if any is unknown.
+                if (Field("ActorDataEffects", id, eventId + "_apply_limit") != "1" || separator == null || choices.Count == 0 || choices.Any(choice => choice == null))
+                    complete = false;
+                else lines.Add(title + " " + string.Join(" " + separator + " ", choices));
+                continue;
+            }
             foreach (string effect in group.Skip(1))
             {
                 string description = SimpleEffect(effect, localize);
