@@ -590,6 +590,12 @@ public sealed class TrinketDescriptions
                 if (runName == null || runComparison == null) return null;
                 args = new object[] { runName, runComparison, "", effect };
                 break;
+            case "item_amount":
+                string itemName = Text("item_name_" + value, localize);
+                string itemComparison = Compare(id, false, localize);
+                if (itemName == null || itemComparison == null) return null;
+                args = new object[] { itemName, itemComparison, "", effect };
+                break;
             case "actor_stat_value":
                 if (string.IsNullOrEmpty(value)) return null;
                 string statName = Text("actor_stat_type_" + value?.Replace('+', '_'), localize);

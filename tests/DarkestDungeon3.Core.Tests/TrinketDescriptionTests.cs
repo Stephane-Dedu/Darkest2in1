@@ -759,7 +759,8 @@ public class TrinketDescriptionTests
             key => key == "duration_display_type_turn" ? "invalid {9}" : null);
         Assert.False(complete);
         Assert.DoesNotContain("Battle Ballad", effects);
-        Assert.Equal("Target: Play Out: Remove 1 Negative Token", effects);
+        Assert.Contains("Target: Play Out: Remove 1 Negative Token", effects);
+        Assert.Contains("Turn End: +1 Stress (25%) when Relics in inventory is below 25", effects);
     }
 
     [Fact]
@@ -794,6 +795,43 @@ public class TrinketDescriptionTests
             Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
             if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
         }
+    }
+
+    [Fact]
+    public void InventoryAmountRequirementRetainsLowRelicsStressChanceAndOtherSkillEffects()
+    {
+        string effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete);
+        Assert.False(complete);
+        Assert.Contains("Turn End: +1 Stress (25%) when Relics in inventory is below 25", effects);
+        Assert.Contains("Target: Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
+        Assert.Contains("Target: Play Out: Remove 1 Negative Token", effects);
+        Assert.DoesNotContain("Gold", effects);
+    }
+
+    [Fact]
+    public void InventoryAmountThresholdsUseNativeRelicsUnitsForStatsAndHealing()
+    {
+        string effects = Data.Effects("trinket_antiq_celebrated_chalice", out _);
+        Assert.Contains("+4 Speed when Relics in inventory is above 50", effects);
+        effects = Data.Effects("trinket_antiq_clarifying_carcanet", out _);
+        Assert.Contains("+20% Max HP when Relics in inventory is above 75", effects);
+        effects = Data.Effects("trinket_antiq_shimmering_crown", out _);
+        Assert.Contains("Combat Start: Heal 100% when Relics in inventory is above 100", effects);
+        Assert.DoesNotContain("above 100%", effects);
+    }
+
+    [Fact]
+    public void InventoryAmountRequirementUsesNativeNamesAndWithholdsMalformedThresholdText()
+    {
+        string effects = Data.Effects("trinket_hero_jes_buskers_haul", out _,
+            key => key == "item_name_gold" ? "Reliques" : null);
+        Assert.Contains("Turn End: +1 Stress (25%) when Reliques in inventory is below 25", effects);
+        effects = Data.Effects("trinket_hero_jes_buskers_haul", out bool complete,
+            key => key == "effect_tooltip_condition_item_amount" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Stress", effects);
+        Assert.Contains("Battle Ballad: Turn Start: Forward 1 (1 Turn)", effects);
+        Assert.Contains("Play Out: Remove 1 Negative Token", effects);
     }
 
     [Fact]
