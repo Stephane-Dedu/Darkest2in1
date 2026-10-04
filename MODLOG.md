@@ -584,10 +584,16 @@ Feasibility notes (decomp):
 - Added ObstacleLibrary with inherited defaults and array-replacing overrides, loaded by CrawlContent. ClearObstacle uses its HP/light/effects; ancestor does not consume a shovel. Without loaded content the fallback now uses 5% HP, 15 stress, 20 light.
 - Verification caught a mistaken test assumption that Stress 2 meant 20; the actual effect is 15, rounded to 1-2 DD2 points. Corrected the expectation, not the data-driven effect application. Release build Deploy=false and all 146 tests pass. No game launch.
 
-## Status 2026-10-04: loop resumed, round 39 complete
+## Round 40: scouting follows squares and critical chance
+- Reference: shared/rules.json scouting_crit_success 0.50; Unity port RaidSceneManager.ScoutingEvent chooses 6 or 12 squares, ScoutingHallway spends the remaining budget across corridor tiles before revealing a room and branching. Core previously revealed all rooms within two graph edges, even behind long halls.
+- CrawlRules reads the critical chance. Crawl uses normal/critical distance; DungeonMap.ScoutFrom handles branch budgets, reverse order, cycles and repeated reveals.
+- Verified: Release build Deploy=false and all 154 Core tests pass. Eight new cases cover length boundaries, reverse travel, cycles and integration. No game launch.
+- Found a separate defect: Begin calls normal room scouting at the entrance despite DD1's zero entry chance. Corrected PARITY's old [x] claim and queued an entry-specific rule for the next round.
+
+## Status 2026-10-04: loop resumed, round 40 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
-- Release build and 146 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: scouting distance, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Release build and 154 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
+- Next: entry scouting, then remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.

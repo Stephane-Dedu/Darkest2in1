@@ -28,6 +28,7 @@ public sealed class CrawlRules
     /// <summary>Eating a provision from the pack in the dungeon heals this much of max HP (provision_hp_heal).</summary>
     public float ProvisionHeal = 0.05f;
     public float ScoutChanceBase = 0.25f;
+    public float ScoutCriticalChance = 0.5f;
     public float SurpriseCorridorParty = 0.1f, SurpriseCorridorMonsters = 0.1f;
     public float SurpriseRoomParty = 0.1f, SurpriseRoomMonsters = 0.1f;
     public float SurpriseMaxParty = 0.65f, SurpriseMaxMonsters = 0.65f;
@@ -83,6 +84,7 @@ public sealed class CrawlRules
         if (none != null) r.StarveStressDd1 = (float)none["stress"];
 
         r.ScoutChanceBase = Get(rules, "scouting_chance_base", r.ScoutChanceBase);
+        r.ScoutCriticalChance = Get(rules, "scouting_crit_success", r.ScoutCriticalChance);
         r.SurpriseCorridorParty = Get(rules, "surprise_corridor_party_base_chance", r.SurpriseCorridorParty);
         r.SurpriseCorridorMonsters = Get(rules, "surprise_corridor_monsters_base_chance", r.SurpriseCorridorMonsters);
         r.SurpriseRoomParty = Get(rules, "surprise_room_party_base_chance", r.SurpriseRoomParty);

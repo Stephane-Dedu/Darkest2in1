@@ -108,6 +108,41 @@ public sealed class DungeonMap
 
     public bool IsConnected() => Distances(EntranceRoomId).All(d => d >= 0);
 
+    /// <summary>DD1 scouting spends a square budget down each branch; reaching a corridor's end reveals its room.</summary>
+    public int ScoutFrom(int from, int squares)
+    {
+        if (squares <= 0) return 0;
+        int revealed = 0;
+        var best = new Dictionary<int, int> { [from] = squares };
+        var queue = new Queue<(int Room, int Left)>();
+        queue.Enqueue((from, squares));
+        while (queue.Count > 0)
+        {
+            var (room, left) = queue.Dequeue();
+            foreach (int cid in Room(room).CorridorIds)
+            {
+                var corridor = Corridor(cid);
+                int count = System.Math.Min(left, corridor.Tiles.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    var tile = corridor.Tiles[room == corridor.RoomA ? i : corridor.Tiles.Count - 1 - i];
+                    if (!tile.Scouted) { tile.Scouted = true; revealed++; }
+                }
+                if (count < corridor.Tiles.Count) continue;
+                int other = corridor.Other(room);
+                var next = Room(other);
+                if (other != from && !next.Scouted) { next.Scouted = true; revealed++; }
+                int remaining = left - count;
+                if (remaining > 0 && (!best.TryGetValue(other, out var prior) || remaining > prior))
+                {
+                    best[other] = remaining;
+                    queue.Enqueue((other, remaining));
+                }
+            }
+        }
+        return revealed;
+    }
+
     /// <summary>ASCII picture for logs and tests: rooms as letters, hall tiles as symbols.</summary>
     public string ToAscii()
     {

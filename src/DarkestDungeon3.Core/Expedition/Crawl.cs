@@ -709,27 +709,15 @@ public sealed class Crawl
         Emit(CrawlEventType.TrapSprung, tile: tile, contentId: tile.ContentId, heroId: hero);
     }
 
-    /// <summary>On entering a new room, maybe reveal what lies within two corridors (DD1 scouting).</summary>
+    /// <summary>DD1 scouting reveals six hallway squares, or twelve on a critical success, along each branch.</summary>
     private void Scout(Room room)
     {
         if (State.Quest?.ScoutingEnabled == false) return;   // DD1: no scouting in the Darkest Dungeon
         var rng = NextRng();
         float chance = _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
-        if (!rng.Chance(chance)) return;
-
-        var dist = Map.Distances(room.Id);
-        int revealed = 0;
-        foreach (var r in Map.Rooms.Where(r => dist[r.Id] > 0 && dist[r.Id] <= 2 && !r.Scouted))
-        {
-            r.Scouted = true;
-            revealed++;
-        }
-        foreach (var c in Map.Corridors.Where(c => Math.Min(dist[c.RoomA], dist[c.RoomB]) <= 1))
-            foreach (var t in c.Tiles.Where(t => !t.Scouted))
-            {
-                t.Scouted = true;
-                revealed++;
-            }
+        if (chance <= 1f && !rng.Chance(chance)) return;
+        bool critical = rng.Chance(_rules.ScoutCriticalChance * (chance > 1f ? chance : 1f));
+        int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6);
         if (revealed > 0) Emit(CrawlEventType.Scouted, roomId: room.Id, amount: revealed);
     }
 
