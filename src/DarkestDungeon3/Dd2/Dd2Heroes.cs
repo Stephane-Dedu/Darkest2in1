@@ -70,7 +70,7 @@ internal static class Dd2Heroes
         var trinkets = actor.GetTrinketInventory();
         var items = SingletonMonoBehaviour<Library<string, ItemDefinition>>.Instance;
         if (trinkets != null && items != null)
-            foreach (var id in hero.Trinkets)
+            foreach (var id in hero.WornTrinkets)
                 if (items.TryGetLibraryElement(id, out var t))
                     trinkets.AddItems(t, 1, false);
 

@@ -11,7 +11,8 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class FakeCatalog : IHeroCatalog
 {
-    public bool TrinketFits(string trinketId, string classId) => true;
+    public bool TrinketFits(string trinketId, string classId) => trinketId != "jester_only" || classId == "jester";
+    public int TrinketEquipLimit(string trinketId) => trinketId == "unlimited" ? 0 : 1;
     public IReadOnlyList<string> RecruitableClasses { get; } =
         new[] { "highwayman", "plague_doctor", "grave_robber", "leper", "man_at_arms", "hellion", "jester", "occultist", "runaway", "flagellant", "vestal" };
 

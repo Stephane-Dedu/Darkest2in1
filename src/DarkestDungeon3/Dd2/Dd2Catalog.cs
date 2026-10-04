@@ -129,6 +129,9 @@ internal sealed class Dd2Catalog : IHeroCatalog
     public bool TrinketFits(string trinketId, string classId) =>
         trinketId == null || !Tables.Trinkets.TryGetValue(trinketId, out var t) || t.IsForHero(classId);
 
+    public int TrinketEquipLimit(string trinketId) =>
+        Tables.Trinkets.TryGetValue(trinketId, out var t) ? t.EquipLimit : 1;
+
     /// <summary>DD1 prices by rarity (the Nomad Wagon sells DD2 trinkets at DD1 prices).</summary>
     public int TrinketPrice(string trinketId)
     {

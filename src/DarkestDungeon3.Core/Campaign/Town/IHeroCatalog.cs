@@ -30,4 +30,6 @@ public interface IHeroCatalog
 
     /// <summary>Can a hero of this class wear the trinket (DD2's hero-only trinkets fit one class)?</summary>
     bool TrinketFits(string trinketId, string classId);
+    /// <summary>Maximum identical copies worn by one hero, zero for unlimited.</summary>
+    int TrinketEquipLimit(string trinketId);
 }

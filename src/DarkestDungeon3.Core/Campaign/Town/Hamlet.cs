@@ -139,7 +139,7 @@ public sealed class Hamlet
         var hero = Estate.Hero(heroId);
         if (hero == null) return false;
         Estate.Roster.Remove(hero);
-        foreach (var t in hero.Trinkets) Estate.Trinkets.Add(t);
+        foreach (var t in hero.WornTrinkets) Estate.Trinkets.Add(t);
         return true;
     }
 
@@ -468,10 +468,10 @@ public sealed class Hamlet
                 if (found != null) { Estate.Trinkets.Add(found); log.Add($"{hero.Name} came back with a trinket: {found}."); }
                 break;
             case "remove_trinket":
-                if (hero.Trinkets.Count > 0)
+                if (hero.WornTrinkets.Any())
                 {
-                    var lost = rng.Pick(hero.Trinkets);
-                    hero.Trinkets.Remove(lost);
+                    var lost = rng.Pick(hero.WornTrinkets.ToList());
+                    hero.SetTrinket(hero.Trinkets.IndexOf(lost), null);
                     log.Add($"{hero.Name} lost a trinket: {lost}.");
                 }
                 break;
@@ -577,7 +577,7 @@ public sealed class Hamlet
             Estate.QuirksRepaired = true;
         }
         foreach (var hero in Estate.Roster)
-            foreach (var t in hero.Trinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
+            foreach (var t in hero.WornTrinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
             {
                 hero.Trinkets.Remove(t);
                 Estate.Trinkets.Add(t);
@@ -701,10 +701,10 @@ public sealed class Hamlet
     public int UnequipAllTrinkets()
     {
         int n = 0;
-        foreach (var hero in Estate.Roster.Where(h => h.MissingWeeks == 0))
+        foreach (var hero in Estate.Roster.Where(h => h.IsAvailable))
         {
-            n += hero.Trinkets.Count;
-            Estate.Trinkets.AddRange(hero.Trinkets);
+            n += hero.WornTrinkets.Count();
+            Estate.Trinkets.AddRange(hero.WornTrinkets);
             hero.Trinkets.Clear();
         }
         return n;

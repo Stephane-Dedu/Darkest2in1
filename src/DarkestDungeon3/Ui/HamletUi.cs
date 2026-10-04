@@ -1255,29 +1255,28 @@ internal sealed class HamletUi
             $"Stress {h.Stress}/10   ({h.ResolveXp} resolve xp)\n\n" +
             $"Quirks: {string.Join(", ", h.Quirks.Select(QuirkName))}\n\n" +
             $"Camp skills: {string.Join(", ", h.CampingSkills.Select(Pretty))}\n\n" +
-            $"Trinkets: {(h.Trinkets.Count == 0 ? "none" : string.Join(", ", h.Trinkets.Select(Pretty)))}" +
+            $"Trinkets: {(!h.WornTrinkets.Any() ? "none" : string.Join(", ", h.WornTrinkets.Select(Pretty)))}" +
             (h.Activity != null ? $"\n\nThis week: {Pretty(h.Activity)}" : ""), 19, Gui.Dd1Text);
 
         float y = area.y + 330;
-        foreach (var t in h.Trinkets.ToList())
+        foreach (var t in h.WornTrinkets.ToList())
         {
             if (Gui.DdButton(new Rect(area.x + 20, y, 330, 42), "Unequip " + Pretty(t), true, 18))
             {
-                h.Trinkets.Remove(t);
-                E.Trinkets.Add(t);
+                if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, h.Trinkets.IndexOf(t))) return;
                 S.Persist();
             }
             y += 48;
         }
-        if (h.Trinkets.Count < 2)
+        if (h.WornTrinkets.Count() < 2)
         {
             int x = 0;
             foreach (var t in E.Trinkets.Distinct().Where(t => S.Catalog.TrinketFits(t, h.ClassId)).Take(8).ToList())
             {
                 if (Gui.DdButton(new Rect(area.x + 20 + (x % 2) * 350, y + (x / 2) * 48, 340, 42), "Equip " + Pretty(t), true, 18))
                 {
-                    E.Trinkets.Remove(t);
-                    h.Trinkets.Add(t);
+                    int slot = h.TrinketAt(0) == null ? 0 : 1;
+                    if (!Core.Campaign.Town.TrinketEquipment.Transfer(E, S.Catalog, t, null, -1, h, slot)) return;
                     S.Persist();
                 }
                 x++;

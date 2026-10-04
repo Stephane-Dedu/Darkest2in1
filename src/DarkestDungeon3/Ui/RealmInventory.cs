@@ -68,9 +68,9 @@ internal static class RealmInventory
         // A worn trinket dropped anywhere on the window comes off (back to the stash).
         if (Drag.Hovering<TrinketDrag>(panel) && Drag.Payload is TrinketDrag worn && worn.FromHero != null)
             Gui.Fill(new Rect(panel.x + 20, panel.yMax - 14, panel.width - 40, 4), Gui.Gold);
-        if (Drag.Drop<TrinketDrag>(panel, out var back) && back.FromHero != null && E.Hero(back.FromHero) is { } wearer && wearer.Trinkets.Remove(back.TrinketId))
+        if (Drag.Drop<TrinketDrag>(panel, out var back) && back.FromHero != null && E.Hero(back.FromHero) is { } wearer &&
+            wearer.TrinketAt(back.FromSlot) == back.TrinketId && Core.Campaign.Town.TrinketEquipment.Unequip(E, wearer, back.FromSlot))
         {
-            E.Trinkets.Add(back.TrinketId);
             Dd1Audio.Play("/ui/dun/trink_unqeuip");
             S.Persist();
             return;
@@ -100,11 +100,11 @@ internal static class RealmInventory
             if (index >= trinkets.Count) break;
             string id = trinkets[index];
             var r = At(Grid.x + (i % Columns) * Cell.x, Grid.y + (i / Columns) * Cell.y, 72, 144);
-            bool fits = hero == null || S.Catalog.TrinketFits(id, hero.ClassId);
-            if (!shift) Drag.Source(r, new TrinketDrag(id), rect => HeroSheet.TrinketIcon(rect, id));
+            bool fits = hero == null || Enumerable.Range(0, 2).Any(slot => Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, id, null, index, hero, slot) == null);
+            if (!shift) Drag.Source(r, new TrinketDrag(id, null, index), rect => HeroSheet.TrinketIcon(rect, id));
             var old = GUI.color;
             if (!fits) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
-            if (!(Drag.Payload is TrinketDrag d && d.FromHero == null && d.TrinketId == id && Drag.Active)) HeroSheet.TrinketIcon(r, id);
+            if (!(Drag.Payload is TrinketDrag d && d.FromHero == null && d.FromSlot == index && Drag.Active)) HeroSheet.TrinketIcon(r, id);
             GUI.color = old;
             if (!r.Contains(Event.current.mousePosition) || Drag.Active) continue;
             hovered = id;

@@ -57,7 +57,10 @@ internal static class HeroSheet
 
         DrawQuirks(h);
         DrawStats(h);
-        DrawEquipment(h);
+        bool equipmentEnabled = GUI.enabled;
+        GUI.enabled = equipmentEnabled && (readOnly || (h.IsAvailable && E.Roster.Contains(h)));
+        try { DrawEquipment(h); }
+        finally { GUI.enabled = equipmentEnabled; }
         DrawSkills(h);
         DrawResistances(h);
         DrawDiseases(h);
@@ -154,10 +157,10 @@ internal static class HeroSheet
         for (int i = 0; i < 2; i++)
         {
             var r = TrinketCell(i);
-            string id = i < h.Trinkets.Count ? h.Trinkets[i] : null;
+            string id = h.TrinketAt(i);
             bool hover = Drag.Hovering<TrinketDrag>(r);
             if (hover && Drag.Payload is TrinketDrag over)
-                Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), S.Catalog.TrinketFits(over.TrinketId, h.ClassId) ? Gui.Gold : Gui.Blood);
+                Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, over.TrinketId, over.FromHero, over.FromSlot, h, i) == null ? Gui.Gold : Gui.Blood);
             if (!_readOnly && Drag.Drop<TrinketDrag>(r, out var dropped)) { Equip(h, dropped, i); return; }
             if (id == null) continue;
             string tid = id;
@@ -167,13 +170,12 @@ internal static class HeroSheet
                 if (r.Contains(Event.current.mousePosition)) Gui.Tip(TrinketText(tid), RarityColour(tid));
                 continue;
             }
-            Drag.Source(r, new TrinketDrag(tid, h.Id), rect => TrinketIcon(rect, tid));
-            if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid)) TrinketIcon(r, tid);
+            Drag.Source(r, new TrinketDrag(tid, h.Id, i), rect => TrinketIcon(rect, tid));
+            if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid && c.FromSlot == i)) TrinketIcon(r, tid);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active) Gui.Tip(TrinketText(tid) + "\nClick, or drag it to the Trinket Inventory, to unequip.", RarityColour(tid));
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
-                h.Trinkets.Remove(tid);
-                E.Trinkets.Add(tid);
+                if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, i)) return;
                 Dd1Audio.Play("/ui/dun/trink_unqeuip");
                 S.Persist();
                 return;
@@ -183,17 +185,9 @@ internal static class HeroSheet
 
     private static void Equip(HeroRecord h, TrinketDrag drag, int slot)
     {
-        if (!S.Catalog.TrinketFits(drag.TrinketId, h.ClassId)) { Gui.Announce($"Only {Dd2.Dd2Catalog.Tables.Trinkets[drag.TrinketId].HeroClass} can wear that."); return; }
-        if (drag.FromHero == h.Id) return;                       // already worn
-        if (drag.FromHero == null) { if (!E.Trinkets.Remove(drag.TrinketId)) return; }
-        else if (E.Hero(drag.FromHero) is { } other) other.Trinkets.Remove(drag.TrinketId);
-        if (slot < h.Trinkets.Count)
-        {
-            E.Trinkets.Add(h.Trinkets[slot]);                    // the one it replaces goes to the stash
-            h.Trinkets[slot] = drag.TrinketId;
-        }
-        else if (h.Trinkets.Count < 2) h.Trinkets.Add(drag.TrinketId);
-        else E.Trinkets.Add(drag.TrinketId);
+        string refusal = Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, drag.TrinketId, drag.FromHero, drag.FromSlot, h, slot);
+        if (refusal != null) { Gui.Announce(refusal); return; }
+        if (!Core.Campaign.Town.TrinketEquipment.Transfer(E, S.Catalog, drag.TrinketId, drag.FromHero, drag.FromSlot, h, slot)) return;
         Dd1Audio.Play("/ui/dun/trink_equip");
         S.Persist();
     }

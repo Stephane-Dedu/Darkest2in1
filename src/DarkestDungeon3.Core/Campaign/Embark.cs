@@ -71,7 +71,7 @@ public static class Embark
         int minDifficulty = (int?)dd1?.Rules?["trinkets_equipped_warning_dungeon_min_difficulty"] ?? 3;
         float minShare = (float?)dd1?.Rules?["trinkets_equipped_warning_min_percent"] ?? 0.5f;
         if (quest.Difficulty < minDifficulty) return false;
-        int worn = party.Sum(h => System.Math.Min(2, h.Trinkets.Count));
+        int worn = party.Sum(h => System.Math.Min(2, h.WornTrinkets.Count()));
         return worn < minShare * 2 * party.Count;
     }
 

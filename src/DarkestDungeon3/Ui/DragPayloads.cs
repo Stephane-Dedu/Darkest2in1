@@ -41,8 +41,9 @@ internal sealed class TrinketDrag
 {
     public readonly string TrinketId;
     public readonly string FromHero;
-    public TrinketDrag(string trinketId, string fromHero = null) { TrinketId = trinketId; FromHero = fromHero; }
-    public override bool Equals(object o) => o is TrinketDrag t && t.TrinketId == TrinketId && t.FromHero == FromHero;
+    public readonly int FromSlot;
+    public TrinketDrag(string trinketId, string fromHero = null, int fromSlot = -1) { TrinketId = trinketId; FromHero = fromHero; FromSlot = fromSlot; }
+    public override bool Equals(object o) => o is TrinketDrag t && t.TrinketId == TrinketId && t.FromHero == FromHero && t.FromSlot == FromSlot;
     public override int GetHashCode() => TrinketId?.GetHashCode() ?? 0;
 }
 

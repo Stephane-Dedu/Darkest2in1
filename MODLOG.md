@@ -662,7 +662,13 @@ DD1 port Character/Trinket.ToolTip lists title, rarity, requirements and every B
 
 Release build, 161 Core + 11 bridge/input tests pass. File tests check actual installed trinkets and both native number units, localization fallback and rich-text conversion. This closes the permanently-empty cache and common stat descriptions; cold-menu conditional/triggered effects are a separate remaining gap (withheld rather than falsely described as unconditional). Native tooltips after a run remain the complete preferred source. No launch/save/config changes. Next: validated equip transfers, tooltip fonts/colors/grid, combat startup.
 
-## Status 2026-10-04: loop resumed, round 53 complete
+## Round 54: atomic DD1-style trinket transfers
+
+DD1 base.entries.trinkets.json limits are not all one: 330 entries limit 1, 159 unlimited (0), one limit 3. CharEquipmentPanel and RealmInventoryWindow validate copies/class restrictions, disable unavailable destinations and swap slots. Added Core TrinketEquipment, with the mapped DD2 item's actual m_possessionLimit supplied by the catalog. It validates both ends before any mutation; stale drag sources cannot manufacture an item. Swaps return displaced items to the source slot/stash position, rejecting a reverse class/copy mismatch. Same-hero left/right moves now work. Drag payloads identify source slots, so duplicate stash icons do not all disappear during a drag. Empty left slots are represented by a null placeholder in the existing save list; WornTrinkets excludes empties from warnings, dismissal, town losses, native item application and display. The computed view is JsonIgnore; old saves still load. Unequip-all skips busy/missing/dead heroes as the DD1 port does.
+
+Release build, 166 Core + 11 bridge/input tests pass. Five new rule tests verify conservation/refusal, unlimited versus limited copies, source/destination swaps, same-hero moves, right-only JSON roundtrip and unavailable/unrecruited heroes. One concurrent test run hit a shared MSBuild obj-file lock; its sequential rerun passed (not a code/test failure). No launch or save write; native mouse checks remain [?]. Next: DD1 tooltip fonts/colors and inventory presentation, remaining cold-menu effects and combat startup.
+
+## Status 2026-10-04: loop resumed, round 54 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 157 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
 - Next priorities: absent trinket effects and DD1 equip/inventory policy/UI; combat startup scans/timings. Then persistent activity-log weeks, activity-log art, secret rooms, remaining Memorial collection/narration. Skip [user] and [blocked] items as the loop instructs.
