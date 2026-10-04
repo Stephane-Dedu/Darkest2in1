@@ -610,10 +610,15 @@ Feasibility notes (decomp):
 - Removed that permanent hint. Trinket details now use the existing multiline Gui.Tip with rarity color when hovering a stock item. Buying, prices and stock remain on the existing path.
 - Verified: Release build Deploy=false and all 155 Core tests pass. No game launch; visual check remains [?].
 
-## Status 2026-10-04: loop resumed, round 44 complete
+## Round 45: Guild uses DD1's hero header and description layout
+- Reference: guild.layout.darkest skill_pos 44,-4, spacing 0,91 and requirement_spacing 75,0; port GuildHeroWindow/HeroOverviewWindow loads class/name/action_verbose_body_guild_<class>. EstateManagement.unity GuildOverview contains CharDescriptionFrame 236x478 and one SkillGroups column.
+- Guild now reuses HeroSlot/HeroVerbose from the Blacksmith. Skills occupy a clipped scrolling column beside the description, keeping DD2 learning/mastery and five-skill choice. Removed the arbitrary 12-skill limit. Scroll resets when selecting another hero; tooltips use the shared overlay after the scroll group closes.
+- Verified: Release build Deploy=false and all 155 tests pass. No game launch; visual and interaction checks are explicitly [?]. Requirement/cost decorations are a separate next round.
+
+## Status 2026-10-04: loop resumed, round 45 complete
 - Owner requested autonomous iteration on 2026-10-04. Continue tools/parity_loop.md; no DD2 launches until explicitly allowed. Build with Deploy=false. Working branch: claude/practical-wright-hicri0.
 - Release build and 155 Core tests passed. Game-facing changes remain [?]. No saves changed, no processes started, no pending restores.
-- Next: Guild layout, graveyard, remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
+- Next: Guild rank decorations, graveyard, remaining plot-map and town UI gaps. Skip [user] and [blocked] items as the loop instructs.
 - Built but not seen in game yet, check these first once launching is allowed:
   1. New estate → House of Ruin + Old Road cinematics → the Old Road loading screen (3 s) → the opening raid with Reynauld and Dismas. The first try froze on "The party sets out" (round 33); the fix routes it through Driver.Embark.
   2. The Ruins tutorial (plot_tutorial_crypts) on a new estate's board, played on tutorial_crypts.dm.
