@@ -713,7 +713,12 @@ internal sealed class Driver : MonoBehaviour
     public void SkipCurio() => Crawl.SkipCurio();
 
     public void MakeCamp() { Dd1Audio.Play("/general/map/camp_start"); Handle(Crawl.MakeCamp()); }
-    public bool EatMeal(Meal meal) => Crawl.EatMeal(meal);
+    public bool EatMeal(Meal meal)
+    {
+        if (!Crawl.EatMeal(meal)) return false;
+        S.Persist();
+        return true;
+    }
     public bool UseCampSkill(string hero, string skill, string target)
     {
         if (!Crawl.UseCampSkill(hero, skill, target)) return false;

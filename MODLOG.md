@@ -2431,3 +2431,25 @@ or private-art changes.
 - Next: save camp meals immediately (separate documented gap), then inspect fallen-hero quirk preservation and host-entry timeout. Resume checks must use only the test estate after explicit launch permission; test corridor/camp/loot/unresolved battle/terminal result and exact single week/payment.
 - Ordinary usage available; session 74%, weekly 89%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 147: persist successful camping meals immediately
+
+DD1 shared/rules.json meals_table defines none/half/full/feast rations, health and
+stress. Unity ScrollMealEvent allows one selected meal and SaveCampaignData stores
+camp phase and formation. Driver's successful EatMeal now immediately persists
+through the existing actor snapshot boundary; rejected choices do not write.
+Four native meal-size cases cover exact food/condition/Ate/respite/light/RNG
+across synthetic reconstruction and no repeated food/effects. Release + 630 Core
++ 57 UI tests pass; stopped-game hashes match. Native immediate persistence remains
+[?]. No launch, owner-estate access or private-art changes.
+
+New separate gap: SaveFile's delete-then-move publication leaves a crash window
+without the main file, despite its atomic-save intent. Inspect replacement and
+backup semantics using synthetic temporary paths only.
+
+## Status 2026-10-05: round 147 complete
+
+- Round 147 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 148: remove save delete-before-publish gap with tested same-directory atomic replacement and previous-file backup; use only owned synthetic temp files. Then inspect fallen-hero quirks and host-entry timeout.
+- Ordinary usage available; session 76%, weekly 89%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
