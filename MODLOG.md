@@ -2052,3 +2052,32 @@ stopped-game deployed DLL hashes match. No game/owner saves/private art changed.
 - Next round 133: inspect first-play cinematic audio extraction or another concrete actionable parity gap. OGV audio extraction still reads a large native video on the caller; prepare/streaming/thread ownership need inspection before changes. Native gameplay/input/rendering/timing checks await explicit launch permission.
 - Ordinary usage available; session 17%, weekly 80%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - Protected estates and abandoned project untouched. Native artwork and the 24 approved arena variants remain outside Git; existing owner preview/server unchanged.
+
+## Round 133: stream native cinematic narration without full-video allocations
+
+Installed OGV sizes are 79,369,515 and 46,185,826 bytes; first Voice previously
+read that entire array, then allocated the extracted track. Inspected native
+Ogg/subtitle files and Unity MoviePlayer video/audio path. Core now copies
+complete pages of the first Vorbis serial through one 65,307-byte buffer, using
+sequential short-read-safe IO. Headers, checksums, sequences and EOS bytes remain
+unchanged; incomplete/non-Ogg tails and other serials are excluded as before.
+The byte[] API delegates to the same reader without a second input allocation.
+Voice writes a unique temporary OGG, rejects no-audio files, publishes after
+closing it and cleans temporary failures. Existing ready audio is reused.
+
+Pre-change deployed extractor hashes captured as evidence, without committing
+native data: House of Ruin 1,233,823 bytes, FB77CAE6070988C999F9D34FEF2E7E467334C516F30573CE73BB41B42A3ADFF5;
+Old Road 661,094 bytes, 290D3E4CDB19634D2C250ABDB7DB745D124F74378EFA4C01CBBAD78201F4B4E8.
+Both streaming outputs match. Nine Core cases cover native equality, short reads,
+non-seeking streams, serial selection, truncated tails and maximum page size.
+Three linked cache cases cover ready reuse/publication and missing/invalid
+cleanup. Release + 519 Core + 39 UI tests pass; stopped-game DLL hashes match.
+Native first-play timing/audio still [?]; IO remains on caller until background
+preparation is added. No launch/owner estate access/private artwork changes.
+
+## Status 2026-10-05: round 133 complete
+
+- Round 133 deployed and green; loop continues. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 134: move voice preparation off the playback caller with pre-resolved plain cache paths, deduplicated work and observable failures; keep FMOD/Unity calls on the main thread. Account for prepare/first-play concurrency before changing the cache. This is a documented latency gap, not a measured native timing claim.
+- Ordinary usage available; session 20%, weekly 81%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Private native artwork and owner preview/server remain unchanged/outside Git.

@@ -5,6 +5,7 @@ namespace DarkestDungeon3.Runtime
     internal sealed class Session
     {
         public static Session Current;
+        public static string SaveDir;
         public Dd1Install Dd1;
     }
 }

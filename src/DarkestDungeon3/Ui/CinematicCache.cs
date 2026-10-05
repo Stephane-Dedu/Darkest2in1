@@ -30,13 +30,26 @@ internal static class CinematicCache
 
     public static string Voice(string name, string ogv)
     {
+        string temporary = null;
         try
         {
             string file = Path.Combine(Dir, "dd1_" + name + ".ogg");
-            if (!File.Exists(file)) File.WriteAllBytes(file, Dd1Cinematic.VorbisAudio(File.ReadAllBytes(ogv)));
+            if (!File.Exists(file))
+            {
+                temporary = file + "." + Guid.NewGuid().ToString("N") + ".part";
+                using (var input = File.OpenRead(ogv))
+                using (var output = new FileStream(temporary, FileMode.CreateNew, FileAccess.Write, FileShare.None))
+                    if (Dd1Cinematic.VorbisAudio(input, output) == 0) throw new InvalidDataException("no Vorbis audio pages");
+                if (!File.Exists(file)) File.Move(temporary, file);
+            }
             return file;
         }
         catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {name} voice: {e.Message}"); return null; }
+        finally
+        {
+            if (temporary != null && File.Exists(temporary))
+                try { File.Delete(temporary); } catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {name} temporary audio: {e.Message}"); }
+        }
     }
 
     /// <summary>The ready .webm picture, or null (still converting, or no ffmpeg).</summary>
