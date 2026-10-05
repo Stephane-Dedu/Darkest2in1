@@ -2209,3 +2209,25 @@ persistence. Inspect native inventory/save behavior before implementing either.
 - Next round 139: inspect native partial loot distribution versus Core's all-or-nothing TryTake. If proven, fix one bounded transfer gap with exact taken/remainder/slot/RNG tests; overflow persistence is a separate round.
 - Ordinary usage available; session 42%, weekly 84%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 139: partial loot pickup with exact remainder
+
+Installed currency stacks are gold 1750, portrait 3, bust/deed 6 and crest 12.
+Unity InventoryItem.MergeItems transfers available capacity and updates the
+source remainder; the port's TakeAll still checks whole source stacks. Our
+scroll click now adapts that partial transfer. Inventory.TakePartial leaves its
+source unchanged and reports an amount; Crawl keeps/copied-taken amounts with
+no new RNG or trinket resolution. Automatic TryTake policy remains unchanged.
+
+Seven cases cover native gold/portrait/torch partial stacks, no-room and later
+full transfer, multiple empty slots, stable copied amounts, concrete trinkets,
+quest-item pass prevention, invalid inputs and pack reload with unchanged RNG.
+Release + 551 Core + 45 UI tests pass; stopped-game DLL hashes match. Native
+scroll/click remains [?]. No launch, owner-estate or private-art changes.
+
+## Status 2026-10-05: round 139 complete
+
+- Round 139 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 140: inspect native save/inventory behavior and close the runtime-only overflow recovery gap in bounded stages, first battle/camping reports, then curios if their alias identities need separate handling.
+- Ordinary usage available; session 46%, weekly 85%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

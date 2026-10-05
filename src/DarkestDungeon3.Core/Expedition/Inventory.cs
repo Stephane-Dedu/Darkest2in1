@@ -103,6 +103,20 @@ public sealed class Inventory
         return true;
     }
 
+    /// <summary>Fill matching stacks and empty slots, returning how much fit. The source drop stays unchanged;
+    /// its owner keeps the remainder on the loot scroll, like DD1's inventory stack merge.</summary>
+    public int TakePartial(LootDrop drop, ItemCatalog catalog)
+    {
+        if (drop == null || drop.Amount <= 0) return 0;
+        int stack = System.Math.Max(1, catalog.StackLimit(drop.Key));
+        int remainder = Count(drop.Key) % stack;
+        long capacity = (long)System.Math.Max(0, Slots - SlotsUsed(catalog)) * stack
+                        + (remainder > 0 ? stack - remainder : 0);
+        int amount = (int)System.Math.Min(drop.Amount, capacity);
+        if (amount > 0) Add(drop.Key, amount);
+        return amount;
+    }
+
     public bool HasRoomFor(string id, int amount, ItemCatalog catalog)
     {
         int stack = catalog.StackLimit(id);

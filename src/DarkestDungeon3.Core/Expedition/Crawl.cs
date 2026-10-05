@@ -61,14 +61,23 @@ public sealed class Crawl
         return report;
     }
 
-    /// <summary>DD1's loot scroll: take one of the items the pack had no room for (once room was made).</summary>
+    /// <summary>DD1's loot scroll: take as much of a waiting drop as fits, retaining its remainder.</summary>
     public bool TakeLeftBehind(List<LootDrop> leftBehind, int index, List<LootDrop> taken = null)
     {
         if (State.Ended || leftBehind == null || index < 0 || index >= leftBehind.Count) return false;
         var drop = leftBehind[index];
-        if (!State.Pack.TryTake(drop, _content.Items)) return false;
-        leftBehind.RemoveAt(index);
-        taken?.Add(drop);
+        int amount = State.Pack.TakePartial(drop, _content.Items);
+        if (amount == 0) return false;
+        if (amount == drop.Amount)
+        {
+            leftBehind.RemoveAt(index);
+            taken?.Add(drop);
+        }
+        else
+        {
+            taken?.Add(new LootDrop { Type = drop.Type, Id = drop.Id, Amount = amount });
+            drop.Amount -= amount;
+        }
         return true;
     }
 
