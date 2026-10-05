@@ -1927,5 +1927,32 @@ before stopped-game deploy; both installed DLL hashes match. Audit 180 complete/
 - Loop continues toward quota handoff under owner authorization; native goal remains paused without a resume API or duplicate goal.
 - Round 127 deployed and green. Next round 128 candidate: Snap Judgement's visible end_combo_snap_judgement (m_IsCombo=True, remove Combo at Speed >=12) needs native marker/description inspection before any code. Other remaining lines mostly involve hidden conditions or unsupported triggers; preserve blocked round 75 policy.
 - Ordinary usage available; session 93%, weekly 77%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Prepare clean handoff at approximately 95%. No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
+
+## Round 128: Combo presentation metadata no longer hides Snap Judgement removal
+
+DD1 complete buff lists and Unity Buff.ToolTip conditional wrapping remain the
+presentation reference. Native end_combo_snap_judgement removes one Combo at
+Speed >=12, with m_IsCombo=True. SkillCalculation uses that flag only to mark an
+already applied result IsCombo, consumed by pop text/haptics; EffectDescription
+does not alter the removal body or add an application requirement.
+
+Only well-formed boolean Combo metadata is accepted. Snap Judgement now retains
+Turn Start: Remove Combo when Speed is 12 or more beside its other effects.
+The Speed threshold, malformed metadata, unknown-field and hidden guards remain.
+One actual-data case plus four true/false/invalid boolean fixtures pass. Release
++ 497 Core + 30 UI tests pass before stopped-game deploy; both installed DLL
+hashes match. Audit 181 complete/9 partial/1 blank of 191. No game launched or
+owner estate accessed. Native tooltip check remains [?].
+
+## Status 2026-10-05: quota pause after round 128
+
+- Stop requested by owner at approximately 95% session usage. Latest API: session 95%, weekly 77%, ordinary usage still available; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris), resetsAt 1791208252. Stay quiet on scheduled runs before this reset or while quota remains >=95%/ordinary unavailable. After reset, owner authorizes resuming this same loop.
+- Native get_goal reports paused, objective unchanged, tokensUsed 722444/timeUsedSeconds 7907 from its earlier pause. Tool cannot resume that status; no duplicate goal or false completion was created. Actual authorized work continued after reset and now stops for quota. The objective is not complete.
+- Completed and deployed rounds 103-128 in this authorized continuation, each documented with DD1/Unity references, required tests/Release checks, stopped-game deploy/hash verification, commit and push. Latest green state: 497 Core + 30 UI tests (527 total), Release, both installed DLL hashes match, cold trinket audit 181 complete/9 partial/1 blank of 191. No active test/build/subagent/game process remains.
+- Delivered persistent weekly activity history/native cards/Caretaker goals, migration/RNG/wagon/resolve corrections, imported secret-room discovery/contents/journal payout/entry/return controls, collected Memorial journal reader and exact native DD1 boss/Darkest narration, plus visible cold-trinket effects/risks/validation. DD2 lair/optional DD1 progress stays independent. Detailed per-round evidence is above.
+- Next round 129: re-read this Status, CLAUDE.md, PARITY.md, tools/handoff_prompt.md and tools/parity_loop.md on claude/practical-wright-hicri0. Inspect remaining visible His Rings and other partial trinket fields from actual installed tables/decomp; choose one documented gap before coding. Shared source-table omissions and metadata are candidates. If a condition is hidden, do not loosen blocked round 75 policy to claim coverage. Appalling Apron's cleansing and several other remaining effects use hidden checks and remain withheld.
+- No DD2 launch until owner explicitly permits it. Stagecoach/recruit portrait/input, first-Hamlet load, native arena light/startup timing, regional scenery memory/seams/fades, secret room HUD/payout and Memorial playback/scroll/art remain native checks rather than [x]. Tests here used synthetic state only; protected estates 1/3 and abandoned Documents/DD1inDD2 were never accessed.
+- Private native-derived artwork remains outside Git; the 24 approved arena extensions, six per primary region, and existing owner preview are unchanged. Do not kill the localhost 8766 gallery server or alter the owner's selected preview unnecessarily.
+- Existing resume-darkest2in1-loop-after-quota-reset heartbeat is ACTIVE, hourly at minute 50, targeting this chat. No duplicate automation was created. Resume locally after reset, one gap per round, green checks before deployment, commit/push, check quota at boundaries and hand off again near 95%.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

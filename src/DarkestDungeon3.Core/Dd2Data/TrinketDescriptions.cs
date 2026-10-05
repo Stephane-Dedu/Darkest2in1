@@ -201,7 +201,7 @@ public sealed class TrinketDescriptions
         "m_TokenAddId", "m_TokenAddAmount", "m_TokenAddAmountRange", "m_StressDamage", "m_StressHeal",
         "m_HealthDamageAmount", "m_HealthHealAmount", "m_HealthHealPercent",
         "m_DotAddId", "m_DotAddAmount", "m_DotAddAmountRange",
-        "m_Priority", "m_IgnoreResist", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
+        "m_Priority", "m_IgnoreResist", "m_IsCombo", "m_TokenAddTag", "m_TokenRemoveId", "m_TokenRemoveTag",
         "m_TokenRemoveAmount", "m_TokenRemoveAmountRange", "m_TokenRemoveRandom",
         "buffs",
         "m_AddTurn", "m_AddTurnRange",
@@ -235,6 +235,9 @@ public sealed class TrinketDescriptions
         // DD2's formatter includes these effects; resistance bypass changes application rather than its text.
         string ignoreResist = Field("Effect", id, "m_IgnoreResist");
         if (ignoreResist != null && !bool.TryParse(ignoreResist, out _)) return null;
+        // Native Combo marks an applied result for pop text/haptics; it adds no tooltip requirement.
+        string combo = Field("Effect", id, "m_IsCombo");
+        if (combo != null && !bool.TryParse(combo, out _)) return null;
         if (Field("Effect", id, "m_CritChance") != null || Field("Effect", id, "m_CritMultiplier") != null)
         {
             // Native applies these to health effects but describes their base amount normally.
