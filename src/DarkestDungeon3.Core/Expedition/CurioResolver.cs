@@ -17,6 +17,23 @@ public sealed class CurioReport
     public List<string> Effects = new();
     public string QuirkGained, Purged;
     public bool Scouted;
+
+    /// <summary>JSON restores shared loot objects as copies. Rebind waiting drops to their display entries without
+    /// changing counts or producing rewards; identical entries are matched only once.</summary>
+    internal void RestoreLootLinks()
+    {
+        var matched = new HashSet<LootDrop>();
+        for (int i = 0; i < LeftBehind.Count; i++)
+        {
+            var waiting = LeftBehind[i];
+            if (Loot.Contains(waiting)) { matched.Add(waiting); continue; }
+            var display = Loot.FirstOrDefault(d => !matched.Contains(d)
+                && d.Type == waiting.Type && d.Id == waiting.Id && d.Amount == waiting.Amount);
+            if (display == null) continue;
+            LeftBehind[i] = display;
+            matched.Add(display);
+        }
+    }
 }
 
 /// <summary>DD1 curio resolution: pick an outcome by weight (or the item interaction), then apply it.</summary>

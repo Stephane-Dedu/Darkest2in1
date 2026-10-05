@@ -32,7 +32,7 @@ internal sealed class Driver : MonoBehaviour
     public Dd2Party Party { get; private set; }
     public List<string> Log { get; } = new();
     public List<string> HomecomingLog { get; private set; } = new();
-    public CurioReport LastCurio { get; private set; }
+    public CurioReport LastCurio => Crawl?.LastCurio;
     /// <summary>How the last expedition ended (the results screen).</summary>
     public HomecomingReport LastReport { get; private set; }
 
@@ -235,7 +235,6 @@ internal sealed class Driver : MonoBehaviour
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
         Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
-        LastCurio = null;
         Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
@@ -622,15 +621,20 @@ internal sealed class Driver : MonoBehaviour
 
     public void Investigate(string heroId, string itemId)
     {
-        LastCurio = Crawl.InteractCurio(heroId, itemId, out var overflow);
-        if (LastCurio != null)
+        var report = Crawl.InteractCurio(heroId, itemId, out var overflow);
+        if (report != null)
         {
-            Say($"{S.Save.Estate.Hero(heroId)?.Name}: {LastCurio.Text ?? LastCurio.OutcomeType}" +
-                (LastCurio.Loot.Count > 0 ? " Found " + string.Join(", ", LastCurio.Loot) + "." : ""));
+            Say($"{S.Save.Estate.Hero(heroId)?.Name}: {report.Text ?? report.OutcomeType}" +
+                (report.Loot.Count > 0 ? " Found " + string.Join(", ", report.Loot) + "." : ""));
             foreach (var drop in overflow) Say($"No room for {drop}: make room in the pack to take it.");
             if (Expedition.QuestComplete) Say("The quest is complete! You may return to the Hamlet.");
         }
         S.Persist();
+    }
+
+    public void DismissCurio(CurioReport report)
+    {
+        if (Crawl?.DismissCurio(report) == true) S.Persist();
     }
 
     public void SkipCurio() => Crawl.SkipCurio();

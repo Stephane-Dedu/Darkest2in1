@@ -15,6 +15,8 @@ public sealed class ExpeditionState
     public Inventory Pack = new();
     /// <summary>Resolved battle/camping loot awaiting dismissal, saved with its exact taken/remainder amounts.</summary>
     public BattleSpoils PendingSpoils;
+    /// <summary>A resolved curio/quest result awaiting dismissal; its effects have already been applied.</summary>
+    public CurioReport PendingCurio;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>

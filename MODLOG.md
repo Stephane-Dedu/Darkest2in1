@@ -2259,3 +2259,26 @@ No game launch, owner-estate access or private-art changes.
 - Next round 141: persist curio outcomes/remainders with restored Loot/LeftBehind identities and explicit dismissal; verify quest effects and RNG do not replay. Then inspect actor snapshots and raid resume as separate stages before enabling native continuation.
 - Ordinary usage available; session 49%, weekly 85%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 141: serialize curio outcomes without replay
+
+Inspected installed heirloom_chest, thanks_chest and crypts quest goals plus
+Unity CurioEvent/investigated save counts. PendingCurio now stores the already
+resolved result. JSON copies shared loot objects, so reconstruction reconnects
+LeftBehind to matching Loot display objects one-to-one without rewards/effects
+or RNG. Driver reads this stored result; invalid/repeated investigations preserve
+it. Dismissal clears only its current passable result and persists.
+
+Seven cases cover native ordinary/journal/gather/activation outcomes, repeated
+synthetic reload, distinct/partial links, unchanged quest progress/items and
+RNG, guarded dismissal and legacy null. Release + 564 Core + 45 UI tests pass;
+stopped-game DLL hashes match. Native recovery/scroll remains [?]; runtime load
+still forces retreat pending the separate actor/location/resume stages.
+No game launch, owner-estate access or private-art changes.
+
+## Status 2026-10-05: round 141 complete
+
+- Round 141 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 142: implement Core re-entry at a saved room/corridor/camp and preserve pending encounter/surprise instead of calling Begin/resetting the entrance. Verify no movement/scout/trap/hunger/RNG replay; inspect installed maps and Unity raid load sequence first. Actor snapshots/runtime resume remain separate stages.
+- Ordinary usage available; session 52%, weekly 86%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

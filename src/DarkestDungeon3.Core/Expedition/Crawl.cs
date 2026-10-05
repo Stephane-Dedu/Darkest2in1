@@ -25,6 +25,7 @@ public sealed class Crawl
         _rules = rules;
         _party = party;
         _content = content;
+        State.PendingCurio?.RestoreLootLinks();
     }
 
     /// <summary>The untouched curio where the party stands (room or hall square), if any.</summary>
@@ -45,7 +46,7 @@ public sealed class Crawl
         if (curio == null) return null;
 
         bool isGoal = State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal;
-        if (isGoal && State.Goal != null) return InteractQuestCurio(curio, heroId, itemId);
+        if (isGoal && State.Goal != null) return State.PendingCurio = InteractQuestCurio(curio, heroId, itemId);
         if (_content?.Curios == null) return null;
 
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
@@ -58,7 +59,16 @@ public sealed class Crawl
         {
             if (!State.Pack.TryTake(drop, _content.Items)) { overflow.Add(drop); report.LeftBehind.Add(drop); }
         }
-        return report;
+        return State.PendingCurio = report;
+    }
+
+    public CurioReport LastCurio => State.PendingCurio;
+
+    public bool DismissCurio(CurioReport report)
+    {
+        if (State.Ended || report == null || report != LastCurio || !CanLeave(report.LeftBehind)) return false;
+        State.PendingCurio = null;
+        return true;
     }
 
     /// <summary>DD1's loot scroll: take as much of a waiting drop as fits, retaining its remainder.</summary>

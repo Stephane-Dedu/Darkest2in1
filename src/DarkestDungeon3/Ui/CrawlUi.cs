@@ -875,7 +875,10 @@ internal sealed class CrawlUi
         bool canLeave = Crawl.CanLeave(report.LeftBehind);
         if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", canLeave, 24)
             || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+        {
             _resultDismissed = report;
+            D.DismissCurio(report);
+        }
         return true;
     }
 
