@@ -708,7 +708,6 @@ public sealed class TrinketDescriptions
             case "wound_percent":
             case "stress":
             case "stress_percent":
-            case "rank":
             case "round":
             case "turn":
                 if (type.StartsWith("health", StringComparison.Ordinal) && (actor == "TARGET" || actor == "PARTY")) key += "_" + actor.ToLowerInvariant();
@@ -718,9 +717,21 @@ public sealed class TrinketDescriptions
                 {
                     string comparison = Compare(id, type.Contains("percent"), localize);
                     if (comparison == null) return null;
-                    // CSV ranks are already one-based; native initialization subtracts one and its description adds it back.
                     args = new object[] { comparison, "", effect };
                 }
+                break;
+            case "rank":
+                if (!_blocks.TryGetValue(("Condition", id), out var rankRows)
+                    || rankRows.Any(row => !TagConditionFields.Contains(row[0]))
+                    || actor != "PERFORMER" || numberType != "PARAMETER"
+                    || !int.TryParse(Field("Condition", id, "m_ConditionNumber"), out int rank) || rank < 1 || rank > 4
+                    || (Field("Condition", id, "m_IsInverse") ?? "False") != "False"
+                    || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE"
+                    || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
+                // CSV ranks are one-based. Native initializes at rank-1 then describes rank+1.
+                string rankText = Format(Text("comparison_equals_label", localize), rank);
+                if (rankText == null) return null;
+                args = new object[] { rankText, "", effect };
                 break;
             case "run_value":
             case "run_value_percent":

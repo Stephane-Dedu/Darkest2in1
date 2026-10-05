@@ -681,13 +681,13 @@ public class TrinketDescriptionTests
     public void HealCritMetadataKeepsBaseHealProcChanceAndNativeLocalization()
     {
         string effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out bool complete);
-        Assert.False(complete);
-        Assert.Equal("Each Hero on Round End: Heal 2 (33%)", effects);
+        Assert.True(complete);
+        Assert.Contains("Each Hero on Round End: Heal 2 (33%)", effects);
         effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out complete,
             key => key == "effect_tooltip_health_heal_amount" ? "Heal {0} HP" : null);
-        Assert.False(complete);
-        Assert.Equal("Each Hero on Round End: Heal 2 HP (33%)", effects);
-        Assert.DoesNotContain("5%", effects);
+        Assert.True(complete);
+        Assert.Contains("Each Hero on Round End: Heal 2 HP (33%)", effects);
+        Assert.DoesNotContain("(5%)", effects);
         Assert.DoesNotContain("Heal 3", effects);
     }
 
@@ -1080,6 +1080,99 @@ public class TrinketDescriptionTests
         Assert.False(complete);
         Assert.DoesNotContain("Remove", effects);
         Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+    }
+
+    [Fact]
+    public void RankParametersKeepGhastlyGruelsFrontAndRearBonusesSeparate()
+    {
+        string effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+50% Healing Received from Skills when Rank is 1", effects);
+        Assert.Contains("+25% Healing Given from Skills when Rank is 4", effects);
+        Assert.Contains("Each Hero on Round End: Heal 2 (33%)", effects);
+        Assert.Equal(3, effects.Split('\n').Length);
+        Assert.DoesNotContain("Rank is 0", effects);
+        Assert.DoesNotContain("Rank is 5", effects);
+    }
+
+    [Fact]
+    public void RankParametersUseNativeTemplatesAndRequireTheirEffectBody()
+    {
+        string effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out bool complete,
+            key => key == "effect_tooltip_condition_rank" ? "Rang{0}: {2}" : key == "comparison_equals_label" ? " = {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("Rang = 1: +50% Healing Received from Skills", effects);
+        Assert.Contains("Rang = 4: +25% Healing Given from Skills", effects);
+        foreach (string template in new[] { "invalid {9}", "Rank {0}" })
+        {
+            effects = Data.Effects("trinket_farm_boss_ghastly_gruel", out complete,
+                key => key == "effect_tooltip_condition_rank" ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Healing", effects);
+            Assert.Contains("Each Hero on Round End: Heal 2 (33%)", effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("trinket_hero_hwy_tormenting_locket", "+10% CRIT when Rank is 1", "+10% CRIT when Rank is 4")]
+    [InlineData("trinket_hero_hel_bloodied_branch", "Turn Start: Bleed 1 (3 Turns) when Rank is 4", "+2 Bleed Dealt when self HP is below 33%")]
+    public void RankParametersRetainOtherNativeBonusesAndSelfDamage(string id, string first, string second)
+    {
+        string effects = Data.Effects(id, out bool complete);
+        Assert.True(complete);
+        Assert.Contains(first, effects);
+        Assert.Contains(second, effects);
+    }
+
+    [Theory]
+    [InlineData("m_ConditionNumber", "1", "1")]
+    [InlineData("m_ConditionNumber", "2", "2")]
+    [InlineData("m_ConditionNumber", "3", "3")]
+    [InlineData("m_ConditionNumber", "4", "4")]
+    [InlineData("m_ConditionNumber", "0", null)]
+    [InlineData("m_ConditionNumber", "5", null)]
+    [InlineData("m_ConditionNumber", "1.5", null)]
+    [InlineData("m_ConditionNumberType", "BOOL", null)]
+    [InlineData("m_ConditionActorType", "TARGET", null)]
+    [InlineData("m_SourceConditionActorType", "PERFORMER", null)]
+    [InlineData("m_IsVisible", "False", null)]
+    [InlineData("m_UnknownRestriction", "True", null)]
+    public void RankParametersUseOneBasedPositionsAndWithholdUnsupportedRequirements(string field, string value, string expectedRank)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_rank_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var condition = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["m_ConditionType"] = "rank", ["m_ConditionActorType"] = "PERFORMER",
+                ["m_ConditionNumber"] = "1", ["m_ConditionNumberType"] = "PARAMETER",
+            };
+            condition[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,rank_item,Item", "element_end",
+                "element_start,rank_item,ActorDataExternalBuffs", "buffs,rank_buff", "element_end",
+                "element_start,rank_buff,Buff", "m_ConditionId,rank_condition", "element_end",
+                "element_start,rank_buff,ActorDataStats", "key_map,crit_chance", "add_stats,0.1", "element_end",
+                "element_start,rank_condition,Condition",
+            });
+            foreach (var row in condition) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_condition_rank={2} when Rank {0}{1}\ncomparison_equals_label= is {0}\nactor_stat_type_formatted_crit_chance={0} CRIT");
+            string effects = TrinketDescriptions.Load(fixture).Effects("rank_item", out bool complete);
+            Assert.Equal(expectedRank != null, complete);
+            Assert.Equal(expectedRank == null ? null : "+10% CRIT when Rank is " + expectedRank, effects);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
     }
 
     [Fact]

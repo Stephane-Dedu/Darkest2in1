@@ -1207,3 +1207,39 @@ process/launch or save access; native before/after-initialization comparison rem
 - Private scenery remains 24 native-reference panoramas, six per primary region, installed at game/PrivateScenery, support up to 12. Native-derived art/full prompts/provenance remain outside Git at local-art/combat-extensions. Native room/reload/ground/torch/load/memory checks remain [?].
 - Local preview server localhost:8766, exec session 20403, and combat-extensions.html remain available; linked preview.html retains historical round 93 art. No pending game/save restores.
 - Last observed five-hour usage 87%; check at round boundaries. Owner requested stopping near 95% and resuming after reset; no scheduled resume established yet. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 102: native rank parameters in trinket effects
+
+Installed performer_is_in_rank_1/4 uses RANK/PERFORMER/PARAMETER. ConditionDefinition
+initializes at CSV number minus one and rounds it; ConditionDescription adds one and
+uses comparison_equals_label, which labels rank rather than numeric threshold scaling.
+Cold Compare rejected PARAMETER. DD1 shared/buffs/base.buffs.json in_rank rules and
+Unity port Buff.ToolTip's SingleParam+1 provide the position-label reference.
+
+Added a dedicated guarded rank path, allowing only integral CSV positions 1..4 and
+the proven self/PARAMETER shape. Generic comparisons stay unchanged; other actors,
+inversions, source exclusions, hidden and unknown restrictions stay withheld. Ghastly
+Gruel now keeps Rank 1 +50% Healing Received from Skills and Rank 4 +25% Healing Given
+from Skills alongside its round-end heal. Tormenting Locket keeps +10% CRIT in Ranks
+1 and 4. Bloodied Branch keeps turn-start Bleed 1 (3 Turns) in Rank 4 alongside benefits.
+
+Four actual-data/localization cases plus twelve rank/actor/restriction fixtures pass.
+Old Ghastly Gruel healing test assumed the item remained incomplete with only one line;
+updated those expectations while keeping heal amount/chance checks. Its broad "5%"
+substring assertion then matched the legitimate +25% bonus; changed it to "(5%)".
+One patch initially targeted the adjacent assertion; restored that unrelated test and
+fixed the intended line. Initial failures were stale test assumptions, not a rank
+implementation failure. Deployment was prematurely triggered before inspecting one
+failed test result; no game was running. Final full green suite and deployment/hash
+verification supersede it. Release + 350 Core + 19 UI tests green, both installed DLLs
+match the verified build. Audit 175 complete/15 partial/1 blank of 191. No game launch
+or save access. Native before/after-initialization comparison remains [?].
+
+## Status 2026-10-05: loop resumed, round 102 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or pending restores.
+- Round 102 locally deployed with Release + 350 Core + 19 UI tests green and both DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission; round 75 visibility stays blocked.
+- Cold audit 175 complete/15 partial/1 blank. Next round 103: actual remaining advanced fields/conditions, Sickening Silence's diseased target or persistent activity-log weeks/art. Many remaining partials involve hidden effects or restrictions; do not weaken the blocked visibility policy to improve counts. Anatomical Map stays blank. Skip [user]/[blocked].
+- Private scenery remains 24 native-reference panoramas, six per primary region, installed at game/PrivateScenery with support up to 12. Full art/prompts/provenance remain outside Git at local-art/combat-extensions. Native room/reload/ground/torch/load/memory checks remain [?].
+- Local preview localhost:8766/combat-extensions.html and server exec session 20403 remain available; linked preview.html retains historical round 93 art. No pending game/save restores.
+- Last observed five-hour usage 92%, reset 2026-10-05 08:44:05 UTC / 10:44:05 Paris. Check at round boundaries. Owner requested stopping near 95% and resuming after reset. Created active thread heartbeat resume-darkest2in1-loop-after-quota-reset, hourly at minute 50, to check allowance and continue this authorized loop after reset without duplicate work; unchanged quota waits stay quiet. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
