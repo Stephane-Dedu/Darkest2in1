@@ -291,7 +291,7 @@ public sealed class Crawl
     }
 
     /// <summary>Report a won fight at the party's current spot.</summary>
-    /// <summary>The loot of the last fight won (DD1 rules, see <see cref="BattleLoot"/>).</summary>
+    /// <summary>The last battle or camping loot batch, including drops that still need pack space.</summary>
     public BattleSpoils LastSpoils { get; private set; }
 
     public List<CrawlEvent> ResolveBattle()
@@ -552,6 +552,7 @@ public sealed class Crawl
         camp.Uses[key] = (camp.Uses.TryGetValue(key, out var n) ? n : 0) + 1;
 
         var rng = NextRng();
+        var loot = new List<LootDrop>();
         foreach (var effect in skill.Effects)
         {
             if (!rng.Chance(effect.Chance)) continue;
@@ -563,12 +564,19 @@ public sealed class Crawl
                 "party_other" => _party.Alive.Where(h => h != heroId).ToArray(),
                 _ => new[] { heroId },
             };
-            foreach (var t in targets) ApplyCampEffect(effect, t, rng);
+            foreach (var t in targets) ApplyCampEffect(effect, t, rng, loot);
+        }
+        if (loot.Count > 0)
+        {
+            LastSpoils = new BattleSpoils { Kind = "camp" };
+            foreach (var drop in loot)
+                if (State.Pack.TryTake(drop, _content.Items)) LastSpoils.Taken.Add(drop);
+                else LastSpoils.LeftBehind.Add(drop);
         }
         return true;
     }
 
-    private void ApplyCampEffect(CampEffect effect, string hero, Rng rng)
+    private void ApplyCampEffect(CampEffect effect, string hero, Rng rng, List<LootDrop> loot)
     {
         switch (effect.Type)
         {
@@ -592,7 +600,7 @@ public sealed class Crawl
                     foreach (var d in _content.Loot.Roll(effect.SubType, Math.Max(1, (int)effect.Amount), State.Quest?.Difficulty ?? 1, State.Quest?.Dungeon ?? "", rng))
                     {
                         var drop = LootDrop.ResolveTrinket(d, TrinketOfRarity, rng);
-                        State.Pack.Add(drop.Key, drop.Amount);
+                        loot.Add(drop);
                     }
                 break;
             // remove_bleeding / remove_poison / remove_deaths_door_recovery_buffs: DoTs already landed out of

@@ -152,7 +152,7 @@ public sealed class BattleLoot
     }
 }
 
-/// <summary>What the party picked up after a fight, and what didn't fit.</summary>
+/// <summary>What the party picked up from a battle or camping skill, and what didn't fit.</summary>
 public sealed class BattleSpoils
 {
     public string Kind;

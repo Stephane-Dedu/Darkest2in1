@@ -72,8 +72,9 @@ internal sealed class CrawlUi
             Gui.DrawAnnouncement();
             return;
         }
-        if (exp.Camp != null) DrawCamp(crawl, exp);
-        else if (DrawSpoils(crawl) || DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
+        if (DrawSpoils(crawl)) UiRoot.ModalOpen = true;
+        else if (exp.Camp != null) DrawCamp(crawl, exp);
+        else if (DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
         else { DrawPrompt(crawl, exp); DrawSecretControls(crawl, exp); }
         Gui.DrawAnnouncement();
     }
@@ -805,7 +806,8 @@ internal sealed class CrawlUi
         var scroll = Scroll("event_scroll_loot.png");
         if (scroll != null) GUI.DrawTexture(new Rect(left, top, 456, 475), scroll);
         else Gui.Fill(new Rect(left, top, 456, 475), new Color(0.05f, 0.04f, 0.03f, 0.93f));
-        Gui.Text(new Rect(left + 40, top + 26, 376, 48), "Spoils", 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        string title = spoils.Kind == "camp" ? Dd1Text.Get("miscellaneous", "str_overlay_loot_chest_title") ?? "Treasure!" : "Spoils";
+        Gui.Text(new Rect(left + 40, top + 26, 376, 48), title, 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
 
         var all = spoils.Taken.Select(d => (d, taken: true)).Concat(spoils.LeftBehind.Select(d => (d, taken: false))).ToList();
         var items = S.Content.Items;

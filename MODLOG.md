@@ -2186,3 +2186,26 @@ transition/input remains [?]. No game launch or owner-estate/private-art access.
 - Next round 138: inspect remaining high-impact campaign/crawl parity against installed DD1 and Unity. Check camping loot capacity and other concrete resource effects before choosing one documented gap; do not invent rules.
 - Ordinary usage available; session 38%, weekly 83%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived art and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 138: camping rewards respect pack capacity
+
+ApplyCampEffect added loot unconditionally, exceeding 16 slots without a scroll.
+Inspected installed pilfer/supply (S), trinket_scrounge (T_ANTIQ_CAMP), native
+loot tables and Unity ExecuteCampEffect -> LoadSingleLoot/LootEvent. Real drops
+now use existing TryTake capacity checks. LastSpoils represents battle or camp
+loot; its scroll draws before camp controls, with native Treasure! text for camp.
+Camp remains active and excess can be taken after discarding pack items.
+
+Four cases cover all three native skills, full-pack overflow, freeing/taking a
+slot, resolved trinkets, stacking into a full pack, unchanged RNG, use limits and
+synthetic reload. Release + 544 Core + 45 UI tests pass; stopped-game DLL hashes
+match. Native scroll/camp controls remain [?]. No launch or owner-estate access.
+Separate follow-ups recorded: partial transfer capacity and runtime-only overflow
+persistence. Inspect native inventory/save behavior before implementing either.
+
+## Status 2026-10-05: round 138 complete
+
+- Round 138 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 139: inspect native partial loot distribution versus Core's all-or-nothing TryTake. If proven, fix one bounded transfer gap with exact taken/remainder/slot/RNG tests; overflow persistence is a separate round.
+- Ordinary usage available; session 42%, weekly 84%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
