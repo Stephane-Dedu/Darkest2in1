@@ -43,7 +43,7 @@ internal sealed class CrawlUi
         var crawl = D.Crawl;
         var exp = D.Expedition;
         if (crawl == null || exp == null) return;
-        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD2 regions use their DD1 zone's art
+        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD1 props and art fallback
         if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
         // While a hero sheet is open, the dungeon under it is only painted: clicks belong to the sheet.
         if (_sheetHeroId != null && Event.current.type != EventType.Repaint && S.Save.Estate.Hero(_sheetHeroId) is { } open)
@@ -86,7 +86,7 @@ internal sealed class CrawlUi
         if (crawl == null || exp == null) return;
         var old = GUI.color;
         GUI.color = new Color(1, 1, 1, alpha);
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, alpha));
         DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
         DrawHeroes(exp);
         DrawHud(exp);
@@ -97,11 +97,30 @@ internal sealed class CrawlUi
 
     private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone)
     {
-        Gui.Fill(new Rect(0, 0, Gui.W, 720), Color.black);
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, GUI.color.a));
         float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
         float slide = t < 1f ? D.LastStepDir * 720f * (1f - Mathf.SmoothStep(0, 1, t)) : 0f;
         slide -= D.WalkProgress * 720f;   // held-key walking scrolls the hallway continuously
 
+        var regional = RegionalScenery.For(exp.Quest.Dungeon);
+        float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
+        if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
+        if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        DrawProps(crawl, exp, slide);
+
+        // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
+        float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
+        if (dark > 0)
+        {
+            float opacity = GUI.color.a;
+            Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, dark * 0.55f * opacity));
+            Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f * opacity));
+            Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f * opacity));
+        }
+    }
+
+    private static void DrawLegacyScene(Crawl crawl, ExpeditionState exp, string zone, float slide)
+    {
         if (exp.InRoom)
         {
             var tex = exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
@@ -136,15 +155,65 @@ internal sealed class CrawlUi
                 if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
             }
         }
-        DrawProps(crawl, exp, slide);
+    }
 
-        // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
-        float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
-        if (dark > 0)
+    private static void DrawRegionalScene(Crawl crawl, ExpeditionState exp, RegionalScenery plan, float slide, float alpha)
+    {
+        var old = GUI.color;
+        GUI.color = new Color(old.r, old.g, old.b, old.a * alpha);
+        uint ambient = plan.Ambient;
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(((ambient >> 16) & 255) / 255f,
+            ((ambient >> 8) & 255) / 255f, (ambient & 255) / 255f, GUI.color.a));
+        bool reverse = !exp.InRoom && exp.HeadingRoomId != crawl.CurrentCorridor.RoomB;
+        float camera = exp.InRoom ? exp.RoomId * 13 * 720f - slide
+            : CorridorSceneryLayout.Camera(crawl.CurrentCorridor.Id, exp.TileIndex, reverse, slide);
+        float opening = exp.InRoom ? 1 : CorridorSceneryLayout.Opening(exp.TileIndex, crawl.CurrentCorridor.Tiles.Count, reverse, slide);
+        try
         {
-            Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, dark * 0.55f));
-            Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
-            Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
+            var sceneColor = GUI.color;
+            foreach (var layer in plan.Layers.Where(layer => !layer.Ground))
+            {
+                GUI.color = new Color(sceneColor.r, sceneColor.g, sceneColor.b,
+                    sceneColor.a * (layer.Parallax >= 0.35f ? 1 - 0.45f * opening : 1));
+                DrawSceneryLayer(layer, camera, reverse);
+            }
+            GUI.color = sceneColor;
+            // Open outdoor locations share the same walkway; no wall or doorway interrupts the landscape.
+            foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
+            if (!exp.InRoom && opening > 0)
+            {
+                int count = crawl.CurrentCorridor.Tiles.Count;
+                int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
+                var cue = new Color(0.85f, 0.81f, 0.7f, sceneColor.a * opening * 0.8f);
+                foreach (float x in new[] { 600 + (-1 - here) * 720 + slide, 600 + (count - here) * 720 + slide })
+                    if (x > -140 && x < Gui.W + 140)
+                        Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
+            }
+        }
+        finally { GUI.color = old; }
+    }
+
+    private static void DrawSceneryLayer(SceneryLayer layer, float camera, bool reverse)
+    {
+        var tex = RegionSceneryArt.Texture(layer.AssetKey);
+        if (tex == null) return;
+        foreach (var tile in CorridorSceneryLayout.Tiles(camera * layer.Parallax, layer.Width, reverse))
+        {
+            var rect = new Rect(tile.X, layer.Top, layer.Width, layer.Height);
+            if (!layer.Ground)
+                GUI.DrawTextureWithTexCoords(rect, tex, tile.Mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
+            else
+            {
+                // DD2 roads run vertically in their source textures; turn them sideways for a continuous walkway.
+                var matrix = GUI.matrix;
+                try
+                {
+                    GUIUtility.RotateAroundPivot(90, rect.center);
+                    var turned = new Rect(rect.center.x - rect.height / 2, rect.center.y - rect.width / 2, rect.height, rect.width);
+                    GUI.DrawTextureWithTexCoords(turned, tex, tile.Mirror ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1));
+                }
+                finally { GUI.matrix = matrix; }
+            }
         }
     }
 

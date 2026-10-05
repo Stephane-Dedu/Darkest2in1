@@ -56,7 +56,11 @@ internal sealed class Driver : MonoBehaviour
         Dd2Combat.Finished += OnFightFinished;
     }
 
-    private void OnDestroy() => Dd2Combat.Finished -= OnFightFinished;
+    private void OnDestroy()
+    {
+        Dd2Combat.Finished -= OnFightFinished;
+        RegionSceneryArt.Clear();
+    }
 
     public void Say(string line)
     {
@@ -87,6 +91,7 @@ internal sealed class Driver : MonoBehaviour
         }
         SpineArt.Update();
         ItemText.Prime();
+        RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();
@@ -191,6 +196,7 @@ internal sealed class Driver : MonoBehaviour
         S.Persist();
 
         Phase = Phase.Embarking;
+        RegionSceneryArt.Prepare(quest.Dungeon);
         Say($"The party sets out: {quest}.");
         Dd2Run.Start(OnRoadReady);
         return null;
