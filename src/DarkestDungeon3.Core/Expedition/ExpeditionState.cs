@@ -13,6 +13,8 @@ public sealed class ExpeditionState
     public DungeonMap Map;
     public List<string> Party = new();           // hero ids, rank order
     public Inventory Pack = new();
+    /// <summary>Resolved battle/camping loot awaiting dismissal, saved with its exact taken/remainder amounts.</summary>
+    public BattleSpoils PendingSpoils;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>

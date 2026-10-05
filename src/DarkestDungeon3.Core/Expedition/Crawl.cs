@@ -301,7 +301,15 @@ public sealed class Crawl
 
     /// <summary>Report a won fight at the party's current spot.</summary>
     /// <summary>The last battle or camping loot batch, including drops that still need pack space.</summary>
-    public BattleSpoils LastSpoils { get; private set; }
+    public BattleSpoils LastSpoils { get => State.PendingSpoils; private set => State.PendingSpoils = value; }
+
+    /// <summary>Close the current loot scroll; DD1 won't leave quest items, and a stale scroll can't clear a new one.</summary>
+    public bool DismissSpoils(BattleSpoils report)
+    {
+        if (State.Ended || report == null || report != LastSpoils || !CanLeave(report.LeftBehind)) return false;
+        State.PendingSpoils = null;
+        return true;
+    }
 
     public List<CrawlEvent> ResolveBattle()
     {

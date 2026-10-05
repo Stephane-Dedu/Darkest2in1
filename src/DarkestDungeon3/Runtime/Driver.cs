@@ -637,7 +637,16 @@ internal sealed class Driver : MonoBehaviour
 
     public void MakeCamp() { Dd1Audio.Play("/general/map/camp_start"); Handle(Crawl.MakeCamp()); }
     public bool EatMeal(Meal meal) => Crawl.EatMeal(meal);
-    public bool UseCampSkill(string hero, string skill, string target) => Crawl.UseCampSkill(hero, skill, target);
+    public bool UseCampSkill(string hero, string skill, string target)
+    {
+        if (!Crawl.UseCampSkill(hero, skill, target)) return false;
+        S.Persist();
+        return true;
+    }
+    public void DismissSpoils(BattleSpoils report)
+    {
+        if (Crawl?.DismissSpoils(report) == true) S.Persist();
+    }
     public void BreakCamp() { Dd1Audio.Play("/general/map/camp_end"); Handle(Crawl.BreakCamp()); }
 
     /// <summary>Leave the dungeon: after the quest is done, or as a retreat before it is.</summary>

@@ -800,7 +800,7 @@ internal sealed class CrawlUi
     {
         var spoils = crawl.LastSpoils;
         if (spoils == null || spoils == _spoilsDismissed) return false;
-        if (spoils.Taken.Count == 0 && spoils.LeftBehind.Count == 0) { _spoilsDismissed = spoils; return false; }
+        if (spoils.Taken.Count == 0 && spoils.LeftBehind.Count == 0) { _spoilsDismissed = spoils; D.DismissSpoils(spoils); return false; }
 
         float left = 1342 - 228, top = 140;
         var scroll = Scroll("event_scroll_loot.png");
@@ -825,7 +825,10 @@ internal sealed class CrawlUi
         bool canLeave = Crawl.CanLeave(spoils.LeftBehind);
         if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", canLeave, 24)
             || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
+        {
             _spoilsDismissed = spoils;
+            D.DismissSpoils(spoils);
+        }
         return true;
     }
 

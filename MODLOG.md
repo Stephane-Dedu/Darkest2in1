@@ -2231,3 +2231,31 @@ scroll/click remains [?]. No launch, owner-estate or private-art changes.
 - Next round 140: inspect native save/inventory behavior and close the runtime-only overflow recovery gap in bounded stages, first battle/camping reports, then curios if their alias identities need separate handling.
 - Ordinary usage available; session 46%, weekly 85%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 140: serialize resolved battle/camping loot
+
+DD1 starting_save inventory and Unity SaveCampaignData inventory/formation plus
+BattlegroundSaveData.BattleLoot were inspected. No equivalent port serialization
+for a currently open loot scroll was found. Our persisted cleared spot/pack
+previously lost LastSpoils on reconstruction. PendingSpoils now stores resolved
+taken/remainders in ExpeditionState; rebuilding Core reuses them without rolls.
+Dismissal clears only the current passable report and persists; successful camp
+skills now persist their generated report/use limits. Legacy saves remain null.
+
+Six cases cover actual battle/camp loot, repeated synthetic reload, partial
+pickup, dismissal/pass without awards, quest/stale/ended guards and legacy data.
+Release + 557 Core + 45 UI tests pass; stopped-game DLL hashes match.
+
+Discovered larger recovery gap: Driver.EnterHamlet forces every started saved
+expedition into retreat and clears it; OnRoadReady always resets to the entrance.
+DD1/Unity saved raid continuation contradicts the old "DD1 counts that as a
+retreat" comment. Logged separately. This round is groundwork only, not native
+resume completion. Curio alias/serialization is the next bounded report stage.
+No game launch, owner-estate access or private-art changes.
+
+## Status 2026-10-05: round 140 complete
+
+- Round 140 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 141: persist curio outcomes/remainders with restored Loot/LeftBehind identities and explicit dismissal; verify quest effects and RNG do not replay. Then inspect actor snapshots and raid resume as separate stages before enabling native continuation.
+- Ordinary usage available; session 49%, weekly 85%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
