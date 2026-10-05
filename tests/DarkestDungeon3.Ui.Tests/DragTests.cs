@@ -124,6 +124,63 @@ public class DragTests : IDisposable
     }
 
     [Fact]
+    public void RecruitReleasedOverRosterWithoutIntermediateDragEventMustStillHire()
+    {
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Source(Source, new Recruit("fast_recruit"), _ => { });
+        GUIUtility.hotControl = 17;
+        // Some input/frame sequences deliver the distant release without a separate MouseDrag pass.
+        Send(EventType.MouseUp, 1600, 200);
+        Drag.Begin();
+        Assert.Equal(EventType.Used, Event.current.type);
+        Assert.True(Drag.Drop<Recruit>(Roster, out var carried));
+        var estate = new Estate { Recruits = { new HeroRecord { Id = carried.HeroId, ClassId = "vestal" } } };
+        var hamlet = new Hamlet(estate, null, Buildings.Load(Dd1Install.Find()), null);
+        Assert.True(hamlet.Recruit(carried.HeroId));
+        Assert.Empty(estate.Recruits); Assert.Single(estate.Roster);
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Assert.Equal(0, GUIUtility.hotControl);
+        Drag.Overlay(); Assert.False(Drag.Active);
+    }
+
+    [Fact]
+    public void FastReleaseOutsideRosterCancelsAndTheNextRecruitCanBeHired()
+    {
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Source(Source, new Recruit("cancelled"), _ => { });
+        GUIUtility.hotControl = 17;
+        Send(EventType.MouseUp, 600, 600);
+        Drag.Begin();
+        Assert.True(Drag.Active);
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Drag.Overlay();
+        Assert.False(Drag.Active);
+        Assert.Equal(0, GUIUtility.hotControl);
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Source(Source, new Recruit("next"), _ => { });
+        Send(EventType.MouseUp, 1600, 200);
+        Drag.Begin();
+        Assert.True(Drag.Drop<Recruit>(Roster, out var next));
+        Assert.Equal("next", next.HeroId);
+    }
+
+    [Theory]
+    [InlineData(0, 1104, 202)] // below threshold: ordinary details click
+    [InlineData(1, 1600, 200)] // another button must not promote a left press
+    public void ReleaseWithoutDragDoesNotPromoteClicksOrAnotherButton(int button, float x, float y)
+    {
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Source(Source, new Recruit("click"), _ => { });
+        Send(EventType.MouseUp, x, y);
+        Event.current.button = button;
+        Drag.Begin();
+        Assert.False(Drag.Active);
+        Assert.Equal(EventType.MouseUp, Event.current.type);
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Drag.Overlay();
+    }
+
+    [Fact]
     public void EscapeCancelsACarriedRecruitWithoutLeavingMouseCapture()
     {
         Send(EventType.MouseDown, 1100, 200);

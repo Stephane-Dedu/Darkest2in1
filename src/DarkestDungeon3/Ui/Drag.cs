@@ -32,7 +32,10 @@ internal static class Drag
             e.Use();
             return;
         }
-        if (e.rawType == EventType.MouseDrag && _payload == null && _pending != null
+        // A fast move/release can arrive without a separate drag pass. Promote before the target's
+        // buttons see that release, using the same screen-space threshold as ordinary drags.
+        if ((e.rawType == EventType.MouseDrag || e.rawType == EventType.MouseUp && e.button == 0)
+            && _payload == null && _pending != null
             && (GUIUtility.GUIToScreenPoint(e.mousePosition) - _downAt).magnitude > Threshold)
         {
             _payload = _pending;

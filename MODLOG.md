@@ -2585,3 +2585,41 @@ bugs skill was read; build a real red-capable caller/input loop before guessing.
 - Next round 153: owner-reported stagecoach drag-to-hire, then round 154 minimap Battle/Curio/Quest Item hover. Existing shared Drag tests are too shallow to confirm native caller behavior; add the correct reproduction seam. No game launch or owner-estate inspection.
 - Ordinary usage available; session 87%, weekly 91%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 153: stagecoach drag release without an intermediate drag pass
+
+Installed DD1 stage_coach.layout.darkest hero_recruit_store and Unity
+RecruitSlot.OnBeginDrag/HeroRosterPanel.OnDrop define moving a recruit to the
+roster once while separating details clicks. The actual shared Drag.Source ->
+Begin -> Drop -> Core Hamlet.Recruit reproduction failed twice: a distant left
+MouseUp without an intermediate MouseDrag never promoted the pending payload.
+Ranked explanations were missing promotion, coordinate mismatch and roster
+button interception. Changing promotion alone made that reproduction pass.
+
+Begin now accepts threshold-crossing left release before ordinary buttons,
+using the existing screen-space threshold. Four added cases cover actual one-time
+recruitment, reserved release, outside cancellation/retry, below-threshold click
+and another-button rejection. All 648 Core + 65 UI tests and Release pass;
+DD2 was stopped and both deployed DLL hashes match. No temporary instrumentation.
+The headless event shim does not reproduce native GUI.Button, viewport matrices
+or full Hamlet rendering. This is a confirmed shared-input gap, not proof of the
+owner's exact native event sequence; keep native verification [?]. No launch,
+owner-estate access or artwork changes.
+
+Minimap investigation for next round: CrawlUi.DrawMap draws hall markers and room
+icons but never calls Gui.Tip. Installed miscellaneous.string_table.xml lines
+1600-1612 provide Battle/Curio/guarded-room/Treasure/Trap/Obstacle/Secret Door/
+Boss/Quest Location labels. Unity RaidMapRoomSlot only offers movement feedback;
+RaidMapHallSectorSlot preserves hidden/scouted/visited/completed knowledge. Add
+actual content labels without exposing unknown or already-resolved content.
+Room/HallTile.IsQuestGoal can identify quest locations; don't invent quest-item
+details from absent payload data. Gui.Tip queues text during Repaint and DrawTip
+renders after EndGroup, so hit testing must remain in the clipped map coordinates.
+
+## Status 2026-10-05: round 153 complete, quota handoff
+
+- Round 153 green, deployed with matching DLL hashes; commit/push this handoff. Native goal remains paused without resume API; no duplicate or false completion.
+- Quota pause at session 94%, weekly 92%, ordinary usage still available. Stop approximately 95% with a clean committed handoff. Resume only after reported session reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892, through the existing hourly heartbeat. Do not create another automation. Heartbeats before this reset must remain quiet.
+- Next round 154: owner-reported missing minimap Battle/Curio/Quest Location hover labels. Record DD1 label/fog differences in PARITY before code, use a meaningful real label-selection seam, test/build/deploy only while stopped and commit/push. The stagecoach's exact native symptom remains unverified; never describe the whole native bug as proven fixed from headless input alone.
+- DD2 stopped at deployment; no game launched or killed. No protected estates, abandoned project or native-derived artwork accessed. Owner preview/server remains unchanged. No running agent, test or build; no save restores pending.
+- Later candidates remain loot-scroll truncation and permitted synthetic-estate/native validation for saved-raid recovery, lighting/startup and stagecoach. Owner launch authorization is still absent.
