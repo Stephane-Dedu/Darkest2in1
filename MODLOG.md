@@ -1060,3 +1060,33 @@ comparison remains [?]. Private scenery and public art remain as round 95.
 - Private regional art remains 24 native-reference panoramas, six per region, at game/PrivateScenery and local-art/combat-extensions. Full prompts/provenance outside Git; runtime supports up to 12. Verify adjacent rooms/reload, footline/props, torch visibility, Shroud ground transitions and load/memory when launch is allowed.
 - Local preview server localhost:8766 remains running, exec session 20403. Keep combat-extensions.html available. It shows the complete private pack; linked preview.html shows historical round-93 art. No pending game/save restore.
 - Owner requested stopping near 95% account session usage and resuming when reset; last observed five-hour usage was 61%. Check get_usage_limits at round boundaries before doing more work. Goal stays active below that threshold. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 97: missing-party scaling for Thrilling Tablet
+
+Both Thrilling Tablet buffs use visible TAG ally, PARTY actor, inverse True,
+MULTIPLE amount one. Native ConditionCalculation counts living tagged friendly actors
+against team size, falling back to four outside combat; ConditionDescription wraps
+with tag_ally and effect_tooltip_condition_tag_inverse. Installed DD1 buff lists and
+Unity port Character/Buff.ToolTip rule wrapping remain the presentation reference.
+The cold formatter now retains +100% DMG and +100% Max HP per Missing Ally. The shared
+TAG field guard rejects unknown restrictions; the new party branch requires the actual
+inverse/count/source shape and leaves other-ally performer-exclusion wording intact.
+No combat stats or party logic changed.
+
+Two actual-data tests cover both bonuses, native/localized labels and malformed templates;
+seven fixtures mutate actor, count, comparison, inverse flag, source/exclusion or unknown
+restriction and prove no unconditional bonus appears. The first full test run found an
+old assertion classifying Tablet as unsupported. Removed that obsolete assertion from
+its unrelated Grim Mask test; new Tablet-specific positive and guard tests cover the
+implemented behavior. The diagnostic no-build rerun confirmed this was a stale expectation,
+not a runtime regression. Final Release + 289 Core + 19 UI tests green, deployed DLL hashes
+match; cold audit 164 complete/25 partial/2 blank. No game launch/process or save access.
+
+## Status 2026-10-05: loop resumed, round 97 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed. No save access or pending restores.
+- Locally deployed round 97 with Release + 289 Core + 19 UI tests green, DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission. Round 75 visibility remains blocked.
+- Cold audit 164 complete/25 partial/2 blank of 191. Next round 98: Caked Palette token-copy fields, then remaining advanced conditions/effects or persistent activity-log weeks/art. Anatomical Map remains the other blank because of hidden target restrictions. Skip [user]/[blocked].
+- Private scenery remains 24 native-reference images, six per primary region, supported up to 12, under game/PrivateScenery and local-art/combat-extensions; full prompts/provenance and native references stay outside Git. Verify room diversity/reload, hero/prop ground band, torch visibility, Shroud joins and repeated load/memory after launch is allowed.
+- Local server localhost:8766, exec session 20403, and combat-extensions.html preview remain available; preview.html retains historical round-93 art. No pending game/save restore.
+- Check account session usage at round boundaries. Owner requested stopping near 95% and restarting after reset; last observed usage at round 96 end was 68%. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.

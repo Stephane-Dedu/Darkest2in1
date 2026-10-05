@@ -464,15 +464,12 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
-    public void SeparateTrinketTableRetainsKnownLinesAndWithholdsUnsupportedEffects()
+    public void SeparateTrinketTableRetainsKnownTeamAndFlameEffects()
     {
         string effects = Data.Effects("trinket_curio_grim_mask", out bool complete);
         Assert.True(complete);
         Assert.Contains("Each Ally On Turn End: +1 Stress (33%) when Flame is below 50", effects);
         Assert.Contains("+40% DMG when Flame is below 50", effects);
-        effects = Data.Effects("trinket_general_thrilling_tablet", out complete);
-        Assert.False(complete);
-        Assert.Null(effects);
     }
 
     [Fact]
@@ -1007,6 +1004,78 @@ public class TrinketDescriptionTests
         Assert.False(complete);
         Assert.DoesNotContain("Remove", effects);
         Assert.Contains("Turn Start: +1 Stress (15%)", effects);
+    }
+
+    [Fact]
+    public void MissingPartyScalingRetainsBothThrillingTabletBonuses()
+    {
+        string effects = Data.Effects("trinket_general_thrilling_tablet", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+100% DMG per Missing Ally", effects);
+        Assert.Contains("+100% Max HP per Missing Ally", effects);
+        Assert.Equal(2, effects.Split('\n').Length);
+    }
+
+    [Fact]
+    public void MissingPartyScalingUsesNativeLocalizationAndRequiresItsEffectBody()
+    {
+        string effects = Data.Effects("trinket_general_thrilling_tablet", out bool complete,
+            key => key == "tag_ally" ? "Allie" : key == "effect_tooltip_condition_tag_inverse" ? "{1} par {0} absent" : null);
+        Assert.True(complete);
+        Assert.Contains("+100% DMG par Allie absent", effects);
+        Assert.Contains("+100% Max HP par Allie absent", effects);
+        foreach (string template in new[] { "invalid {9}", "Missing {0}" })
+        {
+            effects = Data.Effects("trinket_general_thrilling_tablet", out complete,
+                key => key == "effect_tooltip_condition_tag_inverse" ? template : null);
+            Assert.False(complete);
+            Assert.Null(effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("m_ConditionActorType", "TARGET")]
+    [InlineData("m_ConditionNumber", "2")]
+    [InlineData("m_ConditionNumberType", "EQUAL")]
+    [InlineData("m_IsInverse", "False")]
+    [InlineData("m_SourceConditionActorType", "PERFORMER")]
+    [InlineData("m_ActorIsNotSource", "True")]
+    [InlineData("m_UnknownRestriction", "True")]
+    public void UnsupportedPartyCountsNeverBecomeUnconditionalBonuses(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_party_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var condition = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["m_ConditionType"] = "tag", ["m_ConditionString"] = "ally", ["m_ConditionActorType"] = "PARTY",
+                ["m_ConditionNumberType"] = "MULTIPLE", ["m_ConditionNumber"] = "1", ["m_IsInverse"] = "True",
+            };
+            condition[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,party_item,Item", "element_end",
+                "element_start,party_item,ActorDataExternalBuffs", "buffs,party_buff", "element_end",
+                "element_start,party_buff,Buff", "m_ConditionId,party_condition", "element_end",
+                "element_start,party_buff,ActorDataStats", "key_map,crit_chance", "add_stats,0.1", "element_end",
+                "element_start,party_condition,Condition",
+            });
+            foreach (var row in condition) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "tag_ally=Ally\neffect_tooltip_condition_tag_inverse={1} per Missing {0}\nactor_stat_type_formatted_crit_chance={0} CRIT");
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("party_item", out bool complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
     }
 
     [Theory]

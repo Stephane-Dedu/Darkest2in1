@@ -528,15 +528,27 @@ public sealed class TrinketDescriptions
         switch (type)
         {
             case "tag":
+                if (!_blocks.TryGetValue(("Condition", id), out var tagRows)
+                    || tagRows.Any(row => !TagConditionFields.Contains(row[0]))
+                    || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out float tagAmount)) return null;
+                if (actor == "PARTY")
+                {
+                    // Native inverse PARTY counts absent living allies; MULTIPLE one scales per missing ally.
+                    if (value != "ally" || numberType != "MULTIPLE" || tagAmount != 1
+                        || Field("Condition", id, "m_IsInverse") != "True"
+                        || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE"
+                        || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
+                    string allyName = Text("tag_" + value, localize);
+                    if (allyName == null) return null;
+                    args = new object[] { allyName, effect };
+                    break;
+                }
                 // This visible native condition tests the targeted ally and excludes the performer GUID.
                 // Ordinary native TAG wording omits that exclusion, so keep it explicit in the cold description.
                 if (value != "ally" || actor != "TARGET" || Field("Condition", id, "m_IsInverse") == "True"
                     || Field("Condition", id, "m_SourceConditionActorType") != "PERFORMER"
                     || Field("Condition", id, "m_ActorIsNotSource") != "True"
-                    || !_blocks.TryGetValue(("Condition", id), out var tagRows)
-                    || tagRows.Any(row => !OtherAllyConditionFields.Contains(row[0]))
-                    || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
-                        CultureInfo.InvariantCulture, out float tagAmount)
                     || !((numberType == "GREATER_THAN_OR_EQUAL" && tagAmount == 1)
                         || (numberType == "EQUAL" && tagAmount == 1) || (numberType == "GREATER_THAN" && tagAmount == 0))) return null;
                 string otherAlly = Format(Text("effect_tooltip_condition_other_ally", localize) ?? "Other Ally: {0}", effect);
@@ -667,7 +679,7 @@ public sealed class TrinketDescriptions
         return result != null && result.Contains(effect) ? Plain(result) : null;
     }
 
-    private static readonly HashSet<string> OtherAllyConditionFields = new()
+    private static readonly HashSet<string> TagConditionFields = new()
     {
         "m_ConditionType", "m_ConditionString", "m_ConditionActorType", "m_ConditionNumberType", "m_ConditionNumber",
         "m_SourceConditionActorType", "m_ActorIsNotSource", "m_IsVisible", "m_IsInverse",
