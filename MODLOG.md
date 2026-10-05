@@ -1284,3 +1284,34 @@ launch or owner-save access. Native scroll/wrap/restart/estate checks remain [?]
 - Cold audit unchanged: 175 complete/15 partial/1 blank. Round 75 visibility remains blocked; do not weaken hidden-effect guards for coverage. Private scenery unchanged: 24 panoramas, six per region, runtime supports up to 12; artwork/prompts/provenance outside Git.
 - Preview localhost:8766/combat-extensions.html/server session 20403 remains untouched. Protected estates and abandoned project untouched; no game/save restore pending.
 - Five-hour allowance reset and ordinary usage is available; last observed usage 8%, weekly 63%. Check at round boundaries and stop near 95% with a clean committed handoff. Existing hourly minute-50 resume heartbeat remains active; do not duplicate it.
+
+## Round 104: DD1 Activity Log entries and visible history rendering
+
+Read DD1 activity_log.layout.darkest (panel_size 620,550; entry vertical_spacing 20)
+and inspected activitylog_bg, week_title_bar, raid_success/failure_banner and
+hero_activity_entry_backdrop. Unity port WeekLogSlot presents return, town, departure;
+PartyActivityRecordSlot uses saved names/classes and deadhero_portrait. Our plain
+text history lacked these entries and measured every historical row on each draw.
+
+The log now uses the native DD1 background and left viewport, week bars, success/failure
+banners, town-message bands and saved party portraits/names (native DD2 class icons,
+DD1 death portrait). DD1 bitmap-font measurements include long names and wrap text;
+region labels use the area's display name. Layout is cached by estate/week/message
+counts/font, and binary visible-row lookup draws only intersecting entries. Estate
+switches reset scroll; the oldest entry remains reachable. The activity background
+is drawn before the existing close control. Generic town records are still strings:
+typed town actor/building/level-up illustrations and caretaker goals remain gaps.
+
+Four actual-layout tests cover newest-first weeks and DD1 entry ordering, wrapping/
+non-overlap, 1,000 saved weeks with bounded visible rows and oldest reachability, and
+empty/opening bounds. All used native image sources were inspected. Release + 357
+Core + 23 UI tests pass. Green-gated deployment with DD2 stopped; both deployed DLL
+hashes match. Native appearance/portraits/scroll/input remain [?]; no game launch or
+owner-save access, and no native assets entered Git.
+
+## Status 2026-10-05: round 104 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed, no save access or restore pending; app goal still reports the earlier quota pause, while the owner heartbeat authorizes this resumed work.
+- Round 104 locally deployed with Release + 357 Core + 23 UI tests green and DLL hashes matching. Activity Log has saved weeks and initial DD1 presentation; native checks await launch. Next round 105: another documented missing Core/UI behavior, such as secret-room discovery/access, caretaker goals or typed town entries; inspect DD1 data/Unity references before selecting.
+- Cold audit unchanged 175 complete/15 partial/1 blank. Round 75 hidden visibility remains blocked. Private 24-image scenery pack and preview localhost:8766/combat-extensions.html/session 20403 remain unchanged and outside Git.
+- Last observed five-hour usage 12%, weekly 64%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

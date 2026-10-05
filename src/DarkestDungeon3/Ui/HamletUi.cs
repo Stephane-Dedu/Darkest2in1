@@ -20,6 +20,7 @@ internal sealed class HamletUi
     private string _building;          // the building whose window is open
     private string _heroId;
     private Vector2 _panelScroll, _logScroll;
+    private readonly ActivityLogUi _activityLog = new();
 
     public bool WantsEmbark;
 
@@ -466,7 +467,8 @@ internal sealed class HamletUi
     private void DrawWindow(Hamlet hamlet)
     {
         string building = _panel == Panel.Hero || _panel == Panel.Log ? null : _building;
-        var bg = building != null ? Art.BuildingBackground(building) : null;
+        var bg = building != null ? Art.BuildingBackground(building)
+            : _panel == Panel.Log ? Art.Dd1("campaign", "town", "activity_log", "activitylog_bg.png") : null;
         if (bg != null) GUI.DrawTexture(Window, bg);
         else
         {
@@ -509,7 +511,7 @@ internal sealed class HamletUi
         var area = Body;
         switch (_panel)
         {
-            case Panel.Log: DrawTownLog(new Rect(Window.x + 40, Window.y + 30, Window.width - 120, Window.height - 60)); break;
+            case Panel.Log: _activityLog.Draw(Window, E, ref _logScroll); break;
             case Panel.StageCoach: DrawStageCoach(area, hamlet); break;
             case Panel.Abbey: DrawActivities(area, hamlet, Buildings.Abbey); break;
             case Panel.Tavern: DrawActivities(area, hamlet, Buildings.Tavern); break;
@@ -847,38 +849,6 @@ internal sealed class HamletUi
             Gui.Fill(tr, new Color(0.03f, 0.025f, 0.02f, 0.95f));
             Gui.Text(new Rect(tr.x + 10, tr.y + 6, tr.width - 20, tr.height - 10), tip, 16, Gui.Dd1Text);
         }
-    }
-
-    private void DrawTownLog(Rect area)
-    {
-        Frame(area);
-        Gui.Text(new Rect(area.x + 20, area.y + 10, 900, 50), "The Hamlet's chronicle", 40, Gui.Dd1Name, heading: true);
-        var rows = new List<(string Text, bool Heading)>();
-        foreach (var week in (E.ActivityLog ?? new List<ActivityWeek>()).OrderByDescending(w => w.Week))
-        {
-            if (week.Town.Count == 0 && week.Raids.Count == 0) continue;
-            rows.Add(($"Week {week.Week}", true));
-            foreach (var message in week.Town) rows.Add((message, false));
-            foreach (var raid in week.Raids)
-            {
-                rows.Add((raid.Result == "embark"
-                    ? $"Embarked: {raid.Quest}. {string.Join(", ", raid.Heroes.Select(h => h.Name))}."
-                    : $"Returned: {raid.Quest} — {raid.Result}.", false));
-                foreach (var message in raid.Messages) rows.Add((message, false));
-            }
-        }
-        float width = area.width - 70;
-        var heights = rows.Select(r => Gui.LabelHeight(r.Text, width, r.Heading) + 12).ToList();
-        _logScroll = GUI.BeginScrollView(new Rect(area.x + 20, area.y + 70, area.width - 40, area.height - 90), _logScroll, new Rect(0, 0, width, heights.Sum() + 40));
-        if (rows.Count == 0) Gui.Label(new Rect(0, 0, width, 30), "All is quiet. Choose a quest and embark when ready.");
-        float y = 0;
-        for (int i = 0; i < rows.Count; i++)
-        {
-            var rect = new Rect(0, y, width, heights[i] - 12);
-            if (rows[i].Heading) Gui.Title(rect, rows[i].Text); else Gui.Label(rect, rows[i].Text);
-            y += heights[i];
-        }
-        GUI.EndScrollView();
     }
 
     /// <summary>

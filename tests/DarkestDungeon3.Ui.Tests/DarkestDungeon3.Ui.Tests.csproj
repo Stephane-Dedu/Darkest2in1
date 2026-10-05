@@ -12,6 +12,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
     <ProjectReference Include="../../src/DarkestDungeon3.Core/DarkestDungeon3.Core.csproj" />
     <Compile Include="../../src/DarkestDungeon3/Ui/Drag.cs" Link="Drag.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/ActivityLogLayout.cs" Link="ActivityLogLayout.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/DeferredPoll.cs" Link="DeferredPoll.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/SpriteArt.cs" Link="SpriteArt.cs" />

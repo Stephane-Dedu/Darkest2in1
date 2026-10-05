@@ -65,8 +65,6 @@ internal static class Gui
 
     public static void Title(Rect r, string text) => GUI.Label(r, text, _title);
     public static void Label(Rect r, string text) => GUI.Label(r, text, _label);
-    public static float LabelHeight(string text, float width, bool heading = false) =>
-        Mathf.Max(heading ? 34 : 20, (heading ? _title : _label).CalcHeight(new GUIContent(text), width));
     public static void Small(Rect r, string text) => GUI.Label(r, text, _small);
 
     public static bool Button(Rect r, string text, bool enabled = true)
@@ -100,6 +98,15 @@ internal static class Gui
     /// <summary>DD1 draws its fonts at their native size (DwarvenAxe-m: 40 px lines at 1080p); our layouts asked for
     /// less, so headings came out small and thin. Sizes are scaled up to DD1's proportions here.</summary>
     public const float HeadingScale = 1.3f, BodyScale = 1.08f;
+
+    public static float TextHeight(string text, float size, float width, bool heading = false)
+    {
+        size *= heading ? HeadingScale : BodyScale;
+        var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
+        if (font != null) return font.Measure(text, size, width).y;
+        EnsureStyles();
+        return new GUIStyle(_label) { fontSize = (int)(size * 0.8f) }.CalcHeight(new GUIContent(text), width);
+    }
 
     public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
     {
