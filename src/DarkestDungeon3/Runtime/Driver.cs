@@ -151,7 +151,7 @@ internal sealed class Driver : MonoBehaviour
             // An expedition was interrupted (the game closed mid-dungeon). DD1 counts that as a retreat.
             Say("The last expedition was cut short. The party limps home.");
             S.Save.Expedition.Retreated = true;
-            var outcomes = S.Save.Expedition.Party.Select(id => new HeroOutcome { HeroId = id, Stress = S.Save.Estate.Hero(id)?.Stress ?? 0 });
+            var outcomes = ExpeditionParty.Outcomes(S.Save.Expedition, S.Save.Estate);
             HomecomingLog = Homecoming.Apply(S.Save.Estate, S.Campaign, S.Save.Expedition, outcomes);
             S.Save.Expedition = null;
             S.Persist();
@@ -235,10 +235,22 @@ internal sealed class Driver : MonoBehaviour
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
         Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
+        CapturePartyState();
         Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
         Say($"Entered {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+    }
+
+    public void CapturePartyState()
+    {
+        if (Party == null || Expedition == null || Crawl?.State != Expedition) return;
+        var snapshots = new List<ExpeditionHeroState>();
+        foreach (var id in Expedition.Party)
+            if (S.Save.Estate.Hero(id) is { } hero
+                && Dd2Heroes.TryCapture(hero, Party.Guid(id), Expedition.PartyStates.TryGetValue(id, out var previous) ? previous : null, out var snapshot))
+                snapshots.Add(snapshot);
+        ExpeditionParty.Capture(Expedition, snapshots);
     }
 
     // ---------------- Crawl ----------------

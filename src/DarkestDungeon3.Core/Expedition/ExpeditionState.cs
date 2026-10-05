@@ -12,6 +12,7 @@ public sealed class ExpeditionState
     public int GoalProgress;
     public DungeonMap Map;
     public List<string> Party = new();           // hero ids, rank order
+    public Dictionary<string, ExpeditionHeroState> PartyStates = new();
     public Inventory Pack = new();
     /// <summary>Resolved battle/camping loot awaiting dismissal, saved with its exact taken/remainder amounts.</summary>
     public BattleSpoils PendingSpoils;

@@ -110,7 +110,14 @@ internal sealed class Session
 
     public void Persist()
     {
-        try { Save?.Save(SavePath); }
+        try
+        {
+            var driver = Driver.Instance;
+            if (Save?.Expedition != null && driver?.Crawl?.State == Save.Expedition
+                && driver.Party != null && driver.Phase is Phase.Crawling or Phase.Fighting)
+                driver.CapturePartyState();
+            Save?.Save(SavePath);
+        }
         catch (Exception e) { Plugin.Log.LogError("Saving failed: " + e); }
     }
 }

@@ -8,6 +8,7 @@ using Assets.Code.Roster;
 using Assets.Code.Source;
 using Assets.Code.Utils;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Expedition;
 using HarmonyLib;
 
 namespace DarkestDungeon3.Dd2;
@@ -137,5 +138,30 @@ internal static class Dd2Heroes
         outcome.Quirks = actor.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList();
         outcome.Trinkets = actor.GetTrinketInventory()?.GetItemIds()?.ToList();
         return outcome;
+    }
+
+    /// <summary>Read live condition without damage/heal/stress events. Actor teardown is not evidence of death.</summary>
+    public static bool TryCapture(HeroRecord hero, uint guid, ExpeditionHeroState previous, out ExpeditionHeroState snapshot)
+    {
+        snapshot = null;
+        if (guid == 0) return false;
+        var actor = Dd2Api.Actor(guid);
+        bool rosterDead = Dd2Api.Roster?.GetActorGuids(RosterStatusType.DEAD)?.Contains(guid) == true;
+        if (actor == null && !rosterDead) return false;
+        bool dead = rosterDead || !actor.IsLiving;
+        float hpMax = actor?.CurrentHpMax ?? previous?.HpMax ?? 1;
+        if (dead && hpMax <= 0) hpMax = previous?.HpMax > 0 ? previous.HpMax : 1;
+        snapshot = new ExpeditionHeroState
+        {
+            Hp = dead ? 0 : actor.HpRaw, HpMax = hpMax,
+            Stress = actor?.Stress ?? previous?.Stress ?? hero.Stress, WoundPercent = actor?.WoundPercent ?? previous?.WoundPercent ?? 0,
+            Outcome = new HeroOutcome
+            {
+                HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null,
+                Quirks = actor?.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList() ?? previous?.Outcome.Quirks?.ToList(),
+                Trinkets = actor?.GetTrinketInventory()?.GetItemIds()?.ToList() ?? previous?.Outcome.Trinkets?.ToList()
+            }
+        };
+        return true;
     }
 }

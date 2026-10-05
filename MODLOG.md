@@ -2306,3 +2306,33 @@ No game launch, owner-estate access or private-art changes.
 - Next round 143: inspect actual DD2 actor capture/restore and save living/dead HP/stress/quirk state at existing persistence boundaries. Preserve pre-fight checkpoints before enabling interrupted native combat re-entry; exact mid-turn DD2 combat restoration needs separate evidence.
 - Ordinary usage available; session 55%, weekly 86%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 143: capture DD2 condition into expedition saves
+
+Inspected Unity saved formation/alive state and DD2 ActorInstance's serialized
+m_Hp/m_Stress/m_WoundPercent/m_IsLiving and public condition/container getters.
+Existing main-thread save boundaries now capture plain per-hero raw condition
+and current quirks/trinkets. Core owns copies, ignores foreign/nonfinite samples
+and keeps prior data when native actors are unavailable. Confirmed DEAD roster
+or IsLiving=false is death; living zero/negative HP is retained as death's door.
+Destroyed dead actors use the previous valid HP denominator when needed.
+Interrupted-return outcomes now reuse snapshots, fixing the old living-only
+projection even before full resume is enabled.
+
+Eleven Core cases cover list ownership, raw HP/stress/wound reload, death's door,
+invalid/foreign/missing preservation, legacy estate evidence and actual Homecoming
+death/quirk/loadout results. One expectation omitted existing abandonment +2
+stress; corrected after the first failure. Release + 595 Core + 45 UI tests pass;
+stopped-game DLL hashes match. Native capture/restore remains [?]. No launch,
+owner-estate access or private-art changes.
+
+New separate gaps recorded: camp meal lacks immediate save; the dead Homecoming
+branch skips recorded quirk changes (verify native fallen/From Beyond behavior).
+No change to dead-trinket policy.
+
+## Status 2026-10-05: round 143 complete
+
+- Round 143 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 144: inspect/implement DD2 actor restoration without triggering damage/heal/meltdown events and preserve pre-fight party checkpoints. Then route interrupted loads only after all actor/location prerequisites are concrete; exact mid-turn combat restore remains separate.
+- Ordinary usage available; session 60%, weekly 87%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
