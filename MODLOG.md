@@ -1954,5 +1954,27 @@ owner estate accessed. Native tooltip check remains [?].
 - No DD2 launch until owner explicitly permits it. Stagecoach/recruit portrait/input, first-Hamlet load, native arena light/startup timing, regional scenery memory/seams/fades, secret room HUD/payout and Memorial playback/scroll/art remain native checks rather than [x]. Tests here used synthetic state only; protected estates 1/3 and abandoned Documents/DD1inDD2 were never accessed.
 - Private native-derived artwork remains outside Git; the 24 approved arena extensions, six per primary region, and existing owner preview are unchanged. Do not kill the localhost 8766 gallery server or alter the owner's selected preview unnecessarily.
 - Existing resume-darkest2in1-loop-after-quota-reset heartbeat is ACTIVE, hourly at minute 50, targeting this chat. No duplicate automation was created. Resume locally after reset, one gap per round, green checks before deployment, commit/push, check quota at boundaries and hand off again near 95%.
-- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
-- Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 129: His Rings keeps its native Dead of Night loot rewards
+
+After the quota reset, inspected installed DD1 trinket buff lists and Unity
+Trinket.ToolTip, plus actual DD2 effects and EffectDescription/EffectInstance.
+The two guaranteed loot effects have a visible Dead of Night skill condition.
+Native labels supply +2 Relics/+1 Bauble; no table quantity is inferred.
+The cold reader retains both rewards alongside Combo, CRIT and stress risk.
+Fractional loot chances, missing/malformed labels, hidden conditions and unknown
+metadata remain withheld. Two actual/localization cases and eleven synthetic
+guards pass. An initial assertion used the wrong casing for an existing native
+label; corrected that expectation before the green verification and deployment.
+
+Release + 510 Core + 30 UI tests pass. DD2 stopped during deployment; both DLL
+hashes match. Audit 182 complete/8 partial/1 blank of 191. Native comparison [?].
+No game launched, owner estate accessed or private artwork changed. Removed
+outdated duplicate Memorial TODO and contradictory old quota/audit tail bullets.
+
+## Status 2026-10-05: round 129 complete
+
+- Loop resumed under the owner's heartbeat authorization after reset. Native goal still reports paused and has no resume API; no duplicate goal or false completion.
+- Round 129 deployed and green. Next round 130: inspect remaining partial native effects/conditions, including Shambler's Eye and Blood-Smeared Calculations. Preserve round 75's hidden-condition policy; choose one documented supported gap before coding or move to another actionable parity item.
+- Ordinary usage available; session 5%, weekly 78%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check round boundaries and prepare a clean committed handoff near 95%.
+- No DD2 launch until explicitly permitted. Protected estates/abandoned project remain untouched. Private native artwork and the existing localhost 8766 owner preview remain outside Git and unchanged. Native UI, rendering and timing checks remain pending.

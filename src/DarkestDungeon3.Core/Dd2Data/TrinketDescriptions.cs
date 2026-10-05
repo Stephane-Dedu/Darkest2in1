@@ -214,6 +214,7 @@ public sealed class TrinketDescriptions
         "m_QuirkRemoveTag", "m_QuirkRemoveAmount", "m_QuirkRemoveAmountRange",
         "m_QuirkAddTag", "m_QuirkAddAmount", "m_QuirkAddAmountRange",
         "torch",
+        "m_LootIds",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
@@ -249,6 +250,19 @@ public sealed class TrinketDescriptions
                 || float.IsNaN(multiplier) || float.IsInfinity(multiplier) || multiplier < 0 || (crit > 0 && multiplier == 0)) return null;
         }
         var parts = new List<string>();
+        var lootIds = Values("Effect", id, "m_LootIds");
+        if (lootIds.Count > 0)
+        {
+            // Native labels describe the named table, including its quantity. Do not infer rolls.
+            // Native omits the chance suffix for loot; fractional cases need separate semantics.
+            if (chance != 1) return null;
+            foreach (string lootId in lootIds)
+            {
+                string reward = Plain(Format(Text("effect_tooltip_loot_id_" + lootId, localize)));
+                if (string.IsNullOrWhiteSpace(reward)) return null;
+                parts.Add(reward);
+            }
+        }
         if (rows.Any(row => row[0].StartsWith("m_QuirkAdd", StringComparison.Ordinal)))
         {
             // Preserve the Cap's native random disease risk without guessing other quirk selectors.
