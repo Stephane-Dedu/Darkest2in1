@@ -899,6 +899,82 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void TokenCopyRetainsCakedPalettePositiveGainAndNegativeRisk()
+    {
+        string effects = Data.Effects("trinket_curio_caked_palette", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Apply On Hit: Copy Positive Token", effects);
+        Assert.Contains("Apply On Hit: Copy All Negative Tokens (5%)", effects);
+        Assert.DoesNotContain("Steal", effects);
+    }
+
+    [Fact]
+    public void TokenCopyUsesNativeCategoryAndActionLocalization()
+    {
+        string effects = Data.Effects("trinket_curio_caked_palette", out bool complete,
+            key => key == "effect_tooltip_token_copy_tag" ? "Copier {0}"
+                : key == "effect_tooltip_token_copy_all_tag" ? "Copier tous {0}"
+                : key == "token_tag_pos_copy_steal" ? "Positif" : key == "token_tag_negative" ? "Negatif" : null);
+        Assert.True(complete);
+        Assert.Contains("Apply On Hit: Copier Positif", effects);
+        Assert.Contains("Apply On Hit: Copier tous Negatif (5%)", effects);
+    }
+
+    [Fact]
+    public void MalformedTokenCopyTemplatesWithholdOnlyTheirUnknownOutcome()
+    {
+        string effects = Data.Effects("trinket_curio_caked_palette", out bool complete,
+            key => key == "effect_tooltip_token_copy_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Positive", effects);
+        Assert.Contains("Copy All Negative Tokens (5%)", effects);
+        effects = Data.Effects("trinket_curio_caked_palette", out complete,
+            key => key == "effect_tooltip_token_copy_all_tag" ? "invalid {9}" : null);
+        Assert.False(complete);
+        Assert.DoesNotContain("Negative", effects);
+        Assert.Contains("Copy Positive Token", effects);
+    }
+
+    [Theory]
+    [InlineData("m_TokenCopyAmount", "0", null)]
+    [InlineData("m_TokenCopyAmount", "1.5", null)]
+    [InlineData("m_TokenCopyAmountRange", "1", null)]
+    [InlineData("m_TokenCopyTags", "unknown_category", null)]
+    [InlineData("m_UnknownSelector", "TARGET", null)]
+    [InlineData("m_TokenCopyAmount", "2", "Target: Copy 2 Positive Tokens")]
+    public void TokenCopyValidatesQuantitiesAndSelectors(string field, string value, string expected)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_copy_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var fields = new System.Collections.Generic.Dictionary<string, string>
+            { ["m_TokenCopyTags"] = "positive", ["m_TokenCopyAmount"] = "1" };
+            fields[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,copy_item,Item", "element_end",
+                "element_start,copy_item,ActorDataEffects", "target_effects,copy_effect", "element_end",
+                "element_start,copy_effect,Effect", "m_Chance,1",
+            });
+            foreach (var row in fields) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_skill_effect_target=Target:\neffect_tooltip_token_copy_tag=Copy {0} Token\neffect_tooltip_token_copy_tag+plural=Copy {0} {1} Tokens\ntoken_tag_positive=Positive");
+            Assert.Equal(expected, TrinketDescriptions.Load(fixture).Effects("copy_item", out bool complete));
+            Assert.Equal(expected != null, complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
+    }
+
+    [Fact]
     public void StealEffectsUseNativeCategoryAndDotLocalization()
     {
         string effects = Data.Effects("trinket_hero_flg_emancipation", out bool complete,

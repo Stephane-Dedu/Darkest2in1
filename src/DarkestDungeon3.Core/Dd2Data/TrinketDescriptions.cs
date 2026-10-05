@@ -194,6 +194,7 @@ public sealed class TrinketDescriptions
         "m_CritChance", "m_CritMultiplier",
         "m_TokenStealTags", "m_TokenStealAmount", "m_TokenStealAmountRange",
         "m_DotStealTags", "m_DotStealAmount", "m_DotStealAmountRange",
+        "m_TokenCopyTags", "m_TokenCopyAmount", "m_TokenCopyAmountRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
@@ -222,6 +223,24 @@ public sealed class TrinketDescriptions
                 || float.IsNaN(multiplier) || float.IsInfinity(multiplier) || multiplier < 0 || (crit > 0 && multiplier == 0)) return null;
         }
         var parts = new List<string>();
+        var copyTags = Values("Effect", id, "m_TokenCopyTags");
+        if (copyTags.Count > 0)
+        {
+            if (!int.TryParse(Field("Effect", id, "m_TokenCopyAmount"), out int copyAmount) || copyAmount <= 0
+                || (Field("Effect", id, "m_TokenCopyAmountRange") ?? "0") != "0") return null;
+            string copyKey = copyAmount >= 99 ? "effect_tooltip_token_copy_all_tag"
+                : "effect_tooltip_token_copy_tag" + (copyAmount > 1 ? "+plural" : "");
+            foreach (string tag in copyTags)
+            {
+                string label = Plain(Text("token_tag_" + tag, localize));
+                if (label == null) return null;
+                string copy = copyAmount > 1 && copyAmount < 99 ? Format(Text(copyKey, localize), copyAmount, label)
+                    : Format(Text(copyKey, localize), label);
+                if (copy == null) return null;
+                parts.Add(copy);
+            }
+        }
+        else if (rows.Any(row => row[0].StartsWith("m_TokenCopy", StringComparison.Ordinal))) return null;
         foreach (string family in new[] { "Token", "Dot" })
         {
             var tags = Values("Effect", id, "m_" + family + "StealTags");

@@ -1090,3 +1090,29 @@ match; cold audit 164 complete/25 partial/2 blank. No game launch/process or sav
 - Private scenery remains 24 native-reference images, six per primary region, supported up to 12, under game/PrivateScenery and local-art/combat-extensions; full prompts/provenance and native references stay outside Git. Verify room diversity/reload, hero/prop ground band, torch visibility, Shroud joins and repeated load/memory after launch is allowed.
 - Local server localhost:8766, exec session 20403, and combat-extensions.html preview remain available; preview.html retains historical round-93 art. No pending game/save restore.
 - Check account session usage at round boundaries. Owner requested stopping near 95% and restarting after reset; last observed usage at round 96 end was 68%. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 98: Caked Palette token-copy effects
+
+Native EffectDescription formats m_TokenCopyTags/Amount/Range with singular/plural/all
+copy templates and token_tag category names. Amount 99 means all, as for native stealing.
+EffectInstance.TransferTokens copies target tokens to performer without removing originals;
+this is distinct from stealing. DD1 installed buff lists/Unity port Trinket.ToolTip remain
+the presentation reference. Cold descriptions now accept bounded integral copy quantities
+with zero range, use the native copy templates and retain chance/trigger/conditions.
+Unknown categories, selectors, quantities and unsupported ranges remain withheld.
+
+Caked Palette now shows Apply On Hit: Copy Positive Token and Copy All Negative Tokens
+(5%). Three actual-data tests preserve both outcomes and localization, plus malformed
+individual templates. Six fixtures cover valid plural count two, zero/fractional quantities,
+unsupported range, unknown category and unknown selector. All other effect families retain
+their previous guards. Audit 165 complete/25 partial/1 blank out of 191. Release + 298 Core
++ 19 UI tests green, deployed DLL hashes match. No game launch/process or save access.
+
+## Status 2026-10-05: loop resumed, round 98 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed. No save access or pending restores.
+- Round 98 deployed with Release, 298 Core and 19 UI tests green and DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission; round 75 visibility stays blocked.
+- Cold audit 165 complete/25 partial/1 blank of 191. Next round 99: DOT-copy fields for Hag's Hoard and related items, remaining advanced effects/conditions, or persistent activity-log weeks/art. Anatomical Map remains blank because of hidden target restrictions. Skip [user]/[blocked].
+- Private 24-image native-reference scenery remains installed at game/PrivateScenery and recorded in local-art/combat-extensions, with support up to 12 per region. No native/reference/generated derivative art is committed. Native room/reload/ground/torch/load/memory checks remain [?].
+- Local preview server localhost:8766, exec session 20403, remains running. Keep combat-extensions.html open. Linked preview.html retains historical round 93 art. No pending game/save restore.
+- Check session usage at round boundaries; owner requests stopping near 95% and resuming after reset. Last observed round 97 end usage 73%. Open owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
