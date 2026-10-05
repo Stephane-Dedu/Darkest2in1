@@ -1455,3 +1455,30 @@ added to PARITY and deferred rather than changing it in this round.
 - Round 109 locally deployed: Release + 370 Core + 26 UI tests green; DLL hashes match. Caretaker roster achievements/list added. Native UI checks remain pending. Next round 110: fix documented eager RepairEstate RNG advancement, retaining legitimate quirk repair rolls and persisting flags. Then region-aware Caretaker quest goals.
 - Cold audit unchanged 175 complete/15 partial/1 blank; blocked hidden visibility remains. Private art: 24 installed panoramas, six per region, runtime up to 12. Native-derived artwork/prompts/provenance and preview localhost:8766/combat-extensions.html/session 20403 remain outside Git and unchanged.
 - Last observed five-hour usage 29%, weekly 67%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 110: clean estate repairs preserve gameplay randomness
+
+DD1 starting_save/persist.roster.json saves each hero's quirks; port
+Hero(Estate, SaveHeroData) restores saveHeroData.Quirks rather than generating them.
+Our RepairEstate allocated NextRng on every load even after all repairs were done.
+It now creates one shared repair stream only when missing quirks or the existing
+empty-wagon backfill path need it. Nonrandom migrations and equipment recovery
+consume none. Legitimate first-time quirk and wagon rolls keep the same seed and
+shared sequence. QuirksRepaired now emits a migration message whenever set, even
+when all quirks already exist, allowing Session to persist that flag once.
+
+Four Core cases verify repeated clean repair/reload with byte-identical serialized
+state and identical next seed, flag-only migration without changing quirks/counter,
+exact shared quirk/wagon repair rolls, and nonrandom class-restricted equipment
+recovery. Release + 374 Core + 26 UI tests pass. Green-gated local deployment while
+DD2 is stopped; both installed DLL hashes match. No game launch/owner-save access.
+Native load remains [?]. Found the separate empty-wagon policy issue: selling the
+last item produces a valid empty list, but RepairEstate currently restocks it on
+reload. Added that gap without changing the stock policy in this round.
+
+## Status 2026-10-05: round 110 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes work after reset despite the app's earlier paused goal status.
+- Round 110 deployed: Release + 374 Core + 26 UI tests green, DLL hashes match. Clean estate repair/reload no longer consumes random state when no random repair is needed. Next round 111: preserve legitimate sold-out wagon stock across reload, after DD1/Unity save/week references. Then Caretaker town-event resolve completion and region-aware quest goals.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery/localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git. Native rendering/performance/UI checks await launch.
+- Last observed five-hour usage 32%, weekly 67%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

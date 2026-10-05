@@ -589,15 +589,17 @@ public sealed class Hamlet
         if (CampaignJournal.Initialize(Estate)) log.Add("activity log initialized from surviving town messages");
         if (CaretakerGoals.Sync(Estate)) log.Add("caretaker resolve goals recovered from roster and graveyard");
         if (CampaignRegions.Migrate(Estate, Dd1)) log.Add("campaign regions updated; existing progress retained");
-        var rng = Estate.NextRng();
+        Rng rng = null;
+        Rng RepairRng() => rng ??= Estate.NextRng();
         if (!Estate.QuirksRepaired)
         {
             foreach (var hero in Estate.Roster.Concat(Estate.Recruits).Where(h => h.Quirks.Count == 0))
             {
-                hero.Quirks.AddRange(Catalog.StartingQuirks(hero.ClassId, rng, positives: 1 + hero.ResolveLevel / 2, negatives: 1 + hero.ResolveLevel / 3));
+                hero.Quirks.AddRange(Catalog.StartingQuirks(hero.ClassId, RepairRng(), positives: 1 + hero.ResolveLevel / 2, negatives: 1 + hero.ResolveLevel / 3));
                 if (hero.Quirks.Count > 0) log.Add($"{hero.Name}: quirks {string.Join(", ", hero.Quirks)}");
             }
             Estate.QuirksRepaired = true;
+            log.Add("hero quirk migration completed");
         }
         foreach (var hero in Estate.Roster)
             foreach (var t in hero.WornTrinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
@@ -606,7 +608,7 @@ public sealed class Hamlet
                 Estate.Trinkets.Add(t);
                 log.Add($"{hero.Name} can't wear {t}: back in the stash");
             }
-        if (Estate.WagonStock.Count == 0) { RestockWagon(rng); log.Add($"wagon restocked: {Estate.WagonStock.Count} trinkets"); }
+        if (Estate.WagonStock.Count == 0) { RestockWagon(RepairRng()); log.Add($"wagon restocked: {Estate.WagonStock.Count} trinkets"); }
         return log;
     }
 
