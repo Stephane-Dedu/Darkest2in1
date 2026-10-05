@@ -1978,3 +1978,26 @@ outdated duplicate Memorial TODO and contradictory old quota/audit tail bullets.
 - Round 129 deployed and green. Next round 130: inspect remaining partial native effects/conditions, including Shambler's Eye and Blood-Smeared Calculations. Preserve round 75's hidden-condition policy; choose one documented supported gap before coding or move to another actionable parity item.
 - Ordinary usage available; session 5%, weekly 78%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check round boundaries and prepare a clean committed handoff near 95%.
 - No DD2 launch until explicitly permitted. Protected estates/abandoned project remain untouched. Private native artwork and the existing localhost 8766 owner preview remain outside Git and unchanged. Native UI, rendering and timing checks remain pending.
+
+## Round 130: menu introduction replay
+
+The remaining Shambler's Eye effect uses hidden target_not_combo_primed;
+Blood-Smeared Calculations' extra conversions explicitly set m_IsVisible=False.
+These remain withheld under round 75. Moved to the documented menu replay gap.
+Inspected DD1 miscellaneous.string_table.xml menu_base_element_watch_intro,
+shared/menu/menu.layout.darkest and Unity MainMenuWindow/CampaignSelectionManager.
+Watch Intro Cinematic appears above The Hamlet and reuses the existing opening
+queue, subtitles, narration and skip handling. It remains disabled until content
+loads and does not cache a missing localization table before that point.
+The action does not enter an estate, persist, change phase or trigger a raid;
+ending/skipping returns to the same menu. No new rules or mirrored UI tests.
+
+Release + 510 Core + 30 UI tests pass; stopped-game deployed DLL hashes match.
+Native placement/playback/skip/return remain [?]. No game or owner saves accessed.
+
+## Status 2026-10-05: round 130 complete
+
+- Round 130 deployed and green; loop continues under owner authorization. Native goal still paused without a resume API; no duplicate goal or false completion.
+- Next round 131: inspect another documented actionable system gap, including provision fullness/reset behavior against actual DD1/Unity files, or a concrete UI/performance omission. All remaining partial trinkets inspected so far involve hidden policy; do not loosen it to claim completion.
+- Ordinary usage available; session 9%, weekly 79%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Private artwork and owner preview unchanged; native UI/rendering/timing checks still pending.

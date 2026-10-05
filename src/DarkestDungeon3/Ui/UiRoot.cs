@@ -109,6 +109,16 @@ internal sealed class UiRoot : MonoBehaviour
     {
         if (!_slotPicker)
         {
+            string introLabel = Session.Current != null
+                ? Dd1Text.Get("miscellaneous", "menu_base_element_watch_intro") ?? "Watch Intro Cinematic"
+                : "Watch Intro Cinematic";
+            if (Gui.DdButton(new Rect(40, 758, 380, 78), introLabel, Session.Current != null, 26))
+            {
+                // Replay stays at the menu: no estate selection, phase change or opening raid.
+                Dd1Audio.StopNarration();
+                CinematicPlayer.Play(Core.Dd1.Dd1Cinematic.Opening);
+                return;
+            }
             string label = Session.LoadError != null ? "DD1 Hamlet unavailable"
                 : Session.Current == null ? "Loading Darkest Dungeon 1..."
                 : "The Hamlet";
