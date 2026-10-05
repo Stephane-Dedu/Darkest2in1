@@ -1693,3 +1693,32 @@ Secret entry controls are still withheld until the following UI round.
 - Round 118 deployed: Release + 424 Core + 26 UI tests green, DLL hashes match. Exact native secret contents and their journal reward now persist. Next round 119: safe secret minimap/entry/return controls and existing fades, including no unreachable-route softlock; then collected Memorial journal reading/narration.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 62%, weekly 72%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 119: usable secret-room controls and map markers
+
+Inspected native marker_secret.png (gold star) and port RaidMapRoomSlot /
+RaidMapHallSectorSlot's known-icon visibility. Crawl map now shows discovered
+door/branch stars; Enter/Return controls sit to the right of the curio sidebar,
+only outside camp/blocked/modal loot paths. Driver uses Core entry/exit with
+saved state, existing room-transition audio/fade and stopped walking. Keyboard
+directions return from the branch; ordinary map destinations first return then
+route. Secret map clicks use guarded native entrance lookup and approach a local
+square; distant clicks give approach guidance rather than enqueueing an isolated
+room. Core Return remains exact and effect-free. Modal and pending travel guard
+transitions; stale step-interrupt flags are cleared after explicit stopped changes.
+
+Found general curio map reveal exposed all IsSecret rooms after round 115.
+Corrected it to normal rooms plus native always-accessible branches; ordinary
+secrets retain critical-only discovery. Three new cases cover guarded entrance
+lookup and both reveal policies; existing branch/reload/loot tests still pass.
+Release + 427 Core + 26 UI tests green; stopped-game deployment and both DLL hashes
+verified. No game launch/owner saves. Native marker/buttons/keyboard/fades/loot
+need allowed playtesting. Fixed map secrets exist only on newly imported maps;
+older saved expeditions retain their saved layout rather than being rewritten.
+
+## Status 2026-10-05: round 119 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 119 deployed: Release + 427 Core + 26 UI tests green, DLL hashes match. Plot secret metadata, discovery, exact contents/journal payout and usable controls now exist; native check remains. Next round 120: collected Memorial journal reading from saved page IDs using DD1 localized text/category/backdrop, without revealing uncollected pages; then boss narration.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 66%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

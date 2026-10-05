@@ -74,7 +74,7 @@ internal sealed class CrawlUi
         }
         if (exp.Camp != null) DrawCamp(crawl, exp);
         else if (DrawSpoils(crawl) || DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
-        else DrawPrompt(crawl, exp);
+        else { DrawPrompt(crawl, exp); DrawSecretControls(crawl, exp); }
         Gui.DrawAnnouncement();
     }
 
@@ -688,13 +688,14 @@ internal sealed class CrawlUi
                     _ => null,
                 } : null;
                 if (marker != null && Art.MapIcon(marker) is { } m) GUI.DrawTexture(r, m);
+                if (t.SecretRoomId >= 0 && (map.Room(t.SecretRoomId).Scouted || map.Room(t.SecretRoomId).Visited)
+                    && Art.MapIcon("marker_secret") is { } star) GUI.DrawTexture(r, star);
                 if (Gui.Hotspot(r)) D.WalkToTile(c.Id, t.Index);
             }
         }
 
         foreach (var room in map.Rooms)
         {
-            if (room.IsSecret) continue; // hidden branch access and its map marker are handled in the next step
             bool known = room.Visited || room.Scouted || visitedNear.Contains(room.Id);
             if (!known) continue;
             var p = Pos(room.X, room.Y) + offset;
@@ -708,6 +709,8 @@ internal sealed class CrawlUi
                 : room.CurioId != null && !room.CurioTaken ? "room_curio"
                 : "room_empty";
             GUI.DrawTexture(r, Art.MapIcon(icon) ?? Texture2D.whiteTexture);
+            if (room.IsSecret && Art.MapIcon("marker_secret") is { } secretMark)
+                GUI.DrawTexture(new Rect(p.x - 14, p.y - 14, 28, 28), secretMark);
             if (room.Visited && room.Id != map.EntranceRoomId && Art.MapIcon("marker_room_visited") is { } v) GUI.DrawTexture(r, v);
             if (Gui.Hotspot(r)) D.WalkToRoom(room.Id);
         }
@@ -929,6 +932,18 @@ internal sealed class CrawlUi
         }
         _curioPanel = null;
         D.Investigate(D.SelectedHeroId, item);
+    }
+
+    private static void DrawSecretControls(Crawl crawl, ExpeditionState exp)
+    {
+        if (exp.Camp != null || crawl.IsBlocked) return;
+        bool returning = crawl.CurrentRoom?.IsSecret == true;
+        if (!returning && !crawl.CanEnterSecretRoom) return;
+        var button = new Rect(1600, 630, 300, 56);
+        if (Gui.DdButton(button, returning ? "Return to Corridor" : "Enter Secret Room", size: 23))
+        {
+            if (returning) D.ExitSecretRoom(); else D.EnterSecretRoom();
+        }
     }
 
     private void DrawPrompt(Crawl crawl, ExpeditionState exp)

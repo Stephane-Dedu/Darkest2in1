@@ -91,8 +91,13 @@ public sealed class CurioResolver
                 report.Purged = party.PurgeNegative(heroId);
                 break;
             case "Scouting":
-                foreach (var room in state.Map.Rooms) room.Scouted = true;
-                foreach (var tile in state.Map.AllTiles) tile.Scouted = true;
+                foreach (var room in state.Map.QuestRooms) room.Scouted = true;
+                foreach (var tile in state.Map.AllTiles)
+                {
+                    tile.Scouted = true;
+                    if (tile.SecretRoomId >= 0 && tile.SecretDoorAlwaysAccessible)
+                        state.Map.Room(tile.SecretRoomId).Scouted = true;
+                }
                 report.Scouted = true;
                 break;
         }

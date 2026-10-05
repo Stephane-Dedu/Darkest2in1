@@ -105,6 +105,41 @@ public class SecretBranchTests
     }
 
     [Fact]
+    public void SecretEntranceLookupRejectsOrdinaryAndUnlinkedTargets()
+    {
+        var state = AtDoor();
+        int secret = Crawl(state).CurrentTile.SecretRoomId;
+        var entrance = state.Map.SecretEntrance(secret);
+        Assert.Equal((0, 17), (entrance.Corridor.Id, entrance.Tile.Index));
+        Assert.Null(state.Map.SecretEntrance(state.Map.EntranceRoomId).Corridor);
+        Assert.Null(state.Map.SecretEntrance(-1).Corridor);
+        Assert.Null(state.Map.SecretEntrance(999).Corridor);
+        entrance.Tile.SecretRoomId = -1;
+        Assert.Null(state.Map.SecretEntrance(secret).Corridor);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void ACurioMapRevealKeepsOrdinarySecretsHiddenAndHonorsNativeAccessFlags(bool alwaysAccessible)
+    {
+        var state = AtDoor();
+        var crawl = Crawl(state);
+        crawl.CurrentTile.SecretDoorAlwaysAccessible = alwaysAccessible;
+        int secret = crawl.CurrentTile.SecretRoomId;
+        var library = new CurioLibrary();
+        library.Curios["test_map"] = new CurioDef { Id = "test_map", Outcomes = { new CurioOutcome { Type = "Scouting", Weight = 1 } } };
+        var resolver = new CurioResolver(library, null, null);
+        var report = resolver.Resolve("test_map", "a", null, state, new FakeParty("a"), new Rng(3));
+        Assert.True(report.Scouted);
+        Assert.All(state.Map.QuestRooms, r => Assert.True(r.Scouted));
+        Assert.All(state.Map.AllTiles, t => Assert.True(t.Scouted));
+        Assert.Equal(alwaysAccessible, state.Map.Room(secret).Scouted);
+        Assert.Equal(alwaysAccessible, crawl.CanEnterSecretRoom);
+        Assert.Equal(4, state.RandomCounter);
+    }
+
+    [Fact]
     public void InvalidSavedReturnDoesNotMoveThePartyOrConsumeEffects()
     {
         var state = AtDoor();

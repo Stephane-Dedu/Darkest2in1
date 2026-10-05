@@ -94,6 +94,15 @@ public sealed class DungeonMap
     public Corridor FindCorridor(int a, int b) =>
         Corridors.FirstOrDefault(c => (c.RoomA == a && c.RoomB == b) || (c.RoomA == b && c.RoomB == a));
 
+    public (Corridor Corridor, HallTile Tile) SecretEntrance(int roomId)
+    {
+        if (roomId < 0 || roomId >= Rooms.Count || !Room(roomId).IsSecret) return (null, null);
+        foreach (var corridor in Corridors)
+            foreach (var tile in corridor.Tiles)
+                if (tile.SecretRoomId == roomId) return (corridor, tile);
+        return (null, null);
+    }
+
     public IEnumerable<int> Neighbours(int roomId) => Rooms[roomId].CorridorIds.Select(cid => Corridors[cid].Other(roomId));
 
     /// <summary>Room-graph distance from a room (corridors count as one step).</summary>

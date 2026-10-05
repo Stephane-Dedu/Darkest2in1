@@ -251,6 +251,24 @@ internal sealed class Driver : MonoBehaviour
         Handle(Crawl.Step(forward));
     }
 
+    public bool EnterSecretRoom() => ChangeSecretRoom(enter: true);
+    public bool ExitSecretRoom() => ChangeSecretRoom(enter: false);
+
+    private bool ChangeSecretRoom(bool enter)
+    {
+        if (Phase != Phase.Crawling || Crawl == null || Expedition.Camp != null || Ui.UiRoot.ModalOpen || _travelTo >= 0
+            || (enter ? !Crawl.CanEnterSecretRoom : Crawl.CurrentRoom?.IsSecret != true)) return false;
+        StopWalking(); _mouseWalk = 0; _walkVelocity = 0; WalkProgress = 0;
+        int before = Expedition.RoomId;
+        Handle(enter ? Crawl.EnterSecretRoom() : Crawl.ExitSecretRoom());
+        if (Expedition.RoomId == before) return false;
+        _interruptsThisStep = false; // this explicit transition already stopped the route
+        _wasInRoom = Expedition.InRoom;
+        _fadeInFrom = Time.unscaledTime;
+        Dd1Audio.Play("/general/map/room_transition");
+        return true;
+    }
+
     private void MarkStep(int dir)
     {
         LastStepDir = dir;
@@ -308,6 +326,7 @@ internal sealed class Driver : MonoBehaviour
             bool up = kb != null && (kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame);
             bool down = kb != null && (kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame);
             Vector2 dir = rightNow ? Vector2.right : leftNow ? Vector2.left : up ? Vector2.down : down ? Vector2.up : Vector2.zero;
+            if (Crawl.CurrentRoom.IsSecret && dir != Vector2.zero) { ExitSecretRoom(); return; }
             if (dir != Vector2.zero && Crawl.CurioHere == null)
             {
                 int exit = ExitToward(dir);
@@ -461,6 +480,19 @@ internal sealed class Driver : MonoBehaviour
     {
         StopWalking();
         var map = Expedition.Map;
+        if (target < 0 || target >= map.Rooms.Count || target == Expedition.RoomId) return;
+        if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
+        var destination = map.Room(target);
+        if (destination.IsSecret)
+        {
+            if (!destination.Scouted && !destination.Visited) return;
+            if (Crawl.CanEnterSecretRoom && Crawl.CurrentTile.SecretRoomId == target) { EnterSecretRoom(); return; }
+            var entrance = map.SecretEntrance(target);
+            if (entrance.Corridor == null) return;
+            WalkToTile(entrance.Corridor.Id, entrance.Tile.Index);
+            if (!IsWalking) Ui.Gui.Announce("Approach the marked corridor square to enter the secret room.");
+            return;
+        }
         int from = Expedition.InRoom ? Expedition.RoomId : NearestEnd(target);
         foreach (int r in RoomPath(map, from, target)) _route.Enqueue(r);
         _routeTargetRoom = target;
@@ -470,6 +502,7 @@ internal sealed class Driver : MonoBehaviour
     public void WalkToTile(int corridorId, int tileIndex)
     {
         StopWalking();
+        if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
         var c = Expedition.Map.Corridor(corridorId);
         if (Expedition.InRoom && c.RoomA != Expedition.RoomId && c.RoomB != Expedition.RoomId) return;
         if (!Expedition.InRoom && Expedition.CorridorId != corridorId) return;
