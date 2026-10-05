@@ -34,6 +34,8 @@ public sealed class Estate
     public int QuestsCompleted = 1;
     public Dictionary<string, int> ZoneXp = new();
     public HashSet<string> CompletedPlotQuests = new();
+    /// <summary>DD1 Caretaker roster goals: classes which have reached Resolve Level 6, even after leaving.</summary>
+    public HashSet<string> CompletedResolveGoals = new();
 
     public List<HeroRecord> Roster = new();
     public List<HeroRecord> Recruits = new();

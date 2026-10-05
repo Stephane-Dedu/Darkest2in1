@@ -133,6 +133,7 @@ public static class Homecoming
         {
             var hero = estate.Hero(o.HeroId);
             if (hero == null) continue;
+            CaretakerGoals.Record(estate, hero);
             var result = new HeroResult { Id = hero.Id, Name = hero.Name, ClassId = hero.ClassId, ResolveBefore = hero.ResolveLevel };
             report.Heroes.Add(result);
             if (o.Died)
@@ -178,6 +179,7 @@ public static class Homecoming
                 }
             }
             result.ResolveAfter = hero.ResolveLevel;
+            CaretakerGoals.Record(estate, hero);
             result.ResolveXp = hero.ResolveXp;
         }
 

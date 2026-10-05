@@ -1422,3 +1422,36 @@ launch, owner-save access or native art committed.
 - Round 108 locally deployed with Release + 365 Core + 26 UI tests green and both DLL hashes matching. Saved Activity Log retains weeks, actors, resolve and building cards, and distinct abandonment art. Native UI checks await launch. Next round 109: missing caretaker goals, starting with supported hero resolve achievements and saved completion, or another documented safe gap after reference inspection.
 - Cold audit unchanged 175 complete/15 partial/1 blank; blocked hidden visibility stays. Private 24-image scenery and localhost:8766/combat-extensions.html/server session 20403 unchanged and outside Git.
 - Last observed five-hour usage 24%, weekly 66%; check at round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active; protected estates/abandoned project untouched.
+
+## Round 109: persistent Caretaker roster goals
+
+DD1 str_caretaker_goal_hero_resolve says Raise a class to Resolve Level 6.
+ActivityLogWindow/LogQuestGoal in the Unity port display class goals and saved
+completion checks. Added CompletedResolveGoals separate from quest IDs. Homecoming
+records newly achieved/already-maxed classes before death; dismissal records a
+maxed class before removing its hero. Migration recovers only evidence in the
+current roster/graveyard, preserving completion thereafter without guessing prior
+dismissals. These goal helpers do not alter XP/rewards/week/random state.
+
+The right-hand 600x240 goal area from activity_log.layout.darkest now lists DD2's
+recruitable classes, using native Caretaker/Roster Goals headings, resolve template
+and completion-only check_mark art. Both menu check images were inspected; pending
+goals are left unmarked, following port checkIcon.enabled. Cached labels/heights,
+visible rows and independent estate-resetting scroll preserve responsiveness and
+keep the caretaker painting below the list. Quest goals remain a separate region-
+aware gap, including native lair tiers and independent optional originals.
+
+Five Core cases cover eligibility/idempotence, old-save recovery/reload, dismissal
+and trinket return, achievement on reaching six, preservation before death, and
+retreat exclusion. Release + 370 Core + 26 UI tests pass. Green-gated local deployment
+with DD2 stopped; DLL hashes match. No launch or owner-save access. Native goal
+layout/scroll/checks remain [?]. Found another gap during migration inspection:
+RepairEstate eagerly consumes NextRng on every load even with no quirks to repair;
+added to PARITY and deferred rather than changing it in this round.
+
+## Status 2026-10-05: round 109 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. The app goal retains the prior paused status; the owner heartbeat authorizes continued work after reset.
+- Round 109 locally deployed: Release + 370 Core + 26 UI tests green; DLL hashes match. Caretaker roster achievements/list added. Native UI checks remain pending. Next round 110: fix documented eager RepairEstate RNG advancement, retaining legitimate quirk repair rolls and persisting flags. Then region-aware Caretaker quest goals.
+- Cold audit unchanged 175 complete/15 partial/1 blank; blocked hidden visibility remains. Private art: 24 installed panoramas, six per region, runtime up to 12. Native-derived artwork/prompts/provenance and preview localhost:8766/combat-extensions.html/session 20403 remain outside Git and unchanged.
+- Last observed five-hour usage 29%, weekly 67%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

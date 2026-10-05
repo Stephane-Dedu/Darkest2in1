@@ -139,6 +139,7 @@ public sealed class Hamlet
     {
         var hero = Estate.Hero(heroId);
         if (hero == null) return false;
+        CaretakerGoals.Record(Estate, hero);
         Estate.Roster.Remove(hero);
         foreach (var t in hero.WornTrinkets) Estate.Trinkets.Add(t);
         return true;
@@ -586,6 +587,7 @@ public sealed class Hamlet
     {
         var log = new List<string>();
         if (CampaignJournal.Initialize(Estate)) log.Add("activity log initialized from surviving town messages");
+        if (CaretakerGoals.Sync(Estate)) log.Add("caretaker resolve goals recovered from roster and graveyard");
         if (CampaignRegions.Migrate(Estate, Dd1)) log.Add("campaign regions updated; existing progress retained");
         var rng = Estate.NextRng();
         if (!Estate.QuirksRepaired)
