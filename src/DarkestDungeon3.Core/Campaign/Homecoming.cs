@@ -171,7 +171,11 @@ public static class Homecoming
                     hero.PendingBuffs.RemoveAll(b => buffs.Contains(b) && dd1.Buffs?.Get(b)?.DurationType == "quest_complete");
                 int before = hero.ResolveLevel;
                 hero.ResolveLevel = Math.Max(before, Math.Min(6, dd1.HeroResolveLevel(hero.ResolveXp)));
-                if (hero.ResolveLevel > before) log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");
+                if (hero.ResolveLevel > before)
+                {
+                    report.MessageActors.Add(CampaignJournal.Actor(hero, log.Count, ActivityEntryKind.LevelUp));
+                    log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");
+                }
             }
             result.ResolveAfter = hero.ResolveLevel;
             result.ResolveXp = hero.ResolveXp;
@@ -208,6 +212,7 @@ public sealed class HomecomingReport
     public List<string> Trinkets = new();
     public List<Reward> Rewards = new();
     public List<string> Log = new();
+    public List<ActivityTownActor> MessageActors = new();
 }
 
 public sealed class HeroResult

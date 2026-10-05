@@ -1344,3 +1344,31 @@ match. Native portrait/wrap behavior remains [?]; no game launch or save access.
 - Round 105 locally deployed: Release + 359 Core + 24 UI tests green; both DLL hashes match. Activity Log persistence, week/raid art and saved town actor portraits are implemented, awaiting native checks. Next round 106: remaining activity-log building-upgrade/resolve entries or another documented safe gap after DD1/Unity inspection.
 - Cold audit unchanged 175 complete/15 partial/1 blank; blocked visibility guards remain. Private art: 24 installed panoramas, six per region, supports up to 12, outside Git. Preview localhost:8766/combat-extensions.html/session 20403 unchanged.
 - Last observed five-hour usage 15%, weekly 65%; check each round and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 106: resolve-level Activity Log cards
+
+Read DD1 roster.variables.json resolve_level_thresholds (0,2,8,14,24,36,48),
+inspected hero_level_up_entry_backdrop, and checked Unity port ActorActivityRecord's
+ActivityType.LevelUp and ActivityRecordSlot. Return reports already included resolve
+messages but stored/rendered them as generic text, losing the actor and entry kind.
+
+Homecoming now marks the existing message's index when a surviving hero actually
+levels up. It copies hero identity/class and LevelUp kind; Journal.Return copies
+bounded indexed metadata into the saved raid. The UI renders that same line once
+with DD1's level-up band/notable color and the saved DD2 class portrait. No name or
+message matching, duplicated text, or inferred actors for older untyped records.
+Resolve/XP/reward/random behavior stays in the existing rules.
+
+Three Core cases cover two heroes with identical names receiving distinct indexed
+cards, copied metadata/reload, death exclusion, retreats and maximum resolve, with
+unchanged XP/random counts. One actual-layout case verifies a single typed line and
+legacy fallback. Release + 362 Core + 25 UI tests pass; deployment gated on green
+results and DD2 stopped. Both deployed DLL hashes match. Native appearance remains
+[?], no launch or owner-save access, and native art remains outside Git.
+
+## Status 2026-10-05: round 106 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or restore pending. The app goal still reports the earlier pause; the owner heartbeat authorizes continued work after reset.
+- Round 106 locally deployed: Release + 362 Core + 25 UI tests green, both DLL hashes match. Activity Log now has saved history, week/raid art, town actor portraits and resolve cards, awaiting native checks. Next round 107: remaining actual building-upgrade entries/caretaker goals or another documented safe gap after DD1/Unity inspection.
+- Cold audit unchanged 175 complete/15 partial/1 blank. Hidden visibility remains blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git.
+- Last observed five-hour usage 17%, weekly 65%; check each round and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

@@ -43,16 +43,18 @@ public static class CampaignJournal
         week.Town.AddRange(estate.TownLog);
         foreach (var actor in actors ?? Enumerable.Empty<ActivityTownActor>())
             if (actor.MessageIndex >= 0 && actor.MessageIndex < estate.TownLog.Count)
-                week.TownActors.Add(new ActivityTownActor
-                {
-                    MessageIndex = start + actor.MessageIndex, HeroId = actor.HeroId,
-                    HeroName = actor.HeroName, HeroClass = actor.HeroClass
-                });
+                week.TownActors.Add(CopyActor(actor, start));
     }
 
-    public static ActivityTownActor Actor(HeroRecord hero, int messageIndex) => new()
+    public static ActivityTownActor Actor(HeroRecord hero, int messageIndex, ActivityEntryKind kind = ActivityEntryKind.HeroActivity) => new()
     {
-        MessageIndex = messageIndex, HeroId = hero.Id, HeroName = hero.Name, HeroClass = hero.ClassId
+        MessageIndex = messageIndex, HeroId = hero.Id, HeroName = hero.Name, HeroClass = hero.ClassId, Kind = kind
+    };
+
+    private static ActivityTownActor CopyActor(ActivityTownActor actor, int offset = 0) => new()
+    {
+        MessageIndex = offset + actor.MessageIndex, HeroId = actor.HeroId,
+        HeroName = actor.HeroName, HeroClass = actor.HeroClass, Kind = actor.Kind
     };
 
     public static void Embark(Estate estate, QuestOffer quest, IEnumerable<HeroRecord> heroes)
@@ -74,6 +76,8 @@ public static class CampaignJournal
         {
             Quest = report.Quest.ToString(), Region = report.Quest.Dungeon, Result = report.Result,
             Messages = report.Log.ToList(),
+            MessageActors = report.MessageActors.Where(a => a.MessageIndex >= 0 && a.MessageIndex < report.Log.Count)
+                .Select(a => CopyActor(a)).ToList(),
             Heroes = report.Heroes.Select(h => new ActivityHero
             {
                 Id = h.Id, Name = h.Name, ClassId = h.ClassId, Died = h.Died,
@@ -96,13 +100,17 @@ public sealed class ActivityTownActor
 {
     public int MessageIndex;
     public string HeroId, HeroName, HeroClass;
+    public ActivityEntryKind Kind;
 }
+
+public enum ActivityEntryKind { HeroActivity, LevelUp }
 
 public sealed class ActivityRaid
 {
     public string Quest, Region, Result;
     public List<ActivityHero> Heroes = new();
     public List<string> Messages = new();
+    public List<ActivityTownActor> MessageActors = new();
 }
 
 public sealed class ActivityHero

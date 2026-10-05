@@ -83,4 +83,24 @@ public class ActivityLogLayoutTests
         Assert.True(20 + 90 < 135); // portrait clears the text's left edge
         Assert.True(135 + 440 <= ActivityLogLayout.Width);
     }
+
+    [Fact]
+    public void LevelUpMetadataStylesTheExistingReturnLineOnceAndDoesNotGuessLegacyActors()
+    {
+        var raid = new ActivityRaid
+        {
+            Result = "complete", Quest = "Short quest",
+            Messages = { "Reward: 100 gold", "Dismas reached resolve level 1.", "Quest complete." },
+            MessageActors = { new() { MessageIndex = 1, HeroId = "a", HeroName = "Dismas", HeroClass = "highwayman", Kind = ActivityEntryKind.LevelUp } }
+        };
+        var layout = ActivityLogLayout.Build(new[] { new ActivityWeek { Week = 1, Raids = { raid } } }, Measure);
+        var level = Assert.Single(layout.Rows, r => r.Actor?.Kind == ActivityEntryKind.LevelUp);
+        Assert.Equal("Dismas reached resolve level 1.", level.Text);
+        Assert.Equal("a", level.Actor.HeroId);
+        Assert.Single(layout.Rows, r => r.Text == level.Text);
+        raid.MessageActors.Clear();
+        var legacy = ActivityLogLayout.Build(new[] { new ActivityWeek { Raids = { raid } } }, Measure);
+        Assert.All(legacy.Rows, r => Assert.Null(r.Actor));
+        Assert.Single(legacy.Rows, r => r.Text == level.Text);
+    }
 }

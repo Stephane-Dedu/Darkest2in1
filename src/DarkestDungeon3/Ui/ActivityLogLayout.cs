@@ -60,7 +60,9 @@ internal sealed class ActivityLogLayout
         float nameHeight = raid.Heroes.Take(4).Select(h => measure(h.Name ?? "", 130)).DefaultIfEmpty(0).Max();
         Add(new Row { Type = Kind.Raid, Raid = raid, Text = text, NameHeight = nameHeight,
             Height = (raid.Result == "embark" ? 0 : 60) + 125 + nameHeight + measure(text, Width - 50) + 16 });
-        foreach (var message in raid.Messages) Message(message, measure);
+        var actors = raid.MessageActors.GroupBy(a => a.MessageIndex).ToDictionary(g => g.Key, g => g.Last());
+        for (int i = 0; i < raid.Messages.Count; i++)
+            Message(raid.Messages[i], measure, actors.TryGetValue(i, out var actor) ? actor : null);
     }
 
     public IEnumerable<Row> Visible(float top, float height)

@@ -179,4 +179,51 @@ public class CampaignJournalTests
         Assert.Equal(7, estate.RandomCounter);
         Assert.Equal(9, estate.Week);
     }
+
+    [Fact]
+    public void SameNameLevelUpsKeepDistinctCopiedActorsAtTheExactReturnMessageIndices()
+    {
+        var estate = new Estate { Week = 2, Seed = 9 };
+        estate.Roster.Add(new HeroRecord { Id = "a", Name = "Shared", ClassId = "highwayman" });
+        estate.Roster.Add(new HeroRecord { Id = "b", Name = "Shared", ClassId = "vestal" });
+        estate.Roster.Add(new HeroRecord { Id = "dead", Name = "Shared", ClassId = "leper" });
+        var quest = new QuestOffer { Id = "q", Dungeon = "dd2_sprawl", Type = "explore", Length = 1, Difficulty = 1 };
+        var report = Homecoming.Report(estate, Dd1, new ExpeditionState { Quest = quest, QuestComplete = true }, new[]
+        {
+            new HeroOutcome { HeroId = "a" }, new HeroOutcome { HeroId = "b" }, new HeroOutcome { HeroId = "dead", Died = true }
+        });
+        Assert.Equal(2, report.MessageActors.Count);
+        Assert.Equal(2, report.MessageActors.Select(a => a.MessageIndex).Distinct().Count());
+        Assert.All(report.MessageActors, a => Assert.Equal(ActivityEntryKind.LevelUp, a.Kind));
+        var messages = report.Log.ToList();
+        report.MessageActors[0].HeroClass = "Changed";
+        report.MessageActors.Clear();
+        var loaded = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        var raid = Assert.Single(Assert.Single(loaded.ActivityLog).Raids);
+        Assert.Equal(messages, raid.Messages);
+        Assert.Equal(new[] { "a", "b" }, raid.MessageActors.Select(a => a.HeroId));
+        Assert.Equal(new[] { "highwayman", "vestal" }, raid.MessageActors.Select(a => a.HeroClass));
+        Assert.All(raid.MessageActors, a => Assert.Equal("Shared reached resolve level 1.", raid.Messages[a.MessageIndex]));
+        Assert.All(raid.MessageActors, a => Assert.Equal(ActivityEntryKind.LevelUp, a.Kind));
+        Assert.Equal(1, loaded.RandomCounter); // Homecoming's existing retreat-sacrifice seed, no logging rolls
+        Assert.Equal(2, loaded.Roster[0].ResolveXp);
+        Assert.Equal(2, loaded.Roster[1].ResolveXp);
+        Assert.Single(loaded.Graveyard);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void RetreatAndMaximumResolveDoNotInventLevelUpEntries(bool success)
+    {
+        var estate = new Estate { Seed = 3 };
+        estate.Roster.Add(new HeroRecord { Id = "a", Name = "Dismas", ClassId = "highwayman", ResolveLevel = 6, ResolveXp = 64 });
+        var quest = new QuestOffer { Id = "q", Dungeon = "dd2_sprawl", Type = "explore", Length = 1, Difficulty = 1 };
+        var report = Homecoming.Report(estate, Dd1, new ExpeditionState { Quest = quest, QuestComplete = success, Retreated = !success }, new[] { new HeroOutcome { HeroId = "a" } });
+        Assert.Empty(report.MessageActors);
+        Assert.Empty(Assert.Single(Assert.Single(estate.ActivityLog).Raids).MessageActors);
+        Assert.DoesNotContain(report.Log, m => m.Contains("reached resolve level"));
+        Assert.Equal(6, estate.Roster[0].ResolveLevel);
+        Assert.Equal(success ? 66 : 64, estate.Roster[0].ResolveXp);
+    }
 }
