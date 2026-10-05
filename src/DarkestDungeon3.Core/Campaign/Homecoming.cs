@@ -140,6 +140,7 @@ public static class Homecoming
             report.Heroes.Add(result);
             if (o.Died)
             {
+                if (o.Quirks != null) hero.Quirks = o.Quirks.ToList();
                 result.Died = true;
                 result.Cause = o.CauseOfDeath;
                 hero.IsDead = true;

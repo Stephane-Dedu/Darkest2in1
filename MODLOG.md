@@ -2479,3 +2479,26 @@ Mono persistence remains [?]. No launch, owner-save/cache access or art changes.
 - Next round 149: inspect fallen-hero quirk records and From Beyond, preserve only proven recorded state without changing dead-trinket policy. Then bound host-entry waits while keeping slow native asset transitions safe; native resume tests still await explicit launch permission.
 - Ordinary usage available; session 78%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 149: keep recorded quirk changes on fallen heroes
+
+Installed base.town_events.events.json dead_recruit requires dead_heroes=3 and
+offers number_data=3 after minimum_week=15. It does not define resurrection quirk
+rules. Unity DeathRecord only stores memorial metadata, not a full resurrectable
+hero. The mod already reuses its full graveyard HeroRecord for From Beyond, but
+Homecoming discarded a dead outcome's recorded quirks. Copy known quirks/diseases
+onto that record; unknown null stays unchanged and known empty clears it. This
+fixes the mod's own recorded-state loss without claiming unproven native semantics.
+Existing dead-trinket/progression behavior is unchanged.
+
+Three cases exercise real Homecoming, synthetic save, native-data From Beyond
+and recruit, plus copy ownership and null/empty handling. Release + 636 Core +
+57 UI tests pass; stopped-game DLL hashes match. Native graveyard/return display
+remains [?]. No game launch, owner-estate access or art changes.
+
+## Status 2026-10-05: round 149 complete
+
+- Round 149 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 150: bound the no-callback host wait with a main-thread timer, one reported failure and cancelled stale callbacks; preserve an in-progress native transition/save and allow retry when ready. Use a generous threshold because native asset loading can be slow. Then inspect remaining save/recovery and crawl UI gaps.
+- Ordinary usage available; session 80%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
