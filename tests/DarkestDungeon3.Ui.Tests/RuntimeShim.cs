@@ -6,7 +6,9 @@ internal static class Plugin
     public sealed class TestConfig<T> { public T Value; }
     public sealed class TestLog
     {
-        public void LogInfo(object message) { }
-        public void LogWarning(object message) { }
+        public readonly List<string> Infos = new(), Warnings = new();
+        public readonly List<int> Threads = new();
+        public void LogInfo(object message) { Infos.Add(message.ToString()); Threads.Add(Environment.CurrentManagedThreadId); }
+        public void LogWarning(object message) { Warnings.Add(message.ToString()); Threads.Add(Environment.CurrentManagedThreadId); }
     }
 }

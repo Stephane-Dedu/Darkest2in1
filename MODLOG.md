@@ -2115,3 +2115,31 @@ in PARITY rather than folded into this round.
 - Next round 135: address the documented conversion-queue active-name/failure progression gap after actual reference inspection; use synthetic files/process helpers, never owner cache files or DD2 launch.
 - Ordinary usage available; session 26%, weekly 82%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - Protected estates/abandoned project untouched. Private native artwork and owner preview/server remain unchanged/outside Git; native UI/rendering/timing checks await explicit launch permission.
+
+## Round 135: conversion queue deduplication and failure progression
+
+Inspected installed opening assets and Unity GameIntro's ordered completion.
+Queued names excluded the current conversion, so repeated Prepare could start
+it twice; start failure abandoned later movies and leaked the Process wrapper.
+Queue jobs now own source/encoder/output paths and unique temporary WebM files,
+with one reservation covering both queued/active work. Missing sources and start
+failure release their key and progress later jobs. Main-thread completion keeps
+ready output intact, publishes only its completed temporary, cleans failed
+temporary output, disposes the Process and advances. Picture readiness tracks
+the exact active output rather than a substring in process arguments.
+
+Three linked cache tests use synthetic DD1 markers/files/cache paths. Missing
+encoder start failure progresses both jobs and permits retry; harmless where.exe
+rejects encoder arguments to exercise real asynchronous exit callbacks, active/
+queued dedup and external-ready preservation; ready output/missing source skip
+without blocking later work. Logging/callback state stays on the pump thread.
+No owner cache, native video or DD2 process launched during these tests. Release
++ 519 Core + 45 UI tests pass; stopped-game DLL hashes match. Native ffmpeg
+conversion/picture/playback remains [?].
+
+## Status 2026-10-05: round 135 complete
+
+- Round 135 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 136: inspect remaining crawl/party system gaps against actual DD1/Unity, including handling of dead heroes in trap/curio/hunger or battle continuation. Choose one proven difference and document it before coding; do not infer missing rules without reference evidence.
+- Ordinary usage available; session 30%, weekly 82%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Private native artwork and owner preview/server remain unchanged/outside Git; native UI/rendering/timing checks await explicit launch permission.

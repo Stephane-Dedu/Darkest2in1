@@ -18,7 +18,11 @@ namespace DarkestDungeon3.Ui;
 internal static class CinematicCache
 {
     private static Process _converting;
-    private static readonly Queue<string> Pending = new();
+    private sealed class Conversion { public string Name, Source, Output, Temporary, Encoder; }
+    private static Conversion _active;
+    private static readonly Queue<Conversion> Pending = new();
+    private static readonly HashSet<string> ConversionFiles = new(StringComparer.OrdinalIgnoreCase);
+    internal static bool HasPendingPictures => _active != null || Pending.Count > 0;
     private static readonly ConcurrentQueue<Action> Completed = new();
     private sealed class VoiceResult { public string File, Error; }
     private sealed class VoiceJob { public string Name; public Task<VoiceResult> Work; public bool Reported; }
@@ -102,7 +106,7 @@ internal static class CinematicCache
     public static string Picture(string name)
     {
         string file = Path.Combine(Dir, "dd1_" + name + ".webm");
-        bool busy = _converting != null && !_converting.HasExited && Equals(_converting.StartInfo.Arguments.Contains(name), true);
+        bool busy = _active != null && string.Equals(_active.Output, file, StringComparison.OrdinalIgnoreCase);
         return File.Exists(file) && !busy ? file : null;
     }
 
@@ -114,9 +118,22 @@ internal static class CinematicCache
         foreach (string name in movies) Voice(name, Dd1Cinematic.VideoPath(dd1, name), out _);
         string ffmpeg = FindFfmpeg();
         if (ffmpeg == null) { Plugin.Log.LogInfo("[cinematic] no ffmpeg: cinematics play as narration over DD1's title art"); return; }
-        foreach (var n in movies)
-            if (!File.Exists(Path.Combine(directory, "dd1_" + n + ".webm")) && !Pending.Contains(n)) Pending.Enqueue(n);
-        Pump(dd1, ffmpeg, directory);
+        PreparePictures(dd1, movies, ffmpeg, directory);
+    }
+
+    internal static void PreparePictures(Dd1Install dd1, IEnumerable<string> names, string encoder, string directory)
+    {
+        foreach (string name in names)
+        {
+            string output = Path.Combine(directory, "dd1_" + name + ".webm");
+            if (File.Exists(output) || !ConversionFiles.Add(output)) continue;
+            Pending.Enqueue(new Conversion
+            {
+                Name = name, Source = Dd1Cinematic.VideoPath(dd1, name), Output = output, Encoder = encoder,
+                Temporary = output + "." + Guid.NewGuid().ToString("N") + ".part.webm",
+            });
+        }
+        Pump();
     }
 
     public static void Update()
@@ -126,39 +143,63 @@ internal static class CinematicCache
             if (job.Work.IsCompleted && !job.Reported) Observe(job);
     }
 
-    private static void Pump(Dd1Install dd1, string ffmpeg, string directory)
+    private static void Pump()
     {
-        if ((_converting != null && !_converting.HasExited) || Pending.Count == 0) return;
-        string name = Pending.Dequeue();
-        string src = Dd1Cinematic.VideoPath(dd1, name), part = Path.Combine(directory, "dd1_" + name + ".part.webm"), done = Path.Combine(directory, "dd1_" + name + ".webm");
-        if (!File.Exists(src)) { Pump(dd1, ffmpeg, directory); return; }
+        if (_active != null) return;
+        while (Pending.Count > 0)
+        {
+            var job = Pending.Dequeue();
+            if (!File.Exists(job.Source)) { ConversionFiles.Remove(job.Output); continue; }
+            Process process = null;
+            try
+            {
+                process = new Process
+                {
+                    StartInfo = new ProcessStartInfo(job.Encoder, $"-y -loglevel error -i \"{job.Source}\" -an -c:v libvpx -b:v 3M -deadline realtime -cpu-used 8 \"{job.Temporary}\"")
+                    {
+                        UseShellExecute = false, CreateNoWindow = true,
+                    },
+                    EnableRaisingEvents = true,
+                };
+                var started = process;
+                process.Exited += (_, _) => Completed.Enqueue(() => Finish(job, started));
+                _active = job;
+                _converting = process;
+                if (!process.Start()) throw new InvalidOperationException("encoder did not start");
+                Plugin.Log.LogInfo($"[cinematic] {job.Name}: converting the picture for Unity (ffmpeg, in the background)");
+                return;
+            }
+            catch (Exception e)
+            {
+                Plugin.Log.LogWarning($"[cinematic] {job.Name}: ffmpeg failed to start: {e.Message}");
+                _active = null;
+                _converting = null;
+                ConversionFiles.Remove(job.Output);
+                process?.Dispose();
+            }
+        }
+    }
+
+    private static void Finish(Conversion job, Process process)
+    {
+        if (!ReferenceEquals(_active, job) || !ReferenceEquals(_converting, process)) { process.Dispose(); return; }
         try
         {
-            var p = new Process
-            {
-                StartInfo = new ProcessStartInfo(ffmpeg, $"-y -loglevel error -i \"{src}\" -an -c:v libvpx -b:v 3M -deadline realtime -cpu-used 8 \"{part}\"")
-                {
-                    UseShellExecute = false, CreateNoWindow = true,
-                },
-                EnableRaisingEvents = true,
-            };
-            p.Exited += (_, _) => Completed.Enqueue(() =>
-            {
-                try
-                {
-                    if (p.ExitCode == 0 && File.Exists(part)) { if (File.Exists(done)) File.Delete(done); File.Move(part, done); }
-                    Plugin.Log.LogInfo($"[cinematic] {name}: picture {(File.Exists(done) ? "ready" : "failed (ffmpeg " + p.ExitCode + ")")}");
-                }
-                catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {name}: {e.Message}"); }
-                if (ReferenceEquals(_converting, p)) _converting = null;
-                p.Dispose();
-                Pump(dd1, ffmpeg, directory);
-            });
-            p.Start();
-            _converting = p;
-            Plugin.Log.LogInfo($"[cinematic] {name}: converting the picture for Unity (ffmpeg, in the background)");
+            if (process.ExitCode == 0 && File.Exists(job.Temporary) && !File.Exists(job.Output))
+                File.Move(job.Temporary, job.Output);
+            Plugin.Log.LogInfo($"[cinematic] {job.Name}: picture {(File.Exists(job.Output) ? "ready" : "failed (ffmpeg " + process.ExitCode + ")")}");
         }
-        catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {name}: ffmpeg failed to start: {e.Message}"); }
+        catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {job.Name}: {e.Message}"); }
+        finally
+        {
+            if (File.Exists(job.Temporary))
+                try { File.Delete(job.Temporary); } catch (Exception e) { Plugin.Log.LogWarning($"[cinematic] {job.Name} temporary picture: {e.Message}"); }
+            _active = null;
+            _converting = null;
+            ConversionFiles.Remove(job.Output);
+            process.Dispose();
+            Pump();
+        }
     }
 
     /// <summary>ffmpeg on the PATH, or WinGet's usual install.</summary>
