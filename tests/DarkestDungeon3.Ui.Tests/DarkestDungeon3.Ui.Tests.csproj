@@ -19,6 +19,7 @@
     <Compile Include="../../src/DarkestDungeon3/Ui/MemorialNarrationLayout.cs" Link="MemorialNarrationLayout.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/DeferredPoll.cs" Link="DeferredPoll.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/ExpeditionActorRestore.cs" Link="ExpeditionActorRestore.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/SpriteArt.cs" Link="SpriteArt.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/RegionSceneryArt.cs" Link="RegionSceneryArt.cs" />
     <Compile Include="$(SpineArtSource)" Link="SpineArt.cs" />

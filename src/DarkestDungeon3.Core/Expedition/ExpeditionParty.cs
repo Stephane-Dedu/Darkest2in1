@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Campaign.Town;
+using Newtonsoft.Json;
 
 namespace DarkestDungeon3.Core.Expedition;
 
@@ -20,11 +22,28 @@ public static class ExpeditionParty
         foreach (var snapshot in snapshots)
         {
             string id = snapshot?.Outcome?.HeroId;
-            if (id == null || !state.Party.Contains(id) || !Finite(snapshot.Hp) || !Finite(snapshot.HpMax)
-                || snapshot.HpMax <= 0 || !Finite(snapshot.Stress) || snapshot.Stress < 0
-                || !Finite(snapshot.WoundPercent) || snapshot.WoundPercent < 0 || snapshot.WoundPercent > 1) continue;
+            if (id == null || !state.Party.Contains(id) || !IsValid(snapshot)) continue;
             state.PartyStates[id] = Copy(snapshot);
         }
+    }
+
+    public static bool IsValid(ExpeditionHeroState snapshot) => snapshot?.Outcome?.HeroId != null
+        && Finite(snapshot.Hp) && Finite(snapshot.HpMax) && snapshot.HpMax > 0
+        && Finite(snapshot.Stress) && snapshot.Stress >= 0 && snapshot.Stress < int.MaxValue
+        && Finite(snapshot.WoundPercent) && snapshot.WoundPercent >= 0 && snapshot.WoundPercent <= 1;
+
+    /// <summary>A fresh actor gets a copied persistent loadout plus recorded changes; fallen heroes never respawn.</summary>
+    public static HeroRecord HeroForRestore(HeroRecord hero, ExpeditionHeroState snapshot)
+    {
+        if (hero == null || hero.IsDead) return null;
+        if (snapshot?.Outcome?.HeroId != hero.Id) snapshot = null;
+        if (snapshot?.Outcome?.Died == true) return null;
+        var copy = JsonConvert.DeserializeObject<HeroRecord>(JsonConvert.SerializeObject(hero));
+        if (!IsValid(snapshot)) return copy;
+        copy.Stress = (int)Math.Round(snapshot.Stress);
+        if (snapshot.Outcome.Quirks != null) copy.Quirks = snapshot.Outcome.Quirks.ToList();
+        if (snapshot.Outcome.Trinkets != null) copy.Trinkets = TrinketEquipment.RestoreSlots(hero.Trinkets, snapshot.Outcome.Trinkets);
+        return copy;
     }
 
     public static ExpeditionHeroState Copy(ExpeditionHeroState snapshot) => new()

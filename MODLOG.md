@@ -2336,3 +2336,31 @@ No change to dead-trinket policy.
 - Next round 144: inspect/implement DD2 actor restoration without triggering damage/heal/meltdown events and preserve pre-fight party checkpoints. Then route interrupted loads only after all actor/location prerequisites are concrete; exact mid-turn combat restore remains separate.
 - Ordinary usage available; session 60%, weekly 87%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 144: restore recorded DD2 actor condition quietly
+
+DD2 JsonSerializationUtils.ComplexTypeSerializer.ApplyTo assigns only supplied
+serializable fields. ActorInstance.UpdateStatus(status, source, isLoad:true)
+rebuilds death's-door buffs while skipping effect/event/enter-status callbacks.
+Use that native path for m_Hp/m_Stress/m_WoundPercent, then native clamp, status
+and prior-max refresh. Do not load the whole actor JSON: GUID and containers
+belong to the newly created host actor. Skip equipment's full-health refill
+when restoring condition and do not apply stress damage. Core projects a copied
+full HeroRecord loadout, overlays recorded changes and excludes confirmed deaths;
+missing/foreign/invalid snapshots conservatively use estate evidence.
+
+Six Core cases cover progression, independent lists, empty trinket slots and
+legacy/death fallbacks. Seven tests execute the real small restore bridge against
+native API shims: raw negative/zero/positive/clamped HP, stress 10 without an
+overstress callback, wounds, repeated application, identity/container preservation
+and load call order. UI first failed on a missing test namespace import; fixed.
+Release + 601 Core + 52 UI tests pass; stopped-game DLL hashes match. Native
+restore remains [?]; runtime resume and fight checkpoint are separate stages.
+No launch, owner-estate access or private-art changes.
+
+## Status 2026-10-05: round 144 complete
+
+- Round 144 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 145: save an explicit pre-fight condition checkpoint before enabling native interrupted-fight restart. Then route valid saved crawls back to their saved position without repeating week/provision/quest rolls. Exact mid-turn DD2 combat reconstruction remains separate.
+- Ordinary usage available; session 67%, weekly 88%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
