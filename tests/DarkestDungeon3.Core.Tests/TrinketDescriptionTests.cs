@@ -1372,8 +1372,39 @@ public class TrinketDescriptionTests
         }
     }
 
+    [Fact]
+    public void SickeningSilenceRetainsTargetDiseaseRetaliationAndItsSelfPenalty()
+    {
+        string effects = Data.Effects("trinket_cultist_sickening_silence", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Apply to Attacker When Hit: Blight 6 (3 Turns) when target Disease", effects);
+        Assert.Contains("If not Disease: -200% Disease RES", effects);
+        Assert.DoesNotContain("<sprite", effects);
+        Assert.DoesNotContain("when self Disease", effects);
+    }
+
+    [Fact]
+    public void TargetDiseaseRetainsLocalizedActorAndWithholdsMalformedBodyTemplates()
+    {
+        string effects = Data.Effects("trinket_cultist_sickening_silence", out bool complete, key => key switch
+        {
+            "effect_tooltip_actor_type_target" => "cible", "quirk+disease" => "Maladie",
+            "effect_tooltip_condition_quirk_tag_amount" => "{1} si {0}", _ => null,
+        });
+        Assert.True(complete);
+        Assert.Contains("Blight 6 (3 Turns) si cible Maladie", effects);
+        foreach (string template in new[] { "invalid {9}", "When {0}" })
+        {
+            effects = Data.Effects("trinket_cultist_sickening_silence", out complete,
+                key => key == "effect_tooltip_condition_quirk_tag_amount" ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Blight", effects);
+            Assert.Contains("-200% Disease RES", effects);
+        }
+    }
+
     [Theory]
-    [InlineData("m_ConditionActorType", "TARGET")]
+    [InlineData("m_ConditionActorType", "BOTH")]
     [InlineData("m_ConditionActorType", "PARTY")]
     [InlineData("m_ConditionString", "negative")]
     [InlineData("m_ConditionNumber", "2")]

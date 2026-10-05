@@ -1778,5 +1778,31 @@ art and scrolling remain [?].
 - Loop continues under owner authorization; native app goal still reports paused and cannot be resumed by the status tool. No duplicate goal created.
 - Round 121 deployed: Release + 432 Core + 30 UI tests green, DLL hashes match. Memorial videos, saved journals and independent native DD1 narration now exist in code. Next round 122: inspect remaining visible cold-menu trinket conditions, starting with target disease on Sickening Silence; hidden/blocked policy remains intact.
 - Ordinary usage available; session 75%, weekly 74%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue at boundaries until approximately 95% with clean committed handoff. Do not launch DD2 without owner permission; protected estates/abandoned project/private native artwork constraints remain.
+
+## Round 122: target disease no longer hides Sickening Silence retaliation
+
+Read installed DD1 trinket buff lists and Unity Buff.ToolTip Status wrapping.
+Native DD2 target_is_diseased is QUIRK_TAG_AMOUNT disease/TARGET >=1, with no
+hidden/inverse/source/exclusion restriction. ConditionCalculation counts the
+target's tagged quirks; SkillCalculation retains the original condition input
+when applying target-to-performer retaliation. ConditionDescription's generic
+quirk template omits actor, so cold text retains the localized target label.
+
+Sickening Silence now shows its actual Blight 6 (3 Turns) Apply to Attacker When
+Hit alongside the -200% Disease RES self penalty. No combat behavior changed.
+Only the proven target presence shape is added; self wording and blocked hidden
+policy remain. Other counts/actors/source/exclusion/unknown fields stay withheld.
+Two actual-data/localization/malformed-body cases and the existing unsafe disease
+fixtures pass (TARGET is now supported, so that fixture checks unsupported BOTH).
+
+Release + 434 Core + 30 UI tests pass before stopped-game deploy; both installed
+DLL hashes match. Full cold audit: 176 complete, 14 partial, 1 blank of 191.
+No game launched or owner estate accessed; native tooltip comparison remains [?].
+
+## Status 2026-10-05: round 122 complete
+
+- Loop continues under owner authorization; native goal remains paused with no resume API or duplicate goal.
+- Round 122 deployed and green. Next round 123: inspect remaining visible trinket choice/conditional fields from actual native data; skip hidden-policy blockers and do not invent unknown effects. Native scene/recruit/combat/reader checks still await owner launch permission.
+- Ordinary usage available; session 79%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. Protected estates, abandoned project and private native artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

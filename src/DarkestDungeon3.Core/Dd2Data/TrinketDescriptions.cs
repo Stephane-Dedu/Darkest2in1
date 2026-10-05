@@ -586,11 +586,11 @@ public sealed class TrinketDescriptions
                 args = new object[] { overstressName + " ", effect };
                 break;
             case "quirk_tag_amount":
-                // Native disease presence is a tagged-quirk count. Its template omits actor/count details,
-                // so accept only the proven self-presence shape rather than mislabeling other requirements.
+                // Native disease presence is a tagged-quirk count. Keep target explicit because the
+                // generic native template omits actor/count details; other shapes remain withheld.
                 if (!_blocks.TryGetValue(("Condition", id), out var quirkRows)
                     || quirkRows.Any(row => !TagConditionFields.Contains(row[0]))
-                    || value != "disease" || actor != "PERFORMER" || numberType != "GREATER_THAN_OR_EQUAL"
+                    || value != "disease" || (actor != "PERFORMER" && actor != "TARGET") || numberType != "GREATER_THAN_OR_EQUAL"
                     || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
                         CultureInfo.InvariantCulture, out float quirkAmount) || quirkAmount != 1
                     || (Field("Condition", id, "m_IsInverse") ?? "False") != "False"
@@ -598,6 +598,12 @@ public sealed class TrinketDescriptions
                     || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
                 string quirkName = Text("quirk+" + value, localize);
                 if (quirkName == null) return null;
+                if (actor == "TARGET")
+                {
+                    string quirkActor = Text("effect_tooltip_actor_type_target", localize);
+                    if (quirkActor == null) return null;
+                    quirkName = quirkActor + " " + quirkName;
+                }
                 args = new object[] { quirkName, effect };
                 break;
             case "tag":
