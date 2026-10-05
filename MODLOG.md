@@ -1315,3 +1315,32 @@ owner-save access, and no native assets entered Git.
 - Round 104 locally deployed with Release + 357 Core + 23 UI tests green and DLL hashes matching. Activity Log has saved weeks and initial DD1 presentation; native checks await launch. Next round 105: another documented missing Core/UI behavior, such as secret-room discovery/access, caretaker goals or typed town entries; inspect DD1 data/Unity references before selecting.
 - Cold audit unchanged 175 complete/15 partial/1 blank. Round 75 hidden visibility remains blocked. Private 24-image scenery pack and preview localhost:8766/combat-extensions.html/session 20403 remain unchanged and outside Git.
 - Last observed five-hour usage 12%, weekly 64%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 105: saved actors on town Activity Log entries
+
+DD1 activity_log.layout.darkest uses hero portraits beside a 440-pixel text box.
+Unity port ActorActivityRecord copies Actor/HeroClass when logging an outcome;
+ActivityRecordSlot reads that class without consulting the current roster. Our
+saved town messages had no actor metadata, preventing accurate historical portraits.
+
+Core now attaches copied hero ID/name/class to append-only town-message indices.
+Guild/Blacksmith/Survivalist action messages include their actor; EndWeek associates
+all messages emitted by each hero with that hero, including rest, activity/side
+outcomes, sanitarium and missing returns. TownResults copies batch metadata and
+rejects invalid indices; legacy messages retain their text with no guessed actor.
+The UI uses the saved DD2 class portrait and DD1's 440-pixel body width; wrapped
+height accounts for the narrower text. No gameplay outcomes/RNG changed.
+
+Two new Core cases plus the expanded real Blacksmith check cover old-message offsets,
+copied batches, invalid indices, rest/prayer/treatment/missing outcomes, exact message
+association and names/classes surviving rename/removal/death/reload. One actual-layout
+case checks actor versus legacy text widths and long-message height. Release + 359
+Core + 24 UI tests pass. Green-gated deployment with DD2 stopped; installed DLL hashes
+match. Native portrait/wrap behavior remains [?]; no game launch or save access.
+
+## Status 2026-10-05: round 105 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or pending restores. The app's prior paused goal status is not programmatically resumable; this heartbeat explicitly authorizes continued work.
+- Round 105 locally deployed: Release + 359 Core + 24 UI tests green; both DLL hashes match. Activity Log persistence, week/raid art and saved town actor portraits are implemented, awaiting native checks. Next round 106: remaining activity-log building-upgrade/resolve entries or another documented safe gap after DD1/Unity inspection.
+- Cold audit unchanged 175 complete/15 partial/1 blank; blocked visibility guards remain. Private art: 24 installed panoramas, six per region, supports up to 12, outside Git. Preview localhost:8766/combat-extensions.html/session 20403 unchanged.
+- Last observed five-hour usage 15%, weekly 65%; check each round and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

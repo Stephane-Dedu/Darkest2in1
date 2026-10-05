@@ -260,7 +260,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -SkillLearnCost(hero, skillId));
         hero.LearnedSkills.Add(skillId);
-        CampaignJournal.Town(Estate, $"The Guild teaches {hero.Name} a new technique.");
+        CampaignJournal.Town(Estate, $"The Guild teaches {hero.Name} a new technique.", hero);
         return true;
     }
 
@@ -283,7 +283,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantMasterSkill(hero, skillId, known) != null) return false;
         Estate.Add(Currency.Gold, -SkillMasterCost(hero, skillId));
         hero.MasteredSkills.Add(skillId);
-        CampaignJournal.Town(Estate, $"The Guild masters {hero.Name}'s technique.");
+        CampaignJournal.Town(Estate, $"The Guild masters {hero.Name}'s technique.", hero);
         return true;
     }
 
@@ -313,7 +313,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnCampSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -CampSkillCost(Camping.Get(skillId)));
         hero.CampingSkills.Add(skillId);
-        CampaignJournal.Town(Estate, $"The Survivalist teaches {hero.Name} a new camping skill.");
+        CampaignJournal.Town(Estate, $"The Survivalist teaches {hero.Name} a new camping skill.", hero);
         return true;
     }
 
@@ -363,7 +363,7 @@ public sealed class Hamlet
         Estate.Add(Currency.Gold, -EquipmentCost(NextEquipment(hero, slot)));
         if (FreeEquipment(slot)) Estate.TownEventFreeUpgrades--;
         if (slot == Weapon) hero.WeaponRank++; else hero.ArmorRank++;
-        CampaignJournal.Town(Estate, $"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
+        CampaignJournal.Town(Estate, $"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).", hero);
         return true;
     }
 
@@ -377,13 +377,21 @@ public sealed class Hamlet
     {
         CampaignJournal.Initialize(Estate);
         var log = new List<string>();
+        var actors = new List<ActivityTownActor>();
         var rng = Estate.NextRng();
+
+        void Capture(HeroRecord hero, int first)
+        {
+            for (int i = first; i < log.Count; i++) actors.Add(CampaignJournal.Actor(hero, i));
+        }
 
         foreach (var hero in Estate.Roster.ToList())
         {
+            int first = log.Count;
             if (hero.MissingWeeks > 0)
             {
                 if (--hero.MissingWeeks == 0) log.Add($"{hero.Name} has returned to the Hamlet.");
+                Capture(hero, first);
                 continue;
             }
             if (hero.Activity == null)
@@ -397,6 +405,7 @@ public sealed class Hamlet
                     hero.Stress = Math.Max(0, hero.Stress - idleRelief);
                     log.Add($"{hero.Name} rested in the Hamlet: stress {was} → {hero.Stress}.");
                 }
+                Capture(hero, first);
                 continue;
             }
 
@@ -404,6 +413,8 @@ public sealed class Hamlet
                 FinishTreatment(hero, rng, log);
             else if (Buildings.Activity(hero.Activity) is { } activity)
                 FinishActivity(hero, activity, rng, log);
+
+            Capture(hero, first);
 
             if (!hero.ActivityLocked)
             {
@@ -415,7 +426,7 @@ public sealed class Hamlet
 
         Estate.Week++;
         RefreshWeek();
-        CampaignJournal.TownResults(Estate, log);
+        CampaignJournal.TownResults(Estate, log, actors);
         return log;
     }
 

@@ -26,20 +26,34 @@ public static class CampaignJournal
         return week;
     }
 
-    public static void Town(Estate estate, string message)
+    public static void Town(Estate estate, string message, HeroRecord hero = null)
     {
         var week = Current(estate); // import legacy messages before appending this one
         (estate.TownLog ??= new List<string>()).Add(message);
         week.Town.Add(message);
+        if (hero != null) week.TownActors.Add(Actor(hero, week.Town.Count - 1));
     }
 
     /// <summary>Resolve town activities into the newly advanced week, keeping the previous week's entries.</summary>
-    public static void TownResults(Estate estate, IEnumerable<string> messages)
+    public static void TownResults(Estate estate, IEnumerable<string> messages, IEnumerable<ActivityTownActor> actors = null)
     {
         var week = Current(estate);
         estate.TownLog = messages.ToList();
+        int start = week.Town.Count;
         week.Town.AddRange(estate.TownLog);
+        foreach (var actor in actors ?? Enumerable.Empty<ActivityTownActor>())
+            if (actor.MessageIndex >= 0 && actor.MessageIndex < estate.TownLog.Count)
+                week.TownActors.Add(new ActivityTownActor
+                {
+                    MessageIndex = start + actor.MessageIndex, HeroId = actor.HeroId,
+                    HeroName = actor.HeroName, HeroClass = actor.HeroClass
+                });
     }
+
+    public static ActivityTownActor Actor(HeroRecord hero, int messageIndex) => new()
+    {
+        MessageIndex = messageIndex, HeroId = hero.Id, HeroName = hero.Name, HeroClass = hero.ClassId
+    };
 
     public static void Embark(Estate estate, QuestOffer quest, IEnumerable<HeroRecord> heroes)
     {
@@ -73,7 +87,15 @@ public sealed class ActivityWeek
 {
     public int Week;
     public List<string> Town = new();
+    /// <summary>Actor snapshots keyed to Town's append-only message indices; older records have none.</summary>
+    public List<ActivityTownActor> TownActors = new();
     public List<ActivityRaid> Raids = new();
+}
+
+public sealed class ActivityTownActor
+{
+    public int MessageIndex;
+    public string HeroId, HeroName, HeroClass;
 }
 
 public sealed class ActivityRaid

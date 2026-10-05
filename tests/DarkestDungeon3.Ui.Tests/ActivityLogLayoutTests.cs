@@ -63,4 +63,24 @@ public class ActivityLogLayoutTests
         Assert.Equal("Week 0", opening.Rows[0].Text);
         Assert.All(opening.Visible(0, ActivityLogLayout.ViewHeight), r => Assert.InRange(r.Y, 0, ActivityLogLayout.ViewHeight));
     }
+
+    [Fact]
+    public void SavedTownActorsUseDd1PortraitAndTextWidthsWhileLegacyEntriesKeepFullWidth()
+    {
+        var widths = new List<float>();
+        var week = new ActivityWeek
+        {
+            Town = { "Legacy message", new string('T', 600) },
+            TownActors = { new() { MessageIndex = 1, HeroName = "Dismas", HeroClass = "highwayman" } }
+        };
+        var layout = ActivityLogLayout.Build(new[] { week }, (text, width) => { widths.Add(width); return Measure(text, width); });
+        Assert.Equal(new[] { 550f, 440f }, widths);
+        var entries = layout.Rows.Where(r => r.Type == ActivityLogLayout.Kind.Town).ToList();
+        Assert.Null(entries[0].Actor);
+        Assert.Equal("highwayman", entries[1].Actor.HeroClass);
+        Assert.Equal("Dismas", entries[1].Actor.HeroName);
+        Assert.True(entries[1].Height >= Measure(entries[1].Text, 440) + 32);
+        Assert.True(20 + 90 < 135); // portrait clears the text's left edge
+        Assert.True(135 + 440 <= ActivityLogLayout.Width);
+    }
 }

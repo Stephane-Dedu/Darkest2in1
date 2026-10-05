@@ -46,7 +46,10 @@ internal sealed class ActivityLogUi
         {
             var backdrop = Art.Dd1("activity_log", "hero_activity_entry_backdrop.png");
             if (backdrop != null) GUI.DrawTexture(rect, backdrop); else Gui.Fill(rect, new Color(0.1f, 0.1f, 0.1f, 0.95f));
-            Gui.Text(new Rect(25, row.Y + 16, 550, row.Height - 32), row.Text, 20, Gui.Dd1Text);
+            if (row.Actor != null && Art.HeroIcon(row.Actor.HeroClass) is { } portrait)
+                Art.DrawSprite(new Rect(20, row.Y + 15, 90, 90), portrait);
+            Gui.Text(new Rect(row.Actor == null ? 25 : 135, row.Y + 16,
+                row.Actor == null ? 550 : 440, row.Height - 32), row.Text, 20, Gui.Dd1Text);
             return;
         }
         var raid = row.Raid;

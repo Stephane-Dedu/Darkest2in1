@@ -15,6 +15,7 @@ internal sealed class ActivityLogLayout
         public Kind Type;
         public string Text;
         public ActivityRaid Raid;
+        public ActivityTownActor Actor;
         public float Y, Height, NameHeight;
     }
 
@@ -30,7 +31,9 @@ internal sealed class ActivityLogLayout
             layout.Add(new Row { Type = Kind.Week, Text = $"Week {week.Week}", Height = 123 });
             // DD1 shows the return, the Hamlet's activities, then the departure for this week.
             foreach (var raid in week.Raids.Where(r => r.Result != "embark").Reverse()) layout.Party(raid, measure, regionName);
-            foreach (var message in week.Town) layout.Message(message, measure);
+            var actors = week.TownActors.GroupBy(a => a.MessageIndex).ToDictionary(g => g.Key, g => g.Last());
+            for (int i = 0; i < week.Town.Count; i++)
+                layout.Message(week.Town[i], measure, actors.TryGetValue(i, out var actor) ? actor : null);
             foreach (var raid in week.Raids.Where(r => r.Result == "embark").Reverse()) layout.Party(raid, measure, regionName);
         }
         return layout;
@@ -43,8 +46,9 @@ internal sealed class ActivityLogLayout
         Height += row.Height + 20; // activity_log_entry_layout.vertical_spacing
     }
 
-    private void Message(string text, Func<string, float, float> measure) =>
-        Add(new Row { Type = Kind.Town, Text = text, Height = Math.Max(120, measure(text, Width - 50) + 32) });
+    private void Message(string text, Func<string, float, float> measure, ActivityTownActor actor = null) =>
+        Add(new Row { Type = Kind.Town, Text = text, Actor = actor,
+            Height = Math.Max(120, measure(text, actor == null ? Width - 50 : 440) + 32) });
 
     private void Party(ActivityRaid raid, Func<string, float, float> measure, Func<string, string> regionName)
     {

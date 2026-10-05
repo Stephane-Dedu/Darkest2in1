@@ -69,6 +69,9 @@ public class CampaignJournalTests
         Assert.Equal(results, loaded.ActivityLog.Single(w => w.Week == 1).Town);
         Assert.Equal(results, loaded.TownLog);
         Assert.Equal(1, loaded.Roster[0].WeaponRank);
+        var upgradeActor = Assert.Single(loaded.ActivityLog.Single(w => w.Week == 0).TownActors);
+        Assert.Equal(hero.Id, upgradeActor.HeroId);
+        Assert.Equal(hero.ClassId, upgradeActor.HeroClass);
     }
 
     [Theory]
@@ -126,5 +129,54 @@ public class CampaignJournalTests
         Assert.Equal(2, second.RandomCounter);
         Assert.Equal(0, first.Week);
         Assert.Equal(5, second.Week);
+    }
+
+    [Fact]
+    public void TownOutcomeActorsRemainCorrectAfterRenameDismissalDeathAndReload()
+    {
+        var estate = Hamlet.NewEstate(37, Dd1, Buildings, new FakeCatalog());
+        var idle = estate.Roster[0];
+        idle.Stress = 6;
+        var praying = estate.Roster[1];
+        praying.Stress = 8;
+        praying.Activity = "abbey.prayer";
+        estate.Roster.Add(new HeroRecord { Id = "patient", Name = "Patient", ClassId = "leper", Activity = "sanitarium.disease_treatment", ActivityTarget = "disease_test", Quirks = { "disease_test" } });
+        estate.Roster.Add(new HeroRecord { Id = "missing", Name = "Missing", ClassId = "jester", MissingWeeks = 1 });
+        var identities = estate.Roster.ToDictionary(h => h.Id, h => (h.Name, h.ClassId));
+        var messages = new Hamlet(estate, Dd1, Buildings, new FakeCatalog()).EndWeek();
+        foreach (var hero in estate.Roster) { hero.Name = "Changed"; hero.ClassId = "runaway"; hero.IsDead = true; }
+        estate.Roster.Clear();
+        var loaded = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        var week = loaded.ActivityLog.Single(w => w.Week == 1);
+        Assert.Equal(messages.Count, week.TownActors.Count);
+        Assert.Contains(week.TownActors, a => a.HeroId == idle.Id);
+        Assert.Contains(week.TownActors, a => a.HeroId == praying.Id);
+        Assert.Contains(week.TownActors, a => a.HeroId == "patient");
+        Assert.Contains(week.TownActors, a => a.HeroId == "missing");
+        Assert.Equal(Enumerable.Range(0, messages.Count), week.TownActors.Select(a => a.MessageIndex));
+        foreach (var actor in week.TownActors)
+        {
+            Assert.Equal(identities[actor.HeroId].Name, actor.HeroName);
+            Assert.Equal(identities[actor.HeroId].ClassId, actor.HeroClass);
+            Assert.StartsWith(actor.HeroName, week.Town[actor.MessageIndex]);
+        }
+    }
+
+    [Fact]
+    public void ActorIndicesAppendAfterLegacyMessagesAndCopyBatchMetadataWithoutRandomness()
+    {
+        var estate = new Estate { Week = 9, RandomCounter = 7, TownLog = new List<string> { "Legacy result" } };
+        var hero = new HeroRecord { Id = "a", Name = "Dismas", ClassId = "highwayman" };
+        CampaignJournal.Town(estate, "Direct action", hero);
+        var actor = CampaignJournal.Actor(hero, 0);
+        CampaignJournal.TownResults(estate, new[] { "Batch outcome" }, new[] { actor, CampaignJournal.Actor(hero, -1), CampaignJournal.Actor(hero, 1) });
+        actor.HeroClass = "Changed";
+        hero.Name = "Changed";
+        var week = Assert.Single(estate.ActivityLog);
+        Assert.Equal(new[] { "Legacy result", "Direct action", "Batch outcome" }, week.Town);
+        Assert.Equal(new[] { 1, 2 }, week.TownActors.Select(a => a.MessageIndex));
+        Assert.All(week.TownActors, a => { Assert.Equal("Dismas", a.HeroName); Assert.Equal("highwayman", a.HeroClass); });
+        Assert.Equal(7, estate.RandomCounter);
+        Assert.Equal(9, estate.Week);
     }
 }
