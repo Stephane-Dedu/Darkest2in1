@@ -642,6 +642,19 @@ public sealed class TrinketDescriptions
                     || tagRows.Any(row => !TagConditionFields.Contains(row[0]))
                     || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
                         CultureInfo.InvariantCulture, out float tagAmount)) return null;
+                if (actor == "MONSTERS")
+                {
+                    // Rat Skull tests any living Creature in the enemy team, not the wearer or target.
+                    if (value != "animal" || numberType != "GREATER_THAN_OR_EQUAL" || tagAmount != 1
+                        || (Field("Condition", id, "m_IsInverse") ?? "False") != "False"
+                        || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE"
+                        || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
+                    string enemy = Plain(Text("effect_tooltip_actor_type_monsters", localize));
+                    string enemyTag = Plain(Text("tag_" + value, localize));
+                    if (enemy == null || enemyTag == null) return null;
+                    string presence = Format(Text("effect_tooltip_condition_enemy_tag_presence", localize) ?? "{0} present: {1}", enemy + " " + enemyTag, effect);
+                    return presence != null && presence.Contains(effect) && presence.Contains(enemyTag) && presence.Contains(enemy) ? Plain(presence) : null;
+                }
                 if (actor == "PARTY")
                 {
                     // Native inverse PARTY counts absent living allies; MULTIPLE one scales per missing ally.

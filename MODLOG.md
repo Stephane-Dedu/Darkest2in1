@@ -1902,5 +1902,30 @@ game deploy; both installed DLL hashes match. Audit 179 complete/11 partial/
 - Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
 - Round 126 deployed and green. Next round 127: inspect the remaining visible His Rings/Rat Skull/Shambler's Eye/Apron/Snap Judgement fields and referenced tables; choose one documented supported gap, leaving hidden-policy blockers intact. Prepare committed quota handoff at approximately 95%.
 - Ordinary usage available; session 90%, weekly 76%; five-hour reset 2026-10-05 13:50:53 UTC (15:50:53 Paris). No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
+
+## Round 127: Rat Skull keeps the living-enemy Creature healing penalty
+
+Read installed DD1 monster-type buffs and Unity Buff.ToolTip EnemyType qualifier.
+Native enemy_party_contains_animal is TAG/MONSTERS/animal >=1 without inverse,
+source/exclusion or hidden restrictions. ConditionCalculation queries living
+enemy team members. Generic TAG text omits actor/presence, so the cold reader
+keeps native Enemy/Creature labels and an explicit presence wrapper. A localized
+effect_tooltip_condition_enemy_tag_presence can replace the English fallback;
+actor, tag and penalty must survive formatting.
+
+Rat Skull retains -66% Healing Received from Skills while an enemy Creature is
+present, beside its three existing benefits. Other actor/count/source/exclusion,
+hidden and unknown-field requirements remain withheld. Appalling Apron's DOT
+cleansing uses hidden conditions and stays withheld under blocked round 75;
+no visibility policy changed. Two actual/localization/malformed-wrapper cases
+and ten unsafe requirement fixtures pass. Release + 492 Core + 30 UI tests pass
+before stopped-game deploy; both installed DLL hashes match. Audit 180 complete/
+10 partial/1 blank of 191. No game launched or owner estate accessed; native [?].
+
+## Status 2026-10-05: round 127 complete
+
+- Loop continues toward quota handoff under owner authorization; native goal remains paused without a resume API or duplicate goal.
+- Round 127 deployed and green. Next round 128 candidate: Snap Judgement's visible end_combo_snap_judgement (m_IsCombo=True, remove Combo at Speed >=12) needs native marker/description inspection before any code. Other remaining lines mostly involve hidden conditions or unsupported triggers; preserve blocked round 75 policy.
+- Ordinary usage available; session 93%, weekly 77%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Prepare clean handoff at approximately 95%. No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
