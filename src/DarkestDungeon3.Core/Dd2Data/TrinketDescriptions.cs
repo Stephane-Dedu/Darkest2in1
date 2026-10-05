@@ -31,6 +31,10 @@ public sealed class TrinketDescriptions
         // Native shared Resolute/Meltdown conditions live with Infernal Flame construction data.
         foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, "infernal_flame_construction_export.Group.csv")))
             if (type == "Condition" && !data._blocks.ContainsKey((type, id))) data._blocks[(type, id)] = lines;
+        // Early Experiment references a shared inversion effect defined with boss blessings. Primary
+        // effect tables remain authoritative; no boss buffs or actor libraries are imported here.
+        foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, "boss_blessing_data_export.Group.csv")))
+            if (type == "Effect" && !data._blocks.ContainsKey((type, id))) data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");
         // Sources are DD2's English fallback. Runtime localization takes precedence in Text.
         foreach (string file in Directory.Exists(sources) ? Directory.GetFiles(sources, "*.txt") : Array.Empty<string>())

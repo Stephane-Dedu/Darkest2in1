@@ -1876,5 +1876,31 @@ native tooltip comparison remains [?], existing hidden policy unchanged.
 - Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
 - Round 125 deployed and green. Next round 126: inspect Early Experiment's visible invert_2_positive_tokens effect and native inversion templates/selector semantics; skip hidden-policy blockers and preserve unknown effect withholding.
 - Ordinary usage available; session 86%, weekly 76%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
+
+## Round 126: Early Experiment resolves its shared native inversion effect
+
+DD1 complete trinket buff lists/Unity Trinket.ToolTip remain the presentation
+reference. Native ActorDataEffectDescription uses SourceDefinition effects from
+the complete library. Early Experiment's invert_2_positive_tokens Effect lives
+only in boss_blessing_data_export.Group.csv, not the main effect table. Its
+native authored text already says Invert 2 Positive Tokens. EffectInstance
+replaces up to two eligible tokens with their defined inverse; no generic
+inversion description or behavior was invented.
+
+Cold loading now imports only missing Effect definitions from the 6,329-byte
+installed boss-blessing table. Primary definitions win. No boss buffs, actors
+or runtime libraries are initialized, and ordinary authored/condition/visibility
+and unknown-field safeguards remain. Early Experiment now retains Apply On CRIT:
+Invert 2 Positive Tokens beside Blight Dealt and its movement-triggered DOT risk.
+Three cases cover actual/localized/malformed body and fallback precedence with
+unknown-field withholding. Release + 480 Core + 30 UI tests pass before stopped
+game deploy; both installed DLL hashes match. Audit 179 complete/11 partial/
+1 blank of 191. No game launched or owner estate accessed; native check [?].
+
+## Status 2026-10-05: round 126 complete
+
+- Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
+- Round 126 deployed and green. Next round 127: inspect the remaining visible His Rings/Rat Skull/Shambler's Eye/Apron/Snap Judgement fields and referenced tables; choose one documented supported gap, leaving hidden-policy blockers intact. Prepare committed quota handoff at approximately 95%.
+- Ordinary usage available; session 90%, weekly 76%; five-hour reset 2026-10-05 13:50:53 UTC (15:50:53 Paris). No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
