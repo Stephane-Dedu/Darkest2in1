@@ -40,6 +40,7 @@ public sealed class Crawl
     public CurioReport InteractCurio(string heroId, string itemId, out List<LootDrop> overflow)
     {
         overflow = new List<LootDrop>();
+        if (heroId == null || !_party.Alive.Contains(heroId)) return null;
         string curio = CurioHere;
         if (curio == null) return null;
 

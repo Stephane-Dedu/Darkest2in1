@@ -2143,3 +2143,25 @@ conversion/picture/playback remains [?].
 - Next round 136: inspect remaining crawl/party system gaps against actual DD1/Unity, including handling of dead heroes in trap/curio/hunger or battle continuation. Choose one proven difference and document it before coding; do not infer missing rules without reference evidence.
 - Ordinary usage available; session 30%, weekly 82%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Private native artwork and owner preview/server remain unchanged/outside Git; native UI/rendering/timing checks await explicit launch permission.
+
+## Round 136: require a living investigator for curios
+
+InteractCurio accepted dead, null and unknown hero IDs before resolving ordinary
+or quest curios. A key could be consumed, loot taken and a quest completed
+without a living investigator. Inspected DD1 heirloom_chest's skeleton_key
+interaction and crypts gather/activation goals, plus Unity ExecuteDeath's unit
+removal/reselection and CurioEvent's selected-unit effects. The entry point now
+rejects actors absent from IParty.Alive before any state/RNG change.
+
+Twelve synthetic cases reproduced the old behavior and pass after the guard.
+They cover room/hall, gather/activation, exact save preservation, unchanged next
+loot/RNG, valid subsequent interaction and reload. Release + 531 Core + 45 UI
+tests pass; stopped-game DLL hashes match. Native hero selection remains [?].
+No game launch, owner-estate access or private-art changes.
+
+## Status 2026-10-05: round 136 complete
+
+- Round 136 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 137: inspect remaining crawl/party lifecycle gaps against actual DD1/Unity, including stale actions after expedition end. Choose one proven difference and document it before coding.
+- Ordinary usage available; session 36%, weekly 83%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived art and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
