@@ -17,6 +17,8 @@ public sealed class ExpeditionState
     public BattleSpoils PendingSpoils;
     /// <summary>A resolved curio/quest result awaiting dismissal; its effects have already been applied.</summary>
     public CurioReport PendingCurio;
+    /// <summary>The already-rolled encounter at the current spot, including surprise and camp-ambush identity.</summary>
+    public CrawlEvent PendingEncounter;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>

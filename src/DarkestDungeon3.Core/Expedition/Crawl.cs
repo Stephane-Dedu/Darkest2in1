@@ -170,11 +170,53 @@ public sealed class Crawl
     {
         _events.Clear();
         if (State.Ended) return Blocked();
+        if (State.Started) return Resume();
         State.Started = true;
         State.RoomId = Map.EntranceRoomId;
         EnterRoom(Map.Room(State.RoomId), enteringDungeon: true);
         return Flush();
     }
+
+    public bool CanResume => State.Started && !State.Ended && Map != null
+        && (State.InRoom ? State.RoomId < Map.Rooms.Count
+            : State.RoomId == -1 && State.CorridorId >= 0 && State.CorridorId < Map.Corridors.Count
+              && State.TileIndex >= 0 && State.TileIndex < Map.Corridor(State.CorridorId).Tiles.Count
+              && (State.HeadingRoomId == Map.Corridor(State.CorridorId).RoomA || State.HeadingRoomId == Map.Corridor(State.CorridorId).RoomB));
+
+    /// <summary>Present an interrupted crawl at its saved spot without walking, scouting, eating or rolling again.</summary>
+    public List<CrawlEvent> Resume()
+    {
+        _events.Clear();
+        if (!CanResume) return Blocked();
+        if (State.InRoom) Emit(CrawlEventType.EnteredRoom, roomId: State.RoomId);
+        else Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
+        var saved = State.PendingEncounter;
+        bool atSpot = saved != null && (State.InRoom ? saved.RoomId == State.RoomId
+            : saved.RoomId == -1 && saved.CorridorId == State.CorridorId && saved.TileIndex == State.TileIndex);
+        if (atSpot && saved.Type is CrawlEventType.Battle or CrawlEventType.Ambush)
+            _events.Add(CopyEncounter(saved));
+        else if (State.Camp == null)
+        {
+            // Older saves have no surprise snapshot; don't invent or reroll one.
+            if (State.InRoom && CurrentRoom.HasBattle && !CurrentRoom.Cleared)
+                Emit(CrawlEventType.Battle, roomId: State.RoomId);
+            else if (!State.InRoom && CurrentTile is { Resolved: false } tile)
+            {
+                if (tile.Content == HallContent.Battle) Emit(CrawlEventType.Battle, tile: tile);
+                else if (tile.Content == HallContent.Obstacle) Emit(CrawlEventType.Obstacle, tile: tile, contentId: tile.ContentId);
+                else if (tile.Content == HallContent.Trap && tile.Scouted) Emit(CrawlEventType.Trap, tile: tile, contentId: tile.ContentId);
+            }
+            if (LastCurio == null && CurioHere is { } curio) Emit(CrawlEventType.Curio, roomId: State.InRoom ? State.RoomId : -1,
+                tile: CurrentTile, contentId: curio);
+        }
+        return Flush();
+    }
+
+    private static CrawlEvent CopyEncounter(CrawlEvent e) => new()
+    {
+        Type = e.Type, RoomId = e.RoomId, CorridorId = e.CorridorId, TileIndex = e.TileIndex,
+        ContentId = e.ContentId, HeroesSurprised = e.HeroesSurprised, MonstersSurprised = e.MonstersSurprised
+    };
 
     /// <summary>From a room, step into the corridor leading to a neighbouring room.</summary>
     public List<CrawlEvent> Travel(int toRoomId)
@@ -305,6 +347,7 @@ public sealed class Crawl
             }
             else State.TileIndex = back;
         }
+        State.PendingEncounter = null;
         Emit(CrawlEventType.Retreated);
         return Flush();
     }
@@ -325,6 +368,7 @@ public sealed class Crawl
     {
         _events.Clear();
         if (State.Ended) return Blocked();
+        State.PendingEncounter = null;
         State.BattlesWon++;
         LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
         CountDownBuffs();
@@ -649,7 +693,8 @@ public sealed class Crawl
         {
             // DD1: the night ambush snuffs the torch (ambush_torch_reduction -100); the fight starts in the dark.
             ChangeLight(_rules.AmbushTorchChange);
-            _events.Add(new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" });
+            State.PendingEncounter = new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" };
+            _events.Add(CopyEncounter(State.PendingEncounter));
         }
         return Flush();
     }
@@ -852,6 +897,7 @@ public sealed class Crawl
             e.TileIndex = tile.Index;
             if (type == CrawlEventType.Ambush) { tile.Content = HallContent.Battle; tile.Resolved = false; }
         }
+        State.PendingEncounter = CopyEncounter(e);
         _events.Add(e);
     }
 

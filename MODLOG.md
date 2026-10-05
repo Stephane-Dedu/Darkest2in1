@@ -2282,3 +2282,27 @@ No game launch, owner-estate access or private-art changes.
 - Next round 142: implement Core re-entry at a saved room/corridor/camp and preserve pending encounter/surprise instead of calling Begin/resetting the entrance. Verify no movement/scout/trap/hunger/RNG replay; inspect installed maps and Unity raid load sequence first. Actor snapshots/runtime resume remain separate stages.
 - Ordinary usage available; session 52%, weekly 86%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 142: Core re-entry preserves position and encounter rolls
+
+Inspected DD1 starting_save in_area/areatile, installed DD_map4 and Unity's
+InRaid branch restoring location/direction/torch/camp/formation. Resume now
+presents a validated saved spot without ordinary entry traversal. Begin on an
+already started crawl delegates to it rather than resetting the entrance.
+PendingEncounter stores battle/ambush/surprise as a copy and emits copies on
+re-entry, clearing on win/successful fallback. Legacy unresolved battles get
+neutral surprise without another draw; exact prior flags cannot be recovered.
+
+Twenty cases cover native plot rooms/secrets, hall interactions/resolved hunger
+and traps, active camp/night ambush, groups/surprise/copy ownership, fallback,
+invalid/ended rejection and exact saved state/actor/RNG preservation. Release
++ 584 Core + 45 UI tests pass; stopped-game DLL hashes match. Native continuation
+is still not enabled: actor snapshots and runtime load routing remain separate.
+No game launch, owner-estate access or private-art changes.
+
+## Status 2026-10-05: round 142 complete
+
+- Round 142 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 143: inspect actual DD2 actor capture/restore and save living/dead HP/stress/quirk state at existing persistence boundaries. Preserve pre-fight checkpoints before enabling interrupted native combat re-entry; exact mid-turn DD2 combat restoration needs separate evidence.
+- Ordinary usage available; session 55%, weekly 86%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
