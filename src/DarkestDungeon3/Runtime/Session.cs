@@ -32,8 +32,9 @@ internal sealed class Session
     public ZoneEncounters Zones;
     public Dd1Bestiary Bestiary;
 
-    public SaveFile Save;
-    public string SavePath;
+    private readonly CampaignSaveSlot _slot = new();
+    public SaveFile Save { get => _slot.Save; set => _slot.Save = value; }
+    public string SavePath => _slot.Path;
 
     /// <summary>Start loading DD1 content in the background. Safe to call more than once.</summary>
     public static void BeginLoad(string configuredDd1Path, string pluginDir)
@@ -85,8 +86,7 @@ internal sealed class Session
 
     public void LoadOrCreate(int slot)
     {
-        SavePath = SlotPath(slot);
-        Save = SaveFile.Load(SavePath);
+        _slot.Select(SlotPath(slot));
         if (Save == null)
         {
             Save = new SaveFile { Estate = Hamlet.NewEstate(Environment.TickCount, Campaign, Buildings, Catalog, Content.Camping) };

@@ -145,7 +145,13 @@ internal sealed class Driver : MonoBehaviour
         HeroStage.Instance?.Clear(); Log.Clear(); HomecomingLog.Clear();
         Phase = Phase.Off;
         LogDd2Libraries();
-        S.LoadOrCreate(slot);
+        try { S.LoadOrCreate(slot); }
+        catch (System.Exception e)
+        {
+            Plugin.Log.LogError("[session] estate could not load: " + e);
+            RecoveryFailed("The saved estate could not be read. Its files have been kept. Return to the main menu and try again.");
+            return;
+        }
         var route = ExpeditionRecovery.Inspect(S.Save);
         if (route == ExpeditionLoadRoute.Refund)
         {

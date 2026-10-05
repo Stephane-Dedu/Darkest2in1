@@ -2558,3 +2558,30 @@ exception. Fix feedback and clear stale context in the next round.
 - Next round 152: show unavailable/recovered estate summaries and retry/refresh; guard click-time failure and clear previous Save/SavePath before reading. Do not inspect owner saves. Deploy accumulated changes only after the game is stopped; round 150 is last deployed.
 - Ordinary usage available; session 85%, weekly 91%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 152: preserve failed estate selection and show its state
+
+Core CampaignSaveSlot clears prior Save/Path before reading, assigning the pair
+only after success. This prevents Session keeping the previous estate with a
+new destination after a load exception. Picker summaries distinguish absent/new,
+valid, recovered and unavailable saves; unreadable rows cannot open as new, refresh
+retries and recovered summaries show previous-save feedback. Driver catches
+click-time failure and opens preserved-file feedback. Unity SaveSlot and installed
+DD1 complete campaign saves are references for selection/payload behavior.
+
+Two Core and one linked picker-summary test use owned temporary synthetic files
+for cross-slot failures, new/recovered selections, retry/refresh and no writes or
+stale destination. Release + 648 Core + 61 UI tests pass. DD2 stopped again before
+deployment; accumulated rounds 151-152 DLLs deployed and hashes match. Native
+visual/load checks remain [?]. No launch, owner-estate access or art changes.
+
+Owner steering while the round finished: drag-to-hire still fails and minimap
+hover lacks content labels. Both documented and now take priority. The diagnosing
+bugs skill was read; build a real red-capable caller/input loop before guessing.
+
+## Status 2026-10-05: round 152 complete
+
+- Round 152 green, committed/deployed; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 153: owner-reported stagecoach drag-to-hire, then round 154 minimap Battle/Curio/Quest Item hover. Existing shared Drag tests are too shallow to confirm native caller behavior; add the correct reproduction seam. No game launch or owner-estate inspection.
+- Ordinary usage available; session 87%, weekly 91%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
