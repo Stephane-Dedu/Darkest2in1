@@ -645,7 +645,10 @@ public sealed class TrinketDescriptions
                 args = new object[] { runName, runComparison, "", effect };
                 break;
             case "item_amount":
-                string itemName = Text("item_name_" + value, localize);
+            case "item_tag_amount":
+                // Native category thresholds count tagged inventory quantities, including Baubles.
+                // MULTIPLE scaling needs its separate native template and is still withheld.
+                string itemName = Text((type == "item_tag_amount" ? "item_tag_" : "item_name_") + value, localize);
                 string itemComparison = Compare(id, false, localize);
                 if (itemName == null || itemComparison == null) return null;
                 args = new object[] { itemName, itemComparison, "", effect };

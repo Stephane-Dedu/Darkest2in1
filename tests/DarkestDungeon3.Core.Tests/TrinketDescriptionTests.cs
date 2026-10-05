@@ -809,6 +809,54 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void InventoryCategoryThresholdRestoresCleansingClaspWithoutDroppingItsRequirement()
+    {
+        string effects = Data.Effects("trinket_antiq_cleansing_clasp", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Remove 1 Negative Token when Baubles in inventory is above 25", effects);
+        Assert.DoesNotContain("above 25%", effects);
+        Assert.DoesNotContain("Relics", effects);
+    }
+
+    [Fact]
+    public void InventoryCategoryThresholdsKeepSeparateCurrencyBonuses()
+    {
+        string effects = Data.Effects("trinket_antiq_celebrated_chalice", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("+4 Speed when Relics in inventory is above 50", effects);
+        Assert.Contains("+10% CRIT when Baubles in inventory is above 50", effects);
+        effects = Data.Effects("trinket_antiq_clarifying_carcanet", out complete);
+        Assert.True(complete);
+        Assert.Contains("+20% Max HP when Relics in inventory is above 75", effects);
+        Assert.Contains("+20% DMG when Baubles in inventory is above 75", effects);
+        effects = Data.Effects("trinket_antiq_shimmering_crown", out complete);
+        Assert.True(complete);
+        Assert.Contains("Combat Start: Heal 100% when Relics in inventory is above 100", effects);
+        Assert.Contains("Combat Start: -10 Stress when Baubles in inventory is above 100", effects);
+    }
+
+    [Fact]
+    public void InventoryCategoryUsesNativeNamesAndWithholdsMalformedRequirements()
+    {
+        string effects = Data.Effects("trinket_antiq_cleansing_clasp", out bool complete,
+            key => key == "item_tag_faction" ? "Babioles" : null);
+        Assert.True(complete);
+        Assert.Contains("Turn Start: Remove 1 Negative Token when Babioles in inventory is above 25", effects);
+        foreach (string template in new[] { "invalid {9}", "{0} {1} {2}" })
+        {
+            effects = Data.Effects("trinket_antiq_cleansing_clasp", out complete,
+                key => key == "effect_tooltip_condition_item_tag_amount" ? template : null);
+            Assert.False(complete);
+            Assert.Null(effects);
+            effects = Data.Effects("trinket_antiq_celebrated_chalice", out complete,
+                key => key == "effect_tooltip_condition_item_tag_amount" ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("CRIT", effects);
+            Assert.Contains("+4 Speed when Relics in inventory is above 50", effects);
+        }
+    }
+
+    [Fact]
     public void InventoryAmountThresholdsUseNativeRelicsUnitsForStatsAndHealing()
     {
         string effects = Data.Effects("trinket_antiq_celebrated_chalice", out _);

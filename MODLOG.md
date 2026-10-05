@@ -1030,3 +1030,33 @@ retains the previous round 93 public corridor/room composition.
 - Existing built systems/priority fixes remain as round 94 status: DD2 default paired regions and DD1 quest rows with single right arrow, independent progress, native arena/light, open native corridors, bounded setup polling, atlas portraits and expanded trinket effect/condition presentation. Native priority-bug verification awaits launch permission; round 75 visibility remains blocked.
 - Next round 96: remaining cold-menu trinket effect fields/conditions or persistent activity-log weeks/art. Cold tooltip coverage remains 159 complete/28 partial/4 blank of 191 base trinkets. Later: secret rooms and Memorial. Skip [user]/[blocked].
 - Outstanding owner choices: DLC content, game modes after the Darkest Dungeon, trinket retention on party wipe.
+
+## Round 96: category inventory thresholds in trinket descriptions
+
+Cold audit confirmed Cleansing Clasp was blank and three Antiquarian items partial.
+Installed condition_data_export ITEM_TAG_AMOUNT defines Baubles thresholds 25/50/75/100/150.
+Native ConditionDescription uses item_tag_<category>, raw comparison and
+effect_tooltip_condition_item_tag_amount. DD1 base.entries.trinkets.json's buff lists
+and Unity port Character/Buff.ToolTip's rule wrapping remain the presentation reference.
+Added category amounts to the existing inventory-comparison path without changing units
+or combat behavior. Native MULTIPLE food scaling is still withheld, rather than using
+ordinary threshold text. Invisible conditions and malformed/missing templates remain guarded.
+
+Cleansing Clasp now shows turn-start Remove 1 Negative Token above 25 Baubles. Celebrated
+Chalice shows +10% CRIT above 50 Baubles alongside +4 Speed above 50 Relics; Clarifying
+Carcanet +20% DMG above 75 Baubles alongside +20% Max HP above 75 Relics; Shimmering Crown
+combat-start -10 Stress above 100 Baubles alongside Heal 100% above 100 Relics. Three tests
+exercise actual definitions, raw thresholds, event/stat/heal wording, localized category
+names, invalid placeholders and templates that omit the effect body. Audit improves from
+159 complete/28 partial/4 blank to 163/25/3 among 191. Release + 280 Core + 19 UI tests pass;
+both deployed DLLs hash-match. No game process, launch or save access. Native cold-menu
+comparison remains [?]. Private scenery and public art remain as round 95.
+
+## Status 2026-10-05: loop resumed, round 96 complete
+
+- Goal remains active. Continue tools/parity_loop.md on claude/practical-wright-hicri0; no DD2 launch until explicitly allowed. No game/saves accessed, no pending restores.
+- Round 96 deployed with Release, 280 Core and 19 UI tests green and both DLL hashes matching. Native menu/portrait/quest/lighting/loading/art verification still awaits launch permission; round 75 visibility stays blocked.
+- Cold trinket coverage 163 complete/25 partial/3 blank of 191. Next round 97: Thrilling Tablet's visible PARTY TAG inverse/MULTIPLE requirement, token-copy fields for Caked Palette, remaining advanced conditions/effects, or persistent activity-log weeks/art. Skip [user]/[blocked].
+- Private regional art remains 24 native-reference panoramas, six per region, at game/PrivateScenery and local-art/combat-extensions. Full prompts/provenance outside Git; runtime supports up to 12. Verify adjacent rooms/reload, footline/props, torch visibility, Shroud ground transitions and load/memory when launch is allowed.
+- Local preview server localhost:8766 remains running, exec session 20403. Keep combat-extensions.html available. It shows the complete private pack; linked preview.html shows historical round-93 art. No pending game/save restore.
+- Owner requested stopping near 95% account session usage and resuming when reset; last observed five-hour usage was 61%. Check get_usage_limits at round boundaries before doing more work. Goal stays active below that threshold. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
