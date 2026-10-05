@@ -1148,3 +1148,29 @@ access. Native comparison before/after combat initialization remains [?].
 - Private scenery remains 24 native-reference panoramas, six per primary region, at game/PrivateScenery and local-art/combat-extensions, support up to 12 per region. Full prompts/provenance/art remain outside Git. Native room/reload/ground/torch/load/memory checks remain [?].
 - Local preview localhost:8766/combat-extensions.html and server exec session 20403 remain available. Linked preview.html retains historical round-93 art. No pending game/save restore.
 - Last observed five-hour usage 82%; check at round boundaries. Owner requested stopping near 95% and resuming after reset. No scheduled resume was established yet. Open owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 100: Peculiar Pods disease removal
+
+Installed remove_1_disease_5pct uses chance .05, disease tag, remove amount one, zero
+range. Buff on_hit_as_target_to_target targets the wearer. Native EffectDescription uses
+quirk+disease, token_amount_format_singular (normally just the icon/name) and
+effect_tooltip_remove_quirk. EffectInstance.ApplyQuirks selects matching unlocked diseases;
+default QuirkRemoveRandom is true and source-only false. DD1 ordered buff lists and port
+Trinket.ToolTip remain the presentation reference. Only the proven tag/count/range shape
+was added; locked/source/random selectors, other tags/counts and ranges stay withheld.
+
+Peculiar Pods now has all three lines: +25% Debuff RES Piercing, Gain When Hit: Remove
+Disease (5%) and -2 Speed above 75 Flame. Existing event/chance wrapping remains intact.
+Actual installed-data and localization/malformed-template tests plus seven unsupported
+shape fixtures pass. Native singular quantity template is respected rather than inventing
+a numeric label. Release + 324 Core + 19 UI tests green; both deployed DLL hashes match.
+Audit 171 complete/19 partial/1 blank of 191. No game process/launch or save access.
+
+## Status 2026-10-05: loop resumed, round 100 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed, no save access or pending restores.
+- Round 100 locally deployed with Release + 324 Core + 19 UI tests green and both DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission; round 75 visibility stays blocked.
+- Cold audit 171 complete/19 partial/1 blank. Next round 101: actual unsupported conditions, such as Heart-Shaped Padlock's Resolute requirement or Sickening Silence's diseased target, or persistent activity-log weeks/art. Hidden-outcome/visibility cases remain separate. Anatomical Map stays blank because of hidden target restrictions. Skip [user]/[blocked].
+- Private 24-image native-reference scenery remains installed at game/PrivateScenery, six per primary region, support up to 12. Full art/prompts/provenance outside Git at local-art/combat-extensions. Native room/reload/ground/torch/load/memory checks remain [?].
+- Local preview server localhost:8766, exec session 20403, and combat-extensions.html remain available. Linked preview.html retains historical round 93 art. No pending game/save restores.
+- Last observed five-hour usage 84%; check at round boundaries. Owner requested stopping near 95% and resuming after reset; no scheduled resume established yet. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.

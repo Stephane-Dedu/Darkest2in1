@@ -1082,6 +1082,77 @@ public class TrinketDescriptionTests
         Assert.Contains("Turn Start: +1 Stress (15%)", effects);
     }
 
+    [Fact]
+    public void DiseaseRemovalKeepsPeculiarPodsChanceEventAndOtherEffects()
+    {
+        string effects = Data.Effects("trinket_cave_peculiar_pods", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain When Hit: Remove Disease (5%)", effects);
+        Assert.Contains("+25% Debuff RES Piercing", effects);
+        Assert.Contains("-2 Speed when Flame is above 75", effects);
+        Assert.DoesNotContain("<sprite", effects);
+    }
+
+    [Fact]
+    public void DiseaseRemovalUsesNativeTemplatesAndWithholdsMalformedActions()
+    {
+        string effects = Data.Effects("trinket_cave_peculiar_pods", out bool complete,
+            key => key == "quirk+disease" ? "Maladie" : key == "token_amount_format_singular" ? "{0} x{1}"
+                : key == "effect_tooltip_remove_quirk" ? "Retirer {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("Gain When Hit: Retirer Maladie x1 (5%)", effects);
+        foreach (string key in new[] { "token_amount_format_singular", "effect_tooltip_remove_quirk" })
+        foreach (string template in new[] { "invalid {9}", "No effect body" })
+        {
+            effects = Data.Effects("trinket_cave_peculiar_pods", out complete,
+                name => name == key ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Remove", effects);
+            Assert.Contains("+25% Debuff RES Piercing", effects);
+            Assert.Contains("-2 Speed when Flame is above 75", effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("m_QuirkRemoveTag", "negative")]
+    [InlineData("m_QuirkRemoveAmount", "0")]
+    [InlineData("m_QuirkRemoveAmount", "2")]
+    [InlineData("m_QuirkRemoveAmountRange", "1")]
+    [InlineData("m_QuirkRemoveIsLocked", "True")]
+    [InlineData("m_IsSourceOnly", "True")]
+    [InlineData("m_QuirkRemoveRandom", "False")]
+    public void UnsupportedDiseaseRemovalShapesNeverPromiseACure(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_cure_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var fields = new System.Collections.Generic.Dictionary<string, string>
+            { ["m_QuirkRemoveTag"] = "disease", ["m_QuirkRemoveAmount"] = "1" };
+            fields[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,cure_item,Item", "element_end",
+                "element_start,cure_item,ActorDataEffects", "on_hit_as_target_to_target_effects,cure_effect", "element_end",
+                "element_start,cure_effect,Effect", "m_Chance,0.05",
+            });
+            foreach (var row in fields) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_skill_effect_on_hit_as_target_to_target=Gain When Hit:\nquirk+disease=Disease\ntoken_amount_format_singular={0}\neffect_tooltip_remove_quirk=Remove {0}\neffect_tooltip_effect_chance=({0}%)");
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("cure_item", out bool complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
+    }
+
     [Theory]
     [InlineData("trinket_farm_hags_hoard", "-10% Max HP when Disease", "+10% Healing Received from Skills per Positive Token")]
     [InlineData("trinket_farm_brilliant_brew", "-20% Move RES when Disease", "+2 Blight Duration Dealt")]
