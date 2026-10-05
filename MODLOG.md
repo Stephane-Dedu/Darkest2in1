@@ -1509,3 +1509,27 @@ can underfill DD1's stated capacity. Added that gap for a separate round.
 - Round 111 deployed: Release + 376 Core + 26 UI tests green, DLL hashes match. Sold-out wagon stock persists until week advance, and clean repair/reload preserves gameplay randomness. Next round 112: fix underfilled wagon slots caused by duplicate filtering, following installed amounts and port RestockTrinkets; then Caretaker town-event resolve completion and region-aware quest goals.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 36%, weekly 68%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 112: fill DD1 wagon slots with valid duplicate copies
+
+Installed nomad_wagon.building.json number_of_trinkets_upgrades is 2/4/6/8/12.
+Port NomadWagon.RestockTrinkets appends each slot's valid pick. Our RestockWagon
+rolled every slot but discarded duplicate IDs, underfilling the advertised capacity.
+It now keeps each valid pick. Catalogue rarity/class eligibility and null withholding
+stay in place; no additional attempts/RNG calls. Existing UI renders stock by index
+up to 12, and BuyTrinket removes/transfers one copy per purchase.
+
+Seven new cases verify all installed capacities with a repeating valid catalogue,
+exact bounded call/RNG counts, absent choices without invented items, and duplicate
+purchases/reload one copy at a time with exact wallet/inventory. FakeCatalog's trinket
+method is virtual only for this test override; product interface unchanged. Release
++ 383 Core + 26 UI tests pass. Green-gated local deployment while DD2 stopped; both
+installed DLL hashes match. Native duplicate display/purchase remains [?]; no game
+launch or owner-save access. Native equip limits/combat behavior unchanged.
+
+## Status 2026-10-05: round 112 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 112 locally deployed: Release + 383 Core + 26 UI tests green, both DLL hashes match. Wagon now retains valid duplicate slots and stays sold out across reload; clean load preserves random state. Next round 113: native idle-resolve town events, including XP threshold consistency and immediate Caretaker goal recording, after Campaign.cs/Resolve.cs reference inspection. Then region-aware Caretaker quest goals.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and localhost:8766/combat-extensions.html/server session 20403 unchanged and outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 39%, weekly 68%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

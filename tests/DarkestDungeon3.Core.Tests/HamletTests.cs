@@ -22,7 +22,7 @@ public class FakeCatalog : IHeroCatalog
     public string MapDd1Quirk(string dd1QuirkId) => dd1QuirkId == null ? null : "dd2_" + dd1QuirkId;
     public bool IsDisease(string q) => q.StartsWith("disease_");
     public bool IsPositive(string q) => q.StartsWith("pos_");
-    public string RandomTrinket(string rarity, Rng rng, string forClass = null) => rarity + "_trinket_" + rng.Next(3);
+    public virtual string RandomTrinket(string rarity, Rng rng, string forClass = null) => rarity + "_trinket_" + rng.Next(3);
     public int TrinketPrice(string trinketId) => 1000;
 }
 

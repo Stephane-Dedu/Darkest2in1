@@ -566,7 +566,7 @@ public sealed class Hamlet
         for (int i = 0; i < Buildings.WagonStock(Estate); i++)
         {
             var t = Catalog.RandomTrinket(WagonRarity(rarities, rng), rng);
-            if (t != null && !Estate.WagonStock.Contains(t)) Estate.WagonStock.Add(t);
+            if (t != null) Estate.WagonStock.Add(t);
         }
     }
 
