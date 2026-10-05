@@ -70,6 +70,8 @@ public static class Homecoming
         bool success = expedition.QuestComplete && !expedition.Retreated;
         bool wiped = outcomeList.Count > 0 && outcomeList.All(o => o.Died);
         report.Result = success ? "complete" : wiped ? "defeat" : "retreat";
+        report.JournalPages = JournalPages.Collect(estate, expedition.Pack, survived: outcomeList.Any(o => !o.Died));
+        foreach (int page in report.JournalPages) log.Add($"Brought home journal page {page}.");
 
         // Loot carried out of the dungeon always counts, success or not.
         foreach (var kv in expedition.Pack.Items.ToList())
@@ -212,6 +214,7 @@ public sealed class HomecomingReport
     public Dictionary<string, int> Gems = new();
     public int GemGold;
     public List<string> Trinkets = new();
+    public List<int> JournalPages = new();
     public List<Reward> Rewards = new();
     public List<string> Log = new();
     public List<ActivityTownActor> MessageActors = new();

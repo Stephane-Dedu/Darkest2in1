@@ -120,6 +120,13 @@ public sealed class LootTables
             case "trinket":
                 drops.Add(new LootDrop { Type = "trinket", Id = (string)data["rarity"], Amount = 1 });
                 break;
+            case "journal_page":
+                int? page = (int?)data["specific_page_index"];
+                if (!page.HasValue && (int?)data["min_page_index"] is int min && (int?)data["max_page_index"] is int max
+                    && min >= 0 && max >= min && max < int.MaxValue)
+                    page = rng.Range(min, max);
+                if (page >= 0) drops.Add(new LootDrop { Type = "journal_page", Id = page.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), Amount = 1 });
+                break;
         }
     }
 

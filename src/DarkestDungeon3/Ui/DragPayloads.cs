@@ -74,6 +74,9 @@ internal static class ItemArt
         var icon = Art.InventoryIcon(key, Mathf.Max(1, count), Mathf.Max(1, stackLimit));
         if (icon != null) GUI.DrawTexture(r, icon); else Gui.Text(r, HamletUi.Pretty(key), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
         GUI.color = old;
+        if (Core.Campaign.JournalPages.TryPage(key, out int page) && r.Contains(Event.current.mousePosition))
+            Gui.Tip((Session.Current.Lore.Text("journal_page_title_" + page) ?? "Journal Page")
+                + "\n\n" + (Session.Current.Lore.Text("str_inventory_description_journal_page") ?? "A snippet from the journal of a doomed expedition."));
         if (stackLimit > 1 || count > 1)
             Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 21, Color.white, TextAnchor.LowerRight);
     }

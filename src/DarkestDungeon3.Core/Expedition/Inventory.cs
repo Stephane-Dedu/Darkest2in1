@@ -58,7 +58,8 @@ public sealed class ItemCatalog
     /// <summary>Our item key: the id, except DD1's id-less types (food is "provision", gold is "gold") and quest items,
     /// which DD1 keeps apart from supplies of the same id (the altar quest's holy water isn't a supply).</summary>
     public static string KeyOf(string type, string id) =>
-        type == "provision" ? Supply.Food : type == "quest_item" ? QuestKey(id) : string.IsNullOrEmpty(id) ? type : id;
+        type == "provision" ? Supply.Food : type == "quest_item" ? QuestKey(id)
+        : type == "journal_page" ? Campaign.JournalPages.Prefix + id : string.IsNullOrEmpty(id) ? type : id;
 
     public static string QuestKey(string id) => "quest_item+" + id;
 

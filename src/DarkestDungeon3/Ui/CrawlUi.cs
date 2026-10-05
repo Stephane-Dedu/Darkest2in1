@@ -756,7 +756,9 @@ internal sealed class CrawlUi
             bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == i;
             if (!carried) ItemArt.Stack(r, key, count, limit);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
-                Gui.Text(new Rect(960, 1050, 960, 26), $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+                Gui.Text(new Rect(960, 1050, 960, 26), Core.Campaign.JournalPages.TryPage(key, out _)
+                    ? "Journal Page: bring it back to the Hamlet; shift+click to discard one."
+                    : $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
             bool shift = Event.current.shift;
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {

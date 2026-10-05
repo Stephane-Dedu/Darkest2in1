@@ -1666,3 +1666,30 @@ Next round implements page collection before exposing branch controls/markers.
 - Round 117 deployed: Release + 416 Core + 26 UI tests green, DLL hashes match. Secret contents/aliases now reference actual DD1 props; journal payout and player controls still pending. Next round 118: DD1/Unity journal loot collection and persisted owner-estate page identities using synthetic tests only; then branch UI and Memorial pages.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 57%, weekly 71%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 118: journal rewards survive the pack and homecoming
+
+Installed loot.json THANKS has fixed journal_page index 0; JOURNALONLY ranges 1..21
+inclusive. Port DarkestDatabase and RaidSolver preserve those IDs in carried items;
+no saved page collection implementation found. LootTables now handles both forms,
+and ItemCatalog keeps distinct journal_page+<id> keys with normal one-slot capacity.
+Homecoming stores carried indices in CollectedJournalPages only when an outcome
+records a survivor, on victory or retreat. Wiped/unknown-survivor/uncarried pages
+do not become history; duplicate copies add no achievement or monetary reward.
+Older saves start empty. Collection uses no RNG and changes no other wipe-loot
+policy. Pack art uses native inv_journal_page.png with localized title/description
+and a carry/discard hint. Saved Memorial reading remains the next UI step.
+
+Eight cases cover native fixed page/RNG, inclusive ranged/deterministic rolls,
+actual Thanks Chest with full pack/overflow/reload/single use, victory/retreat/wipe,
+unknown survivors, duplicate collection, old estates and discarded pages. Release
++ 424 Core + 26 UI tests pass. Green-gated stopped-game deployment, both DLL hashes
+match. No DD2 launch or owner saves. Native inventory/loot/return checks remain [?].
+Secret entry controls are still withheld until the following UI round.
+
+## Status 2026-10-05: round 118 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 118 deployed: Release + 424 Core + 26 UI tests green, DLL hashes match. Exact native secret contents and their journal reward now persist. Next round 119: safe secret minimap/entry/return controls and existing fades, including no unreachable-route softlock; then collected Memorial journal reading/narration.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 62%, weekly 72%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

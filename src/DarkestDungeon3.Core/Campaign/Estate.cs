@@ -36,6 +36,8 @@ public sealed class Estate
     public HashSet<string> CompletedPlotQuests = new();
     /// <summary>DD1 Caretaker roster goals: classes which have reached Resolve Level 6, even after leaving.</summary>
     public HashSet<string> CompletedResolveGoals = new();
+    /// <summary>Journal page indices carried home; older estates start with no invented collection.</summary>
+    public HashSet<int> CollectedJournalPages = new();
 
     public List<HeroRecord> Roster = new();
     public List<HeroRecord> Recruits = new();

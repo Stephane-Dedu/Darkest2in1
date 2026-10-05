@@ -99,6 +99,7 @@ internal static class Art
     {
         int fill = stackLimit <= 1 ? 3 : Mathf.Clamp((int)(4f * count / stackLimit - 0.01f), 0, 3);
         if (key.StartsWith("quest_item+", System.StringComparison.Ordinal)) return Dd1("panels", "icons_equip", "quest_item", "inv_" + key + ".png");
+        if (Core.Campaign.JournalPages.TryPage(key, out _)) return Dd1("panels", "icons_equip", "journal_page", "inv_journal_page.png");
         return key switch
         {
             "food" => Dd1("panels", "icons_equip", "provision", $"inv_provision+_{fill}.png"),
