@@ -24,6 +24,7 @@ public class PlotSecretRoomTests
         var door = Assert.Single(map.AllTiles.Where(t => t.SecretRoomId >= 0));
         Assert.Equal((tileIndex, doorX, doorY), (door.Index, door.X, door.Y));
         Assert.Equal(secret.Id, door.SecretRoomId);
+        Assert.True(door.SecretDoorAlwaysAccessible);
         Assert.False(secret.Visited); Assert.False(secret.Scouted);
         Assert.Empty(secret.CorridorIds);
         Assert.True(map.IsConnected());

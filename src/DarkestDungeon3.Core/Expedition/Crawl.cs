@@ -170,6 +170,45 @@ public sealed class Crawl
         return Flush();
     }
 
+    public bool CanEnterSecretRoom => !State.Ended && !State.InRoom && !IsBlocked
+        && CurrentTile is { SecretRoomId: >= 0 } tile && tile.SecretRoomId < Map.Rooms.Count
+        && Map.Room(tile.SecretRoomId).IsSecret
+        && (tile.SecretDoorAlwaysAccessible || Map.Room(tile.SecretRoomId).Scouted || Map.Room(tile.SecretRoomId).Visited);
+
+    public List<CrawlEvent> EnterSecretRoom()
+    {
+        _events.Clear();
+        if (!CanEnterSecretRoom) return Blocked();
+        var secret = Map.Room(CurrentTile.SecretRoomId);
+        State.SecretReturnCorridorId = State.CorridorId;
+        State.SecretReturnTileIndex = State.TileIndex;
+        State.SecretReturnHeadingRoomId = State.HeadingRoomId;
+        State.RoomId = secret.Id;
+        State.CorridorId = State.TileIndex = State.HeadingRoomId = -1;
+        secret.Scouted = true;
+        EnterRoom(secret);
+        return Flush();
+    }
+
+    public List<CrawlEvent> ExitSecretRoom()
+    {
+        _events.Clear();
+        if (State.Ended || CurrentRoom?.IsSecret != true || IsBlocked
+            || State.SecretReturnCorridorId < 0 || State.SecretReturnCorridorId >= Map.Corridors.Count) return Blocked();
+        var corridor = Map.Corridor(State.SecretReturnCorridorId);
+        if (State.SecretReturnTileIndex < 0 || State.SecretReturnTileIndex >= corridor.Tiles.Count
+            || corridor.Tiles[State.SecretReturnTileIndex].SecretRoomId != State.RoomId
+            || (State.SecretReturnHeadingRoomId != corridor.RoomA && State.SecretReturnHeadingRoomId != corridor.RoomB)) return Blocked();
+        State.RoomId = -1;
+        State.CorridorId = corridor.Id;
+        State.TileIndex = State.SecretReturnTileIndex;
+        State.HeadingRoomId = State.SecretReturnHeadingRoomId;
+        State.SecretReturnCorridorId = State.SecretReturnTileIndex = State.SecretReturnHeadingRoomId = -1;
+        // Returning to the same square replays no movement, stress, light, hunger or ambush effects.
+        Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
+        return Flush();
+    }
+
     /// <summary>Walk one square toward the room the party is heading for (forward) or back the way it came.</summary>
     public List<CrawlEvent> Step(bool forward)
     {
@@ -588,6 +627,8 @@ public sealed class Crawl
 
         bool firstVisit = !tile.Visited;
         tile.Visited = true;
+        if (tile.SecretRoomId >= 0 && tile.SecretDoorAlwaysAccessible)
+            Map.Room(tile.SecretRoomId).Scouted = true;
         Emit(CrawlEventType.EnteredTile, tile: tile, contentId: tile.ContentId);
 
         if (firstVisit && !tile.Resolved)
@@ -627,7 +668,7 @@ public sealed class Crawl
         room.Visited = true;
         Emit(CrawlEventType.EnteredRoom, roomId: room.Id);
 
-        if (firstVisit) Scout(room, enteringDungeon);
+        if (firstVisit && !room.IsSecret) Scout(room, enteringDungeon);
 
         if (room.HasBattle && !room.Cleared)
             EmitBattle(CrawlEventType.Battle, null, corridor: false, NextRng(), room.Id);
@@ -718,7 +759,7 @@ public sealed class Crawl
             : _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
         if (chance <= 1f && !rng.Chance(chance)) return;
         bool critical = rng.Chance(_rules.ScoutCriticalChance * (chance > 1f ? chance : 1f));
-        int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6);
+        int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6, revealSecrets: critical);
         if (revealed > 0) Emit(CrawlEventType.Scouted, roomId: room.Id, amount: revealed);
     }
 

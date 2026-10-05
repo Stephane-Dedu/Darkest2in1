@@ -43,6 +43,7 @@ public static class PlotMap
         public int Content;
         public string Mash, Prop, DoorTo;
         public float X, Y;
+        public bool AlwaysAccessible;
     }
 
     private sealed class Area
@@ -73,6 +74,7 @@ public static class PlotMap
                     Mash = string.IsNullOrEmpty(mash) ? null : mash,
                     X = x, Y = y,
                     DoorTo = nameOf.TryGetValue(t.At("door_to", "area_to")?.Int ?? 0, out var n) ? n : null,
+                    AlwaysAccessible = t["hd_always_accessible"]?.Bool ?? false,
                 });
             }
             return area;
@@ -176,7 +178,10 @@ public static class PlotMap
                 var s = area.Squares[i];
                 var hall = new HallTile { Index = i, X = (int)Math.Floor(s.X), Y = (int)Math.Floor(s.Y), MashName = s.Mash };
                 if (s.Content == SecretDoor && RoomAt(s) is { IsSecret: true } secret)
+                {
                     hall.SecretRoomId = secret.Id;
+                    hall.SecretDoorAlwaysAccessible = s.AlwaysAccessible;
+                }
                 switch (s.Content)
                 {
                     case Battle: hall.Content = HallContent.Battle; break;

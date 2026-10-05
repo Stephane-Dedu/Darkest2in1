@@ -1613,3 +1613,29 @@ green-gated while stopped, both DLL hashes match. No DD2 launch/owner-save acces
 - Round 115 deployed: Release + 403 Core + 26 UI tests green, DLL hashes match. Plot secret metadata is saved, hidden and excluded from normal exploration. Next round 116: inspect critical scouting/secret treasure references, add branch discovery/entry/return with exact corridor resume and saved state; split loot/UI if needed.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 50%, weekly 70%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 116: secret branches preserve native accessibility and exact return
+
+Inspected static hd_always_accessible: both installed plot secret doors are true.
+DD_map4 disables scouting, so critical-only access would permanently hide its
+branch. Imported the flag and reveal it when the party reaches the door square,
+or scouting reaches it. Ordinary doors use critical scouting within the existing
+square budget. DD1 dynamic crit_scout and Unity RaidSceneManager.ScoutingEvent's
+6/12-square distinction inspected; no port secret movement implementation exists.
+
+Core EnterSecretRoom requires the current accessible, unblocked door. New saved
+return fields preserve corridor/tile/heading independently of normal room retreat
+state. Exit validates all three and emits only EnteredTile: it does not execute
+movement or replay torch/stress/hunger/ambush/RNG. Secret rooms skip ordinary
+scouting, remain optional for exploration, and still await player UI/contents.
+Nine cases cover actual access, both directions and mid-branch reload, critical
+budgets, walking discovery, blocked/ended refusal and invalid saved return.
+Release + 412 Core + 26 UI tests pass. Green-gated stopped-game deployment; both
+DLL hashes match. No game launch or owner saves. Native verification remains [?].
+
+## Status 2026-10-05: round 116 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 116 deployed: Release + 412 Core + 26 UI tests green, DLL hashes match. Secret branch rules/discovery/saved return exist; UI still withheld. Next round 117: inspect exact secret curio_prop hashes (town is heirloom_chest, DD_map4 hash 163014735 unresolved) and add usable controls/markers with safe contents; do not invent a generic stash. Then remaining Memorial/cold-trinket gaps.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 53%, weekly 71%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

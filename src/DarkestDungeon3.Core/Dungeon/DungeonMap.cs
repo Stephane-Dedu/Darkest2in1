@@ -60,6 +60,7 @@ public sealed class HallTile
     public string MashName;
     /// <summary>Plot-map secret door target; -1 for ordinary squares and older saves.</summary>
     public int SecretRoomId = -1;
+    public bool SecretDoorAlwaysAccessible;
 
     // Expedition state.
     public bool Visited, Scouted, Resolved;
@@ -118,7 +119,7 @@ public sealed class DungeonMap
     }
 
     /// <summary>DD1 scouting spends a square budget down each branch; reaching a corridor's end reveals its room.</summary>
-    public int ScoutFrom(int from, int squares)
+    public int ScoutFrom(int from, int squares, bool revealSecrets = false)
     {
         if (squares <= 0) return 0;
         int revealed = 0;
@@ -136,6 +137,11 @@ public sealed class DungeonMap
                 {
                     var tile = corridor.Tiles[room == corridor.RoomA ? i : corridor.Tiles.Count - 1 - i];
                     if (!tile.Scouted) { tile.Scouted = true; revealed++; }
+                    if (tile.SecretRoomId >= 0 && (revealSecrets || tile.SecretDoorAlwaysAccessible))
+                    {
+                        var secret = Room(tile.SecretRoomId);
+                        if (!secret.Scouted) { secret.Scouted = true; revealed++; }
+                    }
                 }
                 if (count < corridor.Tiles.Count) continue;
                 int other = corridor.Other(room);

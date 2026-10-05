@@ -23,6 +23,8 @@ public sealed class ExpeditionState
     public int HeadingRoomId = -1;
     /// <summary>The corridor square the party last stepped off into the current room (where a retreat leads).</summary>
     public int CameFromCorridorId = -1, CameFromTileIndex = -1;
+    /// <summary>Exact corridor position/direction to resume after a secret-room detour.</summary>
+    public int SecretReturnCorridorId = -1, SecretReturnTileIndex = -1, SecretReturnHeadingRoomId = -1;
     /// <summary>The DD1 monsters of the fight at <see cref="FightAt"/> (rolled when it starts, kept through a
     /// retreat so the same group waits there; its loot is theirs).</summary>
     public List<string> FightMonsters;
