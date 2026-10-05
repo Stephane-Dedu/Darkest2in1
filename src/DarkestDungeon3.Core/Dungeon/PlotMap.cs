@@ -34,7 +34,7 @@ public static class PlotMap
         name == Opening
             ? FromJson(JToken.Parse(Regex.Replace(File.ReadAllText(PathOf(dd1, name)), @",(\s*[}\]])", "$1"))["data"]?["map"],
                        dd1, dungeon, questType, seed, props, entranceArea, goalArea)
-            : From(Dd1Binary.Load(PathOf(dd1, name)), dungeon, questType, seed, props);
+            : From(Dd1Binary.Load(PathOf(dd1, name)), dungeon, questType, seed, props, CurioNames(dd1));
 
     // ---- the areas as read from either file ----
 
@@ -53,7 +53,8 @@ public static class PlotMap
         public List<Square> Squares = new();
     }
 
-    public static DungeonMap From(Dd1Binary file, string dungeon, string questType, int seed, ZoneProps props = null)
+    public static DungeonMap From(Dd1Binary file, string dungeon, string questType, int seed, ZoneProps props = null,
+                                  IReadOnlyDictionary<uint, string> curios = null)
     {
         var root = file.Root["map"];
         var dynamicAreas = root.At("static_dynamic", "areas");
@@ -68,9 +69,12 @@ public static class PlotMap
                 var state = states?[t.Name];
                 var (x, y) = t["mappos"].Vector;
                 string mash = state?["mash_name"]?.String;
+                int content = state?["content"]?.Int ?? 0;
+                uint propHash = unchecked((uint)(t["curio_prop"]?.Int ?? 0));
                 area.Squares.Add(new Square
                 {
-                    Content = state?["content"]?.Int ?? 0,
+                    Content = content,
+                    Prop = content == SecretRoom && curios != null && curios.TryGetValue(propHash, out var prop) ? prop : null,
                     Mash = string.IsNullOrEmpty(mash) ? null : mash,
                     X = x, Y = y,
                     DoorTo = nameOf.TryGetValue(t.At("door_to", "area_to")?.Int ?? 0, out var n) ? n : null,
@@ -122,6 +126,8 @@ public static class PlotMap
     private static Dictionary<uint, string> CurioNames(Dd1Install dd1)
     {
         var names = new Dictionary<uint, string>();
+        foreach (var prop in Core.Expedition.CurioLibrary.LoadPropSprites(dd1).Keys)
+            names[Dd1Binary.Hash(prop)] = prop;
         string dir = dd1.PathOf("props", "shared", "curios");
         if (Directory.Exists(dir))
             foreach (var d in Directory.GetDirectories(dir)) names[Dd1Binary.Hash(Path.GetFileName(d))] = Path.GetFileName(d);
@@ -148,6 +154,10 @@ public static class PlotMap
             bool guarded = room.MashName != null;
             switch (code)
             {
+                case SecretRoom:
+                    room.Content = RoomContent.Treasure;
+                    room.CurioId = tile?.Prop; // unknown native hashes stay withheld, never become a guessed stash
+                    break;
                 case Battle: room.Content = RoomContent.Battle; break;
                 case RoomCurio:
                 case HallCurio:   // the town invasion puts a curio in a room with the hall code

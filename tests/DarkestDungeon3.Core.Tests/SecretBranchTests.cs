@@ -38,7 +38,9 @@ public class SecretBranchTests
         int corridor = state.CorridorId, tile = state.TileIndex, heading = state.HeadingRoomId;
         var crawl = Crawl(state);
         Assert.True(crawl.CanEnterSecretRoom);
-        Assert.Equal(CrawlEventType.EnteredRoom, Assert.Single(crawl.EnterSecretRoom()).Type);
+        Assert.Collection(crawl.EnterSecretRoom(),
+            e => Assert.Equal(CrawlEventType.EnteredRoom, e.Type),
+            e => { Assert.Equal(CrawlEventType.Curio, e.Type); Assert.Equal("thanks_chest", e.ContentId); });
         Assert.True(crawl.CurrentRoom.IsSecret);
         Assert.True(crawl.CurrentRoom.Visited);
         Assert.False(state.QuestComplete);

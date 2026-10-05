@@ -42,10 +42,33 @@ public sealed class CurioDef
 public sealed class CurioLibrary
 {
     public Dictionary<string, CurioDef> Curios { get; } = new();
+    private IReadOnlyDictionary<string, string> _propSprites = new Dictionary<string, string>();
 
     public CurioDef Get(string id) => id != null && Curios.TryGetValue(id, out var c) ? c : null;
 
-    public static CurioLibrary Load(Dd1Install dd1) => Parse(File.ReadAllLines(dd1.PathOf("curios", "curio_type_library.csv")));
+    public string SpriteOf(string propId) => propId != null && _propSprites.TryGetValue(propId, out var sprite) ? sprite : propId;
+
+    public static CurioLibrary Load(Dd1Install dd1)
+    {
+        var library = Parse(File.ReadAllLines(dd1.PathOf("curios", "curio_type_library.csv")));
+        library._propSprites = LoadPropSprites(dd1);
+        return library;
+    }
+
+    /// <summary>Native prop IDs can share art without sharing effects (e.g. the Thanks Chest).</summary>
+    public static IReadOnlyDictionary<string, string> LoadPropSprites(Dd1Install dd1)
+    {
+        var sprites = new Dictionary<string, string>();
+        string path = dd1.PathOf("curios", "curio_props.csv");
+        if (!File.Exists(path)) return sprites;
+        foreach (var line in File.ReadLines(path).Skip(1))
+        {
+            var cells = Csv(line);
+            if (cells.Count >= 2 && !string.IsNullOrWhiteSpace(cells[0]) && !string.IsNullOrWhiteSpace(cells[1]))
+                sprites[cells[0].Trim()] = cells[1].Trim();
+        }
+        return sprites;
+    }
 
     public static CurioLibrary Parse(IEnumerable<string> lines)
     {

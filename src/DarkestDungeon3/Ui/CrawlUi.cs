@@ -304,7 +304,8 @@ internal sealed class CrawlUi
     {
         if (x < -400 || x > 2320) return;
         var feet = new Vector2(x, Feet + 10);
-        string folder = S.Dd1.PathOf("props", "shared", kind, id ?? "");
+        string spriteId = kind == "curios" ? S.Content.Curios.SpriteOf(id) : id;
+        string folder = S.Dd1.PathOf("props", "shared", kind, spriteId ?? "");
         SpineArt.Picture pic;
         if (kind == "curios")
         {

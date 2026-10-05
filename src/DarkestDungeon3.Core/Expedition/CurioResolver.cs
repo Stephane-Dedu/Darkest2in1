@@ -37,6 +37,7 @@ public sealed class CurioResolver
     }
 
     public CurioDef Def(string curioId) => _curios.Get(curioId);
+    public string SpriteOf(string curioId) => _curios.SpriteOf(curioId);
 
     /// <summary>Items that do something special on this curio (e.g. a skeleton key on a locked strongbox).</summary>
     public IEnumerable<string> UsefulItems(string curioId) => _curios.Get(curioId)?.Items.Select(i => i.Item) ?? Enumerable.Empty<string>();
