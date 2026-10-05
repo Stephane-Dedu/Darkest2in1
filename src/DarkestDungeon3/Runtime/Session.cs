@@ -95,7 +95,11 @@ internal sealed class Session
             // DD1 opens a new campaign with its cinematics: "House of Ruin", then "The Old Road".
             Ui.CinematicPlayer.Play(Core.Dd1.Dd1Cinematic.Opening);
         }
-        else Plugin.Log.LogInfo($"[session] loaded slot {slot}: week {Save.Estate.Week}, {Save.Estate.Roster.Count} heroes");
+        else
+        {
+            if (Save.RecoveredFromBackup) Plugin.Log.LogWarning($"[session] slot {slot} recovered from its previous-save backup");
+            Plugin.Log.LogInfo($"[session] loaded slot {slot}: week {Save.Estate.Week}, {Save.Estate.Roster.Count} heroes");
+        }
         Migrate(Save.Estate);
     }
 

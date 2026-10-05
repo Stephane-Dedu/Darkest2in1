@@ -2529,3 +2529,32 @@ delete window. Fix read-only backup selection separately, then picker error UI.
 - Next round 151: validated read-only backup recovery for missing/corrupt main saves, without rewriting or swallowing access/lock errors; test only temporary synthetic files. Then show unrecoverable load errors in the picker and inspect loot-scroll truncation.
 - Ordinary usage available; session 82%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 151: recover valid backups without rewriting saves
+
+DD1 complete campaign saves and Unity ReadSave's header/SaveCampaignData are
+format references. SaveFile.Load prefers a valid main file, otherwise reads a
+validated backup for absent/malformed/null/missing-estate payloads. Existing
+unrecoverable files throw rather than looking like a new estate. Reads propagate
+access/lock errors; File.Exists is not used to mask those errors as absence.
+Recovery metadata is not serialized and Session logs the backup selection.
+Neither file is rewritten by loading; JSON is parsed once for validation/loading.
+
+Ten real-filesystem cases use owned synthetic temporary files: exact campaign,
+raid, raw condition and pending loot; missing/invalid main, valid-main preference,
+unrecoverable rejection, truly absent files, Windows lock propagation and no
+writes/temp files. Release + 646 Core + 60 UI tests pass. Deployment was blocked
+by the stopped-game guard: DD2 is now running. No game process was launched or
+stopped by this agent; use Deploy=false until it stops. Round 150 is the last
+deployed build. Native validation remains [?]; no owner-estate or art access.
+
+New gap: picker summary failures look like new estates, and Session.SavePath is
+assigned before load, risking a stale prior Save with a different path after an
+exception. Fix feedback and clear stale context in the next round.
+
+## Status 2026-10-05: round 151 complete, deployment pending
+
+- Round 151 built/tested; deployment deferred while DD2 runs. Loop continues with Deploy=false. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 152: show unavailable/recovered estate summaries and retry/refresh; guard click-time failure and clear previous Save/SavePath before reading. Do not inspect owner saves. Deploy accumulated changes only after the game is stopped; round 150 is last deployed.
+- Ordinary usage available; session 85%, weekly 91%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
