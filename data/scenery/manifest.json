@@ -1,0 +1,87 @@
+{
+  "generator": "Codex built-in imagegen",
+  "date": "2026-10-05",
+  "purpose": "Original regional room variations; installed game textures were visual references only and are not distributed.",
+  "assets": [
+    {
+      "id": "dd2_city-01",
+      "file": "dd2_city-01.png",
+      "prompt": "Use case: stylized-concept. Asset type: a complete production background for a side-view Darkest Dungeon inspired exploration room inside an existing mod. Generate ONE ORIGINAL scene, not a texture atlas, screenshot or collage. References are solely palette, environment and angular ink/paint rendering references; invent the location, do not trace the source texture.\nScene: The Sprawl: a ruined civic courtyard, shattered masonry and timber houses receding behind it, an abandoned fountain off-center, red fire smoke on the horizon under a charcoal sky. Muted black-brown buildings, ember red atmosphere, no brightly glowing objects.\nComposition: very wide landscape 1920 by 720, ratio 8:3. Fixed side-on camera, level horizon; scenery arranged horizontally, no road receding into the image. The lower 15% is a plain, uninterrupted horizontal walkable ground strip. Keep the central 65% clear of foreground obstacles or important props, reserved for four hero sprites and interactable objects. Major architecture/trees behind that plane or at the far edges; open natural transitions on both sides, no doorway frames, no gates across the walking line. Moderate readable values, textured shadows, hand-painted angular forms with dark ink contours, layered distant silhouettes. Full opaque background, no characters, creatures, HUD, labels, text, borders or watermarks. No perspective tilt, bloom, photorealism or concept sheet.",
+      "referenceRole": "Installed regional palette/environment references",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "cf19ead02f2cb1617709675074f20a2e32b2181dadbb2069007dbd1388915593"
+    },
+    {
+      "id": "dd2_city-02",
+      "file": "dd2_city-02.png",
+      "prompt": "Use case: stylized-concept. Asset type: complete side-view exploration room background, variation 2 for the same Darkest Dungeon inspired mod region. The input is a style/palette/ground-height reference, NOT a scene to duplicate. Invent a distinctly different location.\nScene: The Sprawl: a burned market square with collapsed awnings, empty market stalls pushed to the outer edges and an old stone arcade behind the walking plane. A broken clocktower silhouette in the far distance. The same charcoal and brown masonry with muted ember-red smoke sky, no fountain, no foreground doorway.\nKeep the exact rendering vocabulary of the reference: hand-painted angular shapes, strong dark ink outlines, textured matte shadows, subtle depth layers. Match its region palette, value range and level horizontal ground plane. Very wide landscape 1920x720, 8:3 ratio. Fixed side-on camera and level horizon. Bottom 15% forms a continuous flat horizontal walking strip; central 65% stays visually quiet for four hero sprites and interactable props. Architecture behind the plane, visual landmarks toward the edges. Open transitions at both edges. Opaque full-frame environment only; no characters, monsters, gates or doorway frames across the walkway, no HUD, labels, typography, watermark, frame, collage, bloom, photorealism or road going into the distance.",
+      "referenceRole": "First generated regional scene for palette and ground-height consistency",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "8a0d777a096f6dd9172c31e3fb3e6369c6bfe941e35b8d640876be34b5e26206"
+    },
+    {
+      "id": "dd2_farm-01",
+      "file": "dd2_farm-01.png",
+      "prompt": "Use case: stylized-concept. Asset type: a complete production background for a side-view Darkest Dungeon inspired exploration room inside an existing mod. Generate ONE ORIGINAL scene, not a texture atlas, screenshot or collage. References are solely palette, environment and angular ink/paint rendering references; invent the location, do not trace the source texture.\nScene: The Foetor: a blighted farmstead clearing beyond a broken low fence, crooked barn and contaminated ochre fields, grotesquely swollen roots and diseased crop foliage at the far edges. Mustard haze, olive shadows, dried brown earth. Quiet center and ominous distant farmland.\nComposition: very wide landscape 1920 by 720, ratio 8:3. Fixed side-on camera, level horizon; scenery arranged horizontally, no road receding into the image. The lower 15% is a plain, uninterrupted horizontal walkable ground strip. Keep the central 65% clear of foreground obstacles or important props, reserved for four hero sprites and interactable objects. Major architecture/trees behind that plane or at the far edges; open natural transitions on both sides, no doorway frames, no gates across the walking line. Moderate readable values, textured shadows, hand-painted angular forms with dark ink contours, layered distant silhouettes. Full opaque background, no characters, creatures, HUD, labels, text, borders or watermarks. No perspective tilt, bloom, photorealism or concept sheet.",
+      "referenceRole": "Installed regional palette/environment references",
+      "width": 2046,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "fbea2211e3c3236a84cacffd148025cb15b9f76a907a71e515e96e4ecc563f82"
+    },
+    {
+      "id": "dd2_farm-02",
+      "file": "dd2_farm-02.png",
+      "prompt": "Use case: stylized-concept. Asset type: complete side-view exploration room background, variation 2 for the same Darkest Dungeon inspired mod region. The input is a style/palette/ground-height reference, NOT a scene to duplicate. Invent a distinctly different location.\nScene: The Foetor: a diseased orchard clearing with a sagging grain store and broken windmill in the distant left, twisted fruit trees and swollen vines around the outer edges, infected crops beyond the walking plane. The same ochre sky, olive shadows and brown soil; no central barn, no blockage across the ground.\nKeep the exact rendering vocabulary of the reference: hand-painted angular shapes, strong dark ink outlines, textured matte shadows, subtle depth layers. Match its region palette, value range and level horizontal ground plane. Very wide landscape 1920x720, 8:3 ratio. Fixed side-on camera and level horizon. Bottom 15% forms a continuous flat horizontal walking strip; central 65% stays visually quiet for four hero sprites and interactable props. Architecture behind the plane, visual landmarks toward the edges. Open transitions at both edges. Opaque full-frame environment only; no characters, monsters, gates or doorway frames across the walkway, no HUD, labels, typography, watermark, frame, collage, bloom, photorealism or road going into the distance.",
+      "referenceRole": "First generated regional scene for palette and ground-height consistency",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "8ccc39104c87d4ecde69cad4bd746f855806885e2e2915e52242645ad7e65de9"
+    },
+    {
+      "id": "dd2_forest-01",
+      "file": "dd2_forest-01.png",
+      "prompt": "Use case: stylized-concept. Asset type: a complete production background for a side-view Darkest Dungeon inspired exploration room inside an existing mod. Generate ONE ORIGINAL scene, not a texture atlas, screenshot or collage. References are solely palette, environment and angular ink/paint rendering references; invent the location, do not trace the source texture.\nScene: The Tangle: a deserted forest clearing around an old military camp, battered palisade remnants on the far edges and broken spears behind the ground plane, deep layers of twisted leafless trees and blue gray mist. Desaturated slate blue sky, moss green and charcoal silhouettes.\nComposition: very wide landscape 1920 by 720, ratio 8:3. Fixed side-on camera, level horizon; scenery arranged horizontally, no road receding into the image. The lower 15% is a plain, uninterrupted horizontal walkable ground strip. Keep the central 65% clear of foreground obstacles or important props, reserved for four hero sprites and interactable objects. Major architecture/trees behind that plane or at the far edges; open natural transitions on both sides, no doorway frames, no gates across the walking line. Moderate readable values, textured shadows, hand-painted angular forms with dark ink contours, layered distant silhouettes. Full opaque background, no characters, creatures, HUD, labels, text, borders or watermarks. No perspective tilt, bloom, photorealism or concept sheet.",
+      "referenceRole": "Installed regional palette/environment references",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "6ca60439d9c5b0227bd9bbb915f917dc75782d1df8c2d9ab404220478ed23969"
+    },
+    {
+      "id": "dd2_forest-02",
+      "file": "dd2_forest-02.png",
+      "prompt": "Use case: stylized-concept. Asset type: complete side-view exploration room background, variation 2 for the same Darkest Dungeon inspired mod region. The input is a style/palette/ground-height reference, NOT a scene to duplicate. Invent a distinctly different location.\nScene: The Tangle: a forest clearing below the remains of a stone watchtower at the distant left and a fallen mossy tree on the far right. Broken abandoned fortifications recede into mist between leafless trees. The same desaturated slate-blue sky and charcoal/moss palette; no tent, no central tree or obstacle.\nKeep the exact rendering vocabulary of the reference: hand-painted angular shapes, strong dark ink outlines, textured matte shadows, subtle depth layers. Match its region palette, value range and level horizontal ground plane. Very wide landscape 1920x720, 8:3 ratio. Fixed side-on camera and level horizon. Bottom 15% forms a continuous flat horizontal walking strip; central 65% stays visually quiet for four hero sprites and interactable props. Architecture behind the plane, visual landmarks toward the edges. Open transitions at both edges. Opaque full-frame environment only; no characters, monsters, gates or doorway frames across the walkway, no HUD, labels, typography, watermark, frame, collage, bloom, photorealism or road going into the distance.",
+      "referenceRole": "First generated regional scene for palette and ground-height consistency",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "392102a3ce2205bb9efea135d1307035ecd466d17fe20c91fe598656202c4b44"
+    },
+    {
+      "id": "dd2_coast-01",
+      "file": "dd2_coast-01.png",
+      "prompt": "Use case: stylized-concept. Asset type: a complete production background for a side-view Darkest Dungeon inspired exploration room inside an existing mod. Generate ONE ORIGINAL scene, not a texture atlas, screenshot or collage. References are solely palette, environment and angular ink/paint rendering references; invent the location, do not trace the source texture.\nScene: The Shroud: an abandoned coastal landing at low tide, jagged slate cliffs, broken weathered fishing wharf in the distance to the right, rope and wreckage near the outer corners, a dark ocean and heavy marine mist. Desaturated blue gray, sea green and muted wet sand. No sea creatures.\nComposition: very wide landscape 1920 by 720, ratio 8:3. Fixed side-on camera, level horizon; scenery arranged horizontally, no road receding into the image. The lower 15% is a plain, uninterrupted horizontal walkable ground strip. Keep the central 65% clear of foreground obstacles or important props, reserved for four hero sprites and interactable objects. Major architecture/trees behind that plane or at the far edges; open natural transitions on both sides, no doorway frames, no gates across the walking line. Moderate readable values, textured shadows, hand-painted angular forms with dark ink contours, layered distant silhouettes. Full opaque background, no characters, creatures, HUD, labels, text, borders or watermarks. No perspective tilt, bloom, photorealism or concept sheet.",
+      "referenceRole": "Installed regional palette/environment references",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "fa9133092dcf6534be2ad43030f47861741b1e238b1c1c07c506e83af970cfde"
+    },
+    {
+      "id": "dd2_coast-02",
+      "file": "dd2_coast-02.png",
+      "prompt": "Use case: stylized-concept. Asset type: complete side-view exploration room background, variation 2 for the same Darkest Dungeon inspired mod region. The input is a style/palette/ground-height reference, NOT a scene to duplicate. Invent a distinctly different location.\nScene: The Shroud: an empty tidal clearing beside a weathered shipwreck behind the walking plane, a collapsed beacon tower on a far cliff, and dark rock formations at the outer edges. The same blue-gray marine mist, sea green and wet sand; no central pier or obstacle.\nKeep the exact rendering vocabulary of the reference: hand-painted angular shapes, strong dark ink outlines, textured matte shadows, subtle depth layers. Match its region palette, value range and level horizontal ground plane. Very wide landscape 1920x720, 8:3 ratio. Fixed side-on camera and level horizon. Bottom 15% forms a continuous flat horizontal walking strip; central 65% stays visually quiet for four hero sprites and interactable props. Architecture behind the plane, visual landmarks toward the edges. Open transitions at both edges. Opaque full-frame environment only; no characters, monsters, gates or doorway frames across the walkway, no HUD, labels, typography, watermark, frame, collage, bloom, photorealism or road going into the distance.",
+      "referenceRole": "First generated regional scene for palette and ground-height consistency",
+      "width": 2048,
+      "height": 768,
+      "mode": "RGB",
+      "sha256": "b1bceeed69860cf2c37f2545c0410f48ed492366bfb11e9e0b5cf36bfe737dd6"
+    }
+  ]
+}

@@ -89,6 +89,48 @@ public class RegionalSceneryTests
     }
 
     [Fact]
+    public void GeneratedRoomChoicesStayStableAndAlternateWithoutGameplayRng()
+    {
+        foreach (string region in CampaignRegions.Primary)
+        foreach (int seed in new[] { int.MinValue, -1, 0, 2719, int.MaxValue })
+        {
+            var plan = RegionalScenery.For(region)!;
+            Assert.Equal(2, plan.RoomBackgrounds.Count);
+            Assert.Null(plan.RoomBackground(seed, -1));
+            var choices = Enumerable.Range(0, 12).Select(room => plan.RoomBackground(seed, room)).ToArray();
+            Assert.Equal(4, choices.Select(choice => (choice.FileName, choice.Mirror)).Distinct().Count());
+            for (int room = 0; room < choices.Length; room++)
+            {
+                var revisited = plan.RoomBackground(seed, room);
+                Assert.Equal(choices[room].FileName, revisited.FileName);
+                Assert.Equal(choices[room].Mirror, revisited.Mirror);
+                Assert.Contains(revisited.FileName, plan.RoomBackgrounds);
+                Assert.DoesNotContain("/", revisited.FileName);
+                if (room > 0) Assert.NotEqual(choices[room - 1].FileName, revisited.FileName);
+            }
+        }
+    }
+
+    [Fact]
+    public void GeneratedRoomAssetsAreWideOpaquePngsAtTheSharedSceneRatio()
+    {
+        var folder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../data/scenery"));
+        foreach (string region in CampaignRegions.Primary)
+        foreach (string file in RegionalScenery.For(region)!.RoomBackgrounds)
+        {
+            byte[] data = File.ReadAllBytes(Path.Combine(folder, file));
+            Assert.InRange(data.Length, 24, 16 * 1024 * 1024);
+            Assert.Equal(new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, data.Take(8));
+            int width = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
+            int height = (data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23];
+            Assert.InRange(width, 1920, 4096);
+            Assert.InRange(height, 720, 2048);
+            Assert.InRange((double)width / height, 2.6, 2.7);
+            Assert.Contains(data[25], new byte[] { 2, 6 }); // RGB or RGBA; opacity is inspected in the generated outputs.
+        }
+    }
+
+    [Fact]
     public void InvalidStripGeometryCannotCauseAnUnboundedDrawLoop()
     {
         Assert.Empty(CorridorSceneryLayout.Tiles(0, 0, false));

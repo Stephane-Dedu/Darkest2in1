@@ -180,6 +180,8 @@ internal sealed class CrawlUi
             GUI.color = sceneColor;
             // Open outdoor locations share the same walkway; no wall or doorway interrupts the landscape.
             foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
+            // Existing room fade covers the scene switch; a half-visible panorama during walking would look ghosted.
+            if (exp.InRoom) DrawGeneratedRoom(plan, exp.Seed, exp.RoomId);
             if (!exp.InRoom && opening > 0)
             {
                 int count = crawl.CurrentCorridor.Tiles.Count;
@@ -193,28 +195,62 @@ internal sealed class CrawlUi
         finally { GUI.color = old; }
     }
 
+    private static void DrawGeneratedRoom(RegionalScenery plan, int seed, int roomId)
+    {
+        var choice = plan.RoomBackground(seed, roomId);
+        var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
+        if (texture == null) return;
+        var old = GUI.color;
+        float opacity = old.a * RegionSceneryArt.RoomAlpha(choice.FileName);
+        float floorTop = plan.Layers.First(layer => layer.Ground).Top;
+        try
+        {
+            void Strip(float y, float height, float alpha)
+            {
+                GUI.color = new Color(old.r, old.g, old.b, opacity * alpha);
+                var uv = new Rect(choice.Mirror ? 1 : 0, 1 - (y + height) / 720f, choice.Mirror ? -1 : 1, height / 720f);
+                GUI.DrawTextureWithTexCoords(new Rect(0, y, Gui.W, height), texture, uv);
+            }
+            Strip(0, floorTop, 1);
+            // Blend the painted ground into the same native road instead of pasting a hard edge at the footline.
+            for (float y = floorTop; y < 720; y += 5)
+            {
+                float height = Mathf.Min(5, 720 - y);
+                Strip(y, height, 1 - (y + height / 2 - floorTop) / (720 - floorTop));
+            }
+        }
+        finally { GUI.color = old; }
+    }
+
     private static void DrawSceneryLayer(SceneryLayer layer, float camera, bool reverse)
     {
         var tex = RegionSceneryArt.Texture(layer.AssetKey);
         if (tex == null) return;
-        foreach (var tile in CorridorSceneryLayout.Tiles(camera * layer.Parallax, layer.Width, reverse))
+        var old = GUI.color;
+        GUI.color = new Color(old.r * ((layer.Tint >> 16) & 255) / 255f,
+            old.g * ((layer.Tint >> 8) & 255) / 255f, old.b * (layer.Tint & 255) / 255f, old.a);
+        try
         {
-            var rect = new Rect(tile.X, layer.Top, layer.Width, layer.Height);
-            if (!layer.Ground)
-                GUI.DrawTextureWithTexCoords(rect, tex, tile.Mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
-            else
+            foreach (var tile in CorridorSceneryLayout.Tiles(camera * layer.Parallax, layer.Width, reverse))
             {
-                // DD2 roads run vertically in their source textures; turn them sideways for a continuous walkway.
-                var matrix = GUI.matrix;
-                try
+                var rect = new Rect(tile.X, layer.Top, layer.Width, layer.Height);
+                if (!layer.Ground)
+                    GUI.DrawTextureWithTexCoords(rect, tex, tile.Mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
+                else
                 {
-                    GUIUtility.RotateAroundPivot(90, rect.center);
-                    var turned = new Rect(rect.center.x - rect.height / 2, rect.center.y - rect.width / 2, rect.height, rect.width);
-                    GUI.DrawTextureWithTexCoords(turned, tex, tile.Mirror ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1));
+                    // DD2 roads run vertically in their source textures; turn them sideways for a continuous walkway.
+                    var matrix = GUI.matrix;
+                    try
+                    {
+                        GUIUtility.RotateAroundPivot(90, rect.center);
+                        var turned = new Rect(rect.center.x - rect.height / 2, rect.center.y - rect.width / 2, rect.height, rect.width);
+                        GUI.DrawTextureWithTexCoords(turned, tex, tile.Mirror ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1));
+                    }
+                    finally { GUI.matrix = matrix; }
                 }
-                finally { GUI.matrix = matrix; }
             }
         }
+        finally { GUI.color = old; }
     }
 
     /// <summary>A 720-wide layer repeated across the screen, scrolled by <paramref name="offset"/> pixels.</summary>
