@@ -72,6 +72,7 @@ public sealed class RenderTexture : Texture
     private bool _created;
     public RenderTexture(int w, int h, int depth, RenderTextureFormat format, RenderTextureReadWrite rw)
     { width = w; height = h; Created.Add(this); }
+    public RenderTexture(int w, int h, int depth) : this(w, h, depth, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { }
     public bool Create() { _created = true; return true; }
     public bool IsCreated() => _created;
     public void Release() => _created = false;

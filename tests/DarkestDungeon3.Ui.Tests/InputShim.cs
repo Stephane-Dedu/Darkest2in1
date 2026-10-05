@@ -4,7 +4,7 @@
 namespace UnityEngine;
 
 public enum EventType { MouseDown, MouseDrag, MouseUp, MouseMove, Repaint, Layout, Used, KeyDown }
-public enum KeyCode { None, Escape }
+public enum KeyCode { None, Escape, Space, Return }
 public sealed class Event
 {
     public static Event current;
@@ -31,17 +31,20 @@ public struct Rect(float x, float y, float width, float height)
     public Vector2 size => new(width, height);
     public bool Contains(Vector2 p) => p.x >= x && p.x < x + width && p.y >= y && p.y < y + height;
 }
-public readonly struct Color(float r, float g, float b, float a)
+public readonly struct Color(float r, float g, float b, float a = 1)
 {
     public readonly float r = r, g = g, b = b, a = a;
     public static Color white => new(1, 1, 1, 1);
     public static Color clear => new(0, 0, 0, 0);
+    public static Color black => new(0, 0, 0, 1);
 }
 public static class GUI
 {
     public static Color color;
     public static bool enabled = true;
     public static void DrawTexture(Rect r, Texture2D t) { }
+    public static void DrawTexture(Rect r, Texture t) { }
+    public static void DrawTexture(Rect r, Texture t, ScaleMode mode) { }
     public static (Rect Rect, Texture Texture, Rect Uv) LastTextureDraw;
     public static void DrawTextureWithTexCoords(Rect r, Texture t, Rect uv, bool alpha) => LastTextureDraw = (r, t, uv);
 }
@@ -96,4 +99,8 @@ public sealed class Texture2D : Texture
     public void SetPixels32(Color32[] pixels) => Track();
     public void Apply(bool mipMaps, bool makeNoLongerReadable) => Track();
 }
-public static class Object { public static void Destroy(object value) => Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId); }
+public static class Object
+{
+    public static void Destroy(object value) => Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId);
+    public static void DontDestroyOnLoad(object value) { }
+}

@@ -27,5 +27,6 @@
     <Compile Include="$(Dd1TextSource)" Link="Dd1Text.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/PngPreloader.cs" Link="PngPreloader.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CinematicCache.cs" Link="CinematicCache.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CinematicPlayer.cs" Link="CinematicPlayer.cs" />
   </ItemGroup>
 </Project>

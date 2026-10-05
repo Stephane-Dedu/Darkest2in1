@@ -85,6 +85,9 @@ internal sealed class Driver : MonoBehaviour
         {
             _townArtPrimed = true;
             Art.PrepareTown(S.Dd1);
+            // Resolve Unity's cache path on this thread; conversion/extraction only receives plain paths.
+            try { Ui.CinematicCache.Prepare(S.Dd1, Core.Dd1.Dd1Cinematic.Opening); }
+            catch (System.Exception e) { Plugin.Log.LogWarning("[cinematic] " + e.Message); }
             // Common town art can bake while the player is still at the menu/estate picker.
             foreach (var id in new[] { "ground", "stage_coach", "graveyard", "statue" })
                 SpineArt.Get(Core.Campaign.Town.TownLayout.ArtFolder(S.Dd1, id, true, 0), "idle",
@@ -92,6 +95,7 @@ internal sealed class Driver : MonoBehaviour
         }
         SpineArt.Update();
         Art.Update();
+        Ui.CinematicCache.Update();
         ItemText.Prime();
         RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,

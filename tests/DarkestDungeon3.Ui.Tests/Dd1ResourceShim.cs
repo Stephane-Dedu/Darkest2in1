@@ -5,7 +5,13 @@ namespace DarkestDungeon3.Runtime
     internal sealed class Session
     {
         public static Session Current;
-        public static string SaveDir;
+        private static string _saveDir;
+        public static readonly List<int> SaveDirReads = new();
+        public static string SaveDir
+        {
+            get { SaveDirReads.Add(Environment.CurrentManagedThreadId); return _saveDir; }
+            set => _saveDir = value;
+        }
         public Dd1Install Dd1;
     }
 }

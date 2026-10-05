@@ -4,6 +4,7 @@ using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Runtime;
 using UnityEngine;
 using UnityEngine.Video;
+using Object = UnityEngine.Object;
 
 namespace DarkestDungeon3.Ui;
 
@@ -25,6 +26,7 @@ internal static class CinematicPlayer
     private static string _playing;
     private static float _startedAt;
     private static Texture2D _titleArt;
+    private static string _pendingVoiceSource;
 
     public static bool Active => _playing != null || Queue.Count > 0;
 
@@ -38,6 +40,11 @@ internal static class CinematicPlayer
     public static bool Draw()
     {
         if (!Active) return false;
+        var e = Event.current;
+        bool skip = (e.type == EventType.MouseDown) ||
+                    (e.type == EventType.KeyDown && e.keyCode is KeyCode.Space or KeyCode.Return or KeyCode.Escape);
+        if (skip) { e.Use(); Plugin.Log.LogInfo($"[cinematic] {_playing}: skipped"); Next(); return true; }
+        if (_pendingVoiceSource != null) TryStartPlayback(_playing, _pendingVoiceSource, Session.Current.Dd1);
         Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
         if (_video == null && _titleArt != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), _titleArt, ScaleMode.ScaleAndCrop);
         if (_picture != null && _video != null && _video.isPlaying && Event.current.type == EventType.Repaint)
@@ -48,14 +55,10 @@ internal static class CinematicPlayer
             if (h > Gui.H) { h = Gui.H; w = h * aspect; }
             GUI.DrawTexture(new Rect((Gui.W - w) / 2, (Gui.H - h) / 2, w, h), _picture);
         }
-        double now = _video != null && _video.isPlaying ? _video.time : _video == null ? Time.unscaledTime - _startedAt : -1;
+        double now = _pendingVoiceSource != null ? -1 : _video != null && _video.isPlaying ? _video.time : _video == null ? Time.unscaledTime - _startedAt : -1;
         if (_video == null && _voice != null && !_voice.IsPlaying && now > 1) { Next(); return true; }   // narration over the title art: done
         if (now >= 0 && Dd1Cinematic.SubtitleAt(_subtitles, now) is { } line && line.Length > 0)
             Gui.Text(new Rect(160, Gui.H - 150, Gui.W - 320, 80), line, 34, new Color(0.93f, 0.88f, 0.76f), TextAnchor.MiddleCenter);
-        var e = Event.current;
-        bool skip = (e.type == EventType.MouseDown) ||
-                    (e.type == EventType.KeyDown && e.keyCode is KeyCode.Space or KeyCode.Return or KeyCode.Escape);
-        if (skip) { e.Use(); Plugin.Log.LogInfo($"[cinematic] {_playing}: skipped ({e.type} {e.keyCode})"); Next(); }
         return true;
     }
 
@@ -78,13 +81,23 @@ internal static class CinematicPlayer
     {
         _playing = name;
         Dd1Audio.Hush = true;   // the Hamlet's music and ambience wait
+        _pendingVoiceSource = path;
+        _titleArt ??= Art.Dd1("fe_flow", "title_bg.png");
+        TryStartPlayback(name, path, dd1);
+    }
+
+    private static void TryStartPlayback(string name, string path, Dd1Install dd1)
+    {
+        string voice = CinematicCache.Voice(name, path, out bool complete);
+        if (!complete) return;
+        _pendingVoiceSource = null;
         _subtitles = Dd1Cinematic.Subtitles(dd1, name);
         string webm = CinematicCache.Picture(name);
         if (webm == null)
         {
             // No playable picture (yet): DD1's narration and subtitles over its title art.
             _titleArt ??= Art.Dd1("fe_flow", "title_bg.png");
-            _voice = Dd1Audio.PlayStream(CinematicCache.Voice(name, path));
+            _voice = Dd1Audio.PlayStream(voice);
             _startedAt = Time.unscaledTime;
             Plugin.Log.LogInfo($"[cinematic] {name}: no picture yet, narration over the title art (voice {(_voice != null ? "on" : "off")})");
             if (_voice == null) Next();
@@ -107,7 +120,7 @@ internal static class CinematicPlayer
         {
             if (vp != player || _video != player) return;
             vp.Play();
-            _voice = Dd1Audio.PlayStream(CinematicCache.Voice(name, path));
+            _voice = Dd1Audio.PlayStream(voice);
             Plugin.Log.LogInfo($"[cinematic] {name}: {vp.width}x{vp.height}, {vp.length:0.0} s, {_subtitles.Count} subtitles, voice {(_voice != null ? "on" : "off")}");
         };
         _video.Prepare();
@@ -120,5 +133,6 @@ internal static class CinematicPlayer
         if (_video != null) { _video.Stop(); Object.Destroy(_video); _video = null; }
         if (_picture != null) { _picture.Release(); Object.Destroy(_picture); _picture = null; }
         _playing = null;
+        _pendingVoiceSource = null;
     }
 }

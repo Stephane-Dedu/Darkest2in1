@@ -2081,3 +2081,37 @@ preparation is added. No launch/owner estate access/private artwork changes.
 - Next round 134: move voice preparation off the playback caller with pre-resolved plain cache paths, deduplicated work and observable failures; keep FMOD/Unity calls on the main thread. Account for prepare/first-play concurrency before changing the cache. This is a documented latency gap, not a measured native timing claim.
 - Ordinary usage available; session 20%, weekly 81%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Private native artwork and owner preview/server remain unchanged/outside Git.
+
+## Round 134: asynchronous narration readiness with main-thread cache ownership
+
+Streaming removed large arrays but still blocked first playback on file IO.
+Session's content worker also called Prepare -> Dir -> Unity's save-path API;
+ffmpeg Exited called Pump -> Dir from another worker. Inspected native OGVs and
+Unity GameIntro/MoviePlayer sequencing. Preparation now starts from Driver;
+workers receive plain source/output paths, deduplicate by output and stream
+audio independently of ffmpeg availability. Pending results return immediately;
+completed failures/temporary-cleanup errors are observed and logged once.
+Callbacks enqueue conversion publication/progression for Driver's main-thread
+pump, and completed processes dispose before the next conversion.
+
+The actual player waits for voice readiness before starting video/audio/subtitle
+time. Skip runs first and can cancel pending playback without starting audio;
+the background cache job can finish safely for later reuse. Existing no-video
+narration and no-audio video behavior remains. Three linked cache cases now
+cover async completion and main-thread SaveDir access; three linked player cases
+cover subtitle clock zero after delay, immediate pending skip and video/audio
+start/stop on the drawing thread. The first harness compile hit implicit System
+Object ambiguity; an explicit Unity Object alias fixed it before green checks.
+Release + 519 Core + 42 UI tests pass; stopped-game DLL hashes match. Native
+FMOD/video/rendering/timing remains [?], no launch or owner-save access.
+
+New separate gap: repeated Prepare can duplicate an active video conversion;
+start failure leaves the remaining queue unpumped and Process undisposed. Logged
+in PARITY rather than folded into this round.
+
+## Status 2026-10-05: round 134 complete
+
+- Round 134 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 135: address the documented conversion-queue active-name/failure progression gap after actual reference inspection; use synthetic files/process helpers, never owner cache files or DD2 launch.
+- Ordinary usage available; session 26%, weekly 82%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- Protected estates/abandoned project untouched. Private native artwork and owner preview/server remain unchanged/outside Git; native UI/rendering/timing checks await explicit launch permission.
