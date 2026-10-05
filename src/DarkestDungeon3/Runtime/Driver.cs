@@ -84,12 +84,14 @@ internal sealed class Driver : MonoBehaviour
         if (!_townArtPrimed && S?.Dd1 != null)
         {
             _townArtPrimed = true;
+            Art.PrepareTown(S.Dd1);
             // Common town art can bake while the player is still at the menu/estate picker.
             foreach (var id in new[] { "ground", "stage_coach", "graveyard", "statue" })
                 SpineArt.Get(Core.Campaign.Town.TownLayout.ArtFolder(S.Dd1, id, true, 0), "idle",
                     slot => Core.Campaign.Town.TownLayout.IdleSlot(slot.Name));
         }
         SpineArt.Update();
+        Art.Update();
         ItemText.Prime();
         RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,

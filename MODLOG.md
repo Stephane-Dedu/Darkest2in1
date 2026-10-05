@@ -2026,3 +2026,29 @@ hashes match. No launch, owner-save access or native artwork in Git.
 - Next round 132: inspect a concrete remaining startup asset-loading issue or another actionable parity gap. Art.Dd1/Png still synchronously reads/decodes first-use images, and CinematicCache.Voice can synchronously read 79,369,515-byte/46,185,826-byte opening OGVs on first playback. Investigate before choosing one bounded change; do not claim native timing improvement without a permitted trace.
 - Ordinary usage available; session 13%, weekly 80%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estate/abandoned project access or private art/owner preview changes. Native input/visual/timing checks remain pending.
+
+## Round 132: prewarm initial Hamlet PNGs without first-draw IO/decode bursts
+
+Art.Dd1 still synchronously read/decoded UI PNGs on first draw after the Spine
+worker change. Inspected DD1's exact sky/nameplate/currency/navigation files and
+Unity EstateSceneManager initialization/fade. Twelve initial images total only
+746,364 encoded bytes; warm only this bounded set, not every town state/building.
+Driver requests them when DD1 content becomes available at the menu, workers
+read files, and a main-thread pump uploads at most one image per Update.
+Pending Art.Dd1/Png requests return null for their existing UI fallback; finished
+requests share the texture/cache, and task byte buffers release after upload.
+Existing unqueued/scenery behavior remains. Missing/faulted assets finish as a
+cached fallback, and corrupt images free their failed texture.
+
+Three linked PngPreloader cases cover actual native paths/dimensions, no texture
+APIs during request, one-upload/main-thread bounds, duplicate/cache reuse and
+missing/corrupt/locked-file failures without starving later images. Native GPU
+decode cost/frame timing still unmeasured. Release + 510 Core + 36 UI tests pass;
+stopped-game deployed DLL hashes match. No game/owner saves/private art changed.
+
+## Status 2026-10-05: round 132 complete
+
+- Round 132 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 133: inspect first-play cinematic audio extraction or another concrete actionable parity gap. OGV audio extraction still reads a large native video on the caller; prepare/streaming/thread ownership need inspection before changes. Native gameplay/input/rendering/timing checks await explicit launch permission.
+- Ordinary usage available; session 17%, weekly 80%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- Protected estates and abandoned project untouched. Native artwork and the 24 approved arena variants remain outside Git; existing owner preview/server unchanged.

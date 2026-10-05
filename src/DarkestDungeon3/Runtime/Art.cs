@@ -15,27 +15,25 @@ namespace DarkestDungeon3.Runtime;
 internal static class Art
 {
     private static readonly Dictionary<string, Texture2D> Cache = new();
+    private static readonly PngPreloader TownImages = new();
 
     public static Texture2D Dd1(params string[] parts)
     {
         var session = Session.Current;
         if (session == null) return null;
-        string path = session.Dd1.PathOf(parts);
-        if (Cache.TryGetValue(path, out var tex)) return tex;
-
-        tex = null;
-        if (File.Exists(path))
-        {
-            tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
-            if (!tex.LoadImage(File.ReadAllBytes(path), markNonReadable: true))
-            {
-                Object.Destroy(tex);
-                tex = null;
-            }
-        }
-        Cache[path] = tex;
-        return tex;
+        return Png(session.Dd1.PathOf(parts));
     }
+
+    public static void PrepareTown(Dd1Install dd1)
+    {
+        foreach (string relative in PngPreloader.InitialTownImages)
+        {
+            string path = dd1.PathOf(relative.Split('/'));
+            if (!Cache.ContainsKey(path)) TownImages.Request(path);
+        }
+    }
+
+    public static void Update() => TownImages.Update();
 
     // ---- town ----
     public static Texture2D TownBackdrop => Dd1("campaign", "town", "town_bg.png");
@@ -69,6 +67,11 @@ internal static class Art
     {
         if (string.IsNullOrEmpty(path)) return null;
         if (Cache.TryGetValue(path, out var tex)) return tex;
+        if (TownImages.TryGet(path, out tex, out bool finished))
+        {
+            if (finished) Cache[path] = tex;
+            return tex;
+        }
         tex = null;
         if (System.IO.File.Exists(path))
         {
