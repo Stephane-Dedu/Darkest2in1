@@ -1083,6 +1083,100 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void ResoluteEventKeepsPadlocksOwnEffectAndIndependentAllyHealingTrigger()
+    {
+        string effects = Data.Effects("trinket_curio_heart-shaped_padlock", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("On Resolute: Add 2 Positive Tokens", effects);
+        Assert.Contains("Random Ally When Healed: Add 1 Positive Token (33%)", effects);
+        Assert.Equal(2, effects.Split('\n').Length);
+    }
+
+    [Fact]
+    public void ResoluteEventUsesNativeLabelAndRequiresTheEffectInItsTemplate()
+    {
+        string effects = Data.Effects("trinket_curio_heart-shaped_padlock", out bool complete,
+            key => key == "overstress_condition_resolute" ? "Resolution:" : null);
+        Assert.True(complete);
+        Assert.Contains("Resolution: Add 2 Positive Tokens", effects);
+        foreach (string template in new[] { "invalid {9}", "Only {0}" })
+        {
+            effects = Data.Effects("trinket_curio_heart-shaped_padlock", out complete,
+                key => key == "effect_tooltip_condition_overstress" ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Add 2", effects);
+            Assert.Contains("Random Ally When Healed: Add 1 Positive Token (33%)", effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("m_ConditionActorType", "PERFORMER")]
+    [InlineData("m_ConditionString", "unknown_event")]
+    [InlineData("m_ConditionNumber", "2")]
+    [InlineData("m_ConditionNumberType", "MULTIPLE")]
+    [InlineData("m_IsInverse", "True")]
+    [InlineData("m_SourceConditionActorType", "PERFORMER")]
+    [InlineData("m_IsVisible", "False")]
+    [InlineData("m_UnknownRestriction", "True")]
+    public void BlankEventHeadingDoesNotHideUnsupportedOverstressRequirements(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_overstress_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            string itemCsv = string.Join("\n", new[]
+            {
+                "element_start,event_item,Item", "element_end",
+                "element_start,event_item,ActorDataEffects", "on_overstress_effects,event_effect", "element_end",
+                "element_start,event_effect,Effect", "m_Chance,1", "m_TokenAddTag,positive", "m_TokenAddAmount,2",
+                "all_conditions,event_condition", "element_end",
+            });
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), itemCsv);
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_skill_effect_on_overstress= \neffect_tooltip_condition_overstress={0}{1}\noverstress_condition_resolute=On Resolute:\ntoken_add_tag_positive=Positive\neffect_tooltip_token_add_tag+plural=Add {0} {1} Tokens");
+            // A blank native heading is insufficient when the requirement's shared file is absent.
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("event_item", out bool complete));
+            Assert.False(complete);
+            var condition = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["m_ConditionType"] = "overstress", ["m_ConditionActorType"] = "NONE", ["m_ConditionString"] = "resolute",
+                ["m_ConditionNumber"] = "1", ["m_ConditionNumberType"] = "BOOL",
+            };
+            string conditionCsv = "element_start,event_condition,Condition";
+            foreach (var row in condition) conditionCsv += "\n" + row.Key + "," + row.Value;
+            conditionCsv += "\nelement_end";
+            string sharedFile = Path.Combine(fixture, "Excel", "infernal_flame_construction_export.Group.csv");
+            File.WriteAllText(sharedFile, conditionCsv);
+            Assert.Equal("On Resolute: Add 2 Positive Tokens", TrinketDescriptions.Load(fixture).Effects("event_item", out complete));
+            Assert.True(complete);
+            condition[field] = value;
+            string restrictedCsv = "element_start,event_condition,Condition";
+            foreach (var row in condition) restrictedCsv += "\n" + row.Key + "," + row.Value;
+            restrictedCsv += "\nelement_end";
+            // Ordinary condition data wins over the shared construction table's definition.
+            File.WriteAllText(Path.Combine(fixture, "Excel", "condition_data_export.Group.csv"), restrictedCsv);
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("event_item", out complete));
+            Assert.False(complete);
+            File.Delete(Path.Combine(fixture, "Excel", "condition_data_export.Group.csv"));
+            File.WriteAllText(sharedFile, restrictedCsv);
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("event_item", out complete));
+            Assert.False(complete);
+            File.WriteAllText(sharedFile, conditionCsv);
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), itemCsv.Replace("all_conditions,event_condition\n", ""));
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("event_item", out complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
+    }
+
+    [Fact]
     public void DiseaseRemovalKeepsPeculiarPodsChanceEventAndOtherEffects()
     {
         string effects = Data.Effects("trinket_cave_peculiar_pods", out bool complete);

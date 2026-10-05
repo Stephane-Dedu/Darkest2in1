@@ -28,6 +28,9 @@ public sealed class TrinketDescriptions
         foreach (string file in new[] { "trinkets", "buff", "condition", "effect", "dots", "trinkets_actor_effect_trigger" })
             foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, file + "_data_export.Group.csv")))
                 data._blocks[(type, id)] = lines;
+        // Native shared Resolute/Meltdown conditions live with Infernal Flame construction data.
+        foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, "infernal_flame_construction_export.Group.csv")))
+            if (type == "Condition" && !data._blocks.ContainsKey((type, id))) data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");
         // Sources are DD2's English fallback. Runtime localization takes precedence in Text.
         foreach (string file in Directory.Exists(sources) ? Directory.GetFiles(sources, "*.txt") : Array.Empty<string>())
@@ -103,7 +106,16 @@ public sealed class TrinketDescriptions
             if (!group[0].EndsWith("_effects", StringComparison.Ordinal)) { complete = false; continue; }
             string eventId = group[0].Substring(0, group[0].Length - (limited ? limitedSuffix.Length : "_effects".Length));
             bool friendly = FriendlyEffectEvents.Contains(eventId);
-            string title = Plain(Text("effect_tooltip_skill_effect_" + eventId, localize));
+            string eventText = Text("effect_tooltip_skill_effect_" + eventId, localize);
+            string title = Plain(eventText);
+            // Native overstress deliberately leaves the heading blank; its explicit condition names the event.
+            if (eventId == "on_overstress" && eventText != null && string.IsNullOrWhiteSpace(eventText)
+                && group.Skip(1).Any() && group.Skip(1).All(effect =>
+                {
+                    var conditions = Values("Effect", effect, "all_conditions");
+                    return conditions.Count == 1 && Values("Effect", effect, "any_conditions").Count == 0
+                        && Field("Condition", conditions[0], "m_ConditionType") == "overstress";
+                })) title = "";
             if (title == null) { complete = false; continue; }
             if (limited && Field("ActorDataEffects", id, eventId + "_apply_limit") != "1") { complete = false; continue; }
             AddEffectGroup(title, friendly, group.Skip(1), limited, lines, ref complete, localize, depth);
@@ -161,14 +173,14 @@ public sealed class TrinketDescriptions
             var choices = effects.Select(effect => SimpleEffect(effect, localize, friendly, depth)).ToList();
             // Native limit one is a choice. Withhold the whole group if any possible outcome is unknown.
             if (separator == null || choices.Count == 0 || choices.Any(choice => choice == null)) complete = false;
-            else lines.Add(title + " " + string.Join(" " + separator + " ", choices));
+            else lines.Add((title.Length == 0 ? "" : title + " ") + string.Join(" " + separator + " ", choices));
             return;
         }
         foreach (string effect in effects)
         {
             string description = SimpleEffect(effect, localize, friendly, depth);
             if (description == null) complete = false;
-            else lines.Add(title + " " + description);
+            else lines.Add((title.Length == 0 ? "" : title + " ") + description);
         }
     }
 
@@ -561,6 +573,18 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "overstress":
+                if (!_blocks.TryGetValue(("Condition", id), out var overstressRows)
+                    || overstressRows.Any(row => !TagConditionFields.Contains(row[0]))
+                    || (value != "resolute" && value != "meltdown") || actor != "NONE" || numberType != "BOOL"
+                    || Field("Condition", id, "m_ConditionNumber") != "1"
+                    || (Field("Condition", id, "m_IsInverse") ?? "False") != "False"
+                    || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE"
+                    || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
+                string overstressName = Plain(Text("overstress_condition_" + value, localize));
+                if (overstressName == null) return null;
+                args = new object[] { overstressName + " ", effect };
+                break;
             case "quirk_tag_amount":
                 // Native disease presence is a tagged-quirk count. Its template omits actor/count details,
                 // so accept only the proven self-presence shape rather than mislabeling other requirements.

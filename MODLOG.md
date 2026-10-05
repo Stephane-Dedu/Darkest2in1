@@ -1174,3 +1174,36 @@ Audit 171 complete/19 partial/1 blank of 191. No game process/launch or save acc
 - Private 24-image native-reference scenery remains installed at game/PrivateScenery, six per primary region, support up to 12. Full art/prompts/provenance outside Git at local-art/combat-extensions. Native room/reload/ground/torch/load/memory checks remain [?].
 - Local preview server localhost:8766, exec session 20403, and combat-extensions.html remain available. Linked preview.html retains historical round 93 art. No pending game/save restores.
 - Last observed five-hour usage 84%; check at round boundaries. Owner requested stopping near 95% and resuming after reset; no scheduled resume established yet. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 101: Heart-Shaped Padlock's Resolute effect
+
+condition_is_resolute is not in condition_data_export: native shared conditions live in
+infernal_flame_construction_export.Group.csv. It defines OVERSTRESS/NONE/resolute/BOOL
+one; ConditionCalculation compares the current overstress ID. Native ActorDataEffects
+on_overstress heading is intentionally whitespace. ConditionDescription supplies
+overstress_condition_resolute through effect_tooltip_condition_overstress. Cold reader
+previously omitted the shared file and rejected its blank event heading. DD1 buff lists
+and Unity port Trinket.ToolTip remain the presentation reference.
+
+Load only Condition blocks from the shared construction table without overriding
+ordinary definitions. Permit a blank on_overstress heading only when every effect has
+one explicit overstress all-condition and no any-conditions; validate exact native
+BOOL/NONE/resolute or meltdown shape before rendering. Unknown restrictions, hidden
+conditions and missing data remain withheld. Event label gets a readable space after
+its colon. Heart-Shaped Padlock now shows On Resolute: Add 2 Positive Tokens and the
+independent Random Ally When Healed: Add 1 Positive Token (33%). No combat logic changed.
+
+Two actual-data/localization tests and eight fixtures cover missing shared data, absent
+requirements, primary-table precedence, actor/value/count/inverse/source/visibility/unknown
+restrictions and malformed effect templates. Release + 334 Core + 19 UI tests green,
+locally deployed DLL hashes match. Audit 172 complete/18 partial/1 blank of 191. No DD2
+process/launch or save access; native before/after-initialization comparison remains [?].
+
+## Status 2026-10-05: loop resumed, round 101 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or pending restores.
+- Round 101 locally deployed with Release + 334 Core + 19 UI tests green and both DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission; round 75 visibility stays blocked.
+- Cold audit 172 complete/18 partial/1 blank. Next round 102: remaining actual advanced effect/condition fields, such as Sickening Silence's diseased target or other incomplete trinkets, or persistent activity-log weeks/art. Hidden-outcome/visibility cases remain separate; Anatomical Map stays blank. Skip [user]/[blocked].
+- Private scenery remains 24 native-reference panoramas, six per primary region, installed at game/PrivateScenery, support up to 12. Native-derived art/full prompts/provenance remain outside Git at local-art/combat-extensions. Native room/reload/ground/torch/load/memory checks remain [?].
+- Local preview server localhost:8766, exec session 20403, and combat-extensions.html remain available; linked preview.html retains historical round 93 art. No pending game/save restores.
+- Last observed five-hour usage 87%; check at round boundaries. Owner requested stopping near 95% and resuming after reset; no scheduled resume established yet. Other owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
