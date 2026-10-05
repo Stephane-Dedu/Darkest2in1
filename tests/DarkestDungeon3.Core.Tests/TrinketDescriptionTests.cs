@@ -1082,6 +1082,87 @@ public class TrinketDescriptionTests
         Assert.Contains("Turn Start: +1 Stress (15%)", effects);
     }
 
+    [Theory]
+    [InlineData("trinket_farm_hags_hoard", "-10% Max HP when Disease", "+10% Healing Received from Skills per Positive Token")]
+    [InlineData("trinket_farm_brilliant_brew", "-20% Move RES when Disease", "+2 Blight Duration Dealt")]
+    [InlineData("trinket_farm_corrupting_cleaver", "-15% Stun RES when Disease", "+25% Blight RES Piercing")]
+    [InlineData("trinket_farm_hint_of_home", "-10% DMG when Disease", "Gain When Hit: Regen 2 (3 Turns) (15%)")]
+    [InlineData("trinket_cultist_key_dark_impulse_disease_res", "-25% Max HP when Disease", "+33% Disease RES")]
+    public void DiseaseConditionsKeepPenaltiesAlongsideTheirBenefits(string id, string penalty, string benefit)
+    {
+        string effects = Data.Effects(id, out bool complete);
+        Assert.True(complete);
+        Assert.Contains(penalty, effects);
+        Assert.Contains(benefit, effects);
+        Assert.DoesNotContain("<sprite", effects);
+    }
+
+    [Fact]
+    public void DiseaseConditionUsesNativeLocalizationAndRequiresItsEffectBody()
+    {
+        string effects = Data.Effects("trinket_farm_hags_hoard", out bool complete,
+            key => key == "quirk+disease" ? "Maladie" : key == "effect_tooltip_condition_quirk_tag_amount" ? "{1} si {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("-10% Max HP si Maladie", effects);
+        foreach (string template in new[] { "invalid {9}", "When {0}" })
+        {
+            effects = Data.Effects("trinket_farm_hags_hoard", out complete,
+                key => key == "effect_tooltip_condition_quirk_tag_amount" ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Max HP", effects);
+            Assert.Contains("+10% Healing Received from Skills per Positive Token", effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("m_ConditionActorType", "TARGET")]
+    [InlineData("m_ConditionActorType", "PARTY")]
+    [InlineData("m_ConditionString", "negative")]
+    [InlineData("m_ConditionNumber", "2")]
+    [InlineData("m_ConditionNumber", "NaN")]
+    [InlineData("m_ConditionNumberType", "MULTIPLE")]
+    [InlineData("m_IsInverse", "True")]
+    [InlineData("m_SourceConditionActorType", "PERFORMER")]
+    [InlineData("m_ActorIsNotSource", "True")]
+    [InlineData("m_IsVisible", "False")]
+    [InlineData("m_UnknownRestriction", "True")]
+    public void UnsupportedDiseaseRequirementsNeverBecomeUnconditionalPenalties(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_disease_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var condition = new System.Collections.Generic.Dictionary<string, string>
+            {
+                ["m_ConditionType"] = "quirk_tag_amount", ["m_ConditionString"] = "disease", ["m_ConditionActorType"] = "PERFORMER",
+                ["m_ConditionNumberType"] = "GREATER_THAN_OR_EQUAL", ["m_ConditionNumber"] = "1",
+            };
+            condition[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,disease_item,Item", "element_end",
+                "element_start,disease_item,ActorDataExternalBuffs", "buffs,disease_buff", "element_end",
+                "element_start,disease_buff,Buff", "m_ConditionId,disease_condition", "element_end",
+                "element_start,disease_buff,ActorDataStats", "key_map,health_max", "multiply_stats,-0.1", "element_end",
+                "element_start,disease_condition,Condition",
+            });
+            foreach (var row in condition) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "quirk+disease=Disease\neffect_tooltip_condition_quirk_tag_amount={1} when {0}\nactor_stat_type_formatted_health_max={0} Max HP");
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("disease_item", out bool complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
+    }
+
     [Fact]
     public void MissingPartyScalingRetainsBothThrillingTabletBonuses()
     {

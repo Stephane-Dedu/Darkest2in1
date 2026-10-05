@@ -1116,3 +1116,35 @@ their previous guards. Audit 165 complete/25 partial/1 blank out of 191. Release
 - Private 24-image native-reference scenery remains installed at game/PrivateScenery and recorded in local-art/combat-extensions, with support up to 12 per region. No native/reference/generated derivative art is committed. Native room/reload/ground/torch/load/memory checks remain [?].
 - Local preview server localhost:8766, exec session 20403, remains running. Keep combat-extensions.html open. Linked preview.html retains historical round 93 art. No pending game/save restore.
 - Check session usage at round boundaries; owner requests stopping near 95% and resuming after reset. Last observed round 97 end usage 73%. Open owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.
+
+## Round 99: retain disease-dependent trinket penalties
+
+The proposed DOT-copy candidate was inaccurate: Hag's Hoard's second buff is instead
+performer_is_diseased. Installed condition_data_export defines QUIRK_TAG_AMOUNT,
+PERFORMER, disease, GREATER_THAN_OR_EQUAL one. ConditionCalculation counts quirks with
+that tag; ConditionDescription uses QuirkDescription.GetTagString and
+effect_tooltip_condition_quirk_tag_amount. LocalizationCascadingLookup resolves
+quirk+disease to the native disease icon, expanded to Disease by the existing text path.
+DD1 base.entries.trinkets.json buff lists and Unity port Character/Buff.ToolTip remain
+the presentation reference. No DOT-copy effects appeared in the installed trinket CSVs.
+
+Added only this proven visible self-presence condition. Native template has no count or
+actor placeholders, so other actors/counts, inversions, source exclusions and unknown
+restrictions stay withheld. Five completed items now keep their penalties: Hag's Hoard
+-10% Max HP, Brilliant Brew -20% Move RES, Corrupting Cleaver -15% Stun RES, Hint of Home
+-10% DMG and disease-resist Dark Impulse -25% Max HP, each when Disease and alongside
+existing benefits. Sickening Silence still has a separate unsupported target condition.
+
+Five actual-data cases plus localization/malformed-template checks and eleven restricted
+shape mutations pass. Release + 315 Core + 19 UI tests green; both deployed DLL hashes
+match. Audit 170 complete/20 partial/1 blank among 191. No game launch/process or save
+access. Native comparison before/after combat initialization remains [?].
+
+## Status 2026-10-05: loop resumed, round 99 complete
+
+- Goal active; continue tools/parity_loop.md on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed. No save access or pending restores.
+- Round 99 locally deployed with Release + 315 Core + 19 UI tests green and both DLL hashes matching. Native priority UI/lighting/loading/scene verification awaits launch permission; round 75 visibility stays blocked.
+- Cold audit 170 complete/20 partial/1 blank. Next round 100: remaining advanced effect/condition shapes, notably Sickening Silence's diseased target condition, skill selections or other actual incomplete trinkets, or persistent activity-log weeks/art. Anatomical Map remains blank because of hidden target restrictions. Skip [user]/[blocked].
+- Private scenery remains 24 native-reference panoramas, six per primary region, at game/PrivateScenery and local-art/combat-extensions, support up to 12 per region. Full prompts/provenance/art remain outside Git. Native room/reload/ground/torch/load/memory checks remain [?].
+- Local preview localhost:8766/combat-extensions.html and server exec session 20403 remain available. Linked preview.html retains historical round-93 art. No pending game/save restore.
+- Last observed five-hour usage 82%; check at round boundaries. Owner requested stopping near 95% and resuming after reset. No scheduled resume was established yet. Open owner choices remain DLC content, post-Darkest-Dungeon modes and wipe trinket retention.

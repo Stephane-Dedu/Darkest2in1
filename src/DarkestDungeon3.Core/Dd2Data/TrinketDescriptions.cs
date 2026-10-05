@@ -546,6 +546,21 @@ public sealed class TrinketDescriptions
         object[] args;
         switch (type)
         {
+            case "quirk_tag_amount":
+                // Native disease presence is a tagged-quirk count. Its template omits actor/count details,
+                // so accept only the proven self-presence shape rather than mislabeling other requirements.
+                if (!_blocks.TryGetValue(("Condition", id), out var quirkRows)
+                    || quirkRows.Any(row => !TagConditionFields.Contains(row[0]))
+                    || value != "disease" || actor != "PERFORMER" || numberType != "GREATER_THAN_OR_EQUAL"
+                    || !float.TryParse(Field("Condition", id, "m_ConditionNumber"), NumberStyles.Float,
+                        CultureInfo.InvariantCulture, out float quirkAmount) || quirkAmount != 1
+                    || (Field("Condition", id, "m_IsInverse") ?? "False") != "False"
+                    || (Field("Condition", id, "m_SourceConditionActorType") ?? "NONE") != "NONE"
+                    || (Field("Condition", id, "m_ActorIsNotSource") ?? "False") != "False") return null;
+                string quirkName = Text("quirk+" + value, localize);
+                if (quirkName == null) return null;
+                args = new object[] { quirkName, effect };
+                break;
             case "tag":
                 if (!_blocks.TryGetValue(("Condition", id), out var tagRows)
                     || tagRows.Any(row => !TagConditionFields.Contains(row[0]))
