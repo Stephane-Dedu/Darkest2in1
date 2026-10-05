@@ -38,6 +38,8 @@ public sealed class Room
     public bool IsQuestGoal;
     /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
     public string MashName;
+    /// <summary>A hidden branch room, excluded from the ordinary room graph and exploration quota.</summary>
+    public bool IsSecret;
     public List<int> CorridorIds = new();
 
     // Expedition state.
@@ -56,6 +58,8 @@ public sealed class HallTile
     public bool IsQuestGoal;
     /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
     public string MashName;
+    /// <summary>Plot-map secret door target; -1 for ordinary squares and older saves.</summary>
+    public int SecretRoomId = -1;
 
     // Expedition state.
     public bool Visited, Scouted, Resolved;
@@ -84,6 +88,7 @@ public sealed class DungeonMap
     public Corridor Corridor(int id) => Corridors[id];
 
     public IEnumerable<HallTile> AllTiles => Corridors.SelectMany(c => c.Tiles);
+    public IEnumerable<Room> QuestRooms => Rooms.Where(r => !r.IsSecret);
 
     public Corridor FindCorridor(int a, int b) =>
         Corridors.FirstOrDefault(c => (c.RoomA == a && c.RoomB == b) || (c.RoomA == b && c.RoomB == a));
@@ -106,7 +111,11 @@ public sealed class DungeonMap
         return dist;
     }
 
-    public bool IsConnected() => Distances(EntranceRoomId).All(d => d >= 0);
+    public bool IsConnected()
+    {
+        var distances = Distances(EntranceRoomId);
+        return QuestRooms.All(r => distances[r.Id] >= 0);
+    }
 
     /// <summary>DD1 scouting spends a square budget down each branch; reaching a corridor's end reveals its room.</summary>
     public int ScoutFrom(int from, int squares)

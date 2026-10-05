@@ -513,7 +513,7 @@ internal sealed class CrawlUi
         switch (exp.Quest.Type)
         {
             case "explore":
-                return $"Explore rooms: {map.Rooms.Count(r => r.Visited)} / {Mathf.CeilToInt(map.Rooms.Count * 0.9f)}";
+                return $"Explore rooms: {map.QuestRooms.Count(r => r.Visited)} / {Mathf.CeilToInt(map.QuestRooms.Count() * 0.9f)}";
             case "cleanse":
                 return $"Clear room battles: {map.Rooms.Count(r => r.HasBattle && r.Cleared)} / {map.Rooms.Count(r => r.HasBattle)}";
             case "kill_boss":
@@ -693,6 +693,7 @@ internal sealed class CrawlUi
 
         foreach (var room in map.Rooms)
         {
+            if (room.IsSecret) continue; // hidden branch access and its map marker are handled in the next step
             bool known = room.Visited || room.Scouted || visitedNear.Contains(room.Id);
             if (!known) continue;
             var p = Pos(room.X, room.Y) + offset;

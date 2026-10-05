@@ -133,14 +133,13 @@ public static class PlotMap
         var rng = new Rng(seed);
         var map = new DungeonMap { Seed = seed, Dungeon = dungeon, Size = "plot", QuestType = questType };
 
-        // Rooms. Secret rooms open off a corridor square, not a corridor end: the map has no way to walk there yet.
+        // Append hidden branch rooms after normal rooms, preserving existing IDs and normal prop-roll order.
         var roomOf = new Dictionary<string, Room>();
-        foreach (var area in areas.Where(a => a.Kind == 0))
+        foreach (var area in areas.Where(a => a.Kind == 0).OrderBy(a => a.Squares.FirstOrDefault()?.Content == SecretRoom))
         {
             var tile = area.Squares.FirstOrDefault();
             int code = tile?.Content ?? 0;
-            if (code == SecretRoom) continue;
-            var room = new Room { Id = map.Rooms.Count, X = (int)Math.Floor(tile?.X ?? 0f), Y = (int)Math.Floor(tile?.Y ?? 0f) };
+            var room = new Room { Id = map.Rooms.Count, X = (int)Math.Floor(tile?.X ?? 0f), Y = (int)Math.Floor(tile?.Y ?? 0f), IsSecret = code == SecretRoom };
             room.GridX = room.X;
             room.GridY = room.Y;
             room.MashName = tile?.Mash;
@@ -176,6 +175,8 @@ public static class PlotMap
             {
                 var s = area.Squares[i];
                 var hall = new HallTile { Index = i, X = (int)Math.Floor(s.X), Y = (int)Math.Floor(s.Y), MashName = s.Mash };
+                if (s.Content == SecretDoor && RoomAt(s) is { IsSecret: true } secret)
+                    hall.SecretRoomId = secret.Id;
                 switch (s.Content)
                 {
                     case Battle: hall.Content = HallContent.Battle; break;

@@ -1586,3 +1586,30 @@ stale Activity-log parent checklist to reflect delivered work and pending checks
 - Round 114 deployed: Release + 399 Core + 26 UI tests green, DLL hashes match. Caretaker quest/roster lists now follow independent native/optional areas. Next round 115: inspect documented plot-map secret rooms/doors against DD1 maps and Unity; split into small verified map/crawl steps if needed.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 47%, weekly 70%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 115: retain native plot secret rooms and door links
+
+Read owned DD_map4.dm and town_invasion_0.dm through existing Dd1Binary (no owner
+saves). Static door_to.area_to and dynamic content establish corA.tile17 (12,3)
+-> rooC (12,5), and corC.tile2 (8,1) -> rooA (5,1). The Unity port includes both
+maps and parses secret_room_treasures into SecretTresures; no secret movement code
+was found. Split the larger missing mechanic into metadata and access/loot steps.
+
+Importer now retains code-9 rooms after normal rooms, preserving normal IDs and
+prop-roll order, and code-13 door targets on their exact hall squares. IsSecret /
+SecretRoomId survive saves with false/-1 defaults for older maps. Main corridor
+endpoints stay unchanged. QuestRooms defines the ordinary graph/explore quota;
+secret visits cannot fulfill it and are never required. Secret minimap icons stay
+withheld until access exists; this step does not expose an unusable UI choice.
+Four cases cover both actual native links/coordinates, main graph/boss, reload,
+old-map defaults and exploration exclusion. Existing native map counts now include
+the retained rooms. Initial test compile guessed movement names; corrected to
+existing Travel/Step(bool). Final Release + 403 Core + 26 UI tests pass. Deployment
+green-gated while stopped, both DLL hashes match. No DD2 launch/owner-save access.
+
+## Status 2026-10-05: round 115 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 115 deployed: Release + 403 Core + 26 UI tests green, DLL hashes match. Plot secret metadata is saved, hidden and excluded from normal exploration. Next round 116: inspect critical scouting/secret treasure references, add branch discovery/entry/return with exact corridor resume and saved state; split loot/UI if needed.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 50%, weekly 70%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

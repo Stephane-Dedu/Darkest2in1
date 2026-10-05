@@ -17,8 +17,7 @@ public class PlotMapTests
     private static DungeonMap Load(string name, string dungeon, string type = "kill_boss") =>
         PlotMap.Load(Install, name, dungeon, type, 7, Dd1.Props(dungeon));
 
-    private static void Connected(DungeonMap map) =>
-        Assert.All(map.Distances(map.EntranceRoomId), d => Assert.True(d >= 0));
+    private static void Connected(DungeonMap map) => Assert.True(map.IsConnected());
 
     [Fact]
     public void TheDarkestDungeonsFirstPartIsDd1sMap()
@@ -51,7 +50,8 @@ public class PlotMapTests
     public void TheHeartsCaveIsOneLongCorridorWithItsObstacles()
     {
         var map = Load("DD_map4", "darkestdungeon");
-        Assert.Equal(2, map.Rooms.Count);                       // the secret room off the corridor is left out for now
+        Assert.Equal(3, map.Rooms.Count);
+        Assert.Equal(2, map.QuestRooms.Count());
         var corridor = Assert.Single(map.Corridors);
         Assert.Equal(28, corridor.Tiles.Count);
         Assert.Equal(3, corridor.Tiles.Count(t => t.Content == HallContent.Obstacle && t.ContentId == "rubble"));
@@ -64,7 +64,8 @@ public class PlotMapTests
     public void TheTownInvasionAndTheCrowsLair()
     {
         var town = Load("town_invasion_0", "town");
-        Assert.Equal(7, town.Rooms.Count);
+        Assert.Equal(8, town.Rooms.Count);
+        Assert.Equal(7, town.QuestRooms.Count());
         Assert.Equal(7, town.Corridors.Count);
         Connected(town);
         Assert.Equal(6, town.AllTiles.Count(t => t.Content == HallContent.Obstacle));

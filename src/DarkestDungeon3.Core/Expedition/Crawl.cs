@@ -778,11 +778,11 @@ public sealed class Crawl
             ? Map.Rooms.Any(r => r.IsQuestGoal && r.Visited && (!r.HasBattle || r.Cleared))
             : State.Quest.Type switch
         {
-            "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * explorePct),
+            "explore" => Map.QuestRooms.Count(r => r.Visited) >= Math.Ceiling(Map.QuestRooms.Count() * explorePct),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
             "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
-            _ => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
+            _ => Map.QuestRooms.Count(r => r.Visited) >= Math.Ceiling(Map.QuestRooms.Count() * 0.9),
         };
         if (!done) return;
         State.QuestComplete = true;
