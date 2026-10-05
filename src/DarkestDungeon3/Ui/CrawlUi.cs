@@ -197,7 +197,7 @@ internal sealed class CrawlUi
 
     private static void DrawGeneratedRoom(RegionalScenery plan, int seed, int roomId)
     {
-        var choice = plan.RoomBackground(seed, roomId);
+        var choice = RegionSceneryArt.RoomChoice(plan, seed, roomId);
         var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
         if (texture == null) return;
         var old = GUI.color;
@@ -211,6 +211,8 @@ internal sealed class CrawlUi
                 var uv = new Rect(choice.Mirror ? 1 : 0, 1 - (y + height) / 720f, choice.Mirror ? -1 : 1, height / 720f);
                 GUI.DrawTextureWithTexCoords(new Rect(0, y, Gui.W, height), texture, uv);
             }
+            // Private arena extensions include their own continuous floor, including the Shroud's wharves.
+            if (RegionSceneryArt.PrivateRoom(choice.FileName)) { Strip(0, 720, 1); return; }
             Strip(0, floorTop, 1);
             // Blend the painted ground into the same native road instead of pasting a hard edge at the footline.
             for (float y = floorTop; y < 720; y += 5)

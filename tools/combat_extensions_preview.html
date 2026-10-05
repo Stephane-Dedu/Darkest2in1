@@ -9,55 +9,74 @@ h1{font-size:24px;margin:0 0 8px}p{color:#afa99b;max-width:1100px;line-height:1.
 button,select{background:#252a2a;color:inherit;padding:9px;border:1px solid #646057;border-radius:4px;margin:0 8px 8px 0}
 button[aria-pressed=true]{background:#564632;border-color:#b09c75}a{color:#d3ba83}
 canvas{display:block;width:min(100%,1440px);border:1px solid #544e43;margin:12px 0}
-#gallery{display:grid;grid-template-columns:repeat(4,minmax(140px,1fr));gap:12px;max-width:1440px;margin-top:24px}
+#gallery{display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:12px;max-width:1440px;margin-top:24px}
 #gallery button{padding:0;margin:0;overflow:hidden;text-align:left}#gallery img{display:block;width:100%}#gallery span{display:block;padding:9px}
 label{margin-left:12px}small{color:#9b978c;display:block;max-width:1100px;line-height:1.5}
 @media(max-width:700px){body{margin:16px}#gallery{grid-template-columns:repeat(2,minmax(140px,1fr))}label{display:block;margin:0}}
 </style>
 <h1>DD2 combat scenery extensions</h1>
-<p>Four wider studies based directly on the installed combat arena geometry and painted textures. Compare each extension with its native reference or the first generated room set.</p>
+<p>24 locations, six per region, extended from different native DD2 combat arenas. Browse each room and compare it with its source. The local exploration pack uses these scenes with stable room assignments.</p>
 <select id="region" aria-label="Region">
  <option value="city">The Sprawl</option><option value="farm">The Foetor</option>
  <option value="forest">The Tangle</option><option value="coast">The Shroud</option>
 </select>
+<select id="variant" aria-label="Scene"></select>
+<button id="previous" aria-label="Previous scene">←</button><button id="next" aria-label="Next scene">→</button>
+<br>
 <button data-mode="extension" aria-pressed="true">Arena extension</button>
 <button data-mode="reference" aria-pressed="false">Native reference</button>
 <button data-mode="first" aria-pressed="false">First generated set</button>
 <label><input type="checkbox" id="guide">Show walking band</label>
+<label><input type="checkbox" id="mirror">Mirror view</label>
 <canvas id="scene" width="2048" height="768" aria-label="Selected scenery comparison"></canvas>
 <small id="caption" role="status">Loading scenery...</small>
 <p><a href="preview.html">Room and corridor preview</a> · <a id="asset" href="dd2_city-arena-01.png">Open selected image</a></p>
-<small>The native reference is an offline Blender render of the owner's DD2 files. It retains the arena layout and base textures; Unity lighting, fog, animated effects and post processing are omitted or approximate. AI extensions continue its sides and foreground. These are private comparison assets, currently separate from the installed mod.</small>
+<small>The native reference is an offline Blender render of the owner's DD2 files. It retains the arena layout and base textures; Unity lighting, fog, animated effects and post processing are omitted or approximate. AI extensions continue its sides and foreground. The private pack is loaded separately from the distributed mod. Hero scale, torch visibility and corridor joins still need an in-game check.</small>
 <div id="gallery"></div>
 <script>
 const names={city:'The Sprawl',farm:'The Foetor',forest:'The Tangle',coast:'The Shroud'};
+const scenes=['Native exterior','Resistance site','Faction site','Creature den','Pillager camp','Cultist site'];
 const skies={city:'#342119',farm:'#41402a',forest:'#172127',coast:'#31424a'};
 const canvas=document.querySelector('#scene'),ctx=canvas.getContext('2d');
 const select=document.querySelector('#region'),caption=document.querySelector('#caption');
+const variant=document.querySelector('#variant'),gallery=document.querySelector('#gallery');
 let mode='extension',request=0;
 const cache=new Map();
-function file(region,kind){return kind==='reference'?'combat-references/'+region+'.png':kind==='first'?'dd2_'+region+'-01.png':'dd2_'+region+'-arena-01.png'}
+const number=index=>String(index+1).padStart(2,'0');
+function file(region,kind,index){return kind==='reference'?'combat-references/'+region+'-'+number(index)+'.png':kind==='first'?'dd2_'+region+'-01.png':'dd2_'+region+'-arena-'+number(index)+'.png'}
 function image(path){if(!cache.has(path))cache.set(path,new Promise((resolve,reject)=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>{cache.delete(path);reject(new Error('Missing local image: '+path))};im.src=path}));return cache.get(path)}
 async function render(){
- const id=++request,region=select.value,path=file(region,mode);
+ const id=++request,region=select.value,index=Number(variant.value),path=file(region,mode,index);
  caption.textContent='Loading '+names[region]+'...';
  document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));
+ gallery.querySelectorAll('button').forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
  try{
   const im=await image(path);if(id!==request)return;
   ctx.fillStyle=skies[region];ctx.fillRect(0,0,2048,768);
   const width=mode==='reference'?im.width/im.height*768:2048;
-  ctx.drawImage(im,(2048-width)/2,0,width,768);
+  ctx.save();if(document.querySelector('#mirror').checked){ctx.translate(2048,0);ctx.scale(-1,1)}
+  ctx.drawImage(im,(2048-width)/2,0,width,768);ctx.restore();
   if(document.querySelector('#guide').checked){ctx.fillStyle='rgba(226,197,133,.1)';ctx.fillRect(0,614,2048,77);ctx.strokeStyle='#cfb786';ctx.setLineDash([12,10]);ctx.beginPath();ctx.moveTo(0,650);ctx.lineTo(2048,650);ctx.stroke();ctx.setLineDash([])}
-  caption.textContent=names[region]+' · '+({extension:'Arena extension study',reference:'Native geometry and texture reference, centered at its original proportions',first:'Round 93 generated room, first scene'}[mode])+' · '+im.width+' × '+im.height;
+  caption.textContent=names[region]+' · '+(mode==='first'?'Round 93, first generated scene':number(index)+' / '+scenes.length+' · '+scenes[index]+' · '+(mode==='reference'?'Native reference, original proportions':'Arena extension'))+' · '+im.width+' × '+im.height;
   document.querySelector('#asset').href=path;
  }catch(e){if(id===request)caption.textContent=e.message}
 }
-for(const [region,label] of Object.entries(names)){
- const button=document.createElement('button'),im=document.createElement('img'),span=document.createElement('span');
- im.src=file(region,'extension');im.alt=label+' arena extension';span.textContent=label;
- button.append(im,span);button.onclick=()=>{select.value=region;mode='extension';render()};document.querySelector('#gallery').append(button);
+for(const [index,label] of scenes.entries()){
+ const option=document.createElement('option');option.value=index;option.textContent=number(index)+' · '+label;variant.append(option);
+}
+function refreshGallery(){
+ gallery.replaceChildren();
+ for(const [index,label] of scenes.entries()){
+  const button=document.createElement('button'),im=document.createElement('img'),span=document.createElement('span');
+  im.src=file(select.value,'extension',index);im.alt=names[select.value]+' '+label;span.textContent=number(index)+' · '+label;
+  button.append(im,span);button.onclick=()=>{variant.value=index;mode='extension';render()};gallery.append(button);
+ }
 }
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;render()});
-select.onchange=render;document.querySelector('#guide').onchange=render;render();
+select.onchange=()=>{refreshGallery();render()};variant.onchange=render;
+document.querySelector('#previous').onclick=()=>{variant.value=(Number(variant.value)+scenes.length-1)%scenes.length;render()};
+document.querySelector('#next').onclick=()=>{variant.value=(Number(variant.value)+1)%scenes.length;render()};
+document.querySelector('#guide').onchange=render;document.querySelector('#mirror').onchange=render;
+refreshGallery();render();
 </script>
 </html>

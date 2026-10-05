@@ -957,3 +957,76 @@ Existing preview server session20403 serves localhost:8766/combat-extensions.htm
   5. A slain corpse-leaving DD1 monster lying in its dead pose (Ctrl+F10 kills the front enemy as a skill kill).
 - [user] questions still open: DLC content; game modes (heroes refusing to go back after the Darkest Dungeon); trinket retention on a party wipe.
 
+## Round 95: six native-reference exploration scenes per region
+
+Owner approved round 94's native-arena extension style and requested a larger set.
+Selected six actual arena types per primary region: dungeon_exterior, resist, faction,
+creature_den, pillager and cultist. Exported/rendered 20 additional private references
+from owned Unity bundles, preserving mesh placement, painted textures and the native
+default combat camera. Exporter now detects actual RGBA alpha even when native custom
+materials omit the alpha-cutout flag, and skips enabled renderers with null MeshFilters
+which have no Unity geometry. All 24 references resolve their exported objects; counts
+and full source/output hashes are recorded in the private manifest. City pillager/cultist
+scene metadata was refreshed after the empty-filter fix; their rendered geometry did
+not change. This is an offline material/camera approximation, not a native game capture.
+
+Built-in imagegen made 20 distinct extensions, one call per asset, preserving native
+landmarks and regional colors/ink marks. Shroud pillager foreground had a dark gap;
+one localized edit joined its board surface while keeping the arena recognizable.
+Combined with the approved first four scenes: 24 unique output hashes, all RGB, 20 at
+2048x768, three 2046x768 and one 2043x770, fitted with a 2.6–2.7 ratio tolerance. No image
+resampling/editing scripts. Total 46,754,480 bytes; largest 2,466,193 bytes. Full prompts,
+original candidates and two Shroud correction prompts remain with the private pack
+at C:\Users\Piral\DarkestDungeon3\local-art\combat-extensions. Source meshes/textures,
+offline references and Blender scenes remain under .universal-modder/inspection.
+No native or source-derived images committed or included in release data.
+
+DD1 crypts.props.darkest separates hall_curios and room_curios; Unity port
+Assets/Scripts/Generation/DungeonGenerator.cs initializes generation RNG with its seed
+and assigns room grid IDs. The art change leaves those expedition systems alone:
+RegionalScenery now accepts an ordered variable-size pool and chooses only from saved
+expedition seed/room ID, without advancing gameplay RNG. Every N consecutive room IDs
+uses each of N scenes, then mirrored views. Stable revisit/reload behavior requires an
+unchanged pack. PrivateRoomScenery discovers strict two-digit regional filenames,
+takes up to 12 per region and checks byte count/PNG IHDR, unsigned dimensions, color
+format and ratio before Unity allocates a texture.
+
+Plugin Paths/NativeRoomSceneryFolder defaults to game/PrivateScenery; empty disables.
+RegionSceneryArt reads only active-region files on a worker, uploads at most one image
+per Update on Unity's main thread with markNonReadable, and adopts the complete valid
+private pool once. Corrupt/missing files retain public/native fallback; pool adoption
+fades over 0.35s and cannot reshuffle later as individual files arrive. Clear destroys
+owned generated textures, releases native handles and drops pending worker/queue
+references. Private rooms draw their own entire coherent floor; the Shroud's boards
+are no longer faded into sand. Existing short room fades cover switches to native
+corridors. Public round 93 art keeps its former road blend. Native DD2 combat unchanged.
+
+Three Core tests cover strict bounded discovery, six/twelve-scene deterministic
+assignment over extreme seeds, and real PNG bounds/corruption. A headless integration
+test compiles the actual loader with Unity/Addressables shims and exercises two public
+fallbacks plus seven private candidates (one corrupt), exactly six valid scenes,
+one decode per update, main-thread calls, adoption/fade, bad-file skip, clear/missing/
+legacy-region fallback and outstanding worker teardown. Initial UI test compilation
+found a duplicate Mathf shim; consolidated its added methods into the existing shim.
+Release + 277 Core + 19 UI tests pass. Shims are not GPU/Unity PNG-decoder verification.
+
+Backed up both installed DLLs/PDBs before deployment at
+C:\Users\Piral\.universal-modder\backups\darkest2in1-plugin\20261005-round95-before-052418.zip.
+Deployed Release DLLs and public data normally; copied the private 24-PNG pack/manifest/
+README separately to game/PrivateScenery. Both DLLs, public fallbacks and all private
+workspace/preview/installed copies hash-match. No DD2 process running/launched and no
+save access. Existing localhost comparison now has six per-region thumbnails, a scene
+selector, previous/next arrows and source/mirror/walking-band controls. Native-source
+matching and generated scenes inspected in the browser. The linked older preview.html
+retains the previous round 93 public corridor/room composition.
+
+## Status 2026-10-05: loop resumed, round 95 complete
+
+- Owner authorized autonomous iterations. Continue tools/parity_loop.md on claude/practical-wright-hicri0. Do not launch DD2 until explicitly allowed. Build Deploy=false if a game process is running; game-facing changes remain [?].
+- Round 95 Release, 277 Core and 19 UI tests passed. Locally deployed DLLs/public fallbacks hash-match. Private 24-image pack installed at game/PrivateScenery and hash-matches local-art/combat-extensions and preview copies. The default config path is bound on next plugin startup; no save/campaign migration was needed.
+- Native arena references/artwork remain outside Git. Only loader/tools/test/document changes are tracked. Full prompts, arena names, source/output hashes, original generated paths and Shroud corrections are in local-art/combat-extensions/manifest.json. Six distinct images per primary region, support up to 12; mirrors reuse art.
+- No game launch or save access, no pending restores. Exact plugin-assembly backup above. Local preview server port 8766, exec session 20403, still running; combat-extensions.html is the expanded pack browser and is kept open. The linked round 93 corridor preview is historical.
+- Native verification when launch is allowed: embark in each primary region, walk both directions/room boundaries, six consecutive room IDs, revisit/save reload, hero/prop footline and interactions, torch darkness (particularly Tangle), battle fade, Shroud wharf/sand joins, missing-pack fallback, load timing and repeated expedition memory. Headless tests verify lifecycle/selection; they do not verify native rendering.
+- Existing built systems/priority fixes remain as round 94 status: DD2 default paired regions and DD1 quest rows with single right arrow, independent progress, native arena/light, open native corridors, bounded setup polling, atlas portraits and expanded trinket effect/condition presentation. Native priority-bug verification awaits launch permission; round 75 visibility remains blocked.
+- Next round 96: remaining cold-menu trinket effect fields/conditions or persistent activity-log weeks/art. Cold tooltip coverage remains 159 complete/28 partial/4 blank of 191 base trinkets. Later: secret rooms and Memorial. Skip [user]/[blocked].
+- Outstanding owner choices: DLC content, game modes after the Darkest Dungeon, trinket retention on party wipe.

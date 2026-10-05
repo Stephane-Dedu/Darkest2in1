@@ -10,7 +10,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace DarkestDungeon3.Runtime;
 
-/// <summary>One expedition's native scenery textures, loaded during embark and released on leaving the expedition.</summary>
+/// <summary>One expedition's native scenery and optional private rooms, loaded during embark and released on exit.</summary>
 internal static class RegionSceneryArt
 {
     private static readonly Dictionary<string, AsyncOperationHandle<Texture2D>> Handles = new();
@@ -19,11 +19,14 @@ internal static class RegionSceneryArt
     private static bool _failed;
     private static float _readyAt = -1, _retryAt;
     private static readonly Dictionary<string, RoomTexture> Rooms = new();
-    private static Task<RoomBytes[]> _roomLoading;
+    private static Task<RoomLoadSet> _roomLoading;
     private static Queue<RoomBytes> _roomPending;
+    private static IReadOnlyList<string> _privateCandidates = Array.Empty<string>(), _privateVariants = Array.Empty<string>();
+    private static float _privateReadyAt = -1;
 
     private sealed class RoomBytes { public string FileName, Error; public byte[] Data; }
     private sealed class RoomTexture { public Texture2D Texture; public float ReadyAt; }
+    private sealed class RoomLoadSet { public RoomBytes[] Images; public IReadOnlyList<string> PrivateFiles; public string Error; }
 
     public static void Prepare(string region)
     {
@@ -34,21 +37,37 @@ internal static class RegionSceneryArt
         _region = region;
         int generation = _generation;
         string folder = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "data", "scenery");
-        _roomLoading = Task.Run(() => plan.RoomBackgrounds.Select(fileName =>
+        string privateFolder = Plugin.NativeRoomSceneryPath?.Value;
+        _roomLoading = Task.Run(() =>
         {
-            var result = new RoomBytes { FileName = fileName };
-            try
+            IReadOnlyList<string> privateFiles = Array.Empty<string>();
+            string error = null;
+            try { privateFiles = PrivateRoomScenery.Find(privateFolder, region); }
+            catch (Exception e) { error = e.Message; }
+            RoomBytes Read(string source, string fileName)
             {
-                string path = Path.Combine(folder, fileName);
-                if (File.Exists(path))
+                var result = new RoomBytes { FileName = fileName };
+                try
                 {
-                    if (new FileInfo(path).Length > 16 * 1024 * 1024) result.Error = "file exceeds 16 MB";
-                    else result.Data = File.ReadAllBytes(path);
+                    string path = Path.Combine(source, fileName);
+                    if (File.Exists(path))
+                    {
+                        if (new FileInfo(path).Length > PrivateRoomScenery.MaxFileBytes) result.Error = "file exceeds 16 MB";
+                        else
+                        {
+                            result.Data = File.ReadAllBytes(path);
+                            if (!PrivateRoomScenery.ValidPng(result.Data))
+                            { result.Data = null; result.Error = "invalid PNG header, dimensions or scene ratio"; }
+                        }
+                    }
                 }
+                catch (Exception e) { result.Error = e.Message; }
+                return result;
             }
-            catch (Exception e) { result.Error = e.Message; }
-            return result;
-        }).ToArray());
+            return new RoomLoadSet { PrivateFiles = privateFiles, Error = error,
+                Images = plan.RoomBackgrounds.Select(name => Read(folder, name))
+                    .Concat(privateFiles.Select(name => Read(privateFolder, name))).ToArray() };
+        });
         try
         {
             foreach (string key in plan.AssetKeys)
@@ -95,16 +114,19 @@ internal static class RegionSceneryArt
     {
         if (_roomLoading != null && _roomLoading.IsCompleted)
         {
-            _roomPending = new Queue<RoomBytes>(_roomLoading.GetAwaiter().GetResult());
+            var loaded = _roomLoading.GetAwaiter().GetResult();
+            _roomPending = new Queue<RoomBytes>(loaded.Images);
+            _privateCandidates = loaded.PrivateFiles;
+            if (loaded.Error != null) Plugin.Log.LogWarning($"[scenery] private room pack: {loaded.Error}; using distributed room scenes");
             _roomLoading = null;
         }
         if (_roomPending == null || _roomPending.Count == 0) return;
         var image = _roomPending.Dequeue();
         if (image.Error != null) Plugin.Log.LogWarning($"[scenery] {image.FileName}: {image.Error}; retaining native region scene");
-        if (image.Data == null) return;
         Texture2D texture = null;
         try
         {
+            if (image.Data == null) return;
             texture = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false)
                 { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             if (!texture.LoadImage(image.Data, markNonReadable: true) || texture.width > 4096 || texture.height > 2048)
@@ -117,11 +139,26 @@ internal static class RegionSceneryArt
             if (texture != null) UnityEngine.Object.Destroy(texture);
             Plugin.Log.LogWarning($"[scenery] {image.FileName}: {e.Message}; retaining native region scene");
         }
+        finally
+        {
+            if (_roomPending.Count == 0)
+            {
+                // Adopt a completed set once; skipped/broken files cannot shift room choices on later frames.
+                _privateVariants = _privateCandidates.Where(Rooms.ContainsKey).ToArray();
+                _privateReadyAt = Time.unscaledTime;
+                if (_privateVariants.Count > 0)
+                    Plugin.Log.LogInfo($"[scenery] {_region}: {_privateVariants.Count} private arena extension scenes ready");
+            }
+        }
     }
 
+    public static RoomSceneryChoice RoomChoice(RegionalScenery plan, int seed, int roomId) =>
+        plan.RoomBackground(seed, roomId, _region == plan.Region && _privateVariants.Count > 0 ? _privateVariants : plan.RoomBackgrounds);
+    public static bool PrivateRoom(string fileName) => fileName != null && _privateVariants.Contains(fileName);
     public static Texture2D RoomTextureFor(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image) ? image.Texture : null;
     public static float RoomAlpha(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image)
-        ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((Time.unscaledTime - image.ReadyAt) / 0.35f)) : 0;
+        ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((Time.unscaledTime - (PrivateRoom(fileName)
+            ? Mathf.Max(image.ReadyAt, _privateReadyAt) : image.ReadyAt)) / 0.35f)) : 0;
 
     public static void Clear()
     {
@@ -133,6 +170,8 @@ internal static class RegionSceneryArt
         Rooms.Clear();
         _roomLoading = null;
         _roomPending = null;
+        _privateCandidates = _privateVariants = Array.Empty<string>();
+        _privateReadyAt = -1;
         _region = null;
         _failed = false;
         _readyAt = -1;

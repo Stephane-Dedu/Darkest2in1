@@ -21,13 +21,15 @@ public sealed class RegionalScenery
     }
 
     /// <summary>Stable after reload/revisit, without consuming expedition RNG; consecutive room IDs get different scenes.</summary>
-    public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId)
+    public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId) => RoomBackground(expeditionSeed, roomId, RoomBackgrounds);
+
+    public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId, IReadOnlyList<string> variants)
     {
-        if (roomId < 0) return null;
+        if (roomId < 0 || variants == null || variants.Count == 0) return null;
         uint seed = unchecked((uint)expeditionSeed), room = (uint)roomId;
-        int index = (int)((seed % (uint)RoomBackgrounds.Count + room) % (uint)RoomBackgrounds.Count);
-        bool mirror = ((seed / (uint)RoomBackgrounds.Count + room / (uint)RoomBackgrounds.Count) & 1) != 0;
-        return new RoomSceneryChoice(RoomBackgrounds[index], mirror);
+        int index = (int)((seed % (uint)variants.Count + room) % (uint)variants.Count);
+        bool mirror = ((seed / (uint)variants.Count + room / (uint)variants.Count) & 1) != 0;
+        return new RoomSceneryChoice(variants[index], mirror);
     }
 
     private const string Textures = "Assets/Art/Textures/Environments/";

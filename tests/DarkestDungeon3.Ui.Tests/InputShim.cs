@@ -63,6 +63,7 @@ public class Texture { public int width, height; }
 public sealed class Texture2D : Texture
 {
     public static readonly List<int> ApiThreads = new();
+    public static int RoomDecodeCount;
     public byte[] Raw;
     public FilterMode filterMode;
     public TextureWrapMode wrapMode;
@@ -73,6 +74,14 @@ public sealed class Texture2D : Texture
     private static void Track() => ApiThreads.Add(Environment.CurrentManagedThreadId);
     // Synthetic atlas pixels, not Unity decoding. Tests validate scheduling, row orientation, caching and hits.
     public bool LoadImage(byte[] data) { Track(); width = height = 2; return true; }
+    // Only validates call scheduling and allocation bounds; native Unity PNG decoding remains unverified.
+    public bool LoadImage(byte[] data, bool markNonReadable)
+    {
+        Track(); RoomDecodeCount++;
+        width = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
+        height = (data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23];
+        return true;
+    }
     public Color32[] GetPixels32()
     {
         Track();

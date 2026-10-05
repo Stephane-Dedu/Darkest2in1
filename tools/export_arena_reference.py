@@ -18,14 +18,17 @@ def main():
     parser.add_argument("--game", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--region", choices=["city", "farm", "forest", "coast"], required=True)
+    parser.add_argument("--arena", choices=["dungeon_exterior", "resist", "faction", "creature_den", "pillager", "cultist"], default="dungeon_exterior")
     args = parser.parse_args()
     repo = Path(__file__).resolve().parents[1]
     if args.output.resolve().is_relative_to(repo):
         parser.error("Private game assets must be exported outside the mod repository.")
     bundles = args.game / "Darkest Dungeon II_Data/StreamingAssets/aa"
     out = args.output / args.region
+    if args.arena != "dungeon_exterior":
+        out /= args.arena
     out.mkdir(parents=True, exist_ok=True)
-    scene_name = f"scenes_scenes_combat_arena_{args.region}_dungeon_exterior.bundle"
+    scene_name = f"scenes_scenes_combat_arena_{args.region}_{args.arena}.bundle"
     env = UnityPy.load(str(bundles / scene_name))
     scene_objects = list(env.objects)
     # Cross-referenced materials and meshes, including shared terrain pieces.
@@ -87,12 +90,15 @@ def main():
         floats = dict(tree["m_SavedProperties"]["m_Floats"])
         colors = dict(tree["m_SavedProperties"]["m_Colors"])
         texture = None
+        has_alpha = False
         scale, offset = {"x": 1, "y": 1}, {"x": 0, "y": 0}
         for name, tex in m.m_SavedProperties.m_TexEnvs:
             if name in ["_MainTex", "_BaseMap", "_BaseMap_texture"] and tex.m_Texture.m_PathID:
                 image_obj = tex.m_Texture.read()
                 texture = f"tex-{tex.m_Texture.m_PathID}.png"
-                image_obj.image.save(out / texture)
+                pixels = image_obj.image
+                has_alpha = pixels.mode == "RGBA" and pixels.getextrema()[3][0] < 255
+                pixels.save(out / texture)
                 scale = {"x": tex.m_Scale.x, "y": tex.m_Scale.y}
                 offset = {"x": tex.m_Offset.x, "y": tex.m_Offset.y}
                 break
@@ -102,7 +108,7 @@ def main():
             scale, offset = {"x": tiling["r"], "y": tiling["g"]}, {"x": tiling["b"], "y": tiling["a"]}
         materials[key] = {"name": m.m_Name, "texture": texture, "tint": tint,
                           "scale": scale, "offset": offset,
-                          "cutout": "transp" in m.m_Name.lower() or floats.get("_IsAlphaCutout", 0) > 0}
+                          "cutout": has_alpha or "transp" in m.m_Name.lower() or floats.get("_IsAlphaCutout", 0) > 0}
         return key
 
     for obj in scene_objects:
@@ -121,6 +127,8 @@ def main():
             if any("vfx" in p.read().m_Name.lower() for p in d.m_Materials):
                 continue
             mesh_ptr = filters[go.object_reader.path_id]
+            if not mesh_ptr.m_PathID:
+                continue  # Enabled renderer with an empty filter contributes no geometry in Unity either.
             mesh = mesh_ptr.read()
             mesh_key = str(mesh_ptr.m_PathID)
             if mesh_key not in meshes:
@@ -144,7 +152,7 @@ def main():
                 "camera": {"position": [0, .74, -8.3], "vertical_fov": 38},
                 "notice": "Private game assets. Offline material/camera approximation; no Unity VFX or post processing."}
     (out / "scene.json").write_text(json.dumps(document, separators=(",", ":")), encoding="utf-8")
-    print(f"{args.region}: {len(objects)} scenery objects, {len(materials)} materials, {len(missing)} unresolved")
+    print(f"{args.region}/{args.arena}: {len(objects)} scenery objects, {len(materials)} materials, {len(missing)} unresolved")
     for entry in missing[:8]:
         print(entry)
 
