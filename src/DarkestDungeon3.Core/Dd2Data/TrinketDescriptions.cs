@@ -209,6 +209,7 @@ public sealed class TrinketDescriptions
         "m_TokenCopyTags", "m_TokenCopyAmount", "m_TokenCopyAmountRange",
         "m_QuirkRemoveTag", "m_QuirkRemoveAmount", "m_QuirkRemoveAmountRange",
         "m_QuirkAddTag", "m_QuirkAddAmount", "m_QuirkAddAmountRange",
+        "torch",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
@@ -408,6 +409,16 @@ public sealed class TrinketDescriptions
                 (value * (stat.Item1.EndsWith("Percent", StringComparison.Ordinal) ? 100 : 1)).ToString("0.##", CultureInfo.InvariantCulture)));
             if (statText == null) return null;
             parts.Add(statText);
+        }
+        string torch = Field("Effect", id, "torch");
+        if (torch != null)
+        {
+            if (!float.TryParse(torch, NumberStyles.Float, CultureInfo.InvariantCulture, out float delta)
+                || float.IsNaN(delta) || float.IsInfinity(delta) || delta == 0) return null;
+            string amount = (delta > 0 ? "+" : "") + delta.ToString(CultureInfo.InvariantCulture);
+            string change = Format(Text("effect_tooltip_torch_change", localize), amount);
+            if (change == null || !change.Contains(amount)) return null;
+            parts.Add(change);
         }
         if (parts.Count == 0) return null;
         float chance = Field("Effect", id, "m_Chance") == null ? 1 : Number("Effect", id, "m_Chance");

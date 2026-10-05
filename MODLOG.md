@@ -1826,5 +1826,33 @@ of 191. No game launched or owner estate accessed; native tooltip remains [?].
 - Loop continues under owner authorization; native goal remains paused and no duplicate goal exists.
 - Round 123 deployed and green. Next round 124: inspect Icon of the Light's visible torch -5 at 66% on received CRIT; native EffectDescription templates/units and DD1/Unity torch display are references. Do not alter hidden buff/condition policy to force complete coverage.
 - Ordinary usage available; session 81%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch, protected estates/abandoned project/private artwork constraints remain.
+
+## Round 124: native additive Flame changes retain their raw units
+
+Read DD1 base.effects Darkness/Light torch amounts and Unity Effect.Tooltip's
+Global torch branch. Native EffectDescription enumerates RunValues using signed
+raw change versus set-to templates; EffectInstance applies the corresponding
+ChangeValue or SetValue. Icon of the Light's visible effect is torch -5 at 66%
+when critically hit. It now appears beside existing Regen/Consecration benefits.
+
+Only finite nonzero additive torch is supported, using native localization,
+event, sign, raw precision and chance. Set-to, unknown metadata, hidden effects
+and malformed bodies remain withheld. Three signed/raw-unit fixtures and seven
+unsafe value/selector fixtures accompany the actual item/localization checks.
+The initial item test wrongly expected it to remain partial. Audit confirmed
+torch was its final omitted effect; that expectation was corrected, then all
+checks passed before deployment. No red build/test was deployed.
+
+Found a separate gap: Number accepts NaN chance, whose comparisons skip the
+suffix and could imply a guaranteed effect. Recorded for next round, not changed
+here. Release + 456 Core + 30 UI tests pass; stopped-game installed DLL hashes
+match. Audit: 178 complete/12 partial/1 blank of 191. No game launched or owner
+estate accessed. Native tooltip comparison remains [?], hidden policy unchanged.
+
+## Status 2026-10-05: round 124 complete
+
+- Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
+- Round 124 deployed and green. Next round 125: finite effect chance validation, preserving omitted/default 100%, real 5/66% risks and body retention. Then remaining visible token mutations/conditional effects; skip hidden-policy blockers.
+- Ordinary usage available; session 84%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch, protected estates/abandoned project/private artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
