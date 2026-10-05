@@ -1,5 +1,5 @@
-// An event-only shim for running the actual Drag.cs outside Unity. It deliberately does not simulate
-// native GUI buttons, GUI.matrix, rendering or resource loading; those still need an in-game check.
+// Input shims for actual Drag/map drawing outside Unity, with group-local pointer coordinates.
+// They do not simulate native GUI buttons, GUI.matrix, rendering or resource loading; those need a game check.
 [assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
 namespace UnityEngine;
 
@@ -11,13 +11,16 @@ public sealed class Event
     public EventType type, rawType;
     public int button;
     public KeyCode keyCode;
-    public Vector2 mousePosition;
+    public Vector2 mousePosition, delta;
     public void Use() => type = EventType.Used;
 }
 public readonly struct Vector2(float x, float y)
 {
     public readonly float x = x, y = y;
     public float magnitude => MathF.Sqrt(x * x + y * y);
+    public static Vector2 zero => new(0, 0);
+    public Vector2 normalized => magnitude > 0 ? new(x / magnitude, y / magnitude) : zero;
+    public static Vector2 operator *(Vector2 a, float b) => new(a.x * b, a.y * b);
     public static Vector2 operator -(Vector2 a, Vector2 b) => new(a.x - b.x, a.y - b.y);
     public static Vector2 operator +(Vector2 a, Vector2 b) => new(a.x + b.x, a.y + b.y);
 }
@@ -40,6 +43,19 @@ public readonly struct Color(float r, float g, float b, float a = 1)
 }
 public static class GUI
 {
+    private static readonly Stack<(Vector2 Mouse, Vector2 Clip)> Groups = new();
+    public static void BeginGroup(Rect area)
+    {
+        Groups.Push((Event.current.mousePosition, GUIUtility.clipOffset));
+        Event.current.mousePosition -= area.position;
+        GUIUtility.clipOffset += area.position;
+    }
+    public static void EndGroup()
+    {
+        var prior = Groups.Pop();
+        Event.current.mousePosition = prior.Mouse;
+        GUIUtility.clipOffset = prior.Clip;
+    }
     public static Color color;
     public static bool enabled = true;
     public static void DrawTexture(Rect r, Texture2D t) { }
@@ -67,6 +83,8 @@ public readonly struct Color32(byte r, byte g, byte b, byte a)
 public class Texture { public int width, height; }
 public sealed class Texture2D : Texture
 {
+    private static Texture2D _whiteTexture;
+    public static Texture2D whiteTexture => _whiteTexture ??= new(1, 1, TextureFormat.RGBA32, false);
     public static readonly List<int> ApiThreads = new();
     public static int RoomDecodeCount;
     public byte[] Raw;

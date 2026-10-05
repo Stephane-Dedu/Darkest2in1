@@ -36,7 +36,11 @@ namespace UnityEngine.Video
 
 namespace DarkestDungeon3.Runtime
 {
-    internal static class Art { public static Texture2D Dd1(params string[] parts) => null; }
+    internal static class Art
+    {
+        public static Texture2D Dd1(params string[] parts) => null;
+        public static Texture2D MapIcon(string id) => null;
+    }
     internal static class Dd1Audio
     {
         public static bool Hush;
@@ -61,6 +65,13 @@ namespace DarkestDungeon3.Ui
     {
         public const float W = 1920, H = 1080;
         public static readonly List<string> Texts = new();
+        public static readonly List<string> Tips = new();
+        public static void Tip(string text, Color? title = null)
+        {
+            if (Event.current.type == EventType.Repaint && !string.IsNullOrEmpty(text)) Tips.Add(text);
+        }
+        public static bool Hotspot(Rect rect) => GUI.enabled && Event.current.type == EventType.MouseUp
+            && Event.current.button == 0 && rect.Contains(Event.current.mousePosition);
         public static void Fill(Rect rect, Color colour) { }
         public static void Text(Rect rect, string text, float size, Color colour, TextAnchor align) => Texts.Add(text);
     }

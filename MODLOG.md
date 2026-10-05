@@ -2623,3 +2623,41 @@ renders after EndGroup, so hit testing must remain in the clipped map coordinate
 - Next round 154: owner-reported missing minimap Battle/Curio/Quest Location hover labels. Record DD1 label/fog differences in PARITY before code, use a meaningful real label-selection seam, test/build/deploy only while stopped and commit/push. The stagecoach's exact native symptom remains unverified; never describe the whole native bug as proven fixed from headless input alone.
 - DD2 stopped at deployment; no game launched or killed. No protected estates, abandoned project or native-derived artwork accessed. Owner preview/server remains unchanged. No running agent, test or build; no save restores pending.
 - Later candidates remain loot-scroll truncation and permitted synthetic-estate/native validation for saved-raid recovery, lighting/startup and stagecoach. Owner launch authorization is still absent.
+
+## Round 154: restore minimap content hover labels
+
+Owner directly requested finishing the pending task while ordinary usage was
+still available at 95%; completed this single bounded round and then stopped.
+Installed miscellaneous.string_table.xml str_map_*_tooltip supplies Battle,
+Curio, Quest Location, guarded curios/treasure, Treasure, Trap, Obstacle, Boss
+and Secret Door. Unity RaidMapHallSectorSlot gates content by Knowledge and hides
+hunger; RaidMapRoomSlot provides movement feedback. DD2 KingdomMapCellBiomeInfoBhv
+UpdateKillContract uses its own native tooltip/localization path; the mod retains
+its DD1 map and Gui.Tip rather than replacing native DD2 map components.
+
+Moved the existing map drawing/panning into CrawlMapUi without changing its
+initial behavior, enabling a linked-source pointer replay of the real draw loop.
+Battle, curio and quest-location hover cases failed with no queued tip. Ranked
+missing-request, group-coordinate and fog hypotheses; adding requests alone
+made the original cases pass. Labels follow the visible marker/icon, preserving
+unknown/resolved/consumed states. Remaining guarded curios change from battle
+labels to their curio/treasure label; quest objects use DD1 Quest Location wording.
+Known secret doors retain their label after resolving another hall object.
+Viewport, disabled-page and pan guards prevent tips outside the active map.
+
+Seventeen drawing/input cases exercise installed text, fog, completed objects,
+known secrets, guarded objectives, clipped/disabled pointers, Repaint, plot and
+generated halls, pan/recenter and unchanged travel callbacks. The shim models
+group-local pointer coordinates and tooltip requests, not Unity rasterization,
+native GUI.Button or viewport matrices. All 648 Core + 82 UI tests and Release
+pass; DD2 was stopped and both installed DLL hashes match. No temporary probes,
+new dependencies, save access, game launch or native-derived artwork changes.
+Native tooltip visibility/position remains [?], including scaled windows.
+
+## Status 2026-10-05: round 154 complete, quota handoff
+
+- Round 154 built, all 730 tests green and deployed with matching DLL hashes; commit/push this handoff. Both owner-reported input/display gaps now have tested fixes, with native confirmation still pending. Native goal remains paused without resume API; no duplicate or false completion.
+- Pause now at session 99%, weekly 93%, ordinary usage available at the final boundary. Owner's finish-task instruction allowed this bounded round past the usual cutoff; do not start another before session reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Existing hourly heartbeat resumes the loop after reset; earlier unchanged-quota heartbeats stay quiet. Do not create another automation.
+- Next round 155 candidate: inspect and document battle/curio loot-scroll truncation against DD1 and the Unity port, then implement one proven gap with tests/build and stopped-game deployment. Native stagecoach drag and map hover checks remain [?]; do not claim native symptoms fully confirmed by headless input tests.
+- DD2 stopped at deployment; no launch or process termination. No protected estates, abandoned project or private art accessed; owner preview/server unchanged. No running tests/builds/agents or save restores pending.
+- Native checks once explicitly permitted: drag recruits to occupied/empty roster areas, cancel/retry/open details/check full capacity; hover scouted/visited battle, curio, quest location and guarded room/hall markers; pan and scale the map, ensure hidden/completed content stays concealed and tooltips render above the panel.
