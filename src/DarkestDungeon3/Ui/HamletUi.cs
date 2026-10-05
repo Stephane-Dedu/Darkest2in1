@@ -1091,15 +1091,29 @@ internal sealed class HamletUi
     private Memorial _memorial;
     private Vector2 _memorialScroll;
     private bool _epiloguePrepared;
+    private Estate _memorialEstate;
+    private int _memorialJournalCount = -1;
+    private Dd1Font _memorialJournalFont;
+    private MemorialJournalLayout _memorialJournals;
 
     private void DrawMemorial()
     {
         _memorial ??= Memorial.Load(S.Dd1);
+        if (_memorialEstate != E || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != Dd1Font.Body)
+        {
+            if (_memorialEstate != E) _memorialScroll = Vector2.zero;
+            _memorialEstate = E; _memorialJournalCount = E.CollectedJournalPages.Count; _memorialJournalFont = Dd1Font.Body;
+            _memorialJournals = MemorialJournalLayout.Build(Memorial.Journals(E, S.Lore),
+                title => Gui.TextHeight(title, 23, 560), text => Gui.TextHeight(text, 20, 560));
+        }
         Gui.Text(W(704, 74, 650, 64), Plain(S.Lore?.Text("str_statue_ancestor_quote")), 23, Gui.Dd1Class, TextAnchor.MiddleCenter);
         var entries = _memorial.Categories.Where(c => _memorial.Videos.Any(v => v.Category == c.Name && v.Visible())).ToList();
         int rows = _memorial.Videos.Count(v => v.Visible());
         var view = W(704, 170, 648, 580);
-        _memorialScroll = GUI.BeginScrollView(view, _memorialScroll, new Rect(0, 0, 620, Mathf.Max(view.height, entries.Count * 50 + rows * 130)));
+        var journals = _memorial.Categories.FirstOrDefault(c => c.Name == "backerjournal");
+        float height = entries.Count * 50 + rows * 130 + (journals != null ? 50 + Mathf.Max(80, _memorialJournals.Height) : 0);
+        _memorialScroll.y = Mathf.Clamp(_memorialScroll.y, 0, Mathf.Max(0, height - view.height));
+        _memorialScroll = GUI.BeginScrollView(view, _memorialScroll, new Rect(0, 0, 620, Mathf.Max(view.height, height)));
         float y = 0;
         string play = null;
         foreach (var category in entries)
@@ -1120,6 +1134,22 @@ internal sealed class HamletUi
                 if (allowed && Gui.Hotspot(button)) play = video.VideoName;
                 if (allowed && video.Name == "epilog" && !_epiloguePrepared) { _epiloguePrepared = true; CinematicCache.Prepare(S.Dd1, new[] { video.VideoName }); }
                 y += 130;
+            }
+        }
+        if (journals != null)
+        {
+            if (Art.Dd1(journals.LabelBackdrop) is { } titleBar) GUI.DrawTexture(new Rect(0, y, 600, 40), titleBar);
+            Gui.Text(new Rect(20, y, 560, 40), S.Lore.Text(journals.Label) ?? "Journals", 25, Gui.Dd1Name, heading: true);
+            y += 50;
+            if (_memorialJournals.Rows.Count == 0)
+                Gui.Text(new Rect(20, y + 10, 560, 60), "No journal pages have been recovered.", 20, Gui.Dd1Class);
+            foreach (var row in _memorialJournals.Rows)
+            {
+                float top = y + row.Y;
+                if (top + row.Height <= _memorialScroll.y || top >= _memorialScroll.y + view.height) continue;
+                if (Art.Dd1(journals.EntryBackdrop) is { } bg) GUI.DrawTexture(new Rect(0, top, 600, row.Height), bg);
+                Gui.Text(new Rect(20, top + 12, 560, row.TitleHeight), row.Journal.Title, 23, Gui.Dd1Name, heading: true);
+                Gui.Text(new Rect(20, top + 20 + row.TitleHeight, 560, row.BodyHeight), row.Journal.Text, 20, Gui.Dd1Text);
             }
         }
         GUI.EndScrollView();

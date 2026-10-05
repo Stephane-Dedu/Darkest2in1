@@ -22,11 +22,23 @@ public sealed class MemorialVideo
         !AccessOnlyIfViewed || viewed?.Contains(Name) == true || (AccessIfPlot != null && completedPlots.Contains(AccessIfPlot));
 }
 
+public sealed class MemorialJournal
+{
+    public int Page;
+    public string Title, Text;
+}
+
 /// <summary>DD1's Memorial media categories and video unlock rules, read from statue_media_info.json.</summary>
 public sealed class Memorial
 {
     public List<MemorialCategory> Categories = new();
     public List<MemorialVideo> Videos = new();
+
+    public static IReadOnlyList<MemorialJournal> Journals(Estate estate, Dd1Lore lore) => estate.CollectedJournalPages
+        .Where(p => p >= 0).OrderBy(p => p).Select(p => new MemorialJournal
+        {
+            Page = p, Title = lore.Text("journal_page_title_" + p), Text = lore.Text("journal_page_text_" + p)
+        }).Where(p => !string.IsNullOrWhiteSpace(p.Title) && !string.IsNullOrWhiteSpace(p.Text)).ToList();
 
     public static Memorial Load(Dd1Install dd1)
     {

@@ -1722,3 +1722,29 @@ older saved expeditions retain their saved layout rather than being rewritten.
 - Round 119 deployed: Release + 427 Core + 26 UI tests green, DLL hashes match. Plot secret metadata, discovery, exact contents/journal payout and usable controls now exist; native check remains. Next round 120: collected Memorial journal reading from saved page IDs using DD1 localized text/category/backdrop, without revealing uncollected pages; then boss narration.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 66%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 120: Memorial reads only collected journal pages
+
+Owned statue_media_info.json supplies the backerjournal category/title/entry art;
+statue.layout.darkest supplies the 600x580 list and 10-pixel entry spacing. Native
+journal.string_table.xml supplies exact page titles/text, including special page
+0. Unity StatueWindow/StatueAudioEntry handles plot audio, with no page reader.
+Memorial.Journals is a read-only projection of saved collected IDs, ordered and
+withheld when either native title or text is absent. It never creates collection
+history or draws a seed. UI appends measured journal cards to the existing videos,
+using native art, bounded scroll and an empty-state message. Height/text caches
+refresh on collection/font changes and reset scroll/cache on estate changes.
+
+Two Core tests verify ordered native text, unknown/uncollected withholding,
+byte-identical state/RNG through viewing and reload, and estate isolation. Two UI
+tests verify full long/wrapped text geometry, native spacing and empty collections.
+Release + 429 Core + 28 UI tests pass. Green-gated stopped-game deployment, both
+DLL hashes match. No game launch or owner saves; native reader/scroll/art check [?].
+Boss narration remains a separate missing category, not inferred from journal pages.
+
+## Status 2026-10-05: round 120 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 120 deployed: Release + 429 Core + 28 UI tests green, DLL hashes match. Plot secrets and saved journal reading now work in code. Next round 121: native DD1 Memorial boss/Darkest narration, actual audio event/portrait/plot unlock references and coherent optional-region filtering; native DD2 lairs must not receive unrelated DD1 boss narration.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
