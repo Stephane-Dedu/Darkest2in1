@@ -237,6 +237,48 @@ internal static class Dd1Audio
     /// <summary>DD1 has a sample of this name.</summary>
     public static bool Has(string sample) => Ensure() && _index.Has(sample);
 
+    private static Fsb5Index _narrationIndex;
+    private static Stream _narration;
+    public static string NarrationSample { get; private set; }
+
+    public static bool HasNarration(string sample)
+    {
+        if (!Ensure()) return false;
+        try { _narrationIndex ??= Fsb5Index.Load(new[] { Session.Current.Dd1.PathOf("audio", "secondary_banks", "voiceover.bank") }); }
+        catch (Exception e) { if (Missing.Add("voiceover.bank")) Plugin.Log.LogWarning("[audio] narration unavailable: " + e.Message); return false; }
+        return _narrationIndex.Has(sample);
+    }
+
+    public static void StopNarration()
+    {
+        _narration?.Stop();
+        _narration = null; NarrationSample = null;
+    }
+
+    public static void PlayNarration(string sample)
+    {
+        bool toggleOff = NarrationSample == sample;
+        StopNarration();
+        if (toggleOff || !HasNarration(sample) || !_narrationIndex.TryGet(sample, out var chunk, out int i)) return;
+        Sound parent = default;
+        try
+        {
+            var core = RuntimeManager.CoreSystem;
+            var info = Info(chunk, i);
+            if (core.createSound(chunk.File, MODE.CREATESTREAM | MODE._2D | MODE.LOOP_OFF, ref info, out parent) != RESULT.OK) return;
+            if (parent.getSubSound(i, out Sound sound) != RESULT.OK) { parent.release(); return; }
+            core.getMasterChannelGroup(out ChannelGroup master);
+            if (core.playSound(sound, master, false, out Channel channel) != RESULT.OK) { parent.release(); return; }
+            channel.setVolume(Plugin.Dd1SoundVolume.Value * MasterGain());
+            _narration = new Stream { Sound = parent, Channel = channel }; NarrationSample = sample;
+        }
+        catch (Exception e)
+        {
+            if (parent.hasHandle()) parent.release();
+            Plugin.Log.LogWarning("[audio] narration: " + e.Message);
+        }
+    }
+
     /// <summary>DD1's exploration music for the zone, darker as the torch burns down.</summary>
     private static string Exploration(string zone, float light)
     {
@@ -267,6 +309,7 @@ internal static class Dd1Audio
     /// </summary>
     public static void Update(Phase phase, string zone, bool camping, float light = 100f, bool hallFight = false)
     {
+        if (_narration != null && (phase != Phase.Hamlet || !Plugin.Dd1AudioOn.Value || !_narration.IsPlaying)) StopNarration();
         CurrentZone = zone;
         if (!Plugin.Dd1AudioOn.Value || !Ensure())
         {

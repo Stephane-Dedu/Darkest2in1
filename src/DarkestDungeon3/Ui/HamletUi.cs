@@ -41,6 +41,7 @@ internal sealed class HamletUi
 
     public void Draw()
     {
+        if (_panel != Panel.Memorial || _memorialEstate != E) Dd1Audio.StopNarration();
         var recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
         bool enabled = GUI.enabled;
         try
@@ -1095,27 +1096,38 @@ internal sealed class HamletUi
     private int _memorialJournalCount = -1;
     private Dd1Font _memorialJournalFont;
     private MemorialJournalLayout _memorialJournals;
+    private MemorialNarrationLayout _memorialNarrations;
+    private int _memorialPlotCount = -1, _memorialRegions;
+    private Dd1Campaign _memorialCampaign;
 
     private void DrawMemorial()
     {
         _memorial ??= Memorial.Load(S.Dd1);
-        if (_memorialEstate != E || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != Dd1Font.Body)
+        int regions = 17;
+        foreach (string region in CampaignRegions.Options) regions = unchecked(regions * 31 + (CampaignRegions.Enabled(E, region) ? 1 : 0));
+        if (_memorialEstate != E || _memorialCampaign != S.Campaign || _memorialRegions != regions || _memorialPlotCount != E.CompletedPlotQuests.Count
+            || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != Dd1Font.Body)
         {
             if (_memorialEstate != E) _memorialScroll = Vector2.zero;
             _memorialEstate = E; _memorialJournalCount = E.CollectedJournalPages.Count; _memorialJournalFont = Dd1Font.Body;
+            _memorialCampaign = S.Campaign; _memorialRegions = regions; _memorialPlotCount = E.CompletedPlotQuests.Count;
             _memorialJournals = MemorialJournalLayout.Build(Memorial.Journals(E, S.Lore),
                 title => Gui.TextHeight(title, 23, 560), text => Gui.TextHeight(text, 20, 560));
+            _memorialNarrations = MemorialNarrationLayout.Build(_memorial.Narrations(E, S.Campaign), S.Lore,
+                text => Gui.TextHeight(text, 20, 340));
         }
         Gui.Text(W(704, 74, 650, 64), Plain(S.Lore?.Text("str_statue_ancestor_quote")), 23, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        var entries = _memorial.Categories.Where(c => _memorial.Videos.Any(v => v.Category == c.Name && v.Visible())).ToList();
+        var entries = _memorial.Categories.Where(c => c.Name == "backerjournal" || _memorial.Videos.Any(v => v.Category == c.Name && v.Visible())
+            || _memorialNarrations.Rows.Any(r => r.Narration.Category == c.Name)).ToList();
         int rows = _memorial.Videos.Count(v => v.Visible());
         var view = W(704, 170, 648, 580);
         var journals = _memorial.Categories.FirstOrDefault(c => c.Name == "backerjournal");
-        float height = entries.Count * 50 + rows * 130 + (journals != null ? 50 + Mathf.Max(80, _memorialJournals.Height) : 0);
+        float height = entries.Count * 50 + rows * 130 + _memorialNarrations.Height + (journals != null ? Mathf.Max(80, _memorialJournals.Height) : 0);
         _memorialScroll.y = Mathf.Clamp(_memorialScroll.y, 0, Mathf.Max(0, height - view.height));
         _memorialScroll = GUI.BeginScrollView(view, _memorialScroll, new Rect(0, 0, 620, Mathf.Max(view.height, height)));
         float y = 0;
         string play = null;
+        string narration = null;
         foreach (var category in entries)
         {
             if (Art.Dd1(category.LabelBackdrop) is { } titleBar) GUI.DrawTexture(new Rect(0, y, 600, 40), titleBar);
@@ -1135,12 +1147,27 @@ internal sealed class HamletUi
                 if (allowed && video.Name == "epilog" && !_epiloguePrepared) { _epiloguePrepared = true; CinematicCache.Prepare(S.Dd1, new[] { video.VideoName }); }
                 y += 130;
             }
-        }
-        if (journals != null)
-        {
-            if (Art.Dd1(journals.LabelBackdrop) is { } titleBar) GUI.DrawTexture(new Rect(0, y, 600, 40), titleBar);
-            Gui.Text(new Rect(20, y, 560, 40), S.Lore.Text(journals.Label) ?? "Journals", 25, Gui.Dd1Name, heading: true);
-            y += 50;
+            foreach (var row in _memorialNarrations.Rows.Where(r => r.Narration.Category == category.Name))
+            {
+                var entry = row.Narration;
+                if (y + row.Height > _memorialScroll.y && y < _memorialScroll.y + view.height)
+                {
+                    if (Art.Dd1(category.EntryBackdrop) is { } bg) GUI.DrawTexture(new Rect(0, y, 600, row.Height), bg);
+                    if (BuildingArt(Buildings.Memorial, entry.Portrait) is { } portrait) GUI.DrawTexture(new Rect(10, y + 10, 150, 100), portrait, ScaleMode.ScaleToFit);
+                    Gui.Text(new Rect(176, y + 12, 340, row.TextHeight), row.Caption, 20, entry.Complete ? Gui.Dd1Text : Gui.Dd1Class);
+                    bool allowed = entry.Complete && Dd1Audio.HasNarration(entry.Sample);
+                    var button = new Rect(530, y + 36, 54, 54);
+                    var oldColor = GUI.color;
+                    if (Dd1Audio.NarrationSample == entry.Sample) GUI.color = Gui.Gold;
+                    if (BuildingArt(Buildings.Memorial, allowed ? "playmedia.png" : "lockedmedia.png") is { } marker) GUI.DrawTexture(button, marker, ScaleMode.ScaleToFit);
+                    GUI.color = oldColor;
+                    if (allowed && Gui.Hotspot(button)) narration = entry.Sample;
+                    if (button.Contains(Event.current.mousePosition)) Gui.Tip(!entry.Complete ? "Complete this quest to unlock its narration."
+                        : !allowed ? "DD1 narration audio is unavailable." : Dd1Audio.NarrationSample == entry.Sample ? "Stop narration" : "Play narration");
+                }
+                y += row.Height + 10;
+            }
+            if (category != journals) continue;
             if (_memorialJournals.Rows.Count == 0)
                 Gui.Text(new Rect(20, y + 10, 560, 60), "No journal pages have been recovered.", 20, Gui.Dd1Class);
             foreach (var row in _memorialJournals.Rows)
@@ -1151,9 +1178,11 @@ internal sealed class HamletUi
                 Gui.Text(new Rect(20, top + 12, 560, row.TitleHeight), row.Journal.Title, 23, Gui.Dd1Name, heading: true);
                 Gui.Text(new Rect(20, top + 20 + row.TitleHeight, 560, row.BodyHeight), row.Journal.Text, 20, Gui.Dd1Text);
             }
+            y += Mathf.Max(80, _memorialJournals.Height);
         }
         GUI.EndScrollView();
-        if (play != null) CinematicPlayer.Play(play);
+        if (narration != null) Dd1Audio.PlayNarration(narration);
+        if (play != null) { Dd1Audio.StopNarration(); CinematicPlayer.Play(play); }
     }
 
     private Vector2 _graveyardScroll;

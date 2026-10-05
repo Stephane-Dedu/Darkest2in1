@@ -1746,5 +1746,37 @@ Boss narration remains a separate missing category, not inferred from journal pa
 
 - Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
 - Round 120 deployed: Release + 429 Core + 28 UI tests green, DLL hashes match. Plot secrets and saved journal reading now work in code. Next round 121: native DD1 Memorial boss/Darkest narration, actual audio event/portrait/plot unlock references and coherent optional-region filtering; native DD2 lairs must not receive unrelated DD1 boss narration.
+
+## Round 121: native Memorial boss and Darkest narration
+
+Inspected DD1 statue_media_info.json category regexes/priority, installed portrait
+files, narration.json loading-screen quest tags and voiceover.bank FSB names.
+Unity StatueAudioEntry and serialized EstateManagement scene confirm the exact
+plot/event IDs and locked goal versus completed audio-line caption policy.
+
+Memorial now projects 24 DD1 boss tiers and the first three Darkest quests from
+those installed records, with native portraits and captions. Optional DD1 areas
+show future entries only while enabled; completed entries survive disabling.
+Native DD2 lair completions stay independent. DD4 has no matching loading entry,
+so no fourth speech is invented. Measured cached cards preserve category order,
+long captions, journal reading, estate reset and bounded visible-row drawing.
+
+DD1 narration indexes its voiceover bank lazily and streams a single FSB sample
+without copying game audio. Clicking the active entry stops it; another replaces
+it. Playback releases after completion, panel/estate/phase/audio-setting change
+and before a video replay. Disabled or unavailable samples cannot be played.
+
+Three Core cases check all 27 native samples/portraits/both captions, region/tier
+unlocks, disabled history, DD2 isolation, save/RNG neutrality and estate isolation.
+Two UI cases check long captions, native minimum geometry and empty rows.
+Release + 432 Core + 30 UI tests pass before stopped-game deploy; both installed
+DLL hashes match. No game launched and no owner estate accessed. Native audio,
+art and scrolling remain [?].
+
+## Status 2026-10-05: round 121 complete
+
+- Loop continues under owner authorization; native app goal still reports paused and cannot be resumed by the status tool. No duplicate goal created.
+- Round 121 deployed: Release + 432 Core + 30 UI tests green, DLL hashes match. Memorial videos, saved journals and independent native DD1 narration now exist in code. Next round 122: inspect remaining visible cold-menu trinket conditions, starting with target disease on Sickening Silence; hidden/blocked policy remains intact.
+- Ordinary usage available; session 75%, weekly 74%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue at boundaries until approximately 95% with clean committed handoff. Do not launch DD2 without owner permission; protected estates/abandoned project/private native artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
