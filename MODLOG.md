@@ -1482,3 +1482,30 @@ reload. Added that gap without changing the stock policy in this round.
 - Round 110 deployed: Release + 374 Core + 26 UI tests green, DLL hashes match. Clean estate repair/reload no longer consumes random state when no random repair is needed. Next round 111: preserve legitimate sold-out wagon stock across reload, after DD1/Unity save/week references. Then Caretaker town-event resolve completion and region-aware quest goals.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery/localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git. Native rendering/performance/UI checks await launch.
 - Last observed five-hour usage 32%, weekly 67%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 111: preserve sold-out wagon stock through reload
+
+DD1 nomad_wagon.building.json defines stock amounts and rarity generation. The port
+SaveCampaignData saves every remaining item, Campaign.Load restores that list even
+when empty, and Estate.ExecuteProgress calls RestockTrinkets for campaign progress.
+Our RepairEstate instead filled an empty saved list on every load, including a
+legitimately sold-out visit. Removed that guessed backfill. NewEstate/RefreshWeek
+still use the normal DD1 stock generation; an older absent/empty list waits for the
+next week rather than inventing missing purchases or advancing random state.
+
+Two new Core cases buy every item, verify exact wallet/owned inventory, serialize/
+reload/repair three times with stock/counter/wallet unchanged, and verify next-week
+replenishment plus legacy absent-stock behavior. Updated round 110's combined
+repair test: missing quirks retain the same repair sequence; empty wagon stock now
+stays empty with no extra random roll. Release + 376 Core + 26 UI tests pass.
+Green-gated local deployment while DD2 stopped; both installed DLL hashes match.
+No game launch/owner-save access. Native shop/reload check remains [?]. Found another
+stock discrepancy: RestockWagon discards duplicate IDs after rolling a slot, so it
+can underfill DD1's stated capacity. Added that gap for a separate round.
+
+## Status 2026-10-05: round 111 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes continued work after reset despite the app's earlier paused goal status.
+- Round 111 deployed: Release + 376 Core + 26 UI tests green, DLL hashes match. Sold-out wagon stock persists until week advance, and clean repair/reload preserves gameplay randomness. Next round 112: fix underfilled wagon slots caused by duplicate filtering, following installed amounts and port RestockTrinkets; then Caretaker town-event resolve completion and region-aware quest goals.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 36%, weekly 68%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

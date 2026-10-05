@@ -608,7 +608,6 @@ public sealed class Hamlet
                 Estate.Trinkets.Add(t);
                 log.Add($"{hero.Name} can't wear {t}: back in the stash");
             }
-        if (Estate.WagonStock.Count == 0) { RestockWagon(RepairRng()); log.Add($"wagon restocked: {Estate.WagonStock.Count} trinkets"); }
         return log;
     }
 

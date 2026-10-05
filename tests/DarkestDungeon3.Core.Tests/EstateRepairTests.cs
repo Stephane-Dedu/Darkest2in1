@@ -48,7 +48,7 @@ public class EstateRepairTests
     }
 
     [Fact]
-    public void MissingQuirksAndWagonKeepTheExistingSingleSharedRepairSequence()
+    public void MissingQuirksKeepTheExistingRepairSequenceWithoutRestockingSoldOutWagon()
     {
         var estate = NewEstate();
         estate.Roster[0].Quirks.Clear();
@@ -58,13 +58,11 @@ public class EstateRepairTests
         var rng = control.NextRng();
         var hero = control.Roster[0];
         var expectedQuirks = Catalog.StartingQuirks(hero.ClassId, rng, 1 + hero.ResolveLevel / 2, 1 + hero.ResolveLevel / 3);
-        Town(control).RestockWagon(rng);
         var repairs = Town(estate).RepairEstate();
         Assert.Equal(expectedQuirks, estate.Roster[0].Quirks);
-        Assert.Equal(control.WagonStock, estate.WagonStock);
+        Assert.Empty(estate.WagonStock);
         Assert.Equal(counter + 1, estate.RandomCounter);
-        Assert.Contains(repairs, s => s.StartsWith("wagon restocked"));
-        Assert.NotEmpty(estate.WagonStock);
+        Assert.DoesNotContain(repairs, s => s.StartsWith("wagon restocked"));
         Assert.Empty(Town(estate).RepairEstate());
         Assert.Equal(counter + 1, estate.RandomCounter);
     }
@@ -83,5 +81,46 @@ public class EstateRepairTests
         Assert.Equal(counter, estate.RandomCounter);
         Assert.Empty(Town(estate).RepairEstate());
         Assert.Equal(counter, estate.RandomCounter);
+    }
+
+    [Fact]
+    public void BuyingLastWagonItemStaysSoldOutAcrossReloadAndReplenishesNextWeek()
+    {
+        var estate = NewEstate();
+        estate.QuirksRepaired = true;
+        estate.Add(Currency.Gold, 20000);
+        int counter = estate.RandomCounter;
+        int gold = estate.Get(Currency.Gold);
+        var stock = estate.WagonStock.ToList();
+        Assert.NotEmpty(stock);
+        int totalPrice = stock.Sum(Town(estate).WagonPrice);
+        foreach (var trinket in stock) Assert.True(Town(estate).BuyTrinket(trinket));
+        Assert.Empty(estate.WagonStock);
+        Assert.Equal(stock.OrderBy(t => t), estate.Trinkets.OrderBy(t => t));
+        Assert.Equal(gold - totalPrice, estate.Get(Currency.Gold));
+        for (int i = 0; i < 3; i++)
+        {
+            estate = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+            Assert.Empty(Town(estate).RepairEstate());
+            Assert.Empty(estate.WagonStock);
+            Assert.Equal(counter, estate.RandomCounter);
+            Assert.Equal(gold - totalPrice, estate.Get(Currency.Gold));
+            Assert.False(Town(estate).BuyTrinket(stock[0]));
+        }
+        Town(estate).EndWeek();
+        Assert.Equal(1, estate.Week);
+        Assert.NotEmpty(estate.WagonStock);
+        Assert.Equal(gold - totalPrice, estate.Get(Currency.Gold));
+    }
+
+    [Fact]
+    public void LegacyAbsentStockRemainsEmptyRatherThanInventingLostItems()
+    {
+        var estate = SaveFile.FromJson("{\"Estate\":{\"RegionLayoutVersion\":1,\"QuirksRepaired\":true,\"RandomCounter\":7}}").Estate;
+        Town(estate).RepairEstate();
+        Assert.Empty(estate.WagonStock);
+        Assert.Equal(7, estate.RandomCounter);
+        Town(estate).EndWeek();
+        Assert.NotEmpty(estate.WagonStock);
     }
 }
