@@ -62,7 +62,9 @@ internal sealed class ActivityLogUi
         float y = row.Y;
         if (raid.Result != "embark")
         {
-            Gui.Image(new Rect(0, y, 600, 60), Art.Dd1("activity_log", raid.Result == "complete" ? "raid_success_banner.png" : "raid_failure_banner.png"), ScaleMode.StretchToFill);
+            string banner = raid.Result == "complete" ? "raid_success_banner.png"
+                : raid.Result == "retreat" ? "raid_abandon_banner.png" : "raid_failure_banner.png";
+            Gui.Image(new Rect(0, y, 600, 60), Art.Dd1("activity_log", banner), ScaleMode.StretchToFill);
             y += 60;
         }
         for (int i = 0; i < raid.Heroes.Count && i < 4; i++)

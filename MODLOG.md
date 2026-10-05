@@ -1404,3 +1404,21 @@ it to PARITY without changing it this round.
 - Round 107 deployed: Release + 365 Core + 26 UI tests green, both DLL hashes match. Saved Activity Log now includes building purchase/completion cards and matching rounded panel progress. Native UI checks await launch. Next round 108: the newly documented distinct retreat banner, then caretaker goals or another documented safe gap.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git.
 - Last observed five-hour usage 22%, weekly 66%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 108: DD1 abandonment banner for retreat records
+
+Inspected installed activity_log/raid_abandon_banner.png; its source hash differs
+from raid_failure_banner.png. Port WeekLogSlot chooses success/failure from a boolean,
+but this mod already saves complete/retreat/defeat outcomes. Retreat cards now select
+the dedicated DD1 abandonment image, retaining existing victory/defeat paths.
+This is an art-path correction with no rules or save changes, so no new mirror test.
+Required Release + 365 Core + 26 UI checks pass. Green-gated local deployment with
+DD2 stopped; both installed DLL hashes match. Native appearance remains [?]; no
+launch, owner-save access or native art committed.
+
+## Status 2026-10-05: round 108 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 108 locally deployed with Release + 365 Core + 26 UI tests green and both DLL hashes matching. Saved Activity Log retains weeks, actors, resolve and building cards, and distinct abandonment art. Native UI checks await launch. Next round 109: missing caretaker goals, starting with supported hero resolve achievements and saved completion, or another documented safe gap after reference inspection.
+- Cold audit unchanged 175 complete/15 partial/1 blank; blocked hidden visibility stays. Private 24-image scenery and localhost:8766/combat-extensions.html/server session 20403 unchanged and outside Git.
+- Last observed five-hour usage 24%, weekly 66%; check at round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active; protected estates/abandoned project untouched.
