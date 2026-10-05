@@ -1854,5 +1854,27 @@ estate accessed. Native tooltip comparison remains [?], hidden policy unchanged.
 - Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
 - Round 124 deployed and green. Next round 125: finite effect chance validation, preserving omitted/default 100%, real 5/66% risks and body retention. Then remaining visible token mutations/conditional effects; skip hidden-policy blockers.
 - Ordinary usage available; session 84%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch, protected estates/abandoned project/private artwork constraints remain.
+
+## Round 125: malformed effect chances cannot read as guaranteed
+
+Read DD1 base effects/Unity Effect percentage parsing and native DD2
+EffectDefinition's default chance one plus EffectDescription's fractional chance
+suffix. The cold parser accepted NaN through Number; all comparisons were false,
+so its suffix vanished. It now validates finite (0,1] chance before generated or
+authored descriptions. Malformed/nonfinite/zero/negative/out-of-range values stay
+withheld. Omitted/default one remains guaranteed, native 5/66% risks keep units,
+and a valid authored body's chance is not duplicated. No combat code changed.
+
+Sixteen generated/authored negative fixtures, four default/fractional cases and
+one valid authored case pass. Release + 477 Core + 30 UI tests pass before
+stopped-game deploy; both installed DLL hashes match. Full audit unchanged:
+178 complete/12 partial/1 blank of 191. No game launched or owner estate accessed;
+native tooltip comparison remains [?], existing hidden policy unchanged.
+
+## Status 2026-10-05: round 125 complete
+
+- Loop continues under owner authorization; native goal remains paused without a resume API or duplicate goal.
+- Round 125 deployed and green. Next round 126: inspect Early Experiment's visible invert_2_positive_tokens effect and native inversion templates/selector semantics; skip hidden-policy blockers and preserve unknown effect withholding.
+- Ordinary usage available; session 86%, weekly 76%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch; protected estates/abandoned project/private artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

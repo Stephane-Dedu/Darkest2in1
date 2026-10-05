@@ -215,6 +215,10 @@ public sealed class TrinketDescriptions
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
     {
         if (!_blocks.TryGetValue(("Effect", id), out var rows) || Field("Effect", id, "m_IsVisible") == "False") return null;
+        float chance = 1;
+        string rawChance = Field("Effect", id, "m_Chance");
+        if (rawChance != null && (!float.TryParse(rawChance, NumberStyles.Float, CultureInfo.InvariantCulture, out chance)
+            || float.IsNaN(chance) || float.IsInfinity(chance) || chance <= 0 || chance > 1)) return null;
         // Native authored bodies already include their chances; actor conditions still wrap them afterward.
         string authored = Text("effect_skill_" + id + "_override", localize);
         if (authored != null)
@@ -421,8 +425,6 @@ public sealed class TrinketDescriptions
             parts.Add(change);
         }
         if (parts.Count == 0) return null;
-        float chance = Field("Effect", id, "m_Chance") == null ? 1 : Number("Effect", id, "m_Chance");
-        if (chance <= 0 || chance > 1) return null;
         if (chance < 1)
         {
             string suffix = Format(Text(Field("Effect", id, "m_ChancePerRoundSuffix") == "True" ? "effect_tooltip_chance_per_round" : "effect_tooltip_pct", localize),
