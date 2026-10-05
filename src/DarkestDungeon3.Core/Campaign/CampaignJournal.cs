@@ -26,12 +26,12 @@ public static class CampaignJournal
         return week;
     }
 
-    public static void Town(Estate estate, string message, HeroRecord hero = null)
+    public static void Town(Estate estate, string message, HeroRecord hero = null, ActivityEntryKind kind = ActivityEntryKind.HeroActivity)
     {
         var week = Current(estate); // import legacy messages before appending this one
         (estate.TownLog ??= new List<string>()).Add(message);
         week.Town.Add(message);
-        if (hero != null) week.TownActors.Add(Actor(hero, week.Town.Count - 1));
+        if (hero != null) week.TownActors.Add(Actor(hero, week.Town.Count - 1, kind));
     }
 
     /// <summary>Resolve town activities into the newly advanced week, keeping the previous week's entries.</summary>

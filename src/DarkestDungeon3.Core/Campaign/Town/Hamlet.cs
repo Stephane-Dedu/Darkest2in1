@@ -654,7 +654,17 @@ public sealed class Hamlet
         }
         foreach (var (cls, levels) in EventData("idle_resolve_level"))
             foreach (var hero in Estate.Roster.Where(h => h.ClassId == cls && h.MissingWeeks == 0))
-                hero.ResolveLevel = Math.Min(6, hero.ResolveLevel + Math.Max(1, (int)levels));
+            {
+                int before = hero.ResolveLevel;
+                hero.ResolveLevel = Math.Min(CaretakerGoals.ResolveTarget, before + Math.Max(1, (int)levels));
+                if (hero.ResolveLevel > before)
+                {
+                    // Core saves cumulative XP; grant only the amount needed to reach the awarded level.
+                    hero.ResolveXp = Math.Max(hero.ResolveXp, Dd1.HeroResolveThresholds[hero.ResolveLevel]);
+                    CampaignJournal.Town(Estate, $"{hero.Name} reached resolve level {hero.ResolveLevel}.", hero, ActivityEntryKind.LevelUp);
+                }
+                CaretakerGoals.Record(Estate, hero);
+            }
     }
 
     /// <summary>An activity's price this week (free or discounted by a town event).</summary>

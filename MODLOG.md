@@ -1533,3 +1533,28 @@ launch or owner-save access. Native equip limits/combat behavior unchanged.
 - Round 112 locally deployed: Release + 383 Core + 26 UI tests green, both DLL hashes match. Wagon now retains valid duplicate slots and stays sold out across reload; clean load preserves random state. Next round 113: native idle-resolve town events, including XP threshold consistency and immediate Caretaker goal recording, after Campaign.cs/Resolve.cs reference inspection. Then region-aware Caretaker quest goals.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and localhost:8766/combat-extensions.html/server session 20403 unchanged and outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 39%, weekly 68%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 113: town resolve awards keep XP and Caretaker history consistent
+
+Installed base.town_events.events.json gives idle plague_doctor/jester/highwayman
+one level; roster.variables.json thresholds are 0/2/8/14/24/36/48. The Unity port's
+Campaign.IdleResolve grants the exact remaining XP via Resolve.AddExperience.
+Our event changed only ResolveLevel. It now raises cumulative ResolveXp to the
+awarded level's threshold, records a newly maxed class immediately, and saves a
+LevelUp activity entry with actor identity. The port stores within-level XP; its
+subtraction is deliberately adapted to Core's established cumulative-XP model.
+Existing class/missing eligibility, event timing and cap stay in place.
+
+Ten cases cover all six boundaries, unchanged other/missing/capped heroes, exact
+event RNG, achievement/portrait persistence after reload and dismissal, and quest
+XP continuing from the event boundary. First test compile used Rng.Next without
+its required bound; corrected before rerun. Final Release + 393 Core + 26 UI tests
+pass. Deployment was gated on all green and DD2 stopped; both DLL hashes match.
+No game launch or owner-save access; native event/card/goal appearance remains [?].
+
+## Status 2026-10-05: round 113 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 113 deployed: Release + 393 Core + 26 UI tests green, DLL hashes match. Town-event resolve now retains cumulative XP, achievements and portrait history. Next round 114: region-aware Caretaker quest goals, reading DD1/Unity references and current native lair progression without quest-generation RNG.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 43%, weekly 69%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
