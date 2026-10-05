@@ -2453,3 +2453,29 @@ backup semantics using synthetic temporary paths only.
 - Next round 148: remove save delete-before-publish gap with tested same-directory atomic replacement and previous-file backup; use only owned synthetic temp files. Then inspect fallen-hero quirks and host-entry timeout.
 - Ordinary usage available; session 76%, weekly 89%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 148: publish saves without deleting the prior destination
+
+The old writer copied .bak, deleted the main save and only then moved its temp.
+DD1 complete starting saves and Unity SaveLoadManager/SaveCampaignData are payload
+references, not a reason to keep this mod-specific failure window. Consulted
+[Microsoft File.Replace](https://learn.microsoft.com/en-us/dotnet/api/system.io.file.replace?view=netframework-4.8)
+for same-volume replacement and replacement of an existing backup with the prior
+destination. Use a unique same-directory temp, File.Replace for existing saves
+and Move for first creation. Clean failed temps; never delete the destination
+as a fallback when replacement fails.
+
+Three tests use real Windows filesystem operations on owned temporary synthetic
+paths: exact complete current/previous JSON through repeated saves, an exclusively
+locked destination preserving both files and cleaning temp before a successful
+retry, and a blocked first destination retaining its directory/sentinel. Cleanup
+asserts the resolved temp parent and owned prefix before recursive deletion.
+Release + 633 Core + 57 UI tests pass; stopped-game DLL hashes match. Native
+Mono persistence remains [?]. No launch, owner-save/cache access or art changes.
+
+## Status 2026-10-05: round 148 complete
+
+- Round 148 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 149: inspect fallen-hero quirk records and From Beyond, preserve only proven recorded state without changing dead-trinket policy. Then bound host-entry waits while keeping slow native asset transitions safe; native resume tests still await explicit launch permission.
+- Ordinary usage available; session 78%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

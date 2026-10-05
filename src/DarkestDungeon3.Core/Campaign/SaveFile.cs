@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using DarkestDungeon3.Core.Expedition;
 using Newtonsoft.Json;
@@ -25,14 +26,20 @@ public sealed class SaveFile
     public void Save(string path)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path));
-        string tmp = path + ".tmp";
-        File.WriteAllText(tmp, ToJson());
-        if (File.Exists(path))
+        string tmp = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+        try
         {
-            File.Copy(path, path + ".bak", overwrite: true);
-            File.Delete(path);
+            File.WriteAllText(tmp, ToJson());
+            if (File.Exists(path)) File.Replace(tmp, path, path + ".bak", ignoreMetadataErrors: true);
+            else File.Move(tmp, path);
         }
-        File.Move(tmp, path);
+        finally
+        {
+            // Never delete the destination to recover from a failed replace.
+            try { if (File.Exists(tmp)) File.Delete(tmp); }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
     }
 
     public static SaveFile Load(string path) => File.Exists(path) ? FromJson(File.ReadAllText(path)) : null;
