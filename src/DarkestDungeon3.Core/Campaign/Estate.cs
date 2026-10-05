@@ -44,6 +44,8 @@ public sealed class Estate
     public int RegionLayoutVersion;
     /// <summary>Messages for the next town screen ("Dismas went missing", ...).</summary>
     public List<string> TownLog = new();
+    /// <summary>Saved weekly chronicle. Null identifies an older save whose surviving TownLog needs importing.</summary>
+    public List<ActivityWeek> ActivityLog;
     /// <summary>This town visit's DD1 town event (null: none), and what the roll needs to remember.</summary>
     public string TownEventId;
     /// <summary>The plot quest the party last came home from (DD1's town background changes after a Darkest Dungeon part).</summary>

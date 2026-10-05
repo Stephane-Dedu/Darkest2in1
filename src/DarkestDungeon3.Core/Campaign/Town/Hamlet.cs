@@ -28,6 +28,7 @@ public sealed class Hamlet
     public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
         var estate = new Estate { Seed = seed, RegionLayoutVersion = CampaignRegions.LayoutVersion };
+        CampaignJournal.Initialize(estate);
         // DD1's new game (scripts/starting_save): the opening's wallet (heirlooms, no gold) and heroes.
         var start = dd1.Install != null ? StartingSave.Load(dd1.Install) : null;
         if (start != null && start.Wallet.Count > 0)
@@ -259,7 +260,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -SkillLearnCost(hero, skillId));
         hero.LearnedSkills.Add(skillId);
-        Estate.TownLog.Add($"The Guild teaches {hero.Name} a new technique.");
+        CampaignJournal.Town(Estate, $"The Guild teaches {hero.Name} a new technique.");
         return true;
     }
 
@@ -282,7 +283,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantMasterSkill(hero, skillId, known) != null) return false;
         Estate.Add(Currency.Gold, -SkillMasterCost(hero, skillId));
         hero.MasteredSkills.Add(skillId);
-        Estate.TownLog.Add($"The Guild masters {hero.Name}'s technique.");
+        CampaignJournal.Town(Estate, $"The Guild masters {hero.Name}'s technique.");
         return true;
     }
 
@@ -312,7 +313,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnCampSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -CampSkillCost(Camping.Get(skillId)));
         hero.CampingSkills.Add(skillId);
-        Estate.TownLog.Add($"The Survivalist teaches {hero.Name} a new camping skill.");
+        CampaignJournal.Town(Estate, $"The Survivalist teaches {hero.Name} a new camping skill.");
         return true;
     }
 
@@ -362,7 +363,7 @@ public sealed class Hamlet
         Estate.Add(Currency.Gold, -EquipmentCost(NextEquipment(hero, slot)));
         if (FreeEquipment(slot)) Estate.TownEventFreeUpgrades--;
         if (slot == Weapon) hero.WeaponRank++; else hero.ArmorRank++;
-        Estate.TownLog.Add($"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
+        CampaignJournal.Town(Estate, $"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
         return true;
     }
 
@@ -374,6 +375,7 @@ public sealed class Hamlet
     /// </summary>
     public List<string> EndWeek()
     {
+        CampaignJournal.Initialize(Estate);
         var log = new List<string>();
         var rng = Estate.NextRng();
 
@@ -413,7 +415,7 @@ public sealed class Hamlet
 
         Estate.Week++;
         RefreshWeek();
-        Estate.TownLog = log;
+        CampaignJournal.TownResults(Estate, log);
         return log;
     }
 
@@ -566,6 +568,7 @@ public sealed class Hamlet
     public List<string> RepairEstate()
     {
         var log = new List<string>();
+        if (CampaignJournal.Initialize(Estate)) log.Add("activity log initialized from surviving town messages");
         if (CampaignRegions.Migrate(Estate, Dd1)) log.Add("campaign regions updated; existing progress retained");
         var rng = Estate.NextRng();
         if (!Estate.QuirksRepaired)

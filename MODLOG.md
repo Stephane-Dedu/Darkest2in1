@@ -1251,3 +1251,36 @@ or save access. Native before/after-initialization comparison remains [?].
 - Resume heartbeat resume-darkest2in1-loop-after-quota-reset is ACTIVE and attached to this chat, verified in its saved automation.toml. It checks hourly at minute 50, waits quietly before reset/while allowance is unavailable, and is authorized to continue the loop from this handoff. First hourly check after this reset is approximately 10:50 Paris. Goal status resumption is controlled by the app; the automation prompt explicitly authorizes continuing the work.
 - Next round 103 and constraints remain the preceding status: cold audit 175 complete/15 partial/1 blank, advanced actual conditions/effects or activity-log persistence, no weakening blocked visibility guards, no DD2 launch until explicitly allowed. Protected estates/abandoned project remain untouched.
 - Private 24-image scenery remains installed, six per region, runtime support up to 12. Browser gallery combat-extensions.html was preserved again this turn, still showing Tangle/04 Creature den; no owner selection changed. Native rendering/ground/torch/load checks remain [?]. Server localhost:8766, exec session 20403, remains available. Art/provenance stay outside Git.
+
+## Round 103: persistent weekly Activity Log
+
+DD1 campaign/town/activity_log/activity_log.layout.darkest defines week entries, spacing
+and party/hero entry areas. The Unity port persists Campaign.Logs through
+WeekActivityLog and PartyActivityRecord. Our panel instead concatenated this week's
+TownLog with Driver.HomecomingLog: EndWeek replaced the former and restarting lost
+the latter. This also allowed a runtime return report to appear in another estate.
+
+Core now saves per-estate ActivityWeek records containing town messages and copied
+party departure/return records, including hero identity/class/death/resolve snapshots.
+The four existing Guild/Survivalist/Blacksmith messages and resolved town activities
+enter the journal; returns are captured in Homecoming.Report, including interrupted
+expeditions returned during load. Driver records departure after the existing week
+advance, while the opening remains week zero. Existing saves import only their
+surviving TownLog once; no earlier history or lost runtime report is reconstructed.
+The panel reads only the saved journal, newest week first, with measured wrapping.
+Full DD1 week banners/party art remain a separate presentation gap.
+
+Seven new cases pass: old-save import/reload without deduping repeated messages,
+first-action import, real Blacksmith/EndWeek retention and unchanged random rolls,
+victory/retreat/death snapshots with unchanged rewards, and estate/opening isolation.
+Release + 357 Core + 19 UI tests pass. Deployment was gated on all green results and
+absence of DD2 processes; both installed DLL hashes match the verified build. No DD2
+launch or owner-save access. Native scroll/wrap/restart/estate checks remain [?].
+
+## Status 2026-10-05: round 103 complete after quota reset
+
+- Continue the authorized loop on claude/practical-wright-hicri0. The heartbeat authorizes work after reset even though the app still reports the earlier goal as paused; no new goal was created. No DD2 launch until explicitly allowed, no save access or pending restores.
+- Round 103 locally deployed: Release + 357 Core + 19 UI tests green, both DLL hashes match. Weekly Activity Log persistence is implemented; native verification awaits launch. Next round 104: DD1 activity-log presentation/long-history rendering, using the installed artwork and Unity port; other documented safe gaps remain eligible.
+- Cold audit unchanged: 175 complete/15 partial/1 blank. Round 75 visibility remains blocked; do not weaken hidden-effect guards for coverage. Private scenery unchanged: 24 panoramas, six per region, runtime supports up to 12; artwork/prompts/provenance outside Git.
+- Preview localhost:8766/combat-extensions.html/server session 20403 remains untouched. Protected estates and abandoned project untouched; no game/save restore pending.
+- Five-hour allowance reset and ordinary usage is available; last observed usage 8%, weekly 63%. Check at round boundaries and stop near 95% with a clean committed handoff. Existing hourly minute-50 resume heartbeat remains active; do not duplicate it.

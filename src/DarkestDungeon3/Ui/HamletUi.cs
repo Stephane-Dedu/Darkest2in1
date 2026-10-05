@@ -853,10 +853,31 @@ internal sealed class HamletUi
     {
         Frame(area);
         Gui.Text(new Rect(area.x + 20, area.y + 10, 900, 50), "The Hamlet's chronicle", 40, Gui.Dd1Name, heading: true);
-        var lines = E.TownLog.Concat(Driver.Instance.HomecomingLog).ToList();
-        _logScroll = GUI.BeginScrollView(new Rect(area.x + 20, area.y + 70, area.width - 40, area.height - 90), _logScroll, new Rect(0, 0, area.width - 70, lines.Count * 34 + 40));
-        if (lines.Count == 0) Gui.Label(new Rect(0, 0, area.width - 70, 30), "All is quiet. Choose a quest and embark when ready.");
-        for (int i = 0; i < lines.Count; i++) Gui.Label(new Rect(0, i * 34, area.width - 70, 32), lines[i]);
+        var rows = new List<(string Text, bool Heading)>();
+        foreach (var week in (E.ActivityLog ?? new List<ActivityWeek>()).OrderByDescending(w => w.Week))
+        {
+            if (week.Town.Count == 0 && week.Raids.Count == 0) continue;
+            rows.Add(($"Week {week.Week}", true));
+            foreach (var message in week.Town) rows.Add((message, false));
+            foreach (var raid in week.Raids)
+            {
+                rows.Add((raid.Result == "embark"
+                    ? $"Embarked: {raid.Quest}. {string.Join(", ", raid.Heroes.Select(h => h.Name))}."
+                    : $"Returned: {raid.Quest} — {raid.Result}.", false));
+                foreach (var message in raid.Messages) rows.Add((message, false));
+            }
+        }
+        float width = area.width - 70;
+        var heights = rows.Select(r => Gui.LabelHeight(r.Text, width, r.Heading) + 12).ToList();
+        _logScroll = GUI.BeginScrollView(new Rect(area.x + 20, area.y + 70, area.width - 40, area.height - 90), _logScroll, new Rect(0, 0, width, heights.Sum() + 40));
+        if (rows.Count == 0) Gui.Label(new Rect(0, 0, width, 30), "All is quiet. Choose a quest and embark when ready.");
+        float y = 0;
+        for (int i = 0; i < rows.Count; i++)
+        {
+            var rect = new Rect(0, y, width, heights[i] - 12);
+            if (rows[i].Heading) Gui.Title(rect, rows[i].Text); else Gui.Label(rect, rows[i].Text);
+            y += heights[i];
+        }
         GUI.EndScrollView();
     }
 

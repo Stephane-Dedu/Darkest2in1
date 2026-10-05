@@ -193,6 +193,7 @@ internal sealed class Driver : MonoBehaviour
         if (opening) S.Save.Estate.OpeningRaidPending = false;
         // DD1 resolves town activities while the party is away.
         else S.Hamlet.EndWeek();
+        CampaignJournal.Embark(S.Save.Estate, quest, party);
         S.Persist();
 
         Phase = Phase.Embarking;

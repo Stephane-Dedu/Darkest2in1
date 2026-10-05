@@ -65,6 +65,8 @@ internal static class Gui
 
     public static void Title(Rect r, string text) => GUI.Label(r, text, _title);
     public static void Label(Rect r, string text) => GUI.Label(r, text, _label);
+    public static float LabelHeight(string text, float width, bool heading = false) =>
+        Mathf.Max(heading ? 34 : 20, (heading ? _title : _label).CalcHeight(new GUIContent(text), width));
     public static void Small(Rect r, string text) => GUI.Label(r, text, _small);
 
     public static bool Button(Rect r, string text, bool enabled = true)

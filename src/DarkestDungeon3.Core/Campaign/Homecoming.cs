@@ -190,6 +190,7 @@ public static class Homecoming
 
         estate.Quests.RemoveAll(q => q.Id == quest.Id);
         log.Add(success ? $"Quest complete: {quest}." : expedition.Retreated ? $"The party retreated from {quest}." : $"Quest failed: {quest}.");
+        CampaignJournal.Return(estate, report);
         return report;
     }
 
