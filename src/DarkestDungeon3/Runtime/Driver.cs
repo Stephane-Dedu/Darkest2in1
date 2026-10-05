@@ -14,6 +14,7 @@ internal enum Phase
     Off,         // plain DD2
     Hamlet,      // our town screens
     Embarking,   // waiting for the DD2 host run to reach the road
+    Recovery,    // a saved expedition needs a retry; preserve it instead of abandoning it
     Crawling,    // our dungeon screens
     Fighting,    // DD2 combat (our UI hidden)
     Homecoming,  // results screen before the Hamlet
@@ -35,6 +36,8 @@ internal sealed class Driver : MonoBehaviour
     public CurioReport LastCurio => Crawl?.LastCurio;
     /// <summary>How the last expedition ended (the results screen).</summary>
     public HomecomingReport LastReport { get; private set; }
+    public string RecoveryMessage { get; private set; }
+    public bool CanResumeSaved => ExpeditionRecovery.Inspect(S?.Save) == ExpeditionLoadRoute.Resume;
 
     /// <summary>The hero shown in the bottom-left banner (DD1: click a hero to select).</summary>
     public string SelectedHeroId;
@@ -136,27 +139,57 @@ internal sealed class Driver : MonoBehaviour
 
     public void EnterHamlet(int slot)
     {
+        StopWalking();
+        Crawl = null; Party = null; SelectedHeroId = null; LastReport = null; RecoveryMessage = null;
+        HeroStage.Instance?.Clear(); Log.Clear(); HomecomingLog.Clear();
+        Phase = Phase.Off;
         LogDd2Libraries();
         S.LoadOrCreate(slot);
-        if (S.Save.Expedition is { Started: false } stillborn)
+        var route = ExpeditionRecovery.Inspect(S.Save);
+        if (route == ExpeditionLoadRoute.Refund)
         {
+            var stillborn = Expedition;
             // The party never reached the dungeon (the game closed or failed during embark): call it off.
             S.Save.Estate.Add(Currency.Gold, stillborn.ProvisionCost);
             S.Save.Expedition = null;
             Say($"The expedition never left. {stillborn.ProvisionCost} gold of provisions refunded.");
             S.Persist();
         }
-        else if (S.Save.Expedition != null)
+        else if (route == ExpeditionLoadRoute.Resume)
         {
-            // An expedition was interrupted (the game closed mid-dungeon). DD1 counts that as a retreat.
-            Say("The last expedition was cut short. The party limps home.");
-            S.Save.Expedition.Retreated = true;
-            var outcomes = ExpeditionParty.Outcomes(S.Save.Expedition, S.Save.Estate);
-            HomecomingLog = Homecoming.Apply(S.Save.Estate, S.Campaign, S.Save.Expedition, outcomes);
-            S.Save.Expedition = null;
-            S.Persist();
+            ResumeExpedition();
+            return;
+        }
+        else if (route == ExpeditionLoadRoute.Results)
+        {
+            Expedition.Ended = true;
+            CompleteHomecoming(ExpeditionParty.Outcomes(Expedition, S.Save.Estate));
+            return;
+        }
+        else if (route == ExpeditionLoadRoute.Invalid)
+        {
+            RecoveryFailed("The saved dungeon could not be restored. Your expedition has been kept.");
+            return;
         }
         Phase = Phase.Hamlet;
+    }
+
+    public void ResumeExpedition()
+    {
+        if (!CanResumeSaved || Phase is Phase.Embarking or Phase.Fighting or Phase.Crawling) return;
+        ExpeditionFight.RestoreParty(Expedition);
+        Phase = Phase.Embarking;
+        RegionSceneryArt.Prepare(Expedition.Quest.Dungeon);
+        Say("Returning to the saved expedition.");
+        if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Retry when the game is ready.")))
+            RecoveryFailed("The game is still changing scenes. Your expedition is saved; try again in a moment.");
+    }
+
+    private void RecoveryFailed(string message)
+    {
+        RecoveryMessage = message;
+        Phase = Phase.Recovery;
+        Say(message);
     }
 
     public void LeaveHamlet()
@@ -177,6 +210,7 @@ internal sealed class Driver : MonoBehaviour
 
     public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought, bool opening = false)
     {
+        if (Expedition != null) return "The saved expedition must be resumed before setting out again.";
         // This week's town event sets prices and who will go; it changes when the week ends below.
         var hamlet = S.Hamlet;
         var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party, hamlet.AnyResolveCanEmbark);
@@ -205,7 +239,8 @@ internal sealed class Driver : MonoBehaviour
         Phase = Phase.Embarking;
         RegionSceneryArt.Prepare(quest.Dungeon);
         Say($"The party sets out: {quest}.");
-        Dd2Run.Start(OnRoadReady);
+        if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.")))
+            RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.");
         return null;
     }
 
@@ -229,17 +264,26 @@ internal sealed class Driver : MonoBehaviour
 
     private void OnRoadReady()
     {
+        bool resuming = Expedition.Started;
         var heroes = Expedition.Party.Select(id => S.Save.Estate.Hero(id)).Where(h => h != null).ToList();
-        var guids = Dd2Heroes.BuildParty(heroes);
+        var conditions = resuming ? Expedition.PartyStates : null;
+        var expected = heroes.Count(h => ExpeditionParty.HeroForRestore(h,
+            conditions != null && conditions.TryGetValue(h.Id, out var saved) ? saved : null) != null);
+        var guids = Dd2Heroes.BuildParty(heroes, conditions);
+        if (guids.Count != expected || expected == 0)
+        {
+            RecoveryFailed("The party could not be restored. Your expedition is saved; try again.");
+            return;
+        }
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
         Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
         CapturePartyState();
-        Handle(Crawl.Begin());
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
-        Say($"Entered {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+        Say($"{(resuming ? "Returned to" : "Entered")} {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+        Handle(resuming ? Crawl.Resume() : Crawl.Begin());
     }
 
     public void CapturePartyState()
@@ -751,12 +795,13 @@ internal sealed class Driver : MonoBehaviour
 
     private void FinishExpedition()
     {
+        CapturePartyState();
+        CompleteHomecoming(ExpeditionParty.Outcomes(Expedition, S.Save.Estate));
+    }
+
+    private void CompleteHomecoming(List<HeroOutcome> outcomes)
+    {
         var exp = Expedition;
-        var outcomes = exp.Party
-            .Select(id => (hero: S.Save.Estate.Hero(id), guid: Party?.Guid(id) ?? 0u))
-            .Where(x => x.hero != null)
-            .Select(x => Dd2Heroes.ReadBack(x.hero, x.guid))
-            .ToList();
         var rng = new Rng(exp.Seed * 31 + exp.StepsTaken);
         LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng));
         HomecomingLog = LastReport.Log;
@@ -766,7 +811,7 @@ internal sealed class Driver : MonoBehaviour
         Party = null;
         HeroStage.Instance?.Clear();
         Phase = Phase.Homecoming;
-        Dd2Run.End();
+        if (Dd2Run.Hosting) Dd2Run.End();
     }
 
     public void BackToHamlet() => Phase = Phase.Hamlet;

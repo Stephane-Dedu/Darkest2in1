@@ -2395,3 +2395,39 @@ or private-art changes.
 - Next round 146: route valid interrupted crawls to a fresh host at their saved position, restore checkpoints/actors before presentation, avoid repeated week/provisions and retain terminal results once. Set Crawling before handling entry events so an immediate fight stays Fighting. Native DD2 run-entry needs guarded failure handling; inspect before changing it.
 - Ordinary usage available; session 70%, weekly 88%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 146: resume the saved dungeon instead of abandoning it
+
+DD1 starting raid in_area/areatile and Unity RaidSceneManager.InRaid restore
+current room/hall, direction, inventory, formation, quest, camp and torch.
+DD2 GameModeMgr runs its completed-entry callbacks after native scene receivers.
+Core now inspects saves without mutation: town, never-left refund, valid resume,
+terminal results or invalid preservation. Valid loads restore pre-fight evidence
+first, then create native actors with recorded condition and Resume at the saved
+spot; no repeated town week, provisions cost or quest rolls. Legacy missing
+condition conservatively retains estate evidence, not invented historical wounds.
+
+Terminal results keep recorded success/retreat/deaths and clear the expedition
+once; ordinary FinishExpedition also captures/outcomes via the recorded path.
+Invalid state or native host failure shows a saved-expedition retry/menu screen;
+another embark cannot overwrite it. Entry sets Crawling before handling events,
+fixing the immediate-battle phase overwrite. Dd2Run reports busy/setup/transition
+failure, retries a ready host road without a second run and invalidates stale
+callbacks on end/replacement. A no-callback timeout is a separate recorded gap.
+
+Twelve Core cases cover repeated room/hall/camp/loot reconstruction with exact
+campaign/RNG preservation, mid-fight versus prior deaths, invalid saves and
+terminal reward/retreat outcomes once. Five linked tests run the actual Dd2Run
+against native API shims for busy/missing modes, completed-entry ordering,
+ready-road retries, setup/exhausted-transition failures and callback cancellation.
+Release + 626 Core + 57 UI tests pass; stopped-game DLL hashes match. Runtime
+resume is enabled in code but remains [?] until a permitted native synthetic-estate
+check. Exact mid-turn DD2 combat is not restored. No launch, owner-estate access
+or private-art changes.
+
+## Status 2026-10-05: round 146 complete
+
+- Round 146 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next: save camp meals immediately (separate documented gap), then inspect fallen-hero quirk preservation and host-entry timeout. Resume checks must use only the test estate after explicit launch permission; test corridor/camp/loot/unresolved battle/terminal result and exact single week/payment.
+- Ordinary usage available; session 74%, weekly 89%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

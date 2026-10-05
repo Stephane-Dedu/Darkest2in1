@@ -177,11 +177,7 @@ public sealed class Crawl
         return Flush();
     }
 
-    public bool CanResume => State.Started && !State.Ended && Map != null
-        && (State.InRoom ? State.RoomId < Map.Rooms.Count
-            : State.RoomId == -1 && State.CorridorId >= 0 && State.CorridorId < Map.Corridors.Count
-              && State.TileIndex >= 0 && State.TileIndex < Map.Corridor(State.CorridorId).Tiles.Count
-              && (State.HeadingRoomId == Map.Corridor(State.CorridorId).RoomA || State.HeadingRoomId == Map.Corridor(State.CorridorId).RoomB));
+    public bool CanResume => ExpeditionRecovery.PositionIsValid(State);
 
     /// <summary>Present an interrupted crawl at its saved spot without walking, scouting, eating or rolling again.</summary>
     public List<CrawlEvent> Resume()

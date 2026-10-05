@@ -1,6 +1,6 @@
 namespace Assets.Code.Utils
 {
-    public static class SingletonMonoBehaviour<T> { public static T Instance; }
+    public static class SingletonMonoBehaviour<T> { public static T Instance; public static bool HasInstance() => Instance != null; }
     public static class Singleton<T> { public static T Instance; }
 }
 namespace Assets.Code.Library

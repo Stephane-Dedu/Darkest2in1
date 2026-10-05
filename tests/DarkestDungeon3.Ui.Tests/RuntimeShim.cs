@@ -10,5 +10,6 @@ internal static class Plugin
         public readonly List<int> Threads = new();
         public void LogInfo(object message) { Infos.Add(message.ToString()); Threads.Add(Environment.CurrentManagedThreadId); }
         public void LogWarning(object message) { Warnings.Add(message.ToString()); Threads.Add(Environment.CurrentManagedThreadId); }
+        public void LogError(object message) { Warnings.Add(message.ToString()); Threads.Add(Environment.CurrentManagedThreadId); }
     }
 }

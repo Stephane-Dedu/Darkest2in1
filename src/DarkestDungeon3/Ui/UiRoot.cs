@@ -35,7 +35,7 @@ internal sealed class UiRoot : MonoBehaviour
         Drag.Begin();
         GUI.depth = -1000;
 
-        bool fullscreen = d.Phase is Phase.Hamlet or Phase.Crawling or Phase.Homecoming;
+        bool fullscreen = d.Phase is Phase.Hamlet or Phase.Crawling or Phase.Homecoming or Phase.Recovery;
         Gui.BlockInput(fullscreen || _slotPicker || CinematicPlayer.Active);
         if (CinematicPlayer.Active)
         {
@@ -76,6 +76,18 @@ internal sealed class UiRoot : MonoBehaviour
                     Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
                     Gui.Text(new Rect(460, 480, 1000, 70), "The party sets out...", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
                     _embarking = false;
+                    break;
+                case Phase.Recovery:
+                    _embarking = false;
+                    Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+                    Gui.Text(new Rect(460, 350, 1000, 80), "Your expedition is saved", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+                    Gui.Text(new Rect(460, 450, 1000, 100), d.RecoveryMessage, 26, Gui.Dd1Text, TextAnchor.MiddleCenter);
+                    if (d.CanResumeSaved && Gui.DdButton(new Rect(710, 620, 500, 72), "Resume expedition", true, 30)) d.ResumeExpedition();
+                    if (Gui.DdButton(new Rect(710, 720, 500, 72), "Main menu", true, 30))
+                    {
+                        d.LeaveHamlet();
+                        if (Dd2.Dd2Run.Hosting) Dd2.Dd2Run.End();
+                    }
                     break;
                 case Phase.Crawling:
                     _crawl.Draw();
