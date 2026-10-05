@@ -1558,3 +1558,31 @@ No game launch or owner-save access; native event/card/goal appearance remains [
 - Round 113 deployed: Release + 393 Core + 26 UI tests green, DLL hashes match. Town-event resolve now retains cumulative XP, achievements and portrait history. Next round 114: region-aware Caretaker quest goals, reading DD1/Unity references and current native lair progression without quest-generation RNG.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 43%, weekly 69%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 114: Caretaker goals follow independent campaign regions
+
+DD1 quest.plot_quests.json, miscellaneous.string_table.xml caretaker strings and
+Unity ActivityLogWindow/LogQuestGoal list plot identities and check CompletedPlot.
+Core now projects supported progression plots plus the existing native lair tier
+IDs, without constructing an offer or drawing a seed. New campaigns show 12 native
+lair tiers and five story goals. Enabled optional DD1 boss chains remain separate;
+completed goals from disabled regions remain visible without changing progress.
+Unsupported town invasion and repeatable event quests are not invented goals.
+
+The 600x240 Caretaker view uses the existing next_hero arrow to switch Quest/Roster
+lists, each retaining its own scroll. Names/heights are cached; checks read current
+saved completion. Native lairs use native boss/region/tier words, and an intro in
+the Sprawl no longer claims its destination is the Ruins. Estate changes reset
+the view. Six Core cases cover all default identities, separate DD1/native checks,
+region toggles/history, no Sluice lair, repeated views/save with no state/RNG change,
+and the actual generated PlotOffers' IDs/regions/bosses. Release + 399 Core + 26 UI
+tests pass; stopped-game deployment and both DLL hashes verified. No owner saves or
+game launch. Native arrow/scroll/text/check appearance remains [?]. Updated the
+stale Activity-log parent checklist to reflect delivered work and pending checks.
+
+## Status 2026-10-05: round 114 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no owner-save access or restore pending. Owner heartbeat authorizes resumed work despite the app's earlier paused goal status.
+- Round 114 deployed: Release + 399 Core + 26 UI tests green, DLL hashes match. Caretaker quest/roster lists now follow independent native/optional areas. Next round 115: inspect documented plot-map secret rooms/doors against DD1 maps and Unity; split into small verified map/crawl steps if needed.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
+- Last observed five-hour usage 47%, weekly 70%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

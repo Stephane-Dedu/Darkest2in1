@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Expedition;
 using DarkestDungeon3.Runtime;
 using UnityEngine;
 
@@ -17,6 +18,15 @@ internal sealed class ActivityLogUi
     private List<string> _goalClasses, _goalTexts;
     private List<float> _goalHeights;
     private Dd1Font _goalFont;
+    private bool _showQuests = true;
+    private Vector2 _questScroll;
+    private Estate _questEstate;
+    private Dd1Campaign _questCampaign;
+    private int _questRegions, _questCompleted;
+    private Dd1Font _questFont;
+    private IReadOnlyList<CaretakerQuestGoal> _questGoals;
+    private List<string> _questTexts;
+    private List<float> _questHeights;
 
     public void Draw(Rect window, Estate estate, ref Vector2 scroll)
     {
@@ -26,7 +36,7 @@ internal sealed class ActivityLogUi
         var font = Dd1Font.Body;
         if (_estate != estate || _layout == null || _week != estate.Week || _weeks != weeks || _town != town || _raids != raids || _font != font)
         {
-            if (_estate != estate) { scroll = Vector2.zero; _goalScroll = Vector2.zero; }
+            if (_estate != estate) { scroll = Vector2.zero; _goalScroll = Vector2.zero; _questScroll = Vector2.zero; _showQuests = true; }
             _estate = estate; _week = estate.Week; _weeks = weeks; _town = town; _raids = raids; _font = font;
             _layout = ActivityLogLayout.Build(estate.ActivityLog, (text, width) => Gui.TextHeight(text, 20, width), region => Session.Current.Zones.ZoneName(region),
                 upgrade => ActivityLogLayout.BuildingText(upgrade, Session.Current.Lore.Text("str_building_upgraded_to_percent"), Session.Current.Lore.Text("town_name_" + upgrade.Building)));
@@ -38,15 +48,21 @@ internal sealed class ActivityLogUi
             Gui.Text(new Rect(25, 15, 550, 70), "All is quiet. Choose a quest and embark when ready.", 20, Gui.Dd1Text);
         foreach (var row in _layout.Visible(scroll.y, view.height)) DrawRow(row);
         GUI.EndScrollView();
-        DrawRosterGoals(window, estate);
+        DrawGoals(window, estate);
     }
 
-    private void DrawRosterGoals(Rect window, Estate estate)
+    private void DrawGoals(Rect window, Estate estate)
     {
         var session = Session.Current;
         var lore = session.Lore;
         Gui.Text(new Rect(window.x + 720, window.y + 35, 600, 65), lore.Text("str_caretaker_goals_heading") ?? "Caretaker Goals", 36, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        Gui.Text(new Rect(window.x + 720, window.y + 123, 600, 32), lore.Text("str_caretaker_goals_roster_goals_heading") ?? "Roster Goals", 24, Gui.Dd1Name, heading: true);
+        var next = new Rect(window.x + 1282, window.y + 123, 32, 32);
+        Gui.Image(next, Art.Dd1("shared", "character", "next_hero.png"), ScaleMode.ScaleToFit);
+        if (next.Contains(Event.current.mousePosition)) Gui.Tip(_showQuests ? "Show Roster Goals" : "Show Quest Goals");
+        if (Gui.Hotspot(next)) _showQuests = !_showQuests;
+        string heading = _showQuests ? lore.Text("str_caretaker_goals_quest_goals_heading") ?? "Quest Goals"
+            : lore.Text("str_caretaker_goals_roster_goals_heading") ?? "Roster Goals";
+        Gui.Text(new Rect(window.x + 720, window.y + 123, 550, 32), heading, 24, Gui.Dd1Name, heading: true);
         var source = session.Catalog.RecruitableClasses;
         var font = Dd1Font.Body;
         if (_goalSource != source || _goalClasses == null || _goalFont != font)
@@ -57,23 +73,53 @@ internal sealed class ActivityLogUi
                 .Replace("%s", lore.Text("hero_class_name_" + c) ?? HamletUi.Pretty(c))).ToList();
             _goalHeights = _goalTexts.Select(t => Mathf.Max(40, Gui.TextHeight(t, 20, 520) + 12)).ToList();
         }
-        float height = _goalHeights.Sum() + _goalClasses.Count * 10;
+        if (_showQuests)
+        {
+            int regions = 17;
+            foreach (var zone in CampaignRegions.Options)
+                regions = unchecked(regions * 31 + (CampaignRegions.Enabled(estate, zone) ? zone.GetHashCode() : 0));
+            if (_questGoals == null || _questEstate != estate || _questCampaign != session.Campaign || _questRegions != regions
+                || _questCompleted != estate.CompletedPlotQuests.Count || _questFont != font)
+            {
+                _questEstate = estate; _questCampaign = session.Campaign; _questRegions = regions;
+                _questCompleted = estate.CompletedPlotQuests.Count; _questFont = font;
+                _questGoals = CaretakerGoals.Quests(estate, session.Campaign);
+                _questTexts = _questGoals.Select(g =>
+                {
+                    if (g.BossId != null)
+                    {
+                        string tier = g.Tier == 1 ? "Apprentice" : g.Tier == 2 ? "Veteran" : "Champion";
+                        return $"Defeat the {HamletUi.Pretty(ZoneEncounters.BossKey(g.BossId))} in {session.Zones.ZoneName(g.Region)} ({tier}).";
+                    }
+                    if (g.Id == "plot_tutorial_crypts" && g.Region != "crypts")
+                        return $"Successfully complete your first foray into {session.Zones.ZoneName(g.Region)}.";
+                    return lore.Text("str_caretaker_goal_" + g.Id) ?? HamletUi.Pretty(g.Id);
+                }).ToList();
+                _questHeights = _questTexts.Select(t => Mathf.Max(40, Gui.TextHeight(t, 20, 520) + 12)).ToList();
+            }
+        }
+        var texts = _showQuests ? _questTexts : _goalTexts;
+        var heights = _showQuests ? _questHeights : _goalHeights;
+        var scroll = _showQuests ? _questScroll : _goalScroll;
+        float height = heights.Sum() + texts.Count * 10;
         var view = new Rect(window.x + 720, window.y + 160, 600, 240);
-        _goalScroll.y = Mathf.Clamp(_goalScroll.y, 0, Mathf.Max(0, height - view.height));
-        _goalScroll = GUI.BeginScrollView(view, _goalScroll, new Rect(0, 0, 580, height));
+        scroll.y = Mathf.Clamp(scroll.y, 0, Mathf.Max(0, height - view.height));
+        scroll = GUI.BeginScrollView(view, scroll, new Rect(0, 0, 580, height));
         var mark = Art.Dd1("shared", "menu", "menu.check_mark.png");
         float y = 0;
-        for (int i = 0; i < _goalClasses.Count; i++)
+        for (int i = 0; i < texts.Count; i++)
         {
-            if (y + _goalHeights[i] > _goalScroll.y && y < _goalScroll.y + view.height)
+            if (y + heights[i] > scroll.y && y < scroll.y + view.height)
             {
-                bool complete = estate.CompletedResolveGoals.Contains(_goalClasses[i]);
+                bool complete = _showQuests ? estate.CompletedPlotQuests.Contains(_questGoals[i].Id)
+                    : estate.CompletedResolveGoals.Contains(_goalClasses[i]);
                 if (complete) Gui.Image(new Rect(0, y + 4, 32, 32), mark, ScaleMode.ScaleToFit);
-                Gui.Text(new Rect(50, y + 6, 520, _goalHeights[i] - 12), _goalTexts[i], 20, complete ? Gui.Dd1Name : Gui.Dd1Text);
+                Gui.Text(new Rect(50, y + 6, 520, heights[i] - 12), texts[i], 20, complete ? Gui.Dd1Name : Gui.Dd1Text);
             }
-            y += _goalHeights[i] + 10;
+            y += heights[i] + 10;
         }
         GUI.EndScrollView();
+        if (_showQuests) _questScroll = scroll; else _goalScroll = scroll;
     }
 
     private static void DrawRow(ActivityLogLayout.Row row)
