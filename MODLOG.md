@@ -2502,3 +2502,30 @@ remains [?]. No game launch, owner-estate access or art changes.
 - Next round 150: bound the no-callback host wait with a main-thread timer, one reported failure and cancelled stale callbacks; preserve an in-progress native transition/save and allow retry when ready. Use a generous threshold because native asset loading can be slow. Then inspect remaining save/recovery and crawl UI gaps.
 - Ordinary usage available; session 80%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 150: bound inactive host-entry waits
+
+DD1 loading-screen data/Unity SaveSelector.LoadScene are presentation references;
+DD2 GameModeMgr dispatches ready callbacks only after completed native entry.
+Driver now pumps a main-thread three-minute inactivity timer. Each completed
+intermediate scene resets it; road readiness/end clears it. A wait with no progress
+reports once and cancels late gameplay callbacks while retaining the save and
+native host/transition, so DD2 may finish loading and a ready-road retry can reuse
+it. Three minutes is a generous mod UX choice, not a claimed DD1 timing value.
+
+Three real-linked fake-clock cases cover slow-but-successful readiness with no
+later failure, timeout during continuing native loading/one notification/late
+callback cancellation/ready-host reuse, intermediate progress and end cancellation.
+Release + 636 Core + 60 UI tests pass; stopped-game DLL hashes match. Native
+slow-load timing/retry remains [?]. No launch, owner-estate access or art changes.
+
+New gap recorded: missing/corrupt main saves do not recover from an existing
+backup. Missing main can be misidentified as a new estate after the old writer's
+delete window. Fix read-only backup selection separately, then picker error UI.
+
+## Status 2026-10-05: round 150 complete
+
+- Round 150 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 151: validated read-only backup recovery for missing/corrupt main saves, without rewriting or swallowing access/lock errors; test only temporary synthetic files. Then show unrecoverable load errors in the picker and inspect loot-scroll truncation.
+- Ordinary usage available; session 82%, weekly 90%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

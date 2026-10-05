@@ -16,6 +16,7 @@ public class RunRecoveryTests : IDisposable
         Singleton<GameTypeMgr>.Instance = new(); SingletonMonoBehaviour<RunBhv>.Instance = _run;
         Dd2Run.End(); _modes.ModeRequests = 0;
         GameModeMgr.CurrentMode = GameModeType.MAIN_MENU;
+        UnityEngine.Time.unscaledTime = 0;
     }
     public void Dispose() { Dd2Run.End(); Dd2Api.Modes = null; }
 
@@ -80,5 +81,49 @@ public class RunRecoveryTests : IDisposable
         Dd2Run.End();
         _modes.Complete(GameModeType.DRIVING);
         Assert.Equal(0, oldReady); Assert.Equal(1, newReady);
+    }
+
+    [Fact]
+    public void SlowButCompletedEntryBeforeTheBoundDoesNotFailLater()
+    {
+        int ready = 0, failed = 0;
+        Dd2Run.Start(() => ready++, () => failed++);
+        UnityEngine.Time.unscaledTime = Dd2Run.RoadWaitSeconds - 1;
+        Dd2Run.Update(); Assert.Equal(0, failed);
+        _modes.Complete(GameModeType.DRIVING);
+        UnityEngine.Time.unscaledTime += Dd2Run.RoadWaitSeconds * 2;
+        Dd2Run.Update();
+        Assert.Equal(1, ready); Assert.Equal(0, failed);
+    }
+
+    [Fact]
+    public void InactiveWaitReportsOnceAndLateRoadEntryCanRetryWithoutANewRun()
+    {
+        int ready = 0, failed = 0;
+        Dd2Run.Start(() => ready++, () => failed++);
+        _modes.Changing = true;
+        UnityEngine.Time.unscaledTime = Dd2Run.RoadWaitSeconds;
+        Dd2Run.Update(); Dd2Run.Update();
+        Assert.Equal(1, failed); Assert.Equal(0, ready);
+        Assert.True(Dd2Run.Hosting); Assert.Equal(1, _modes.ModeRequests);
+        Assert.False(Dd2Run.Start(() => ready++)); // still loading: don't interrupt the transition
+        _modes.Changing = false; _modes.Complete(GameModeType.DRIVING);
+        Assert.Equal(0, ready); // cancelled late callback
+        Assert.True(Dd2Run.Start(() => ready++, () => failed++));
+        Assert.Equal(1, ready); Assert.Equal(1, failed); Assert.Equal(1, _run.NewRunRequests);
+    }
+
+    [Fact]
+    public void IntermediateProgressRestartsTheInactivityClockAndEndCancelsIt()
+    {
+        int failed = 0;
+        Dd2Run.Start(() => { }, () => failed++);
+        UnityEngine.Time.unscaledTime = Dd2Run.RoadWaitSeconds - 1;
+        _modes.Complete(GameModeType.HERO_SELECT);
+        UnityEngine.Time.unscaledTime += Dd2Run.RoadWaitSeconds - 1;
+        Dd2Run.Update(); Assert.Equal(0, failed);
+        Dd2Run.End();
+        UnityEngine.Time.unscaledTime += Dd2Run.RoadWaitSeconds * 2;
+        Dd2Run.Update(); Assert.Equal(0, failed);
     }
 }

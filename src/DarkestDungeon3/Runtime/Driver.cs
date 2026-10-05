@@ -84,6 +84,7 @@ internal sealed class Driver : MonoBehaviour
 
     private void Update()
     {
+        Dd2Run.Update();
         if (!_townArtPrimed && S?.Dd1 != null)
         {
             _townArtPrimed = true;
