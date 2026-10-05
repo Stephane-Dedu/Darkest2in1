@@ -190,7 +190,7 @@ public sealed class Crawl
         if (!CanResume) return Blocked();
         if (State.InRoom) Emit(CrawlEventType.EnteredRoom, roomId: State.RoomId);
         else Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
-        var saved = State.PendingEncounter;
+        var saved = ExpeditionFight.Presentation(State) ?? State.PendingEncounter;
         bool atSpot = saved != null && (State.InRoom ? saved.RoomId == State.RoomId
             : saved.RoomId == -1 && saved.CorridorId == State.CorridorId && saved.TileIndex == State.TileIndex);
         if (atSpot && saved.Type is CrawlEventType.Battle or CrawlEventType.Ambush)
@@ -348,6 +348,7 @@ public sealed class Crawl
             else State.TileIndex = back;
         }
         State.PendingEncounter = null;
+        State.FightCheckpoint = null;
         Emit(CrawlEventType.Retreated);
         return Flush();
     }
@@ -369,6 +370,7 @@ public sealed class Crawl
         _events.Clear();
         if (State.Ended) return Blocked();
         State.PendingEncounter = null;
+        State.FightCheckpoint = null;
         State.BattlesWon++;
         LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
         CountDownBuffs();

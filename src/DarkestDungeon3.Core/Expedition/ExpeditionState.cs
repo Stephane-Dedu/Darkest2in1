@@ -20,6 +20,8 @@ public sealed class ExpeditionState
     public CurioReport PendingCurio;
     /// <summary>The already-rolled encounter at the current spot, including surprise and camp-ambush identity.</summary>
     public CrawlEvent PendingEncounter;
+    /// <summary>Resolved native fight and pre-fight party condition, retained until its outcome is known.</summary>
+    public FightCheckpoint FightCheckpoint;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>

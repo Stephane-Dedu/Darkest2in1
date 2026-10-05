@@ -2364,3 +2364,34 @@ No launch, owner-estate access or private-art changes.
 - Next round 145: save an explicit pre-fight condition checkpoint before enabling native interrupted-fight restart. Then route valid saved crawls back to their saved position without repeating week/provision/quest rolls. Exact mid-turn DD2 combat reconstruction remains separate.
 - Ordinary usage available; session 67%, weekly 88%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 145: checkpoint native fights before their transition
+
+DD1 starting_save/persist.raid.json records location/party; Unity
+Setup/SaveSystem/SaveCampaignData.UpdateRaid records current location, formation
+and fighting BattleGroundSaveData. DD2 CombatBhv.SaveToJson/LoadFromJson requires
+complete Battle/Arena state. The mod does not save that native state, so a restart
+must restore both teams from the beginning rather than combine damaged/dead
+mid-fight heroes with fresh enemies.
+
+Store copied pre-fight raw condition, torch, resolved native configuration/arena,
+surprise, kind/presentation and translated lineup before DD2 changes mode. The
+prepared callback persists first; Session.Persist now reports failure so a failed
+write can stop combat. Valid saved checkpoints provide exact restart plans and
+resume presentation without crawl RNG. Successful win/fallback clears them;
+failed fallback and start rejection preserve them. Native table results are
+stored after their roll, not rerolled on re-entry. Runtime load remains separate.
+
+Thirteen Core cases cover room/hall/camp restart, pre-existing versus mid-fight
+deaths and damage, exact plans, copied lists, torch/surprise/RNG stability, invalid
+and stale state, legacy saves and outcome cleanup. Release + 614 Core + 52 UI
+tests pass; stopped-game DLL hashes match. Native restart remains [?]; exact
+mid-turn combat restoration is not implemented. No launch, owner-estate access
+or private-art changes.
+
+## Status 2026-10-05: round 145 complete
+
+- Round 145 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 146: route valid interrupted crawls to a fresh host at their saved position, restore checkpoints/actors before presentation, avoid repeated week/provisions and retain terminal results once. Set Crawling before handling entry events so an immediate fight stays Fighting. Native DD2 run-entry needs guarded failure handling; inspect before changing it.
+- Ordinary usage available; session 70%, weekly 88%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived artwork and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.

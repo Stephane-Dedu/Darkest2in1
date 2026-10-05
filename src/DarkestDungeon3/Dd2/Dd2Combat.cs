@@ -156,7 +156,8 @@ internal static class Dd2Combat
     private static List<uint> _buffed = new();
 
     public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised,
-                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null, bool monstersSurprised = false)
+                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null, bool monstersSurprised = false,
+                             Func<string, string, bool> onPrepared = null)
     {
         var modes = Dd2Api.Modes;
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[combat] mode change in progress"); return false; }
@@ -176,6 +177,8 @@ internal static class Dd2Combat
         var source = plan.Kind == FightKind.CampAmbush || heroesSurprised ? CombatSource.AMBUSH : CombatSource.DUNGEON;
         var scenario = new CombatScenarioData(battle, arena, source, party);
         long scenarioMs = setupWatch.ElapsedMilliseconds;
+        // Save the actual rolled configuration before native combat can change either team.
+        if (onPrepared != null && !onPrepared(battle, scenario.BackgroundSceneName)) return false;
 
         Dd2Api.Torch = torch;
         LastBattleId = battle;

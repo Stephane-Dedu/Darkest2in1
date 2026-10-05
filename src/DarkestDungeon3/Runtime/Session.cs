@@ -108,7 +108,7 @@ internal sealed class Session
         if (repairs.Count > 0) Persist();
     }
 
-    public void Persist()
+    public bool Persist()
     {
         try
         {
@@ -117,7 +117,8 @@ internal sealed class Session
                 && driver.Party != null && driver.Phase is Phase.Crawling or Phase.Fighting)
                 driver.CapturePartyState();
             Save?.Save(SavePath);
+            return Save != null;
         }
-        catch (Exception e) { Plugin.Log.LogError("Saving failed: " + e); }
+        catch (Exception e) { Plugin.Log.LogError("Saving failed: " + e); return false; }
     }
 }

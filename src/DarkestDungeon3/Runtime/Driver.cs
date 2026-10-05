@@ -576,17 +576,34 @@ internal sealed class Driver : MonoBehaviour
         var quest = Expedition.Quest;
         var rng = new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken);
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, rng, quest.BossId);
+        var checkpoint = ExpeditionFight.Current(Expedition);
         // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles,
         // and DD2's regions keep their own natives).
-        if (kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
+        if (checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
         {
             var monsters = Crawl.FightMonsters(kind == FightKind.Room ? "room" : "hall");
             plan.Enemies = S.Bestiary.Translate(monsters, rng, Dd2Combat.EnemySize);
             Plugin.Log.LogInfo($"[combat] DD1 encounter [{string.Join(", ", monsters)}] -> {(plan.Enemies != null ? string.Join(", ", plan.Enemies) : "zone table")}");
         }
+        if (checkpoint != null)
+        {
+            plan = checkpoint.Plan();
+            heroesSurprised = checkpoint.HeroesSurprised;
+            monstersSurprised = checkpoint.MonstersSurprised;
+        }
+        CapturePartyState();
         var guids = Expedition.Party.Select(Party.Guid).Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
         var buffs = Crawl.FightBuffs().Select(b => (Party.Guid(b.Hero), b.Buff)).Where(b => b.Item1 != 0).ToList();
-        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised))
+        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised,
+                (battle, arena) =>
+                {
+                    if (checkpoint == null && !ExpeditionFight.Record(Expedition, plan, battle, arena, heroesSurprised, monstersSurprised))
+                    {
+                        Say("The fight is waiting for a complete party checkpoint.");
+                        return false;
+                    }
+                    return S.Persist();
+                }))
         {
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
             Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
