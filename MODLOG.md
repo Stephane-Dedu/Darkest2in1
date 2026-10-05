@@ -2165,3 +2165,24 @@ No game launch, owner-estate access or private-art changes.
 - Next round 137: inspect remaining crawl/party lifecycle gaps against actual DD1/Unity, including stale actions after expedition end. Choose one proven difference and document it before coding.
 - Ordinary usage available; session 36%, weekly 83%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Native-derived art and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
+
+## Round 137: ended expeditions reject late actions
+
+Only secret-room actions checked State.Ended. Ordinary crawl entry points could
+still move, spend/loot, camp, roll enemies or resolve a battle after termination;
+late Retreat could rewrite a successful end. DD1's abandonment help and Unity
+RaidResultsEvent's raycast/room/hall disable establish the terminal boundary.
+Core now enforces it before mutation; QuestComplete alone still allows exploring.
+
+Eight scenario cases exercise room/hall/camp/battle after success/retreat and
+synthetic reload, asserting exact save, actor, external loot and RNG preservation.
+A ninth follows a completed quest through loot, movement and camp until leaving.
+Release + 540 Core + 45 UI tests pass; stopped-game DLL hashes match. Native
+transition/input remains [?]. No game launch or owner-estate/private-art access.
+
+## Status 2026-10-05: round 137 complete
+
+- Round 137 deployed and green; loop continues under owner authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 138: inspect remaining high-impact campaign/crawl parity against installed DD1 and Unity. Check camping loot capacity and other concrete resource effects before choosing one documented gap; do not invent rules.
+- Ordinary usage available; session 38%, weekly 83%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estates or abandoned project access. Native-derived art and owner preview/server remain unchanged/outside Git; native checks await explicit launch permission.
