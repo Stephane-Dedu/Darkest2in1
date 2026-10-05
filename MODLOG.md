@@ -1804,5 +1804,27 @@ No game launched or owner estate accessed; native tooltip comparison remains [?]
 - Loop continues under owner authorization; native goal remains paused with no resume API or duplicate goal.
 - Round 122 deployed and green. Next round 123: inspect remaining visible trinket choice/conditional fields from actual native data; skip hidden-policy blockers and do not invent unknown effects. Native scene/recruit/combat/reader checks still await owner launch permission.
 - Ordinary usage available; session 79%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. Protected estates, abandoned project and private native artwork constraints remain.
+
+## Round 123: Spiked Leather Cap retains its native disease risk
+
+Inspected DD1 quirk_library disease flags and Unity Trinket.ToolTip's complete
+buff enumeration. Native add_1_disease_5pct adds one disease-tag quirk with zero
+range at 5%; EffectDescription supplies singular/add templates, and EffectInstance
+draws an eligible disease from the recipient's quirk bag. Only that exact visible
+shape is supported. Unknown rarity, category, selector, count, range and hidden
+effects stay withheld, with the existing visibility policy unchanged.
+
+Spiked Leather Cap now retains Gain On CRIT: Add Disease (5%) alongside CRIT when
+target Bleed, retaliation Bleed and Bone Saw's additional Bleed. No combat behavior
+changed. Two actual-data/localization/malformed-template cases and nine synthetic
+unsafe-shape cases pass. Release + 445 Core + 30 UI tests pass before stopped-game
+deploy; both installed DLL hashes match. Audit: 177 complete/13 partial/1 blank
+of 191. No game launched or owner estate accessed; native tooltip remains [?].
+
+## Status 2026-10-05: round 123 complete
+
+- Loop continues under owner authorization; native goal remains paused and no duplicate goal exists.
+- Round 123 deployed and green. Next round 124: inspect Icon of the Light's visible torch -5 at 66% on received CRIT; native EffectDescription templates/units and DD1/Unity torch display are references. Do not alter hidden buff/condition policy to force complete coverage.
+- Ordinary usage available; session 81%, weekly 75%; five-hour reset 2026-10-05 13:50:52 UTC (15:50:52 Paris). Continue toward approximately 95% with clean committed handoff. No DD2 launch, protected estates/abandoned project/private artwork constraints remain.
 - Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/server session 20403 unchanged/outside Git; native UI/performance/rendering checks await launch.
 - Last observed five-hour usage 70%, weekly 73%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

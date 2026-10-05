@@ -208,6 +208,7 @@ public sealed class TrinketDescriptions
         "m_DotStealTags", "m_DotStealAmount", "m_DotStealAmountRange",
         "m_TokenCopyTags", "m_TokenCopyAmount", "m_TokenCopyAmountRange",
         "m_QuirkRemoveTag", "m_QuirkRemoveAmount", "m_QuirkRemoveAmountRange",
+        "m_QuirkAddTag", "m_QuirkAddAmount", "m_QuirkAddAmountRange",
     };
 
     private string SimpleEffect(string id, Func<string, string> localize, bool friendly, int depth)
@@ -236,6 +237,19 @@ public sealed class TrinketDescriptions
                 || float.IsNaN(multiplier) || float.IsInfinity(multiplier) || multiplier < 0 || (crit > 0 && multiplier == 0)) return null;
         }
         var parts = new List<string>();
+        if (rows.Any(row => row[0].StartsWith("m_QuirkAdd", StringComparison.Ordinal)))
+        {
+            // Preserve the Cap's native random disease risk without guessing other quirk selectors.
+            if (Field("Effect", id, "m_QuirkAddTag") != "disease"
+                || Field("Effect", id, "m_QuirkAddAmount") != "1"
+                || (Field("Effect", id, "m_QuirkAddAmountRange") ?? "0") != "0") return null;
+            string disease = Plain(Text("quirk+disease", localize));
+            string quantity = disease == null ? null : Format(Text("token_amount_format_singular", localize), disease, 1);
+            string addition = quantity == null || !quantity.Contains(disease) ? null
+                : Format(Text("effect_tooltip_add_quirk", localize), quantity);
+            if (addition == null || !addition.Contains(disease)) return null;
+            parts.Add(addition);
+        }
         if (rows.Any(row => row[0].StartsWith("m_QuirkRemove", StringComparison.Ordinal)))
         {
             // Native Pods removes one randomly selected unlocked disease. Other selection/count shapes

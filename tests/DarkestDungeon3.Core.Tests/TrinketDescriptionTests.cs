@@ -1281,6 +1281,80 @@ public class TrinketDescriptionTests
     }
 
     [Fact]
+    public void SpikedLeatherCapKeepsDiseaseRiskBesideAllOtherEffects()
+    {
+        string effects = Data.Effects("trinket_surgeon_spiked_leather_cap", out bool complete);
+        Assert.True(complete);
+        Assert.Contains("Gain On CRIT: Add Disease (5%)", effects);
+        Assert.Contains("+15% CRIT when target Bleed", effects);
+        Assert.Contains("Apply to Attacker When Hit: Bleed 1 (3 Turns)", effects);
+        Assert.Contains("Apply On CRIT: Bleed 2 (3 Turns) when Bone Saw is equipped", effects);
+        Assert.DoesNotContain("<sprite", effects);
+    }
+
+    [Fact]
+    public void DiseaseAdditionRetainsNativeLocalizationAndRequiresItsActionBody()
+    {
+        string effects = Data.Effects("trinket_surgeon_spiked_leather_cap", out bool complete,
+            key => key == "quirk+disease" ? "Maladie" : key == "token_amount_format_singular" ? "{0} x{1}"
+                : key == "effect_tooltip_add_quirk" ? "Ajouter {0}" : null);
+        Assert.True(complete);
+        Assert.Contains("Gain On CRIT: Ajouter Maladie x1 (5%)", effects);
+        foreach (string key in new[] { "token_amount_format_singular", "effect_tooltip_add_quirk" })
+        foreach (string template in new[] { "invalid {9}", "No effect body" })
+        {
+            effects = Data.Effects("trinket_surgeon_spiked_leather_cap", out complete,
+                name => name == key ? template : null);
+            Assert.False(complete);
+            Assert.DoesNotContain("Add Disease", effects);
+            Assert.Contains("+15% CRIT when target Bleed", effects);
+            Assert.Contains("Bleed 1 (3 Turns)", effects);
+        }
+    }
+
+    [Theory]
+    [InlineData("m_QuirkAddTag", "negative")]
+    [InlineData("m_QuirkAddAmount", "0")]
+    [InlineData("m_QuirkAddAmount", "2")]
+    [InlineData("m_QuirkAddAmount", "NaN")]
+    [InlineData("m_QuirkAddAmountRange", "1")]
+    [InlineData("m_QuirkAddRarity", "rare")]
+    [InlineData("m_QuirkAddRandom", "False")]
+    [InlineData("m_IsSourceOnly", "True")]
+    [InlineData("m_IsVisible", "False")]
+    public void UnsupportedDiseaseAdditionNeverBecomesAnInventedRisk(string field, string value)
+    {
+        string tempRoot = Path.GetFullPath(Path.GetTempPath()).TrimEnd(Path.DirectorySeparatorChar);
+        string fixture = Path.Combine(tempRoot, "dd3_trinket_add_disease_" + Guid.NewGuid().ToString("N"));
+        Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+        try
+        {
+            Directory.CreateDirectory(Path.Combine(fixture, "Excel"));
+            Directory.CreateDirectory(Path.Combine(fixture, "Localization", "Sources"));
+            var fields = new System.Collections.Generic.Dictionary<string, string>
+            { ["m_QuirkAddTag"] = "disease", ["m_QuirkAddAmount"] = "1" };
+            fields[field] = value;
+            string csv = string.Join("\n", new[]
+            {
+                "element_start,risk_item,Item", "element_end",
+                "element_start,risk_item,ActorDataEffects", "on_crit_as_performer_to_performer_effects,risk_effect", "element_end",
+                "element_start,risk_effect,Effect", "m_Chance,0.05",
+            });
+            foreach (var row in fields) csv += "\n" + row.Key + "," + row.Value;
+            File.WriteAllText(Path.Combine(fixture, "Excel", "trinkets_data_export.Group.csv"), csv + "\nelement_end");
+            File.WriteAllText(Path.Combine(fixture, "Localization", "Sources", "combat.txt"),
+                "effect_tooltip_skill_effect_on_crit_as_performer_to_performer=Gain On CRIT:\nquirk+disease=Disease\ntoken_amount_format_singular={0}\neffect_tooltip_add_quirk=Add {0}\neffect_tooltip_effect_chance=({0}%)");
+            Assert.Null(TrinketDescriptions.Load(fixture).Effects("risk_item", out bool complete));
+            Assert.False(complete);
+        }
+        finally
+        {
+            Assert.Equal(tempRoot, Path.GetDirectoryName(Path.GetFullPath(fixture)));
+            if (Directory.Exists(fixture)) Directory.Delete(fixture, true);
+        }
+    }
+
+    [Fact]
     public void DiseaseRemovalUsesNativeTemplatesAndWithholdsMalformedActions()
     {
         string effects = Data.Effects("trinket_cave_peculiar_pods", out bool complete,
