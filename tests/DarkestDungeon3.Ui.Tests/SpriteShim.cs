@@ -37,6 +37,7 @@ public static class Mathf
     public static int Max(int a, int b) => Math.Max(a, b);
     public static int CeilToInt(float a) => (int)MathF.Ceiling(a);
     public static float Clamp01(float x) => Math.Clamp(x, 0, 1);
+    public static float Clamp(float x, float min, float max) => Math.Clamp(x, min, max);
     public static float SmoothStep(float from, float to, float x) => from + (to-from)*x*x*(3-2*x);
 }
 public sealed class Shader

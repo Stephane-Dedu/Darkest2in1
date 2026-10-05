@@ -15,6 +15,8 @@ internal static class Dd1Text
 
     public static string Get(string table, string id)
     {
+        // A request before content is ready must not permanently cache an empty table.
+        if (Session.Current?.Dd1 == null) return null;
         if (!Tables.TryGetValue(table, out var strings)) Tables[table] = strings = Load(table);
         return id != null && strings.TryGetValue(id, out var s) ? s : null;
     }

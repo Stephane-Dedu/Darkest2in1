@@ -72,8 +72,11 @@ internal sealed class Dd1Font
 
     public static Dd1Font Get(string name)
     {
+        var dd1 = Session.Current?.Dd1;
+        // Menu text appears during background content loading. That is not a missing font.
+        if (dd1 == null) return null;
         if (Cache.TryGetValue(name, out var f)) return f;
-        try { f = Load(Session.Current.Dd1.PathOf("fonts", name + ".fnt")); }
+        try { f = Load(dd1.PathOf("fonts", name + ".fnt")); }
         catch (Exception e) { Plugin.Log.LogWarning($"DD1 font {name}: {e.Message}"); f = null; }
         Cache[name] = f;
         return f;

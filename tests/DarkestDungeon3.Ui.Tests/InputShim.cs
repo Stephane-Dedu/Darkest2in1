@@ -33,6 +33,7 @@ public struct Rect(float x, float y, float width, float height)
 }
 public readonly struct Color(float r, float g, float b, float a)
 {
+    public readonly float r = r, g = g, b = b, a = a;
     public static Color white => new(1, 1, 1, 1);
     public static Color clear => new(0, 0, 0, 0);
 }
@@ -52,7 +53,8 @@ public static class GUIUtility
 }
 public static class Time { public static int frameCount; public static float unscaledTime; }
 public enum TextureFormat { RGBA32 }
-public enum FilterMode { Bilinear }
+public enum FilterMode { Bilinear, Trilinear }
+public enum TextAnchor { UpperLeft, UpperCenter, UpperRight, MiddleLeft, MiddleCenter, MiddleRight, LowerLeft, LowerCenter, LowerRight }
 public enum TextureWrapMode { Clamp }
 public enum HideFlags { HideAndDontSave }
 public readonly struct Color32(byte r, byte g, byte b, byte a)
@@ -69,6 +71,8 @@ public sealed class Texture2D : Texture
     public TextureWrapMode wrapMode;
     public HideFlags hideFlags;
     public string name;
+    public int anisoLevel;
+    public float mipMapBias;
     public Texture2D(int w, int h, TextureFormat format, bool mipChain)
     { Track(); width = w; height = h; }
     private static void Track() => ApiThreads.Add(Environment.CurrentManagedThreadId);
@@ -89,6 +93,7 @@ public sealed class Texture2D : Texture
             new Color32(50, 100, 200, 255), new Color32(100, 50, 200, 255) };
     }
     public void LoadRawTextureData(byte[] data) { Track(); Raw = data; }
-    public void Apply(bool mipMaps, bool nonReadable) => Track();
+    public void SetPixels32(Color32[] pixels) => Track();
+    public void Apply(bool mipMaps, bool makeNoLongerReadable) => Track();
 }
 public static class Object { public static void Destroy(object value) => Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId); }

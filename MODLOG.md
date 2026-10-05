@@ -2001,3 +2001,28 @@ Native placement/playback/skip/return remain [?]. No game or owner saves accesse
 - Next round 131: inspect another documented actionable system gap, including provision fullness/reset behavior against actual DD1/Unity files, or a concrete UI/performance omission. All remaining partial trinkets inspected so far involve hidden policy; do not loosen it to claim completion.
 - Ordinary usage available; session 9%, weekly 79%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
 - No DD2 launch, protected estates or abandoned project access. Private artwork and owner preview unchanged; native UI/rendering/timing checks still pending.
+
+## Round 131: early menu requests no longer poison DD1 font/text caches
+
+Gui.Text requests Dd1Font while the content worker has not published Session.
+Get caught that null session and permanently cached a null font; Dd1Text cached
+an empty localization table under the same condition. This can keep fallback
+fonts/labels throughout a session despite successful DD1 loading afterward.
+Inspected all four installed .fnt/TGA resources, native miscellaneous label and
+Unity LocalizationManager's load-before-lookup path. Both readers now guard
+Session.Dd1 readiness before accessing caches/loading/logging. Genuine missing
+resources after readiness retain their existing cached result.
+
+Linked the real Dd1Font/Dd1Text runtime files into the UI suite with a minimal
+session/texture shim. The old sources fail both recovery cases; fixed sources
+pass all three, including actual metrics/wrapping, main-thread texture ownership,
+localization recovery and post-readiness missing files. Shims do not prove GPU
+font drawing. Release + 510 Core + 33 UI tests pass; stopped-game deployment
+hashes match. No launch, owner-save access or native artwork in Git.
+
+## Status 2026-10-05: round 131 complete
+
+- Round 131 deployed and green; loop continues under owner authorization. Native goal remains paused without a resume API; no duplicate or false completion.
+- Next round 132: inspect a concrete remaining startup asset-loading issue or another actionable parity gap. Art.Dd1/Png still synchronously reads/decodes first-use images, and CinematicCache.Voice can synchronously read 79,369,515-byte/46,185,826-byte opening OGVs on first playback. Investigate before choosing one bounded change; do not claim native timing improvement without a permitted trace.
+- Ordinary usage available; session 13%, weekly 80%; reset 2026-10-05 19:51:32 UTC (21:51:32 Paris), resetsAt 1791229892. Check boundaries and hand off near 95%.
+- No DD2 launch, protected estate/abandoned project access or private art/owner preview changes. Native input/visual/timing checks remain pending.

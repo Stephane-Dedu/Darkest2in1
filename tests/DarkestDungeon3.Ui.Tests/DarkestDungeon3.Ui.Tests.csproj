@@ -5,6 +5,8 @@
     <IsTestProject>true</IsTestProject>
     <SpineArtSource Condition="'$(SpineArtSource)' == ''">../../src/DarkestDungeon3/Runtime/SpineArt.cs</SpineArtSource>
     <ItemTextSource Condition="'$(ItemTextSource)' == ''">../../src/DarkestDungeon3/Dd2/ItemText.cs</ItemTextSource>
+    <Dd1FontSource Condition="'$(Dd1FontSource)' == ''">../../src/DarkestDungeon3/Runtime/Dd1Font.cs</Dd1FontSource>
+    <Dd1TextSource Condition="'$(Dd1TextSource)' == ''">../../src/DarkestDungeon3/Runtime/Dd1Text.cs</Dd1TextSource>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
@@ -21,5 +23,7 @@
     <Compile Include="../../src/DarkestDungeon3/Runtime/RegionSceneryArt.cs" Link="RegionSceneryArt.cs" />
     <Compile Include="$(SpineArtSource)" Link="SpineArt.cs" />
     <Compile Include="$(ItemTextSource)" Link="ItemText.cs" />
+    <Compile Include="$(Dd1FontSource)" Link="Dd1Font.cs" />
+    <Compile Include="$(Dd1TextSource)" Link="Dd1Text.cs" />
   </ItemGroup>
 </Project>
