@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using DarkestDungeon3.Core.Campaign;
 
 namespace DarkestDungeon3.Ui;
@@ -16,13 +17,15 @@ internal sealed class ActivityLogLayout
         public string Text;
         public ActivityRaid Raid;
         public ActivityTownActor Actor;
+        public ActivityBuildingUpgrade Building;
         public float Y, Height, NameHeight;
     }
 
     public List<Row> Rows { get; } = new();
     public float Height { get; private set; }
 
-    public static ActivityLogLayout Build(IEnumerable<ActivityWeek> weeks, Func<string, float, float> measure, Func<string, string> regionName = null)
+    public static ActivityLogLayout Build(IEnumerable<ActivityWeek> weeks, Func<string, float, float> measure, Func<string, string> regionName = null,
+        Func<ActivityBuildingUpgrade, string> buildingText = null)
     {
         var layout = new ActivityLogLayout();
         foreach (var week in (weeks ?? Enumerable.Empty<ActivityWeek>()).OrderByDescending(w => w.Week))
@@ -32,8 +35,13 @@ internal sealed class ActivityLogLayout
             // DD1 shows the return, the Hamlet's activities, then the departure for this week.
             foreach (var raid in week.Raids.Where(r => r.Result != "embark").Reverse()) layout.Party(raid, measure, regionName);
             var actors = week.TownActors.GroupBy(a => a.MessageIndex).ToDictionary(g => g.Key, g => g.Last());
+            var upgrades = week.BuildingUpgrades.GroupBy(b => b.MessageIndex).ToDictionary(g => g.Key, g => g.Last());
             for (int i = 0; i < week.Town.Count; i++)
-                layout.Message(week.Town[i], measure, actors.TryGetValue(i, out var actor) ? actor : null);
+            {
+                upgrades.TryGetValue(i, out var upgrade);
+                layout.Message(upgrade != null && buildingText != null ? buildingText(upgrade) : week.Town[i], measure,
+                    actors.TryGetValue(i, out var actor) ? actor : null, upgrade);
+            }
             foreach (var raid in week.Raids.Where(r => r.Result == "embark").Reverse()) layout.Party(raid, measure, regionName);
         }
         return layout;
@@ -46,9 +54,14 @@ internal sealed class ActivityLogLayout
         Height += row.Height + 20; // activity_log_entry_layout.vertical_spacing
     }
 
-    private void Message(string text, Func<string, float, float> measure, ActivityTownActor actor = null) =>
-        Add(new Row { Type = Kind.Town, Text = text, Actor = actor,
-            Height = Math.Max(120, measure(text, actor == null ? Width - 50 : 440) + 32) });
+    private void Message(string text, Func<string, float, float> measure, ActivityTownActor actor = null, ActivityBuildingUpgrade building = null) =>
+        Add(new Row { Type = Kind.Town, Text = text, Actor = actor, Building = building,
+            Height = Math.Max(120, measure(text, actor == null && building == null ? Width - 50 : 440) + 32) });
+
+    public static string BuildingText(ActivityBuildingUpgrade upgrade, string template, string name) =>
+        Regex.Replace(template ?? "%s has been leveled up to %d%%", @"\{[^}]*\}", "")
+            .Replace("%s", name ?? upgrade.Building.Replace('_', ' '))
+            .Replace("%d", upgrade.Percent.ToString()).Replace("%%", "%");
 
     private void Party(ActivityRaid raid, Func<string, float, float> measure, Func<string, string> regionName)
     {

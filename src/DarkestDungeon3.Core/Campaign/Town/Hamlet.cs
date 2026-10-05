@@ -224,7 +224,13 @@ public sealed class Hamlet
 
     // ---------------- Upgrades ----------------
 
-    public bool BuyUpgrade(string treeId, string code) => Buildings.Trees.TryBuy(Estate, treeId, code);
+    public bool BuyUpgrade(string treeId, string code)
+    {
+        if (!Buildings.Trees.TryBuy(Estate, treeId, code)) return false;
+        string building = treeId.Split('.')[0];
+        CampaignJournal.BuildingUpgrade(Estate, building, treeId, code, Buildings.Trees.Percent(Estate, building));
+        return true;
+    }
 
     // ---- Guild: learn DD2 skills a hero hasn't unlocked, master (upgrade) the ones they know ----
     // Prices follow the DD1 skill tree that matches: learning is DD1's "code 0" (1000 gold for most), mastering

@@ -1,4 +1,5 @@
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Ui;
 using Xunit;
 
@@ -102,5 +103,24 @@ public class ActivityLogLayoutTests
         var legacy = ActivityLogLayout.Build(new[] { new ActivityWeek { Raids = { raid } } }, Measure);
         Assert.All(legacy.Rows, r => Assert.Null(r.Actor));
         Assert.Single(legacy.Rows, r => r.Text == level.Text);
+    }
+
+    [Fact]
+    public void BuildingCardUsesNativeNamesAndTemplateWithSavedPercentageAndOneMessage()
+    {
+        var lore = Dd1Lore.Load(Dd1Install.Find());
+        var upgrade = new ActivityBuildingUpgrade { MessageIndex = 0, Building = "stage_coach", Tree = "stage_coach.rostersize", Code = "a", Percent = 8 };
+        string Format(ActivityBuildingUpgrade b) => ActivityLogLayout.BuildingText(b, lore.Text("str_building_upgraded_to_percent"), lore.Text("town_name_" + b.Building));
+        Assert.Equal("Stage Coach has been leveled up to 8%", Format(upgrade));
+        var week = new ActivityWeek { Town = { "Fallback upgrade message" }, BuildingUpgrades = { upgrade } };
+        var layout = ActivityLogLayout.Build(new[] { week }, Measure, buildingText: Format);
+        var row = Assert.Single(layout.Rows, r => r.Building != null);
+        Assert.Equal("Stage Coach has been leveled up to 8%", row.Text);
+        Assert.Equal(8, row.Building.Percent);
+        Assert.Null(row.Actor);
+        Assert.Equal(2, layout.Rows.Count); // week header and the existing purchase entry
+        Assert.Equal("Survivalist has been leveled up to 100%", ActivityLogLayout.BuildingText(new ActivityBuildingUpgrade { Building = "camping_trainer", Percent = 100 }, null, "Survivalist"));
+        Assert.DoesNotContain("{", row.Text);
+        Assert.DoesNotContain("%%", row.Text);
     }
 }

@@ -1372,3 +1372,35 @@ results and DD2 stopped. Both deployed DLL hashes match. Native appearance remai
 - Round 106 locally deployed: Release + 362 Core + 25 UI tests green, both DLL hashes match. Activity Log now has saved history, week/raid art, town actor portraits and resolve cards, awaiting native checks. Next round 107: remaining actual building-upgrade entries/caretaker goals or another documented safe gap after DD1/Unity inspection.
 - Cold audit unchanged 175 complete/15 partial/1 blank. Hidden visibility remains blocked. Private 24-image scenery and preview localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git.
 - Last observed five-hour usage 17%, weekly 65%; check each round and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.
+
+## Round 107: building-upgrade records and DD1 completion percentage
+
+DD1 upgrades/building/stage_coach.upgrades.json contains 13 levels across the three
+trees. The localization str_building_upgraded_to_percent logs the building's total
+completion; building_upgrade_entry_backdrop supplies its band. Checked port
+Estate.BuyUpgrade/GetBuildingUpgradeRatio and UpgradableBuildingWindow: progress is
+rounded (Mathf.RoundToInt), whereas our panel truncated 1/13 to 7% rather than 8%.
+
+Successful Hamlet.BuyUpgrade now appends one town message with a copied building,
+tree/code and completion-percent snapshot. Rejected/duplicate purchases return
+before logging. UpgradeTrees.Percent counts only installed levels of the specific
+building and rounds to even, shared by the panel and journal. Later purchases do
+not rewrite historical percentages. UI uses the native building icon/name, inspected
+purple band and DD1's own percentage template with formatting markers removed.
+Costs, prerequisites and gameplay random sequence remain unchanged.
+
+Three Core cases cover real purchase costs and 8%/15% progress, duplicate/rejected
+transactions, reload snapshots, no random advancement, unknown keys, empty/full
+buildings and rounding ties. One actual-localization layout case verifies a single
+card and template/name/fallback rendering. Release + 365 Core + 26 UI tests pass.
+Green-gated deployment with DD2 stopped; DLL hashes match. No launch/save access.
+Native purchase/layout checks remain [?]. Found a separate presentation gap:
+raid_abandon_banner exists but retreat cards currently use the defeat banner; added
+it to PARITY without changing it this round.
+
+## Status 2026-10-05: round 107 complete
+
+- Continue the authorized loop on claude/practical-wright-hicri0. No DD2 launch until explicitly allowed; no save access or restore pending. App goal still reports the prior paused status; resumed work is authorized by the owner heartbeat.
+- Round 107 deployed: Release + 365 Core + 26 UI tests green, both DLL hashes match. Saved Activity Log now includes building purchase/completion cards and matching rounded panel progress. Native UI checks await launch. Next round 108: the newly documented distinct retreat banner, then caretaker goals or another documented safe gap.
+- Cold audit unchanged 175 complete/15 partial/1 blank; hidden visibility remains blocked. Private 24-image scenery and localhost:8766/combat-extensions.html/session 20403 unchanged and outside Git.
+- Last observed five-hour usage 22%, weekly 66%; check round boundaries and stop near 95% with committed handoff. Existing hourly minute-50 resume heartbeat remains active. Protected estates and abandoned project untouched.

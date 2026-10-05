@@ -51,6 +51,16 @@ public static class CampaignJournal
         MessageIndex = messageIndex, HeroId = hero.Id, HeroName = hero.Name, HeroClass = hero.ClassId, Kind = kind
     };
 
+    public static void BuildingUpgrade(Estate estate, string building, string tree, string code, int percent)
+    {
+        Town(estate, $"{building.Replace('_', ' ')} has been leveled up to {percent}%.");
+        var week = Current(estate);
+        week.BuildingUpgrades.Add(new ActivityBuildingUpgrade
+        {
+            MessageIndex = week.Town.Count - 1, Building = building, Tree = tree, Code = code, Percent = percent
+        });
+    }
+
     private static ActivityTownActor CopyActor(ActivityTownActor actor, int offset = 0) => new()
     {
         MessageIndex = offset + actor.MessageIndex, HeroId = actor.HeroId,
@@ -93,6 +103,7 @@ public sealed class ActivityWeek
     public List<string> Town = new();
     /// <summary>Actor snapshots keyed to Town's append-only message indices; older records have none.</summary>
     public List<ActivityTownActor> TownActors = new();
+    public List<ActivityBuildingUpgrade> BuildingUpgrades = new();
     public List<ActivityRaid> Raids = new();
 }
 
@@ -104,6 +115,12 @@ public sealed class ActivityTownActor
 }
 
 public enum ActivityEntryKind { HeroActivity, LevelUp }
+
+public sealed class ActivityBuildingUpgrade
+{
+    public int MessageIndex, Percent;
+    public string Building, Tree, Code;
+}
 
 public sealed class ActivityRaid
 {

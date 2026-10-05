@@ -1169,12 +1169,11 @@ internal sealed class HamletUi
         if (frame != null) GUI.DrawTexture(panel, frame); else Gui.Fill(panel, new Color(0.04f, 0.035f, 0.03f, 0.97f));
         var lore = S.Lore;
         var trees = S.Buildings.Trees.Trees.Keys.Where(k => k.StartsWith(building + ".")).OrderBy(k => k).ToList();
-        int owned = trees.Sum(t => S.Buildings.Trees.Trees[t].Count(l => E.Upgrades.Contains(l.Key)));
         int total = trees.Sum(t => S.Buildings.Trees.Trees[t].Count);
         // The plaque at the panel's top right holds the title (upgrade_title_offset 458,36) and how far the building
         // is upgraded (upgrade_percent_offset 480,62); the description sits at verbose_offset (20,30), 380 wide.
         Gui.Text(new Rect(basePos.x + 458 - 100, basePos.y + 36 - 22, 200, 40), "Upgraded:", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{owned * 100 / total}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{S.Buildings.Trees.Percent(E, building)}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
         Gui.Text(new Rect(basePos.x + 20, basePos.y + 30, 380, 110), lore?.Text("building_verbose_" + building) ?? "Spend heirlooms to improve the building. Hover a level for what it costs; click the next one when you can afford it.", 18, Gui.Dd1Class);
 
         var bought = UpgradeArt("requirement_purchased_icon.png");

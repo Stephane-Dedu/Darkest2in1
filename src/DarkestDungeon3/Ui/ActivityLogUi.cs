@@ -22,7 +22,8 @@ internal sealed class ActivityLogUi
         {
             if (_estate != estate) scroll = Vector2.zero;
             _estate = estate; _week = estate.Week; _weeks = weeks; _town = town; _raids = raids; _font = font;
-            _layout = ActivityLogLayout.Build(estate.ActivityLog, (text, width) => Gui.TextHeight(text, 20, width), region => Session.Current.Zones.ZoneName(region));
+            _layout = ActivityLogLayout.Build(estate.ActivityLog, (text, width) => Gui.TextHeight(text, 20, width), region => Session.Current.Zones.ZoneName(region),
+                upgrade => ActivityLogLayout.BuildingText(upgrade, Session.Current.Lore.Text("str_building_upgraded_to_percent"), Session.Current.Lore.Text("town_name_" + upgrade.Building)));
         }
         var view = new Rect(window.x + 25, window.y + 160, ActivityLogLayout.ViewWidth, ActivityLogLayout.ViewHeight);
         scroll.y = Mathf.Clamp(scroll.y, 0, Mathf.Max(0, _layout.Height - view.height));
@@ -45,12 +46,16 @@ internal sealed class ActivityLogUi
         if (row.Type == ActivityLogLayout.Kind.Town)
         {
             bool levelUp = row.Actor?.Kind == ActivityEntryKind.LevelUp;
-            var backdrop = Art.Dd1("activity_log", levelUp ? "hero_level_up_entry_backdrop.png" : "hero_activity_entry_backdrop.png");
+            var backdrop = Art.Dd1("activity_log", row.Building != null ? "building_upgrade_entry_backdrop.png"
+                : levelUp ? "hero_level_up_entry_backdrop.png" : "hero_activity_entry_backdrop.png");
             if (backdrop != null) GUI.DrawTexture(rect, backdrop); else Gui.Fill(rect, new Color(0.1f, 0.1f, 0.1f, 0.95f));
             if (row.Actor != null && Art.HeroIcon(row.Actor.HeroClass) is { } portrait)
                 Art.DrawSprite(new Rect(20, row.Y + 15, 90, 90), portrait);
-            Gui.Text(new Rect(row.Actor == null ? 25 : 135, row.Y + 16,
-                row.Actor == null ? 550 : 440, row.Height - 32), row.Text, 20, levelUp ? Gui.Dd1Name : Gui.Dd1Text);
+            else if (row.Building != null)
+                Gui.Image(new Rect(20, row.Y + 15, 90, 90), Art.BuildingIcon(row.Building.Building), ScaleMode.ScaleToFit);
+            bool icon = row.Actor != null || row.Building != null;
+            Gui.Text(new Rect(icon ? 135 : 25, row.Y + 16,
+                icon ? 440 : 550, row.Height - 32), row.Text, 20, levelUp || row.Building != null ? Gui.Dd1Name : Gui.Dd1Text);
             return;
         }
         var raid = row.Raid;

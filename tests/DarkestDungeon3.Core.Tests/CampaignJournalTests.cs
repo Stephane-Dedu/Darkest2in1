@@ -226,4 +226,64 @@ public class CampaignJournalTests
         Assert.Equal(6, estate.Roster[0].ResolveLevel);
         Assert.Equal(success ? 66 : 64, estate.Roster[0].ResolveXp);
     }
+
+    [Fact]
+    public void SuccessfulBuildingPurchasesRecordRoundedProgressOnceWithExactNativeCost()
+    {
+        var estate = Hamlet.NewEstate(7, Dd1, Buildings, new FakeCatalog());
+        foreach (var currency in Currency.Heirlooms) estate.Add(currency, 100);
+        var hamlet = new Hamlet(estate, Dd1, Buildings, new FakeCatalog());
+        int counter = estate.RandomCounter;
+        var before = estate.Currencies.ToDictionary(k => k.Key, k => k.Value);
+        var firstCost = Buildings.Trees.Find("stage_coach.rostersize", "a").Cost;
+        Assert.True(hamlet.BuyUpgrade("stage_coach.rostersize", "a"));
+        foreach (var currency in before.Keys)
+            Assert.Equal(before[currency] - firstCost.Where(c => c.Type == currency).Sum(c => c.Amount), estate.Get(currency));
+        Assert.Equal(8, Buildings.Trees.Percent(estate, Buildings.StageCoach)); // 1 of 13 installed levels
+        Assert.False(hamlet.BuyUpgrade("stage_coach.rostersize", "a"));
+        Assert.True(hamlet.BuyUpgrade("stage_coach.numrecruits", "a"));
+        Assert.Equal(15, Buildings.Trees.Percent(estate, Buildings.StageCoach));
+        var saved = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        var week = Assert.Single(saved.ActivityLog);
+        Assert.Equal(2, week.BuildingUpgrades.Count);
+        Assert.Equal(new[] { 8, 15 }, week.BuildingUpgrades.Select(b => b.Percent));
+        Assert.Equal(new[] { "stage_coach.rostersize", "stage_coach.numrecruits" }, week.BuildingUpgrades.Select(b => b.Tree));
+        Assert.All(week.BuildingUpgrades, b => { Assert.Equal("stage_coach", b.Building); Assert.Equal("a", b.Code); Assert.Contains(b.Percent + "%", week.Town[b.MessageIndex]); });
+        Assert.Equal(counter, saved.RandomCounter);
+    }
+
+    [Fact]
+    public void RejectedBuildingPurchasesLeaveCurrencyAndJournalUntouched()
+    {
+        var estate = new Estate { Currencies = new Dictionary<string, int>(), RandomCounter = 9 };
+        var hamlet = new Hamlet(estate, Dd1, Buildings, new FakeCatalog());
+        Assert.False(hamlet.BuyUpgrade("stage_coach.rostersize", "a")); // cannot afford
+        foreach (var currency in Currency.Heirlooms) estate.Add(currency, 100);
+        var before = estate.Currencies.ToDictionary(k => k.Key, k => k.Value);
+        Assert.False(hamlet.BuyUpgrade("stage_coach.rostersize", "b")); // prerequisite missing
+        Assert.False(hamlet.BuyUpgrade("unknown.tree", "a"));
+        Assert.Equal(before.OrderBy(k => k.Key), estate.Currencies.OrderBy(k => k.Key));
+        Assert.Null(estate.ActivityLog);
+        Assert.Empty(estate.TownLog);
+        Assert.Equal(9, estate.RandomCounter);
+    }
+
+    [Fact]
+    public void CompletionUsesOnlyTheBuildingKnownLevelsAndHandlesEmptyFullAndTies()
+    {
+        var trees = new UpgradeTrees();
+        trees.Trees["building.tree"] = Enumerable.Range(0, 8).Select(i => new UpgradeLevel { TreeId = "building.tree", Code = i.ToString() }).ToList();
+        var estate = new Estate();
+        Assert.Equal(0, trees.Percent(estate, "building"));
+        Assert.Equal(0, trees.Percent(estate, "missing"));
+        estate.Upgrades.Add("building.tree:0");
+        estate.Upgrades.Add("building.tree:unknown");
+        estate.Upgrades.Add("building_extra.tree:0");
+        Assert.Equal(12, trees.Percent(estate, "building")); // 12.5 rounds to even, matching Mathf.RoundToInt
+        estate.Upgrades.Add("building.tree:1");
+        estate.Upgrades.Add("building.tree:2");
+        Assert.Equal(38, trees.Percent(estate, "building"));
+        foreach (var level in trees.Trees["building.tree"]) estate.Upgrades.Add(level.Key);
+        Assert.Equal(100, trees.Percent(estate, "building"));
+    }
 }
