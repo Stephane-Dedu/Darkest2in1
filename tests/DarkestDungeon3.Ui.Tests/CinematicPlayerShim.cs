@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace UnityEngine
 {
-    public enum ScaleMode { ScaleAndCrop }
+    public enum ScaleMode { ScaleAndCrop, ScaleToFit }
     public sealed class GameObject(string name)
     {
         public T AddComponent<T>() where T : new() => new T();
@@ -61,8 +61,15 @@ namespace DarkestDungeon3.Runtime
 
 namespace DarkestDungeon3.Ui
 {
+    internal static class ItemArt
+    {
+        public static readonly List<(Rect Rect, string Key, int Amount, bool Dim)> Cards = new();
+        public static void Stack(Rect rect, string key, int amount, int limit, bool dim = false) => Cards.Add((rect, key, amount, dim));
+    }
+
     internal static class Gui
     {
+        public static readonly Color Dd1Name = new(0.7f, 0.6f, 0.4f), Dim = new(0.4f, 0.4f, 0.4f);
         public const float W = 1920, H = 1080;
         public static readonly List<string> Texts = new();
         public static readonly List<string> Tips = new();

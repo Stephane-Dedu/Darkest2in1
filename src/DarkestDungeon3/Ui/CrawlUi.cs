@@ -692,6 +692,7 @@ internal sealed class CrawlUi
     // ---------------- battle spoils (DD1's loot scroll) ----------------
 
     private BattleSpoils _spoilsDismissed;
+    private readonly LootGridUi _spoilsGrid = new(), _curioGrid = new();
 
     private bool DrawSpoils(Crawl crawl)
     {
@@ -706,17 +707,7 @@ internal sealed class CrawlUi
         string title = spoils.Kind == "camp" ? Dd1Text.Get("miscellaneous", "str_overlay_loot_chest_title") ?? "Treasure!" : "Spoils";
         Gui.Text(new Rect(left + 40, top + 26, 376, 48), title, 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
 
-        var all = spoils.Taken.Select(d => (d, taken: true)).Concat(spoils.LeftBehind.Select(d => (d, taken: false))).ToList();
-        var items = S.Content.Items;
-        int perRow = Mathf.Min(5, all.Count), takenCount = spoils.Taken.Count, clicked = -1;
-        for (int i = 0; i < all.Count && i < 10; i++)
-        {
-            var (drop, taken) = all[i];
-            int row = i / 5, col = i % 5, inRow = row == 0 ? perRow : Mathf.Min(5, all.Count - 5);
-            var r = new Rect(left + 228 - inRow * 40 + col * 80 + 4, top + 96 + row * 150, 72, 144);
-            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)), dim: !taken);
-            if (!taken && Gui.Hotspot(r)) clicked = i - takenCount;
-        }
+        int clicked = _spoilsGrid.DrawBattle(spoils, new Rect(left, top + 96, 456, 294), S.Content.Items);
         if (clicked >= 0) TakeLeftBehind(crawl, spoils.LeftBehind, clicked, spoils.Taken);
         if (spoils.LeftBehind.Count > 0) NoRoomHint(left, top + 475);
         bool canLeave = Crawl.CanLeave(spoils.LeftBehind);
@@ -757,16 +748,7 @@ internal sealed class CrawlUi
         if (report.Scouted) lines.Add("The way ahead is revealed.");
         Gui.Text(new Rect(left + 50, top + 104, 356, 130), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
 
-        var items = S.Content.Items;
-        int clicked = -1;
-        for (int i = 0; i < report.Loot.Count && i < 5; i++)
-        {
-            var drop = report.Loot[i];
-            var r = new Rect(left + 228 - Mathf.Min(5, report.Loot.Count) * 40 + i * 80 + 4, top + 236, 72, 144);
-            int waiting = report.LeftBehind.IndexOf(drop);
-            ItemArt.Stack(r, drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)), dim: waiting >= 0);
-            if (waiting >= 0 && Gui.Hotspot(r)) clicked = waiting;
-        }
+        int clicked = _curioGrid.DrawCurio(report, new Rect(left, top + 236, 456, 144), S.Content.Items);
         if (clicked >= 0) TakeLeftBehind(D.Crawl, report.LeftBehind, clicked);
         if (report.LeftBehind.Count > 0) NoRoomHint(left, top + height);
         bool canLeave = Crawl.CanLeave(report.LeftBehind);

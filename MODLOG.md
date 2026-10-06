@@ -2661,3 +2661,47 @@ Native tooltip visibility/position remains [?], including scaled windows.
 - Next round 155 candidate: inspect and document battle/curio loot-scroll truncation against DD1 and the Unity port, then implement one proven gap with tests/build and stopped-game deployment. Native stagecoach drag and map hover checks remain [?]; do not claim native symptoms fully confirmed by headless input tests.
 - DD2 stopped at deployment; no launch or process termination. No protected estates, abandoned project or private art accessed; owner preview/server unchanged. No running tests/builds/agents or save restores pending.
 - Native checks once explicitly permitted: drag recruits to occupied/empty roster areas, cancel/retry/open details/check full capacity; hover scouted/visited battle, curio, quest location and guarded room/hall markers; pan and scale the map, ensure hidden/completed content stays concealed and tooltips render above the panel.
+
+## Round 155: make every retained loot card reachable
+
+Battle/camp scrolls capped Taken+LeftBehind at 10 cards; curio results capped Loot
+at 5. Taken entries or partial pickups could hide a waiting quest object while
+Continue remained blocked. Installed overlay.loot.darkest max_items 9 and dynamic
+backdrop/overflow assets define presentation; Unity ScrollEventLoot distributes
+all generated loot and Close refuses remaining quest items. Shared LootGridUi
+first preserved the capped drawing as a linked test seam; both original battle
+and curio scenarios failed to reach the hidden quest item. Ranked display limit,
+waiting-index and capacity causes; paging removed the observed display failure.
+
+DD1 shared/menu left/right arrows sit outside existing card bounds. Page owner
+changes reset to the first page; shrinking reports clamp the current page. Clicks
+retain actual waiting-list indexes, consumed arrow events cannot also pick a
+card, and existing Core capacity/pickup/dismissal rules remain. Pagination is this
+mod's UX choice; ordinary small-card positions and 10/5 cards per page are kept.
+Seven actual linked UI/Core cases cover hidden quest pickup, partial pickup/list
+growth/remainder retry, curio indexes and saved aliases, clamp/reset, disabled
+input, exact report preservation and unchanged RNG. After correcting two test
+compile issues during development, all 648 Core + 89 UI tests and Release pass;
+DD2 was stopped and both installed DLL hashes match. Native appearance remains [?].
+
+New separate gap: gather goals bypass capacity with Pack.Add and create no
+LeftBehind. Ordinary curios already TryTake; fix native gather overflow next.
+
+Owner asked whether https://github.com/morluto/rea would help. Reviewed its README,
+docs/managed-code-analysis.md and docs/windows-ghidra-p0.md. Useful candidates are
+managed IL/build comparison for DD2 and targeted native DD1 questions unavailable
+in data or the Unity port. Windows Ghidra is experimental, read-only and limited
+to native x64 executables; managed analysis is a separate provider. Read-only PE
+header inspection of installed _windows/win64/Darkest.exe found machine 0x8664,
+PE32+ magic 0x20b and zero CLI RVA, matching that target format but not proving
+provider compatibility. No REA installation, configuration or game launch occurred.
+Sources: https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md and
+https://github.com/morluto/rea/blob/main/docs/windows-ghidra-p0.md.
+
+## Status 2026-10-06: round 155 complete
+
+- Quota reset cleared the previous pause; round 155 is green/deployed and the authorized loop continues. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 156: gather quest full-pack capacity/retained quest loot, using installed native goals and synthetic states. Then inspect any proven bypass of pending quest-loot dismissal rather than guessing.
+- Ordinary usage available; session 9%, weekly 95%, session resetsAt 1791324444. Check usage at round boundaries, stop around 95% session or if ordinary usage becomes unavailable, and leave a clean committed handoff. Existing hourly heartbeat remains; no duplicate automation.
+- All 737 tests and Release pass; stopped-game DLL hashes match. Native loot paging/hover/stagecoach/save recovery still need permitted game checks; no launch authorization yet.
+- No protected estates, abandoned project or native-derived artwork accessed. No running tests/builds/agents or save restores pending; preview/server unchanged. REA was evaluated only, not installed.
