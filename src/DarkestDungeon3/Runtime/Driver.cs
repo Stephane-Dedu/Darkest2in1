@@ -741,8 +741,8 @@ internal sealed class Driver : MonoBehaviour
     /// <summary>Leave the dungeon: after the quest is done, or as a retreat before it is.</summary>
     public void Leave()
     {
-        if (!Expedition.QuestComplete) { Crawl.Retreat(); Say("The party retreats."); }
-        Expedition.Ended = true;
+        if (Crawl?.TryLeave() != true) { Say("The expedition cannot be left yet."); return; }
+        if (Expedition.Retreated) Say("The party retreats.");
         FinishExpedition();
     }
 

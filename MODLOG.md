@@ -2729,9 +2729,11 @@ capacity before continuing. The second Core run passes all 658 cases; 89 UI and
 Release also pass. DD2 stopped and deployed DLL hashes match. Native scroll
 interaction remains [?]; no game launch or owner-save access.
 
-New separate gap: Driver.Leave unconditionally ends the expedition after calling
-Retreat, even if Core rejected a forbidden retreat, and never checks retained
-required loot. Guard explicit returns in Core next; forced wipe must stay separate.
+New separate gap: Driver.Leave unconditionally ends the expedition and never
+checks retained required loot. Follow-up inspection corrects the initial
+assumption about Retreat: it currently has no Quest.CanRetreat guard either;
+only the visible UI hides forbidden abandonment. Guard explicit returns in Core
+next; forced wipe must stay separate.
 
 ## Status 2026-10-06: round 156 complete
 
@@ -2739,4 +2741,33 @@ required loot. Guard explicit returns in Core next; forced wipe must stay separa
 - Next round 157: guarded explicit return respecting required loot and refused retreat, with actual Core transition tests and Driver integration. Do not alter forced wipe results. Then inspect whether another curio can overwrite pending required loot.
 - Ordinary usage available; session 13%, weekly 95%; session reset 2026-10-06 22:07:24 UTC (2026-10-07 00:07:24 Paris), resetsAt 1791324444. Check boundaries; stop around 95% session or ordinary unavailability with clean commit/push and existing heartbeat handoff.
 - All 747 tests and Release pass; stopped-game DLL hashes match. Native UI/persistence checks remain [?]; launch authorization is still absent.
+- No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; owner preview/server unchanged. REA evaluated, not installed.
+
+## Round 157: explicit returns respect required loot and quest retreat flags
+
+Driver.Leave set Ended without guarding pending quest loot; Core.Retreat also
+lacked a CanRetreat check, correcting the earlier assumption in round 156.
+Installed DD4 can_retreat=false and Unity ScrollEventLoot.Close's required-loot
+gate are the references. Three actual Core cases reproduced ending with required
+curio/battle loot and abandoning the native final DD quest. Ranked transition
+guards, imported quest flags and loot identity; the latter two were correct.
+
+Core CanLeaveExpedition/TryLeave now owns explicit return eligibility; Retreat
+shares the required-loot gate and independently refuses forbidden abandonment.
+Completed returns do not set Retreated, while permitted abandonment still does.
+Driver uses TryLeave; the quest return button/art dims with a collection hint
+when blocked. Forced wipe stays on its separate results path. Nine cases cover
+both reports, completed/incomplete quests, synthetic save reload, pickup then
+return, repeated calls, native forbidden retreat, optional loot and legacy quest
+defaults, including byte-exact rejected states and unchanged RNG. All 667 Core
++ 89 UI tests and Release pass. DD2 was stopped; both installed DLL hashes match.
+No temporary probes, game launch or owner-save access. Native button dimming and
+full Driver presentation still need a permitted game check.
+
+## Status 2026-10-06: round 157 complete
+
+- Round 157 green/deployed; commit/push and continue the authorized loop. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 158: inspect whether a second curio can overwrite retained required loot. Reproduce the actual transition before choosing a fix, using installed DD1 and the Unity port.
+- Ordinary usage available; session 17%, weekly 96%; session reset 2026-10-06 22:07:24 UTC (2026-10-07 00:07:24 Paris), resetsAt 1791324444. Check boundaries; stop around 95% session or ordinary unavailability with clean commit/push and existing heartbeat handoff.
+- All 756 tests and Release pass; stopped-game DLL hashes match. Native input/UI/persistence checks remain [?]; launch authorization is absent.
 - No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; owner preview/server unchanged. REA evaluated, not installed.

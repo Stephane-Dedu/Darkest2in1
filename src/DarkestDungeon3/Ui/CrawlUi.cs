@@ -484,13 +484,18 @@ internal sealed class CrawlUi
 
         if (exp.QuestComplete)
         {
+            bool canLeave = crawl.CanLeaveExpedition;
             var home = Art.Panel("quest_return_to_hamlet.png");
+            var old = GUI.color;
+            if (!canLeave) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1);
             var r = Gui.At(home, 16, 112);
+            GUI.color = old;
             if (home == null) r = new Rect(16, 112, 220, 50);
-            if (home == null ? Gui.DdButton(r, "Return home") : Gui.Hotspot(r)) D.Leave();
-            Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, Gui.Gold, heading: true);
+            if (home == null ? Gui.DdButton(r, "Return home", canLeave) : canLeave && Gui.Hotspot(r)) D.Leave();
+            Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, canLeave ? Gui.Gold : Gui.Dim, heading: true);
+            if (!canLeave && r.Contains(Event.current.mousePosition)) Gui.Tip("Collect all quest items before returning.");
         }
-        else if (!crawl.IsBlocked && exp.Quest?.CanRetreat != false)   // DD1: some plot quests can't be abandoned
+        else if (!crawl.IsBlocked && crawl.CanLeaveExpedition)   // DD1: no required loot can be left; some plot quests can't be abandoned
         {
             var retreat = Art.Panel("retreat_button.png");
             var r = Gui.At(retreat, 20, 112);

@@ -106,6 +106,19 @@ public sealed class Crawl
     /// <summary>DD1 won't close a loot scroll that still holds a quest item.</summary>
     public static bool CanLeave(IEnumerable<LootDrop> leftBehind) => leftBehind == null || !leftBehind.Any(d => IsQuestItem(d.Key));
 
+    /// <summary>Explicit returns cannot discard required loot or abandon a no-retreat quest.</summary>
+    public bool CanLeaveExpedition => !State.Ended
+        && CanLeave(State.PendingCurio?.LeftBehind) && CanLeave(State.PendingSpoils?.LeftBehind)
+        && (State.QuestComplete || State.Quest?.CanRetreat != false);
+
+    public bool TryLeave()
+    {
+        if (!CanLeaveExpedition) return false;
+        if (State.QuestComplete) State.Ended = true;
+        else Retreat();
+        return State.Ended;
+    }
+
     private static bool IsQuestItem(string key) => key != null && key.StartsWith("quest_item+", StringComparison.Ordinal);
 
     /// <summary>The item an inventory-activate quest curio needs (e.g. holy water for a corrupted altar), or null.</summary>
@@ -705,7 +718,7 @@ public sealed class Crawl
 
     public void Retreat()
     {
-        if (State.Ended) return;
+        if (!CanLeaveExpedition || State.Quest?.CanRetreat == false) return;
         State.Retreated = true;
         State.Ended = true;
     }
