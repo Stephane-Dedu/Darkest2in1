@@ -50,6 +50,7 @@ independent. Do not move contracts into a separate strip below the map.
 | DD2 (the modded game) | `C:\Users\Piral\DarkestDungeon3\game` (the E:/D: copies are old or broken) |
 | DD1 install (read at runtime) | `C:\Program Files (x86)\Steam\steamapps\common\DarkestDungeon` |
 | DD2 decomp / data / compile refs | `C:\Users\Piral\dd2-decomp` (`IronCrown/`, `data/Excel/`, `refs/`) |
+| DD1 code map (Ghidra, private) | `D:\dd1-decomp` (`decomp/`, `map/`, `ghidra/DD1.gpr`); query with `tools/dd1re/dd1q.py` |
 | Unity port of DD1 | `C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity` |
 | Logs | `game\BepInEx\LogOutput.log`, `%USERPROFILE%\AppData\LocalLow\RedHook\Darkest Dungeon II\Player.log` |
 | Cinematics cache (webm/ogg) | saves folder `\cache` (made with the owner's ffmpeg, WinGet) |
@@ -64,7 +65,9 @@ independent. Do not move contracts into a separate strip below the map.
 - Git Bash eats `\\n` in heredocs: write patch scripts with the Write tool.
 
 ## Skills (universal-modder plugin)
-For native DD1 rules, DD2 CIL or build-comparison investigations, read
+For a native DD1 rule (formula, ordering, whether the exe reads a data key), start with the DD1 code map:
+[`tools/dd1re/README.md`](tools/dd1re/README.md). It is decompiled code: never commit or copy it.
+For DD2 CIL or build-comparison investigations, read
 [`tools/rea_usage.md`](tools/rea_usage.md), then the installed REA skill it names.
 The guide covers the working CLI, evidence reuse and current native prerequisites;
 [`tools/rea_investigation_backlog.md`](tools/rea_investigation_backlog.md) holds the owner's priority choices.

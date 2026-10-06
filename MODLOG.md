@@ -2868,3 +2868,43 @@ the last runtime verification. No game launch or new binary analysis required.
 - Direct managed REA CLI works. DD1 native prerequisites and published/main release distinction remain documented in the guide/backlog; no global MCP/agent configuration changes.
 - Usage at the start of this documentation task: ordinary available, session38%, weekly99%, session resetsAt1791324444. Check usage before the next task; keep quota-aware heartbeat quiet while priorities are pending.
 - Native goal remains paused without resume API. No duplicate goal, tests/builds/agents or save restores pending. No game/protected-estate/abandoned-project/art access; existing preview/server unchanged.
+
+## DD1 code map, 2026-10-06
+
+The owner asked for a full reverse-engineered DD1 map first, for easy future mapping. Built with Ghidra 12.1.4
+(official zip, checksum verified, at D:\re-tools) and Microsoft OpenJDK 21 (winget), driven headless without REA.
+The repo has only scripts and docs, in tools/dd1re (README.md explains querying and rebuilding). The map is private
+under D:\dd1-decomp: Ghidra project, raw facts, one decompiled C file per function and map files. Never commit or
+copy it. C: has under 7 GB free, so Ghidra and the map live on D: (an SSD with 100 GB free).
+
+Darkest.exe win64 (sha256 4d78fbfa..., PE timestamp 2026-09-21) ships no PDB, but has 3,402 RTTI type names,
+126 DD1 source paths in assert strings and 180 of the 188 rules.json keys as literals. Auto-analysis took 9 minutes
+and found 56,343 functions. Ghidra's RecoverClassesFromRTTIScript stops with "More than one Base Class Array"
+(MSVC folds identical lambda RTTI), so Dd1NameVirtuals names virtual functions instead: 2,316 under their classes.
+Dd1NameFromStrings applied 169 names from DD1's own log strings. The first full decompile produced 55,965 C files.
+
+Key technique: a loader compares each rules key by name and stores it in a global (rules.json loader 1404ea3d0).
+build_map.py turns that into key -> global -> users. That pattern extracted 170 rules keys. Gotchas: analyzeHeadless.bat
+breaks on "(x86)" paths, so the exe is copied first. PowerShell 5.1 '*>' writes UTF-16 logs, so run_all uses
+Start-Process. The second run (8 GB heap, 12 decompilers, with the owner's game running) used up RAM and Claude Code
+stopped it. Defaults are now 4 GB and 4 threads, and the decompile resumes with -From decomp -Resume.
+
+First answers, written into PARITY and the backlog:
+- R1: Roster::System::OnRaidFinish ages all quirks by 1 per finished quest, then auto-locks negatives
+  (age >= 2, roll < 0.25, cap 3). Mod has no per-quirk age.
+- R3: dismissal stress is dead data (key never referenced). Mod already matches; PARITY [x].
+- New gap: DD1's surprise is one weighted pick with a 25% "none" floor, hero surprise buffs and a one-hero exemption.
+  The mod rolls sequentially.
+- meals_table / rations_per / healing are never referenced by the exe; round 147's meal numbers are unconfirmed.
+
+## Status 2026-10-06: DD1 code map built, refresh pending the owner's OK
+
+- Last implemented round is still 158 (be92fce); next implementation number 159. No game launch; DD2 code unchanged,
+  so no build or test was needed. The map scripts compile against Ghidra (javac), parse (PowerShell) and byte-compile (Python).
+- Map state: the Ghidra project and raw facts include the virtual and string names. D:\dd1-decomp\map is from the first
+  run. decomp/ is partial (35,134 of 55,971 files) because the refresh was stopped for low memory. Finish it, when the
+  owner allows and isn't gaming, with:
+  powershell -ExecutionPolicy Bypass -File tools\dd1re\run_all.ps1 -From decomp -Resume
+- D:\dd1-decomp\ghidra_after_autoanalysis is a backup of the project from before any naming (311 MB); delete it when it's no longer needed.
+- Next candidates once the map is complete: R1 implementation (per-quirk age); the surprise roll shape; DD1's real meal
+  numbers; R2/R4 from the same OnRaidFinish function. Owner priorities still decide.

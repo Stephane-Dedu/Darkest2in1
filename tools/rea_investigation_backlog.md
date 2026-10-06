@@ -46,6 +46,21 @@ Sources: [Windows guide](https://raw.githubusercontent.com/morluto/rea/main/docs
 [managed analysis](https://github.com/morluto/rea/blob/main/docs/managed-code-analysis.md),
 [installation](https://github.com/morluto/rea/blob/main/docs/installation.md).
 
+## Update 2026-10-06: DD1 native analysis works through the code map
+
+The owner asked for a full DD1 map first. Ghidra 12.1.4 now analyses `Darkest.exe` directly, without REA; see
+[tools/dd1re/README.md](dd1re/README.md). The map is private, under `D:\dd1-decomp`. First answers, in our words:
+
+- **R1, answered except two details:** `Roster::System::OnRaidFinish` ages every quirk by one at each quest end
+  ("turn" means a finished quest). It then locks eligible negative quirks (age >= 2, roll < 0.25) until 3 are locked.
+  Still to confirm: the candidate filter and the quest-results condition that gates the block. PARITY has the full rule.
+  The same function holds the quest-end quirk and disease work (R2, R4); the disease keys load into globals
+  `disease_after_quest_*` / `disease_max_chance`, which the full map lists.
+- **R3, resolved:** DD1 applies no dismissal stress. The exe never references `dismissed_hero_stress_penalties`,
+  and the dismissal event listeners are achievements, building slots, a counter and the UI. The mod already matches.
+- **Found on the way:** the surprise roll is shaped differently from the mod's, and the exe never reads `meals_table`.
+  Both are in PARITY.
+
 ## Choices
 
 Difficulty estimates describe implementation after the rule is understood;
@@ -53,9 +68,9 @@ native investigation time remains uncertain. The suggested order is advisory.
 
 | ID | System | What we need to establish | REA value / route | Implementation scope |
 | --- | --- | --- | --- | --- |
-| R1 | Negative quirk locking | What ages a quirk, when the 25% roll occurs, replacement/reset order and the three-lock cap | High, DD1 native; currently blocked | High, per-quirk persistence and return processing |
+| R1 | Negative quirk locking | Mostly answered by the code map (see the update above); left: candidate filter, gating condition, age reset on replacement | Code map | High, per-quirk persistence and return processing |
 | R2 | Post-quest disease | Exact stress/resistance formula, resolve eligibility, retreat treatment and disease selection | High, DD1 native; currently blocked | Medium/high, return roll and DD2 disease/resistance mapping |
-| R3 | Hero dismissal stress | Meaning of `upper_level`, threshold boundaries and which remaining heroes receive stress | High, DD1 native; currently blocked | Low/medium, a narrow campaign rule once established |
+| R3 | Hero dismissal stress | Resolved: DD1 never reads the key, so there's no dismissal stress; the mod matches | Done | None |
 | R4 | Post-quest quirk gains | Positive/negative roll order, stress interpolation, success/failure behavior, weighted choices and incompatibilities | High, DD1 native | High, native candidate pool and once-only gains |
 | R5 | "Never Again" veterans | Per-hero completion flag, strict/permissive entry rules and veteran party XP stacking | Medium/high, DD1 native for hidden state; visible option values already available | Medium/high, save migration, embark restrictions and XP |
 | R6 | From Beyond resurrection | Which original hero fields survive, reset or are reconstructed | High, DD1 native | Medium/high, preservation policy; event already implemented |
