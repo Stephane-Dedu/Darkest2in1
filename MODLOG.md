@@ -2844,3 +2844,27 @@ were inferred from rule names or Unity port differences alone.
 - REA managed analysis works through direct CLI. DD1 native analysis is unavailable with the current package/provider prerequisites; the list records that limitation. No global agent/MCP configuration changes, Ghidra/Java installs or open native analysis session.
 - Usage at research boundary: ordinary available, session 31%, weekly 98%, session resetsAt 1791324444. Check limits when work resumes; ordinary unavailability can stop work before session95. Native goal remains paused without resume API; no duplicate or false completion.
 - No game launch, owner-save/protected estate access, abandoned project access or native art changes. Native UI/input/performance checks remain [?]. No running tests/builds/agents or save restores pending; owner preview/server unchanged.
+
+## REA usage documentation, 2026-10-06
+
+Owner asked to add and commit how to use the REA skill before selecting priorities.
+tools/rea_usage.md provides the project recipe: loading the upstream skill from the
+private installed package, pinned CLI installation, exact target routes, DD2
+identity/member inspection and evidence reuse, managed build comparison, and
+conditional DD1 native queries after provider prerequisites are verified.
+CLAUDE.md, README.md and the investigation backlog point to this guide.
+The upstream skill remains package-owned; no REA package, game/CIL output or
+agent registration is added to the repo. Writing-for-agents instructions applied
+to the agent pointer and guide structure.
+
+Verified installed REA version4.0.1 and search/decompile/compare command help.
+Six PowerShell examples parse, local guide links resolve and diff checks pass.
+No production code changes; the previous 762 passing tests/build/deployment remain
+the last runtime verification. No game launch or new binary analysis required.
+
+## Status 2026-10-06: REA usage documented, priorities pending
+
+- Commit/push the usage guide and its discovery links. Round 158 at be92fce remains the last implemented round; next implementation number159 awaits the owner's R1-R10 ranking.
+- Direct managed REA CLI works. DD1 native prerequisites and published/main release distinction remain documented in the guide/backlog; no global MCP/agent configuration changes.
+- Usage at the start of this documentation task: ordinary available, session38%, weekly99%, session resetsAt1791324444. Check usage before the next task; keep quota-aware heartbeat quiet while priorities are pending.
+- Native goal remains paused without resume API. No duplicate goal, tests/builds/agents or save restores pending. No game/protected-estate/abandoned-project/art access; existing preview/server unchanged.

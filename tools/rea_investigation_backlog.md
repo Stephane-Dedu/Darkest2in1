@@ -3,6 +3,7 @@
 Owner request, 2026-10-06: use REA for difficult DD1-to-DD2 systems, provide a list,
 then let the owner set priorities. These IDs are stable discussion references.
 They are investigation candidates, not claims that native DD1 rules were recovered.
+For setup, skill loading and command examples, use [the REA usage guide](rea_usage.md).
 
 ## Trial result
 

@@ -64,6 +64,11 @@ independent. Do not move contracts into a separate strip below the map.
 - Git Bash eats `\\n` in heredocs: write patch scripts with the Write tool.
 
 ## Skills (universal-modder plugin)
+For native DD1 rules, DD2 CIL or build-comparison investigations, read
+[`tools/rea_usage.md`](tools/rea_usage.md), then the installed REA skill it names.
+The guide covers the working CLI, evidence reuse and current native prerequisites;
+[`tools/rea_investigation_backlog.md`](tools/rea_investigation_backlog.md) holds the owner's priority choices.
+
 The Claude Code plugin `universal-modder` is installed on this machine. Its skills fit this project:
 `universal-modder:game-automation` (driving and screenshotting DD2), `universal-modder:mod-any-game`,
 `universal-modder:mashup-mods`, `universal-modder:reverse-engineering`, `universal-modder:game-recon`. Load the relevant
