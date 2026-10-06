@@ -2705,3 +2705,38 @@ https://github.com/morluto/rea/blob/main/docs/windows-ghidra-p0.md.
 - Ordinary usage available; session 9%, weekly 95%, session resetsAt 1791324444. Check usage at round boundaries, stop around 95% session or if ordinary usage becomes unavailable, and leave a clean committed handoff. Existing hourly heartbeat remains; no duplicate automation.
 - All 737 tests and Release pass; stopped-game DLL hashes match. Native loot paging/hover/stagecoach/save recovery still need permitted game checks; no launch authorization yet.
 - No protected estates, abandoned project or native-derived artwork accessed. No running tests/builds/agents or save restores pending; preview/server unchanged. REA was evaluated only, not installed.
+
+## Round 156: gather quest objects obey pack capacity
+
+DD1 quest.types.json gather_holy_relic/reliquary yields three holy_relic objects;
+base.quest_item.inventory.items.darkest assigns one per stack to native gather
+items. Unity ScrollEventLoot.LoadCurioLoot routes quest objects to limited loot
+inventory and TakeAll respects pack space; Close refuses a waiting quest object.
+The mod used unconditional Pack.Add and its special goal return skipped overflow.
+Five actual native-zone/room/hall scenarios failed with 17 occupied slots in a
+16-slot pack. Ranked insertion bypass, bad stack limit and bad slot count;
+capacity-aware TryTake alone removed that overflow.
+
+Gather reports retain a waiting drop shared with Loot/LeftBehind when full or
+the catalog is unavailable. The caller receives the same waiting entries in its
+overflow list. One-time investigation, objective progress and curio consumption
+stay recorded; report dismissal already requires taking quest loot. Ten cases
+cover all four native regions, room/hall, full/free/missing-catalog, reload aliases,
+pickup rejection then freeing/taking, no repeated goal or item, exact capacity/RNG.
+The first broad Core run exposed a walkthrough helper that silently depended on
+overfilling; it now frees a nonquest item and collects required loot, asserting
+capacity before continuing. The second Core run passes all 658 cases; 89 UI and
+Release also pass. DD2 stopped and deployed DLL hashes match. Native scroll
+interaction remains [?]; no game launch or owner-save access.
+
+New separate gap: Driver.Leave unconditionally ends the expedition after calling
+Retreat, even if Core rejected a forbidden retreat, and never checks retained
+required loot. Guard explicit returns in Core next; forced wipe must stay separate.
+
+## Status 2026-10-06: round 156 complete
+
+- Round 156 green/deployed; loop continues under the reset heartbeat authorization. Native goal remains paused without resume API; no duplicate or false completion.
+- Next round 157: guarded explicit return respecting required loot and refused retreat, with actual Core transition tests and Driver integration. Do not alter forced wipe results. Then inspect whether another curio can overwrite pending required loot.
+- Ordinary usage available; session 13%, weekly 95%; session reset 2026-10-06 22:07:24 UTC (2026-10-07 00:07:24 Paris), resetsAt 1791324444. Check boundaries; stop around 95% session or ordinary unavailability with clean commit/push and existing heartbeat handoff.
+- All 747 tests and Release pass; stopped-game DLL hashes match. Native UI/persistence checks remain [?]; launch authorization is still absent.
+- No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; owner preview/server unchanged. REA evaluated, not installed.

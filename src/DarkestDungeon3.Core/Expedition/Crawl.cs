@@ -46,7 +46,12 @@ public sealed class Crawl
         if (curio == null) return null;
 
         bool isGoal = State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal;
-        if (isGoal && State.Goal != null) return State.PendingCurio = InteractQuestCurio(curio, heroId, itemId);
+        if (isGoal && State.Goal != null)
+        {
+            var questReport = InteractQuestCurio(curio, heroId, itemId);
+            overflow.AddRange(questReport.LeftBehind);
+            return State.PendingCurio = questReport;
+        }
         if (_content?.Curios == null) return null;
 
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
@@ -130,8 +135,9 @@ public sealed class Crawl
         }
         else if (goal.Type == "gather" && goal.QuestItem != null)
         {
-            State.Pack.Add(ItemCatalog.QuestKey(goal.QuestItem), 1);
-            report.Loot.Add(new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 });
+            var drop = new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 };
+            report.Loot.Add(drop);
+            if (_content?.Items == null || !State.Pack.TryTake(drop, _content.Items)) report.LeftBehind.Add(drop);
         }
 
         State.GoalProgress++;

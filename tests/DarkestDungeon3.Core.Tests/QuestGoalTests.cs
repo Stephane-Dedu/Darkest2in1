@@ -342,7 +342,22 @@ public class QuestGoalTests
             if (crawl.CurioHere != null)
             {
                 var r = crawl.InteractCurio("a", crawl.QuestItemNeededHere ?? useItem, out _);
-                if (r?.OutcomeType == "Quest") _out.WriteLine(r.Text);
+                if (r?.OutcomeType == "Quest")
+                {
+                    _out.WriteLine(r.Text);
+                    // A full pack must make room on the loot scroll before continuing. The old walk
+                    // helper silently relied on gathering exceeding DD1's inventory capacity.
+                    while (r.LeftBehind.Count > 0)
+                    {
+                        if (crawl.TakeLeftBehind(r.LeftBehind, 0)) continue;
+                        var discard = state.Pack.Items.Where(kv => !kv.Key.StartsWith("quest_item+"))
+                            .OrderBy(kv => kv.Value).FirstOrDefault();
+                        Assert.False(string.IsNullOrEmpty(discard.Key));
+                        Assert.True(crawl.Discard(discard.Key));
+                    }
+                    Assert.True(crawl.DismissCurio(r));
+                    Assert.True(state.Pack.SlotsUsed(Content.Items) <= Inventory.Slots);
+                }
                 if (crawl.CurioHere != null) crawl.SkipCurio();
                 continue;
             }
