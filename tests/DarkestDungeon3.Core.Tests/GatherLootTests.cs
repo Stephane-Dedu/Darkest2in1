@@ -106,4 +106,94 @@ public class GatherLootTests
         Assert.Single(overflow);
         Assert.False(crawl.DismissCurio(report));
     }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AnotherInvestigationCannotReplaceRequiredGatherLoot(bool hall)
+    {
+        var goal = Dd1.Goals.For("gather", "crypts");
+        var map = new DungeonMap
+        {
+            Rooms =
+            {
+                new Room { Id = 0, Content = RoomContent.Curio, CurioId = goal.CurioName, IsQuestGoal = true },
+                new Room { Id = 1, Content = RoomContent.Curio, CurioId = goal.CurioName, IsQuestGoal = true },
+            },
+            Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles =
+            {
+                new HallTile { Index = 0, Content = hall ? HallContent.Curio : HallContent.Empty,
+                    ContentId = hall ? goal.CurioName : null, IsQuestGoal = hall },
+            } } },
+        };
+        var state = new ExpeditionState
+        {
+            Started = true, Goal = goal, Quest = new QuestOffer { Dungeon = "crypts", Type = "gather" },
+            Map = map, RoomId = 0, CorridorId = -1, TileIndex = -1, Party = { "h" },
+        };
+        for (int i = 0; i < Inventory.Slots; i++) state.Pack.Add("filler" + i, 1);
+        var crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
+        var first = crawl.InteractCurio("h", null, out _);
+        Assert.Single(first.LeftBehind);
+        crawl.Travel(1);
+        if (!hall) crawl.Step(true);
+        Assert.Equal(goal.CurioName, crawl.CurioHere);
+        string before = new SaveFile { Expedition = state }.ToJson();
+        Assert.Null(crawl.InteractCurio("h", null, out var overflow));
+        Assert.Empty(overflow);
+        Assert.Same(first, crawl.LastCurio);
+        Assert.Equal(before, new SaveFile { Expedition = state }.ToJson());
+        state = SaveFile.FromJson(before).Expedition;
+        crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
+        first = crawl.LastCurio;
+        Assert.Null(crawl.InteractCurio("h", null, out var reloadedOverflow));
+        Assert.Empty(reloadedOverflow);
+        Assert.Equal(before, new SaveFile { Expedition = state }.ToJson());
+        Assert.True(crawl.Discard("filler0"));
+        Assert.True(crawl.TakeLeftBehind(first.LeftBehind, 0));
+        Assert.True(crawl.DismissCurio(first));
+        var second = crawl.InteractCurio("h", null, out var nextOverflow);
+        Assert.NotNull(second);
+        Assert.Same(second, crawl.LastCurio);
+        Assert.Single(nextOverflow);
+        Assert.Equal(2, state.GoalProgress);
+        Assert.Equal(1, state.Pack.Count(ItemCatalog.QuestKey(goal.QuestItem)));
+        Assert.Single(second.LeftBehind);
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    public void PendingRequiredLootGuardsNativeItemConsumptionButOptionalLootKeepsItsExistingBehavior(bool spoils, bool required)
+    {
+        var drop = new LootDrop { Type = required ? "quest_item" : "gold", Id = required ? "holy_relic" : null, Amount = 1 };
+        var state = new ExpeditionState
+        {
+            Started = true, Quest = new QuestOffer { Dungeon = "crypts", Difficulty = 1 }, Party = { "h" },
+            RoomId = 0, CorridorId = -1, TileIndex = -1, RandomCounter = 11,
+            Map = new DungeonMap { Rooms = { new Room { Id = 0, Content = RoomContent.Curio, CurioId = "heirloom_chest" } } },
+        };
+        state.Pack.Add(Supply.Key, 1);
+        if (spoils) state.PendingSpoils = new BattleSpoils { LeftBehind = { drop } };
+        else state.PendingCurio = new CurioReport { Loot = { drop }, LeftBehind = { drop } };
+        state = SaveFile.FromJson(new SaveFile { Expedition = state }.ToJson()).Expedition;
+        var crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
+        string before = new SaveFile { Expedition = state }.ToJson();
+        var report = crawl.InteractCurio("h", Supply.Key, out var overflow);
+        if (required)
+        {
+            Assert.Null(report);
+            Assert.Empty(overflow);
+            Assert.Equal(before, new SaveFile { Expedition = state }.ToJson());
+        }
+        else
+        {
+            Assert.NotNull(report);
+            Assert.Equal(Supply.Key, report.ItemUsed);
+            Assert.Equal(0, state.Pack.Count(Supply.Key));
+            Assert.True(state.Map.Room(0).CurioTaken);
+        }
+    }
 }

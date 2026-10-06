@@ -2743,6 +2743,38 @@ next; forced wipe must stay separate.
 - All 747 tests and Release pass; stopped-game DLL hashes match. Native UI/persistence checks remain [?]; launch authorization is still absent.
 - No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; owner preview/server unchanged. REA evaluated, not installed.
 
+## Round 158: another investigation cannot replace required loot
+
+Installed gather_holy_relic and native one-item stacks supply a two-curio fixture.
+Unity RaidSceneManager awaits LootEvent; ScrollEventLoot.Close refuses quest items.
+Actual gather/travel/second room or hall investigation reproduced replacement of
+the first uncollected holy relic. Ranked missing interaction guard, item identity
+and report-link restoration; both failures preceded reload with native item keys.
+One interaction-entry guard for required loot in either report made both pass.
+
+Six cases cover room/hall paths, synthetic reload, byte-exact refused state,
+freeing/collecting/dismissing then investigating the next objective, and native
+keyed chest interaction with either pending report. The rejected call consumes no
+key, RNG or objective; optional-loot behavior is deliberately unchanged here.
+All 673 Core + 89 UI tests and Release pass. DD2 stopped and both deployed DLL
+hashes match. Native input/presentation remains [?]; no launch or save access.
+Movement behind the modal still needs a separate round rather than widening this
+required-item-loss fix.
+
+The owner now explicitly asks to use REA and produce a list of difficult DD1-to-DD2
+systems so they can choose priorities. Finish this round, then perform a bounded
+read-only REA trial and create that list before selecting further implementation
+work. REA 4.0.1 installed locally under C:/Users/Piral/rea-workbench with lifecycle
+scripts disabled; no global agent/MCP configuration changed. Published package
+omits the docs paths, so use the official repository docs for setup details.
+
+## Status 2026-10-06: round 158 complete, REA prioritization next
+
+- Round 158 green/deployed; commit/push this fix. Next authorized task is the owner's REA feasibility trial and difficult-system listing, then let the owner guide priorities. Do not automatically choose another implementation gap ahead of that list.
+- Ordinary usage available; session 22%, weekly 97%; session resetsAt 1791324444. Check usage; stop around 95% session or ordinary unavailability with clean handoff and the existing heartbeat. Native goal remains paused without resume API; no duplicate or false completion.
+- All 762 tests and Release pass; stopped-game DLL hashes match. Native UI/input/persistence checks remain [?], and launch authorization is absent.
+- No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; preview/server unchanged. Local REA CLI is installed for the requested trial, not yet a verified DD1 analysis.
+
 ## Round 157: explicit returns respect required loot and quest retreat flags
 
 Driver.Leave set Ended without guarding pending quest loot; Core.Retreat also

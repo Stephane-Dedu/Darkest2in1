@@ -42,6 +42,7 @@ public sealed class Crawl
     {
         overflow = new List<LootDrop>();
         if (State.Ended || heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (!CanLeave(State.PendingCurio?.LeftBehind) || !CanLeave(State.PendingSpoils?.LeftBehind)) return null;
         string curio = CurioHere;
         if (curio == null) return null;
 
