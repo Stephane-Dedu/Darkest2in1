@@ -168,7 +168,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [blocked] Negative quirk auto-lock: DD1 `quirk_chance_to_lock_negative` 0.25 / `quirk_negative_locked_after_turn_count` 2 — when the roll happens and what the "turn" counts is in darkest.exe, not in the data or the Unity port.
 - [blocked] Disease after a quest: DD1 has the numbers (`disease_after_quest_min_chance` 0.05, `disease_max_chance` 0.32, `disease_hero_disease_resist_weight` 0.33, from resolve 2) but not the formula; it is in darkest.exe, not in the data or the Unity port.
 - [blocked] Dismissing a hero: DD1 `dismissed_hero_stress_penalties` [{upper_level 4: 5}, {12: 10}, {1000000: 20}] — what "upper_level" counts (resolve? weeks? roster size?) isn't in the data or the Unity port.
-- [?] Quirk gain/loss after quests and from curios (DD1 quirk library → DD2 quirk ids).
+- [?] Curio/town quirk gain/loss and caps have implementations; native checks remain. Ordinary DD1 post-quest gains are separately missing: Homecoming only compares returned actor snapshots, without using rules.json negStress*/posStress*Success/Failure or a native weighted return pool. REA candidate R4 in tools/rea_investigation_backlog.md needs roll/interpolation/selection order before implementation.
 - [x] Recruits arrive with DD1-style quirks. In game (round 26): Bonel (Man-at-Arms) "Last Stand, Nervous", Veci (Leper) two quirks.
 
 ## Trinkets

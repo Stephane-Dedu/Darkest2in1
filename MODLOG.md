@@ -2775,6 +2775,47 @@ omits the docs paths, so use the official repository docs for setup details.
 - All 762 tests and Release pass; stopped-game DLL hashes match. Native UI/input/persistence checks remain [?], and launch authorization is absent.
 - No protected estates, abandoned project or art access. No running tests/builds/agents or save restores pending; preview/server unchanged. Local REA CLI is installed for the requested trial, not yet a verified DD1 analysis.
 
+## REA reconnaissance: owner priority list, 2026-10-06
+
+Owner requests an evidence-backed list before choosing further implementation
+priorities. Followed REA's supplied investigation workflow; its explicit parallel
+scope instruction authorized one read-only campaign-reference worker. No code was
+changed after round 158. tools/rea_investigation_backlog.md has ten stable R1-R10
+choices, implementation estimates, source locations, current behavior and unknowns.
+R3 dismissal is a narrow native pilot; R1/R2/R4 share campaign return questions.
+R5 Never Again and R6 resurrection share persistent hero state. R7-R10 cover DD2
+stress adaptation, remaining trinket descriptions and runtime performance/input.
+
+Direct REA 4.0.1 managed CLI inspection succeeded on the installed IronCrown.dll.
+Unity Mono/AnyCPU/CIL observed; 4,721 types/33,158 methods with complete metadata
+coverage and no issues. Selected stress/run/effect-description CIL bodies present.
+Installed/reference SHA-256 matches dd97e30f2f37e2a287633ab322b8fd18bcfe9e240903713a5c2ae00c894692e6;
+MVID c8627dd8-3822-4311-9403-8920d40a2892. Source hash unchanged. Static evidence
+does not observe runtime hook timing, application behavior or performance.
+Private full evidence, selected summary and helper live under
+C:/Users/Piral/rea-workbench/evidence, outside Git; no game code is copied here.
+
+DD1 native inspect with provider ghidra returned provider_unavailable/not_configured.
+Doctor confirms Ghidra absent; no Java command resolves. The live official raw
+Windows guide says npm 4.0.1 lacks its Windows native bundle, which also is absent
+from the installed package. Main-branch documentation and release support differ.
+Do not claim original DD1 rules recovered or that MCP registration supplies this
+bundle. Native analysis needs a compatible verified bundle/Ghidra12.1.4/fullx64JDK21
+or a separately validated supported host. Sources are linked in the backlog.
+
+The broad quest/curio quirk PARITY entry was corrected: ordinary DD1 return quirk
+rolls are missing in Homecoming, while curio/town gains and caps already exist.
+Other native blockers remain blocked pending evidence; no native conclusions
+were inferred from rule names or Unity port differences alone.
+
+## Status 2026-10-06: REA list ready, awaiting owner's priorities
+
+- Round 158 remains the last implemented round, committed/pushed/deployed at be92fce, with 673 Core + 89 UI tests and Release passing. Research-only changes need no repeat build. Commit/push this listing and handoff.
+- tools/rea_investigation_backlog.md lists R1-R10. Await the owner's ranking before selecting a further implementation round; next number 159. Existing heartbeat must remain quiet until a selection arrives, then retain quota-aware resumption for the selected work.
+- REA managed analysis works through direct CLI. DD1 native analysis is unavailable with the current package/provider prerequisites; the list records that limitation. No global agent/MCP configuration changes, Ghidra/Java installs or open native analysis session.
+- Usage at research boundary: ordinary available, session 31%, weekly 98%, session resetsAt 1791324444. Check limits when work resumes; ordinary unavailability can stop work before session95. Native goal remains paused without resume API; no duplicate or false completion.
+- No game launch, owner-save/protected estate access, abandoned project access or native art changes. Native UI/input/performance checks remain [?]. No running tests/builds/agents or save restores pending; owner preview/server unchanged.
+
 ## Round 157: explicit returns respect required loot and quest retreat flags
 
 Driver.Leave set Ended without guarding pending quest loot; Core.Retreat also
