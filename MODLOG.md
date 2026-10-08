@@ -2908,3 +2908,34 @@ First answers, written into PARITY and the backlog:
 - D:\dd1-decomp\ghidra_after_autoanalysis is a backup of the project from before any naming (311 MB); delete it when it's no longer needed.
 - Next candidates once the map is complete: R1 implementation (per-quirk age); the surprise roll shape; DD1's real meal
   numbers; R2/R4 from the same OnRaidFinish function. Owner priorities still decide.
+
+## DD1 reverse-engineering tool review, 2026-10-08
+
+Owner asked to inspect the new tools/dd1re pipeline. Reviewed the PowerShell runner, four Ghidra scripts, map builder,
+query CLI and documentation. The installed win64 Darkest.exe still matches the private manifest's SHA-256. A real
+key query reaches the rules loader, and Darkest::RaidFinish resolves to an existing decompiled file. No game launch,
+binary import, bulk decompile or private map rewrite was needed.
+
+Confirmed a rebuild blocker with a synthetic loader/global/reader fixture: build_map.py overwrote its string-reader
+dictionary with display text while writing rule_globals.md, then failed at users.items() with AttributeError. Renamed
+that display variable. tools/dd1re/test_build_map.py reproduced the failure before the fix, then passed, checking the
+source-file index and the actual key/global/function query commands against a temporary synthetic map.
+
+The current private outputs are mixed: map/ indexes 55,971 C files, but decomp/ contains 35,134 and 22,540 indexed
+paths are missing after renames and interruption. globals_index.json and rule_globals.md are absent, so the real
+global query fails. No attempt to complete the refresh was made; the preceding handoff requires the owner's OK and
+no concurrent gaming. README now records these limitations. The exporter keeps failed-decompile C stubs on resume;
+file counts do not prove successful coverage. An unmatched key in exported string references likewise does not
+prove a game rule is unused; the guide and generated-map wording now require following the loader and indirect use.
+
+Verification: one synthetic CLI integration test passes, including three query subchecks; PowerShell runner parses.
+The initial query-test fixture lacked the exported signature field; corrected that fixture without changing dd1q.py.
+Only tooling and documentation changed, so no gameplay build, deployment or repeated .NET suite was needed.
+
+## Status 2026-10-08: DD1 tool reviewed, builder fixed; priorities and refresh pending
+
+- Last gameplay round remains 158 at be92fce; next number 159 awaits the owner's R1-R10 selection. No gameplay gap selected.
+- Commit/push the map-builder fix, synthetic regression and review notes. Native map refresh remains pending the owner's OK under the previous handoff; no Ghidra/decompile/build/test processes or save restores left running.
+- The private map and game binaries remain untouched. Query limitations are documented in tools/dd1re/README.md; use REA for managed DD2 and this direct Ghidra pipeline for native DD1.
+- Usage at task start: ordinary available, five-hour 1%, weekly 0%, session reset1791500512. Goal remains paused without a resume API; no duplicate goal. Heartbeat stays quiet while owner priorities are pending.
+- No game launch, protected-estate access, abandoned-project access or artwork changes. Last gameplay verification remains 673 Core +89 UI tests and Release passing; native UI checks remain unverified.

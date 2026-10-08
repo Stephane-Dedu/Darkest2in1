@@ -34,8 +34,9 @@ Or grep `D:\dd1-decomp\decomp` (one `.c` file per function) and read `D:\dd1-dec
 | `ghidra/DD1.gpr` | the Ghidra project: open it in Ghidra to rename and annotate while investigating |
 
 ## How to read the evidence
-- A key with no reader is not referenced as a string anywhere in the exe, so DD1 almost certainly ignores it. Confirm it
-  in the decompilation before changing mod behaviour, because a key could be built at runtime.
+- A key with no reader has no match in the exported string references. That alone does not prove DD1 ignores it.
+  The key may be constructed at runtime or consumed indirectly. Trace the loader and gameplay code before changing
+  mod behaviour.
 - Names come from RTTI (classes, vftables, constructors) and from DD1's own log strings. Names from strings carry the plate
   comment `dd1re: named from a log/assert string`: an inlined callee can lend its name to the caller.
 - Most functions stay `FUN_<entry>`. Navigate from a data key to the global it is loaded into and the functions using
@@ -43,6 +44,23 @@ Or grep `D:\dd1-decomp\decomp` (one `.c` file per function) and read `D:\dd1-dec
   prints lambda vtable names such as `Roster::System::OnRaidFinish(...)::<lambda_1>`, which name the enclosing function.
 - Decompiled floats, struct offsets and inlined code mislead easily. Check every rule against DD1's data, then write a
   Core test before coding it.
+
+## Current private output (checked 2026-10-08)
+
+The executable still matches the manifest's SHA-256. The interrupted refresh has 35,134 C files; the older map
+indexes 55,971, with 22,540 indexed paths currently missing. `globals_index.json` and `rule_globals.md` have not
+been generated in the private map yet. Key-to-string lookup works, but global queries fail until the map is rebuilt.
+Treat this as mixed output from two runs, rather than a complete current analysis.
+
+The owner's handoff requires approval for the interrupted decompile refresh, with the game stopped. After that
+refresh, regenerate the map. `-Resume` skips any existing C file, including files containing a `decompile failed`
+marker, so file counts alone do not establish successful decompilation.
+
+The builder and query smoke test uses synthetic input in a temporary directory, without Ghidra or game files:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\Python\Python311\python.exe" tools\dd1re\test_build_map.py
+```
 
 ## Rebuild
 Needs Microsoft OpenJDK 21 (`winget install Microsoft.OpenJDK.21`), Ghidra 12.1.4 unpacked at

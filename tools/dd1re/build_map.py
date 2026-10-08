@@ -162,9 +162,9 @@ def main():
              "serialization) are left out: " + ", ".join(short(functions[e]) for e in sorted(bulk) if e in functions), ""]
     for key, info in key_out.items():
         for g in info["globals"]:
-            users = ", ".join(short(functions[e]) for e in g["used_by"] if e in functions) or "(no other function)"
+            reader_text = ", ".join(short(functions[e]) for e in g["used_by"] if e in functions) or "(no other function)"
             lines.append(f"- `{key}` ({', '.join(info['files'])}) -> `{g['global']}`, loaded in "
-                         f"{short(functions[g['loader']]) if g['loader'] in functions else g['loader']}; used by {users}")
+                         f"{short(functions[g['loader']]) if g['loader'] in functions else g['loader']}; used by {reader_text}")
     (out / "rule_globals.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     by_family = collections.defaultdict(list)
@@ -172,8 +172,8 @@ def main():
         for fam in info["files"]:
             by_family[fam].append(key)
     lines = ["# DD1 data keys and the Darkest.exe functions that reference them", "",
-             "In gameplay data, a key with no reader is not referenced as a string anywhere in the exe: DD1 most",
-             "likely ignores it (confirm in the decompilation before relying on that). Presentation files come last:",
+             "A key with no reader has no match in the exported string references. That alone does not prove it",
+             "is unused: trace the loader and gameplay code, including indirect access. Presentation files come last:",
              "their entry names are widget/instance names looked up indirectly, so 'never referenced' means little",
              "there. Reader lists show at most 4 functions; the rest are in keys.json.", ""]
     for fam in sorted(by_family, key=lambda f: (bool(PRESENTATION.search(f)), f)):
