@@ -3075,3 +3075,23 @@ Native UI announcement/banner/modal checks remain [?]. No game launch, protected
 - Round 162 committed/pushed at 64274cf; commit/push round 163. Next round 164: Q14 camp light restores before meals/skills, rather than on BreakCamp erasing a skill's reduce_torch effect. Read native phase ordering and installed skill before changing it.
 - All 782 tests and Release pass; stopped-game DLL hashes match. No builds/tests/workers/native-map processes/restores pending. Native UI/gameplay checks remain [?]; DD2 launch still unauthorized.
 - Ordinary usage available, session 77%, weekly 12%, reset1791500512. Stop around 95% with clean commits and resume after reset via the updated existing heartbeat. The broad quest implementation remains incomplete; do not mark its goal achieved.
+
+## Round 164: camp intro restores light before meals and skills
+
+Native camp controller 1406fbb90 calls torch modifier 1406091a0 with camp_restore_torch in intro phase2,
+then advances to provisions phase3 and saves. The modifier adds its amount with light bounds, rather than
+assigning an absolute target. Unity RaidSceneManager camp intro also increases torch before provisions.
+Installed default.camping_skills.json gives dark_ritual a guaranteed reduce_torch100 effect.
+
+Moved the additive restore to accepted MakeCamp and removed the late BreakCamp restore, which erased a
+camp skill's reduction. Existing saved camp light is preserved on Resume rather than reapplying intro.
+Six cases cover entry from0/30/100, an additive25 fixture, light events, single firewood use, rejected repeat,
+saved pre-meal state, and actual dark ritual across saved rest with forced/no ambush. Five failed before the fix.
+All 699 Core + 89 UI tests and Release pass; DD2 stopped and both deployed hashes match. Native camp light/
+transition remains [?]. Food modifiers/refusal and exact native ambush-return restoration remain separate.
+
+## Status 2026-10-08: round 164 complete, hallway stress next
+
+- Round 163 committed/pushed at46e1fd7; commit/push round164. Next round165: Q08 hallway stress should roll once, pick one hero and apply forward stress only on an empty tile, before torch loss. Inspect native caller/selector and installed darkness/rules before implementation.
+- All788 tests and Release pass; stopped-game hashes match. No pending tests/builds/native-map processes/workers/restores. Game-facing checks remain [?]; no game/protected-save/abandoned-project/art access.
+- Ordinary available, session81%, weekly13%, reset1791500512. Continue to around95%, then commit a quota handoff for automatic reset resumption. Goal remains paused without a resume API; quest mapping/implementation continues under owner authorization.

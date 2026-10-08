@@ -603,6 +603,8 @@ public sealed class Crawl
         State.Pack.TryUse(Supply.Firewood);
         State.Camp = new CampState { RespiteLeft = _rules.CampPoints };
         State.CampsMade++;
+        // DD1 restores light during camp intro, before provisions and skills can change it.
+        ChangeLight(_rules.CampRestoreTorch);
         return Flush();
     }
 
@@ -708,7 +710,7 @@ public sealed class Crawl
         }
     }
 
-    /// <summary>Strike camp: the torch is relit, and DD1 rolls for a night ambush.</summary>
+    /// <summary>Strike camp, preserving skill torch changes, and roll for a night ambush.</summary>
     public List<CrawlEvent> BreakCamp()
     {
         _events.Clear();
@@ -717,7 +719,6 @@ public sealed class Crawl
         float ambush = Math.Max(0f, _rules.AmbushCampChance - State.Camp.AmbushReduction);
         if (!State.Camp.Ate) foreach (var hero in _party.Alive) StressDd1(hero, _rules.Meals[Meal.None].StressDd1, rng, "no meal");
         State.Camp = null;
-        ChangeLight(_rules.CampRestoreTorch - State.Light);
         if (rng.Chance(ambush))
         {
             // DD1: the night ambush snuffs the torch (ambush_torch_reduction -100); the fight starts in the dark.
