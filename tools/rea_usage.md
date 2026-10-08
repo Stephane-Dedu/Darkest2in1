@@ -3,9 +3,9 @@
 Use REA when an investigation needs shipped-binary evidence, CIL inspection,
 native DD1 rules unavailable in data, or comparison across DD2 builds.
 Use the existing source, DD1 data and Unity port for questions they already answer.
-Choose investigations from [the R1-R10 backlog](rea_investigation_backlog.md)
-in the owner's priority order. The owner has requested this guide first;
-implementation priorities are still pending.
+The owner's full quest-lifecycle request supersedes waiting for R1-R10 selections.
+Use [the quest map](quest_parity_map.md), latest MODLOG Status and PARITY.md for current priorities;
+[the R1-R10 backlog](rea_investigation_backlog.md) remains a supporting investigation list.
 
 ## Load the skill and select the target
 

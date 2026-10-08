@@ -13,6 +13,10 @@ Owner priority, 2026-10-08: map the complete base-game DD1 quest lifecycle throu
 its quest systems in DD2. This supersedes waiting for R1-R10 choices. Use `tools/quest_parity_map.md` for native
 contracts, implementation seams and acceptance scenarios. Finish the interrupted private native map with conservative
 resources while no game runs; preserve the separate no-DD2-launch rule.
+Owner focus, 2026-10-08: first match Hamlet, quest selection, room/hallway travel, curios, battles and proper
+transitions. Reported rendering/input defects outrank numeric return-phase tuning. Later ideas recorded in
+PARITY.md: DD1 resolve levels and tiered skill damage/utility upgrades, both games' trinkets, and a DD1-style
+trinket panel with a central main button. Audit existing progression before changing it; preserve campaigns.
 Owner's map design: pair Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at the same map positions.
 Keep DD1's area names with their quests directly beneath each area. A single existing next-arrow beside the name on
 its right switches enabled areas at that position, such as Foetor/Warrens. Every area's XP, quests and bosses stay

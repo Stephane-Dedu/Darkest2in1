@@ -15,6 +15,7 @@
     <ProjectReference Include="../../src/DarkestDungeon3.Core/DarkestDungeon3.Core.csproj" />
     <Compile Include="../../src/DarkestDungeon3/Ui/Drag.cs" Link="Drag.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CrawlMapUi.cs" Link="CrawlMapUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CorridorGroundUi.cs" Link="CorridorGroundUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/LootGridUi.cs" Link="LootGridUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/ActivityLogLayout.cs" Link="ActivityLogLayout.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/MemorialJournalLayout.cs" Link="MemorialJournalLayout.cs" />

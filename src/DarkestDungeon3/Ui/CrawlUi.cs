@@ -239,17 +239,7 @@ internal sealed class CrawlUi
                 if (!layer.Ground)
                     GUI.DrawTextureWithTexCoords(rect, tex, tile.Mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
                 else
-                {
-                    // DD2 roads run vertically in their source textures; turn them sideways for a continuous walkway.
-                    var matrix = GUI.matrix;
-                    try
-                    {
-                        GUIUtility.RotateAroundPivot(90, rect.center);
-                        var turned = new Rect(rect.center.x - rect.height / 2, rect.center.y - rect.width / 2, rect.height, rect.width);
-                        GUI.DrawTextureWithTexCoords(turned, tex, tile.Mirror ? new Rect(0, 1, 1, -1) : new Rect(0, 0, 1, 1));
-                    }
-                    finally { GUI.matrix = matrix; }
-                }
+                    CorridorGroundUi.Draw(rect, tex, tile.Mirror);
             }
         }
         finally { GUI.color = old; }

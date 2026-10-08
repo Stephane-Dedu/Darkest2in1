@@ -29,7 +29,24 @@ public readonly struct Vector3(float x, float y, float z)
 {
     public readonly float x = x, y = y, z = z;
 }
-public readonly struct Matrix4x4 { public static Matrix4x4 identity => default; }
+// Only the 2D affine operations used by the linked road renderer; this is not a Unity rasterizer.
+public struct Matrix4x4
+{
+    public float m00, m01, m03, m10, m11, m13, m22, m33;
+    public static Matrix4x4 identity => new() { m00 = 1, m11 = 1, m22 = 1, m33 = 1 };
+    public static Matrix4x4 operator *(Matrix4x4 a, Matrix4x4 b) => new()
+    {
+        m00 = a.m00 * b.m00 + a.m01 * b.m10,
+        m01 = a.m00 * b.m01 + a.m01 * b.m11,
+        m03 = a.m00 * b.m03 + a.m01 * b.m13 + a.m03,
+        m10 = a.m10 * b.m00 + a.m11 * b.m10,
+        m11 = a.m10 * b.m01 + a.m11 * b.m11,
+        m13 = a.m10 * b.m03 + a.m11 * b.m13 + a.m13,
+        m22 = a.m22 * b.m22, m33 = a.m33 * b.m33,
+    };
+    public Vector3 MultiplyPoint3x4(Vector3 p) => new(m00 * p.x + m01 * p.y + m03,
+        m10 * p.x + m11 * p.y + m13, m22 * p.z);
+}
 public static class Mathf
 {
     public static float Min(float a, float b) => MathF.Min(a, b);

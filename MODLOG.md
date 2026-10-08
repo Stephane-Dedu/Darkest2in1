@@ -3119,3 +3119,39 @@ access; native stress presentation remains [?]. Saved encounter flags remain cov
 - Round164 committed/pushed at5cd5d65; commit/push round165. Next round166: Q20 survivor resolve-XP bonus rounds up separately and stored XP caps at the final threshold. Inspect the current effective-bonus path/native body and installed roster thresholds before implementing.
 - All799 tests and Release pass; stopped-game hashes match. No tests/builds/workers/native-map jobs/restores pending. Native gameplay remains unverified; no DD2 launch permission.
 - Ordinary available, session85%, weekly13%, reset1791500512. Continue only while below roughly95%; leave clean commits and quota handoff for the existing reset automation. Full quest implementation remains in progress.
+
+## Round 166: corridor roads rotate before window scaling
+
+Owner screenshot showed rectangular road strips at different heights. Gui.Begin already scales/translates
+the virtual canvas; GUIUtility.RotateAroundPivot then applies its turn after that matrix. The tile-dependent
+pivot consequently moves each strip differently in scaled/letterboxed windows. The public Unity GUIUtility
+source confirms that ordering; the Unity reference RaidHallway.LoadHallway reverses sector presentation for
+left/bottom traversal. This is a bridge rendering correction, not a change to DD1 corridor rules or native combat.
+
+Moved the actual road draw into linked CorridorGroundUi. Its exact quarter-turn now precedes the screen
+transform, retaining the existing vertical-road UV mirroring and restoring the canvas in finally. Eight cases
+failed with the old draw after extraction; eleven cover five window sizes including the screenshot dimensions,
+both directions, negative/fractional camera positions, matching edges, floor bounds and draw-failure restoration.
+The first test compile needed its missing Xunit import; no gameplay change was involved in that fixture repair.
+All 710 Core + 100 UI tests and Release pass; DD2 stopped and both deployed DLL hashes match.
+Native GPU/clipping/visual checks remain [?]; no DD2 launch, protected-save or abandoned-project access.
+
+Owner priority now explicitly puts Hamlet, selection, room/hallway travel, curios, battles and transitions first.
+Return XP is deferred. Later ideas are recorded in PARITY: DD1 resolve levels/tiered damage and utility skill
+upgrades, trinkets from both games, and a DD1-style trinket panel with a central main button. These are backlog
+items, not implemented claims. Updated the quest map, continuation instructions and stale REA ranking wait.
+
+## Status 2026-10-08: round 166 complete, quota handoff
+
+- Round165 is committed/pushed at bc3956b; commit/push round166's corridor renderer and owner-priority docs.
+  All810 tests and Release pass. DD2 stopped; both deployed DLL hashes match. No test/build/worker/native-map
+  jobs or save restores pending. Native floor alignment, reverse walking, room fades and combat return still
+  need a permitted visual check; the owner's screenshot does not authorize launching DD2.
+- Quota pause near the95% cutoff: last reading94% session/15% weekly, ordinary available. Do not start another
+  round before the reported reset at2026-10-08T23:01:52Z (1791500512; Paris2026-10-09 01:01:52). The existing
+  heartbeat has been updated and will resume selected main-flow work after reset; no duplicate automation.
+- Next round167 candidate: Q12 Core movement/room/secret/camp guards while a curio, loot, camp or encounter
+  report is pending. Read native event/modal ordering and Unity's awaited raid events before implementing.
+  Prioritize Hamlet, selection, hallway/curio flow, battles and transitions; return-XP tuning is deferred.
+  Later progression/trinket ideas are in PARITY.md. Full quest parity remains incomplete; the native goal is
+  still paused without a resume API, and this authorized manual work must not be marked achieved.

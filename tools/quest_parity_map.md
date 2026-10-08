@@ -2,6 +2,8 @@
 
 Owner direction, 2026-10-08: reverse engineer the full base-game quest flow, then implement the equivalent quest
 systems inside DD2. This replaces waiting for an R1-R10 ranking. DD2 regions and native DD2 combat remain the design.
+Owner's first priorities are Hamlet, quest selection, room/hallway travel and curios, battles and coherent
+transitions. Fix reported defects before tuning return XP. Later progression/trinket ideas are recorded in PARITY.md.
 
 This document maps the whole lifecycle, including cancellation, failure and recovery. It does not claim that every
 rule or native UI interaction already matches. The native engine takes precedence where the Unity reference differs.
@@ -136,9 +138,10 @@ state so an old active save is not charged a second week after migration.
 | 163 | Q16 held-item gather predicate, shared HUD/report progress, pickup reevaluation | Full-pack room/hall reloads, four DD2 region predicates and final pickup→return→loot/reward→saved estate; 693 Core + 89 UI/Release green, stopped-game hashes match | Pending: completion announcement/banner and required-item modal flow. |
 | 164 | Q14 camp intro light before meal/skills | Six `CampLightTests` cases including saved dark ritual and forced/no ambush; 699 Core + 89 UI/Release green, stopped-game hashes match | Pending: native camp light/transition. Remaining food modifiers and ambush-return flow stay open. |
 | 165 | Q08 one-hero hallway stress, raw chance, content gate and pre-torch order | Eleven direct cases plus corrected installed-rule party mean; 710 Core + 89 UI/Release green, stopped-game hashes match | Pending: native stress presentation; individual modifiers/plot overrides remain separate. |
+| 166 | Reported corridor floor displacement under window scaling | Eight original failures; eleven linked-renderer geometry/restore cases; 710 Core + 100 UI/Release green, stopped-game hashes match | Pending: native floor alignment, reverse walking and transitions across DD2 regions. |
 
 Each subsequent round closes one contract gap, records the native address and fixture, and updates PARITY/MODLOG.
-Prioritize incorrect objectives and return state before broader UI refinements. Keep uncertainty visible instead of
+Prioritize the owner's main quest flow and reported input/rendering defects. Keep uncertainty visible instead of
 implementing a guessed native rule.
 
 The acceptance matrix for the full quest experience is:

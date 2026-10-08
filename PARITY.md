@@ -4,6 +4,16 @@ Owner priority 2026-10-08: full DD1 quest lifecycle mapping and implementation. 
 locations, acceptance cases and unresolved evidence are in [tools/quest_parity_map.md](tools/quest_parity_map.md).
 Its Q01-Q23 gaps are the active implementation backlog; DD2 native combat and primary regions remain the design.
 
+Owner focus: Hamlet, quest selection, room/hallway travel and curios, battles and coherent transitions first.
+The reported corridor background defect takes immediate priority over return-XP tuning.
+
+- [?] Round 166 corridor floor placement: the owner's screenshot showed road strips at different heights. Extracted the actual road draw to CorridorGroundUi and applied its quarter-turn within the virtual canvas before the screen transform. Eight cases reproduced displacement with the old transform; eleven now cover five window sizes, both travel directions, negative/scrolled coordinates, adjacent edges, mirrored UVs and matrix restoration on draw failure. All 710 Core + 100 UI tests and Release pass; DD2 stopped, both deployed hashes match. Unity RaidHallway.LoadHallway's direction ordering and [Unity's GUIUtility source](https://github.com/Unity-Technologies/UnityCsReference/blob/master/Modules/IMGUI/GUIUtility.cs) are references. Native visual checks remain [?]: walk/reverse through the Sprawl and other DD2 regions at a scaled/letterboxed window, check continuous ground beneath the party and room/combat transitions.
+
+Later owner ideas, after the main quest flow:
+- [ ] Audit and implement DD1-style resolve levels and tiered combat-skill upgrades, including damage and utility scaling, instead of DD2's single mastery upgrade; preserve existing campaign progress.
+- [ ] Support trinkets from DD1 and DD2 with clear effects and appropriate equip rules.
+- [ ] Fit the trinket UI into the DD1-style layout, with a central main button consistent with the other panels.
+
 - [?] Round 165, Q08 hallway stress: native 140768820→1405f98b0→1405f9c70 uses one raw chance and one uniform party hero on forward empty tiles/backing steps, before torch loss. Crawl now matches selection/gate/order, without adding darkness chance; it retains pre-step light damage scaling. Eleven cases reproduced all mismatches and now cover content gates, backing, uniform choice, band-crossing order and raw chance. The old per-hero average fixture now isolates an empty square and checks the native party mean. All 710 Core + 89 UI tests and Release pass; stopped-game hashes match. Native stress presentation, individual modifiers and plot overrides remain [?]/separate.
 
 - [?] Round 164, Q14 camp torch timing: accepted MakeCamp now adds camp_restore_torch before meal/skills, as native 1406fbb90→1406091a0 and Unity camp intro do; BreakCamp preserves later skill reductions. Installed dark_ritual reduce_torch100 now survives rest/reload. Six cases cover entry/light clamp/additive amount, rejected repeat, saved pre-meal camp and dark ritual with forced/no ambush; five reproduced the old behavior. All 699 Core + 89 UI tests and Release pass; stopped-game hashes match. Native camp lighting/transition remains [?]; food modifiers/refusal and ambush-rest restoration are separate gaps.

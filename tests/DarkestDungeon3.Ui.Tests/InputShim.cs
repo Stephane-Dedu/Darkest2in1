@@ -1,5 +1,5 @@
 // Input shims for actual Drag/map drawing outside Unity, with group-local pointer coordinates.
-// They do not simulate native GUI buttons, GUI.matrix, rendering or resource loading; those need a game check.
+// Affine draw recording checks geometry; native GUI buttons, GPU rendering and resource loading need a game check.
 [assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
 namespace UnityEngine;
 
@@ -32,6 +32,7 @@ public struct Rect(float x, float y, float width, float height)
     public Rect(Vector2 position, Vector2 size) : this(position.x, position.y, size.x, size.y) { }
     public Vector2 position => new(x, y);
     public Vector2 size => new(width, height);
+    public Vector2 center => new(x + width / 2, y + height / 2);
     public bool Contains(Vector2 p) => p.x >= x && p.x < x + width && p.y >= y && p.y < y + height;
 }
 public readonly struct Color(float r, float g, float b, float a = 1)
@@ -57,12 +58,20 @@ public static class GUI
         GUIUtility.clipOffset = prior.Clip;
     }
     public static Color color;
+    public static Matrix4x4 matrix = Matrix4x4.identity;
     public static bool enabled = true;
     public static void DrawTexture(Rect r, Texture2D t) { }
     public static void DrawTexture(Rect r, Texture t) { }
     public static void DrawTexture(Rect r, Texture t, ScaleMode mode) { }
     public static (Rect Rect, Texture Texture, Rect Uv) LastTextureDraw;
-    public static void DrawTextureWithTexCoords(Rect r, Texture t, Rect uv, bool alpha) => LastTextureDraw = (r, t, uv);
+    public static Matrix4x4 LastTextureMatrix;
+    public static bool ThrowOnTextureDraw;
+    public static void DrawTextureWithTexCoords(Rect r, Texture t, Rect uv, bool alpha = true)
+    {
+        LastTextureDraw = (r, t, uv);
+        LastTextureMatrix = matrix;
+        if (ThrowOnTextureDraw) throw new InvalidOperationException("synthetic draw failure");
+    }
 }
 public static class GUIUtility
 {
