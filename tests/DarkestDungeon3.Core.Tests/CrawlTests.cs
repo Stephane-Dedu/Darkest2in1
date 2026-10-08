@@ -368,21 +368,25 @@ public class CrawlTests
     [Fact]
     public void HallwayStressAveragesLikeDd1()
     {
-        // DD1: 30% per square of 2 stress (of 100) per hero. In DD2 points that's 0.06 per hero per square.
+        // DD1: 30% per empty forward square of 2 stress on one hero. DD2 mean: 0.06 for the party.
         int squares = 0, stress = 0;
-        for (int seed = 0; seed < 300; seed++)
+        for (int seed = 0; seed < 1000; seed++)
         {
             var (crawl, party) = NewCrawl("crypts", "medium", "explore", seed, torches: 0);
             crawl.Begin();
             crawl.State.Light = 100;
             var map = crawl.State.Map;
             int target = map.Neighbours(map.EntranceRoomId).First();
+            var corridor = map.FindCorridor(map.EntranceRoomId, target);
+            var destination = corridor.RoomA == map.EntranceRoomId ? corridor.Tiles.First() : corridor.Tiles.Last();
+            destination.Content = HallContent.Empty;
+            destination.Resolved = true;
             crawl.Travel(target);
             squares++;
             stress += party.Stress.Values.Sum();
         }
-        double perHeroPerSquare = stress / (double)(squares * 4);
-        _out.WriteLine($"stress per hero per new square at full light: {perHeroPerSquare:F3}");
-        Assert.InRange(perHeroPerSquare, 0.03, 0.10);
+        double perPartyPerSquare = stress / (double)squares;
+        _out.WriteLine($"stress per party per empty forward square at full light: {perPartyPerSquare:F3}");
+        Assert.InRange(perPartyPerSquare, 0.03, 0.10);
     }
 }

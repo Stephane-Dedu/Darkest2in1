@@ -744,8 +744,8 @@ public sealed class Crawl
         var rng = NextRng();
         State.StepsTaken++;
 
-        ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
         HallwayStress(forward, rng);
+        ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
 
         bool firstVisit = !tile.Visited;
         tile.Visited = true;
@@ -802,11 +802,14 @@ public sealed class Crawl
 
     private void HallwayStress(bool forward, Rng rng)
     {
+        if (forward && CurrentTile.Content != HallContent.Empty) return;
+        var alive = _party.Alive;
+        if (alive.Count == 0) return;
+        float chance = forward ? _rules.StressChanceForward : _rules.StressChanceBack;
+        if (!rng.Chance(chance)) return;
         var band = _rules.Band(State.Light);
-        float chance = (forward ? _rules.StressChanceForward : _rules.StressChanceBack) + band.StressChanceIncrease / 100f;
         float dd1 = (forward ? _rules.StressDd1Forward : _rules.StressDd1Back) * (1f + band.StressDamageIncrease / 100f);
-        foreach (var hero in _party.Alive)
-            if (rng.Chance(chance)) StressDd1(hero, dd1, rng, "hallway");
+        StressDd1(rng.Pick(alive), dd1, rng, "hallway");
     }
 
     /// <summary>

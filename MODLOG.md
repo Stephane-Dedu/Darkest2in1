@@ -3095,3 +3095,27 @@ transition remains [?]. Food modifiers/refusal and exact native ambush-return re
 - Round 163 committed/pushed at46e1fd7; commit/push round164. Next round165: Q08 hallway stress should roll once, pick one hero and apply forward stress only on an empty tile, before torch loss. Inspect native caller/selector and installed darkness/rules before implementation.
 - All788 tests and Release pass; stopped-game hashes match. No pending tests/builds/native-map processes/workers/restores. Game-facing checks remain [?]; no game/protected-save/abandoned-project/art access.
 - Ordinary available, session81%, weekly13%, reset1791500512. Continue to around95%, then commit a quota handoff for automatic reset resumption. Goal remains paused without a resume API; quest mapping/implementation continues under owner authorization.
+
+## Round 165: native hallway stress selects one hero before torch loss
+
+Native tile handler 140768820 checks an advancing empty tile or backing step, invokes 1405f98b0 before torch
+loss, then resolves effects/content. The helper makes one raw chance roll and selector 1405f9c70 with all filter
+flags false uniformly picks one party hero. The forward chance global DAT_142acb918 has initializer/loader/caller
+users; caller and helper add no darkness chance. Installed rules give forward0.30/2 stress and backing0.55/5.
+The Unity area path loses light before its EnteredSector call, differing from the native ordering.
+
+The mod previously rolled independently for each hero on every tile after light loss, also adding torch
+chance metadata. Crawl now gates advancing content squares, rolls once, picks one living hero and uses
+pre-step light damage scaling. All eleven direct cases failed before the change; they cover five content
+types, three backing destinations, uniform selection, band-crossing event order and raw chance. The old
+per-hero average test now isolates an empty destination and checks the installed-rule party mean of0.06 DD2
+points per square. Individual modifiers and plot overrides remain separate work, not a full stress-parity claim.
+
+All 710 Core + 89 UI tests and Release pass. DD2 stopped and both deployed hashes match. No launch/save/art
+access; native stress presentation remains [?]. Saved encounter flags remain covered by the full suite.
+
+## Status 2026-10-08: round 165 complete, return XP next
+
+- Round164 committed/pushed at5cd5d65; commit/push round165. Next round166: Q20 survivor resolve-XP bonus rounds up separately and stored XP caps at the final threshold. Inspect the current effective-bonus path/native body and installed roster thresholds before implementing.
+- All799 tests and Release pass; stopped-game hashes match. No tests/builds/workers/native-map jobs/restores pending. Native gameplay remains unverified; no DD2 launch permission.
+- Ordinary available, session85%, weekly13%, reset1791500512. Continue only while below roughly95%; leave clean commits and quota handoff for the existing reset automation. Full quest implementation remains in progress.
