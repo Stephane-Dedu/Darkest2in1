@@ -47,14 +47,15 @@ Or grep `D:\dd1-decomp\decomp` (one `.c` file per function) and read `D:\dd1-dec
 
 ## Current private output (checked 2026-10-08)
 
-The executable still matches the manifest's SHA-256. The interrupted refresh has 35,134 C files; the older map
-indexes 55,971, with 22,540 indexed paths currently missing. `globals_index.json` and `rule_globals.md` have not
-been generated in the private map yet. Key-to-string lookup works, but global queries fail until the map is rebuilt.
-Treat this as mixed output from two runs, rather than a complete current analysis.
+The owner authorized completing the refresh for the full quest map on 2026-10-08. It finished with a 1 GB heap
+and one worker while no game was running. The new manifest indexes 56,343 functions and 55,971 exported C files,
+with 2,597 named functions and 141 data keys traced into globals. `globals_index.json` and `rule_globals.md` now
+exist; a real global query reaches the loader, initializer and raid-finish consumer.
 
-The owner's handoff requires approval for the interrupted decompile refresh, with the game stopped. After that
-refresh, regenerate the map. `-Resume` skips any existing C file, including files containing a `decompile failed`
-marker, so file counts alone do not establish successful decompilation.
+Four exported files contain failed-decompile markers, including QuestSelect vf23 and TownDisplay vf6. Exported
+file counts therefore do not mean every function has a usable body. `-Resume` skips existing files, including
+failed stubs; retry those separately when their bodies are needed. The remaining quest contracts and unknowns
+are mapped in [quest_parity_map.md](../quest_parity_map.md).
 
 The builder and query smoke test uses synthetic input in a temporary directory, without Ghidra or game files:
 

@@ -768,7 +768,8 @@ internal sealed class Driver : MonoBehaviour
                     break;
                 case CrawlEventType.Ambush:
                     fight = e.ContentId == "camp" ? FightKind.CampAmbush : FightKind.Hall;
-                    surprised = true;
+                    surprised = e.HeroesSurprised;
+                    monstersSurprised = e.MonstersSurprised;
                     Announce(e.ContentId == "camp" ? "The camp is ambushed in the night!" : "Something stirs in the dark...");
                     break;
                 case CrawlEventType.TrapSprung:

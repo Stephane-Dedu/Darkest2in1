@@ -230,7 +230,7 @@ public class CrawlTests
         Assert.Equal(0.5f, known.Monsters, 3);      // surprise_known_room_monsters_base_chance 0.25 + 0.25
         var ambush = crawl.SurpriseChances(corridor: true, known: false, ambush: true);
         Assert.Equal(1f, ambush.Heroes, 3);         // surprise_ambush_party_base_chance 1.0: always
-        Assert.Equal(0.25f, ambush.Monsters, 3);    // 0.0 + 0.25
+        Assert.Equal(0f, ambush.Monsters, 3);       // native forced branch bypasses torch/buff modifiers
         crawl.State.Light = 0f;                     // darkness raises the party's chance, never above 65%
         Assert.True(crawl.SurpriseChances(corridor: true, known: false, ambush: false).Heroes <= 0.65f);
     }

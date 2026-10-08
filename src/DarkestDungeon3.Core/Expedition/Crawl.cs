@@ -874,33 +874,40 @@ public sealed class Crawl
     }
 
     /// <summary>
-    /// DD1's surprise chances for a battle (shared/rules.json surprise_*): unknown rooms/corridors 10%/10%; scouted
-    /// ("known") ones never surprise the party and catch the monsters 25% of the time; ambushes always surprise the
-    /// party. The torch's band adds its increases; each side is capped at 65% (ambushes excepted).
+    /// DD1's surprise weights before normalization: room/corridor base, torch band and active hero buffs.
+    /// A lone hero loses the party base before modifiers. Forced ambushes bypass weights and surprise only heroes.
     /// </summary>
     public (float Heroes, float Monsters) SurpriseChances(bool corridor, bool known, bool ambush)
     {
         if (State.Quest?.SurpriseEnabled == false && !ambush) return (0f, 0f);   // DD1: no surprise in the Darkest Dungeon
+        if (ambush) return (1f, 0f);
         var band = _rules.Band(State.Light);
-        float heroes = ambush ? _rules.SurpriseAmbushParty
-            : known ? (corridor ? _rules.SurpriseKnownCorridorParty : _rules.SurpriseKnownRoomParty)
+        float heroes = known ? (corridor ? _rules.SurpriseKnownCorridorParty : _rules.SurpriseKnownRoomParty)
             : corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty;
-        float monsters = ambush ? _rules.SurpriseAmbushMonsters
-            : known ? (corridor ? _rules.SurpriseKnownCorridorMonsters : _rules.SurpriseKnownRoomMonsters)
+        float monsters = known ? (corridor ? _rules.SurpriseKnownCorridorMonsters : _rules.SurpriseKnownRoomMonsters)
             : corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters;
+        if (_party.Alive.Count == 1) heroes = 0f;
         heroes += band.HeroesSurprisedIncrease / 100f;
         monsters += band.MonstersSurprisedIncrease / 100f;
-        // An ambush's 1.0 means "always" (DD1's camp and corridor-return ambushes surprise the party): no cap there.
-        float heroCap = ambush ? 1f : _rules.SurpriseMaxParty;
-        return (Math.Max(0f, Math.Min(heroes, heroCap)), Math.Max(0f, Math.Min(monsters, _rules.SurpriseMaxMonsters)));
+        foreach (var (_, buff) in FightBuffs())
+        {
+            if (buff.Stat == "party_surprise_chance") heroes += buff.Amount;
+            else if (buff.Stat == "monsters_surprise_chance") monsters += buff.Amount;
+        }
+        return (Math.Max(0f, Math.Min(heroes, _rules.SurpriseMaxParty)), Math.Max(0f, Math.Min(monsters, _rules.SurpriseMaxMonsters)));
     }
 
     private void EmitBattle(CrawlEventType type, HallTile tile, bool corridor, Rng rng, int roomId = -1)
     {
         bool known = tile != null ? tile.Scouted : roomId >= 0 && Map.Room(roomId) is { Scouted: true };
-        var (heroes, monsters) = SurpriseChances(corridor, known, type == CrawlEventType.Ambush);
-        bool heroesSurprised = rng.Chance(heroes);
-        bool monstersSurprised = !heroesSurprised && rng.Chance(monsters);
+        // A roaming corridor fight is native ac_battle, not a forced camp ambush.
+        // BreakCamp supplies the forced camp encounter separately.
+        var (heroes, monsters) = SurpriseChances(corridor, known, ambush: false);
+        // Native 1405fe3d0 inserts none first, then party, then monsters and draws once over their total.
+        float none = Math.Max(0.25f, Math.Min(1f, 1f - (heroes + monsters)));
+        double draw = rng.NextDouble() * (none + heroes + monsters);
+        bool heroesSurprised = draw >= none && draw < none + heroes;
+        bool monstersSurprised = draw >= none + heroes;
 
         var e = new CrawlEvent
         {

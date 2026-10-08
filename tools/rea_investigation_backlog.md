@@ -5,6 +5,9 @@ then let the owner set priorities. These IDs are stable discussion references.
 They are investigation candidates, not claims that native DD1 rules were recovered.
 For setup, skill loading and command examples, use [the REA usage guide](rea_usage.md).
 
+Update 2026-10-08: the owner prioritized a complete base-game quest lifecycle map and its implementation in DD2.
+Use [the quest parity map](quest_parity_map.md). R1-R10 remain reference IDs; work no longer waits for their ranking.
+
 ## Trial result
 
 REA 4.0.1 is installed at `C:/Users/Piral/rea-workbench` with npm lifecycle scripts

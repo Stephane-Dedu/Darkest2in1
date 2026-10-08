@@ -2939,3 +2939,60 @@ Only tooling and documentation changed, so no gameplay build, deployment or repe
 - The private map and game binaries remain untouched. Query limitations are documented in tools/dd1re/README.md; use REA for managed DD2 and this direct Ghidra pipeline for native DD1.
 - Usage at task start: ordinary available, five-hour 1%, weekly 0%, session reset1791500512. Goal remains paused without a resume API; no duplicate goal. Heartbeat stays quiet while owner priorities are pending.
 - No game launch, protected-estate access, abandoned-project access or artwork changes. Last gameplay verification remains 673 Core +89 UI tests and Release passing; native UI checks remain unverified.
+
+## Full quest lifecycle reverse-engineering map, 2026-10-08
+
+The owner now requests the complete base-game DD1 quest experience mapped and then implemented inside DD2.
+This supersedes waiting for R1-R10 choices and authorizes finishing the interrupted private map. The existing
+quota-aware heartbeat was updated to resume this work, preserving the no-launch and save-protection rules.
+REA's broader investigation instruction authorized three read-only phase workers: preparation, exploration,
+and return. No worker edited the repo or accessed saves.
+
+The private Ghidra refresh completed with a 1 GB heap and one worker while no game ran. It retained 35,134 files,
+decompiled 20,834 pending functions and reported 3 failures in that batch. The rebuilt manifest indexes 56,343
+functions and 55,971 exported C files, 2,597 named functions, and 141 keys traced into globals. Four C files have
+failed-decompile markers; this is not a claim of complete usable-body coverage. Global lookup now reaches the
+quirk rule initializer, loader and raid-finish consumer. All native evidence stays under D:/dd1-decomp.
+
+tools/quest_parity_map.md maps Q01-Q23 across board/party/provisions/cancel, start/restore, room and corridor
+events, combat, loot, hunger, camping, goal completion, abandonment/wipe, results, town refresh and persistence.
+Each row connects native addresses to current Core/bridge methods, tests, mismatches and evidence limits.
+Important recovered differences:
+- Native provisioning prepopulates party supplies, cancellation refunds and clears both inventories, and the
+  recovered confirmation helper checks food rather than adding the mod's torch warning.
+- Hallway stress makes one chance and picks one hero; forward stress applies only on empty tiles. Hunger uses
+  an explicit eat/starve choice and saved room buffer. Camp light restores before meals and skills.
+- Explore goals truncate the required room count; gather goals count currently held quest items. Kill and
+  tutorial goals also have predicates that differ from the current simplified progress checks.
+- Return separates finished from successful quests; zone XP can be suppressed by plot metadata; resolve XP
+  bonuses round up and stored XP caps at the final threshold. Town event/board generation follows return facts.
+- Native ordinary return quirks/disease formulas and candidate filters are recovered, but failed-return town
+  eligibility, effective disease resistance and weighted pools still need work before implementation.
+
+The map distinguishes static facts from observed play and includes success, continue, abandon, retreat,
+full-pack gather, camp interruption, failed-host rollback, wipe and restart acceptance cases. Full 1:1 parity
+is the target, not a completed claim. Existing native DD2 combat and DD2 primary regions remain the design.
+
+## Round 159: native DD1 encounter surprise selection
+
+Native 1405fe3d0 uses one weighted pick in order none, party, monsters. None has a minimum weight of 0.25,
+not a probability applied before two sequential rolls. Party and monster weights include knowledge, light
+and living heroes' active surprise buffs, capped at 0.65. A lone hero loses the party base before modifiers;
+darkness can still surprise that hero. The forced branch returns party-only before modifiers.
+Native content dispatch 140766c20 distinguishes ordinary ac_battle from forced ambush contents. Roaming
+return fights are ordinary battles, even though the mod labels their event Ambush.
+
+Crawl now uses that weighted draw, includes active pending DD1 surprise buffs and applies lone-base ordering.
+Driver preserves roaming flags instead of forcing hero surprise. Camp ambush construction remains separate.
+Tests reproduced five surprise mismatches and the forced roaming mismatch before the fix. Seven new cases
+cover actual encounters at 0.65/0.65 (5/31 none, 13/31 each side), buffs/caps, lone hero, roaming fights and
+saved pending encounters without rerolling. All 680 Core + 89 UI tests and Release pass. DD2 was stopped;
+both deployed assembly hashes match. No game launch, protected save, abandoned project or artwork access.
+Native first-turn/announcement presentation and plot/formation override branches remain [?].
+
+## Status 2026-10-08: round 159 and full quest map ready
+
+- Commit/push round 159 and the Q01-Q23 quest map. Next round is 160: explore threshold truncation, then held-item gather completion. Continue the owner's authorized quest mapping/implementation loop; no R1-R10 wait remains.
+- All 769 tests and Release pass; stopped-game deployment hashes match. Native UI/gameplay still awaits explicit launch permission. No outstanding builds, workers, native-map processes or save restores; preview unchanged.
+- Private map rebuild completed; four known failed bodies remain documented. Native/CIL evidence and derived game assets stay outside Git. Some preparation/failed-return gates remain unresolved rather than guessed.
+- Usage at this boundary: ordinary available, session 66%, weekly 10%, reset1791500512. Check each round; stop around95% with a clean committed handoff. Native goal remains paused without a resume API; no duplicate or false completion.
