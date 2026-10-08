@@ -525,7 +525,7 @@ internal sealed class CrawlUi
             case "kill_boss":
                 return $"Slay {HamletUi.Pretty(Core.Expedition.ZoneEncounters.BossKey(exp.Quest.BossId))}";
             default:
-                return goal != null ? $"{HamletUi.Pretty(goal.CurioName)}: {exp.GoalProgress} / {goal.Amount}" : "";
+                return goal != null ? $"{HamletUi.Pretty(goal.CurioName)}: {Crawl.QuestCurioProgress(exp)} / {goal.Amount}" : "";
         }
     }
 
@@ -782,8 +782,10 @@ internal sealed class CrawlUi
     {
         if (crawl == null) return;
         var drop = index >= 0 && index < left.Count ? left[index] : null;
+        bool complete = crawl.State.QuestComplete;
         if (crawl.TakeLeftBehind(left, index, taken))
         {
+            if (!complete && crawl.State.QuestComplete) Gui.Announce("Quest complete! You may return to the Hamlet.");
             // DD1's per-kind loot sounds (ui_dun_loot_take_*).
             string kind = drop?.Type switch { "gold" => "gold", "heirloom" => "heirloom", "gem" => "jewelry", "provision" or "supply" => "provisions", _ => "all" };
             Runtime.Dd1Audio.Play("/ui/dun/loot_take_" + kind);

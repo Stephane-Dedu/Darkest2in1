@@ -94,8 +94,19 @@ public sealed class Crawl
             taken?.Add(new LootDrop { Type = drop.Type, Id = drop.Id, Amount = amount });
             drop.Amount -= amount;
         }
+        if (State.Goal?.Type == "gather")
+        {
+            if (State.PendingCurio is { OutcomeType: "Quest" } report)
+                report.Text = $"Quest objective {QuestCurioProgress(State)}/{State.Goal.Amount}.";
+            CheckQuest();
+        }
         return true;
     }
+
+    /// <summary>Gather progress is held quest items; activation progress is resolved quest curios.</summary>
+    public static int QuestCurioProgress(ExpeditionState state) => state?.Goal?.Type == "gather"
+        ? string.IsNullOrEmpty(state.Goal.QuestItem) ? 0 : state.Pack.Count(ItemCatalog.QuestKey(state.Goal.QuestItem))
+        : state?.GoalProgress ?? 0;
 
     /// <summary>DD1: shift+click a pack item to throw one away (quest items can't be).</summary>
     public bool Discard(string key)
@@ -155,7 +166,7 @@ public sealed class Crawl
         }
 
         State.GoalProgress++;
-        report.Text = $"Quest objective {State.GoalProgress}/{goal.Amount}.";
+        report.Text = $"Quest objective {QuestCurioProgress(State)}/{goal.Amount}.";
         if (State.InRoom) CurrentRoom.CurioTaken = true;
         else CurrentTile.Resolved = true;
         CheckQuest();
@@ -950,7 +961,8 @@ public sealed class Crawl
             "explore" => Map.QuestRooms.Count(r => r.Visited) >= ExploreRoomTarget(State),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
-            "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
+            "gather" when goal != null && goal.Amount > 0 => QuestCurioProgress(State) >= goal.Amount,
+            "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
             _ => Map.QuestRooms.Count(r => r.Visited) >= (int)(Map.QuestRooms.Count() * 0.9f),
         };
         if (!done) return;

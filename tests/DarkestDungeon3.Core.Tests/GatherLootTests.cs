@@ -39,16 +39,20 @@ public class GatherLootTests
     public void FullPackRetainsNativeGatherItemForPickupAfterReloadWithoutAnotherObjective(string zone, bool hall)
     {
         var (crawl, state) = AtGoal(zone, hall);
-        for (int i = 0; i < Inventory.Slots; i++) state.Pack.Add("filler" + i, 1);
+        string key = ItemCatalog.QuestKey(state.Goal.QuestItem);
+        state.GoalProgress = state.Goal.Amount - 1;
+        state.Pack.Add(key, state.Goal.Amount - 1);
+        for (int i = 0; i < Inventory.Slots - state.Goal.Amount + 1; i++) state.Pack.Add("filler" + i, 1);
         var report = crawl.InteractCurio("h", null, out var overflow);
         Assert.Equal(Inventory.Slots, state.Pack.SlotsUsed(Content.Items));
-        string key = ItemCatalog.QuestKey(state.Goal.QuestItem);
-        Assert.Equal(0, state.Pack.Count(key));
+        Assert.Equal(state.Goal.Amount - 1, state.Pack.Count(key));
+        Assert.False(state.QuestComplete);
+        Assert.Equal($"Quest objective {state.Goal.Amount - 1}/{state.Goal.Amount}.", report.Text);
         var drop = Assert.Single(report.Loot);
         Assert.Same(drop, Assert.Single(report.LeftBehind));
         Assert.Same(drop, Assert.Single(overflow));
         Assert.Equal(1, drop.Amount);
-        Assert.Equal(1, state.GoalProgress);
+        Assert.Equal(state.Goal.Amount, state.GoalProgress);
         Assert.False(Crawl.CanLeave(report.LeftBehind));
         Assert.False(crawl.DismissCurio(report));
         Assert.Null(crawl.InteractCurio("h", null, out var repeated));
@@ -57,19 +61,89 @@ public class GatherLootTests
         state = SaveFile.FromJson(new SaveFile { Expedition = state }.ToJson()).Expedition;
         crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
         report = crawl.LastCurio;
+        Assert.False(state.QuestComplete);
         Assert.Same(Assert.Single(report.Loot), Assert.Single(report.LeftBehind));
         Assert.False(crawl.TakeLeftBehind(report.LeftBehind, 0));
         Assert.True(crawl.Discard("filler0"));
         Assert.True(crawl.TakeLeftBehind(report.LeftBehind, 0));
         Assert.Empty(report.LeftBehind);
-        Assert.Equal(1, state.Pack.Count(key));
+        Assert.Equal(state.Goal.Amount, state.Pack.Count(key));
+        Assert.True(state.QuestComplete);
+        Assert.Equal($"Quest objective {state.Goal.Amount}/{state.Goal.Amount}.", report.Text);
         Assert.Equal(Inventory.Slots, state.Pack.SlotsUsed(Content.Items));
-        Assert.Equal(1, state.GoalProgress);
+        Assert.Equal(state.Goal.Amount, state.GoalProgress);
         Assert.Equal(19, state.RandomCounter);
         Assert.True(hall ? state.Map.Corridor(0).Tiles[0].Resolved : state.Map.Room(0).CurioTaken);
         Assert.True(crawl.DismissCurio(report));
         Assert.Null(crawl.LastCurio);
         Assert.False(crawl.TakeLeftBehind(report.LeftBehind, 0));
+        Assert.True(crawl.TryLeave());
+        Assert.True(state.Ended);
+    }
+
+    [Theory]
+    [InlineData("crypts", "dd2_city")]
+    [InlineData("warrens", "dd2_farm")]
+    [InlineData("weald", "dd2_forest")]
+    [InlineData("cove", "dd2_coast")]
+    public void HeldMatchingItemsDetermineCompletionIndependentOfInvestigationCount(string zone, string nativeZone)
+    {
+        var (crawl, state) = AtGoal(zone);
+        state.Quest.Dungeon = nativeZone;
+        state.GoalProgress = state.Goal.Amount;
+        state.Pack.Add(ItemCatalog.QuestKey("unrelated_object"), state.Goal.Amount);
+        crawl.CheckQuest();
+        Assert.False(state.QuestComplete);
+        string key = ItemCatalog.QuestKey(state.Goal.QuestItem);
+        state.Pack.Add(key, state.Goal.Amount - 1);
+        crawl.CheckQuest();
+        Assert.False(state.QuestComplete);
+        state.GoalProgress = 0;
+        state.Pack.Add(key, 1);
+        crawl.CheckQuest();
+        Assert.True(state.QuestComplete);
+        Assert.False(state.Ended);
+        Assert.Equal(19, state.RandomCounter);
+    }
+
+    [Fact]
+    public void SavedFinalGatherPickupReturnsCarriedLootAndSuccessRewardsToTheEstate()
+    {
+        var (crawl, state) = AtGoal("crypts");
+        state.Quest.Dungeon = "dd2_city";
+        state.Quest.Id = "native_gather";
+        state.Quest.Difficulty = 1;
+        state.Quest.Length = 2;
+        state.Quest.ResolveXp = 4;
+        state.Quest.Rewards.Add(new Reward { Type = "gold", Amount = 1500 });
+        var estate = new Estate { Seed = 12 };
+        estate.Add(Currency.Gold, 5000);
+        estate.Roster.Add(new HeroRecord { Id = "h", ClassId = "highwayman" });
+        estate.Quests.Add(state.Quest);
+        state.GoalProgress = 2;
+        state.Pack.Add(ItemCatalog.QuestKey(state.Goal.QuestItem), 2);
+        state.Pack.Add(Currency.Gold, 250);
+        for (int i = 0; i < Inventory.Slots - 3; i++) state.Pack.Add("filler" + i, 1);
+        var report = crawl.InteractCurio("h", null, out _);
+        Assert.False(state.QuestComplete);
+        Assert.False(crawl.TryLeave());
+
+        var save = SaveFile.FromJson(new SaveFile { Estate = estate, Expedition = state }.ToJson());
+        estate = save.Estate;
+        state = save.Expedition;
+        crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
+        Assert.True(crawl.Discard("filler0"));
+        Assert.True(crawl.TakeLeftBehind(crawl.LastCurio.LeftBehind, 0));
+        Assert.True(state.QuestComplete);
+        Assert.True(crawl.DismissCurio(crawl.LastCurio));
+        Assert.True(crawl.TryLeave());
+        Assert.False(state.Retreated);
+        Homecoming.Apply(estate, Dd1, state, new[] { new HeroOutcome { HeroId = "h" } });
+        save = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson());
+        Assert.Equal(6750, save.Estate.Get(Currency.Gold));
+        Assert.Equal(4, Assert.Single(save.Estate.Roster).ResolveXp);
+        Assert.DoesNotContain(save.Estate.Quests, q => q.Id == "native_gather");
+        Assert.Null(save.Expedition);
     }
 
     [Theory]

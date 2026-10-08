@@ -64,6 +64,7 @@ public class CurioActorTests
         state.Map.Corridors[0].Tiles[0].IsQuestGoal = true;
         string item = goal.NeedsItem ? ItemCatalog.QuestKey(goal.StartingItems[0].Id) : null;
         if (item != null) state.Pack.Add(item, 1);
+        else state.Pack.Add(ItemCatalog.QuestKey(goal.QuestItem), goal.Amount - 1);
         var crawl = Crawl(state, Party());
         string before = Json(state);
         Assert.Null(crawl.InteractCurio(actor, item, out var rejected));
@@ -79,7 +80,7 @@ public class CurioActorTests
         Assert.Equal(goal.Amount, loaded.GoalProgress);
         Assert.Null(resumed.CurioHere);
         if (item != null) Assert.Equal(0, loaded.Pack.Count(item));
-        else Assert.Equal(1, loaded.Pack.Count(ItemCatalog.QuestKey(goal.QuestItem)));
+        else Assert.Equal(goal.Amount, loaded.Pack.Count(ItemCatalog.QuestKey(goal.QuestItem)));
         Assert.Equal(state.RandomCounter, loaded.RandomCounter);
     }
 

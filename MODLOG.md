@@ -3050,3 +3050,28 @@ Release pass; stopped-game deployed hashes match. Native layout/display remains 
 - Round 161 rollback recorded at b5ca544; commit/push round 162. Next round 163 reopens Q16 after correcting both SavedCurio and CurioActor fixtures to include held items from their previous investigations. Narrow pickup reevaluation to gather goals. No guess about native behavior is needed.
 - All 777 tests and Release pass, stopped-game hashes match; no tests/builds/native-map jobs/workers/restores remain. Game-facing checks stay [?]. No new assets or private game evidence in Git.
 - Ordinary usage available, session 75%, weekly 12%, reset1791500512. Continue with the existing heartbeat and stop around95% session with clean commits/pushes; owner explicitly reiterated this cutoff.
+
+## Round 163: native gather completion waits for carried items
+
+Reopened Q16 after round 162, correcting BOTH known fixture prerequisites before implementation: prior gather
+investigations in SavedCurio and CurioActor now include the corresponding held quest items. Nine regressions
+again failed against the old predicate while the corrected fixture families passed. Native 14057a930 and
+Unity QuestGatherData both count matching items in the current inventory, agreeing with installed quest.types.
+
+Crawl.QuestCurioProgress now provides held gather count to completion, result text and HUD; activation retains
+its consumption counter. Interactions still resolve once even when their item overflows. Only gather pickup
+reevaluates completion, updates its report and announces the first transition; ordinary pickup is unchanged.
+Full-pack last-objective cases across all four native item families and room/hall placement reload while
+incomplete, collect after freeing a slot, dismiss and return. Four DD2 region cases distinguish unrelated items,
+investigation count and held count. An added headless quest-flow case reloads the final waiting item, collects,
+returns to the estate, applies carried gold plus success rewards and saves the estate. This is Core integration,
+not a claim of observed native DD2 play or complete return-phase parity.
+
+All 693 Core + 89 UI tests and Release pass. DD2 stopped; both deployed hashes match. Q16 is no longer blocked.
+Native UI announcement/banner/modal checks remain [?]. No game launch, protected save, abandoned project or art access.
+
+## Status 2026-10-08: round 163 complete, camp torch timing next
+
+- Round 162 committed/pushed at 64274cf; commit/push round 163. Next round 164: Q14 camp light restores before meals/skills, rather than on BreakCamp erasing a skill's reduce_torch effect. Read native phase ordering and installed skill before changing it.
+- All 782 tests and Release pass; stopped-game DLL hashes match. No builds/tests/workers/native-map processes/restores pending. Native UI/gameplay checks remain [?]; DD2 launch still unauthorized.
+- Ordinary usage available, session 77%, weekly 12%, reset1791500512. Stop around 95% with clean commits and resume after reset via the updated existing heartbeat. The broad quest implementation remains incomplete; do not mark its goal achieved.
