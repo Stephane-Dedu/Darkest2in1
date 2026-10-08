@@ -2996,3 +2996,23 @@ Native first-turn/announcement presentation and plot/formation override branches
 - All 769 tests and Release pass; stopped-game deployment hashes match. Native UI/gameplay still awaits explicit launch permission. No outstanding builds, workers, native-map processes or save restores; preview unchanged.
 - Private map rebuild completed; four known failed bodies remain documented. Native/CIL evidence and derived game assets stay outside Git. Some preparation/failed-return gates remain unresolved rather than guessed.
 - Usage at this boundary: ordinary available, session 66%, weekly 10%, reset1791500512. Check each round; stop around95% with a clean committed handoff. Native goal remains paused without a resume API; no duplicate or false completion.
+
+## Round 160: native explore objective threshold
+
+Native ExploreRoom goal start 14057a740 counts ordinary rooms excluding secret-door rooms, uses an explicit
+nonzero amount when present, otherwise truncates room count times percentage. Installed quest.types.json's
+explore_all_rooms uses amount 0 and percentage 0.9. Unity QuestVisitedData compares a ratio instead, effectively
+rounding up, as the mod previously did. The native executable is authoritative for this mismatch.
+
+Crawl.CheckQuest now follows that count predicate, including the legacy 90% fallback. Eight new cases cover
+3/9/10/11/20-room boundaries, secret rooms, amount precedence, and actual travel/arrival followed by saved
+continuation and a single return. Five cases failed against the old code. The first full suite exposed an older
+two-room secret fixture that expected both rooms; updated it to three ordinary rooms so it still verifies
+secret exclusion without asserting the wrong rounding. All 688 Core + 89 UI tests and Release pass. DD2 was
+stopped and both deployed hashes match. Native completion presentation remains [?]; no game/save access.
+
+## Status 2026-10-08: round 160 complete, gather predicate next
+
+- Round 159/map committed and pushed at f5cd20e. Commit/push round 160 now. Next number 161: Q16 gather completion must count held quest items and reevaluate after pickup, retaining the existing investigation counter and overflow guards.
+- All 777 tests and Release pass; stopped-game hashes match. No builds, tests, native-map processes, workers or restores pending. Native gameplay/UI remains unverified; no launch authorization.
+- Ordinary usage available, session 70%, weekly 11%, reset1791500512. Continue until approximately95%, leaving a clean committed handoff. Goal stays paused without a resume API; updated heartbeat resumes this quest-parity priority.

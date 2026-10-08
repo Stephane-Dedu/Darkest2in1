@@ -931,17 +931,21 @@ public sealed class Crawl
     {
         if (State.Ended || State.QuestComplete || State.Quest == null) return;
         var goal = State.Goal;
-        float explorePct = goal?.Type == "explore_room" && goal.Percentage > 0 ? goal.Percentage : 0.9f;
+        int roomCount = Map.QuestRooms.Count();
+        // Native ExploreRoom::OnRaidStart excludes secret rooms and truncates the percentage target.
+        int exploreTarget = goal?.Type == "explore_room"
+            ? goal.Amount != 0 ? goal.Amount : (int)(roomCount * goal.Percentage)
+            : (int)(roomCount * 0.9f);
         bool done = goal?.Type == "tutorial_room"
             // DD1's opening raid: reach the last room and win its fight.
             ? Map.Rooms.Any(r => r.IsQuestGoal && r.Visited && (!r.HasBattle || r.Cleared))
             : State.Quest.Type switch
         {
-            "explore" => Map.QuestRooms.Count(r => r.Visited) >= Math.Ceiling(Map.QuestRooms.Count() * explorePct),
+            "explore" => Map.QuestRooms.Count(r => r.Visited) >= exploreTarget,
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
             "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
-            _ => Map.QuestRooms.Count(r => r.Visited) >= Math.Ceiling(Map.QuestRooms.Count() * 0.9),
+            _ => Map.QuestRooms.Count(r => r.Visited) >= (int)(roomCount * 0.9f),
         };
         if (!done) return;
         State.QuestComplete = true;

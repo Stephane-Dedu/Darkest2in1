@@ -54,7 +54,8 @@ public class PlotSecretRoomTests
         var map = new DungeonMap { QuestType = "explore", EntranceRoomId = 0 };
         map.Rooms.Add(new Room { Id = 0, Content = RoomContent.Entrance });
         map.Rooms.Add(new Room { Id = 1 });
-        map.Rooms.Add(new Room { Id = 2, IsSecret = true, Visited = true });
+        map.Rooms.Add(new Room { Id = 2 });
+        map.Rooms.Add(new Room { Id = 3, IsSecret = true, Visited = true });
         map.Corridors.Add(new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles = { new HallTile() } });
         map.Rooms[0].CorridorIds.Add(0); map.Rooms[1].CorridorIds.Add(0);
         var state = new ExpeditionState { Map = map, Quest = new QuestOffer { Type = "explore" }, Party = { "a" } };
