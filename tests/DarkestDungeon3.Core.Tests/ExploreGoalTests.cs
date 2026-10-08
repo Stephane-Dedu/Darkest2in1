@@ -15,7 +15,7 @@ public class ExploreGoalTests
     {
         var state = new ExpeditionState
         {
-            Quest = new QuestOffer { Dungeon = "dd2_sprawl", Type = "explore" },
+            Quest = new QuestOffer { Dungeon = "dd2_city", Type = "explore" },
             Goal = Dd1.Goals.For("explore", "crypts"), Map = new DungeonMap(), Party = { "h" },
         };
         for (int i = 0; i < rooms; i++) state.Map.Rooms.Add(new Room { Id = i });
@@ -35,6 +35,7 @@ public class ExploreGoalTests
         var state = State(rooms);
         Assert.Equal(0, state.Goal.Amount);
         Assert.Equal(0.9f, state.Goal.Percentage);
+        Assert.Equal(target, Core.Expedition.Crawl.ExploreRoomTarget(state));
         var crawl = Crawl(state);
         foreach (var room in state.Map.Rooms.Take(target - 1)) room.Visited = true;
         crawl.CheckQuest();
@@ -51,6 +52,7 @@ public class ExploreGoalTests
     {
         var state = State(10);
         state.Map.Rooms.Add(new Room { Id = 10, IsSecret = true, Visited = true });
+        Assert.Equal(9, Core.Expedition.Crawl.ExploreRoomTarget(state));
         foreach (var room in state.Map.Rooms.Take(8)) room.Visited = true;
         var crawl = Crawl(state);
         crawl.CheckQuest();
@@ -66,6 +68,7 @@ public class ExploreGoalTests
     {
         var state = State(10);
         state.Goal = new QuestGoal { Type = "explore_room", Amount = 2, Percentage = 0.9f };
+        Assert.Equal(2, Core.Expedition.Crawl.ExploreRoomTarget(state));
         state.Map.Room(0).Visited = true;
         var crawl = Crawl(state);
         crawl.CheckQuest();

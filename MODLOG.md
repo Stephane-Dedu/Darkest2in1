@@ -3036,3 +3036,17 @@ not missing native evidence. Correct BOTH fixture families before reattempting i
 - Round 160 committed/pushed at15c06f8; round161 left no gameplay change. Commit/push this rollback handoff, then implement the Q15 HUD count target in round162. Reopen Q16 after both fixture setups are corrected; use the private patch as a reference, not as an unchecked replay.
 - Last green baseline remains688 Core+89 UI tests, Release and stopped-game hashes. No game launch/save access or builds/workers/restores pending. No failed tests or uncommitted implementation will be committed.
 - Owner reiterated the95% session cutoff and resumption after reset; existing hourly heartbeat already provides it. No duplicate automation. Check usage at the next boundary.
+
+## Round 162: explore HUD shares the native count target
+
+CrawlUi still displayed an upward-rounded 90% quota after round 160 fixed completion. Extracted the existing
+native predicate target into Crawl.ExploreRoomTarget and used it in both Core completion and the HUD. This
+also retains explicit amount and excludes secrets in the displayed quota. Existing ExploreGoalTests now
+assert the shared target, and their DD2 fixture uses the actual dd2_city ID. All 688 Core + 89 UI tests and
+Release pass; stopped-game deployed hashes match. Native layout/display remains [?]. No launch or save access.
+
+## Status 2026-10-08: round 162 complete, gather retry prerequisites known
+
+- Round 161 rollback recorded at b5ca544; commit/push round 162. Next round 163 reopens Q16 after correcting both SavedCurio and CurioActor fixtures to include held items from their previous investigations. Narrow pickup reevaluation to gather goals. No guess about native behavior is needed.
+- All 777 tests and Release pass, stopped-game hashes match; no tests/builds/native-map jobs/workers/restores remain. Game-facing checks stay [?]. No new assets or private game evidence in Git.
+- Ordinary usage available, session 75%, weekly 12%, reset1791500512. Continue with the existing heartbeat and stop around95% session with clean commits/pushes; owner explicitly reiterated this cutoff.

@@ -926,26 +926,32 @@ public sealed class Crawl
         _events.Add(e);
     }
 
+    /// <summary>Native ExploreRoom target, shared by completion and the quest HUD.</summary>
+    public static int ExploreRoomTarget(ExpeditionState state)
+    {
+        var goal = state.Goal;
+        int roomCount = state.Map.QuestRooms.Count();
+        // Native ExploreRoom::OnRaidStart excludes secret rooms and truncates the percentage target.
+        return goal?.Type == "explore_room"
+            ? goal.Amount != 0 ? goal.Amount : (int)(roomCount * goal.Percentage)
+            : (int)(roomCount * 0.9f);
+    }
+
     /// <summary>Mark the quest done once its goal is met (called as the party moves and fights).</summary>
     public void CheckQuest()
     {
         if (State.Ended || State.QuestComplete || State.Quest == null) return;
         var goal = State.Goal;
-        int roomCount = Map.QuestRooms.Count();
-        // Native ExploreRoom::OnRaidStart excludes secret rooms and truncates the percentage target.
-        int exploreTarget = goal?.Type == "explore_room"
-            ? goal.Amount != 0 ? goal.Amount : (int)(roomCount * goal.Percentage)
-            : (int)(roomCount * 0.9f);
         bool done = goal?.Type == "tutorial_room"
             // DD1's opening raid: reach the last room and win its fight.
             ? Map.Rooms.Any(r => r.IsQuestGoal && r.Visited && (!r.HasBattle || r.Cleared))
             : State.Quest.Type switch
         {
-            "explore" => Map.QuestRooms.Count(r => r.Visited) >= exploreTarget,
+            "explore" => Map.QuestRooms.Count(r => r.Visited) >= ExploreRoomTarget(State),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
             "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
-            _ => Map.QuestRooms.Count(r => r.Visited) >= (int)(roomCount * 0.9f),
+            _ => Map.QuestRooms.Count(r => r.Visited) >= (int)(Map.QuestRooms.Count() * 0.9f),
         };
         if (!done) return;
         State.QuestComplete = true;

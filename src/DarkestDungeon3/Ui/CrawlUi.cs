@@ -519,7 +519,7 @@ internal sealed class CrawlUi
         switch (exp.Quest.Type)
         {
             case "explore":
-                return $"Explore rooms: {map.QuestRooms.Count(r => r.Visited)} / {Mathf.CeilToInt(map.QuestRooms.Count() * 0.9f)}";
+                return $"Explore rooms: {map.QuestRooms.Count(r => r.Visited)} / {Crawl.ExploreRoomTarget(exp)}";
             case "cleanse":
                 return $"Clear room battles: {map.Rooms.Count(r => r.HasBattle && r.Cleared)} / {map.Rooms.Count(r => r.HasBattle)}";
             case "kill_boss":
