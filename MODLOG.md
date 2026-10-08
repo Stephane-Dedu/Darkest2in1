@@ -3016,3 +3016,23 @@ stopped and both deployed hashes match. Native completion presentation remains [
 - Round 159/map committed and pushed at f5cd20e. Commit/push round 160 now. Next number 161: Q16 gather completion must count held quest items and reevaluate after pickup, retaining the existing investigation counter and overflow guards.
 - All 777 tests and Release pass; stopped-game hashes match. No builds, tests, native-map processes, workers or restores pending. Native gameplay/UI remains unverified; no launch authorization.
 - Ordinary usage available, session 70%, weekly 11%, reset1791500512. Continue until approximately95%, leaving a clean committed handoff. Goal stays paused without a resume API; updated heartbeat resumes this quest-parity priority.
+
+## Round 161: gather attempt reverted after two verification failures
+
+Native Gather predicate 14057a930 and Unity QuestGatherData both require currently held matching items.
+Nine full-pack/held-item cases reproduced the mod's premature completion; the proposed fix also refreshed
+the report and HUD after pickup. First full verification failed on mapless non-gather exit fixtures because
+pickup reevaluation was too broad, and on older CurioActor gather fixtures. Narrowing to gather removed the
+exit errors, but the second run still failed three CurioActor cases: they set two prior investigations without
+the two corresponding carried items. SavedCurio had the same incomplete setup and was corrected in the attempt.
+
+Following the loop's two-failure rule, all implementation and test edits for this attempt were reverted to
+round 160. No deployment occurred; last green deployed binaries are unchanged. The retry patch is private at
+C:/Users/Piral/rea-workbench/evidence/quest-parity-round161.patch. The Q16 blocker is known fixture setup,
+not missing native evidence. Correct BOTH fixture families before reattempting in a later round.
+
+## Status 2026-10-08: round 161 reverted, round 162 quest HUD next
+
+- Round 160 committed/pushed at15c06f8; round161 left no gameplay change. Commit/push this rollback handoff, then implement the Q15 HUD count target in round162. Reopen Q16 after both fixture setups are corrected; use the private patch as a reference, not as an unchecked replay.
+- Last green baseline remains688 Core+89 UI tests, Release and stopped-game hashes. No game launch/save access or builds/workers/restores pending. No failed tests or uncommitted implementation will be committed.
+- Owner reiterated the95% session cutoff and resumption after reset; existing hourly heartbeat already provides it. No duplicate automation. Check usage at the next boundary.
