@@ -3493,3 +3493,14 @@ screenshots01-07 and copied BepInEx/Player logs. No private assets or native ana
 - Next preparation feature is Q02 free starting supplies/combined pack capacity. Earlier Status entries
   incorrectly called this Q03; Q03 actually concerns the plot warning flag and no-torch confirmation.
   Keep the owner's future Faded Memory/Haunting Memories specification pending its unresolved choices.
+
+## Status 2026-10-09: round 173 pushed; reserve quota for the next reset
+
+- Round173 committed/pushed at b3da393. Checkout clean after push. All904 Core/UI tests and normal
+  Release Rebuild pass; both deployed hashes match. Native Back/reopen verification remains [?], with
+  the quest-board drag/focus observation recorded in PARITY. No game, temporary harness or restore pending.
+- Session87%, weekly77%, ordinary usage available at finalization. The remaining allowance is too small
+  for another complete research/test/native-check round. Quota headroom pause until reported reset
+  1791579072 (2026-10-09T20:51:12Z), then check usage and resume. No owner action required.
+- Next: resolve or isolate the native quest-board input obstruction and finish Q04's visual acceptance
+  check; then Q02 free starting supplies. Keep later overhaul features deferred to their recorded design.
