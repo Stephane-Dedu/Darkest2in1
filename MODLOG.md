@@ -3445,3 +3445,51 @@ code validation, not a new test run. Main-flow implementation round173 remains a
   future features is still pending. Keep the private catalogue output outside Git.
 - Next implementation candidate remains round173/Q04, then Q03. Read tools/faded_memory_design.md
   for the owner's refined future-feature rules; preserve unresolved reward pools and encounter policy.
+
+## Round 173: clear provisions when returning to quest selection
+
+Q04 reference: private DD1 FUN_1406d3e30 refunds tracked spending and clears the provision inventories.
+Unity EstateSceneManager.cs return from ProvisionScreen (around line741) calls SellOutEverything before
+restoring preparation. Our purchase cart is only charged at embark, so cancellation must clear it without
+crediting estate gold. Previously Back only changed two flags: quantities and their slot layout survived
+quest/party changes, as did an old failure message.
+
+Moved the actual Back transition and its existing state into EmbarkUi.Navigation.cs, linked into the UI
+test project. Back now clears quantities, layout and error and returns immediately from provision drawing;
+quest and party stay selected. No Core economics or native combat changes. Before the fix, two regression
+cases failed on retained twelve food/two keys and food leaking into the next real Embark.Create. All six
+new navigation cases now pass, including non-Back/disabled input. Full validation:792 Core +112 UI =904
+tests pass. The previous ten catalogue-tool tests are not included in this round's test count.
+
+Native check used estate2 only with byte-for-byte backups of its main file and .bak. A temporary F2 entry
+loaded estate2 without opening the protected-slot picker; its subsequent reflection-based party setup
+failed twice (NullReferenceException, temporary DebugKeys.cs:45). Switched to ordinary Hamlet and quest
+controls instead of repeating that setup. Selected The Shroud/Apprentice Medium Explore and four heroes;
+gold in Hamlet was58,175. A carried Jester icon remained at the Provision button and two clicks did not
+enter the shop. Later keyboard driving reported ChatGPT as foreground. The Back/reopen native acceptance
+case is therefore unverified, not a pass. Diagnose focus/automation versus a drag-release defect separately.
+The log's two errors belong to the removed temporary setup; no normal navigation exception was logged.
+
+Stopped exact game PID32576. Restored estate2, its .bak and DebugKeys.cs from the private manifest; all
+three SHA256 checks match. Forced normal Release Rebuild after restoring source, because copied source
+timestamps can otherwise allow an incremental build to retain test code. Build succeeded with the three
+existing warnings and no errors; deployed both DLLs only while DD2 was stopped and verified both hashes.
+Normal DebugKeys has no Git diff. No protected estate or abandoned project access.
+
+Private evidence: C:\Users\Piral\rea-workbench\evidence\round173, containing the backup manifest,
+screenshots01-07 and copied BepInEx/Player logs. No private assets or native analysis entered Git.
+
+## Status 2026-10-09: round 173 cancellation implemented; native check pending
+
+- Q04 cancellation fix and six regressions are ready to commit/push on claude/practical-wright-hicri0.
+  All904 Core/UI tests and normal Release Rebuild pass; deployed DLL hashes match. Native verification
+  remains [?]: buy/rearrange supplies, Back, preserve quest/party, reopen empty cart with full stock/zero
+  cost/unchanged gold, then repeat after changing quest. Investigate the recorded quest-board input issue
+  first if it reproduces with focus secured; reported input/rendering failures retain priority.
+- DD2 stopped; estate2 main/.bak restored with matching hashes; temporary DebugKeys removed. No test,
+  restore, build or analysis jobs pending. Earlier private catalogue preview remains independent.
+- Usage83% session/76% weekly at final rebuild, ordinary usage available. Reserve finalization headroom;
+  check fresh usage before another round. Reported session reset1791579072 =2026-10-09T20:51:12Z.
+- Next preparation feature is Q02 free starting supplies/combined pack capacity. Earlier Status entries
+  incorrectly called this Q03; Q03 actually concerns the plot warning flag and no-torch confirmation.
+  Keep the owner's future Faded Memory/Haunting Memories specification pending its unresolved choices.

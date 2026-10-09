@@ -79,6 +79,12 @@ namespace DarkestDungeon3.Ui
         }
         public static bool Hotspot(Rect rect) => GUI.enabled && Event.current.type == EventType.MouseUp
             && Event.current.button == 0 && rect.Contains(Event.current.mousePosition);
+        public static bool DdButton(Rect rect, string text, bool enabled = true, int size = 24)
+        {
+            if (!enabled || !Hotspot(rect)) return false;
+            Event.current.Use();
+            return true;
+        }
         public static void Fill(Rect rect, Color colour) { }
         public static void Text(Rect rect, string text, float size, Color colour, TextAnchor align) => Texts.Add(text);
     }
