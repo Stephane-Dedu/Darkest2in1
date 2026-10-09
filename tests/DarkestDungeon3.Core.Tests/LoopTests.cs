@@ -57,6 +57,7 @@ public class LoopTests
         int guard = 0;
         while (!exp.QuestComplete && guard++ < 3000)
         {
+            if (crawl.LastSpoils != null) { Assert.True(crawl.DismissSpoils(crawl.LastSpoils)); continue; }
             if (crawl.IsBlocked)
             {
                 if (exp.InRoom || crawl.CurrentTile.Content == HallContent.Battle) crawl.ResolveBattle();

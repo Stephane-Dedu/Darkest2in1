@@ -209,10 +209,8 @@ public class GatherLootTests
         var crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
         var first = crawl.InteractCurio("h", null, out _);
         Assert.Single(first.LeftBehind);
-        crawl.Travel(1);
-        if (!hall) crawl.Step(true);
-        Assert.Equal(goal.CurioName, crawl.CurioHere);
         string before = new SaveFile { Expedition = state }.ToJson();
+        Assert.Equal(CrawlEventType.Blocked, Assert.Single(crawl.Travel(1)).Type);
         Assert.Null(crawl.InteractCurio("h", null, out var overflow));
         Assert.Empty(overflow);
         Assert.Same(first, crawl.LastCurio);
@@ -226,6 +224,9 @@ public class GatherLootTests
         Assert.True(crawl.Discard("filler0"));
         Assert.True(crawl.TakeLeftBehind(first.LeftBehind, 0));
         Assert.True(crawl.DismissCurio(first));
+        crawl.Travel(1);
+        if (!hall) crawl.Step(true);
+        Assert.Equal(goal.CurioName, crawl.CurioHere);
         var second = crawl.InteractCurio("h", null, out var nextOverflow);
         Assert.NotNull(second);
         Assert.Same(second, crawl.LastCurio);

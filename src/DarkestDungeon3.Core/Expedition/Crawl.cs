@@ -188,6 +188,11 @@ public sealed class Crawl
     public Corridor CurrentCorridor => State.CorridorId >= 0 ? Map.Corridor(State.CorridorId) : null;
     public HallTile CurrentTile => !State.InRoom && CurrentCorridor != null ? CurrentCorridor.Tiles[State.TileIndex] : null;
 
+    /// <summary>Traversal waits for the current event, loot, camp or encounter to finish.
+    /// Destination obstacles are separate: the party may still back away from an unopened obstacle or trap.</summary>
+    public bool CanNavigate => !State.Ended && State.PendingCurio == null && State.PendingSpoils == null
+        && State.Camp == null && State.PendingEncounter == null;
+
     /// <summary>A fight or obstacle the party has to deal with before it can go on.</summary>
     public bool IsBlocked =>
         State.InRoom
@@ -249,7 +254,7 @@ public sealed class Crawl
     public List<CrawlEvent> Travel(int toRoomId)
     {
         _events.Clear();
-        if (State.Ended || !State.InRoom || IsBlocked) return Blocked();
+        if (!CanNavigate || !State.InRoom || IsBlocked) return Blocked();
         var corridor = Map.FindCorridor(State.RoomId, toRoomId);
         if (corridor == null) return Blocked();
 
@@ -261,7 +266,7 @@ public sealed class Crawl
         return Flush();
     }
 
-    public bool CanEnterSecretRoom => !State.Ended && !State.InRoom && !IsBlocked
+    public bool CanEnterSecretRoom => CanNavigate && !State.InRoom && !IsBlocked
         && CurrentTile is { SecretRoomId: >= 0 } tile && tile.SecretRoomId < Map.Rooms.Count
         && Map.Room(tile.SecretRoomId).IsSecret
         && (tile.SecretDoorAlwaysAccessible || Map.Room(tile.SecretRoomId).Scouted || Map.Room(tile.SecretRoomId).Visited);
@@ -284,7 +289,7 @@ public sealed class Crawl
     public List<CrawlEvent> ExitSecretRoom()
     {
         _events.Clear();
-        if (State.Ended || CurrentRoom?.IsSecret != true || IsBlocked
+        if (!CanNavigate || CurrentRoom?.IsSecret != true || IsBlocked
             || State.SecretReturnCorridorId < 0 || State.SecretReturnCorridorId >= Map.Corridors.Count) return Blocked();
         var corridor = Map.Corridor(State.SecretReturnCorridorId);
         if (State.SecretReturnTileIndex < 0 || State.SecretReturnTileIndex >= corridor.Tiles.Count
@@ -304,7 +309,7 @@ public sealed class Crawl
     public List<CrawlEvent> Step(bool forward)
     {
         _events.Clear();
-        if (State.Ended || State.InRoom) return Blocked();
+        if (!CanNavigate || State.InRoom) return Blocked();
         var tile = CurrentTile;
         // An unresolved fight pins the party; an obstacle only blocks the way forward.
         if (!tile.Resolved && (tile.Content == HallContent.Battle || (forward && tile.Content == HallContent.Obstacle)))
@@ -594,7 +599,7 @@ public sealed class Crawl
     // ---- camping ----
 
     /// <summary>DD1 camps need firewood and a safe (cleared) room.</summary>
-    public bool CanCamp => !State.Ended && State.InRoom && !IsBlocked && State.Camp == null && State.Pack.Count(Supply.Firewood) > 0;
+    public bool CanCamp => CanNavigate && State.InRoom && !IsBlocked && State.Pack.Count(Supply.Firewood) > 0;
 
     public List<CrawlEvent> MakeCamp()
     {

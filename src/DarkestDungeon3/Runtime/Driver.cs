@@ -308,12 +308,14 @@ internal sealed class Driver : MonoBehaviour
 
     public void Travel(int roomId)
     {
+        if (!Crawl.CanNavigate) return;
         MarkStep(+1);
         Handle(Crawl.Travel(roomId));
     }
 
     public void Step(bool forward)
     {
+        if (!Crawl.CanNavigate) return;
         if (Crawl.IsBlocked && !forward && Crawl.CurrentTile?.Content == Core.Dungeon.HallContent.Battle) return;
         MarkStep(forward ? +1 : -1);
         Handle(Crawl.Step(forward));
@@ -324,7 +326,7 @@ internal sealed class Driver : MonoBehaviour
 
     private bool ChangeSecretRoom(bool enter)
     {
-        if (Phase != Phase.Crawling || Crawl == null || Expedition.Camp != null || Ui.UiRoot.ModalOpen || _travelTo >= 0
+        if (Phase != Phase.Crawling || Crawl == null || !Crawl.CanNavigate || Ui.UiRoot.ModalOpen || _travelTo >= 0
             || (enter ? !Crawl.CanEnterSecretRoom : Crawl.CurrentRoom?.IsSecret != true)) return false;
         StopWalking(); _mouseWalk = 0; _walkVelocity = 0; WalkProgress = 0;
         int before = Expedition.RoomId;
@@ -366,6 +368,13 @@ internal sealed class Driver : MonoBehaviour
     private void Walk(UnityEngine.InputSystem.Keyboard kb)
     {
         _walkVelocity = 0;
+        if (!Crawl.CanNavigate || Ui.UiRoot.ModalOpen)
+        {
+            _mouseWalk = 0;
+            _travelTo = -1;
+            StopWalking();
+            return;
+        }
         if (Expedition.InRoom != _wasInRoom) { _wasInRoom = Expedition.InRoom; _fadeInFrom = Time.unscaledTime; }
         if (_travelTo >= 0)
         {
@@ -380,7 +389,6 @@ internal sealed class Driver : MonoBehaviour
             if (_interruptsThisStep) { StopWalking(); _interruptsThisStep = false; }
             return;
         }
-        if (Expedition.Camp != null || Ui.UiRoot.ModalOpen) { _mouseWalk = 0; return; }
         int mouse = MouseWalk();
         bool right = mouse > 0 || (kb != null && (kb.dKey.isPressed || kb.rightArrowKey.isPressed));
         bool left = mouse < 0 || (kb != null && (kb.aKey.isPressed || kb.leftArrowKey.isPressed));
@@ -547,6 +555,7 @@ internal sealed class Driver : MonoBehaviour
     public void WalkToRoom(int target)
     {
         StopWalking();
+        if (!Crawl.CanNavigate) return;
         var map = Expedition.Map;
         if (target < 0 || target >= map.Rooms.Count || target == Expedition.RoomId) return;
         if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
@@ -570,6 +579,7 @@ internal sealed class Driver : MonoBehaviour
     public void WalkToTile(int corridorId, int tileIndex)
     {
         StopWalking();
+        if (!Crawl.CanNavigate) return;
         if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
         var c = Expedition.Map.Corridor(corridorId);
         if (Expedition.InRoom && c.RoomA != Expedition.RoomId && c.RoomB != Expedition.RoomId) return;

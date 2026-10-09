@@ -332,6 +332,7 @@ public class QuestGoalTests
         int guard = 0;
         while (!state.QuestComplete && guard++ < 4000)
         {
+            if (crawl.LastSpoils != null) { Assert.True(crawl.DismissSpoils(crawl.LastSpoils)); continue; }
             if (crawl.IsBlocked)
             {
                 if (state.InRoom || crawl.CurrentTile.Content == HallContent.Battle) crawl.ResolveBattle();
@@ -358,6 +359,7 @@ public class QuestGoalTests
                     Assert.True(crawl.DismissCurio(r));
                     Assert.True(state.Pack.SlotsUsed(Content.Items) <= Inventory.Slots);
                 }
+                if (r != null && crawl.LastCurio == r) Assert.True(crawl.DismissCurio(r));
                 if (crawl.CurioHere != null) crawl.SkipCurio();
                 continue;
             }

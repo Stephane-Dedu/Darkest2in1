@@ -87,6 +87,7 @@ public class EndedCrawlTests
         Assert.True(crawl.CanCamp);
         Assert.Contains(crawl.UseTorch(), e => e.Type == CrawlEventType.LightChanged);
         Assert.NotNull(crawl.InteractCurio("a", "skeleton_key", out _));
+        Assert.True(crawl.DismissCurio(crawl.LastCurio));
         Assert.Contains(crawl.Travel(1), e => e.Type == CrawlEventType.EnteredTile);
         Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.EnteredTile);
         Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.EnteredTile);

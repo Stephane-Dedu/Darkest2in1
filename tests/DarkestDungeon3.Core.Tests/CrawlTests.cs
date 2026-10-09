@@ -260,6 +260,7 @@ public class CrawlTests
         float afterFirst = crawl.State.Light;
         Assert.Equal(94f, afterFirst);
         if (crawl.IsBlocked) crawl.ResolveBattle();
+        if (crawl.LastSpoils != null) Assert.True(crawl.DismissSpoils(crawl.LastSpoils));
         crawl.Step(forward: false); // back into the entrance room
         Assert.True(crawl.State.InRoom);
         crawl.Travel(other);        // the first square again: already visited
@@ -312,6 +313,7 @@ public class CrawlTests
 
             while (!crawl.State.QuestComplete && guard++ < 5000)
             {
+                if (crawl.LastSpoils != null) { Assert.True(crawl.DismissSpoils(crawl.LastSpoils)); continue; }
                 if (crawl.IsBlocked)
                 {
                     if (crawl.State.InRoom || crawl.CurrentTile.Content == HallContent.Battle) { crawl.ResolveBattle(); battles++; }

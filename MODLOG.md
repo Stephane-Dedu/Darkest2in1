@@ -3155,3 +3155,35 @@ items, not implemented claims. Updated the quest map, continuation instructions 
   Prioritize Hamlet, selection, hallway/curio flow, battles and transitions; return-XP tuning is deferred.
   Later progression/trinket ideas are in PARITY.md. Full quest parity remains incomplete; the native goal is
   still paused without a resume API, and this authorized manual work must not be marked achieved.
+
+## Round 167: navigation waits for the active event
+
+Quota reset confirmed; resumed from clean/pushed44f0878 with no active workers, DD2 or Ghidra job. Native
+InteractWithProp140768320 requires a reset overlay and changes the interaction phase; RaidDisplay vf10 at
+14074e0c0 waits in phase4 until the overlay resets, then saves in phase5 before returning to2. Unity
+RaidSceneManager.CurioEvent disables movement and awaits LootEvent before restoring movement and clearing
+CurrentEvent. These are phase-contract references; no native gameplay was observed.
+
+Core CanNavigate now rejects traversal/new camp during PendingCurio, PendingSpoils, Camp or PendingEncounter.
+Room travel, hall steps and secret entry/return share it. Driver rejects step animation/map routes and cancels
+a queued room transition before processing it when an event or UI modal owns input. Unopened obstacles/traps
+still allow backing away. Collection/dismissal, battle outcomes and camp completion remain usable.
+
+Nineteen regression cases failed before implementation. All24 new cases pass: optional/required reports in
+room/hall/secret locations, saved reconstruction with exact state/HP/stress preservation, same-location retry,
+actual camp→ambush→saved encounter→battle loot→dismissal→travel and trap/obstacle backing. Updated existing
+walk helpers and gather continuation to close their reports rather than walking behind them. Empty native loot
+is already auto-dismissed by CrawlUi.DrawSpoils, so the phase guard has an existing completion path.
+All734 Core +100 UI tests and Release pass; DD2 stopped and both deployed hashes match. Test TRX is private
+at C:\Users\Piral\rea-workbench\evidence\round167.trx. No game/save/abandoned-project access.
+
+## Status 2026-10-09: round 167 complete, environmental interaction guards next
+
+- Round166 is44f0878; commit/push round167. All834 tests and Release green, stopped-game hashes match.
+  Native held movement/map clicks during curio/loot/camp and a queued room fade need permitted visual checks.
+- Next round168: Q12 prevent optional result replacement and environmental actions behind a pending event;
+  retain collection/dismissal. Camp skill/rest and explicit exit guards are separate follow-ups. Main-flow
+  features remain first; progression/trinket work stays in the later backlog.
+- Session32%, weekly21%, ordinary available, reset1791521699. Continue to roughly95%, then leave a clean quota
+  handoff for the existing automation. No tests/builds/workers/native jobs/restores pending. DD2 launch remains
+  unauthorized; full quest parity is not complete.
