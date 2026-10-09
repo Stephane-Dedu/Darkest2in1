@@ -669,8 +669,12 @@ internal sealed class CrawlUi
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
                 Gui.Text(new Rect(960, 1050, 960, 26), Core.Campaign.JournalPages.TryPage(key, out _)
                     ? "Journal Page: bring it back to the Hamlet; shift+click to discard one."
-                    : $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+                    : _curioPanel != null && _curioPanel == CrawlInventoryInput.CurioPanelKey(crawl)
+                        ? $"{HamletUi.Pretty(key)}: right-click to use on this curio, or drag it into the item slot."
+                        : $"{HamletUi.Pretty(key)}: click or right-click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
             bool shift = Event.current.shift;
+            if (CrawlInventoryInput.RightClick(r, crawl, _curioPanel,
+                    curio => UseOnCurio(crawl, curio, key), () => UseItem(key, crawl))) continue;
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
                 // DD1: shift+click throws one away to make room (quest items can't be).
@@ -853,7 +857,7 @@ internal sealed class CrawlUi
         bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
         bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
         bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
-        string here = curio == null ? null : (exp.InRoom ? "r" + exp.RoomId : $"c{exp.CorridorId}:{exp.TileIndex}") + ":" + curio;
+        string here = CrawlInventoryInput.CurioPanelKey(crawl);
         if (CurioDrop != null && curio != null) { string item = CurioDrop; CurioDrop = null; _curioPanel = here; UseOnCurio(crawl, curio, item); return; }
         if (CurioClicked && curio != null) _curioPanel = here;
         CurioClicked = false;
@@ -881,7 +885,7 @@ internal sealed class CrawlUi
         if (curio != null)
         {
             Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-            Gui.Text(body, $"{who} will investigate. Select another hero to send them instead, or drag an item from the inventory onto it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            Gui.Text(body, $"{who} will investigate. Select another hero, right-click an inventory item to use it here, or drag it into the slot.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
             if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Investigate")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
             if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { _curioPanel = null; return; }
 

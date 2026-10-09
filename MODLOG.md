@@ -3545,3 +3545,50 @@ state logger. Source probes were restored from backups; normal Release Rebuild w
 Do not restart the currently deployed test DLL. After this test session exits, restore estate2 main/.bak
 from round174/backup-manifest.json, verify hashes, deploy normal Release and compare DLL hashes.
 No protected estate access or normal picker. Preserve this pending restore through further rounds.
+
+## Round175: right-click inventory items on the open curio
+
+DrawInventory previously supported left-click hero use and drag-to-curio only. Added a right-click
+route before the ordinary button. An open panel matching the current room/hall location receives the
+item; closed/stale panels route to the selected hero. Existing UseOnCurio validates the supply and
+Driver/Core retain consumption, effects and persistence. Active drags, disabled input, pending reports,
+camp and blocked navigation cannot use items. No combat or curio outcome rules changed.
+
+Reference: Unity InventoryItem.OnPointerClick handles right-button item activation, while the curio
+interaction slot dispatches through the interaction inventory. DD1 heirloom_chest's skeleton_key
+interaction supplies the consumption/loot contract. Eleven linked UI/Core regressions cover room/hall
+consumption exactly once, saved reports, stale/closed panels and blocked input; four positive cases
+failed before the route existed. All 125 UI +792 Core =917 tests and normal Release Rebuild pass.
+
+Native estate 2 verification also completed round174's building checks: dragging MacRae into the
+Blacksmith/Guild succeeds. Weapon rank 0->1 costs 600 gold (63,175->62,575); mastering Hand of Light
+costs 1,000 (62,575->61,575). Screenshots03/05 and native-first.log record those purchases.
+The first curio fixture accidentally retained its quest-goal flag; right-click reached the interaction
+but the quest correctly requested holy water. It did not prove chest-key consumption. Corrected only
+the private fixture. Screenshot13-key-used and native-final.log now show Used Skeleton Key, key 1->0,
+water remaining 1, CurioTaken=true and 4 deeds/2 busts/4 crests presented. The brief white prop in
+screenshot11 resolved once its texture loaded (screenshot12); no lasting rendering defect established.
+
+Interrupted native test PID27404 had already exited when this heartbeat resumed. Preserved its logs
+and restored estate 2 main/.bak and DebugKeys from round174/backup-manifest.json before the final test.
+Stopped verified test PID28240 after that check, restored all three again and matched manifest SHA256s.
+Both estate backups in the actual manifest have hash64B7A80D...; use that manifest, not an earlier summary.
+Forced normal Release Rebuild after source restoration, deployed while DD2 stopped and checked both DLL
+hashes. No DebugKeys/UiRoot diff or private harness remains. No protected estate/picker/abandoned project.
+Private evidence: C:\Users\Piral\rea-workbench\evidence\round175. The earlier log contains an
+IMainInstaller shutdown exception after the interaction; the final chest check logged no exception.
+
+## Status 2026-10-10: input fixes verified; continue Faded Memory
+
+- Round174 is pushed at e3e0784. Round175 curio right-click and its 11 regressions are ready to commit
+  and push. All 917 tests and normal Release Rebuild pass. Native recruitment, building purchases and
+  chest-key right-click are verified. Both deployed DLL hashes must match the build at finalization.
+- DD2 stopped; estate 2 main/.bak and DebugKeys restored with manifest hashes. No temporary harness,
+  save restore, test, build or analysis job remains. The interrupted test cleanup is complete.
+- Usage reset confirmed at 1% session/16% weekly, ordinary usage available. The previous pause is over;
+  check usage at round boundaries and preserve finalization headroom before 95%.
+- Next selected feature: O3 Faded Memory, then O6 Haunting Memories. Start with native boss/zone/hero
+  sprite coverage and a saved encounter contract; do not expose an incomplete curio. Legendary now
+  means the owner-approved very_rare DD1 pool. Remaining Ancestor/unique-item and defeat/retreat rules
+  stay open in tools/faded_memory_design.md. Keep the region switch. Q04 native Back/reopen remains
+  pending separately; its shared drag obstruction is repaired, but cancellation has not been observed.
