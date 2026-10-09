@@ -6,6 +6,10 @@ have owner-defined rules in the linked design, and the item mapping is research 
 Gameplay implementation remains pending. The main quest-flow backlog in
 [quest_parity_map.md](quest_parity_map.md) remains active.
 
+Latest owner follow-up selects O3 Faded Memory for implementation next, then O6 Haunting Memories.
+Resume after the recorded quota pause. The linked feature design contains the agreed rules and
+remaining choices; other overhaul tracks remain deferred.
+
 ## Tracks
 
 | ID | Owner's direction | State | First useful implementation |

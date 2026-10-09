@@ -7,6 +7,10 @@ Its Q01-Q23 gaps are the active implementation backlog; DD2 native combat and pr
 Owner focus: Hamlet, quest selection, room/hallway travel and curios, battles and coherent transitions first.
 The reported corridor background defect takes immediate priority over return-XP tuning.
 
+Owner follow-up 2026-10-09: start O3 Faded Memory, then O6 Haunting Memories, from
+[tools/faded_memory_design.md](tools/faded_memory_design.md). These are now selected implementation
+tracks, beginning after the current quota reset. Preserve the pending main-flow checks below.
+
 - [?] Round 173, Q04 provisioning cancellation: native1406d3e30 clears both provision inventories after restoring paid currency; Unity EstateSceneManager's return from ProvisionScreen sells out the shop. Back now clears staged purchases, layout and stale errors while preserving quest/party, with no refund because our cart is charged only at embark. Two regressions reproduced the retained 12 food/2 keys and subsequent expedition leakage before the fix; all six navigation cases and 792 Core +112 UI tests pass. Normal Release rebuilt/deployed with matching DLL hashes. Native estate2 check reached quest selection and a four-hero party, but a carried icon/input-focus failure prevented entering provisioning. Still verify buy/rearrange -> Back -> same quest/party -> reopen empty pack/full stock/zero cost/unchanged gold, then repeat after changing quest. Private evidence: rea-workbench/evidence/round173; saves restored exactly.
 - [?] Round 173 native-input observation: after roster clicks on the quest board, a Jester icon remained under the cursor and Provision did not open on two clicks. Later keyboard driving rejected input because ChatGPT, not DD2, was foreground. Distinguish automation/focus effects from a production drag-release defect before changing Drag; no extra gameplay change in round173. Test with focus secured and capture press/release events if reproducible.
 

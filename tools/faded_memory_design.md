@@ -4,6 +4,12 @@ Owner-defined feature rules, 2026-10-09. This supersedes the earlier O3 "old mem
 [overhaul_roadmap.md](overhaul_roadmap.md). The rules below are recorded for implementation;
 neither feature is enabled by this document.
 
+Owner follow-up, 2026-10-09: "Start" selects these features for implementation. Faded Memory is
+the next feature track after the quota reset, followed by Haunting Memories. Begin with the
+boss/zone and sprite coverage audit and a saved encounter contract, then one complete playable
+encounter. Existing quest-flow defects remain recorded. Do not expose a curio that cannot finish
+its fight, award both rewards and return safely. Unresolved pool/policy details below remain open.
+
 ## Faded Memory: agreed experience
 
 | Part | Owner's rule |

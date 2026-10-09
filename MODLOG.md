@@ -3504,3 +3504,17 @@ screenshots01-07 and copied BepInEx/Player logs. No private assets or native ana
   1791579072 (2026-10-09T20:51:12Z), then check usage and resume. No owner action required.
 - Next: resolve or isolate the native quest-board input obstruction and finish Q04's visual acceptance
   check; then Q02 free starting supplies. Keep later overhaul features deferred to their recorded design.
+
+## Status 2026-10-09: owner starts Faded Memory and Haunting Memories
+
+- Owner's latest "Start" selects O3 Faded Memory, followed by O6 Haunting Memories. Resume from
+  tools/faded_memory_design.md after reset. Start with boss/zone/hero-sprite coverage and saved encounter
+  state, then one complete hand interaction -> DD1 boss fight -> two rewards -> return implementation.
+  Preserve DD2 player skills/stats. Guarantee one reachable curio on every boss quest once enabled.
+  Keep the region switch until special access and migration are ready. Exact reward pools and remaining
+  encounter policy are still open; the request repeats the agreed rules without settling those details.
+- Fresh usage92% session/77% weekly; preserve the owner's approximately95% stop rule. Quota pause
+  remains until1791579072, 2026-10-09T20:51:12Z. This turn records the selected priority only; no new
+  gameplay implementation, game launch or save access. Last code validation remains904 tests/Release.
+- Round173 fix is pushed at b3da393, handoff at80c4d3b. Its native Back/reopen and drag/focus checks
+  remain pending, as does Q02. They are not silently marked complete by this priority change.
