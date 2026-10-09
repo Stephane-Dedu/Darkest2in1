@@ -3771,3 +3771,36 @@ No live curio/controller is enabled and no temporary source/save remains.
   supported behavior without broadening into unsupported bosses. Reward identity/equipment follows.
 - Keep owner Very Rare confirmation, open reward/retreat policies, region switch and Q04 acceptance.
   Check usage at this boundary; retain enough headroom for clean finalization before95%.
+
+## Round181: native death links for the Necromancer's skeletons
+
+Round180 pushed at7b306c0. DD1 loader stores life_link.base_class at MonsterClass+0xeb8; private
+callback1405f69a0 matches notification identity and sets dependent flag0x1504. Unity checks linked
+base-class presence in formation. DD2 ActorInstance's same-team m_DeathChainIds/CHAIN path supplies
+the scoped one-anchor encounter. Register the prepared same-tier Necromancer before minion class
+validation; generated skeletons link to it with no chain loot/corpse. No ordinary classes change.
+Summon bridge now rejects !IsLiving as well as nonpositive HP. Multiple anchors remain unsupported.
+
+Two cases plus all880 Core +125 UI =1005 tests/Release pass. Probe1 PID5664 logs boss SKILL death
+and three skeleton CHAIN deaths (two initial, one actual summon), with skeleton views removed.
+Its direct Kill did not lower boss HP; boss remained visible/acted, so this is not victory evidence.
+Probe2 PID28292 instead applies lethal skill damage, but placeholder sourceId probe181 makes native
+AchievementsMgr.HandleEventActorDeath dereference a missing ActorDataSkill before remaining listeners.
+Stop after2 probes; full lethal kill/return acceptance remains [?]. Correct the harness to use a real
+equipped skill ID when testing the next death-flow slice. Do not claim completed memory victory.
+
+Stopped both exactPIDs/waited exit, saved separate private attempt logs/screenshots, restored estate2
+main/.bak/DebugKeys/Driver after each and verified all hashes. Forced normal Release Rebuild/deploy.
+No game, probe, save restore or native analysis remains. Native catalogue/evidence stays outsideGit.
+
+## Status 2026-10-10: round181 death links built; lethal acceptance pending
+
+- Round180 pushed. Round181 links pass all1005 tests/Release; chain death observed in isolation,
+  complete lethal kill/return [?] after two probe setup failures. Commit/push before next slice.
+- DD2 stopped; estate2 main/.bak/DebugKeys/Driver restored/hash-matched. No pending save restore,
+  harness, game/build/test or analysis job. Confirm normal deployed DLL hashes at finalization.
+- Next O3 gap: prepared skeleton corpses still borrow stand-in corpse definitions; inspect existing
+  CorpseRule/Dd1Corpse before replacing data, then allow native front summons to consume eligible
+  corpse ranks. Native death-flow test must use an actual equipped skill ID (achievement handler).
+- Memory remains disabled. Preserve Very Rare confirmation, open reward/retreat policies, region
+  switch and Q04 acceptance. Usage69% at this boundary; keep finalization headroom before95%.

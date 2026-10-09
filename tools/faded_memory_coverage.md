@@ -171,3 +171,25 @@ and Unity AvailableSummonSpace confirm that corpses can supply ranks, unlike the
 check. Zero native add-to-turn-order uses next-round timing; Unity's absent summon initiative field
 also selects no initiative roll, but exact native DD1 timing remains to confirm. Actual miss, retreat,
 reload, linked deaths and corpse behavior need acceptance before enabling the complete encounter.
+
+## Linked skeleton death: round181
+
+Private DD1 MonsterClass loader stores life_link.base_class at0xeb8. Callback1405f69a0 matches the
+configured base-class identity against its notification and sets the dependent's0x1504 flag; readers
+include monster/captor lifecycle code. Unity additionally checks whether the formation retains the
+linked base class. DD2's native m_DeathChainIds matches same-team death events and emits CHAIN kills.
+The scoped single-Necromancer encounter now links skeletons to that prepared same-tier actor ID,
+registering the anchor before native class validation. Chain loot and chain corpse are absent.
+Multiple anchors and other bosses are outside this adapter's supported contract.
+
+Two cases bring the suite to1005 passing tests. Native probe1/PID5664 receives three CHAIN death
+events (two initial skeletons and one summon) and removes those views. Direct Kill left boss HP at105
+and did not establish fight completion; do not count screenshot01 as a successful lethal kill.
+Probe2/PID28292 used lethal ApplyHealthDamage with placeholder source ID probe181. AchievementsMgr
+requires an actual skill ID for that event and throws before the remaining death listeners run.
+This is a probe setup failure, not evidence of successful victory. Native full lethal kill/return
+remains pending after the two-attempt timebox. Use a real equipped skill ID in the next death-flow
+acceptance test. Nonliving performers are now also rejected by the summon bridge.
+
+Both games stopped by exact PID; estate2 main/.bak and probe sources restored/hash-matched, normal
+Release rebuilt/deployed. Private attempts/logs/screenshots stay in rea-workbench/evidence/round181.

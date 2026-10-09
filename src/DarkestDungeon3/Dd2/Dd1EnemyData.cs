@@ -43,6 +43,13 @@ internal static class Dd1EnemyData
         var session = Runtime.Session.Current;
         var kit = Dd1EnemyKit.Read(session?.Dd1, family, tier);
         if (kit == null || kit.Protection < 0 || kit.Protection > 1 || kit.Dodge != 0 || session?.Content?.Effects == null) return false;
+        string lifeLinkId = null;
+        if (!string.IsNullOrEmpty(kit.LifeLinkBaseClass))
+        {
+            // This audited encounter has one anchor. Register it first so native class validation can link it.
+            if (kit.LifeLinkBaseClass != "necromancer" || !TryRegister(kit.LifeLinkBaseClass, tier, out var anchor)) return false;
+            lifeLinkId = anchor.Id;
+        }
 
         string baseActor = family == "necromancer" ? "lost_battalion_bishop" : "lost_battalion_foot_soldier";
         var database = Singleton<ResourceDatabaseActors>.Instance;
@@ -85,7 +92,7 @@ internal static class Dd1EnemyData
             var stats = new ActorDataStats(id, kit.ActorStatsText());
             stats.Init(id);
             SingletonMonoBehaviour<Library<string, ActorDataStats>>.Instance.AddLibraryElement(stats, overrideCSV: true);
-            var actorClass = new ActorDataClass(id, kit.ActorClassText(), 0);
+            var actorClass = new ActorDataClass(id, kit.ActorClassText(lifeLinkId), 0);
             actorClass.Init(id);
             actorClass.PostInit();
             SingletonMonoBehaviour<Library<string, ActorDataClass>>.Instance.AddLibraryElement(actorClass, overrideCSV: true);

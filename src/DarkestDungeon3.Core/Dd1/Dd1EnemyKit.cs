@@ -55,10 +55,12 @@ public sealed class Dd1EnemyKit
         };
     }
 
-    public string ActorClassText() => $"m_Size,{Size},\nm_Tags,monster,{(Boss ? "boss," : "")}\n"
+    public string ActorClassText(string lifeLinkActorId = null) => $"m_Size,{Size},\nm_Tags,monster,{(Boss ? "boss," : "")}\n"
         + $"m_ActorControllerType,RANDOM,\nm_EquippedCombatSkillLimit,{Skills.Count},\n"
         + "m_IsTickTriggerValid,True,\nm_IsStressTriggerValid,True,\n"
-        + $"m_IsStallCounted,{(!Boss ? "True" : "False")},\n";
+        + $"m_IsStallCounted,{(!Boss ? "True" : "False")},\n"
+        + (!string.IsNullOrEmpty(LifeLinkBaseClass) && !string.IsNullOrEmpty(lifeLinkActorId)
+            ? $"m_DeathChainIds,{lifeLinkActorId},\nm_IsDeathChainDeathClassValid,False,\n" : "");
 
     /// <summary>DD2 retains its combat engine; it has no accuracy/dodge stat, and DD1 has no burn resistance.</summary>
     public string ActorStatsText()

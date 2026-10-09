@@ -26,7 +26,7 @@ internal static class Dd1EnemySummons
         var performer = Dd2Api.Actor(skillResult.m_PerformerActorGuid);
         var entry = Dd1EnemyData.Get(performer?.ActorDataId);
         if (entry == null || !entry.Summons.TryGetValue(skillResult.m_SkillId, out var summon)
-            || performer.HpRaw <= 0 || TeamField?.GetValue(performer) is not Team team) return;
+            || !performer.IsLiving || performer.HpRaw <= 0 || TeamField?.GetValue(performer) is not Team team) return;
         try
         {
             // Never borrow an unregistered actor, or consume a roll with incomplete candidate coverage.

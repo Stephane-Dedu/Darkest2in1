@@ -62,4 +62,17 @@ public class Dd1EnemyKitTests
         Assert.Equal(-0.15f, Dd1SkillToDd2.Stats(kit.ActorStatsText())["health_damage_received_percent"]);
         Assert.Equal("necromancer", Dd1EnemyKit.Read(Install, "skeleton_common", 'A').LifeLinkBaseClass);
     }
+
+    [Theory]
+    [InlineData("skeleton_common")]
+    [InlineData("skeleton_militia")]
+    public void DependentSkeletonLinksOnlyToItsPreparedBossAndNeverGeneratesChainLoot(string family)
+    {
+        var kit = Dd1EnemyKit.Read(Install, family, 'A');
+        string text = kit.ActorClassText("dd3_memory_necromancer_A");
+        Assert.Contains("m_DeathChainIds,dd3_memory_necromancer_A,", text);
+        Assert.Contains("m_IsDeathChainDeathClassValid,False,", text);
+        Assert.DoesNotContain("m_DeathChainLootIds", text);
+        Assert.DoesNotContain("DeathChain", Dd1EnemyKit.Read(Install, "necromancer", 'A').ActorClassText());
+    }
 }
