@@ -130,3 +130,23 @@ accepts usable rank capacity from that future bridge; it does not infer corpse r
 Thirty tests check all three installed tiers and every Necromancer skill, selection boundaries,
 capacity failure/RNG consumption, fresh pools and fail-closed unsupported effects. No runtime caller
 or playable memory boss is added in this round. Native summons remain unverified.
+
+## Independent enemy definitions: round179
+
+`Dd1EnemyKit` reads exact-tier numbers, complete attacks and life-link metadata. The first runtime
+factory accepts only apprentice Necromancer/common/militia skeletons, rejects missing mechanics
+and unsupported dodge, and generates independent class/stats/skills. Protection uses DD2's direct
+damage-received stat; DD2 retains its accuracy engine. Private ResourceActor/ResourceSkill clones
+carry the generated IDs and complete starting skills. Only the exact CreateActor(string) overload
+routes registered IDs through those clones; shared actors/resources and generic getters stay intact.
+
+Native estate2 probe PID18912 shows the three DD1 enemies, Necromancer105HP/speed8 and all three
+attacks, skeleton8/10HP and their complete attacks. Original Bishop resource/class snapshots match
+before and after actor creation. Screenshot02 shows the boss and skeleton sprites, proper boss name,
+Six Feet Under banner and105/105HP. Summoning is intentionally not connected yet. Random controllers
+are loaded; the skeleton brains' marked-target preference still needs coverage. Their installed
+life_link.base_class=necromancer, corpse and death rules must be connected before enabling the fight.
+
+Eleven cases bring the suite to1003 passing tests. The temporary probe and estate2 main/.bak were
+restored and hash-checked after exit; normal Release was rebuilt/deployed with the game stopped.
+Private evidence is under rea-workbench/evidence/round179. No normal caller exposes the factory yet.

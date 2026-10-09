@@ -3702,3 +3702,37 @@ screenshots/logs/probe remain under rea-workbench/evidence/round178; no native a
   implemented; new-skill visual equivalents and Duelist/Runaway art still need work.
 - Preserve owner Very Rare confirmation, remaining reward/retreat questions, region switch and
   Q04 native Back/reopen acceptance. Check usage at the round boundary; stop with headroom by95%.
+
+## Round179: independent DD1 memory enemy kits in native DD2 combat
+
+Round178 pushed at354473c. Ordinary translated enemies borrow DD2 class numbers and pair a limited
+skill list. Memory bosses need complete independent kits. Dd1EnemyKit reads exact installed tiers,
+HP/speed/turns/size/resists/protection/skills and life-link metadata; missing tiers never fall back.
+The scoped factory registers apprentice Necromancer/common/militia skeletons with independent DD2
+class/stat/skill elements and private ResourceActor/ResourceSkill clones. ActorInstance initializes
+identity and skills from resource name/list, so aliases alone are insufficient. Clear skill ID overrides
+on clones; patch only LibraryActors.CreateActor(string), never the generic resource getter. Art naming
+uses the prepared skill map without retranslating generated IDs. No normal gameplay caller yet.
+
+Installed skeleton life_link.base_class=necromancer and militia prot0.15 were discovered and recorded.
+Protection maps to health_damage_received_percent=-0.15 (native SkillCalculation direct damage, separate
+from DOTs); DD2 accuracy remains native. Linked deaths, corpses, skeleton brains and summons are next.
+
+Eleven new cases and all878 Core +125 UI =1003 tests pass. Native temporary estate2 fight PID18912
+creates boss105HP/speed8/all3 attacks and skeleton8/10HP, all Random controllers and complete skills.
+Screenshot02 shows Necromancer Apprentice, Six Feet Under and DD1 enemy sprites. Original Bishop
+resource/class snapshot remains identical before/after creation. No exceptions found in captured logs.
+Fixed a temporary probe namespace compile error before launch. Stopped exactPID18912, waited for exit,
+captured private logs/screenshots, restored estate2 main/.bak/DebugKeys/Driver and verified four hashes.
+Forced normal Release Rebuild/deployment with DD2 stopped; no harness or save change remains.
+
+## Status 2026-10-10: round179 independent boss factory verified
+
+- Round178 is pushed. Round179 native actor factory and all1003 tests/Release pass; commit/push next.
+  Complete Faded Memory remains disabled until summons, reward equipment and routing are ready.
+- DD2 stopped; estate2 main/.bak and probe source restored/hash-matched. No pending save restore,
+  harness, game/test/build or native analysis job. Verify deployed DLL hashes at finalization.
+- Next O3: once-per-skill summon bridge, dynamic DD1 sprites, Necromancer-linked skeleton death and
+  corpse handling using installed/native/Unity evidence. Keep unresolved encounter policies open.
+- Preserve Very Rare reward confirmation, remaining reward questions, region switch and Q04 native
+  Back/reopen acceptance. Check fresh usage at this boundary and reserve finalization headroom by95%.

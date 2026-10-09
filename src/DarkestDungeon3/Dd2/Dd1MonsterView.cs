@@ -391,6 +391,18 @@ internal static class Dd1MonsterView
             if (lore != null && lore.MonsterNames.TryGetValue(m.Dd1, out var monsterName)) m.Actor.ActorInstance.SetActorName(monsterName);
             if (m.Skills == null || m.Skills.Count == 0) return;
             var ids = m.Actor.ActorInstance.GetEquippedCombatSkillIds();
+            if (Dd1EnemyData.Get(m.Actor.ActorInstance.ActorDataId) is { } prepared)
+            {
+                m.Allowed = new HashSet<string>(prepared.SkillIds.Keys);
+                foreach (string id in ids)
+                    if (prepared.SkillIds.TryGetValue(id, out var dd1Id))
+                    {
+                        m.SkillFor[id] = Math.Max(0, m.Skills.FindIndex(s => s.Id == dd1Id));
+                        if (lore != null && lore.MonsterSkillNames.TryGetValue(dd1Id, out var name))
+                        { m.SkillNames[id] = name; Names["skill_name_" + id] = name; }
+                    }
+                return;
+            }
             var library = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Skill.ActorDataSkill>>.Instance;
             var dd2 = ids.Select(id => Shape(id, library?.GetLibraryElement(id))).ToList();
             var dd1 = Session.Current?.Dd1 != null ? Dd1MonsterSkills.Read(Session.Current.Dd1, m.Family, m.Tier) : new List<SkillShape>();
