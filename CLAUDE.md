@@ -8,11 +8,11 @@ HarmonyX plugin for DD2 v2.04 (Unity 2022.3, Mono). Repo: https://github.com/Ste
 DD2's Sprawl, Foetor, Tangle and Shroud are the default campaign regions. Keep DD1 destinations available through
 region toggles. Retain DD1 expedition systems and DD2 combat; choose exploration/fight backgrounds for coherent,
 responsive UI and transitions. Preserve existing campaign progress and explicit region choices. This supersedes
-DD1-first region defaults; the no-launch and save-protection rules still apply.
+DD1-first region defaults; save-protection rules still apply.
 Owner priority, 2026-10-08: map the complete base-game DD1 quest lifecycle through reverse engineering, then implement
 its quest systems in DD2. This supersedes waiting for R1-R10 choices. Use `tools/quest_parity_map.md` for native
 contracts, implementation seams and acceptance scenarios. Finish the interrupted private native map with conservative
-resources while no game runs; preserve the separate no-DD2-launch rule.
+resources while no game runs; use game launches for testing as authorized on 2026-10-09.
 Owner focus, 2026-10-08: first match Hamlet, quest selection, room/hallway travel, curios, battles and proper
 transitions. Reported rendering/input defects outrank numeric return-phase tuning. Later ideas recorded in
 PARITY.md: DD1 resolve levels and tiered skill damage/utility upgrades, both games' trinkets, and a DD1-style
@@ -32,11 +32,10 @@ independent. Do not move contracts into a separate strip below the map.
 - Work on `claude/practical-wright-hicri0`.
 - `tools/handoff_prompt.md` is the prompt to start any session or agent on this project; leave the same handoff when you stop.
 - The improvement loop prompt is in `tools/parity_loop.md`. Start it with `/loop` followed by that text, and only when the
-  owner asks. The owner resumed it on 2026-10-04; the separate no-launch rule still applies.
+  owner asks. The owner resumed it on 2026-10-04; game launches for testing are authorized as of 2026-10-09.
 
 ## Owner's standing rules
-- **Don't launch DD2 until the owner says so** (asked 2026-10-04). Until then, build with `-p:Deploy=false` while the
-  game runs, and mark game-facing changes `[?]` with what to check.
+- **Owner authorized launching DD1, DD2 and the mod for tests on 2026-10-09.** Use estate 2 only; never touch protected estates. Deploy only while DD2 is stopped. Mark unobserved game-facing changes `[?]`.
 - Decide and act on the project without asking (this machine and this repo only). Commit and push to the working branch
   after each change.
 - DD1 data and the Unity port define expedition systems; DD2 data defines the default regions and native combat.
@@ -46,8 +45,7 @@ independent. Do not move contracts into a separate strip below the map.
 - Never commit game files, extracted assets or decompiled code.
 - Kill processes only by exact PID. Back up saves before risky changes.
 - Saves (`%USERPROFILE%\AppData\LocalLow\RedHook\Darkest Dungeon II\DarkestDungeon3\`): **estate 1 is the owner's
-  campaign, never touch it**; estate 2 is the test estate; estate 3 belongs to the owner too. To test a new estate, move
-  `estate_3.json` and its `.bak` aside, test, delete the test files, move the originals back and `cmp` them.
+  campaign, never touch it**; estate 2 is the test estate; estate 3 belongs to the owner too. Never read or modify either protected slot; use estate 2 for tests.
 - Rules go in Core (no Unity) with a test; bridge and UI code in the plugin; match the existing code.
 - Commits: the repo's local git config holds the author. End messages with
   `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.

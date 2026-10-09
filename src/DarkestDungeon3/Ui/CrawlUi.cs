@@ -106,6 +106,17 @@ internal sealed class CrawlUi
         float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
         if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
         if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        if (regional != null && !exp.InRoom)
+        {
+            var corridor = crawl.CurrentCorridor;
+            bool reverse = exp.HeadingRoomId != corridor.RoomB;
+            var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
+            float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
+            CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
+                CorridorSceneryLayout.Camera(corridor.Id, exp.TileIndex, reverse, slide), reverse,
+                choice?.Mirror ?? false, panoramaAlpha);
+            DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
+        }
         DrawProps(crawl, exp, slide);
 
         // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
@@ -182,17 +193,21 @@ internal sealed class CrawlUi
             foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
             // Existing room fade covers the scene switch; a half-visible panorama during walking would look ghosted.
             if (exp.InRoom) DrawGeneratedRoom(plan, exp.Seed, exp.RoomId);
-            if (!exp.InRoom && opening > 0)
-            {
-                int count = crawl.CurrentCorridor.Tiles.Count;
-                int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
-                var cue = new Color(0.85f, 0.81f, 0.7f, sceneColor.a * opening * 0.8f);
-                foreach (float x in new[] { 600 + (-1 - here) * 720 + slide, 600 + (count - here) * 720 + slide })
-                    if (x > -140 && x < Gui.W + 140)
-                        Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
-            }
         }
         finally { GUI.color = old; }
+    }
+
+    private static void DrawArrivalCue(Crawl crawl, ExpeditionState exp, RegionalScenery plan, float slide, float alpha)
+    {
+        int count = crawl.CurrentCorridor.Tiles.Count;
+        bool reverse = exp.HeadingRoomId != crawl.CurrentCorridor.RoomB;
+        float opening = CorridorSceneryLayout.Opening(exp.TileIndex, count, reverse, slide);
+        if (opening <= 0 || alpha <= 0) return;
+        int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
+        var cue = new Color(0.85f, 0.81f, 0.7f, GUI.color.a * alpha * opening * 0.8f);
+        foreach (float x in new[] { 600 + (-1 - here) * 720 + slide, 600 + (count - here) * 720 + slide })
+            if (x > -140 && x < Gui.W + 140)
+                Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
     }
 
     private static void DrawGeneratedRoom(RegionalScenery plan, int seed, int roomId)

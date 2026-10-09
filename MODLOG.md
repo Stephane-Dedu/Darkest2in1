@@ -3271,3 +3271,60 @@ remain [?]. No game launch, protected-save or abandoned-project access.
   on embark, rather than inventing a refund. Then address Q03 starting supplies in the preparation inventory.
   Main-flow priorities remain in force; later progression/trinkets are deferred. No DD2 launch permission.
   Full quest parity remains incomplete; do not mark the goal achieved.
+
+## Round 171: generated regional corridors
+
+Owner 2026-10-09 requested generated corridor diversity like the room set and explicitly authorized launching
+DD1, DD2 and the mod for tests. CLAUDE, handoff, parity loop and the existing heartbeat now retain that
+permission. Protected estates remain off limits; only estate 2 was used.
+
+DD1 crypts.corridor_wall.00–05 and Unity RaidHallway.LoadHallway/RaidHallwayView retain regional ordered
+segments. The mod only drew generated scenes in rooms. Added a separate private corridor pool under the
+existing NativeRoomSceneryFolder, with dd2_<region>-corridor-<NN>.png names, the existing PNG bounds and
+12-image limit per pool. Seed/corridor ID choose scene/mirror without gameplay RNG. A full panorama and its
+floor scroll together; reflected repeated edges join continuously in the existing physical camera coordinates.
+The room fade and arrival cue remain, and generated corridors do not depend on native Addressables success.
+Worker file IO and at-most-one main-thread upload/update are shared; completed pools adopt once and clear
+on region/expedition exit. Failed or missing art retains the previous scene path.
+
+Eight built-in imagegen panoramas use the private native exterior/resistance reference renders: charred street
+and library lane, farm lane and blighted orchard, ruined forest and palisade track, boardwalk and sandy shore.
+Four first candidates received localized bottom-ground edits; no raster manipulation outside imagegen.
+All final PNGs decoded opaque RGB, six 2048x768 and two 2043x770. Full prompts, corrections, paths, reference
+hashes and output hashes: C:\Users\Piral\DarkestDungeon3\local-art\corridors\manifest.json. Eight installed
+copies in game\PrivateScenery hash-match. No source-derived imagery or binary evidence entered Git.
+
+All 792 Core +106 UI tests pass. Five new Core cases cover discovery/pool separation and stable regional
+selection. Six linked panorama draw cases cover floor/viewport/edge coverage, direction/mirroring, scaled and
+letterboxed canvases and restoration on failure. The actual loader test now checks two valid corridors and
+one invalid corridor alongside room art, completed adoption, single uploads, fade, fallback and teardown.
+Release build passed; both normal deployed DLL hashes matched with DD2 stopped.
+
+Native visual checks used a temporary F2 shortcut in a private test build to enter estate 2 directly (avoiding
+picker reads of protected estates) and cycle preview region while crawling. No such shortcut is committed or
+left installed. Both images in all four regions were inspected in the actual game; real map navigation left
+room2 for corridor2, returned to room2, then entered corridor1 in the opposite heading and displayed its
+other variant. Screenshots at 1600x900 and 1440x900 show continuous ground, party/curio placement and the
+curio interaction panel. A native Curio minimap tooltip was also visible. The resume retry correctly handled
+our early entry while the main menu was still transitioning. No BepInEx exceptions/errors. This is visual
+scenery verification, not a full quest/combat or prolonged memory test.
+
+Private evidence: C:\Users\Piral\rea-workbench\evidence\round171. The test game was stopped by exact PID;
+DebugKeys.cs was restored byte-for-byte, estate_2.json and its .bak restored and hash-matched after process
+exit, then the normal Release was rebuilt/deployed. No protected-estate or abandoned-project access.
+
+## Status 2026-10-09: round 171 complete, quota handoff
+
+- Round170 is committed/pushed at001f83c. Commit/push round171 corridor art loader/drawing/tests/docs.
+  All898 tests and Release pass; normal stopped-game deployment hashes match. Eight private images are
+  installed locally and documented; their generation prompts and native evidence stay outside Git.
+- Session89%, weekly45% at verification boundary. Reserve the remaining allowance for clean handoff;
+  do not start another round before reset1791540022 (2026-10-09T10:00:22Z). Existing automation resumes
+  after reset. No tests/builds/native jobs/test processes or save restores pending.
+- Launching DD1/DD2/the mod for tests is explicitly authorized as of2026-10-09, superseding older no-launch
+  notes. Use estate2 only; never read protected estates. The normal picker reads all slots: future automation
+  must likewise avoid that path, using an isolated test entry if needed.
+- Next round172 candidate: Q04 provisioning cancellation clears the purchase cart when returning to quest
+  selection. Follow native1406d3e30 and Unity return-to-preparation; mod charges only on embark, so no
+  invented refund. Then Q03 starting supplies in preparation inventory. Main-flow priorities remain first;
+  broader native combat/reload/long-session checks and later progression/trinkets remain open.

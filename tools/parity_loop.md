@@ -2,7 +2,7 @@ You are iterating on Darkest2in1: Darkest Dungeon 1's full game loop played insi
 
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
-preserve campaign progress. CLAUDE.md is authoritative for this direction and the separate no-launch rule.
+preserve campaign progress. CLAUDE.md is authoritative for this direction and the latest launch permission.
 Owner focus (2026-10-08): match Hamlet, quest selection, room/hallway travel and curios, battles and proper
 transitions first, using tools/quest_parity_map.md. Reported input/rendering defects outrank return-XP tuning.
 

@@ -2,7 +2,7 @@ You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside
 
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
-preserve campaign progress. CLAUDE.md is authoritative for this direction and the separate no-launch rule.
+preserve campaign progress. CLAUDE.md is authoritative for this direction and the latest launch permission.
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.
 Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/trinket ideas are in PARITY.md.
@@ -10,7 +10,7 @@ Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/tr
 ## Start
 1. In C:\Users\Piral\DarkestDungeon3\mod: `git checkout claude/practical-wright-hicri0` and `git pull --rebase`.
 2. Read CLAUDE.md (owner's rules, machine paths, build/test/drive, skills), then the last "## Status" section at the end of MODLOG.md (where things stand, what to check first, anything pending), then PARITY.md (the checklist against real DD1).
-3. Game launches: obey the latest owner instruction in CLAUDE.md / the MODLOG status. As of 2026-10-04 the owner said not to launch DD2 until told. If unsure, ask the owner before launching.
+3. Owner authorized launching DD1, DD2 and the mod for tests on 2026-10-09. Use estate 2 only; protected estates remain off limits. Deploy only while DD2 is stopped.
 
 ## How a round works (one gap per round)
 Follow tools/parity_loop.md exactly; when the owner asks for the loop, run `/loop` with that file's text.

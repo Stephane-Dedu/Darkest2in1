@@ -40,7 +40,7 @@ public class Plugin : BaseUnityPlugin
         Dd1Path = Config.Bind("Paths", "DarkestDungeon1Folder", "",
             "Your Darkest Dungeon 1 install folder. Leave empty to find it in your Steam libraries.");
         NativeRoomSceneryPath = Config.Bind("Paths", "NativeRoomSceneryFolder", Path.Combine(Paths.GameRootPath, "PrivateScenery"),
-            "Optional private DD2 arena extension pack. Files such as dd2_city-arena-01.png; up to 12 per region. Empty disables it. Missing/invalid art retains distributed room scenery.");
+            "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery.");
         DebugKeysEnabled = Config.Bind("Debug", "DebugKeys", true, "F8 dumps state, F9 test fight from the road, F10 wins a fight, F11 starts a fight in the dungeon.");
         HeroModels = Config.Bind("Look", "Dd2HeroModelsInDungeon", true, "DD2's animated hero models in the DD1 dungeon (falls back to DD2's flat hero art by itself if they render black).");
         Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");

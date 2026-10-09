@@ -66,10 +66,12 @@ public static class GUI
     public static (Rect Rect, Texture Texture, Rect Uv) LastTextureDraw;
     public static Matrix4x4 LastTextureMatrix;
     public static bool ThrowOnTextureDraw;
+    public static Action<Rect, Texture, Rect, Matrix4x4, Color> ObserveTextureDraw;
     public static void DrawTextureWithTexCoords(Rect r, Texture t, Rect uv, bool alpha = true)
     {
         LastTextureDraw = (r, t, uv);
         LastTextureMatrix = matrix;
+        ObserveTextureDraw?.Invoke(r, t, uv, matrix, color);
         if (ThrowOnTextureDraw) throw new InvalidOperationException("synthetic draw failure");
     }
 }

@@ -11,11 +11,15 @@ public static class PrivateRoomScenery
     public const int MaxVariants = 12;
     public const int MaxFileBytes = 16 * 1024 * 1024;
 
-    public static IReadOnlyList<string> Find(string folder, string region)
+    public static IReadOnlyList<string> Find(string folder, string region) => Find(folder, region, "arena");
+
+    public static IReadOnlyList<string> FindCorridors(string folder, string region) => Find(folder, region, "corridor");
+
+    private static IReadOnlyList<string> Find(string folder, string region, string kind)
     {
         if (RegionalScenery.For(region) == null || string.IsNullOrWhiteSpace(folder) || !Directory.Exists(folder))
             return Array.Empty<string>();
-        string prefix = region + "-arena-";
+        string prefix = region + "-" + kind + "-";
         return Directory.EnumerateFiles(folder, "*.png", SearchOption.TopDirectoryOnly)
             .Select(Path.GetFileName)
             .Where(name => name.Length == prefix.Length + 6 && name.StartsWith(prefix, StringComparison.Ordinal)

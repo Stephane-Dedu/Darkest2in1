@@ -10,7 +10,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace DarkestDungeon3.Runtime;
 
-/// <summary>One expedition's native scenery and optional private rooms, loaded during embark and released on exit.</summary>
+/// <summary>One expedition's native scenery and optional private panoramas, loaded during embark and released on exit.</summary>
 internal static class RegionSceneryArt
 {
     private static readonly Dictionary<string, AsyncOperationHandle<Texture2D>> Handles = new();
@@ -22,11 +22,12 @@ internal static class RegionSceneryArt
     private static Task<RoomLoadSet> _roomLoading;
     private static Queue<RoomBytes> _roomPending;
     private static IReadOnlyList<string> _privateCandidates = Array.Empty<string>(), _privateVariants = Array.Empty<string>();
+    private static IReadOnlyList<string> _corridorCandidates = Array.Empty<string>(), _corridorVariants = Array.Empty<string>();
     private static float _privateReadyAt = -1;
 
     private sealed class RoomBytes { public string FileName, Error; public byte[] Data; }
     private sealed class RoomTexture { public Texture2D Texture; public float ReadyAt; }
-    private sealed class RoomLoadSet { public RoomBytes[] Images; public IReadOnlyList<string> PrivateFiles; public string Error; }
+    private sealed class RoomLoadSet { public RoomBytes[] Images; public IReadOnlyList<string> PrivateFiles, CorridorFiles; public string Error; }
 
     public static void Prepare(string region)
     {
@@ -41,8 +42,13 @@ internal static class RegionSceneryArt
         _roomLoading = Task.Run(() =>
         {
             IReadOnlyList<string> privateFiles = Array.Empty<string>();
+            IReadOnlyList<string> corridorFiles = Array.Empty<string>();
             string error = null;
-            try { privateFiles = PrivateRoomScenery.Find(privateFolder, region); }
+            try
+            {
+                privateFiles = PrivateRoomScenery.Find(privateFolder, region);
+                corridorFiles = PrivateRoomScenery.FindCorridors(privateFolder, region);
+            }
             catch (Exception e) { error = e.Message; }
             RoomBytes Read(string source, string fileName)
             {
@@ -64,9 +70,9 @@ internal static class RegionSceneryArt
                 catch (Exception e) { result.Error = e.Message; }
                 return result;
             }
-            return new RoomLoadSet { PrivateFiles = privateFiles, Error = error,
+            return new RoomLoadSet { PrivateFiles = privateFiles, CorridorFiles = corridorFiles, Error = error,
                 Images = plan.RoomBackgrounds.Select(name => Read(folder, name))
-                    .Concat(privateFiles.Select(name => Read(privateFolder, name))).ToArray() };
+                    .Concat(privateFiles.Concat(corridorFiles).Select(name => Read(privateFolder, name))).ToArray() };
         });
         try
         {
@@ -117,6 +123,7 @@ internal static class RegionSceneryArt
             var loaded = _roomLoading.GetAwaiter().GetResult();
             _roomPending = new Queue<RoomBytes>(loaded.Images);
             _privateCandidates = loaded.PrivateFiles;
+            _corridorCandidates = loaded.CorridorFiles;
             if (loaded.Error != null) Plugin.Log.LogWarning($"[scenery] private room pack: {loaded.Error}; using distributed room scenes");
             _roomLoading = null;
         }
@@ -132,7 +139,7 @@ internal static class RegionSceneryArt
             if (!texture.LoadImage(image.Data, markNonReadable: true) || texture.width > 4096 || texture.height > 2048)
                 throw new InvalidDataException("invalid or oversized room image");
             Rooms.Add(image.FileName, new RoomTexture { Texture = texture, ReadyAt = Time.unscaledTime });
-            Plugin.Log.LogInfo($"[scenery] {image.FileName}: generated room texture ready ({texture.width}x{texture.height})");
+            Plugin.Log.LogInfo($"[scenery] {image.FileName}: generated panorama ready ({texture.width}x{texture.height})");
         }
         catch (Exception e)
         {
@@ -145,9 +152,12 @@ internal static class RegionSceneryArt
             {
                 // Adopt a completed set once; skipped/broken files cannot shift room choices on later frames.
                 _privateVariants = _privateCandidates.Where(Rooms.ContainsKey).ToArray();
+                _corridorVariants = _corridorCandidates.Where(Rooms.ContainsKey).ToArray();
                 _privateReadyAt = Time.unscaledTime;
                 if (_privateVariants.Count > 0)
                     Plugin.Log.LogInfo($"[scenery] {_region}: {_privateVariants.Count} private arena extension scenes ready");
+                if (_corridorVariants.Count > 0)
+                    Plugin.Log.LogInfo($"[scenery] {_region}: {_corridorVariants.Count} private corridor scenes ready");
             }
         }
     }
@@ -155,9 +165,11 @@ internal static class RegionSceneryArt
     public static RoomSceneryChoice RoomChoice(RegionalScenery plan, int seed, int roomId) =>
         plan.RoomBackground(seed, roomId, _region == plan.Region && _privateVariants.Count > 0 ? _privateVariants : plan.RoomBackgrounds);
     public static bool PrivateRoom(string fileName) => fileName != null && _privateVariants.Contains(fileName);
+    public static RoomSceneryChoice CorridorChoice(RegionalScenery plan, int seed, int corridorId) =>
+        plan.CorridorBackground(seed, corridorId, _region == plan.Region ? _corridorVariants : Array.Empty<string>());
     public static Texture2D RoomTextureFor(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image) ? image.Texture : null;
     public static float RoomAlpha(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image)
-        ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((Time.unscaledTime - (PrivateRoom(fileName)
+        ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((Time.unscaledTime - (PrivateRoom(fileName) || _corridorVariants.Contains(fileName)
             ? Mathf.Max(image.ReadyAt, _privateReadyAt) : image.ReadyAt)) / 0.35f)) : 0;
 
     public static void Clear()
@@ -171,6 +183,7 @@ internal static class RegionSceneryArt
         _roomLoading = null;
         _roomPending = null;
         _privateCandidates = _privateVariants = Array.Empty<string>();
+        _corridorCandidates = _corridorVariants = Array.Empty<string>();
         _privateReadyAt = -1;
         _region = null;
         _failed = false;

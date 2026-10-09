@@ -23,6 +23,10 @@ public sealed class RegionalScenery
     /// <summary>Stable after reload/revisit, without consuming expedition RNG; consecutive room IDs get different scenes.</summary>
     public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId) => RoomBackground(expeditionSeed, roomId, RoomBackgrounds);
 
+    /// <summary>One continuous scene per hallway, independent of rooms, heading, tile and gameplay RNG.</summary>
+    public RoomSceneryChoice CorridorBackground(int expeditionSeed, int corridorId, IReadOnlyList<string> variants) =>
+        RoomBackground(unchecked(expeditionSeed ^ 0x43A91D27), corridorId, variants);
+
     public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId, IReadOnlyList<string> variants)
     {
         if (roomId < 0 || variants == null || variants.Count == 0) return null;
