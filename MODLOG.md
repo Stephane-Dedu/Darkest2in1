@@ -3736,3 +3736,38 @@ Forced normal Release Rebuild/deployment with DD2 stopped; no harness or save ch
   corpse handling using installed/native/Unity evidence. Keep unresolved encounter policies open.
 - Preserve Very Rare reward confirmation, remaining reward questions, region switch and Q04 native
   Back/reopen acceptance. Check fresh usage at this boundary and reserve finalization headroom by95%.
+
+## Round180: bounded once-per-attack Necromancer summons
+
+Round179 pushed ata82e261. Connected prepared enemy summons to native EventSkillFinalizeResults,
+which fires once after the full result, so multiple targets/hits/misses do not multiply attempts.
+Validate every candidate before consuming DD2 SUMMON RNG; spend a roll on a full formation as native
+DD1 does. Queue exactly one front actor with removeAfterProcess, never defer it to a later opening.
+Reject loot-bearing summon contracts; generated classes inherit no stand-in loot. Post-native team
+creation adds an exact-GUID sprite and restarts bounded binding without clearing party presentation.
+
+All878 Core +125 UI =1003 tests and Release pass. Native temporary estate2 probe PID18404 let the
+boss perform real attacks while heroes passed through the native EventBattlePass. Formation grew
+1->2->3->4, front placement verified in actor snapshots; next attack logged attempt spent/0 free
+ranks and no fifth actor. Screenshot03 shows all skeletons plus retained DD1 hero sprites during
+all-target stress. No exceptions found. Fixed missing Core.Expedition using before launching.
+
+Corpse_A.can_be_summon_rank and Unity AvailableSummonSpace establish corpse capacity as a following
+gap; this slice checks genuinely free ranks. Native zero add-to-turn-order means next-round timing,
+consistent with Unity's absent initiative list but not yet direct-native DD1 acceptance. Death-chain
+metadata exists in DD2 and may supply linked skeleton death after confirming DD1's base-class rule.
+
+Stopped exactPID18404/waited exit, captured private round180 logs/screenshots, restored estate2
+main/.bak/DebugKeys/Driver and verified all hashes, then forced normal Release Rebuild/deploy.
+No live curio/controller is enabled and no temporary source/save remains.
+
+## Status 2026-10-10: round180 native summons verified in isolation
+
+- Round179 pushed. Round180 bounded summons/dynamic sprites and all1003 tests/Release pass;
+  commit/push next. Complete memory still disabled pending corpse/death/reward/routing coverage.
+- DD2 stopped, estate2 main/.bak and source probes restored/hash-matched. No pending save restore,
+  harness, game/test/build or analysis job. Confirm normal DLL deployment hashes before committing.
+- Next O3: native DD1 life-link consumer and corpse replacement/initiative audit; connect exact
+  supported behavior without broadening into unsupported bosses. Reward identity/equipment follows.
+- Keep owner Very Rare confirmation, open reward/retreat policies, region switch and Q04 acceptance.
+  Check usage at this boundary; retain enough headroom for clean finalization before95%.

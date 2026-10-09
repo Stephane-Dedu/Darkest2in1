@@ -68,7 +68,7 @@ internal static class Dd1EnemyData
                 foreach (string effectName in unmapped)
                 {
                     if (!Dd1SingleSummon.TryRead(session.Content.Effects.Get(effectName), out var summon, out _)
-                        || candidate.Summons.ContainsKey(skillId)) return false;
+                        || summon.CanSpawnLoot || candidate.Summons.ContainsKey(skillId)) return false;
                     candidate.Summons[skillId] = summon;
                 }
                 var skillResource = Singleton<ResourceDatabaseSkills>.Instance.GetResource(baseSkill);

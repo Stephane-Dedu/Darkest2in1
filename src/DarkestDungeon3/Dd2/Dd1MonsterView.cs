@@ -136,6 +136,22 @@ internal static class Dd1MonsterView
         Plugin.Log.LogInfo($"[dd1art] {Line.Count} DD1 monsters to draw: {string.Join(", ", Line.Select(m => m.Dd1 + " as " + m.Dd2Class))}");
     }
 
+    /// <summary>Add a newly created prepared enemy without clearing existing enemies or hero presentation.</summary>
+    internal static void AddPreparedEnemy(uint guid, string actorId)
+    {
+        var entry = Dd1EnemyData.Get(actorId);
+        if (guid == 0 || entry == null || Line.Count == 0 || Line.Any(m => m.Guid == guid)) return;
+        var m = new Monster { Dd1 = entry.Kit.Id, Family = entry.Kit.Family, Tier = entry.Kit.Tier, Dd2Class = actorId, Guid = guid };
+        if (Load(m, "combat") == null) return;
+        ReadArt(m);
+        Line.Add(m);
+        var lore = Session.Current?.Lore;
+        if (lore != null && lore.MonsterNames.TryGetValue(m.Dd1, out var name)) Names[actorId] = name;
+        _bound = false;
+        BindPoll.Reset();
+        Listen();
+    }
+
     /// <summary>
     /// Add memory hero sprites after preparing enemies. All requested rigs must exist before changing the
     /// presentation. Exact actor GUIDs bind players; this path never calls MapSkills or enemy naming/AI.
@@ -334,7 +350,8 @@ internal static class Dd1MonsterView
             if (m.Actor != null) { found++; continue; }
             var actor = actors.FirstOrDefault(a => !used.Contains(a) && Line.All(o => o.Actor != a)
                 && (m.HeroArt != null ? party.Contains(a.GetActorGuid()) && a.GetActorGuid() == m.Guid
-                                     : !party.Contains(a.GetActorGuid()) && a.ActorInstance.ActorDataClass?.Id == m.Dd2Class));
+                                     : !party.Contains(a.GetActorGuid()) && a.ActorInstance.ActorDataClass?.Id == m.Dd2Class
+                                       && (m.Guid == 0 || a.GetActorGuid() == m.Guid)));
             if (actor == null) continue;
             used.Add(actor);
             m.Actor = actor;

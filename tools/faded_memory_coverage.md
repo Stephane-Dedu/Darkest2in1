@@ -150,3 +150,24 @@ life_link.base_class=necromancer, corpse and death rules must be connected befor
 Eleven cases bring the suite to1003 passing tests. The temporary probe and estate2 main/.bak were
 restored and hash-checked after exit; normal Release was rebuilt/deployed with the game stopped.
 Private evidence is under rea-workbench/evidence/round179. No normal caller exposes the factory yet.
+
+## Native summon bridge: round180
+
+Prepared enemy skills now use DD2's once-per-result finalization, independent of target count or hit
+results. Candidate coverage is checked before RNG; the SUMMON channel rolls from the full installed
+pool, including on a full formation. A successful attempt queues one front actor, removeAfterProcess,
+without a deferred spawn. The factory rejects loot-bearing summons rather than ignoring that flag.
+Fresh classes have no inherited native loot. Exact created GUIDs add sprites without clearing the
+existing party/enemy presentation. No normal encounter registers/activates these enemies yet.
+
+Private native estate2 probe PID18404 starts with one boss; real attacks grow the enemy formation
+1->2->3->4, with new skeletons at position0 and DD1 hero sprites retained. The following attack spends
+its attempt with0 free ranks and creates no fifth actor. Screenshot03 shows all four enemies during
+the all-target stress attack. No exceptions found. All1003 tests and Release pass; estate2 main/.bak
+and probe sources are restored/hash-matched, normal Release rebuilt/deployed with the game stopped.
+
+Corpse replacement is deliberately still unimplemented here. Installed corpse_A.can_be_summon_rank
+and Unity AvailableSummonSpace confirm that corpses can supply ranks, unlike the current free-rank
+check. Zero native add-to-turn-order uses next-round timing; Unity's absent summon initiative field
+also selects no initiative roll, but exact native DD1 timing remains to confirm. Actual miss, retreat,
+reload, linked deaths and corpse behavior need acceptance before enabling the complete encounter.
