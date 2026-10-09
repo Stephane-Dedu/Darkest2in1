@@ -22,6 +22,8 @@ public sealed class ExpeditionState
     public CrawlEvent PendingEncounter;
     /// <summary>Resolved native fight and pre-fight party condition, retained until its outcome is known.</summary>
     public FightCheckpoint FightCheckpoint;
+    /// <summary>Optional Faded Memory identity/return checkpoint; absent in existing expeditions.</summary>
+    public FadedMemoryEncounter FadedMemory;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>

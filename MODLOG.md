@@ -3592,3 +3592,46 @@ IMainInstaller shutdown exception after the interaction; the final chest check l
   means the owner-approved very_rare DD1 pool. Remaining Ancestor/unique-item and defeat/retreat rules
   stay open in tools/faded_memory_design.md. Keep the region switch. Q04 native Back/reopen remains
   pending separately; its shared drag obstruction is repaired, but cancellation has not been observed.
+
+## Round176: Faded Memory coverage and saved return position
+
+Started O3's first bounded slice. Audited existing boss translation, hero art and DD1 reward sources;
+tools/faded_memory_coverage.md records the findings and next adapters. Private audit scanned installed
+DD1 monster/mash data and DD2 hero-tagged classes, retaining input hashes outside Git. It found 80
+boss-tagged records across 27 families (including companions/props), 15 DD2 hero IDs and 13 namesake
+DD1 art sets. Duelist/Runaway lack namesake art. Base reward files have 24 very_rare, 9 ancestral and
+5 ancestral_shambler entries; these counts do not settle DLC/uniqueness/eligibility policy.
+
+Current Driver excludes bosses from DD1 translation, while zones.json substitutes DD2 boss encounters.
+The existing skill mapper drops summon/capture/control contracts and may omit excess skills. Private
+native EffectTarget::GetTypeFromId1404e6c00 and installed NecroSummon 1 corroborate summon candidate,
+weight, count and no-loot fields. A native mechanic has not been implemented merely by finding them.
+The apprentice Necromancer is the first adapter candidate; all enabled boss destinations still need
+coverage before live placement. Dd2Catalog rarity translation also returns DD2, not DD1, trinkets.
+
+Added optional ExpeditionState.FadedMemory identity/presentation data and MemoryReturnPosition.
+Capture/restore validate the source quest, dungeon, seed and coordinates. Restore changes location
+only, preserving combat HP/stress/deaths, current inventory, loadout, quest state and RNG. It includes
+secret-detour and previous-entrance coordinates without assuming that a remembered entrance is the
+current room's corridor (ordinary travel retains it). No runtime caller exposes/enters a memory yet.
+
+Twenty-one cases use real Crawl travel and save reconstruction for room, forward/reverse hall and
+secret room, then verify retained consequences/loadout and usable secret exit. Foreign/invalid
+checkpoints reject without mutation; legacy saves keep the same route/JSON and no new memory.
+Fixed a test's incorrect HeroRecord.Skills name to EquippedSkills before running the cases. All
+813 Core +125 UI =938 tests and Release pass. Native memory visuals/transitions remain unverified;
+the feature is deliberately not exposed before boss, hero, reward and return routing are complete.
+DD2 remained stopped. No new save access/game launch; both deployed hashes match. Private audit
+and native catalogue are at rea-workbench/evidence/round176 and do not enter Git.
+
+## Status 2026-10-10: round176 memory checkpoint ready
+
+- Round175 is committed/pushed at a946c06. Round176 adds saved return-position groundwork and
+  coverage notes; all 938 tests/Release pass. Commit/push this slice before continuing O3.
+- DD2 stopped, normal source/deployment, estate 2 already restored with matching hashes in round175.
+  No harness, save restore, test/build or native analysis job remains. No playable memory curio yet.
+- Next: explicit boss adapter, beginning with Necromancer summon/skill/AI coverage, and DD1 hero
+  rendering. DD1 reward identity/effects and guaranteed reachable placement remain separate slices.
+  Use tools/faded_memory_coverage.md. Preserve very_rare confirmation and remaining policy questions.
+  Keep the region switch and record native Q04 Back/reopen as pending.
+- Check fresh usage at this boundary; stop with a clean handoff before approximately95%.

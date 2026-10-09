@@ -4,6 +4,10 @@ Owner-defined feature rules, 2026-10-09. This supersedes the earlier O3 "old mem
 [overhaul_roadmap.md](overhaul_roadmap.md). The rules below are recorded for implementation;
 neither feature is enabled by this document.
 
+Implementation evidence is tracked in [faded_memory_coverage.md](faded_memory_coverage.md).
+Round176 adds the optional saved encounter identity and validated return-position checkpoint;
+placement, battle routing, hero rendering and DD1 reward adapters are not yet enabled.
+
 Owner follow-up, 2026-10-09: "Start" selects these features for implementation. Faded Memory is
 the next feature track after the quota reset, followed by Haunting Memories. Begin with the
 boss/zone and sprite coverage audit and a saved encounter contract, then one complete playable
