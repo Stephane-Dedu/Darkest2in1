@@ -3635,3 +3635,31 @@ and native catalogue are at rea-workbench/evidence/round176 and do not enter Git
   Use tools/faded_memory_coverage.md. Preserve very_rare confirmation and remaining policy questions.
   Keep the region switch and record native Q04 Back/reopen as pending.
 - Check fresh usage at this boundary; stop with a clean handoff before approximately95%.
+
+## Round177: native Necromancer summon attempt contract
+
+Round176 was committed/pushed at fafcc9e. Followed the installed NecroSummon 1/2/3 effects through
+private DD1 EffectApplyInternal@1404bc4f0. Candidate weights roll cumulatively before capacity is
+checked; even an oversized/full-board failure spends the attempt. Unity's retry-on-oversize behavior
+differs. DD2's native summon queue can retain an unplaced entry, requiring bounded processing in the
+future bridge. Team.OnQueueSummon can replace actors; DD1 corpse eligibility and timing remain open.
+
+Added Dd1SingleSummon for the proven single unconditional performer effect. It reads weighted pools,
+the no-loot flag and once/on-hit/on-miss contract, plans front-rank placement, spends RNG before the
+capacity decision and never rerolls a smaller candidate. Unsupported fields/rules and missing actor
+coverage fail closed. It does not enqueue actors, determine corpse capacity or enable a boss.
+
+Thirty regressions use all installed Necromancer tiers/skills plus synthetic boundary/invalid cases.
+All 843 Core +125 UI =968 tests and Release pass (three existing plugin warnings). No save access,
+game launch or Ghidra job. Native summoning remains unverified, as does the complete memory flow.
+
+## Status 2026-10-10: round177 summon groundwork verified
+
+- Round175 input repairs and round176 memory checkpoint are pushed. Round177 bounded summon rules
+  pass all968 tests/Release; commit/push before the next O3 slice. No live memory curio/boss yet.
+- DD2 stopped; normal deployment only. Estate2/DebugKeys cleanup/hash restoration was completed
+  in round175. No pending save restore/harness or native analysis job. Keep protected estates untouched.
+- Continue with DD1 hero sprite presentation and explicit boss runtime dependencies, using
+  tools/faded_memory_coverage.md. Very Rare reward confirmation stands; other reward/retreat policies
+  remain open. Preserve region switch. Q04 native Back/reopen remains a separate acceptance check.
+- Check usage at this boundary and retain finalization headroom before95%.

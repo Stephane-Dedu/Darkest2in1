@@ -89,3 +89,26 @@ Private audit output and input hashes are at
 `C:/Users/Piral/rea-workbench/evidence/round176/memory-coverage.json`. It includes 80 boss-tagged
 records across 27 families, including companions/props; that is not 80 distinct boss encounters.
 Raw catalogue and analysis evidence stay outside Git.
+
+## Single summon contract: round177
+
+`Dd1SingleSummon` supports the Necromancer's explicit single performer effect, once on hit or miss,
+with weighted candidates and its summon-loot flag. It rejects additional fields, multiple attempts,
+conditional flags, malformed weights and missing actor coverage. It does not claim to cover summons
+with limits, specified ranks, captures or custom initiative rules.
+
+Private native `EffectApplyInternal@1404bc4f0` builds its candidate pool, rolls cumulatively at
+`1404bee20`, then checks the selected class against usable ranks at `1404bf13e`; the attempt counter
+advances at `1404bf0e0` even when the class cannot fit. The tested helper therefore spends a roll on
+a full formation and never rerolls an oversized selection. Unity's SummonMonstersEffect instead
+removes oversized candidates and retries, so it is not the authority for that edge case.
+
+DD2's native SummonController/EventSummonQueueActor supplies front placement and actor creation.
+Unplaced queue entries can persist unless removeAfterProcess is true. Team.OnQueueSummon replaces
+eligible actors before processing, so a bridge must still establish DD1 corpse eligibility, skill
+completion timing, dynamic sprite binding, no-loot handling and turn-order behavior. The helper
+accepts usable rank capacity from that future bridge; it does not infer corpse rules.
+
+Thirty tests check all three installed tiers and every Necromancer skill, selection boundaries,
+capacity failure/RNG consumption, fresh pools and fail-closed unsupported effects. No runtime caller
+or playable memory boss is added in this round. Native summons remain unverified.
