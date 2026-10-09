@@ -1,8 +1,9 @@
 # Future systems and content
 
 Owner ideas, 2026-10-09. Keep each track, refine it independently, and implement a bounded
-version once its rules and acceptance cases are clear. These are proposals, except the
-requested item mapping, which is research tooling. The main quest-flow backlog in
+version once its rules and acceptance cases are clear. Most tracks are proposals; O3 and O6
+have owner-defined rules in the linked design, and the item mapping is research tooling.
+Gameplay implementation remains pending. The main quest-flow backlog in
 [quest_parity_map.md](quest_parity_map.md) remains active.
 
 ## Tracks
@@ -11,9 +12,10 @@ requested item mapping, which is research tooling. The main quest-flow backlog i
 |---|---|---|---|
 | O1 | DD2 supplies, coherent generated curios and shopkeeper stock | Item definitions mapped; gameplay design open | One item bought in town, carried into a DD2 zone, spent on one new curio, saved and restored correctly |
 | O2 | DD2 inn items become camping items, with a limit of 1 | Proposal; scope of the limit is open | One item with explicit targeting, duration and a persisted camp-use budget |
-| O3 | An "old memory" curio enters DD1 graphics, changes hero visuals, leads to a DD1 boss and rewards a DD1 trinket | Proposal | One complete enter/fight/reward/return encounter with one boss and a supported party |
+| O3 | Faded Memory: one curio per boss quest, hand interaction, DD1 boss/zone and hero sprites with unchanged skills; one random Legendary plus one random Ancestor DD1 item on victory | Owner-defined; reward-pool mapping and encounter policies open | One complete enter/fight/two-reward/return encounter with one boss and a supported party |
 | O4 | The Mountain takes the final Darkest Dungeon region's role, with predetermined layouts, void enemies and a confession boss for each quest | Proposal | One authored quest with its own fixed route, corridor/room encounters and confession boss |
 | O5 | Bring back stun in a more DD1-like form | Balance question | Audit existing stun/daze skills, requirements and resistances before changing access |
+| O6 | Haunting Memories event: a random area quest becomes a DD1 dungeon with current expedition mechanics and DD1 trinket loot; later replaces manual region switching | Owner-defined; scheduling and selection rules open | One persisted event quest with destination, UI and loot policy |
 
 O1 supplies the identity and inventory work needed by O2. O3 also depends on the DD1 trinket
 adapter and a distinct encounter-return checkpoint. O4 can reuse authored plot-map support.
@@ -78,35 +80,12 @@ mod has no inn between rooms. Resetting on load must never grant another use.
 Acceptance: target eligibility, multi-target effects, rejection without consuming an item,
 one successful budget charge, effects across battle handoff, reload, camp exit and ambush.
 
-## O3: old memory encounter
+## O3 and O6: Faded Memory and Haunting Memories
 
-The intended experience is a brief return to DD1: a distinct curio, a transition into old art,
-DD1 hero appearances, a recognizable DD1 boss, a DD1 trinket reward and return to the expedition.
-The title "old memory" is a working name, separate from native DD2 Memory items.
-
-Proposed flow: curio invitation → saved entry checkpoint → DD1 presentation → boss encounter →
-reward/defeat handling → restore regional presentation at the original curio → resume travel.
-Record the originating quest, room/corridor coordinate, heading and encounter state. Preserve
-combat consequences such as HP, stress and deaths; restoring presentation must not restore
-pre-fight health or duplicate rewards. The curio needs a consumed/in-progress/completed state.
-
-Audit local DD1 assets and our existing renderers first. A DD1 portrait alone does not deliver
-DD1 battle visuals: idle/attack/hit/death animations, facing, formation, hit areas, effects and
-camera framing all need coverage. Define a counterpart for each DD2 hero; classes without a
-DD1 equivalent need an explicit art plan. Keep imported/generated art private.
-
-Native DD2 remains the combat engine by the current project direction. A DD1 boss therefore
-needs its mechanics translated and tested in that engine, not just a renamed DD2 enemy.
-The current region boss substitutions are not proof of a faithful DD1 boss implementation.
-Start with one boss and one trinket whose supported effects can be described accurately.
-
-Open rules: entry cost/frequency, boss choice and difficulty, refusal/retreat behaviour, what
-happens after defeat, repeatability and hero counterpart coverage. Do not choose all of these
-implicitly while implementing the transition.
-
-Acceptance: enter once, reject overlapping events, full DD1 presentation in the encounter,
-correct boss mechanics, one reward even with a full inventory, reload at every boundary,
-retreat/wipe outcomes and complete visual restoration on return.
+The owner's detailed rules, proposed original prose, presentation contract, reward evidence,
+acceptance cases and open decisions are in [faded_memory_design.md](faded_memory_design.md).
+Use that specification for either feature. It replaces the earlier single-reward O3 sketch.
+Keep the manual DD1/DD2 switch until the later special-feature transition is complete.
 
 ## O4: Mountain campaign finale
 

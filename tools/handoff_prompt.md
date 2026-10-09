@@ -9,6 +9,8 @@ Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/tr
 For the owner's memory-curio, Mountain, camping-item, stun or DD2 supply/curio proposals, read
 tools/overhaul_roadmap.md. Item research starts at tools/dd2_item_mapping.md and its private catalogue;
 retain native facts separately from proposed interactions. These tracks are not enabled gameplay.
+Faded Memory and Haunting Memories now have owner-defined rules in tools/faded_memory_design.md.
+Read it for their placement, sprite-only transformation, two victory rewards and future switch retirement.
 
 ## Start
 1. In C:\Users\Piral\DarkestDungeon3\mod: `git checkout claude/practical-wright-hicri0` and `git pull --rebase`.

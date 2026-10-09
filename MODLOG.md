@@ -3389,3 +3389,45 @@ Only original tooling, synthetic fixtures and authored documentation enter Git.
   silently settle the camping cap, memory defeat/repeat rules, confession sequence or stun balance.
 - Launches are authorized; use estate2 only with backup/restore/hash checks. The normal picker reads
   protected slots, so avoid it in automation. No protected estate or abandoned project access this round.
+
+## Design follow-up 2026-10-09: Faded Memory and Haunting Memories
+
+Owner refined O3: generated DD1-looking curio named Faded Memory, guaranteed once on every boss quest.
+Hand interaction enters a DD1 boss fight in its corresponding DD1 zone. Change only hero sprites;
+retain current skills/stats and native DD2 combat. Boss kill drops two items: one random Legendary
+DD1 item and one random Ancestor DD1 item, such as Ancestor's Pistol. This supersedes the earlier
+single-trinket sketch and its open placement/entry-method questions.
+
+Owner also added Haunting Memories: a special event makes a random quest in an area a DD1 dungeon,
+using our current expedition mechanics and DD1 trinket loot. Later these special features replace
+the manual DD1/DD2 region switch. Keep that switch until the features and preservation/migration
+of existing progress are ready. The event is a full quest; the curio is a separate boss encounter.
+
+Specification: tools/faded_memory_design.md. Proposed original hand-action copy: "Confront the past."
+Recorded art/visual boundaries, checkpoint/return and two-reward persistence requirements, event
+selection persistence and acceptance cases. Ordinary event quests do not inherit boss-curio rewards;
+automatic hero-sprite conversion for full event quests was not specified. Defeat/retreat/replay rules,
+event scheduling, boss/visual mappings and exact reward pools still need refinement.
+
+Installed DD1 base.rarities.trinkets.json has very_rare, ancestral and ancestral_shambler, not a
+legendary rarity ID. base.entries.trinkets.json lists ancestors_pistol as ancestral. Retain the owner's
+Legendary label; mapping it to very_rare is a proposal, not a silently chosen rule. Inclusion of the
+Shambler's separate ancestral pool and duplicate/unique ownership handling remain open.
+
+Updated roadmap, PARITY, CLAUDE and handoff pointers so later sessions use the refined rules. This
+follow-up changes Markdown only: no art generated, runtime code changed, game launched or saves read.
+Checked documentation links and diff; previous round172's 908-test/Release result remains the last
+code validation, not a new test run. Main-flow implementation round173 remains available for Q04.
+
+## Status 2026-10-09: memory features specified, implementation pending
+
+- Round172 is committed/pushed atbfeb315. Commit/push this Markdown-only design refinement separately.
+  Read tools/faded_memory_design.md for Faded Memory/O3 and Haunting Memories/O6. Their agreed rules
+  supersede earlier idea sketches; unresolved choices are listed there. Neither feature is enabled.
+- Last code validation is908 passing tests and Release from round172. No new build/deploy/native test
+  was needed for the documentation change. No process launched, save read or restore pending this turn.
+- Session usage84% at finalization; check fresh usage before further work and retain headroom before95%.
+  No new quota pause. Existing hourly automation reads the latest Status and roadmap.
+- Next main-flow implementation candidate remains round173/Q04 provisioning-cart cancellation, then
+  Q03 starting supplies. Owner is detailing future tracks; retain these specifications and refine each
+  before implementation. Keep the region swap control until special-feature access and migration work.

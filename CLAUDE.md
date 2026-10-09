@@ -9,6 +9,9 @@ DD2's Sprawl, Foetor, Tangle and Shroud are the default campaign regions. Keep D
 region toggles. Retain DD1 expedition systems and DD2 combat; choose exploration/fight backgrounds for coherent,
 responsive UI and transitions. Preserve existing campaign progress and explicit region choices. This supersedes
 DD1-first region defaults; save-protection rules still apply.
+Owner refinement, 2026-10-09: Faded Memory and the Haunting Memories event will provide special DD1
+encounters/destinations. See `tools/faded_memory_design.md` before implementing either. Retire the region
+swap button later, once those features and progress migration are ready; retain the current switch for now.
 Owner priority, 2026-10-08: map the complete base-game DD1 quest lifecycle through reverse engineering, then implement
 its quest systems in DD2. This supersedes waiting for R1-R10 choices. Use `tools/quest_parity_map.md` for native
 contracts, implementation seams and acceptance scenarios. Finish the interrupted private native map with conservative
