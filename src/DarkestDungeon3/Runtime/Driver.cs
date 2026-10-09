@@ -729,7 +729,12 @@ internal sealed class Driver : MonoBehaviour
 
     public void SkipCurio() => Crawl.SkipCurio();
 
-    public void MakeCamp() { Dd1Audio.Play("/general/map/camp_start"); Handle(Crawl.MakeCamp()); }
+    public void MakeCamp()
+    {
+        if (!Crawl.CanCamp) return;
+        Dd1Audio.Play("/general/map/camp_start");
+        Handle(Crawl.MakeCamp());
+    }
     public bool EatMeal(Meal meal)
     {
         if (!Crawl.EatMeal(meal)) return false;
@@ -746,7 +751,12 @@ internal sealed class Driver : MonoBehaviour
     {
         if (Crawl?.DismissSpoils(report) == true) S.Persist();
     }
-    public void BreakCamp() { Dd1Audio.Play("/general/map/camp_end"); Handle(Crawl.BreakCamp()); }
+    public void BreakCamp()
+    {
+        if (!Crawl.CanContinueCamp) return;
+        Dd1Audio.Play("/general/map/camp_end");
+        Handle(Crawl.BreakCamp());
+    }
 
     /// <summary>Leave the dungeon: after the quest is done, or as a retreat before it is.</summary>
     public void Leave()

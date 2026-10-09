@@ -3215,3 +3215,31 @@ delivery remains [?]. No game launch, protected saves, abandoned project or bina
   separate; then return to Hamlet/quest-selection preparation gaps in the main lifecycle map.
 - Session 50%, weekly 23%, ordinary available, reset1791521699. Continue toward roughly95%, leave a clean
   quota handoff and resume via the existing automation. DD2 launch remains unauthorized; full parity is open.
+
+## Round 169: camp loot completes before the next action
+
+Native camp controller1406fbb90 waits for readiness140769e20 between stages; Skills1406fdd70 changes its
+controls while raid work is pending. The exact pending pointer type was not identified as loot. Unity's
+ExecuteCampEffect(Loot) explicitly awaits LootEvent before the skill loop accepts another choice. Existing
+Core allowed another skill to replace PendingSpoils or rest to hide it behind an ambush.
+
+Shared pending-event detection now backs CanNavigate and CanContinueCamp. Meals, skills and rest reject
+pending results/encounters without cost, effects or RNG. Driver avoids camp transition sounds on rejection;
+the rest button follows the same guard. Saved curio results now precede camp controls, allowing older
+overlapping state to be dismissed. Collection and optional-loot passing remain available.
+
+Nine cases reproduced the bug; eleven new cases cover actual pilfer/supply/trinket_scrounge, full/free packs,
+saved reconstruction, report identity/state preservation, collecting then closing before another skill,
+optional-loot pass and older curio/camp overlap through meal/rest. All 779 Core + 100 UI tests and Release
+pass; DD2 stopped, both deployed hashes match. Private TRX under rea-workbench/evidence/round169. Native
+camp scroll/button/audio verification remains [?]. No launch/protected-save/abandoned-project access.
+
+## Status 2026-10-09: round 169 complete, explicit exit gates next
+
+- Round168 committed/pushed at a0831a8; commit/push round169. All 879 tests and Release pass; stopped-game
+  hashes match. Native event/camp interactions remain unverified. No jobs, workers or restores pending.
+- Next round170: Q18 explicit return/abandon must wait for pending events and camp/encounter completion;
+  inspect native completion and retreat helpers. Preserve completed-quest exploration, optional-loot passing,
+  no-retreat policy and forced outcomes. Then prioritize provision/quest-selection gaps.
+- Session 75%, weekly 27%, ordinary available, reset1791521699. Reserve time for a clean cutoff around95%.
+  Existing automation resumes after reset. DD2 launch remains unauthorized; full parity remains open.

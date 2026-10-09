@@ -187,10 +187,11 @@ public sealed class Crawl
     public Corridor CurrentCorridor => State.CorridorId >= 0 ? Map.Corridor(State.CorridorId) : null;
     public HallTile CurrentTile => !State.InRoom && CurrentCorridor != null ? CurrentCorridor.Tiles[State.TileIndex] : null;
 
+    private bool HasPendingEvent => State.PendingCurio != null || State.PendingSpoils != null || State.PendingEncounter != null;
+
     /// <summary>Traversal waits for the current event, loot, camp or encounter to finish.
     /// Destination obstacles are separate: the party may still back away from an unopened obstacle or trap.</summary>
-    public bool CanNavigate => !State.Ended && State.PendingCurio == null && State.PendingSpoils == null
-        && State.Camp == null && State.PendingEncounter == null;
+    public bool CanNavigate => !State.Ended && !HasPendingEvent && State.Camp == null;
 
     /// <summary>A fight or obstacle the party has to deal with before it can go on.</summary>
     public bool IsBlocked =>
@@ -600,6 +601,9 @@ public sealed class Crawl
     /// <summary>DD1 camps need firewood and a safe (cleared) room.</summary>
     public bool CanCamp => CanNavigate && State.InRoom && !IsBlocked && State.Pack.Count(Supply.Firewood) > 0;
 
+    /// <summary>Camp controls wait until the current result or encounter has finished.</summary>
+    public bool CanContinueCamp => !State.Ended && State.Camp != null && !HasPendingEvent;
+
     public List<CrawlEvent> MakeCamp()
     {
         _events.Clear();
@@ -617,7 +621,7 @@ public sealed class Crawl
 
     public bool EatMeal(Meal meal)
     {
-        if (State.Ended || State.Camp == null || State.Camp.Ate) return false;
+        if (!CanContinueCamp || State.Camp.Ate) return false;
         if (!State.Pack.TryUse(Supply.Food, MealCost(meal)) && MealCost(meal) > 0) return false;
         var (_, heal, stress) = _rules.Meals[meal];
         var rng = NextRng();
@@ -637,6 +641,7 @@ public sealed class Crawl
         var camp = State.Camp;
         var skill = _content?.Camping?.Get(skillId);
         if (camp == null) return "Not camping.";
+        if (!CanContinueCamp) return "Finish the current event first.";
         if (skill == null) return "Unknown skill.";
         if (!_party.Alive.Contains(heroId)) return "Dead.";
         if (!State.CampSkills.TryGetValue(heroId, out var known) || !known.Contains(skillId)) return "Not known.";
@@ -718,7 +723,7 @@ public sealed class Crawl
     public List<CrawlEvent> BreakCamp()
     {
         _events.Clear();
-        if (State.Ended || State.Camp == null) return Blocked();
+        if (!CanContinueCamp) return Blocked();
         var rng = NextRng();
         float ambush = Math.Max(0f, _rules.AmbushCampChance - State.Camp.AmbushReduction);
         if (!State.Camp.Ate) foreach (var hero in _party.Alive) StressDd1(hero, _rules.Meals[Meal.None].StressDd1, rng, "no meal");

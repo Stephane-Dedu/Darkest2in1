@@ -72,8 +72,8 @@ internal sealed class CrawlUi
             return;
         }
         if (DrawSpoils(crawl)) UiRoot.ModalOpen = true;
-        else if (exp.Camp != null) DrawCamp(crawl, exp);
         else if (DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
+        else if (exp.Camp != null) DrawCamp(crawl, exp);
         else { DrawPrompt(crawl, exp); DrawSecretControls(crawl, exp); }
         Gui.DrawAnnouncement();
     }
@@ -997,7 +997,7 @@ internal sealed class CrawlUi
             _campSkillPending = null;    // right-click cancels the targeting
             Event.current.Use();
         }
-        if (Gui.DdButton(new Rect(CampScrollX + 100, CampScrollY + 180, 256, 44), "Rest and break camp", true, 22))
+        if (Gui.DdButton(new Rect(CampScrollX + 100, CampScrollY + 180, 256, 44), "Rest and break camp", crawl.CanContinueCamp, 22))
         {
             _campSkillPending = null;
             D.BreakCamp();
