@@ -3187,3 +3187,31 @@ at C:\Users\Piral\rea-workbench\evidence\round167.trx. No game/save/abandoned-pr
 - Session32%, weekly21%, ordinary available, reset1791521699. Continue to roughly95%, then leave a clean quota
   handoff for the existing automation. No tests/builds/workers/native jobs/restores pending. DD2 launch remains
   unauthorized; full quest parity is not complete.
+
+## Round 168: environmental actions respect the active event
+
+Native InteractWithProp140768320 requires a reset overlay; trap/obstacle handler140768820 sets the same
+overlay and phase3. Unity CurioEvent/TrapEvent disables movement/environment controls while processing the
+event. The previous required-loot guard allowed optional curio results to be replaced by another interaction,
+and direct skip/clear/disarm calls could still consume items or resolve props behind camp/loot/encounter state.
+
+InteractCurio, SkipCurio, ClearObstacle and DisarmTrap now use the existing exploration-phase guard. Collection
+and dismissal remain available, including optional loot. Thirty-two cases failed before the change; all 34
+new tests pass with saved reconstruction, exact state/RNG/actor preservation, retained report identity, empty
+results, room/hall variants, native heirloom-chest key consumption after collection/dismissal, and restored
+trap/obstacle actions. Updated the older optional-replacement expectation and quest-content survey to dismiss
+results explicitly. No new engine state or save migration.
+
+All 768 Core + 100 UI tests and Release pass; DD2 stopped and both deployed DLL hashes match. Before/after
+TRX evidence is private under C:\Users\Piral\rea-workbench\evidence\round168. Native click/drag interaction
+delivery remains [?]. No game launch, protected saves, abandoned project or binary/art additions.
+
+## Status 2026-10-09: round 168 complete, camp loot phase next
+
+- Round167 is committed/pushed at 2f0ee82; commit/push round168. All 868 tests and Release pass; stopped-game
+  DLL hashes match. Native event controls still need a permitted check. No jobs/workers/restores pending.
+- Next round169 candidate: camp loot must finish before another skill or rest can replace/hide its report.
+  Inspect native camping event ownership and Unity camping loot wait. Explicit expedition-exit gates remain
+  separate; then return to Hamlet/quest-selection preparation gaps in the main lifecycle map.
+- Session 50%, weekly 23%, ordinary available, reset1791521699. Continue toward roughly95%, leave a clean
+  quota handoff and resume via the existing automation. DD2 launch remains unauthorized; full parity is open.

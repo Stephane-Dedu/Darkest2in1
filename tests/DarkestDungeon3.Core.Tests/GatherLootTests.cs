@@ -241,7 +241,7 @@ public class GatherLootTests
     [InlineData(true, true)]
     [InlineData(false, false)]
     [InlineData(true, false)]
-    public void PendingRequiredLootGuardsNativeItemConsumptionButOptionalLootKeepsItsExistingBehavior(bool spoils, bool required)
+    public void PendingRequiredOrOptionalLootGuardsNativeItemConsumption(bool spoils, bool required)
     {
         var drop = new LootDrop { Type = required ? "quest_item" : "gold", Id = required ? "holy_relic" : null, Amount = 1 };
         var state = new ExpeditionState
@@ -257,18 +257,8 @@ public class GatherLootTests
         var crawl = new Crawl(state, new CrawlRules(), new FakeParty("h"), Content);
         string before = new SaveFile { Expedition = state }.ToJson();
         var report = crawl.InteractCurio("h", Supply.Key, out var overflow);
-        if (required)
-        {
-            Assert.Null(report);
-            Assert.Empty(overflow);
-            Assert.Equal(before, new SaveFile { Expedition = state }.ToJson());
-        }
-        else
-        {
-            Assert.NotNull(report);
-            Assert.Equal(Supply.Key, report.ItemUsed);
-            Assert.Equal(0, state.Pack.Count(Supply.Key));
-            Assert.True(state.Map.Room(0).CurioTaken);
-        }
+        Assert.Null(report);
+        Assert.Empty(overflow);
+        Assert.Equal(before, new SaveFile { Expedition = state }.ToJson());
     }
 }

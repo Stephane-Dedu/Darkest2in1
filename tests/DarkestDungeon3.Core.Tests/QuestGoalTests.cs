@@ -313,12 +313,14 @@ public class QuestGoalTests
                     foreach (var r in rooms)
                     {
                         state.RoomId = r.Id; state.CorridorId = -1; state.TileIndex = -1;
-                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        var report = crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        if (report != null) Assert.True(crawl.DismissCurio(report));
                     }
                     foreach (var (c, t) in tiles)
                     {
                         state.CorridorId = c.Id; state.TileIndex = t.Index; state.HeadingRoomId = c.RoomB;
-                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        var report = crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        if (report != null) Assert.True(crawl.DismissCurio(report));
                     }
                     if (!state.QuestComplete) problems.Add($"{where}: not complete after every quest curio ({state.GoalProgress}/{goal.Amount})");
                 }

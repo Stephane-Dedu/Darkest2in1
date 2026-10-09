@@ -41,8 +41,7 @@ public sealed class Crawl
     public CurioReport InteractCurio(string heroId, string itemId, out List<LootDrop> overflow)
     {
         overflow = new List<LootDrop>();
-        if (State.Ended || heroId == null || !_party.Alive.Contains(heroId)) return null;
-        if (!CanLeave(State.PendingCurio?.LeftBehind) || !CanLeave(State.PendingSpoils?.LeftBehind)) return null;
+        if (!CanNavigate || heroId == null || !_party.Alive.Contains(heroId)) return null;
         string curio = CurioHere;
         if (curio == null) return null;
 
@@ -176,7 +175,7 @@ public sealed class Crawl
     /// <summary>Walk past a curio without touching it.</summary>
     public void SkipCurio()
     {
-        if (State.Ended) return;
+        if (!CanNavigate) return;
         // A quest curio is never skipped for good: the quest needs it.
         if (State.InRoom) { if (CurrentRoom.CurioId != null && !CurrentRoom.IsQuestGoal) CurrentRoom.CurioTaken = true; }
         else if (CurrentTile is { Content: HallContent.Curio, IsQuestGoal: false } t) t.Resolved = true;
@@ -528,7 +527,7 @@ public sealed class Crawl
     public List<CrawlEvent> ClearObstacle()
     {
         _events.Clear();
-        if (State.Ended) return Blocked();
+        if (!CanNavigate) return Blocked();
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Obstacle || tile.Resolved) return Blocked();
 
@@ -556,7 +555,7 @@ public sealed class Crawl
     public List<CrawlEvent> DisarmTrap(string heroId = null)
     {
         _events.Clear();
-        if (State.Ended) return Blocked();
+        if (!CanNavigate) return Blocked();
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Trap || tile.Resolved) return Blocked();
         TriggerTrap(tile, scouted: true, heroId);
