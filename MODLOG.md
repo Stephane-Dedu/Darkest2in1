@@ -3243,3 +3243,31 @@ camp scroll/button/audio verification remains [?]. No launch/protected-save/aban
   no-retreat policy and forced outcomes. Then prioritize provision/quest-selection gaps.
 - Session 75%, weekly 27%, ordinary available, reset1791521699. Reserve time for a clean cutoff around95%.
   Existing automation resumes after reset. DD2 launch remains unauthorized; full parity remains open.
+
+## Round 170: explicit returns wait for event completion
+
+Native completion helper140741fb0 checks combat, camp, interaction phase and readiness140769e20. Unity
+CurioEvent and CampingEvent disable retreat during their events. CanLeaveExpedition now uses CanNavigate,
+covering optional results, camp and pending encounters as well as the existing quest retreat policy.
+Collection followed by dismissal is required before explicit return; optional loot may still be passed.
+Driver's forced wipe sets Ended independently and does not use this explicit-return guard.
+
+All eight new cases failed before the change and now pass for success/abandon, saved reconstruction,
+state preservation, report dismissal, camp/battle completion and one terminal result. Updated required-loot
+and optional-pass fixtures to close their reports. All 787 Core + 100 UI tests and Release pass; DD2 stopped,
+both deployed hashes match. Private TRX: rea-workbench/evidence/round170. Native return/abandon controls
+remain [?]. No game launch, protected-save or abandoned-project access.
+
+## Status 2026-10-09: round 170 complete, quota pause
+
+- Rounds167–169 pushed at 2f0ee82, a0831a8 and f5f1c06; commit/push round170. All 887 tests and Release pass,
+  stopped-game DLL hashes match. No tests/builds/workers/native jobs/restores pending. Native event/camp/
+  return controls and the prior corridor fix still require permitted visual checks.
+- End-of-round usage check reached97% session/31% weekly, ordinary available. Stop implementation now;
+  only finish this clean handoff. Quota pause until reported reset1791521699 (2026-10-09T04:54:59Z).
+  The existing active heartbeat resumes after reset. Reserve more headroom before the next final round.
+- Next round171 candidate: Q04 provisioning cancellation should clear the purchase cart when returning to
+  quest selection. Follow native1406d3e30 and Unity return-to-preparation; account for the mod charging only
+  on embark, rather than inventing a refund. Then address Q03 starting supplies in the preparation inventory.
+  Main-flow priorities remain in force; later progression/trinkets are deferred. No DD2 launch permission.
+  Full quest parity remains incomplete; do not mark the goal achieved.

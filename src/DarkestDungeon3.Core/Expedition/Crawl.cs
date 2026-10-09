@@ -117,9 +117,8 @@ public sealed class Crawl
     /// <summary>DD1 won't close a loot scroll that still holds a quest item.</summary>
     public static bool CanLeave(IEnumerable<LootDrop> leftBehind) => leftBehind == null || !leftBehind.Any(d => IsQuestItem(d.Key));
 
-    /// <summary>Explicit returns cannot discard required loot or abandon a no-retreat quest.</summary>
-    public bool CanLeaveExpedition => !State.Ended
-        && CanLeave(State.PendingCurio?.LeftBehind) && CanLeave(State.PendingSpoils?.LeftBehind)
+    /// <summary>Explicit returns wait for events/camp to finish and respect the quest's retreat policy.</summary>
+    public bool CanLeaveExpedition => CanNavigate
         && (State.QuestComplete || State.Quest?.CanRetreat != false);
 
     public bool TryLeave()
