@@ -16,7 +16,8 @@ namespace DarkestDungeon3.Dd2;
 /// DD1's own monsters in DD2's fights. DD2 still runs the battle with the look-alike enemies from data/monsters.json;
 /// each one's 3D model is hidden and DD1's Spine animation of the monster it stands in for is drawn in its place,
 /// posed every frame (Core's SpineSkeleton.Pose) and drawn with GL on top of the scene: the idle loop, DD1's held
-/// attack pose when it acts, the defend pose when it is hit, and its death.
+/// attack pose when it acts, the defend pose when it is hit, and its death. Memory hero sprites share this drawing
+/// path through exact player GUIDs, without any enemy skill/name/AI conversion.
 /// </summary>
 internal static class Dd1MonsterView
 {
@@ -37,10 +38,12 @@ internal static class Dd1MonsterView
         public string Family;       // skeleton_arbalist
         public char Tier;
         public string Dd2Class;
+        public Dd1HeroArt HeroArt;   // presentation only: player skills/stats/names are never converted
         public uint Guid;
         public CombatActorBhv Actor;
         public Renderer[] Renderers;
         public bool Hidden;
+        public readonly Dictionary<Renderer, bool> OriginalVisibility = new();
         public string Anim = "combat";
         public string Clip;         // the animation inside the file (combat, attack_x, defend, death)
         public float Since;
@@ -87,7 +90,7 @@ internal static class Dd1MonsterView
     internal static HashSet<string> AllowedFor(uint guid) => Line.Count == 0 ? null : ByGuid(guid)?.Allowed;
 
     /// <summary>The DD1 monster drawn over this DD2 actor (e.g. maggot_A), or null.</summary>
-    internal static string Dd1Of(uint guid) => Line.Count == 0 ? null : ByGuid(guid)?.Dd1;
+    internal static string Dd1Of(uint guid) => Line.Count == 0 || ByGuid(guid) is not { HeroArt: null } m ? null : m.Dd1;
 
     private static float _worldPerUnit;
     private static GameObject _quad;
@@ -129,11 +132,40 @@ internal static class Dd1MonsterView
         var lore = Session.Current?.Lore;
         foreach (var m in Line)
             if (lore != null && lore.MonsterNames.TryGetValue(m.Dd1, out var name) && !Names.ContainsKey(m.Dd2Class)) Names[m.Dd2Class] = name;
+        Listen();
+        Plugin.Log.LogInfo($"[dd1art] {Line.Count} DD1 monsters to draw: {string.Join(", ", Line.Select(m => m.Dd1 + " as " + m.Dd2Class))}");
+    }
+
+    /// <summary>
+    /// Add memory hero sprites after preparing enemies. All requested rigs must exist before changing the
+    /// presentation. Exact actor GUIDs bind players; this path never calls MapSkills or enemy naming/AI.
+    /// The memory controller is not enabled yet; callers must clear this presentation on every exit.
+    /// </summary>
+    internal static bool PrepareHeroes(IReadOnlyDictionary<uint, Dd1HeroArt> heroes)
+    {
+        if (heroes == null || heroes.Count == 0 || heroes.Any(h => h.Key == 0 || h.Value == null)) return false;
+        var prepared = new List<Monster>();
+        foreach (var hero in heroes)
+        {
+            var m = new Monster { Dd1 = hero.Value.ClassId, Family = hero.Value.ClassId, HeroArt = hero.Value, Guid = hero.Key };
+            if (Load(m, "combat") is not { Pages.Count: > 0 } || Load(m, "defend") is not { Pages.Count: > 0 }) return false;
+            prepared.Add(m);
+        }
+        foreach (var old in Line.Where(m => m.HeroArt != null).ToList()) { Show(old); Line.Remove(old); }
+        Line.AddRange(prepared);
+        _bound = false;
+        BindPoll.Reset();
+        Listen();
+        return true;
+    }
+
+    private static void Listen()
+    {
+        if (_listening) return;
         EventManager.AddListener<EventCombatSkillPresentation>(OnSkill);
         EventManager.AddListener<EventCombatPresentationSkillTarget>(OnTarget);
         EventManager.AddListener<EventCombatActorDeath>(OnDeath);
         _listening = true;
-        Plugin.Log.LogInfo($"[dd1art] {Line.Count} DD1 monsters to draw: {string.Join(", ", Line.Select(m => m.Dd1 + " as " + m.Dd2Class))}");
     }
 
     /// <summary>DD1's skill list for the monster: each skill's attack pose, its own effect and the effect on its target.</summary>
@@ -163,6 +195,7 @@ internal static class Dd1MonsterView
     /// <summary>The fight is over: give DD2 its models back.</summary>
     public static void Clear()
     {
+        _drawn = false;
         Effects.Clear();
         Names.Clear();
         _worldPerUnit = 0f;
@@ -185,7 +218,7 @@ internal static class Dd1MonsterView
 
     private static void Play(Monster m, string file, bool loop)
     {
-        var rig = Load(m.Family, file);
+        var rig = Load(m, file);
         if (rig == null) return;
         m.Anim = file;
         m.Clip = file == "dead" || (file == "defend" && rig.Skeleton.Animation("defend") == null) ? "death" : file;
@@ -201,6 +234,11 @@ internal static class Dd1MonsterView
             var data = e.m_SkillPresentationData;
             var m = data == null ? null : ByGuid(data.PerformerGuid);
             if (m == null || m.Dead) return;
+            if (m.HeroArt != null)
+            {
+                Play(m, m.HeroArt.AnimationFor(data.SkillId), loop: false);
+                return;
+            }
             m.Attacks ??= AttackFiles(m.Family);
             var skills = m.Skills is { Count: > 0 } ? m.Skills : m.Attacks.Select(a => (Id: (string)null, Anim: a, Fx: (string)null, TargetFx: (string)null)).ToList();
             if (skills.Count == 0) return;
@@ -264,7 +302,7 @@ internal static class Dd1MonsterView
     private static void Die(Monster m)
     {
         m.Dead = true;
-        Play(m, Load(m.Family, "dead") != null ? "dead" : "defend", loop: false);
+        Play(m, Load(m, "dead") != null ? "dead" : "defend", loop: false);
         if (m.DeathFx != null && Fx(m.Family, m.DeathFx) is { } death)
             Effects.Add(new Effect { Rig = death, Fixed = m.Feet, Since = Time.unscaledTime, Scale = m.Scale, Flip = true });
     }
@@ -287,26 +325,29 @@ internal static class Dd1MonsterView
         if (!BindPoll.Due(Time.unscaledTime, entered)) return;
         var party = new HashSet<uint>(Runtime.Driver.Instance?.Party?.Guids ?? Enumerable.Empty<uint>());
         var actors = UnityEngine.Object.FindObjectsOfType<CombatActorBhv>()
-            .Where(a => a != null && a.ActorInstance != null && !party.Contains(a.GetActorGuid()))
+            .Where(a => a != null && a.ActorInstance != null)
             .OrderBy(a => a.ActorInstance.TeamPosition).ToList();
         var used = new HashSet<CombatActorBhv>();
         int found = 0;
         foreach (var m in Line)
         {
             if (m.Actor != null) { found++; continue; }
-            var actor = actors.FirstOrDefault(a => !used.Contains(a) && a.ActorInstance.ActorDataClass?.Id == m.Dd2Class && Line.All(o => o.Actor != a));
+            var actor = actors.FirstOrDefault(a => !used.Contains(a) && Line.All(o => o.Actor != a)
+                && (m.HeroArt != null ? party.Contains(a.GetActorGuid()) && a.GetActorGuid() == m.Guid
+                                     : !party.Contains(a.GetActorGuid()) && a.ActorInstance.ActorDataClass?.Id == m.Dd2Class));
             if (actor == null) continue;
             used.Add(actor);
             m.Actor = actor;
             m.Guid = actor.GetActorGuid();
-            m.Renderers = ModelRenderers(actor);
-            MapSkills(m);
+            m.Renderers = ModelRenderers(m);
+            if (m.HeroArt == null) MapSkills(m);
+            else m.Dd2Class = actor.ActorInstance.ActorDataId;
             found++;
         }
         if (found == Line.Count || BindPoll.Expired(Time.unscaledTime))
         {
             _bound = true;
-            Plugin.Log.LogInfo($"[dd1art] bound {found}/{Line.Count} DD2 enemies");
+            Plugin.Log.LogInfo($"[dd1art] bound {found}/{Line.Count} DD2 actors");
         }
     }
 
@@ -314,6 +355,9 @@ internal static class Dd1MonsterView
     /// (auras, status clouds: particles and VFX Graph). DD1's sprite carries its own effects.</summary>
     private static Renderer[] ModelRenderers(CombatActorBhv actor) =>
         actor.GetComponentsInChildren<Renderer>(true).Where(r => r is SkinnedMeshRenderer || r is MeshRenderer || IsEffect(r)).ToArray();
+
+    private static Renderer[] ModelRenderers(Monster m) => ModelRenderers(m.Actor)
+        .Where(r => m.HeroArt == null || !IsEffect(r)).ToArray();
 
     private static bool IsEffect(Renderer r) => r.GetType().Name is "ParticleSystemRenderer" or "VFXRenderer";
 
@@ -452,14 +496,21 @@ internal static class Dd1MonsterView
     private static void Hide(Monster m)
     {
         if (m.Hidden || m.Renderers == null) return;
-        foreach (var r in m.Renderers) if (r != null) r.forceRenderingOff = true;
+        foreach (var r in m.Renderers) HideRenderer(m, r);
         m.Hidden = true;
+    }
+
+    private static void HideRenderer(Monster m, Renderer renderer)
+    {
+        if (renderer == null) return;
+        if (!m.OriginalVisibility.ContainsKey(renderer)) m.OriginalVisibility[renderer] = renderer.forceRenderingOff;
+        renderer.forceRenderingOff = true;
     }
 
     private static void Show(Monster m)
     {
-        if (!m.Hidden || m.Renderers == null) return;
-        foreach (var r in m.Renderers) if (r != null) r.forceRenderingOff = false;
+        foreach (var pair in m.OriginalVisibility) if (pair.Key != null) pair.Key.forceRenderingOff = pair.Value;
+        m.OriginalVisibility.Clear();
         m.Hidden = false;
     }
 
@@ -580,8 +631,8 @@ internal static class Dd1MonsterView
         }
         m.Actor = again;
         m.LostAt = -1f;
-        m.Renderers = ModelRenderers(again);
-        foreach (var r in m.Renderers) if (r != null) r.forceRenderingOff = true;
+        m.Renderers = ModelRenderers(m);
+        foreach (var r in m.Renderers) HideRenderer(m, r);
         m.NextRendererScan = 0f;
         Note(m, $"rebound to DD2's new {again.ActorInstance.ActorDataId}");
         return true;
@@ -604,7 +655,7 @@ internal static class Dd1MonsterView
             if (Time.unscaledTime >= m.NextRendererScan)
             {
                 m.NextRendererScan = Time.unscaledTime + 0.5f;
-                m.Renderers = ModelRenderers(m.Actor);
+                m.Renderers = ModelRenderers(m);
                 m.Hidden = false;
             }
             Note(m, "no model renderers yet");
@@ -614,7 +665,7 @@ internal static class Dd1MonsterView
         // that the DD1 monster follows the actor (not its animated outline) and keeps a fixed size in the world, so
         // DD2's hit and cast motions don't make it pulse, and camera zooms enlarge it like the others.
         var root = m.Actor.transform.position;
-        var idle = Load(m.Family, "combat");
+        var idle = Load(m, "combat");
         if (m.WorldRatio <= 0 && idle != null)
         {
             var b = body.bounds;
@@ -629,7 +680,7 @@ internal static class Dd1MonsterView
         // Back to the idle loop when a held pose is done; the dead stay down until DD2 removes them.
         float t = Time.unscaledTime - m.Since;
         if (!m.Loop && !m.Dead && t > (m.Anim == "defend" ? DefendSeconds : AttackSeconds)) { Play(m, "combat", loop: true); t = 0; }
-        var rig = Load(m.Family, m.Anim) ?? Load(m.Family, "combat");
+        var rig = Load(m, m.Anim) ?? Load(m, "combat");
         if (rig == null) { Note(m, "no DD1 animation files"); return false; }
         if (m.Clip == null) m.Clip = rig.Skeleton.Animation("combat")?.Name ?? rig.Skeleton.Animations.FirstOrDefault()?.Name;
         string skin = rig.Skeleton.Skins.Keys.FirstOrDefault(k => string.Equals(k, m.Tier.ToString(), StringComparison.OrdinalIgnoreCase));
@@ -638,16 +689,16 @@ internal static class Dd1MonsterView
 
         // One world size per DD1 unit for the whole line-up (the median over the stand-ins, a fifth smaller), so
         // DD1's own proportions between its monsters stay.
-        if (_worldPerUnit <= 0 || Line.Any(x => x.Actor != null && x.WorldRatio <= 0))
+        if (_worldPerUnit <= 0 || Line.Any(x => x.HeroArt == null && x.Actor != null && x.WorldRatio <= 0))
         {
-            var ratios = Line.Where(x => x.WorldRatio > 0).Select(x => x.WorldRatio).OrderBy(r => r).ToList();
+            var ratios = Line.Where(x => x.HeroArt == null && x.WorldRatio > 0).Select(x => x.WorldRatio).OrderBy(r => r).ToList();
             _worldPerUnit = ratios.Count > 0 ? ratios[ratios.Count / 2] * 0.8f : m.WorldRatio * 0.8f;
         }
-        float scale = _worldPerUnit * pixelsPerUnit * Plugin.Dd1MonsterScale.Value;
+        float scale = (m.HeroArt != null ? m.WorldRatio : _worldPerUnit * Plugin.Dd1MonsterScale.Value) * pixelsPerUnit;
         float bodyPx = (idle?.Height ?? 0) * scale;
         m.Scale = scale;
         m.Feet = feet;
-        if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: true, light)) { Note(m, "no atlas page textures"); return false; }
+        if (!DrawPieces(rig, pieces, feet.x, Screen.height - feet.y, scale, flipX: m.HeroArt == null, light)) { Note(m, "no atlas page textures"); return false; }
         Note(m, $"drawn, over {m.Dd2Class} with {cam.name} at ({feet.x:0},{feet.y:0}): {bodyPx:0} px tall, scale {scale:0.00}");
         Hide(m);   // only once DD1's art is really on screen
         // DD2 keeps adding parts to the model after the fight starts (seen in game: the DD2 spiders stayed drawn in
@@ -655,13 +706,13 @@ internal static class Dd1MonsterView
         if (Time.unscaledTime >= m.NextRendererScan)
         {
             m.NextRendererScan = Time.unscaledTime + 0.5f;
-            var fresh = ModelRenderers(m.Actor);
+            var fresh = ModelRenderers(m);
             int added = 0;
             var effects = new List<string>();
             foreach (var r in fresh)
                 if (r != null && !r.forceRenderingOff)
                 {
-                    r.forceRenderingOff = true;
+                    HideRenderer(m, r);
                     added++;
                     if (IsEffect(r)) effects.Add(r.name);
                 }
@@ -763,10 +814,13 @@ internal static class Dd1MonsterView
         return dd1 == null ? null : LoadFile(dd1.PathOf("monsters", family, "anim"), $"{family}.sprite.{anim}");
     }
 
+    private static Rig Load(Monster m, string anim) => m.HeroArt == null ? Load(m.Family, anim)
+        : m.HeroArt.HasAnimation(anim) ? LoadFile(m.HeroArt.AnimationDirectory, m.HeroArt.Stem(anim), m.HeroArt.TextureDirectory) : null;
+
     /// <summary>A DD1 Spine file (&lt;dir&gt;/&lt;stem&gt;.skel + .atlas + pages), cached.</summary>
-    private static Rig LoadFile(string dir, string stem)
+    private static Rig LoadFile(string dir, string stem, string textureDir = null)
     {
-        string key = dir + "/" + stem;
+        string key = dir + "/" + stem + "|" + textureDir;
         if (Rigs.TryGetValue(key, out var rig)) return rig;
         Rigs[key] = null;
         try
@@ -777,7 +831,7 @@ internal static class Dd1MonsterView
             rig = new Rig { Skeleton = SpineSkeleton.Load(skel), Atlas = SpineAtlas.Parse(File.ReadAllText(atlas)) };
             foreach (var page in rig.Atlas.Pages)
             {
-                string png = Path.Combine(dir, page.File);
+                string png = Path.Combine(textureDir ?? dir, page.File);
                 if (!File.Exists(png)) continue;
                 var tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
                 if (tex.LoadImage(File.ReadAllBytes(png), markNonReadable: true)) rig.Pages[page] = tex;

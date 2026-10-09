@@ -3663,3 +3663,42 @@ game launch or Ghidra job. Native summoning remains unverified, as does the comp
   tools/faded_memory_coverage.md. Very Rare reward confirmation stands; other reward/retreat policies
   remain open. Preserve region switch. Q04 native Back/reopen remains a separate acceptance check.
 - Check usage at this boundary and retain finalization headroom before95%.
+
+## Round178: DD1 hero sprite presentation without player conversion
+
+Round177 committed/pushed at55c9cba. Added Dd1HeroArt: campaign hero anim skeletons/atlases plus
+outfit-A PNG pages, base or campaign DLC. Never falls back to arena or unrelated classes. Shared
+DD2 skill names select DD1 poses, with mastery/path suffixes accepted; new unmatched skills stay
+in combat pose pending explicit visual mapping. Twenty-four tests load nonempty poses/pages for
+all13 namesake heroes and reject missing Duelist/Runaway/invalid IDs. Unity HeroClass.SkillArtInfo
+and installed hero .art.darkest combat_skill entries corroborate pose identity and outfit separation.
+
+Dd1MonsterView.PrepareHeroes reuses drawing via exact player GUIDs. It never calls enemy MapSkills,
+naming or AI restriction for heroes. Right-facing hero sprites keep native player effects visible.
+Clear restores remembered forceRenderingOff states, including late model parts; hero ratios are
+excluded from the enemy scale median. No production controller or curio activates this path yet.
+
+All867 Core +125 UI =992 tests and normal Release Rebuild pass. Native temporary estate2 probe
+PID29700 shows Vestal/Flagellant/Jester/Leper converted in screenshot01-dd1-heroes, and restored DD2
+models in screenshot04-restored. Immediate class/name/max-HP/equipped-skill snapshots compare equal
+both at preparation and Clear. Screenshot02's attempted attack did not prove live attack pose timing;
+keep attack/defend/death and the other heroes pending. No exceptions found in captured logs.
+
+Corrected WinDrive key syntax from F2 (rejected) to0x71; screenshot03 was before restoration and is
+not acceptance evidence. Source review excluded heroes from the enemy scale median and clears the
+draw flag on restoration; the final normal build includes these cleanup details. Stopped exactPID29700
+and waited for exit, restored estate2 main/.bak and DebugKeys from round178/backup-manifest.json,
+verified all hashes, then forced normal Release Rebuild/deployment while DD2 stopped. Private
+screenshots/logs/probe remain under rea-workbench/evidence/round178; no native assets/evidence inGit.
+
+## Status 2026-10-10: round178 hero presentation verified in isolation
+
+- Round177 is pushed. Round178 adds the isolated DD1 hero drawing path; all992 tests/Release pass.
+  Commit/push before continuing. Full Faded Memory encounter remains disabled/incomplete.
+- DD2 stopped. Estate2 main/.bak and DebugKeys restored/hash-matched. No pending save restoration,
+  probe source, game/build/test or native analysis job. Check deployed DLL hashes at finalization.
+- Next O3: explicit boss runtime adapter and DD1 reward identity/equipment, then one complete
+  hand/fight/reward/return path. Use tools/faded_memory_coverage.md. Shared-skill pose coverage is
+  implemented; new-skill visual equivalents and Duelist/Runaway art still need work.
+- Preserve owner Very Rare confirmation, remaining reward/retreat questions, region switch and
+  Q04 native Back/reopen acceptance. Check usage at the round boundary; stop with headroom by95%.

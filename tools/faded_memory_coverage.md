@@ -63,6 +63,24 @@ DD1 art here; their visual counterparts/generated sprites remain to be defined. 
 camping-cost fallback as a visual mapping. This audit checks files, not rendered poses, transformations
 or DD2 skill-animation matching. Player skills/stats/loadouts must remain unchanged.
 
+Round178 adds `Dd1HeroArt` and a presentation-only `Dd1MonsterView.PrepareHeroes` entry. It loads
+skeletons/atlases from the campaign hero's anim directory and page images from outfit A; campaign
+Flagellant works without borrowing the multiplayer copy. All 13 namesake classes produce nonempty
+combat/defend/skill poses in installed-data tests. Missing classes reject rather than borrow another
+hero. Shared DD2 skill names, including mastery/path suffixes, select their corresponding DD1 pose.
+Unmatched new skills currently retain the combat pose; explicit visual equivalents remain to define.
+
+Players bind by exact GUID and never pass through enemy name/skill/AI changes. Their sprite faces
+right and uses their measured model height. Native player effects remain visible. Render visibility
+is remembered per renderer and restored on Clear, including parts loaded after binding. Hero sizes
+do not participate in the existing enemy scale median. No normal gameplay caller enables this yet.
+
+Private native estate2 check shows Vestal, Flagellant, Jester and Leper as DD1 sprites (screenshot01),
+then restores their DD2 models (screenshot04). Class/name/max-HP/equipped-skill snapshots are identical
+immediately before/after preparation and clearing. The attempted attack click did not establish a
+skill-pose acceptance result. Live attack/defend/death timing, remaining classes and actual memory
+exit routing remain unverified. Twenty-four new cases bring the suite to 992 tests.
+
 ## Rewards
 
 Installed base trinket entries contain 24 `very_rare`, 9 `ancestral` and 5 `ancestral_shambler` items.
