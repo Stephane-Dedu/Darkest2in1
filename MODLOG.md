@@ -3328,3 +3328,64 @@ exit, then the normal Release was rebuilt/deployed. No protected-estate or aband
   selection. Follow native1406d3e30 and Unity return-to-preparation; mod charges only on embark, so no
   invented refund. Then Q03 starting supplies in preparation inventory. Main-flow priorities remain first;
   broader native combat/reload/long-session checks and later progression/trinkets remain open.
+
+## Round 172: future-feature roadmap and complete installed DD2 item inventory
+
+Owner added five tracks: DD1 old-memory curio/boss/trinket with transformed hero visuals; the Mountain
+as an authored final region with void-themed hall/room fights and a confession boss per quest; camping
+items based on DD2 inn items with a cap of 1; possible DD1-style stun; and DD2 shop supplies/new curios.
+Recorded each in tools/overhaul_roadmap.md with dependencies, proposed first slice and acceptance cases.
+The camping cap's scope remains open. Native DD2 already has stun/daze; access and balance need an audit.
+
+Built tools/map_dd2_items.py and an offline browser template. The private catalogue reads the current
+game StreamingAssets/Excel: 553 CSVs, 615 Item definitions, 602 IDs, 13 IDs with variants. Unique types:
+85 combat, 70 rest, 109 currency, 107 stagecoach, 211 trinket, 20 memory. Mode/DLC/editor records remain
+distinct; enumeration is not proof of enabled inventory. Source paths/lines/hashes and raw rows preserve
+duplicates, repeated fields and empty positional columns. Explicit active item bindings all resolve.
+The private snapshot has 7,624 evidence records and retains skill payloads, effects, costs, loot entries
+and parent tables. Candidate cross-references are labelled; no runtime interpreter or load order claimed.
+
+Read native ItemDefinition constructor/FetchDefinitions, ActorDataSkill payload selection,
+ActorInstance use histories and inn resets, RestWidgetBhv target/pair/party application and
+TriggerStoreBhv/StoreInventory loot draws. Findings in tools/dd2_item_mapping.md. Per-actor item/tag
+limits differ from stack/possession limits; inn histories cannot be copied into camping without an
+explicit reset/persistence rule. Store roots also come from serialized components, so costs or CSV
+ancestry do not certify live shop availability. Static links do not prove native behaviour.
+
+Read installed DD1 supply inventory/curio tables and Unity Curio/CurioInteraction; mod Supply/ItemCatalog
+and CurioResolver still own DD1 identities and consumption. Proposed adapter must distinguish game
+source and preserve legacy IDs. New curio use must be an explicit authored rule, not an accidental
+invocation of a native combat skill. Existing final boss Mountain mapping was noted for the later audit.
+
+Validation: 10 synthetic Python cases cover variants, empty columns, repeated effects, skill precedence,
+unresolved IDs, positional loot conditions/zero weights/cycles, malformed input, private-output protection
+and HTML escaping. First run exposed an empty test fixture for the existing-evidence check; corrected the
+fixture and all10 pass. All792 Core +106 UI tests and Release pass with existing warnings; DD2 stopped,
+built/deployed DLL hashes match. No runtime source or gameplay changes, no game launched or saves read.
+Corrected stale handoff wording that still suggested slot3; both owner slots remain protected.
+
+Browser check: the in-app automation entry failed with missing kernel assets. Used headless installed Edge
+to check all615 entries, search, rest filtering, variants, bandage effect/loot drill-down, whiskey's adverse
+effects, zero-result search and a640px layout; zero JavaScript errors. Inspected screenshot at1440px.
+The browser tab was queued with open_in_codex. This verifies the research viewer, not native game UI.
+
+Private output/evidence: C:\Users\Piral\rea-workbench\evidence\round172\dd2-items-v2\ (HTML/JSON/CSV).
+Round172 directory also holds original browser-check script/screenshots; v1 is the earlier private snapshot.
+Only original tooling, synthetic fixtures and authored documentation enter Git.
+
+## Status 2026-10-09: round 172 complete, future ideas retained
+
+- Round171 is committed/pushed at2d631c1. Round172 maps the requested installed item universe and records
+  all five future tracks; commit/push its tooling and documentation. No campaign feature from these tracks
+  is enabled yet. Per-item native behaviour, live shop filters/roots, art coverage and balance remain open.
+- All908 tests and Release pass. DD2 is stopped and the deployed normal DLLs match Release. No test game,
+  save restore, build, Ghidra or REA jobs pending. Private catalogue preview serves only127.0.0.1:8772
+  from dd2-items-v2, exec session51423, for owner browsing; it performs no background game work.
+- Usage64% session/57% weekly at the finalization boundary; no quota pause required. Check fresh limits
+  before another round and reserve finalization headroom before95%. The earlier round171 pause has reset.
+- Next main-flow round173 candidate remains Q04: clear purchase cart on return to quest selection,
+  referencing native1406d3e30 and Unity return-to-preparation. Then Q03 starting supplies. Reported defects
+  remain first. Refine overhaul tracks individually from tools/overhaul_roadmap.md when selected; do not
+  silently settle the camping cap, memory defeat/repeat rules, confession sequence or stun balance.
+- Launches are authorized; use estate2 only with backup/restore/hash checks. The normal picker reads
+  protected slots, so avoid it in automation. No protected estate or abandoned project access this round.

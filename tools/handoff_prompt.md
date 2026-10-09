@@ -6,6 +6,9 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.
 Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/trinket ideas are in PARITY.md.
+For the owner's memory-curio, Mountain, camping-item, stun or DD2 supply/curio proposals, read
+tools/overhaul_roadmap.md. Item research starts at tools/dd2_item_mapping.md and its private catalogue;
+retain native facts separately from proposed interactions. These tracks are not enabled gameplay.
 
 ## Start
 1. In C:\Users\Piral\DarkestDungeon3\mod: `git checkout claude/practical-wright-hicri0` and `git pull --rebase`.
@@ -25,7 +28,7 @@ Follow tools/parity_loop.md exactly; when the owner asks for the loop, run `/loo
 ## Habits that matter (learned the hard way)
 - Write multi-line patches with the Write tool or Python scripts that assert the old text exists; Git Bash heredocs eat backslashes.
 - Before driving the game, check idle time (`tools/um win drive --proc explorer idle`); keep sessions short; kill processes only by exact PID.
-- Saves: never touch estate 1 (the owner's campaign); estate 2 is the test estate; test a new estate in slot 3 by moving estate_3.json and its .bak aside, then delete the test files, move the originals back and `cmp` them.
+- Saves: estate 2 is the only test slot. Never read or modify estates 1 or 3. Back up and hash-check estate 2 before native tests, restore it after the test game exits, and verify hashes. Avoid the normal picker, which reads protected slots; use an isolated test entry when needed.
 - Never commit game files, extracted assets or decompiled code. Never read C:\Users\Piral\Documents\DD1inDD2.
 - Time-box in-game checks: if two tries can't produce the evidence, mark `[?]` with what to look at and move on.
 - Talk to the owner in short plain language: what changed, what was verified and how, what needs them.
