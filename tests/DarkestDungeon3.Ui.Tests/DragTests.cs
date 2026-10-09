@@ -20,8 +20,7 @@ public class DragTests : IDisposable
 
     public void Dispose()
     {
-        Send(EventType.MouseUp, 0, 0);
-        Drag.Overlay();
+        Drag.Cancel();
         GUI.enabled = true;
         GUIUtility.hotControl = 0;
         GUIUtility.clipOffset = default;
@@ -41,6 +40,7 @@ public class DragTests : IDisposable
         Send(EventType.MouseUp, 1600, 200);
         Drag.Begin();
         Assert.Equal(EventType.Used, Event.current.type); // a roster button cannot turn it into a hero click
+        Assert.Equal(EventType.Used, Event.current.rawType); // actual Unity Event.Use contract
         Assert.True(Drag.Drop<Recruit>(Roster, out var recruit));
         Assert.Equal("recruit", recruit.HeroId);
         // The real recruitment/save path, not just a payload assertion.
@@ -194,5 +194,39 @@ public class DragTests : IDisposable
         Assert.False(Drag.Active);
         Assert.Equal(0, GUIUtility.hotControl);
         Assert.Equal(EventType.Used, Event.current.type);
+    }
+
+    [Fact]
+    public void ConsumedOrdinaryClickClearsPendingSourceBeforeLaterMouseMovement()
+    {
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Begin();
+        Drag.Source(Source, new Recruit("clicked"), _ => { });
+        Send(EventType.MouseUp, 1100, 200);
+        Drag.Begin();
+        Event.current.Use(); // native source GUI.Button claims its ordinary click
+        Drag.Overlay();
+        Send(EventType.MouseUp, 1600, 200);
+        Drag.Begin();
+        Assert.False(Drag.Active);
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+    }
+
+    [Fact]
+    public void RightReleaseCannotDropALeftDragAndRepaintCannotReplayADrop()
+    {
+        Send(EventType.MouseDown, 1100, 200);
+        Drag.Begin();
+        Drag.Source(Source, new Recruit("held"), _ => { });
+        Send(EventType.MouseDrag, 1600, 200); Drag.Begin();
+        Send(EventType.MouseUp, 1600, 200); Event.current.button = 1; Drag.Begin();
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Drag.Overlay(); Assert.True(Drag.Active);
+        Send(EventType.Repaint, 1600, 200); Drag.Begin();
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Send(EventType.MouseUp, 1600, 200); Drag.Begin();
+        Assert.True(Drag.Drop<Recruit>(Roster, out _));
+        Assert.False(Drag.Drop<Recruit>(Roster, out _));
+        Drag.Overlay(); Assert.False(Drag.Active);
     }
 }

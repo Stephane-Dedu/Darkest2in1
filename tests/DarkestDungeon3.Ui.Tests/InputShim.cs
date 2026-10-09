@@ -12,7 +12,8 @@ public sealed class Event
     public int button;
     public KeyCode keyCode;
     public Vector2 mousePosition, delta;
-    public void Use() => type = EventType.Used;
+    // Verified in DD2's Unity runtime: consuming the event changes rawType as well.
+    public void Use() => type = rawType = EventType.Used;
 }
 public readonly struct Vector2(float x, float y)
 {

@@ -3518,3 +3518,30 @@ screenshots01-07 and copied BepInEx/Player logs. No private assets or native ana
   gameplay implementation, game launch or save access. Last code validation remains904 tests/Release.
 - Round173 fix is pushed at b3da393, handoff at80c4d3b. Its native Back/reopen and drag/focus checks
   remain pending, as does Q02. They are not silently marked complete by this priority change.
+
+## Round174: Unity consumes rawType too, breaking every carried release
+
+Owner reported Stagecoach recruitment, Blacksmith/Guild input and curio right-click failures. Prioritized
+these before Faded Memory. The owner also confirmed its Legendary draw uses DD1 very_rare trinkets;
+updated tools/faded_memory_design.md. Fresh allowance reset to2%, superseding the earlier quota pause.
+
+A temporary native OnGUI probe through the real Drag.Source/Begin/Drop/Overlay reproduced the shared
+drag failure without any save access: before Begin, type/rawType were MouseUp; after Event.Use both
+were Used. Drop returned false and Overlay left Active=true. The headless shim preserved rawType and
+therefore hid the defect. Changing the shim to match measured Unity behaviour made four existing drag
+tests fail. Capture left release at Begin before consumption, deliver once to a target, and clear pending
+click/drag state at Overlay. Two extra cases cover consumed ordinary clicks and right-release/repaint.
+All12 drag cases, 114 UI and792 Core tests pass. Native rerun now reports delivered=True/Active=False.
+
+DD1 references: installed stage_coach/blacksmith/guild layout files; Unity RecruitSlot.OnEndDrag and
+HeroSlot/InventorySlot drop paths. The defect is in our IMGUI adapter, not DD1 recruitment/economics.
+Live estate2 session recorded roster6->7 and recruits3->2, and displayed a hero in Guild. Purchases are
+not yet verified. The test window began receiving user input, so further scripted input stopped.
+Curio right-click is a separate missing route in DrawInventory and remains the next fix.
+
+Private evidence: rea-workbench/evidence/round174/native-red.log, native-green.log and screenshots.
+Native test PID27644 remains running at this point; it uses a temporary automatic estate2 entry and
+state logger. Source probes were restored from backups; normal Release Rebuild with Deploy=false passes.
+Do not restart the currently deployed test DLL. After this test session exits, restore estate2 main/.bak
+from round174/backup-manifest.json, verify hashes, deploy normal Release and compare DLL hashes.
+No protected estate access or normal picker. Preserve this pending restore through further rounds.

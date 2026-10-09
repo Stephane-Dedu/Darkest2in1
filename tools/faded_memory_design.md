@@ -83,8 +83,8 @@ Ancestor's Pistol example. Resolve the pool names against native data before imp
 - Installed `trinkets/base.rarities.trinkets.json` has `very_rare`, `ancestral` and
   `ancestral_shambler`; there is no rarity ID named `legendary`.
 - `trinkets/base.entries.trinkets.json` places `ancestors_pistol` in `ancestral`.
-- The owner's **Legendary** reward label is retained. A proposed mapping is `very_rare`, but
-  that is not yet an agreed pool. An item name containing "legendary" does not define a tier.
+- Owner confirmed on 2026-10-09 that the **Legendary** reward uses DD1's `very_rare` trinket
+  pool. An item name containing "legendary" does not define a tier.
 - Whether the Ancestor draw also includes `ancestral_shambler` needs an explicit pool decision.
   Do not merge special pools or duplicate-limited trinkets by inference.
 

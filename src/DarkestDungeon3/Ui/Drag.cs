@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Ui;
 /// DD1-style drag and drop for our IMGUI screens. A screen marks what can be picked up with <see cref="Source"/>
 /// (call it before any button on the same rect) and where it can land with <see cref="Drop{T}"/>; UiRoot calls
 /// <see cref="Overlay"/> last to draw the carried icon and cancel drops that land nowhere. A press without
-/// movement stays a click. Raw event types are used because IMGUI buttons consume drag and release events.
+/// movement stays a click. Capture the release before IMGUI consumes it: Unity's Event.Use also changes rawType.
 /// </summary>
 internal static class Drag
 {
@@ -17,6 +17,7 @@ internal static class Drag
     private static Action<Rect> _pendingDraw, _draw;
     private static Vector2 _downAt, _size, _grab;
     private static int _droppedFrame = -1;
+    private static bool _releasedThisPass;
 
     public static bool Active => _payload != null;
     public static object Payload => _payload;
@@ -26,6 +27,7 @@ internal static class Drag
     public static void Begin()
     {
         var e = Event.current;
+        _releasedThisPass = e.rawType == EventType.MouseUp && e.button == 0;
         if (e.type == EventType.KeyDown && e.keyCode == KeyCode.Escape && (_pending != null || Active))
         {
             Cancel();
@@ -44,7 +46,7 @@ internal static class Drag
             _pendingDraw = null;
             GUIUtility.hotControl = 0;
         }
-        // Drop targets use rawType. Ordinary buttons must never see a carried drag or release, even
+        // Drop targets use the captured release. Ordinary buttons must never see a carried drag or release, even
         // when they are drawn before the source/target (the Hamlet roster, for example).
         if (Active && (e.rawType == EventType.MouseDrag || e.rawType == EventType.MouseUp)) e.Use();
     }
@@ -54,6 +56,7 @@ internal static class Drag
         if (Active) GUIUtility.hotControl = 0;
         _pending = _payload = null;
         _pendingDraw = _draw = null;
+        _releasedThisPass = false;
     }
 
     /// <summary>Something that can be picked up: <paramref name="drawIcon"/> draws it in a rect (used while carried).</summary>
@@ -77,10 +80,11 @@ internal static class Drag
         payload = null;
         var e = Event.current;
         if (!GUI.enabled || !(_payload is T carried) || !r.Contains(e.mousePosition)) return false;
-        if (e.rawType != EventType.MouseUp) return false;
+        if (!_releasedThisPass) return false;
         payload = carried;
         _payload = null;
         _draw = null;
+        _releasedThisPass = false;
         GUIUtility.hotControl = 0;
         _droppedFrame = Time.frameCount;
         e.Use();
@@ -97,7 +101,7 @@ internal static class Drag
     public static void Overlay()
     {
         var e = Event.current;
-        if (e.rawType == EventType.MouseUp)
+        if (_releasedThisPass)
         {
             Cancel();
             return;
