@@ -59,6 +59,7 @@ internal sealed class HeroStage : MonoBehaviour
     private Transform _root;
     private readonly List<(uint guid, Transform slot, ActorBhv actor)> _heroes = new();
     private string _partyKey;
+    private HeroCombatPalette _palette;
 
     public static float HeroScale = 1f;
     /// <summary>Signed corridor speed: 1 forward, -0.5 backing up, 0 stopped.</summary>
@@ -92,6 +93,7 @@ internal sealed class HeroStage : MonoBehaviour
 
     private void OnDestroy()
     {
+        _palette?.Dispose();
         UnityEngine.Rendering.RenderPipelineManager.beginCameraRendering -= OnBeginCamera;
         UnityEngine.Rendering.RenderPipelineManager.endCameraRendering -= OnEndCamera;
     }
@@ -243,6 +245,7 @@ internal sealed class HeroStage : MonoBehaviour
 
     public void Clear()
     {
+        _palette?.Clear();
         foreach (var motion in _motion.Values) motion.Restore();
         _motion.Clear();
         _motionUnavailable.Clear();
@@ -397,6 +400,7 @@ internal sealed class HeroStage : MonoBehaviour
             slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
+            (_palette ??= new HeroCombatPalette(this)).Apply(actor);
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
                 && _checked && !RendersBlack && bindMotion)
             {

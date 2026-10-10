@@ -4,7 +4,24 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 `HeroStage` spawns separate presentation actors through the existing native loader.
 `CorridorHeroMotion` adds a corridor-only animation layer to those instances.
 No replacement mesh or extracted game asset is distributed, and shared animation
-controllers and combat actors are not modified.
+controllers are not modified. The walk layer affects only the corridor actors.
+
+## Combat palette
+
+The prefab's Hero shader has a blue `_ShadowColour`; changing scene lights does
+not remove it. `HeroCombatPalette` loads the installed Foetor combat material
+preset, matching the owner's warm battle reference, and applies native material
+property overrides to the corridor actors and heroes in fights in place. It finds
+the preset by catalog InternalId because DD2 exposes GUID load keys. The location
+is cached; load handles and actor overrides are released when their presentation
+ends. Shared materials, textures, normal DD2 battles and enemy palettes stay native.
+
+The owner confirmed that this removed the blue tint, then reported faded colours.
+The final ungraded presentation uses brightness1.25, tint intensity1.0 and
+saturation1.10, instead of the arena preset's brightness1.5 and grey tint intensity1.6.
+This final contrast pass is built but still needs visual review. Existing model
+brightness configuration remains available. The unsuccessful global-lighting and
+viewing-angle experiments were removed; the camera-facing walk is retained.
 
 ## Facing and rig
 

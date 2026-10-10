@@ -36,6 +36,8 @@ internal static class Dd1Backdrop
     private static int _sceneryMask, _sceneryLayers, _quadLayer = 31;
     private static Camera _sceneryCamera;
     private static float _distance = 15f;
+    private static HeroCombatPalette _heroPalette;
+    private static readonly List<ActorBhv> PaletteActors = new();
 
     /// <summary>A fight is about to start here: forget the last one. A fight that starts in place keeps the scene the
     /// crawl last drew (see <see cref="TakeSnapshot"/>), also in DD2's regions instead of their arenas.</summary>
@@ -141,6 +143,8 @@ internal static class Dd1Backdrop
             if (arena == null) { GiveUpAfter(15f, "no arena"); return; }
             var heroes = Driver.Instance?.Party?.Guids?.ToHashSet() ?? new HashSet<uint>();
             var actors = UnityEngine.Object.FindObjectsOfType<CombatActorBhv>().Where(a => a != null && a.ActorInstance != null).ToList();
+            PaletteActors.Clear();
+            PaletteActors.AddRange(actors.Where(a => heroes.Contains(a.GetActorGuid())).Select(a => a.CachedActorBhv).Where(a => a != null));
             var heroRenderers = actors.Where(a => heroes.Contains(a.GetActorGuid()))
                                       .SelectMany(a => a.GetComponentsInChildren<Renderer>()).Where(r => r is SkinnedMeshRenderer or MeshRenderer).ToList();
             if (heroRenderers.Count == 0) { GiveUpAfter(30f, "no hero models yet"); return; }
@@ -259,6 +263,9 @@ internal static class Dd1Backdrop
     public static void Tick()
     {
         if (!Ready || _material == null) return;
+        if (_sceneryCamera != null)
+            foreach (var actor in PaletteActors)
+                (_heroPalette ??= new HeroCombatPalette(_sceneryCamera)).Apply(actor);
         HideNewScenery();
         SetDepthOfField(false);
         UndoExposure();
@@ -515,6 +522,9 @@ internal static class Dd1Backdrop
     /// <summary>The fight is over: give DD2 its arena back.</summary>
     public static void End()
     {
+        _heroPalette?.Dispose();
+        _heroPalette = null;
+        PaletteActors.Clear();
         Seen.Clear();
         SetDd2Fog(true);
         SetDd2Lut(true);

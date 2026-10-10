@@ -4213,3 +4213,49 @@ Owner's own DD2 session (PID 26780) was running: an earlier build in this round 
 plugin while it ran (BepInEx had not locked it; the running game kept its loaded build). That broke the
 "deploy only while DD2 is stopped" rule; later builds used -p:Deploy=false. Corpse and scouting builds
 are not deployed yet: deploy when the game is closed. 920 Core + 147 UI tests pass.
+
+## Round193: combat colours for walking heroes and fights in place
+
+Owner requested the battle appearance/palette for the walk, reported that the blue tint remained and
+also appeared in battle, then confirmed "blue tint gone" after the native combat preset was applied.
+They found that first warm pass faded. The final contrast pass is awaiting their visual check.
+
+Private material inspection found the cause: Red Hook/Lit/Hero stores blue `_ShadowColour`
+(0.463,0.714,0.831) in the prefab and its material block. Its `_RealLight` defaults off; scene ambient
+and light-layer experiments did not correct the appearance. All those experiments and the narrower
+walking angle were removed. HeroStage already starts the native combat idle via ActorBhv.Show; its
+existing camera-facing skeletal walk remains the animation layer.
+
+HeroCombatPalette loads the installed MaterialPropertySettings_Combat_Arena_Farm preset, matching
+the owner's Foetor battle reference. The catalog's Assets/... path is an InternalId, not a valid load
+key: resolve it once through ResourceLocators, cache the location, then load that location. Native
+AddTarget/RemoveTarget with distinct sources keeps the overrides local to presentation actors;
+shared materials/assets are not edited. HeroStage applies it after actors load; Dd1Backdrop applies
+it to its cached hero actors only. Block identities detect replaced art; caches/handles are cleared
+on party changes, presentation destruction and fight end. No repeated catalog or scene scans.
+
+The native Farm preset has brown shadow (0.474,0.334,0.255), brightness1.5, grey tint0.89 at opacity1
+and intensity1.6. Both views omit DD2's final region grading. The final pass retains the warm preset
+but overrides brightness1.25, tint intensity1.0 and saturation1.10 to reduce the washed appearance.
+These last three values have not been reviewed in game. Release +920 Core +147 UI tests pass.
+
+Native checks used a detached copy of the earlier estate2 walk fixture, with persistence blocked in
+a temporary helper. Protected estates were not accessed. The game log recorded warm materials on
+all four stage actors and all four fight heroes; owner confirmed removal of the blue cast. The new
+selector's full layout and the Sprawl/Ruins artwork switch with the correct live quest were also
+inspected. Remaining selector interactions stay [?]. Private captures/material inspection are under
+C:\Users\Piral\.universal-modder\inspection\selector-overhaul-20261010. The helper DLL was moved out
+of BepInEx. Both estate2 files are hash-checked against the fresh run-2 backups; no restore needed.
+The exact selector prompts remain in tools/art-prompts and tools/expedition_selector_design.md.
+
+## Status 2026-10-10: round193 ready for owner colour review
+
+- Warm hero materials verified in corridor and battle; owner confirmed no blue tint. Final brightness/
+  tint/saturation adjustment built, native visual review pending. Pose change in the battle crossfade
+  remains separate work in PARITY.
+- Approved selector renders in game; Sprawl/Ruins art and quest selection checked, full interaction
+  review pending. Prompt memory is saved in the repo.
+- Temporary test helper removed. Estate2 files unchanged/hash-matched; protected estates untouched.
+- Owner first asked to wait before launching, then explicitly authorized a launch when the work is
+  done. Finish checks/deploy while stopped and open the normal game once, without the test helper.
+  Further test launches should follow the owner's current instructions. The parity loop stays paused.
