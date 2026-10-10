@@ -4693,3 +4693,9 @@ enter Git; derived meshes, textures, extracted reference art and Blender/preview
   estate-2 acceptance steps only when the owner authorizes launching again.
 - No saves read or modified, no pending restore, and no game launched. Preserve the no-launch constraint.
 - The approved DD1 expedition selector remains; do not resume the removed round200-201 menu.
+
+### Owner-authorized launch after round205
+
+Owner: "you can launch the game". Launched C:\Users\Piral\darkestwithdlc\game\Darkest Dungeon II.exe
+at 20:08 local time, PID 52396. This supersedes the no-launch instruction above. No game input or estate
+selection was sent; Shieldbreaker's native appearance and timing still need review.
