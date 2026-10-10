@@ -17,6 +17,10 @@ public sealed class Dd1EnemyKit
     public int Speed { get; private set; }
     public int Turns { get; private set; }
     public bool Boss { get; private set; }
+    public bool Corpse { get; private set; }
+    public bool CanBeSummonRank { get; private set; }
+    public int AliveRoundLimit { get; private set; }
+    public string DeathClassId { get; private set; }
     public string Brain { get; private set; }
     public string LifeLinkBaseClass { get; private set; }
     public IReadOnlyList<SkillShape> Skills { get; private set; }
@@ -38,7 +42,8 @@ public sealed class Dd1EnemyKit
         var skills = Dd1MonsterSkills.Parse(records);
         int size = records.FirstOrDefault(r => r.Type == "display")?.Int("size") ?? 0;
         int hp = stats.Int("hp"), turns = records.FirstOrDefault(r => r.Type == "initiative")?.Int("number_of_turns_per_round", fallback: 1) ?? 1;
-        if (hp <= 0 || size < 1 || size > 4 || turns < 1 || skills.Count == 0
+        bool corpse = records.Any(r => r.Type == "enemy_type" && r.Str("id") == "corpse");
+        if (hp <= 0 || size < 1 || size > 4 || turns < 0 || (!corpse && (turns == 0 || skills.Count == 0))
             || skills.Any(s => string.IsNullOrEmpty(s.Id)) || skills.Select(s => s.Id).Distinct().Count() != skills.Count) return null;
         var resists = new Dictionary<string, float>(StringComparer.Ordinal);
         foreach (var pair in new[] { ("stun", "stun"), ("poison", "blight"), ("bleed", "bleed"), ("debuff", "debuff"), ("move", "move") })
@@ -48,6 +53,10 @@ public sealed class Dd1EnemyKit
             Id = id, Family = family, Tier = tier, Size = size, Hp = hp, Speed = stats.Int("spd"), Turns = turns,
             Dodge = stats.Float("def"), Protection = stats.Float("prot"),
             Boss = records.Any(r => r.Type == "tag" && r.Str("id") == "boss"),
+            Corpse = corpse,
+            CanBeSummonRank = string.Equals(records.FirstOrDefault(r => r.Type == "battle_modifier")?.Str("can_be_summon_rank"), "True", StringComparison.OrdinalIgnoreCase),
+            AliveRoundLimit = records.FirstOrDefault(r => r.Type == "life_time")?.Int("alive_round_limit") ?? 0,
+            DeathClassId = records.FirstOrDefault(r => r.Type == "death_class" && r.Str("type") == "corpse")?.Str("monster_class_id"),
             Brain = records.FirstOrDefault(r => r.Type == "monster_brain")?.Str("id"),
             LifeLinkBaseClass = records.FirstOrDefault(r => r.Type == "life_link")?.Str("base_class"),
             Skills = skills.AsReadOnly(),
@@ -55,7 +64,12 @@ public sealed class Dd1EnemyKit
         };
     }
 
-    public string ActorClassText(string lifeLinkActorId = null) => $"m_Size,{Size},\nm_Tags,monster,{(Boss ? "boss," : "")}\n"
+    public string ActorClassText(string lifeLinkActorId = null) => Corpse
+        ? $"m_Size,{Size},\nm_Tags,monster,corpse,\nm_ActorControllerType,RANDOM,\nm_EquippedCombatSkillLimit,0,\n"
+          + $"m_IsBattleComplete,True,\nm_IsSummonReplacable,{(CanBeSummonRank ? "True" : "False")},\nm_DeathRound,{AliveRoundLimit},\n"
+          + "m_ClearContainerTypes,BuffContainer,TokenContainer,DotContainer,\nm_SkillBlockId,corpse,\n"
+          + "m_IsTickTriggerValid,False,\nm_IsStressTriggerValid,False,\nm_IsStallCounted,False,\n"
+        : $"m_Size,{Size},\nm_Tags,monster,{(Boss ? "boss," : "")}\n"
         + $"m_ActorControllerType,RANDOM,\nm_EquippedCombatSkillLimit,{Skills.Count},\n"
         + "m_IsTickTriggerValid,True,\nm_IsStressTriggerValid,True,\n"
         + $"m_IsStallCounted,{(!Boss ? "True" : "False")},\n"

@@ -3804,3 +3804,41 @@ No game, probe, save restore or native analysis remains. Native catalogue/eviden
   corpse ranks. Native death-flow test must use an actual equipped skill ID (achievement handler).
 - Memory remains disabled. Preserve Very Rare confirmation, open reward/retreat policies, region
   switch and Q04 acceptance. Usage69% at this boundary; keep finalization headroom before95%.
+
+## Round182: DD1 skeleton corpses and usable summon ranks
+
+Round181 pushed atc0d2558. Skeleton death_class now registers a private corpse_A adapter:7HP,
+zero skills/turns,3-round native lifetime, replaceable summon rank, cleared status containers and
+no loot. No shared corpse changes. Native DD1 loader stores can_be_summon_rank at0xf91; the summon
+capacity branch excludes eligible actor sizes, corroborating Unity AvailableSummonSpace. Core
+AvailableRanks now uses that flag; DD2's bounded front queue removes the eligible corpse before
+creating one fresh skeleton. Existing CorpseRule crit/DOT veto remains in force.
+
+All882 Core +125 UI =1007 tests and Release pass. Native estate2 probes29684 and28876 both produce
+dd3_memory_corpse_A_corpse with the slain skeleton's GUID,7/7HP, replaceable=True and dead-pose log.
+Next real boss attack replaces that GUID with one new front skeleton; four living enemies total.
+Three-round expiry is loaded/tested but not observed without replacement, so it remains [?].
+
+Probe1's valid-source ApplyHealthDamage(SKILL) lowers boss HP below zero and triggers linked deaths,
+but standard SKILL presentation needs an actual skill result. Direct damage leaves the boss onscreen;
+do not claim fight completion. Probe2 uses native selection/target events only after validity checks,
+but never finds a valid equipped damaging skill against the rank4 boss. Full lethal/victory/return
+acceptance stays [?] after2 probes. Next attempt should log each skill's validity and use a reachable
+boss rank. No exceptions in either native log. Initial hidden boot30128 stopped before a scene test.
+
+Stopped both exact testPIDs/waited exit; restored estate2 main/.bak/DebugKeys/Driver after each and
+verified all hashes. Forced normal Release Rebuild/deploy. Evidence private under round182.
+
+## Status 2026-10-10: round182 corpses verified; memory still disabled
+
+- Round181 pushed. Round182 corpse creation/replacement passes native estate2 checks, all1007 tests
+  and normal Release Rebuild/deploy. Commit/push this round before another slice.
+- DD2 stopped; estate2 main/.bak and probe source restored/hash-matched. No pending restore, harness,
+  native analysis or game/build/test process. Confirm deployed DLL hashes during finalization.
+- Full boss lethal presentation/return and unreplaced3-round corpse expiry remain [?]. Use real hero
+  skill results and a reachable boss rank; direct SKILL damage is not sufficient acceptance.
+- Next O3: complete the native death-flow acceptance, audit specific brains/initiative, then DD1
+  reward identity/effect/equipment and live saved encounter routing. Keep the global guarantee dormant
+  until every required encounter can finish. Very Rare confirmed; other reward/retreat choices open.
+- Region switch and Q04 Back/reopen acceptance remain. Usage88% at this boundary; reserve headroom
+  for finalization before95%. Resume from this Status, never duplicate native jobs or touch estates1/3.

@@ -30,19 +30,19 @@ internal static class Dd1EnemyData
     }
 
     private static readonly Dictionary<string, Entry> Entries = new();
-    public static string ActorId(string dd1Id) => "dd3_memory_" + dd1Id;
+    public static string ActorId(string dd1Id) => "dd3_memory_" + dd1Id + (dd1Id.StartsWith("corpse_", StringComparison.Ordinal) ? "_corpse" : "");
     public static Entry Get(string id) => id != null && Entries.TryGetValue(id, out var entry) ? entry : null;
 
     public static bool TryRegister(string family, char tier, out Entry entry)
     {
         entry = null;
-        // Start with one audited kit and its two summon candidates. Broaden only after mechanic coverage.
-        if (tier != 'A' || family is not ("necromancer" or "skeleton_common" or "skeleton_militia")) return false;
+        // One audited boss, its two summon candidates and their corpse. Broaden only after mechanic coverage.
+        if (tier != 'A' || family is not ("necromancer" or "skeleton_common" or "skeleton_militia" or "corpse")) return false;
         string id = ActorId(family + "_" + tier);
         if (Entries.TryGetValue(id, out entry)) return true;
         var session = Runtime.Session.Current;
         var kit = Dd1EnemyKit.Read(session?.Dd1, family, tier);
-        if (kit == null || kit.Protection < 0 || kit.Protection > 1 || kit.Dodge != 0 || session?.Content?.Effects == null) return false;
+        if (kit == null || kit.Protection < 0 || kit.Protection > 1 || (!kit.Corpse && kit.Dodge != 0) || session?.Content?.Effects == null) return false;
         string lifeLinkId = null;
         if (!string.IsNullOrEmpty(kit.LifeLinkBaseClass))
         {
@@ -50,8 +50,15 @@ internal static class Dd1EnemyData
             if (kit.LifeLinkBaseClass != "necromancer" || !TryRegister(kit.LifeLinkBaseClass, tier, out var anchor)) return false;
             lifeLinkId = anchor.Id;
         }
+        Entry corpse = null;
+        if (!string.IsNullOrEmpty(kit.DeathClassId))
+        {
+            var (corpseFamily, corpseTier) = Core.Expedition.Dd1Bestiary.Split(kit.DeathClassId);
+            if (!TryRegister(corpseFamily, corpseTier, out corpse)) return false;
+        }
 
-        string baseActor = family == "necromancer" ? "lost_battalion_bishop" : "lost_battalion_foot_soldier";
+        string baseActor = kit.Corpse ? "lost_battalion_foot_soldier_corpse"
+            : family == "necromancer" ? "lost_battalion_bishop" : "lost_battalion_foot_soldier";
         var database = Singleton<ResourceDatabaseActors>.Instance;
         var locationsField = AccessTools.Field(typeof(ResourceDatabaseAddressable<ResourceDatabaseActors, ResourceActor>), "m_ResourceLocationDictionary");
         if (database == null || locationsField?.GetValue(database) is not IDictionary locations || !locations.Contains(baseActor)) return false;
@@ -101,6 +108,7 @@ internal static class Dd1EnemyData
             clone.hideFlags = HideFlags.HideAndDontSave;
             clone.m_StartingCombatSkills = startingSkills;
             clone.m_AdditionalCombatSkills = new List<ResourceSkillBase>();
+            clone.m_DeathClassResource = corpse?.Resource;
             candidate.Resource = clone;
 
             // Actor/art/audio lookups can use the existing addressable; creation below must use the clone's name/list.

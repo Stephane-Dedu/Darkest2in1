@@ -23,6 +23,19 @@ public sealed class Dd1SingleSummon
     public IReadOnlyList<double> Weights { get; }
     public bool CanSpawnLoot { get; }
 
+    /// <summary>DD1's usable summon ranks: eligible corpses occupy no summon space.</summary>
+    public static int AvailableRanks(IEnumerable<(int Size, bool CanBeSummonRank)> formation)
+    {
+        if (formation == null) throw new ArgumentNullException(nameof(formation));
+        int occupied = 0;
+        foreach (var actor in formation)
+        {
+            if (actor.Size < 1 || actor.Size > 4) throw new ArgumentOutOfRangeException(nameof(formation));
+            if (!actor.CanBeSummonRank) occupied += actor.Size;
+        }
+        return Math.Max(0, 4 - occupied);
+    }
+
     private Dd1SingleSummon(string name, string[] monsters, double[] weights, bool canSpawnLoot)
     {
         Name = name;

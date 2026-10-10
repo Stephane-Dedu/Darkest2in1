@@ -193,3 +193,29 @@ acceptance test. Nonliving performers are now also rejected by the summon bridge
 
 Both games stopped by exact PID; estate2 main/.bak and probe sources restored/hash-matched, normal
 Release rebuilt/deployed. Private attempts/logs/screenshots stay in rea-workbench/evidence/round181.
+
+## Independent corpses and replacement: round182
+
+Installed corpse_A defines7HP, zero turns/skills, three-round lifetime and can_be_summon_rank=True.
+Native MonsterClass stores that flag at0xf91; EffectApplyInternal's capacity branch excludes eligible
+actor sizes, matching Unity AvailableSummonSpace. Dd1EnemyKit retains corpse/death metadata; the
+scoped factory creates private corpse class/stats/resource and links skeleton death_class to it.
+DD2 m_IsSummonReplacable and the existing bounded front queue consume that rank. Corpse class-change
+resets native round count; m_DeathRound=3 supplies the lifetime. Existing crit/DOT veto is retained.
+
+Native probes PID29684 and28876 both show skeleton death changing the same GUID into the private
+corpse,7/7HP and replaceable=True, then a real boss attack replacing it with a fresh front skeleton.
+The dead-pose log is present and the board returns to four living enemies. Two cases bring the suite
+to882 Core +125 UI =1007 passing tests. An unreplaced corpse's exact expiry remains native-unverified.
+
+The first probe also reduces boss HP below zero using a real source skill ID and observes all three
+linked skeletons become nonliving/remove. That direct damage call bypasses standard skill presentation,
+so the boss remains onscreen. DD2 CombatPresentationBhv handles standard SKILL deaths through skill
+results; a direct call is not a complete lethal attack. The second harness tries native skill/target
+selection but never finds a valid equipped damaging attack at boss rank4. Full victory/return remains
+pending after two attempts; do not count either as completed Faded Memory. Log per-skill validity and
+use a reachable boss rank for the next native acceptance test. No exceptions were found in either log.
+
+Both exact PIDs stopped/waited; estate2 main/.bak and both probe sources restored/hash-matched.
+Normal Release Rebuild/deploy completed with DD2 stopped. Private evidence stays outside Git under
+rea-workbench/evidence/round182; the initial hidden boot PID30128 was stopped before any scene test.

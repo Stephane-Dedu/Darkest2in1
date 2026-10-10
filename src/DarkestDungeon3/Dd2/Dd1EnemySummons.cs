@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using System.Linq;
 using Assets.Code.Actor;
 using Assets.Code.Actor.Events;
 using Assets.Code.Combat;
@@ -35,8 +36,8 @@ internal static class Dd1EnemySummons
                 var (family, tier) = Dd1Bestiary.Split(monster);
                 if (!Dd1EnemyData.TryRegister(family, tier, out _)) return;
             }
-            // Corpses currently occupy ranks. Their DD1 replacement policy is a separate audited slice.
-            int room = Math.Max(0, Math.Min(4, team.GetRoomInTeam()));
+            int room = Dd1SingleSummon.AvailableRanks(team.Actors.Select(a =>
+                (a.Size, Dd1EnemyData.Get(a.ActorDataId)?.Kit is { Corpse: true, CanBeSummonRank: true })));
             bool planned = summon.TryPlan(room,
                 id => Dd1EnemyData.Get(Dd1EnemyData.ActorId(id))?.Kit.Size ?? 0,
                 // DD2's float RNG includes 1; integer Range is exclusive at its upper bound.
@@ -47,7 +48,7 @@ internal static class Dd1EnemySummons
                 return;
             }
             // No pending summon survives a full/changed formation. Zero keeps DD2's normal next-round timing;
-            // exact DD1 initiative and corpse replacement must be verified before live memory activation.
+            // exact DD1 initiative must be verified before live memory activation.
             EventSummonQueueActor.Trigger(team.m_TeamIndex, Dd1EnemyData.ActorId(choice.Monster),
                 SummonLocationType.FRONT, removeAfterProcess: true, isWave: false, addToTurnOrderAfterCurrentTurnIndex: 0);
             Plugin.Log.LogInfo($"[memory summon] {entry.Kit.Id}: queued {choice.Monster} once, front, loot={choice.CanSpawnLoot}");

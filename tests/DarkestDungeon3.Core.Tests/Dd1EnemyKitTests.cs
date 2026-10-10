@@ -75,4 +75,33 @@ public class Dd1EnemyKitTests
         Assert.DoesNotContain("m_DeathChainLootIds", text);
         Assert.DoesNotContain("DeathChain", Dd1EnemyKit.Read(Install, "necromancer", 'A').ActorClassText());
     }
+
+    [Fact]
+    public void InstalledCorpseHasItsOwnNumbersLifetimeAndUsableSummonRank()
+    {
+        var corpse = Dd1EnemyKit.Read(Install, "corpse", 'A');
+        Assert.True(corpse.Corpse);
+        Assert.Equal(7, corpse.Hp);
+        Assert.Equal(0, corpse.Turns);
+        Assert.Empty(corpse.Skills);
+        Assert.Equal(3, corpse.AliveRoundLimit);
+        Assert.True(corpse.CanBeSummonRank);
+        Assert.Contains("m_DeathRound,3,", corpse.ActorClassText());
+        Assert.Contains("m_IsSummonReplacable,True,", corpse.ActorClassText());
+        Assert.Contains("m_IsBattleComplete,True,", corpse.ActorClassText());
+        Assert.DoesNotContain("Loot", corpse.ActorClassText());
+        Assert.Equal("corpse_A", Dd1EnemyKit.Read(Install, "skeleton_common", 'A').DeathClassId);
+        Assert.Null(Dd1EnemyKit.Read(Install, "necromancer", 'A').DeathClassId);
+    }
+
+    [Fact]
+    public void FullFormationCanSummonOverEligibleCorpseButNeverLivingSkeleton()
+    {
+        var corpse = Dd1EnemyKit.Read(Install, "corpse", 'A');
+        var skeleton = Dd1EnemyKit.Read(Install, "skeleton_militia", 'A');
+        var boss = Dd1EnemyKit.Read(Install, "necromancer", 'A');
+        Assert.Equal(1, Dd1SingleSummon.AvailableRanks(new[] { corpse, skeleton, skeleton, boss }.Select(k => (k.Size, k.CanBeSummonRank))));
+        Assert.Equal(0, Dd1SingleSummon.AvailableRanks(new[] { skeleton, skeleton, skeleton, boss }.Select(k => (k.Size, k.CanBeSummonRank))));
+        Assert.Equal(4, Dd1SingleSummon.AvailableRanks(new[] { corpse, corpse, corpse, corpse }.Select(k => (k.Size, k.CanBeSummonRank))));
+    }
 }
