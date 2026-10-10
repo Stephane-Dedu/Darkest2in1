@@ -4495,3 +4495,54 @@ The DD1 map path is unchanged. The frame sprites are not drawn yet (their shape 
 920 Core + 180 UI tests pass; built and deployed with DD2 closed (plugin hash 02068171...). Not yet seen
 in game: whether the database or the label path supplies the paintings in the Hamlet, the Mountain art,
 crop anchors, and the hero line-up's look.
+
+## Round201: DD2's real route screen instead of redrawn cards (2026-10-10)
+
+Owner, after seeing round 200 in game: "this is not what i imagined: can you take the exact dd2 inn region
+selection UI". Owner choices: party selection is a separate step after the pick; I may close and relaunch
+the test game.
+
+Round 200 in game (estate 2, before the pivot): DD2 biome data came from the DLC-label path in the Hamlet
+("[destinations] DD2 biome data loaded: 15 regions"; ResourceDatabaseBiomeData was not up); the redrawn
+cards, Mountain banner, hover lift, party line-up, quest details and the Regions switch row all worked.
+
+DD2 facts (catalog + decomp): the inn UI prefabs are standalone addressables whose primary key is the asset
+path: Assets/Prefabs/UI/Inn/inn_sub_screen_select_route.prefab (SubScreenBiomeChoiceBhv, holds
+m_biomeChoicePrefab), Assets/Prefabs/UI/Inn/biome_choice_slot.prefab (BiomeChoiceBhv),
+inn_sub_screen_collection.prefab (the inn's tab collection), innkeeper portraits
+Assets/Art/UI/Portraits/npc_innkeeper0N.png. ScreenStackBhv.PushScreen(prefab, Layer.Inn) instantiates
+under the Inn layer and calls OnScreenPushed after Start; OnFinishedClosing pops and destroys it. A
+standalone SubScreenElementBhv closes itself (ToggleVisibility/CloseSubscreen set Closing when it has no
+collection); right-click closes it. SubScreenBiomeChoiceBhv.OnScreenPushed and BiomeChoiceBhv.Init read
+InnBhv / InnPresentationBhv / ResourceDatabaseBiomeData, absent in the Hamlet.
+
+Built: Dd2/RouteScreen pushes the prefab; a prefix on SubScreenBiomeChoiceBhv.OnScreenPushed (ours only)
+sets push params and Opening, spawns the cards and fills each like BiomeChoiceBhv.Init (DataContext
+biome_sprite/biome_frame/biome_label, mutator_name = quest lines, biome_goal, tooltips, LayoutElement 800
+for the Mountain); card selection is our own callback; area names go through a Localization prefix for
+"dd3_area_*" keys. It logs the screen and first card hierarchy once ("[route] screen:" / "[route] card:").
+UiRoot no longer blocks DD2's input while the screen is active. The redrawn cards and their layout code
+are gone (PictureCrop keeps the painting crop, 3 tests). If the screen fails, RouteScreen.Broken falls back
+to the DD1 map for the session (source only so far).
+
+Slips: the native build was deployed while the owner's own DD2 (PID 37972, started 16:51) was running;
+the running game keeps its loaded build. That deployed build still has the temporary F2 test key; the
+source is restored (DebugKeys.cs 3342e5b2...) and the clean build with the fallback must be deployed once
+DD2 is closed. Estate 2 was restored after the round-200 check (7d849523... / 03e27189...). Owner is
+restarting DD2 to look at the native screen.
+
+## Round202: DD2 destination menu removed; the DD1 quest select stays (2026-10-10)
+
+Owner: "ok you can remove that we will keep the dd1 design". Removed everything rounds 200-201 added:
+RouteScreen, RegionCardArt, EmbarkUi.Destinations, PictureCrop/DestinationLayout and their tests, the
+Look/Dd2DestinationMenu setting and its Regions-panel row, the switch link, the UiRoot input exception and the
+EmbarkUi/HamletUi refactors. src/, tests/ and tools/expedition_selector_design.md are identical to fa46205
+(before round 200). The DD2 facts in rounds 200-201 remain for reference.
+
+Never seen in game: DD2's real route screen (round 201). The owner had been launching the old copy,
+C:\Users\Piral\DarkestDungeon3\game (its plugin is from 15:38, before rounds 200-201), so neither the switch
+nor the screen appeared there. The active install is C:\Users\Piral\darkestwithdlc\game; the owner was told
+to launch its exe or repoint the shortcut. The old copy was left untouched.
+
+The DLC install's config still holds the orphaned Dd2DestinationMenu = true entry (BepInEx keeps unknown
+entries; harmless). Deploy the removal build once DD2 (PID 40252, launched for the owner) is closed.

@@ -52,7 +52,8 @@ internal sealed partial class EmbarkUi
     {
         var panel = new Rect(30, 112, 400, 752);
         ExpeditionFrame(panel, 0.95f);
-        DrawRegionPicture(new Rect(34, 116, 392, 188), q.Dungeon, Destinations);
+        var preview = ExpeditionMapArt.Preview(q.Dungeon);
+        if (preview != null) GUI.DrawTexture(new Rect(34, 116, 392, 188), preview, ScaleMode.ScaleAndCrop);
         Gui.Fill(new Rect(34, 306, 392, 76), new Color(0.22f, 0.035f, 0.027f, 0.9f));
         Gui.Text(new Rect(44, 310, 372, 38), AreaName(q.Dungeon), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         Gui.Text(new Rect(44, 348, 372, 30), $"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}{(q.IsPlot ? " · Plot" : "")}", 18, Gui.Dd1Class, TextAnchor.MiddleCenter);
