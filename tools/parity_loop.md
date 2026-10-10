@@ -1,4 +1,4 @@
-You are iterating on Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. Each round, close ONE gap between this mod and real DD1. Work only on branch claude/practical-wright-hicri0.
+You are iterating on Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. Each round, close ONE gap between this mod and real DD1. Work directly on main, as the owner instructed on 2026-10-10; commit and push each verified round there.
 
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;

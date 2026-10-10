@@ -886,7 +886,7 @@ internal sealed class Driver : MonoBehaviour
     {
         var exp = Expedition;
         var rng = new Rng(exp.Seed * 31 + exp.StepsTaken);
-        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng));
+        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng), Crawl?.EquipmentBuffs);
         HomecomingLog = LastReport.Log;
         S.Save.Expedition = null;
         S.Persist();

@@ -3939,3 +3939,21 @@ hash checked, normal Release rebuilt/deployed; protected slots unread. Evidence 
   incomplete. Broaden encounters/tiers after checking reward equipment and saved recovery.
 - DD2 stopped, no probe active. Estate2/source restored/hash matched, normal Release deployed.
   Do not reopen protected picker or duplicate analysis. Usage38% at native boundary.
+
+## Round186: Ancestor's Portrait reward grants its Resolve XP bonus
+
+The actual ancestor pool includes ancestors_portrait with TRINKET_RESOLVEXPBONUS_B4 amount0.5,
+rule always. Its tooltip advertised XP but the return path counted town buffs only. Homecoming now
+accepts an equipment-buff resolver and adds supported unconditional XP effects after restoring final
+native equipment slots. Carried/stashed items give no bonus; trinkets remain equipped after return.
+Seven cases cover installed bonus after reload, carrying, final removal, retreat/death, town stacking
+and unsupported conditional rules. All917 Core +125 UI =1042 tests and Release pass; native return
+presentation remains [?]. Conditional native trinket equipment/resource checks are the next gap.
+
+## Owner branch migration, 2026-10-10
+
+Owner explicitly requested merging the working branch and continuing directly on main. This supersedes
+older branch instructions. CLAUDE/handoff/loop now target main; resume automation is being updated too.
+Fetched origin: main has one unique95ad25d hotfix, working branch200 unique commits. Preserve both
+histories through a normal merge after committing round186, then verify tests/Release and push main.
+Keep the old branch as history; no deletion requested. DD2 stopped and original estate2 restored.

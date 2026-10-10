@@ -1,4 +1,4 @@
-You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch claude/practical-wright-hicri0). Earlier Claude sessions did the work so far, round by round; continue in exactly the same way, from the next round number in MODLOG.md.
+You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
@@ -13,7 +13,7 @@ Faded Memory and Haunting Memories now have owner-defined rules in tools/faded_m
 Read it for their placement, sprite-only transformation, two victory rewards and future switch retirement.
 
 ## Start
-1. In C:\Users\Piral\DarkestDungeon3\mod: `git checkout claude/practical-wright-hicri0` and `git pull --rebase`.
+1. In C:\Users\Piral\DarkestDungeon3\mod: inspect `git status`, switch to `main` with a clean tree, and `git pull --ff-only`. Preserve any local work or divergent remote commits before proceeding.
 2. Read CLAUDE.md (owner's rules, machine paths, build/test/drive, skills), then the last "## Status" section at the end of MODLOG.md (where things stand, what to check first, anything pending), then PARITY.md (the checklist against real DD1).
 3. Owner authorized launching DD1, DD2 and the mod for tests on 2026-10-09. Use estate 2 only; protected estates remain off limits. Deploy only while DD2 is stopped.
 

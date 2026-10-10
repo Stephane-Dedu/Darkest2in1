@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DarkestDungeon3.Core.Expedition;
+using DarkestDungeon3.Core.Dd1;
 
 namespace DarkestDungeon3.Core.Campaign;
 
@@ -60,7 +61,8 @@ public static class Homecoming
     }
 
     public static HomecomingReport Report(Estate estate, Dd1Campaign dd1, ExpeditionState expedition, IEnumerable<HeroOutcome> outcomes,
-                                          ItemCatalog items = null, Func<string, string> trinketOfRarity = null)
+                                          ItemCatalog items = null, Func<string, string> trinketOfRarity = null,
+                                          Func<string, IEnumerable<Dd1Buff>> equipmentBuffs = null)
     {
         var report = new HomecomingReport { Quest = expedition.Quest };
         var log = report.Log;
@@ -169,6 +171,7 @@ public static class Homecoming
                 // Town events can send a party off with a resolve bonus (DD1 resolve_xp_bonus_percent).
                 float bonus = expedition.PendingBuffs.TryGetValue(hero.Id, out var buffs)
                     ? buffs.Select(b => dd1.Buffs?.Get(b)).Where(b => b?.Stat == "resolve_xp_bonus_percent").Sum(b => b.Amount) : 0f;
+                bonus += equipmentBuffs?.Invoke(hero.Id)?.Where(b => b?.Stat == "resolve_xp_bonus_percent" && b.Rule == "always").Sum(b => b.Amount) ?? 0f;
                 result.XpGained = (int)Math.Round(ResolveXp(quest) * (1f + bonus));
                 hero.ResolveXp += result.XpGained;
                 if (buffs != null)
