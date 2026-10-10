@@ -10,17 +10,17 @@ namespace DarkestDungeon3.Ui;
 /// <summary>
 /// DD1's Trinket Inventory (campaign/town/realm_inventory, realm_inventory.layout and the DD1 Unity port's window):
 /// its chest background, icon and title, the "Hold [SHIFT] to sell" line, the unequip-all and three sort buttons
-/// with the current-sort marker, and the trinkets in a 7-column grid (80 x 160) with DD1's grid lines and scroll
+/// with the current-sort marker, and the trinkets in a clipped 7-column grid (80 x 160) with DD1's grid lines and scroll
 /// arrows. Opened from the estate bar; it stays open beside a hero's sheet, whose trinket slots take trinkets
 /// dragged from it (and give them back when dropped on it). Shift-click sells, after DD1's question.
 /// </summary>
 internal static class RealmInventory
 {
     public static readonly Vector2 O = new(881, 128);
-    private const int Columns = 7, VisibleRows = 3;
+    private const int Columns = 7, VisibleRows = 4;
     private static readonly Vector2 Grid = new(30, 195);       // inventory_grid_pos
     private static readonly Vector2 Cell = new(80, 160);       // grid offset
-    private static int _top;                                   // first visible row
+    private static Vector2 _scroll;
     private static string _sort;                               // "class", "rarity", "name"
     private static bool _descending;
     private static string _sellAsk;                            // the trinket DD1 asks about before selling
@@ -68,45 +68,45 @@ internal static class RealmInventory
         // A worn trinket dropped anywhere on the window comes off (back to the stash).
         if (Drag.Hovering<TrinketDrag>(panel) && Drag.Payload is TrinketDrag worn && worn.FromHero != null)
             Gui.Fill(new Rect(panel.x + 20, panel.yMax - 14, panel.width - 40, 4), Gui.Gold);
-        if (Drag.Drop<TrinketDrag>(panel, out var back) && back.FromHero != null && E.Hero(back.FromHero) is { } wearer && wearer.Trinkets.Remove(back.TrinketId))
+        if (Drag.Drop<TrinketDrag>(panel, out var back) && back.FromHero != null && E.Hero(back.FromHero) is { } wearer &&
+            wearer.TrinketAt(back.FromSlot) == back.TrinketId && Core.Campaign.Town.TrinketEquipment.Unequip(E, wearer, back.FromSlot))
         {
-            E.Trinkets.Add(back.TrinketId);
             Dd1Audio.Play("/ui/dun/trink_unqeuip");
             S.Persist();
             return;
         }
 
-        // The grid: DD1's lines under the trinkets, three rows at a time, scrolled by the wheel or the arrows.
+        // DD1's 525-pixel viewport clips the fourth 160-pixel row. Pixel scrolling lets the last row come fully
+        // into view instead of limiting the grid to three complete rows.
         var trinkets = E.Trinkets;
         int rows = Mathf.Max(1, (trinkets.Count + Columns - 1) / Columns);
-        _top = Mathf.Clamp(_top, 0, Mathf.Max(0, rows - VisibleRows));
-        var gridArea = At(Grid.x, Grid.y, Columns * Cell.x, VisibleRows * Cell.y);
-        if (Event.current.type == EventType.ScrollWheel && gridArea.Contains(Event.current.mousePosition))
-        {
-            _top = Mathf.Clamp(_top + (Event.current.delta.y > 0 ? 1 : -1), 0, Mathf.Max(0, rows - VisibleRows));
-            Event.current.Use();
-        }
+        const float viewHeight = 525;
+        float maxScroll = Mathf.Max(0, rows * Cell.y - viewHeight);
+        _scroll.y = Mathf.Clamp(_scroll.y, 0, maxScroll);
+        var gridArea = At(Grid.x, Grid.y, Columns * Cell.x, viewHeight);
+        bool insideGrid = gridArea.Contains(Event.current.mousePosition);
+        _scroll = GUI.BeginScrollView(gridArea, _scroll, new Rect(0, 0, gridArea.width, Mathf.Max(viewHeight, rows * Cell.y)),
+            false, false, GUIStyle.none, GUIStyle.none);
+        int firstRow = Mathf.FloorToInt(_scroll.y / Cell.y);
         var vGrid = Ri("realminventory_v_grid.png");
         var hGrid = Ri("realminventory_h_grid.png");
-        for (int row = 0; row < VisibleRows; row++)
+        for (int row = firstRow; row < Mathf.Min(rows, firstRow + VisibleRows + 1); row++)
         {
-            float y = O.y + Grid.y + row * Cell.y;
-            if (vGrid != null) GUI.DrawTexture(new Rect(O.x + Grid.x + 74, y - 10, vGrid.width, vGrid.height), vGrid);
-            if (hGrid != null && row < VisibleRows - 1) GUI.DrawTexture(new Rect(O.x + Grid.x + 280 - hGrid.width / 2f, y + 150, hGrid.width, hGrid.height), hGrid);
+            float y = row * Cell.y;
+            if (vGrid != null) GUI.DrawTexture(new Rect(74, y - 10, vGrid.width, vGrid.height), vGrid);
+            if (hGrid != null && row < rows - 1) GUI.DrawTexture(new Rect(280 - hGrid.width / 2f, y + 150, hGrid.width, hGrid.height), hGrid);
         }
-        for (int i = 0; i < VisibleRows * Columns; i++)
+        for (int index = firstRow * Columns; index < Mathf.Min(trinkets.Count, (firstRow + VisibleRows + 1) * Columns); index++)
         {
-            int index = _top * Columns + i;
-            if (index >= trinkets.Count) break;
             string id = trinkets[index];
-            var r = At(Grid.x + (i % Columns) * Cell.x, Grid.y + (i / Columns) * Cell.y, 72, 144);
-            bool fits = hero == null || S.Catalog.TrinketFits(id, hero.ClassId);
-            if (!shift) Drag.Source(r, new TrinketDrag(id), rect => HeroSheet.TrinketIcon(rect, id));
+            var r = new Rect((index % Columns) * Cell.x, (index / Columns) * Cell.y, 72, 144);
+            bool fits = hero == null || Enumerable.Range(0, 2).Any(slot => Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, id, null, index, hero, slot) == null);
+            if (!shift && insideGrid) Drag.Source(r, new TrinketDrag(id, null, index), rect => HeroSheet.TrinketIcon(rect, id));
             var old = GUI.color;
             if (!fits) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
-            if (!(Drag.Payload is TrinketDrag d && d.FromHero == null && d.TrinketId == id && Drag.Active)) HeroSheet.TrinketIcon(r, id);
+            if (!(Drag.Payload is TrinketDrag d && d.FromHero == null && d.FromSlot == index && Drag.Active)) HeroSheet.TrinketIcon(r, id);
             GUI.color = old;
-            if (!r.Contains(Event.current.mousePosition) || Drag.Active) continue;
+            if (!insideGrid || !r.Contains(Event.current.mousePosition) || Drag.Active) continue;
             hovered = id;
             if (shift && Gui.Hotspot(r))
             {
@@ -114,14 +114,15 @@ internal static class RealmInventory
                 else _sellAsk = id;
             }
         }
-        if (rows > VisibleRows)
+        GUI.EndScrollView();
+        if (maxScroll > 0)
         {
             var up = At(594, Grid.y - 6, 50, 40);
-            var down = At(594, Grid.y + VisibleRows * Cell.y - 46, 50, 40);
-            if (_top > 0 && Ri("realm_inventory_uparrow.png") is { } ua) GUI.DrawTexture(up, ua, ScaleMode.ScaleToFit);
-            if (_top < rows - VisibleRows && Ri("realm_inventory_downarrow.png") is { } da) GUI.DrawTexture(down, da, ScaleMode.ScaleToFit);
-            if (_top > 0 && Gui.Hotspot(up)) _top--;
-            if (_top < rows - VisibleRows && Gui.Hotspot(down)) _top++;
+            var down = At(594, Grid.y + viewHeight - 46, 50, 40);
+            if (_scroll.y > 0 && Ri("realm_inventory_uparrow.png") is { } ua) GUI.DrawTexture(up, ua, ScaleMode.ScaleToFit);
+            if (_scroll.y < maxScroll && Ri("realm_inventory_downarrow.png") is { } da) GUI.DrawTexture(down, da, ScaleMode.ScaleToFit);
+            if (_scroll.y > 0 && Gui.Hotspot(up)) _scroll.y = Mathf.Max(0, _scroll.y - Cell.y);
+            if (_scroll.y < maxScroll && Gui.Hotspot(down)) _scroll.y = Mathf.Min(maxScroll, _scroll.y + Cell.y);
         }
         if (trinkets.Count == 0)
             Gui.Text(At(40, Grid.y + 120, 580, 40), "No trinkets. The Nomad Wagon sells them; expeditions find them.", 19, Gui.Dd1Class, TextAnchor.MiddleCenter);
@@ -135,7 +136,7 @@ internal static class RealmInventory
         }
         else Gui.Text(At(150, 92, 300, 30), Str("realm_inventory_trinket_sell_instruction", "Hold [SHIFT] to Sell Trinkets"), 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
-        if (hovered != null && _sellAsk == null) Gui.Tip(HeroSheet.TrinketText(hovered), HeroSheet.RarityColour(hovered));
+        if (hovered != null && _sellAsk == null) HeroSheet.TrinketTip(hovered);
         if (_sellAsk != null) AskToSell();
     }
 

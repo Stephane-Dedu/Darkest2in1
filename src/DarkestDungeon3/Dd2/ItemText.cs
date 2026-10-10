@@ -1,49 +1,62 @@
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using DarkestDungeon3.Core.Dd2Data;
 
 namespace DarkestDungeon3.Dd2;
 
-/// <summary>DD2's own description of an item (a trinket's effects), as plain text for our DD1 tooltips.</summary>
+/// <summary>DD2 effects for DD1 tooltips, including the cold Hamlet before run libraries exist.</summary>
 internal static class ItemText
 {
     private static readonly Dictionary<string, string> Cache = new();
+    private static object _library, _language;
+    private static Task<TrinketDescriptions> _reading;
     private static bool _warned;
 
-    /// <summary>The effects DD2 lists for this item, one per line, or null.</summary>
+    public static void Prime()
+    {
+        if (_reading != null) return;
+        string path = UnityEngine.Application.streamingAssetsPath;
+        _reading = Task.Run(() => TrinketDescriptions.Load(path));
+    }
+
     public static string Effects(string itemId)
     {
         if (itemId == null) return null;
-        if (Cache.TryGetValue(itemId, out var text)) return text;
+        Prime();
+        var library = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Item.ItemDefinition>>.Instance;
+        var loc = Assets.Code.Utils.Singleton<Assets.Code.Locale.Localization>.Instance;
+        object language = loc?.GetLanguage();
+        if (!ReferenceEquals(_library, library) || !ReferenceEquals(_language, language))
+        {
+            Cache.Clear();
+            _library = library;
+            _language = language;
+        }
+        if (Cache.TryGetValue(itemId, out var cached)) return cached;
         try
         {
-            var library = Assets.Code.Utils.SingletonMonoBehaviour<Assets.Code.Library.Library<string, Assets.Code.Item.ItemDefinition>>.Instance;
-            var def = library?.GetLibraryElement(itemId);
-            if (def != null)
-                text = Plain(Assets.Code.Item.ItemDescription.GetDescription(def, 1, false, 0, false, false, hideTitle: true, showBlockedItems: false, showItemTag: false));
+            // TryGet avoids triggering the library's empty-library validation while it is loading.
+            if (library != null && library.IsInitializationFinished() && library.TryGetLibraryElement(itemId, out var def) && def != null)
+            {
+                string text = TrinketDescriptions.Plain(Assets.Code.Item.ItemDescription.GetDescription(def, 1, false, 0, false, false,
+                    hideTitle: true, showBlockedItems: false, showItemTag: false), key => loc?.TryGetString(key));
+                if (!string.IsNullOrWhiteSpace(text)) return Cache[itemId] = text;
+            }
         }
-        catch (Exception e)
+        catch (Exception e) { Warn(e); }
+        // Do not cache misses or fallbacks: native libraries and localization can become ready next frame.
+        if (_reading.IsCompleted)
         {
-            if (!_warned) Plugin.Log.LogWarning("[items] description: " + e.Message);
-            _warned = true;
+            try { return _reading.GetAwaiter().GetResult().Effects(itemId, out _, key => loc?.TryGetString(key)); }
+            catch (Exception e) { Warn(e); }
         }
-        return Cache[itemId] = text;
+        return null;
     }
 
-    /// <summary>DD2's rich text as plain lines: icons become their names, other tags go, blank lines collapse.</summary>
-    private static string Plain(string rich)
+    private static void Warn(Exception e)
     {
-        if (string.IsNullOrEmpty(rich)) return null;
-        string s = Regex.Replace(rich, "<sprite[^>]*name=\"?([A-Za-z0-9_]+)\"?[^>]*>", m => Pretty(m.Groups[1].Value) + " ");
-        s = Regex.Replace(s, "<[^>]*>", "");
-        s = Regex.Replace(s, @"[ \t]+", " ");
-        s = Regex.Replace(s, @"\s*\n\s*", "\n").Trim();
-        return s.Length == 0 ? null : s;
-    }
-
-    private static string Pretty(string id)
-    {
-        string s = id.Replace("token_", "").Replace("icon_", "").Replace('_', ' ').Trim();
-        return s.Length == 0 ? s : char.ToUpperInvariant(s[0]) + s.Substring(1);
+        if (!_warned) Plugin.Log.LogWarning("[items] description: " + e.Message);
+        _warned = true;
     }
 }

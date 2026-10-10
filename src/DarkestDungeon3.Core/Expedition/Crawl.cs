@@ -25,12 +25,13 @@ public sealed class Crawl
         _rules = rules;
         _party = party;
         _content = content;
+        State.PendingCurio?.RestoreLootLinks();
     }
 
     /// <summary>The untouched curio where the party stands (room or hall square), if any.</summary>
     public string CurioHere =>
         State.InRoom
-            ? (CurrentRoom.CurioId != null && !CurrentRoom.CurioTaken && !IsBlocked ? CurrentRoom.CurioId : null)
+            ? (!IsBlocked && FadedMemory.Here(State) ? FadedMemory.CurioId : CurrentRoom.CurioId != null && !CurrentRoom.CurioTaken && !IsBlocked ? CurrentRoom.CurioId : null)
             : (CurrentTile is { Content: HallContent.Curio, Resolved: false } t ? t.ContentId : null);
 
     /// <summary>
@@ -40,24 +41,96 @@ public sealed class Crawl
     public CurioReport InteractCurio(string heroId, string itemId, out List<LootDrop> overflow)
     {
         overflow = new List<LootDrop>();
+        if (!CanNavigate || heroId == null || !_party.Alive.Contains(heroId)) return null;
         string curio = CurioHere;
         if (curio == null) return null;
+        if (curio == FadedMemory.CurioId) return null; // the encounter controller owns entry; supplies cannot consume it
 
         bool isGoal = State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal;
-        if (isGoal && State.Goal != null) return InteractQuestCurio(curio, heroId, itemId);
+        if (isGoal && State.Goal != null)
+        {
+            var questReport = InteractQuestCurio(curio, heroId, itemId);
+            overflow.AddRange(questReport.LeftBehind);
+            return State.PendingCurio = questReport;
+        }
         if (_content?.Curios == null) return null;
 
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
         if (State.InRoom) CurrentRoom.CurioTaken = true;
         else CurrentTile.Resolved = true;
+        var pickRng = NextRng();
+        for (int i = 0; i < report.Loot.Count; i++) report.Loot[i] = LootDrop.ResolveTrinket(report.Loot[i], TrinketOfRarity, pickRng);
 
         foreach (var drop in report.Loot)
         {
-            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items)) State.Pack.Add(drop.Key, drop.Amount);
-            else overflow.Add(drop);
+            if (!State.Pack.TryTake(drop, _content.Items)) { overflow.Add(drop); report.LeftBehind.Add(drop); }
         }
-        return report;
+        return State.PendingCurio = report;
     }
+
+    public CurioReport LastCurio => State.PendingCurio;
+
+    public bool DismissCurio(CurioReport report)
+    {
+        if (State.Ended || report == null || report != LastCurio || !CanLeave(report.LeftBehind)) return false;
+        State.PendingCurio = null;
+        return true;
+    }
+
+    /// <summary>DD1's loot scroll: take as much of a waiting drop as fits, retaining its remainder.</summary>
+    public bool TakeLeftBehind(List<LootDrop> leftBehind, int index, List<LootDrop> taken = null)
+    {
+        if (State.Ended || leftBehind == null || index < 0 || index >= leftBehind.Count) return false;
+        var drop = leftBehind[index];
+        int amount = State.Pack.TakePartial(drop, _content.Items);
+        if (amount == 0) return false;
+        if (amount == drop.Amount)
+        {
+            leftBehind.RemoveAt(index);
+            taken?.Add(drop);
+        }
+        else
+        {
+            taken?.Add(new LootDrop { Type = drop.Type, Id = drop.Id, Amount = amount });
+            drop.Amount -= amount;
+        }
+        if (State.Goal?.Type == "gather")
+        {
+            if (State.PendingCurio is { OutcomeType: "Quest" } report)
+                report.Text = $"Quest objective {QuestCurioProgress(State)}/{State.Goal.Amount}.";
+            CheckQuest();
+        }
+        return true;
+    }
+
+    /// <summary>Gather progress is held quest items; activation progress is resolved quest curios.</summary>
+    public static int QuestCurioProgress(ExpeditionState state) => state?.Goal?.Type == "gather"
+        ? string.IsNullOrEmpty(state.Goal.QuestItem) ? 0 : state.Pack.Count(ItemCatalog.QuestKey(state.Goal.QuestItem))
+        : state?.GoalProgress ?? 0;
+
+    /// <summary>DD1: shift+click a pack item to throw one away (quest items can't be).</summary>
+    public bool Discard(string key)
+    {
+        if (State.Ended || string.IsNullOrEmpty(key) || IsQuestItem(key)) return false;
+        return State.Pack.TryUse(key, 1);
+    }
+
+    /// <summary>DD1 won't close a loot scroll that still holds a quest item.</summary>
+    public static bool CanLeave(IEnumerable<LootDrop> leftBehind) => leftBehind == null || !leftBehind.Any(d => IsQuestItem(d.Key));
+
+    /// <summary>Explicit returns wait for events/camp to finish and respect the quest's retreat policy.</summary>
+    public bool CanLeaveExpedition => CanNavigate
+        && (State.QuestComplete || State.Quest?.CanRetreat != false);
+
+    public bool TryLeave()
+    {
+        if (!CanLeaveExpedition) return false;
+        if (State.QuestComplete) State.Ended = true;
+        else Retreat();
+        return State.Ended;
+    }
+
+    private static bool IsQuestItem(string key) => key != null && key.StartsWith("quest_item+", StringComparison.Ordinal);
 
     /// <summary>The item an inventory-activate quest curio needs (e.g. holy water for a corrupted altar), or null.</summary>
     public string QuestItemNeededHere
@@ -86,12 +159,13 @@ public sealed class Crawl
         }
         else if (goal.Type == "gather" && goal.QuestItem != null)
         {
-            State.Pack.Add(ItemCatalog.QuestKey(goal.QuestItem), 1);
-            report.Loot.Add(new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 });
+            var drop = new LootDrop { Type = "quest_item", Id = goal.QuestItem, Amount = 1 };
+            report.Loot.Add(drop);
+            if (_content?.Items == null || !State.Pack.TryTake(drop, _content.Items)) report.LeftBehind.Add(drop);
         }
 
         State.GoalProgress++;
-        report.Text = $"Quest objective {State.GoalProgress}/{goal.Amount}.";
+        report.Text = $"Quest objective {QuestCurioProgress(State)}/{goal.Amount}.";
         if (State.InRoom) CurrentRoom.CurioTaken = true;
         else CurrentTile.Resolved = true;
         CheckQuest();
@@ -101,6 +175,8 @@ public sealed class Crawl
     /// <summary>Walk past a curio without touching it.</summary>
     public void SkipCurio()
     {
+        if (!CanNavigate) return;
+        if (CurioHere == FadedMemory.CurioId) return;
         // A quest curio is never skipped for good: the quest needs it.
         if (State.InRoom) { if (CurrentRoom.CurioId != null && !CurrentRoom.IsQuestGoal) CurrentRoom.CurioTaken = true; }
         else if (CurrentTile is { Content: HallContent.Curio, IsQuestGoal: false } t) t.Resolved = true;
@@ -111,6 +187,12 @@ public sealed class Crawl
     public Room CurrentRoom => State.InRoom ? Map.Room(State.RoomId) : null;
     public Corridor CurrentCorridor => State.CorridorId >= 0 ? Map.Corridor(State.CorridorId) : null;
     public HallTile CurrentTile => !State.InRoom && CurrentCorridor != null ? CurrentCorridor.Tiles[State.TileIndex] : null;
+
+    private bool HasPendingEvent => State.PendingCurio != null || State.PendingSpoils != null || State.PendingEncounter != null;
+
+    /// <summary>Traversal waits for the current event, loot, camp or encounter to finish.
+    /// Destination obstacles are separate: the party may still back away from an unopened obstacle or trap.</summary>
+    public bool CanNavigate => !State.Ended && !HasPendingEvent && State.Camp == null;
 
     /// <summary>A fight or obstacle the party has to deal with before it can go on.</summary>
     public bool IsBlocked =>
@@ -124,17 +206,56 @@ public sealed class Crawl
     public List<CrawlEvent> Begin()
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
+        if (State.Started) return Resume();
         State.Started = true;
         State.RoomId = Map.EntranceRoomId;
-        EnterRoom(Map.Room(State.RoomId));
+        EnterRoom(Map.Room(State.RoomId), enteringDungeon: true);
         return Flush();
     }
+
+    public bool CanResume => ExpeditionRecovery.PositionIsValid(State);
+
+    /// <summary>Present an interrupted crawl at its saved spot without walking, scouting, eating or rolling again.</summary>
+    public List<CrawlEvent> Resume()
+    {
+        _events.Clear();
+        if (!CanResume) return Blocked();
+        if (State.InRoom) Emit(CrawlEventType.EnteredRoom, roomId: State.RoomId);
+        else Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
+        var saved = ExpeditionFight.Presentation(State) ?? State.PendingEncounter;
+        bool atSpot = saved != null && (State.InRoom ? saved.RoomId == State.RoomId
+            : saved.RoomId == -1 && saved.CorridorId == State.CorridorId && saved.TileIndex == State.TileIndex);
+        if (atSpot && saved.Type is CrawlEventType.Battle or CrawlEventType.Ambush)
+            _events.Add(CopyEncounter(saved));
+        else if (State.Camp == null)
+        {
+            // Older saves have no surprise snapshot; don't invent or reroll one.
+            if (State.InRoom && CurrentRoom.HasBattle && !CurrentRoom.Cleared)
+                Emit(CrawlEventType.Battle, roomId: State.RoomId);
+            else if (!State.InRoom && CurrentTile is { Resolved: false } tile)
+            {
+                if (tile.Content == HallContent.Battle) Emit(CrawlEventType.Battle, tile: tile);
+                else if (tile.Content == HallContent.Obstacle) Emit(CrawlEventType.Obstacle, tile: tile, contentId: tile.ContentId);
+                else if (tile.Content == HallContent.Trap && tile.Scouted) Emit(CrawlEventType.Trap, tile: tile, contentId: tile.ContentId);
+            }
+            if (LastCurio == null && CurioHere is { } curio) Emit(CrawlEventType.Curio, roomId: State.InRoom ? State.RoomId : -1,
+                tile: CurrentTile, contentId: curio);
+        }
+        return Flush();
+    }
+
+    private static CrawlEvent CopyEncounter(CrawlEvent e) => new()
+    {
+        Type = e.Type, RoomId = e.RoomId, CorridorId = e.CorridorId, TileIndex = e.TileIndex,
+        ContentId = e.ContentId, HeroesSurprised = e.HeroesSurprised, MonstersSurprised = e.MonstersSurprised
+    };
 
     /// <summary>From a room, step into the corridor leading to a neighbouring room.</summary>
     public List<CrawlEvent> Travel(int toRoomId)
     {
         _events.Clear();
-        if (!State.InRoom || IsBlocked) return Blocked();
+        if (!CanNavigate || !State.InRoom || IsBlocked) return Blocked();
         var corridor = Map.FindCorridor(State.RoomId, toRoomId);
         if (corridor == null) return Blocked();
 
@@ -146,15 +267,61 @@ public sealed class Crawl
         return Flush();
     }
 
+    public bool CanEnterSecretRoom => CanNavigate && !State.InRoom && !IsBlocked
+        && CurrentTile is { SecretRoomId: >= 0 } tile && tile.SecretRoomId < Map.Rooms.Count
+        && Map.Room(tile.SecretRoomId).IsSecret
+        && (tile.SecretDoorAlwaysAccessible || Map.Room(tile.SecretRoomId).Scouted || Map.Room(tile.SecretRoomId).Visited);
+
+    public List<CrawlEvent> EnterSecretRoom()
+    {
+        _events.Clear();
+        if (!CanEnterSecretRoom) return Blocked();
+        var secret = Map.Room(CurrentTile.SecretRoomId);
+        State.SecretReturnCorridorId = State.CorridorId;
+        State.SecretReturnTileIndex = State.TileIndex;
+        State.SecretReturnHeadingRoomId = State.HeadingRoomId;
+        State.RoomId = secret.Id;
+        State.CorridorId = State.TileIndex = State.HeadingRoomId = -1;
+        secret.Scouted = true;
+        EnterRoom(secret);
+        return Flush();
+    }
+
+    public List<CrawlEvent> ExitSecretRoom()
+    {
+        _events.Clear();
+        if (!CanNavigate || CurrentRoom?.IsSecret != true || IsBlocked
+            || State.SecretReturnCorridorId < 0 || State.SecretReturnCorridorId >= Map.Corridors.Count) return Blocked();
+        var corridor = Map.Corridor(State.SecretReturnCorridorId);
+        if (State.SecretReturnTileIndex < 0 || State.SecretReturnTileIndex >= corridor.Tiles.Count
+            || corridor.Tiles[State.SecretReturnTileIndex].SecretRoomId != State.RoomId
+            || (State.SecretReturnHeadingRoomId != corridor.RoomA && State.SecretReturnHeadingRoomId != corridor.RoomB)) return Blocked();
+        State.RoomId = -1;
+        State.CorridorId = corridor.Id;
+        State.TileIndex = State.SecretReturnTileIndex;
+        State.HeadingRoomId = State.SecretReturnHeadingRoomId;
+        State.SecretReturnCorridorId = State.SecretReturnTileIndex = State.SecretReturnHeadingRoomId = -1;
+        // Returning to the same square replays no movement, stress, light, hunger or ambush effects.
+        Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
+        return Flush();
+    }
+
     /// <summary>Walk one square toward the room the party is heading for (forward) or back the way it came.</summary>
     public List<CrawlEvent> Step(bool forward)
     {
         _events.Clear();
-        if (State.InRoom) return Blocked();
+        if (!CanNavigate || State.InRoom) return Blocked();
         var tile = CurrentTile;
         // An unresolved fight pins the party; an obstacle only blocks the way forward.
         if (!tile.Resolved && (tile.Content == HallContent.Battle || (forward && tile.Content == HallContent.Obstacle)))
             return Blocked();
+
+        // DD1: passing an armed trap springs it even when spotted. Backing away leaves it alone.
+        if (forward && !tile.Resolved && tile.Content == HallContent.Trap)
+        {
+            TriggerTrap(tile, scouted: false);
+            return Flush();
+        }
 
         var corridor = CurrentCorridor;
         int towardB = State.HeadingRoomId == corridor.RoomB ? 1 : -1;
@@ -187,6 +354,7 @@ public sealed class Crawl
     public List<CrawlEvent> FleeBattle()
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
         if (State.InRoom)
         {
             var corridor = State.CameFromCorridorId >= 0 ? Map.Corridor(State.CameFromCorridorId) : null;
@@ -212,17 +380,30 @@ public sealed class Crawl
             }
             else State.TileIndex = back;
         }
+        State.PendingEncounter = null;
+        State.FightCheckpoint = null;
         Emit(CrawlEventType.Retreated);
         return Flush();
     }
 
     /// <summary>Report a won fight at the party's current spot.</summary>
-    /// <summary>The loot of the last fight won (DD1 rules, see <see cref="BattleLoot"/>).</summary>
-    public BattleSpoils LastSpoils { get; private set; }
+    /// <summary>The last battle or camping loot batch, including drops that still need pack space.</summary>
+    public BattleSpoils LastSpoils { get => State.PendingSpoils; private set => State.PendingSpoils = value; }
+
+    /// <summary>Close the current loot scroll; DD1 won't leave quest items, and a stale scroll can't clear a new one.</summary>
+    public bool DismissSpoils(BattleSpoils report)
+    {
+        if (State.Ended || report == null || report != LastSpoils || !CanLeave(report.LeftBehind)) return false;
+        State.PendingSpoils = null;
+        return true;
+    }
 
     public List<CrawlEvent> ResolveBattle()
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
+        State.PendingEncounter = null;
+        State.FightCheckpoint = null;
         State.BattlesWon++;
         LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
         CountDownBuffs();
@@ -279,7 +460,15 @@ public sealed class Crawl
     /// (bleed, blight and horror don't outlast a DD2 fight, so bandages, antivenom and laudanum wait for curios).</summary>
     public string UseSupply(string heroId, string key)
     {
-        if (heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (State.Ended || heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (key == Supply.Food)
+        {
+            // DD1: a provision eaten from the pack heals provision_hp_heal (5%) of max HP.
+            if (_party.HpFraction(heroId) >= 1f) return null;
+            if (!State.Pack.TryUse(Supply.Food)) return null;
+            _party.Heal(heroId, _rules.ProvisionHeal);
+            return $"Ate a provision: +{Math.Round(_rules.ProvisionHeal * 100)}% health.";
+        }
         if (key == Supply.HolyWater)
         {
             if (!State.Pack.TryUse(Supply.HolyWater)) return null;
@@ -298,12 +487,17 @@ public sealed class Crawl
     /// <summary>Where the party stands, as a key for the fight waiting there.</summary>
     private string FightSpot => State.InRoom ? "room:" + State.RoomId : $"hall:{State.CorridorId}:{State.TileIndex}";
 
-    /// <summary>The DD1 monsters of the fight about to start here: DD1's encounter table for the zone and quest
-    /// difficulty (hall, room, boss). After a retreat the same group is still waiting at that spot.</summary>
+    /// <summary>The DD1 monsters of the fight about to start here: a hand-made map's set fight (its named mash row), else
+    /// DD1's encounter table for the zone and quest difficulty (hall, room, boss). After a retreat the same group is still
+    /// waiting at that spot.</summary>
     public List<string> FightMonsters(string kind)
     {
+        if (State.Ended) return new List<string>();
         if (State.FightMonsters is { Count: > 0 } waiting && State.FightAt == FightSpot) return waiting;
-        State.FightMonsters = _content?.Battles?.RollEncounter(State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng()) ?? new List<string>();
+        string named = State.InRoom ? CurrentRoom?.MashName : CurrentTile?.MashName;
+        int difficulty = State.Quest?.Difficulty ?? 1;
+        State.FightMonsters = (named != null ? _content?.Battles?.NamedEncounter(State.Quest?.Dungeon, difficulty, named, NextRng()) : null)
+                              ?? _content?.Battles?.RollEncounter(State.Quest?.Dungeon, difficulty, kind, NextRng()) ?? new List<string>();
         State.FightAt = FightSpot;
         return State.FightMonsters;
     }
@@ -321,13 +515,11 @@ public sealed class Crawl
         else drops = _content.Battles.Roll(_content.Loot, State.Quest?.Dungeon, State.Quest?.Difficulty ?? 1, kind, NextRng(), out spoils.Dd1Monsters);
         State.FightMonsters = null;
         State.FightAt = null;
+        var pick = NextRng();
+        drops = drops.Select(d => LootDrop.ResolveTrinket(d, TrinketOfRarity, pick)).ToList();
         foreach (var drop in drops)
         {
-            if (drop.Type == "trinket" || State.Pack.HasRoomFor(drop.Key, drop.Amount, _content.Items))
-            {
-                State.Pack.Add(drop.Key, drop.Amount);
-                spoils.Taken.Add(drop);
-            }
+            if (State.Pack.TryTake(drop, _content.Items)) spoils.Taken.Add(drop);
             else spoils.LeftBehind.Add(drop);
         }
         return spoils;
@@ -337,16 +529,22 @@ public sealed class Crawl
     public List<CrawlEvent> ClearObstacle()
     {
         _events.Clear();
+        if (!CanNavigate) return Blocked();
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Obstacle || tile.Resolved) return Blocked();
 
-        if (!State.Pack.TryUse(Supply.Shovel))
+        var obstacle = _content?.Obstacles?.Get(tile.ContentId);
+        if (obstacle?.AncestorTalk != true && !State.Pack.TryUse(Supply.Shovel))
         {
             var rng = NextRng();
+            ChangeLight(obstacle?.TorchChange ?? -20f);
             foreach (var hero in _party.Alive)
             {
-                _party.Damage(hero, 0.1f, "obstacle");
-                StressDd1(hero, 10, rng, "obstacle");
+                float health = obstacle?.HealthFraction ?? -0.05f;
+                if (health < 0) _party.Damage(hero, -health, "obstacle");
+                if (obstacle != null)
+                    foreach (var effect in obstacle.FailEffects) _content.Curios.ApplyEffect(effect, hero, _party, rng);
+                else StressDd1(hero, 15, rng, "obstacle");
             }
         }
         tile.Resolved = true;
@@ -359,14 +557,21 @@ public sealed class Crawl
     public List<CrawlEvent> DisarmTrap(string heroId = null)
     {
         _events.Clear();
+        if (!CanNavigate) return Blocked();
         var tile = CurrentTile;
         if (tile == null || tile.Content != HallContent.Trap || tile.Resolved) return Blocked();
         TriggerTrap(tile, scouted: true, heroId);
         return Flush();
     }
 
+    /// <summary>Picks a trinket of a DD1 rarity (rarity, rng → trinket id) so loot holds real trinkets; the plugin
+    /// sets this (DD2's trinkets). Without it, trinket drops stay as rarities and are picked at homecoming.</summary>
+    public Func<string, Rng, string> TrinketOfRarity;
+
     /// <summary>A hero's DD1 class (for its trap disarm chance); the plugin sets this.</summary>
     public Func<string, string> HeroDd1Class;
+    public Func<string, IEnumerable<Dd1Buff>> EquipmentBuffs;
+    private IEnumerable<Dd1Buff> TrinketBuffs(string hero) => EquipmentBuffs?.Invoke(hero)?.Where(b => b?.Rule == "always") ?? Enumerable.Empty<Dd1Buff>();
 
     /// <summary>DD1's chance: the class's trap stat, +40% for a spotted trap, minus the difficulty's penalty.</summary>
     public float TrapDisarmChance(string heroId, bool scouted)
@@ -374,12 +579,14 @@ public sealed class Crawl
         int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
         float chance = (_content?.Traps?.DisarmBase(HeroDd1Class?.Invoke(heroId)) ?? 0.4f)
                        + (scouted ? _rules.TrapScoutDisarmBonus : 0f) - _rules.TrapDifficultyPenalty[difficulty];
+        chance += TrinketBuffs(heroId).Where(b => b.Stat == "resistance" && b.Sub == "trap").Sum(b => b.Amount);
         return Math.Max(0f, Math.Min(0.95f, chance));
     }
 
     public List<CrawlEvent> UseTorch()
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
         if (State.Light < 100 && State.Pack.TryUse(Supply.Torch)) ChangeLight(_rules.TorchLight);
         return Flush();
     }
@@ -388,6 +595,7 @@ public sealed class Crawl
     public List<CrawlEvent> SnuffTorch(float amount = 25f)
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
         ChangeLight(-amount);
         return Flush();
     }
@@ -395,7 +603,10 @@ public sealed class Crawl
     // ---- camping ----
 
     /// <summary>DD1 camps need firewood and a safe (cleared) room.</summary>
-    public bool CanCamp => State.InRoom && !IsBlocked && State.Camp == null && State.Pack.Count(Supply.Firewood) > 0;
+    public bool CanCamp => CanNavigate && State.InRoom && !IsBlocked && State.Pack.Count(Supply.Firewood) > 0;
+
+    /// <summary>Camp controls wait until the current result or encounter has finished.</summary>
+    public bool CanContinueCamp => !State.Ended && State.Camp != null && !HasPendingEvent;
 
     public List<CrawlEvent> MakeCamp()
     {
@@ -404,6 +615,8 @@ public sealed class Crawl
         State.Pack.TryUse(Supply.Firewood);
         State.Camp = new CampState { RespiteLeft = _rules.CampPoints };
         State.CampsMade++;
+        // DD1 restores light during camp intro, before provisions and skills can change it.
+        ChangeLight(_rules.CampRestoreTorch);
         return Flush();
     }
 
@@ -412,7 +625,7 @@ public sealed class Crawl
 
     public bool EatMeal(Meal meal)
     {
-        if (State.Camp == null || State.Camp.Ate) return false;
+        if (!CanContinueCamp || State.Camp.Ate) return false;
         if (!State.Pack.TryUse(Supply.Food, MealCost(meal)) && MealCost(meal) > 0) return false;
         var (_, heal, stress) = _rules.Meals[meal];
         var rng = NextRng();
@@ -428,9 +641,11 @@ public sealed class Crawl
 
     public string WhyCantUseCampSkill(string heroId, string skillId)
     {
+        if (State.Ended) return "Expedition ended.";
         var camp = State.Camp;
         var skill = _content?.Camping?.Get(skillId);
         if (camp == null) return "Not camping.";
+        if (!CanContinueCamp) return "Finish the current event first.";
         if (skill == null) return "Unknown skill.";
         if (!_party.Alive.Contains(heroId)) return "Dead.";
         if (!State.CampSkills.TryGetValue(heroId, out var known) || !known.Contains(skillId)) return "Not known.";
@@ -452,6 +667,7 @@ public sealed class Crawl
         camp.Uses[key] = (camp.Uses.TryGetValue(key, out var n) ? n : 0) + 1;
 
         var rng = NextRng();
+        var loot = new List<LootDrop>();
         foreach (var effect in skill.Effects)
         {
             if (!rng.Chance(effect.Chance)) continue;
@@ -463,12 +679,19 @@ public sealed class Crawl
                 "party_other" => _party.Alive.Where(h => h != heroId).ToArray(),
                 _ => new[] { heroId },
             };
-            foreach (var t in targets) ApplyCampEffect(effect, t, rng);
+            foreach (var t in targets) ApplyCampEffect(effect, t, rng, loot);
+        }
+        if (loot.Count > 0)
+        {
+            LastSpoils = new BattleSpoils { Kind = "camp" };
+            foreach (var drop in loot)
+                if (State.Pack.TryTake(drop, _content.Items)) LastSpoils.Taken.Add(drop);
+                else LastSpoils.LeftBehind.Add(drop);
         }
         return true;
     }
 
-    private void ApplyCampEffect(CampEffect effect, string hero, Rng rng)
+    private void ApplyCampEffect(CampEffect effect, string hero, Rng rng, List<LootDrop> loot)
     {
         switch (effect.Type)
         {
@@ -490,30 +713,38 @@ public sealed class Crawl
             case "loot":
                 if (_content?.Loot != null && !string.IsNullOrEmpty(effect.SubType))
                     foreach (var d in _content.Loot.Roll(effect.SubType, Math.Max(1, (int)effect.Amount), State.Quest?.Difficulty ?? 1, State.Quest?.Dungeon ?? "", rng))
-                        State.Pack.Add(d.Key, d.Amount);
+                    {
+                        var drop = LootDrop.ResolveTrinket(d, TrinketOfRarity, rng);
+                        loot.Add(drop);
+                    }
                 break;
             // remove_bleeding / remove_poison / remove_deaths_door_recovery_buffs: DoTs already landed out of
             // combat, and DD2 owns death's door recovery, so there's nothing left to undo.
         }
     }
 
-    /// <summary>Strike camp: the torch is relit, and DD1 rolls for a night ambush.</summary>
+    /// <summary>Strike camp, preserving skill torch changes, and roll for a night ambush.</summary>
     public List<CrawlEvent> BreakCamp()
     {
         _events.Clear();
-        if (State.Camp == null) return Blocked();
+        if (!CanContinueCamp) return Blocked();
         var rng = NextRng();
         float ambush = Math.Max(0f, _rules.AmbushCampChance - State.Camp.AmbushReduction);
         if (!State.Camp.Ate) foreach (var hero in _party.Alive) StressDd1(hero, _rules.Meals[Meal.None].StressDd1, rng, "no meal");
         State.Camp = null;
-        ChangeLight(_rules.CampRestoreTorch - State.Light);
         if (rng.Chance(ambush))
-            _events.Add(new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" });
+        {
+            // DD1: the night ambush snuffs the torch (ambush_torch_reduction -100); the fight starts in the dark.
+            ChangeLight(_rules.AmbushTorchChange);
+            State.PendingEncounter = new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = State.RoomId, HeroesSurprised = true, ContentId = "camp" };
+            _events.Add(CopyEncounter(State.PendingEncounter));
+        }
         return Flush();
     }
 
     public void Retreat()
     {
+        if (!CanLeaveExpedition || State.Quest?.CanRetreat == false) return;
         State.Retreated = true;
         State.Ended = true;
     }
@@ -526,11 +757,13 @@ public sealed class Crawl
         var rng = NextRng();
         State.StepsTaken++;
 
-        ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
         HallwayStress(forward, rng);
+        ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
 
         bool firstVisit = !tile.Visited;
         tile.Visited = true;
+        if (tile.SecretRoomId >= 0 && tile.SecretDoorAlwaysAccessible)
+            Map.Room(tile.SecretRoomId).Scouted = true;
         Emit(CrawlEventType.EnteredTile, tile: tile, contentId: tile.ContentId);
 
         if (firstVisit && !tile.Resolved)
@@ -564,13 +797,13 @@ public sealed class Crawl
         }
     }
 
-    private void EnterRoom(Room room)
+    private void EnterRoom(Room room, bool enteringDungeon = false)
     {
         bool firstVisit = !room.Visited;
         room.Visited = true;
         Emit(CrawlEventType.EnteredRoom, roomId: room.Id);
 
-        if (firstVisit) Scout(room);
+        if (firstVisit && !room.IsSecret) Scout(room, enteringDungeon);
 
         if (room.HasBattle && !room.Cleared)
             EmitBattle(CrawlEventType.Battle, null, corridor: false, NextRng(), room.Id);
@@ -582,11 +815,14 @@ public sealed class Crawl
 
     private void HallwayStress(bool forward, Rng rng)
     {
+        if (forward && CurrentTile.Content != HallContent.Empty) return;
+        var alive = _party.Alive;
+        if (alive.Count == 0) return;
+        float chance = forward ? _rules.StressChanceForward : _rules.StressChanceBack;
+        if (!rng.Chance(chance)) return;
         var band = _rules.Band(State.Light);
-        float chance = (forward ? _rules.StressChanceForward : _rules.StressChanceBack) + band.StressChanceIncrease / 100f;
         float dd1 = (forward ? _rules.StressDd1Forward : _rules.StressDd1Back) * (1f + band.StressDamageIncrease / 100f);
-        foreach (var hero in _party.Alive)
-            if (rng.Chance(chance)) StressDd1(hero, dd1, rng, "hallway");
+        StressDd1(rng.Pick(alive), dd1, rng, "hallway");
     }
 
     /// <summary>
@@ -627,9 +863,9 @@ public sealed class Crawl
         var rng = NextRng();
         tile.Resolved = true;
         var trap = _content?.Traps?.Get(tile.ContentId, State.Quest?.Difficulty ?? 1);
-        // Walked into unseen: the front hero, on their own chance. Spotted: the hero who tries, with the bonus.
+        // DD1: walking into an unseen trap springs it; only a deliberate disarm gets a roll.
         var hero = heroId != null && _party.Alive.Contains(heroId) ? heroId : _party.Alive.FirstOrDefault();
-        if (rng.Chance(TrapDisarmChance(hero, scouted)))
+        if (scouted && rng.Chance(TrapDisarmChance(hero, scouted)))
         {
             if (hero != null && trap != null)
                 foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
@@ -652,36 +888,60 @@ public sealed class Crawl
         Emit(CrawlEventType.TrapSprung, tile: tile, contentId: tile.ContentId, heroId: hero);
     }
 
-    /// <summary>On entering a new room, maybe reveal what lies within two corridors (DD1 scouting).</summary>
-    private void Scout(Room room)
+    /// <summary>DD1 scouting reveals six hallway squares, or twelve on a critical success, along each branch.</summary>
+    private void Scout(Room room, bool enteringDungeon = false)
     {
+        if (State.Quest?.ScoutingEnabled == false) return;   // DD1: no scouting in the Darkest Dungeon
         var rng = NextRng();
-        float chance = _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
-        if (!rng.Chance(chance)) return;
-
-        var dist = Map.Distances(room.Id);
-        int revealed = 0;
-        foreach (var r in Map.Rooms.Where(r => dist[r.Id] > 0 && dist[r.Id] <= 2 && !r.Scouted))
-        {
-            r.Scouted = true;
-            revealed++;
-        }
-        foreach (var c in Map.Corridors.Where(c => Math.Min(dist[c.RoomA], dist[c.RoomB]) <= 1))
-            foreach (var t in c.Tiles.Where(t => !t.Scouted))
-            {
-                t.Scouted = true;
-                revealed++;
-            }
+        float chance = enteringDungeon ? _rules.ScoutEntryChance
+            : _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
+        chance += _party.Alive.SelectMany(TrinketBuffs).Where(b => b.Stat == "scouting_chance").Sum(b => b.Amount);
+        if (chance <= 1f && !rng.Chance(chance)) return;
+        bool critical = rng.Chance(_rules.ScoutCriticalChance * (chance > 1f ? chance : 1f));
+        int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6, revealSecrets: critical);
         if (revealed > 0) Emit(CrawlEventType.Scouted, roomId: room.Id, amount: revealed);
+    }
+
+    /// <summary>
+    /// DD1's surprise weights before normalization: room/corridor base, torch band and active hero buffs.
+    /// A lone hero loses the party base before modifiers. Forced ambushes bypass weights and surprise only heroes.
+    /// </summary>
+    public (float Heroes, float Monsters) SurpriseChances(bool corridor, bool known, bool ambush)
+    {
+        if (State.Quest?.SurpriseEnabled == false && !ambush) return (0f, 0f);   // DD1: no surprise in the Darkest Dungeon
+        if (ambush) return (1f, 0f);
+        var band = _rules.Band(State.Light);
+        float heroes = known ? (corridor ? _rules.SurpriseKnownCorridorParty : _rules.SurpriseKnownRoomParty)
+            : corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty;
+        float monsters = known ? (corridor ? _rules.SurpriseKnownCorridorMonsters : _rules.SurpriseKnownRoomMonsters)
+            : corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters;
+        if (_party.Alive.Count == 1) heroes = 0f;
+        heroes += band.HeroesSurprisedIncrease / 100f;
+        monsters += band.MonstersSurprisedIncrease / 100f;
+        foreach (var buff in _party.Alive.SelectMany(TrinketBuffs))
+        {
+            if (buff.Stat == "party_surprise_chance") heroes += buff.Amount;
+            if (buff.Stat == "monsters_surprise_chance") monsters += buff.Amount;
+        }
+        foreach (var (_, buff) in FightBuffs())
+        {
+            if (buff.Stat == "party_surprise_chance") heroes += buff.Amount;
+            else if (buff.Stat == "monsters_surprise_chance") monsters += buff.Amount;
+        }
+        return (Math.Max(0f, Math.Min(heroes, _rules.SurpriseMaxParty)), Math.Max(0f, Math.Min(monsters, _rules.SurpriseMaxMonsters)));
     }
 
     private void EmitBattle(CrawlEventType type, HallTile tile, bool corridor, Rng rng, int roomId = -1)
     {
-        var band = _rules.Band(State.Light);
-        float heroes = (corridor ? _rules.SurpriseCorridorParty : _rules.SurpriseRoomParty) + band.HeroesSurprisedIncrease / 100f;
-        float monsters = (corridor ? _rules.SurpriseCorridorMonsters : _rules.SurpriseRoomMonsters) + band.MonstersSurprisedIncrease / 100f;
-        bool heroesSurprised = rng.Chance(Math.Min(heroes, _rules.SurpriseMaxParty));
-        bool monstersSurprised = !heroesSurprised && rng.Chance(monsters);
+        bool known = tile != null ? tile.Scouted : roomId >= 0 && Map.Room(roomId) is { Scouted: true };
+        // A roaming corridor fight is native ac_battle, not a forced camp ambush.
+        // BreakCamp supplies the forced camp encounter separately.
+        var (heroes, monsters) = SurpriseChances(corridor, known, ambush: false);
+        // Native 1405fe3d0 inserts none first, then party, then monsters and draws once over their total.
+        float none = Math.Max(0.25f, Math.Min(1f, 1f - (heroes + monsters)));
+        double draw = rng.NextDouble() * (none + heroes + monsters);
+        bool heroesSurprised = draw >= none && draw < none + heroes;
+        bool monstersSurprised = draw >= none + heroes;
 
         var e = new CrawlEvent
         {
@@ -696,21 +956,37 @@ public sealed class Crawl
             e.TileIndex = tile.Index;
             if (type == CrawlEventType.Ambush) { tile.Content = HallContent.Battle; tile.Resolved = false; }
         }
+        State.PendingEncounter = CopyEncounter(e);
         _events.Add(e);
     }
 
-    private void CheckQuest()
+    /// <summary>Native ExploreRoom target, shared by completion and the quest HUD.</summary>
+    public static int ExploreRoomTarget(ExpeditionState state)
     {
-        if (State.QuestComplete || State.Quest == null) return;
+        var goal = state.Goal;
+        int roomCount = state.Map.QuestRooms.Count();
+        // Native ExploreRoom::OnRaidStart excludes secret rooms and truncates the percentage target.
+        return goal?.Type == "explore_room"
+            ? goal.Amount != 0 ? goal.Amount : (int)(roomCount * goal.Percentage)
+            : (int)(roomCount * 0.9f);
+    }
+
+    /// <summary>Mark the quest done once its goal is met (called as the party moves and fights).</summary>
+    public void CheckQuest()
+    {
+        if (State.Ended || State.QuestComplete || State.Quest == null) return;
         var goal = State.Goal;
-        float explorePct = goal?.Type == "explore_room" && goal.Percentage > 0 ? goal.Percentage : 0.9f;
-        bool done = State.Quest.Type switch
+        bool done = goal?.Type == "tutorial_room"
+            // DD1's opening raid: reach the last room and win its fight.
+            ? Map.Rooms.Any(r => r.IsQuestGoal && r.Visited && (!r.HasBattle || r.Cleared))
+            : State.Quest.Type switch
         {
-            "explore" => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * explorePct),
+            "explore" => Map.QuestRooms.Count(r => r.Visited) >= ExploreRoomTarget(State),
             "cleanse" => Map.Rooms.Where(r => r.HasBattle).All(r => r.Cleared),
             "kill_boss" => Map.BossRoomId >= 0 && Map.Room(Map.BossRoomId).Cleared,
-            "gather" or "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
-            _ => Map.Rooms.Count(r => r.Visited) >= Math.Ceiling(Map.Rooms.Count * 0.9),
+            "gather" when goal != null && goal.Amount > 0 => QuestCurioProgress(State) >= goal.Amount,
+            "activate" or "inventory_activate" when goal != null && goal.Amount > 0 => State.GoalProgress >= goal.Amount,
+            _ => Map.QuestRooms.Count(r => r.Visited) >= (int)(Map.QuestRooms.Count() * 0.9f),
         };
         if (!done) return;
         State.QuestComplete = true;
@@ -721,6 +997,7 @@ public sealed class Crawl
     public List<CrawlEvent> Darken(float amount)
     {
         _events.Clear();
+        if (State.Ended) return Blocked();
         if (amount > 0) ChangeLight(-amount);
         return Flush();
     }

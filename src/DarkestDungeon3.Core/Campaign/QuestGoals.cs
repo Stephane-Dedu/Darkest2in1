@@ -17,6 +17,7 @@ public sealed class QuestGoal
     public float Percentage;         // explore / battle
     public List<string> MonsterClasses = new();
     public List<(string Id, int Amount)> StartingItems = new();
+    public string RoomId;            // tutorial_room: the room to reach (the opening raid's last room)
 
     /// <summary>Inventory-activate goals hand the party the quest items to use on the curios.</summary>
     public bool NeedsItem => StartingItems.Count > 0;
@@ -32,6 +33,17 @@ public sealed class PlotQuest
     public int ResolveXp;
     public List<Reward> Rewards = new();
     public bool Repeatable, Progression;
+    /// <summary>DD1: whether the quest can be abandoned, and how many random heroes die covering the retreat
+    /// (the Darkest Dungeon: 1; its last part can't be abandoned).</summary>
+    public bool CanRetreat = true;
+    public int RetreatKillCount;
+    /// <summary>DD1: no surprise / no scouting in the quest (the Darkest Dungeon), and a win clears the roster's stress.</summary>
+    public bool SurpriseEnabled = true, ScoutingEnabled = true, ClearsRosterStress;
+    /// <summary>DD1: buffs the whole roster gets when a party of at least this resolve fails the quest.</summary>
+    public List<string> RosterBuffsOnFailure = new();
+    public int RosterBuffMinResolve;
+    /// <summary>DD1's hand-made map for the quest (maps/&lt;name&gt;.dm), e.g. the Darkest Dungeon's DD_map1; null = generated.</summary>
+    public string MapName;
 }
 
 public sealed class QuestGoals
@@ -58,6 +70,7 @@ public sealed class QuestGoals
                 Percentage = (float?)data["percentage"] ?? 0f,
                 MonsterClasses = (data["monster_class_ids"] as JArray ?? new JArray()).Select(m => (string)m).ToList(),
                 StartingItems = (g["starting_items"] as JArray ?? new JArray()).Select(i => ((string)i["id"], (int)i["amount"])).ToList(),
+                RoomId = (string)data["room_id"],
             };
             if (goal.Type == "gather" && goal.Amount == 0) goal.Amount = (int?)data["item"]?["amount"] ?? 3;
             q.Goals[goal.Id] = goal;
@@ -86,6 +99,14 @@ public sealed class QuestGoals
                 ResolveXp = (int?)quest["completion_reward"]?["resolve_xp"] ?? 0,
                 Repeatable = (bool?)p["is_repeatable"] ?? false,
                 Progression = (bool?)p["is_progression"] ?? false,
+                CanRetreat = (bool?)p["can_retreat"] ?? true,
+                RetreatKillCount = (int?)p["retreat_party_kill_count"] ?? 0,
+                SurpriseEnabled = (bool?)p["is_surprise_enabled"] ?? true,
+                ScoutingEnabled = (bool?)p["is_scouting_enabled"] ?? true,
+                ClearsRosterStress = (bool?)p["is_roster_stress_cleared_on_completion"] ?? false,
+                RosterBuffsOnFailure = (p["roster_buffs_to_apply_on_failure"] as JArray ?? new JArray()).Select(x => (string)x).ToList(),
+                RosterBuffMinResolve = (int?)p["roster_buff_on_failure_minimum_party_resolve_level"] ?? 0,
+                MapName = string.IsNullOrEmpty((string)quest["map_name"]) ? null : (string)quest["map_name"],
             };
             foreach (var item in (quest["completion_reward"]?["items_definition"]?["items"] as JObject)?.Properties().Select(x => x.Value) ?? Enumerable.Empty<JToken>())
             {

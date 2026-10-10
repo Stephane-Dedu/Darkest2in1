@@ -15,6 +15,7 @@ public sealed class ZoneArt
     public string Dir;
     public readonly List<string> Walls = new();
     public readonly List<string> Rooms = new();
+    public readonly List<string> FinalRooms = new();
     public string Door, EndHall, Background, Mid, ForegroundTop, ForegroundBottom, Entrance;
 
     public static ZoneArt Load(Dd1Install dd1, string zone, int darkestQuest = 1)
@@ -40,6 +41,7 @@ public sealed class ZoneArt
         }
         art.Walls.AddRange(files.Where(f => Matches(f, "*.corridor_wall.*.png")).Select(Full));
         art.Rooms.AddRange(files.Where(f => Matches(f, "*.room_wall.*.png") && !f.Contains(".entrance.")).Select(Full));
+        art.FinalRooms.AddRange(files.Where(f => Matches(f, "*.final_room_wall*.png")).Select(Full));
         art.Door = First("*.corridor_door.basic.png", "*.corridor_door*.png");
         art.EndHall = First("*.endhall.01.png", "*.endhall*.png");
         art.Background = First("*.corridor_bg.png", "*.corridor_bg*.png");
@@ -55,6 +57,26 @@ public sealed class ZoneArt
 
     /// <summary>The backdrop of a room (picked stably per room).</summary>
     public string Room(int roomId) => Rooms.Count == 0 ? null : Rooms[((roomId * 7 + 3) % Rooms.Count + Rooms.Count) % Rooms.Count];
+
+    /// <summary>DD1 prefers a plot-specific final wall, then its generic final wall. Some bosses have neither;
+    /// Necromancer uses the Ruins library as an explicit mod choice, rather than inheriting an entrance/hall.</summary>
+    public string BossRoom(string bossId, string plotId = null, int seed = 0)
+    {
+        string Pick(string suffix) => FinalRooms.FirstOrDefault(p => Path.GetFileName(p).EndsWith(suffix, StringComparison.OrdinalIgnoreCase));
+        string family = bossId;
+        if (family?.Length > 2 && family[family.Length - 2] == '_') family = family.Substring(0, family.Length - 2);
+        string wall = string.IsNullOrEmpty(plotId) ? null : Pick(".final_room_wall." + plotId + ".png");
+        wall ??= string.IsNullOrEmpty(bossId) ? null : Pick(".final_room_wall." + bossId + ".png");
+        wall ??= string.IsNullOrEmpty(family) ? null : Pick(".final_room_wall." + family + ".png");
+        wall ??= Pick(".final_room_wall.png");
+        if (wall != null) return wall;
+        if (family == "necromancer")
+        {
+            wall = Rooms.FirstOrDefault(p => Path.GetFileName(p) == "crypts.room_wall.library.png");
+            if (wall != null) return wall;
+        }
+        return Room(seed);
+    }
 
     /// <summary>File-name glob with '*' only.</summary>
     private static bool Matches(string name, string pattern)

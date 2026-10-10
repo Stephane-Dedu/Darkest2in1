@@ -69,9 +69,9 @@ public class CampingTests
         Assert.Equal("Already used.", crawl.WhyCantUseCampSkill("a", "encourage"));
         Assert.Equal("Not known.", crawl.WhyCantUseCampSkill("a", "bless"));
 
-        crawl.BreakCamp();
+        bool ambushed = crawl.BreakCamp().Any(e => e.Type == CrawlEventType.Ambush);
         Assert.Null(crawl.State.Camp);
-        Assert.Equal(100f, crawl.State.Light);
+        Assert.Equal(ambushed ? 0f : 100f, crawl.State.Light);   // relit to 100, snuffed by a night ambush
     }
 
     [Fact]
@@ -84,7 +84,12 @@ public class CampingTests
             crawl.State.Seed = i;
             crawl.MakeCamp();
             crawl.EatMeal(Meal.Half);
-            if (crawl.BreakCamp().Any(e => e.Type == CrawlEventType.Ambush)) ambushes++;
+            if (crawl.BreakCamp().Any(e => e.Type == CrawlEventType.Ambush))
+            {
+                ambushes++;
+                Assert.Equal(0f, crawl.State.Light, 3);    // DD1 ambush_torch_reduction -100: the fight is in the dark
+            }
+            else Assert.Equal(100f, crawl.State.Light, 3); // camp_restore_torch
         }
         _out.WriteLine($"camp ambush rate {ambushes / 300.0:P0}");
         Assert.InRange(ambushes, 60, 140); // DD1 base 33%

@@ -39,12 +39,13 @@ public class CampaignTests
     }
 
     [Fact]
-    public void NewEstateOffersOnlyRuinsApprenticeShortQuests()
+    public void NewEstateOffersSprawlApprenticeQuests()
     {
         var estate = new Estate { Seed = 42 };
         var board = QuestBoard.Generate(estate, Dd1);
-        Assert.Equal(6, board.Count); // QuestsCompleted starts at 1 (DD1 counts the tutorial) → table index 1
-        Assert.All(board, q => Assert.Equal("crypts", q.Dungeon));
+        Assert.Equal(7, board.Count); // QuestsCompleted starts at 1 (DD1 counts the tutorial) → table index 1: 6 quests
+        Assert.Single(board, q => q.PlotId == "plot_tutorial_crypts");   // + the Ruins tutorial until it's done
+        Assert.All(board, q => Assert.Equal("dd2_city", q.Dungeon));
         Assert.All(board, q => Assert.Equal(1, q.Difficulty));
         Assert.All(board, q => Assert.Contains(q.Rewards, r => r.Type == Currency.Gold && r.Amount > 0));
         foreach (var q in board) _out.WriteLine($"{q}: {string.Join(", ", q.Rewards)}");
@@ -55,15 +56,15 @@ public class CampaignTests
     {
         var estate = new Estate { Seed = 7, QuestsCompleted = 4 };
         var zones = QuestBoard.Generate(estate, Dd1).Select(q => q.Dungeon).Distinct().OrderBy(z => z).ToArray();
-        Assert.Equal(new[] { "cove", "crypts", "warrens", "weald" }, zones);
+        Assert.Equal(new[] { "dd2_city", "dd2_coast", "dd2_farm", "dd2_forest" }, zones);
     }
 
     [Fact]
     public void VeteranZoneCanOfferVeteranQuests()
     {
         var estate = new Estate { Seed = 3, QuestsCompleted = 6 };
-        estate.ZoneXp["weald"] = 12; // zone level 3
-        var weald = Enumerable.Range(0, 20).SelectMany(_ => QuestBoard.Generate(estate, Dd1)).Where(q => q.Dungeon == "weald").ToList();
+        estate.ZoneXp["dd2_forest"] = 12; // zone level 3
+        var weald = Enumerable.Range(0, 20).SelectMany(_ => QuestBoard.Generate(estate, Dd1)).Where(q => q.Dungeon == "dd2_forest").ToList();
         Assert.Contains(weald, q => q.Difficulty == 3);
         Assert.DoesNotContain(weald, q => q.Difficulty == 5);
     }
@@ -75,7 +76,7 @@ public class CampaignTests
         foreach (var q in Enumerable.Range(0, 30).SelectMany(_ => QuestBoard.Generate(estate, Dd1)))
         {
             var p = Dd1.MapGen.Find(q.Dungeon, q.Size, q.Type);
-            Assert.Equal(q.Dungeon, p.Dungeon);
+            Assert.Equal(Core.Dungeon.ZoneBase.Of(q.Dungeon), p.Dungeon);
             Assert.Equal(q.Type, p.QuestType);
         }
     }

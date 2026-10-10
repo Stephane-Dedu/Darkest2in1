@@ -14,6 +14,8 @@ public sealed class FightPlan
     public string Battle;
     public List<string> Arenas = new();
     public FightKind Kind;
+    /// <summary>Keep the native arena, camera lighting and enemy art for a DD2 destination.</summary>
+    public bool NativePresentation;
     /// <summary>DD2 enemies translated from a rolled DD1 encounter (front rank first); when set, they are the
     /// battle and <see cref="Battle"/> is only the fallback.</summary>
     public List<string> Enemies;
@@ -57,9 +59,9 @@ public sealed class ZoneEncounters
     public FightPlan Plan(string zone, int difficulty, FightKind kind, Rng rng, string dd1Boss = null)
     {
         var z = _root["zones"]?[zone] as JObject;
-        var plan = new FightPlan { Kind = kind };
+        var plan = new FightPlan { Kind = kind, NativePresentation = Dungeon.ZoneBase.IsExtra(zone) };
 
-        if (kind == FightKind.CampAmbush)
+        if (kind == FightKind.CampAmbush && !plan.NativePresentation)
         {
             plan.Battle = (string)_root["camp_ambush"];
             plan.Arenas.AddRange(Arenas(z, "room"));

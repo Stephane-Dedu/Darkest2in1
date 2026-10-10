@@ -202,8 +202,82 @@ internal static class Dd1Audio
 
     private static string Pick(params string[] names) => names.FirstOrDefault(n => n != null && _index.Has(n));
 
+    /// <summary>Music and ambience fade out (a cinematic is playing).</summary>
+    public static bool Hush;
+
+    /// <summary>A sound file streamed once (a cinematic's narration).</summary>
+    public sealed class Stream
+    {
+        internal Sound Sound;
+        internal Channel Channel;
+
+        public bool IsPlaying => Channel.isPlaying(out bool on) == RESULT.OK && on;
+
+        public void Stop()
+        {
+            try { Channel.stop(); Sound.release(); } catch (Exception) { }
+        }
+    }
+
+    public static Stream PlayStream(string file)
+    {
+        if (file == null || !File.Exists(file)) return null;
+        try
+        {
+            var core = RuntimeManager.CoreSystem;
+            if (!core.hasHandle() || core.createSound(file, MODE.CREATESTREAM | MODE._2D | MODE.LOOP_OFF, out Sound sound) != RESULT.OK) return null;
+            core.getMasterChannelGroup(out ChannelGroup master);
+            if (core.playSound(sound, master, false, out Channel ch) != RESULT.OK) { sound.release(); return null; }
+            ch.setVolume(Plugin.Dd1SoundVolume.Value * MasterGain());
+            return new Stream { Sound = sound, Channel = ch };
+        }
+        catch (Exception e) { Plugin.Log.LogWarning($"[audio] {file}: {e.Message}"); return null; }
+    }
+
     /// <summary>DD1 has a sample of this name.</summary>
     public static bool Has(string sample) => Ensure() && _index.Has(sample);
+
+    private static Fsb5Index _narrationIndex;
+    private static Stream _narration;
+    public static string NarrationSample { get; private set; }
+
+    public static bool HasNarration(string sample)
+    {
+        if (!Ensure()) return false;
+        try { _narrationIndex ??= Fsb5Index.Load(new[] { Session.Current.Dd1.PathOf("audio", "secondary_banks", "voiceover.bank") }); }
+        catch (Exception e) { if (Missing.Add("voiceover.bank")) Plugin.Log.LogWarning("[audio] narration unavailable: " + e.Message); return false; }
+        return _narrationIndex.Has(sample);
+    }
+
+    public static void StopNarration()
+    {
+        _narration?.Stop();
+        _narration = null; NarrationSample = null;
+    }
+
+    public static void PlayNarration(string sample)
+    {
+        bool toggleOff = NarrationSample == sample;
+        StopNarration();
+        if (toggleOff || !HasNarration(sample) || !_narrationIndex.TryGet(sample, out var chunk, out int i)) return;
+        Sound parent = default;
+        try
+        {
+            var core = RuntimeManager.CoreSystem;
+            var info = Info(chunk, i);
+            if (core.createSound(chunk.File, MODE.CREATESTREAM | MODE._2D | MODE.LOOP_OFF, ref info, out parent) != RESULT.OK) return;
+            if (parent.getSubSound(i, out Sound sound) != RESULT.OK) { parent.release(); return; }
+            core.getMasterChannelGroup(out ChannelGroup master);
+            if (core.playSound(sound, master, false, out Channel channel) != RESULT.OK) { parent.release(); return; }
+            channel.setVolume(Plugin.Dd1SoundVolume.Value * MasterGain());
+            _narration = new Stream { Sound = parent, Channel = channel }; NarrationSample = sample;
+        }
+        catch (Exception e)
+        {
+            if (parent.hasHandle()) parent.release();
+            Plugin.Log.LogWarning("[audio] narration: " + e.Message);
+        }
+    }
 
     /// <summary>DD1's exploration music for the zone, darker as the torch burns down.</summary>
     private static string Exploration(string zone, float light)
@@ -235,6 +309,7 @@ internal static class Dd1Audio
     /// </summary>
     public static void Update(Phase phase, string zone, bool camping, float light = 100f, bool hallFight = false)
     {
+        if (_narration != null && (phase != Phase.Hamlet || !Plugin.Dd1AudioOn.Value || !_narration.IsPlaying)) StopNarration();
         CurrentZone = zone;
         if (!Plugin.Dd1AudioOn.Value || !Ensure())
         {
@@ -244,6 +319,7 @@ internal static class Dd1Audio
         }
         // Under DD2's own volume settings (its Master/Music/SFX sliders), and mixed below the narrator.
         float mv = Plugin.Dd1MusicVolume.Value * 0.45f * MusicGain(), av = Plugin.Dd1SoundVolume.Value * 0.35f * SfxGain();
+        if (Hush) { mv = 0f; av = 0f; }   // a cinematic is playing
         switch (phase)
         {
             case Phase.Hamlet:

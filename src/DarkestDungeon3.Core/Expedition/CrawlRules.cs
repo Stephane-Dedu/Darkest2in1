@@ -25,10 +25,18 @@ public sealed class CrawlRules
     public float StressChanceForward = 0.3f, StressDd1Forward = 2f;
     public float StressChanceBack = 0.55f, StressDd1Back = 5f;
     public float HungerHealFraction = 0.05f, StarveHpFraction = 0.2f, StarveStressDd1 = 15f;
+    /// <summary>Eating a provision from the pack in the dungeon heals this much of max HP (provision_hp_heal).</summary>
+    public float ProvisionHeal = 0.05f;
     public float ScoutChanceBase = 0.25f;
+    public float ScoutCriticalChance = 0.5f;
+    public float ScoutEntryChance;
     public float SurpriseCorridorParty = 0.1f, SurpriseCorridorMonsters = 0.1f;
     public float SurpriseRoomParty = 0.1f, SurpriseRoomMonsters = 0.1f;
-    public float SurpriseMaxParty = 0.65f;
+    public float SurpriseMaxParty = 0.65f, SurpriseMaxMonsters = 0.65f;
+    // Battles in a scouted room/corridor ("known"): the party can't be surprised; ambushes always surprise it.
+    public float SurpriseKnownCorridorParty = -1f, SurpriseKnownCorridorMonsters = 0.25f;
+    public float SurpriseKnownRoomParty = -1f, SurpriseKnownRoomMonsters = 0.25f;
+    public float SurpriseAmbushParty = 1f, SurpriseAmbushMonsters = 0f;
     public float TrapScoutDisarmBonus = 0.4f;
     public float[] TrapDifficultyPenalty = { 0, 0, 0, 0.2f, 0.2f, 0.4f, 0.5f };
     public float ReturnBattleChance = 0.05f, ReturnHungerChance = 0.075f;
@@ -37,6 +45,8 @@ public sealed class CrawlRules
     public float RetreatChance = 0.7f, RetreatBonusPerAttempt = 0.05f;
     public int CampPoints = 12;
     public float CampRestoreTorch = 100f;
+    /// <summary>A camp ambush changes the torch by this much (DD1 -100: the fight is in the dark).</summary>
+    public float AmbushTorchChange = -100f;
     /// <summary>DD1 meals: food per living hero, HP healed (fraction of max), DD1 stress (negative relieves).</summary>
     public Dictionary<Meal, (float RationsPer, float Heal, float StressDd1)> Meals = new()
     {
@@ -75,11 +85,20 @@ public sealed class CrawlRules
         if (none != null) r.StarveStressDd1 = (float)none["stress"];
 
         r.ScoutChanceBase = Get(rules, "scouting_chance_base", r.ScoutChanceBase);
+        r.ScoutCriticalChance = Get(rules, "scouting_crit_success", r.ScoutCriticalChance);
+        r.ScoutEntryChance = Get(rules, "scouting_enter_dungeon_scout_chance", r.ScoutEntryChance);
         r.SurpriseCorridorParty = Get(rules, "surprise_corridor_party_base_chance", r.SurpriseCorridorParty);
         r.SurpriseCorridorMonsters = Get(rules, "surprise_corridor_monsters_base_chance", r.SurpriseCorridorMonsters);
         r.SurpriseRoomParty = Get(rules, "surprise_room_party_base_chance", r.SurpriseRoomParty);
         r.SurpriseRoomMonsters = Get(rules, "surprise_room_monsters_base_chance", r.SurpriseRoomMonsters);
         r.SurpriseMaxParty = Get(rules, "surprise_max_party_surprised_chance", r.SurpriseMaxParty);
+        r.SurpriseMaxMonsters = Get(rules, "surprise_max_monsters_surprised_chance", r.SurpriseMaxMonsters);
+        r.SurpriseKnownCorridorParty = Get(rules, "surprise_known_corridor_party_base_chance", r.SurpriseKnownCorridorParty);
+        r.SurpriseKnownCorridorMonsters = Get(rules, "surprise_known_corridor_monsters_base_chance", r.SurpriseKnownCorridorMonsters);
+        r.SurpriseKnownRoomParty = Get(rules, "surprise_known_room_party_base_chance", r.SurpriseKnownRoomParty);
+        r.SurpriseKnownRoomMonsters = Get(rules, "surprise_known_room_monsters_base_chance", r.SurpriseKnownRoomMonsters);
+        r.SurpriseAmbushParty = Get(rules, "surprise_ambush_party_base_chance", r.SurpriseAmbushParty);
+        r.SurpriseAmbushMonsters = Get(rules, "surprise_ambush_monsters_base_chance", r.SurpriseAmbushMonsters);
         r.TrapScoutDisarmBonus = Get(rules, "trap_scout_disarm_bonus", r.TrapScoutDisarmBonus);
         if (rules["difficulty_trap_base"] is JArray trap) r.TrapDifficultyPenalty = trap.Select(t => (float)t).ToArray();
         r.AmbushCampChance = Get(rules, "ambush_camping_base_chance", r.AmbushCampChance);
@@ -87,6 +106,8 @@ public sealed class CrawlRules
         r.RetreatBonusPerAttempt = Get(rules, "combat_retreat_bonus_chance_per_attempt", r.RetreatBonusPerAttempt);
         r.CampPoints = (int)Get(rules, "camp_start_camping_points", r.CampPoints);
         r.CampRestoreTorch = Get(rules, "camp_restore_torch", r.CampRestoreTorch);
+        r.ProvisionHeal = Get(rules, "provision_hp_heal", r.ProvisionHeal);
+        r.AmbushTorchChange = Get(rules, "ambush_torch_reduction", r.AmbushTorchChange);
         foreach (var m in rules["meals_table"] ?? new JArray())
         {
             var meal = (string)m["type"] switch { "none" => Meal.None, "half" => Meal.Half, "full" => Meal.Full, _ => Meal.Feast };

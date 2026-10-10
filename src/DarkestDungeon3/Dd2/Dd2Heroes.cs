@@ -8,6 +8,7 @@ using Assets.Code.Roster;
 using Assets.Code.Source;
 using Assets.Code.Utils;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Expedition;
 using HarmonyLib;
 
 namespace DarkestDungeon3.Dd2;
@@ -22,7 +23,7 @@ internal static class Dd2Heroes
         AccessTools.FieldRefAccess<RosterManager, List<RosterEntry>>("m_Entries");
 
     /// <summary>Replace DD2's party with our heroes, front rank first. Returns hero id → actor guid.</summary>
-    public static Dictionary<string, uint> BuildParty(IReadOnlyList<HeroRecord> heroes)
+    public static Dictionary<string, uint> BuildParty(IReadOnlyList<HeroRecord> heroes, IReadOnlyDictionary<string, ExpeditionHeroState> states = null)
     {
         var roster = Dd2Api.Roster;
         var map = new Dictionary<string, uint>();
@@ -33,13 +34,18 @@ internal static class Dd2Heroes
         foreach (var e in entries.Where(e => e.GetRosterStatus() == RosterStatusType.PARTY))
             e.SetRosterStatus(RosterStatusType.IDLE, 0u);
 
-        foreach (var hero in heroes)
+        foreach (var original in heroes)
         {
+            ExpeditionHeroState condition = null;
+            states?.TryGetValue(original.Id, out condition);
+            var hero = ExpeditionParty.HeroForRestore(original, condition);
+            if (hero == null) continue;
+            if (condition?.Outcome?.HeroId != hero.Id || !ExpeditionParty.IsValid(condition)) condition = null;
             uint guid = LibraryActors.LibraryActorsInstance.CreateActor(hero.ClassId);
             var actor = Dd2Api.Actor(guid);
             if (actor == null) { Plugin.Log.LogError($"Could not create a DD2 {hero.ClassId} for {hero.Name}"); continue; }
 
-            Apply(hero, actor);
+            Apply(hero, actor, condition);
             var entry = new RosterEntry(hero.ClassId, guid);
             entries.Add(entry);
             // Like DD2's own roster code: a new entry starts IDLE, then joins the party. Going straight to PARTY
@@ -53,7 +59,7 @@ internal static class Dd2Heroes
     }
 
     /// <summary>Write a record's persistent state onto a fresh DD2 actor.</summary>
-    public static void Apply(HeroRecord hero, ActorInstance actor)
+    public static void Apply(HeroRecord hero, ActorInstance actor, ExpeditionHeroState condition = null)
     {
         actor.SetActorName(hero.Name);
 
@@ -70,13 +76,17 @@ internal static class Dd2Heroes
         var trinkets = actor.GetTrinketInventory();
         var items = SingletonMonoBehaviour<Library<string, ItemDefinition>>.Instance;
         if (trinkets != null && items != null)
-            foreach (var id in hero.Trinkets)
+            foreach (var id in hero.WornTrinkets)
+            {
+                if (Dd1TrinketData.Get(id) != null) Dd1TrinketData.Register(id);
                 if (items.TryGetLibraryElement(id, out var t))
                     trinkets.AddItems(t, 1, false);
+            }
 
-        ApplyEquipment(hero, actor);
+        ApplyEquipment(hero, actor, fillHealth: condition == null);
         HeroSkills.Apply(hero, actor);
-        if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
+        if (condition != null) ExpeditionActorRestore.Apply(actor, condition);
+        else if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
     }
 
     // DD1's Blacksmith ranks as DD2's own permanent buffs, distinct ids stacked per rank (the same id doesn't stack).
@@ -106,7 +116,7 @@ internal static class Dd2Heroes
         ? rank switch { 0 => "Standard issue", 1 => "+10% damage, +3% crit", 2 => "+15% damage, +5% crit, +1 speed", 3 => "+30% damage, +8% crit, +1 speed", _ => "+45% damage, +10% crit, +2 speed" }
         : rank switch { 0 => "Standard issue", 1 => "+10% max HP", 2 => "+20% max HP", 3 => "+30% max HP", _ => "+45% max HP" };
 
-    private static void ApplyEquipment(HeroRecord hero, ActorInstance actor)
+    private static void ApplyEquipment(HeroRecord hero, ActorInstance actor, bool fillHealth)
     {
         var buffs = SingletonMonoBehaviour<Library<string, Assets.Code.Buff.BuffDefinition>>.Instance;
         if (buffs == null || actor.BuffContainer == null) return;
@@ -120,7 +130,7 @@ internal static class Dd2Heroes
         }
         actor.BuffContainer.RefreshActiveBuffs();
         // A bigger health pool starts full.
-        if (actor.HpRaw < actor.CurrentHpMax)
+        if (fillHealth && actor.HpRaw < actor.CurrentHpMax)
             actor.ApplyHealthHeal(actor.CurrentHpMax - actor.HpRaw, isCrit: false, SourceType.DRIVING, hasDisplayed: false);
         Plugin.Log.LogInfo($"[party] {hero.Name}: weapon rank {hero.WeaponRank + 1}, armour rank {hero.ArmorRank + 1} → hp {actor.HpRaw}/{actor.CurrentHpMax}");
     }
@@ -137,5 +147,30 @@ internal static class Dd2Heroes
         outcome.Quirks = actor.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList();
         outcome.Trinkets = actor.GetTrinketInventory()?.GetItemIds()?.ToList();
         return outcome;
+    }
+
+    /// <summary>Read live condition without damage/heal/stress events. Actor teardown is not evidence of death.</summary>
+    public static bool TryCapture(HeroRecord hero, uint guid, ExpeditionHeroState previous, out ExpeditionHeroState snapshot)
+    {
+        snapshot = null;
+        if (guid == 0) return false;
+        var actor = Dd2Api.Actor(guid);
+        bool rosterDead = Dd2Api.Roster?.GetActorGuids(RosterStatusType.DEAD)?.Contains(guid) == true;
+        if (actor == null && !rosterDead) return false;
+        bool dead = rosterDead || !actor.IsLiving;
+        float hpMax = actor?.CurrentHpMax ?? previous?.HpMax ?? 1;
+        if (dead && hpMax <= 0) hpMax = previous?.HpMax > 0 ? previous.HpMax : 1;
+        snapshot = new ExpeditionHeroState
+        {
+            Hp = dead ? 0 : actor.HpRaw, HpMax = hpMax,
+            Stress = actor?.Stress ?? previous?.Stress ?? hero.Stress, WoundPercent = actor?.WoundPercent ?? previous?.WoundPercent ?? 0,
+            Outcome = new HeroOutcome
+            {
+                HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null,
+                Quirks = actor?.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList() ?? previous?.Outcome.Quirks?.ToList(),
+                Trinkets = actor?.GetTrinketInventory()?.GetItemIds()?.ToList() ?? previous?.Outcome.Trinkets?.ToList()
+            }
+        };
+        return true;
     }
 }

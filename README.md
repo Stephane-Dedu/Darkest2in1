@@ -43,3 +43,8 @@ In DD2's main menu, **The Hamlet** opens the DD1 campaign (estates are saved nex
 - `tests/` - Core tests against the DD1 install.
 - `MODLOG.md` - the working journal: findings, decisions, what still needs checking in game.
 - `tools/` - playtest scripts and a type-by-type decompiler for reading DD2's code locally.
+
+For binary investigations, follow [the REA usage guide](tools/rea_usage.md).
+It covers the installed skill, CLI commands, private evidence and current Windows
+native-analysis prerequisites. [The investigation backlog](tools/rea_investigation_backlog.md)
+lists the systems awaiting owner priorities.

@@ -43,7 +43,8 @@ internal static class Dd1SkillData
     /// <summary>Make (once) the DD2 skill <paramref name="id"/> for this DD1 skill standing on <paramref name="baseSkill"/>.</summary>
     public static bool Make(string id, string baseSkill, SkillShape dd1, float scale, IReadOnlyCollection<string> target, IReadOnlyCollection<string> performer)
     {
-        if (Made.Contains(id)) return true;
+        if (Made.Contains(id) && SingletonMonoBehaviour<Library<string, ActorDataSkill>>.Instance?.GetHasLibraryKey(id) == true) return true;
+        Made.Remove(id);
         string baseText = Text<ActorDataSkill>(baseSkill);
         if (baseText.Length == 0) return false;
         var stats = new ActorDataStats(id, Dd1SkillToDd2.StatsText(Text<ActorDataStats>(baseSkill), dd1, scale));

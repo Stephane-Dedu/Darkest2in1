@@ -27,7 +27,8 @@ public class DebugKeys : MonoBehaviour
         {
             if (kb.f8Key.wasPressedThisFrame) DumpState();
             if (kb.f9Key.wasPressedThisFrame) StartTestCombat();
-            if (kb.f10Key.wasPressedThisFrame) WinFight();
+            if (kb.f10Key.wasPressedThisFrame && kb.ctrlKey.isPressed) KillFront();
+            else if (kb.f10Key.wasPressedThisFrame) WinFight(onlyOne: kb.shiftKey.isPressed);
             if (kb.f3Key.wasPressedThisFrame)
             {
                 // Testing: walk to the nearest room with a battle still to fight (handles traps/curios on the way: press again).
@@ -43,7 +44,23 @@ public class DebugKeys : MonoBehaviour
                     Plugin.Log.LogInfo("[F3] walking to battle room " + (target?.Id.ToString() ?? "none"));
                 }
             }
-            if (kb.f4Key.wasPressedThisFrame)
+            if (kb.f4Key.wasPressedThisFrame && kb.shiftKey.isPressed)
+            {
+                // Shift+F4, test estate only: open the Darkest Dungeon (a zone at level 6, the roster at resolve 5).
+                var session = Runtime.Session.Current;
+                if (session?.SavePath != null && System.IO.Path.GetFileName(session.SavePath) == "estate_2.json")
+                {
+                    var e = session.Save.Estate;
+                    e.ZoneXp["crypts"] = System.Math.Max(e.ZoneXp.TryGetValue("crypts", out var zx) ? zx : 0, 100000);
+                    foreach (var h in e.Roster) h.ResolveLevel = System.Math.Max(h.ResolveLevel, 5);
+                    e.Quests = Core.Campaign.QuestBoard.Generate(e, session.Campaign, session.Hamlet.ToggledZones());
+                    session.Persist();
+                    var dd = e.Quests.FirstOrDefault(q => q.Dungeon == "darkestdungeon");
+                    Plugin.Log.LogInfo($"[F4] Darkest Dungeon open: {dd?.PlotId ?? "no offer"} map {dd?.MapName ?? "-"}");
+                }
+                else Plugin.Log.LogInfo("[F4] only works on the test estate (slot 2)");
+            }
+            else if (kb.f4Key.wasPressedThisFrame)
             {
                 // Test estate only (slot 2): open the service buildings, add gold and the first Blacksmith upgrades.
                 var session = Runtime.Session.Current;
@@ -77,6 +94,7 @@ public class DebugKeys : MonoBehaviour
             }
             if (kb.f6Key.wasPressedThisFrame)
             {
+                if (kb.ctrlKey.isPressed) { Runtime.Driver.Instance?.DebugMemory(); return; }
                 // Cycle through DD1's curios (Shift+F6 clears the preview).
                 var dir = Runtime.Session.Current?.Dd1.PathOf("props", "shared", "curios");
                 var all = dir != null && System.IO.Directory.Exists(dir) ? System.IO.Directory.GetDirectories(dir).Select(System.IO.Path.GetFileName).OrderBy(n => n).ToList() : new System.Collections.Generic.List<string>();
@@ -86,7 +104,18 @@ public class DebugKeys : MonoBehaviour
             }
             if (kb.f7Key.wasPressedThisFrame)
                 Plugin.Log.LogInfo("[F7] " + (DarkestDungeon3.Dd2.HeroStage.Instance?.Dump(System.IO.Path.Combine(UnityEngine.Application.persistentDataPath, "DarkestDungeon3", "herostage.png")) ?? "no stage"));
-            if (kb.f11Key.wasPressedThisFrame) DarkestDungeon3.Runtime.Driver.Instance?.DebugFight();
+            if (kb.f11Key.wasPressedThisFrame)
+            {
+                // Shift+F11 (testing): fill the pack with torches first, so the spoils don't fit (DD1's full-pack loot scroll).
+                var d = DarkestDungeon3.Runtime.Driver.Instance;
+                var items = Runtime.Session.Current?.Content?.Items;
+                if (kb.shiftKey.isPressed && d?.Expedition != null && items != null)
+                {
+                    while (d.Expedition.Pack.HasRoomFor(Core.Expedition.Supply.Torch, 1, items)) d.Expedition.Pack.Add(Core.Expedition.Supply.Torch, 1);
+                    Plugin.Log.LogInfo($"[F11] pack filled: {d.Expedition.Pack.SlotsUsed(items)}/{Core.Expedition.Inventory.Slots} slots");
+                }
+                d?.DebugFight();
+            }
         }
         catch (Exception e)
         {
@@ -112,22 +141,55 @@ public class DebugKeys : MonoBehaviour
     }
 
     /// <summary>F10 (testing): every enemy in the current fight takes lethal damage, twice to finish corpses.</summary>
-    private static void WinFight()
+    /// <summary>F10 strikes down every enemy; Shift+F10 brings the first one to 1 HP for a hero to finish (corpse checks).</summary>
+    private static void WinFight(bool onlyOne = false)
     {
         var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
         if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
         var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
         int hit = 0;
+        if (onlyOne)
+        {
+            // The enemy in front (lowest team position): the one a hero's melee blow reaches.
+            var front = combat.AllActors.Select(a => a?.ActorInstance)
+                .Where(x => x != null && !party.Contains(x.ActorGuid) && !(x.ActorDataId ?? "").EndsWith("_corpse"))
+                .OrderBy(x => x.TeamPosition).FirstOrDefault();
+            if (front == null) { Plugin.Log.LogInfo("[F10] no living enemy"); return; }
+            front.ApplyHealthDamage(System.Math.Max(0f, front.HpRaw - 1f), isCrit: false, isRiposte: false, front, Assets.Code.Actor.DeathType.DEBUG,
+                                    Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
+            Plugin.Log.LogInfo($"[F10] {front.ActorDataId} at position {front.TeamPosition} left at 1 HP");
+            return;
+        }
         for (int pass = 0; pass < 2; pass++)
             foreach (var a in combat.AllActors.ToList())
             {
                 var actor = a?.ActorInstance;
-                if (actor == null || party.Contains(actor.ActorGuid)) continue;
-                actor.ApplyHealthDamage(9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
+                if (actor == null || party.Contains(actor.ActorGuid) || (onlyOne && (actor.ActorDataId ?? "").EndsWith("_corpse"))) continue;
+                // Shift+F10 leaves it at 1 HP: a hero's blow then kills it through DD2's own flow (a debug kill
+                // outside a skill isn't resolved until combat moves on).
+                actor.ApplyHealthDamage(onlyOne ? System.Math.Max(0f, actor.HpRaw - 1f) : 9999f, isCrit: false, isRiposte: false, actor, Assets.Code.Actor.DeathType.DEBUG,
                                         Assets.Code.Source.SourceType.DEBUG, "F10", hasDisplayed: false);
                 hit++;
+                if (onlyOne) { Plugin.Log.LogInfo($"[F10] struck {actor.ActorDataId} (death class {actor.DeathActorDataId})"); break; }
             }
         Plugin.Log.LogInfo($"[F10] struck {hit} enemy actors");
+    }
+
+    /// <summary>Ctrl+F10: the front enemy dies as from a skill (DD2's Kill with DeathType.SKILL), so its death class
+    /// (corpse) is applied at once — for checking how corpses are drawn.</summary>
+    private static void KillFront()
+    {
+        var combat = UnityEngine.Object.FindObjectOfType<Assets.Code.Combat.Presentation.CombatPresentationBhv>();
+        if (combat == null) { Plugin.Log.LogWarning("[F10] not in combat"); return; }
+        var party = new System.Collections.Generic.HashSet<uint>(Singleton<GameTypeMgr>.Instance.RosterManager.GetActorGuids(RosterStatusType.PARTY));
+        var front = combat.AllActors.Select(a => a?.ActorInstance)
+            .Where(x => x != null && !party.Contains(x.ActorGuid) && !(x.ActorDataId ?? "").EndsWith("_corpse"))
+            .OrderBy(x => x.TeamPosition).FirstOrDefault();
+        if (front == null) { Plugin.Log.LogInfo("[F10] no living enemy"); return; }
+        string before = front.ActorDataId;
+        front.Kill(Assets.Code.Actor.DeathType.SKILL, Assets.Code.Source.SourceType.SKILL, new System.Collections.Generic.List<string>(), 0f,
+                   party.Take(1).ToList());
+        Plugin.Log.LogInfo($"[F10] killed {before} at position {front.TeamPosition}: now {front.ActorDataId}");
     }
 
     private static void StartTestCombat()

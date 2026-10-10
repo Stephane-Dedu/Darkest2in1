@@ -34,6 +34,10 @@ public sealed class Estate
     public int QuestsCompleted = 1;
     public Dictionary<string, int> ZoneXp = new();
     public HashSet<string> CompletedPlotQuests = new();
+    /// <summary>DD1 Caretaker roster goals: classes which have reached Resolve Level 6, even after leaving.</summary>
+    public HashSet<string> CompletedResolveGoals = new();
+    /// <summary>Journal page indices carried home; older estates start with no invented collection.</summary>
+    public HashSet<int> CollectedJournalPages = new();
 
     public List<HeroRecord> Roster = new();
     public List<HeroRecord> Recruits = new();
@@ -41,10 +45,17 @@ public sealed class Estate
     public List<QuestOffer> Quests = new();
     public List<string> Trinkets = new();
     public List<string> WagonStock = new();
+    public int RegionLayoutVersion;
     /// <summary>Messages for the next town screen ("Dismas went missing", ...).</summary>
     public List<string> TownLog = new();
+    /// <summary>Saved weekly chronicle. Null identifies an older save whose surviving TownLog needs importing.</summary>
+    public List<ActivityWeek> ActivityLog;
     /// <summary>This town visit's DD1 town event (null: none), and what the roll needs to remember.</summary>
     public string TownEventId;
+    /// <summary>The plot quest the party last came home from (DD1's town background changes after a Darkest Dungeon part).</summary>
+    public string LastReturnPlotId;
+    /// <summary>A new estate's first act: DD1's opening raid on the road (the bandits), before the first week.</summary>
+    public bool OpeningRaidPending;
     public int TownEventMisses;
     public Dictionary<string, int> TownEventLastWeek = new();
     public int TownEventFreeUpgrades;

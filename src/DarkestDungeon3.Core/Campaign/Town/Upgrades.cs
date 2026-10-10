@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -43,6 +44,13 @@ public sealed class UpgradeTrees
 
     public UpgradeLevel Find(string treeId, string code) =>
         Trees.TryGetValue(treeId, out var levels) ? levels.FirstOrDefault(l => l.Code == code) : null;
+
+    /// <summary>DD1's building completion ratio, rounded as the Unity port's upgrade window does.</summary>
+    public int Percent(Estate estate, string building)
+    {
+        var levels = Trees.Where(t => t.Key.StartsWith(building + ".", StringComparison.Ordinal)).SelectMany(t => t.Value).ToList();
+        return levels.Count == 0 ? 0 : (int)Math.Round(100f * levels.Count(l => estate.Upgrades.Contains(l.Key)) / levels.Count);
+    }
 
     /// <summary>The next level of a tree the estate hasn't bought yet.</summary>
     public UpgradeLevel Next(Estate estate, string treeId) =>

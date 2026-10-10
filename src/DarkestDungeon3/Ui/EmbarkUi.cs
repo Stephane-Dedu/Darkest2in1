@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using DarkestDungeon3.Core.Campaign;
 using DarkestDungeon3.Core.Dd1;
+using DarkestDungeon3.Core.Dungeon;
 using DarkestDungeon3.Core.Expedition;
 using DarkestDungeon3.Runtime;
 using UnityEngine;
@@ -13,13 +14,11 @@ namespace DarkestDungeon3.Ui;
 /// dungeon's quests at its spot, the quest scroll on the left, the party slots at the bottom and the roster on the
 /// right. Provisions: the provisioner's window, the store and the party's pack, then off to the dungeon.
 /// </summary>
-internal sealed class EmbarkUi
+internal sealed partial class EmbarkUi
 {
-    private QuestOffer _quest;
-    private readonly List<string> _party = new();      // front rank first
-    private readonly Inventory _cart = new();
-    private string _error;
-    private bool _confirmLow, _provisioning;
+    private readonly Dictionary<string, string> _mapAreas = new();
+    private readonly Dictionary<string, int> _questRows = new();
+    private string _focusedZone;
 
     public bool WantsBack;
 
@@ -45,8 +44,8 @@ internal sealed class EmbarkUi
 
     private static Dictionary<string, Vector2> _mapSpots;
 
-    /// <summary>Where DD1 draws each dungeon on the estate map (quest_select.layout.darkest), nudged left so the
-    /// rightmost quests clear the roster.</summary>
+    /// <summary>DD1's estate-map positions, nudged left to clear the roster and with twenty extra pixels above
+    /// Tangle/Weald so the preceding area's quest buttons clear its header.</summary>
     private static Dictionary<string, Vector2> MapSpots()
     {
         if (_mapSpots != null) return _mapSpots;
@@ -57,7 +56,8 @@ internal sealed class EmbarkUi
             {
                 const string prefix = "quest_select_dungeon_layout_";
                 if (!r.Type.StartsWith(prefix) || !r.Has("quest_map_pos")) continue;
-                _mapSpots[r.Type.Substring(prefix.Length)] = new Vector2(r.Float("quest_map_pos", 0) - 120, r.Float("quest_map_pos", 1));
+                string location = r.Type.Substring(prefix.Length);
+                _mapSpots[location] = new Vector2(r.Float("quest_map_pos", 0) - 120, r.Float("quest_map_pos", 1) + (location == "weald" ? 20 : 0));
             }
         }
         catch (System.Exception e) { Plugin.Log.LogWarning("[embark] quest map layout: " + e.Message); }
@@ -81,19 +81,23 @@ internal sealed class EmbarkUi
         if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg); else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
         Gui.Text(new Rect(560, 24, 900, 60), "Choose a quest", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
 
-        // Dungeons with their quests. DD2's regions (an estate option) have no spot on DD1's map: they stack in a
-        // column on the left, where the quest scroll opens over them.
-        var spots = MapSpots();
-        var zones = E.Quests.Select(q => q.Dungeon).Distinct().ToList();
-        int extra = 0;
-        foreach (var zone in zones)
-        {
-            if (!spots.TryGetValue(zone, out var pos))
-                pos = new Vector2(130, 150 + extra++ * 150);
-            DrawDungeon(zone, pos, E.Quests.Where(q => q.Dungeon == zone).ToList());
-        }
-
         if (_quest != null && !E.Quests.Contains(_quest)) _quest = null;
+        if (_focusedZone == null || (_focusedZone != QuestBoard.DarkestDungeon && !CampaignRegions.Enabled(E, _focusedZone)))
+            FocusArea(_quest?.Dungeon ?? E.Quests.FirstOrDefault()?.Dungeon);
+
+        // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
+        var spots = MapSpots();
+        foreach (var location in CampaignRegions.Legacy)
+        {
+            var areas = CampaignRegions.AtLocation(E, location);
+            if (areas.Count == 0 || !spots.TryGetValue(location, out var pos)) continue;
+            if (!_mapAreas.TryGetValue(location, out var zone) || !areas.Contains(zone))
+                _mapAreas[location] = zone = areas[0];
+            DrawDungeon(zone, pos, areas);
+        }
+        if (E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
+            DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
+
         if (_quest != null) DrawQuestScroll(_quest);
 
         DrawPartySlots(new Vector2(754, 900));
@@ -154,11 +158,36 @@ internal sealed class EmbarkUi
 
     private List<HeroRecord> Heroes() => _party.Select(E.Hero).Where(h => h != null).ToList();
 
-    private void DrawDungeon(string zone, Vector2 pos, List<QuestOffer> quests)
+    private void FocusArea(string zone)
+    {
+        _focusedZone = zone;
+        if (zone != null) _mapAreas[ZoneBase.Of(zone)] = zone;
+        if (_quest?.Dungeon != zone || !E.Quests.Contains(_quest))
+            SelectQuest(E.Quests.FirstOrDefault(q => q.Dungeon == zone));
+    }
+
+    private void SelectQuest(QuestOffer quest)
+    {
+        _quest = quest;
+        if (quest != null)
+        {
+            _focusedZone = quest.Dungeon;
+            _mapAreas[ZoneBase.Of(quest.Dungeon)] = quest.Dungeon;
+            int index = E.Quests.Where(q => q.Dungeon == quest.Dungeon).ToList().IndexOf(quest);
+            _questRows[quest.Dungeon] = Mathf.Max(0, index / 4);
+            _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), quest, S.Hamlet.AnyResolveCanEmbark));
+        }
+        _error = null;
+    }
+
+    private void DrawDungeon(string zone, Vector2 pos, IReadOnlyList<string> areas)
     {
         var plate = Qs("dungeon_progressionbar.png");
         if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
-        Gui.Text(new Rect(pos.x + 4, pos.y - 6, 190, 30), S.Zones.ZoneName(zone), 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        else Gui.Fill(new Rect(pos.x - 5, pos.y - 10, 282, 84), new Color(0, 0, 0, 0.8f));
+        string name = S.Zones.ZoneName(zone);
+        bool canSwitch = areas.Count > 1;
+        Gui.Text(new Rect(pos.x + 4, pos.y - 6, canSwitch ? 156 : 190, 30), name, 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
 
         E.ZoneXp.TryGetValue(zone, out int xp);
         int level = S.Campaign.ZoneLevel(xp);
@@ -169,30 +198,73 @@ internal sealed class EmbarkUi
             float from = thresholds[level], to = thresholds[level + 1];
             Gui.Fill(new Rect(pos.x + 14, pos.y + 32, 194 * Mathf.Clamp01((xp - from) / Mathf.Max(1, to - from)), 6), new Color(0.75f, 0.62f, 0.3f));
         }
+        bool unlocked = zone == QuestBoard.DarkestDungeon || CampaignRegions.Unlocked(E, S.Campaign, zone);
+        if (canSwitch)
+        {
+            int at = areas.ToList().IndexOf(zone);
+            string nextZone = areas[(at + 1) % areas.Count];
+            float nameWidth = Dd1Font.Heading?.Measure(name, 24 * Gui.HeadingScale).x ?? 156;
+            var next = new Rect(pos.x + 4 + Mathf.Min(nameWidth + 8, 164), pos.y - 6, 24, 30);
+            Gui.Image(next, Art.Dd1("shared", "character", "next_hero.png"), ScaleMode.ScaleToFit);
+            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Switch to " + S.Zones.ZoneName(nextZone));
+            if (Gui.Hotspot(next)) FocusArea(nextZone);
+        }
 
-        for (int i = 0; i < quests.Count; i++)
+        // The header stops above the quest buttons and is registered after the arrow so it cannot steal its clicks.
+        if (Gui.Hotspot(new Rect(pos.x - 5, pos.y - 10, 282, 56))) FocusArea(zone);
+        if (!unlocked)
+        {
+            Gui.Text(new Rect(pos.x + 8, pos.y + 52, 270, 32), $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests", 16, Gui.Dim);
+            return;
+        }
+        var quests = E.Quests.Where(q => q.Dungeon == zone).ToList();
+        int rows = Mathf.Max(1, (quests.Count + 3) / 4);
+        _questRows.TryGetValue(zone, out int row);
+        row = Mathf.Clamp(row, 0, rows - 1);
+        var questArea = new Rect(pos.x + 68, pos.y + 52, 356, 80);
+        if (rows > 1 && questArea.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+        {
+            row = Mathf.Clamp(row + (Event.current.delta.y > 0 ? 1 : Event.current.delta.y < 0 ? -1 : 0), 0, rows - 1);
+            Event.current.Use();
+        }
+        for (int i = row * 4; i < Mathf.Min(quests.Count, (row + 1) * 4); i++)
         {
             var q = quests[i];
-            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92 + (i / 4) * 80);
+            // Keep DD1's first-row positions. Extra rows scroll here instead of covering the next area.
+            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92);
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
             bool hover = r.Contains(Event.current.mousePosition);
             if (q == _quest)
             {
-                var sel = Qs("quest_select_selected.png");
-                if (sel != null) GUI.DrawTexture(new Rect(c.x - 72, c.y - 72, 144, 144), sel);
+                var selected = Qs("quest_select_selected.png");
+                if (selected != null) GUI.DrawTexture(new Rect(c.x - 72, c.y - 72, 144, 144), selected);
             }
             var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png") ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
             if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8) : r, ring);
             int tier = q.Difficulty >= 6 ? 6 : q.Difficulty >= 5 ? 5 : q.Difficulty >= 3 ? 3 : 1;
             var badge = Qs($"quest_select_{q.Type}_{tier}.png") ?? Qs($"quest_select_explore_{tier}.png");
             if (badge != null) GUI.DrawTexture(new Rect(c.x - 20, c.y - 20, 40, 40), badge);
-            if (Gui.Hotspot(r))
-            {
-                _quest = q;
-                _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), q, S.Hamlet.AnyResolveCanEmbark));
-                _error = null;
-            }
+            if (hover) Gui.Tip($"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}");
+            if (Gui.Hotspot(r)) SelectQuest(q);
         }
+        if (rows > 1)
+        {
+            var up = new Rect(pos.x + 86, pos.y + 56, 26, 20);
+            var down = new Rect(pos.x + 86, pos.y + 108, 26, 20);
+            if (row > 0)
+            {
+                Gui.Image(up, Art.Dd1("shared", "widgets", "scrollbar_uparrow.png"), ScaleMode.ScaleToFit);
+                if (Gui.Hotspot(up)) row--;
+            }
+            if (row < rows - 1)
+            {
+                Gui.Image(down, Art.Dd1("shared", "widgets", "scrollbar_downarrow.png"), ScaleMode.ScaleToFit);
+                if (Gui.Hotspot(down)) row++;
+            }
+            Gui.Text(new Rect(pos.x + 68, pos.y + 80, 60, 20), $"{row + 1} / {rows}", 14, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (new Rect(pos.x + 68, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
+        }
+        _questRows[zone] = row;
     }
 
     private static string GoalLine(QuestOffer q)
@@ -307,20 +379,24 @@ internal sealed class EmbarkUi
         if (goldIcon != null) GUI.DrawTexture(new Rect(820, 920, 72, 72), goldIcon);
         Gui.Text(new Rect(900, 924, 600, 64), $"{Gui.Num(gold, "#,0")}   -{Gui.Num(cost, "#,0")}", 34, cost > gold ? Gui.Blood : Gui.Gold, TextAnchor.MiddleLeft, heading: true);
 
-        if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the quests", size: 24)) { _provisioning = false; _confirmLow = false; }
+        if (DrawProvisioningBack()) return;
 
         var heroes = Heroes();
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         int minFood = S.Provisioner.MinimumFood(length);
         bool lowFood = _cart.Count(Supply.Food) < minFood, noTorch = _cart.Count(Supply.Torch) == 0;
-        if (why == null && (lowFood || noTorch))
+        bool fewTrinkets = Embark.TrinketWarning(S.Campaign, _quest, heroes);   // DD1: under half the trinket slots filled
+        if (why == null && (lowFood || noTorch || fewTrinkets))
         {
-            string warn = lowFood ? $"Less than {minFood} food: the party may starve." : "No torches: the dark will press in.";
+            // DD1's own questions (localization: town_provision_*).
+            string warn = lowFood ? (S.Lore?.Text("town_provision_not_enough_food_confirm_format")?.Replace("%d", minFood.ToString()) ?? $"Less than {minFood} food: the party may starve.")
+                : noTorch ? "No torches: the dark will press in."
+                : S.Lore?.Text("town_provision_no_trinkets_equipped") ?? "Your party is not fully outfitted with trinkets. Really embark?";
             Gui.Text(new Rect(1080, 990, 480, 70), warn + (_confirmLow ? "\nEmbark again to go anyway." : ""), 18, Gui.Blood, TextAnchor.MiddleRight);
         }
         if (Gui.DdButton(new Rect(1580, 980, 320, 86), why ?? "Embark", why == null && cost <= gold, why == null ? 44 : 18))
         {
-            if ((lowFood || noTorch) && !_confirmLow) { _confirmLow = true; return; }
+            if ((lowFood || noTorch || fewTrinkets) && !_confirmLow) { _confirmLow = true; return; }
             _confirmLow = false;
             var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);

@@ -3,6 +3,7 @@ using System.Linq;
 using DarkestDungeon3.Core.Campaign;
 using DarkestDungeon3.Core.Campaign.Town;
 using DarkestDungeon3.Core.Dd1;
+using DarkestDungeon3.Core.Expedition;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -10,7 +11,8 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class FakeCatalog : IHeroCatalog
 {
-    public bool TrinketFits(string trinketId, string classId) => true;
+    public bool TrinketFits(string trinketId, string classId) => trinketId != "jester_only" || classId == "jester";
+    public int TrinketEquipLimit(string trinketId) => trinketId == "unlimited" ? 0 : 1;
     public IReadOnlyList<string> RecruitableClasses { get; } =
         new[] { "highwayman", "plague_doctor", "grave_robber", "leper", "man_at_arms", "hellion", "jester", "occultist", "runaway", "flagellant", "vestal" };
 
@@ -20,7 +22,7 @@ public class FakeCatalog : IHeroCatalog
     public string MapDd1Quirk(string dd1QuirkId) => dd1QuirkId == null ? null : "dd2_" + dd1QuirkId;
     public bool IsDisease(string q) => q.StartsWith("disease_");
     public bool IsPositive(string q) => q.StartsWith("pos_");
-    public string RandomTrinket(string rarity, Rng rng, string forClass = null) => rarity + "_trinket_" + rng.Next(3);
+    public virtual string RandomTrinket(string rarity, Rng rng, string forClass = null) => rarity + "_trinket_" + rng.Next(3);
     public int TrinketPrice(string trinketId) => 1000;
 }
 
@@ -51,6 +53,106 @@ public class HamletTests
     }
 
     [Fact]
+    public void FromBeyondOffersThreeFallenHeroesAndOnlyOneReturns()
+    {
+        var h = NewHamlet(41);
+        Assert.NotNull(Dd1.TownEvents.Get("dead_recruit"));                    // DD1 "From Beyond" is rolled now
+        for (int i = 0; i < 4; i++)
+            h.Estate.Graveyard.Add(new HeroRecord { Id = "dead" + i, Name = "Dead " + i, ClassId = "highwayman", IsDead = true, CauseOfDeath = "a blade" });
+        int before = h.Estate.Recruits.Count;
+        h.Estate.TownEventId = "dead_recruit";
+        h.StartTownEvent(new Rng(1));
+        var fallen = h.Estate.Recruits.Where(r => r.FromGraveyard).ToList();
+        Assert.Equal(3, fallen.Count);                                          // number_data 3
+        Assert.Equal(before + 3, h.Estate.Recruits.Count);
+
+        Assert.True(h.Recruit(fallen[0].Id));
+        var back = h.Estate.Hero(fallen[0].Id);
+        Assert.NotNull(back);
+        Assert.False(back.IsDead);
+        Assert.DoesNotContain(back, h.Estate.Graveyard);
+        Assert.DoesNotContain(h.Estate.Recruits, r => r.FromGraveyard);        // only ONE returns
+        Assert.Equal(3, h.Estate.Graveyard.Count);                              // the others stay dead
+    }
+
+    [Fact]
+    public void ANewEstateOpensWithDd1sHeroesAndWallet()
+    {
+        var h = NewHamlet(7);
+        // scripts/starting_save/persist.roster.json: Reynauld and Dismas, stress 10 (of 100) = 1 pip.
+        Assert.Equal(new[] { "Reynauld", "Dismas" }, h.Estate.Roster.Select(r => r.Name));
+        var reynauld = h.Estate.Roster[0];
+        Assert.Equal("man_at_arms", reynauld.ClassId);                 // the Crusader's DD2 stand-in
+        Assert.Equal("highwayman", h.Estate.Roster[1].ClassId);
+        Assert.Equal(1, reynauld.Stress);
+        Assert.Equal(new[] { "dd2_warrior_of_light", "dd2_kleptomaniac", "dd2_god_fearing" }, reynauld.Quirks);
+        Assert.Equal(new[] { "dd2_hard_noggin", "dd2_known_cheat", "dd2_quick_reflexes" }, h.Estate.Roster[1].Quirks);
+        // persist.estate.json wallet: 10 busts, 10 portraits, 10 deeds, 20 crests, no gold (the opening raid pays 5000).
+        Assert.Equal(10, h.Estate.Get("bust"));
+        Assert.Equal(20, h.Estate.Get("crest"));
+        Assert.Equal(0, h.Estate.Get(Currency.Gold));
+        // The Ruins tutorial waits on the board (plot_tutorial_crypts, Ruins level 0) on DD1's own map.
+        var tutorial = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_tutorial_crypts");
+        Assert.Equal(("dd2_city", "explore", "tutorial_crypts"), (tutorial.Dungeon, tutorial.Type, tutorial.MapName));
+        Assert.DoesNotContain("plot_tutorial_crypts", h.Estate.CompletedPlotQuests);
+        // The first coach: stage_coach.building.json first_hero_classes.
+        Assert.Equal(new[] { "plague_doctor", "vestal" }, h.Estate.Recruits.Take(2).Select(r => r.ClassId));
+
+        // Then the opening raid on the road (persist.raid.json): Reynauld in front, Dismas behind, 2 provisions.
+        Assert.True(h.Estate.OpeningRaidPending);
+        var opening = h.OpeningRaid().Value;
+        Assert.Equal(("weald", "tutorial_final_room"), (opening.Quest.Dungeon, opening.Quest.GoalId));
+        Assert.Equal(new[] { "Reynauld", "Dismas" }, opening.Party.Select(p => p.Name));
+        Assert.Equal(2, opening.Pack.Count(Supply.Food));
+        h.Estate.OpeningRaidPending = false;
+        Assert.Null(h.OpeningRaid());
+    }
+
+    [Fact]
+    public void TheCrowsEventPutsItsQuestOnTheBoard()
+    {
+        var h = NewHamlet(9);
+        Assert.NotNull(Dd1.TownEvents.Get("plot_quest_crow_trinket"));
+        Assert.Null(Dd1.TownEvents.Get("plot_quest_town_invasion_0"));        // the `town` dungeon has no zone in the mod
+        h.Estate.TownEventId = "plot_quest_crow_trinket";
+        h.StartTownEvent(new Rng(2));
+        var crow = Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_crow_trinket");
+        Assert.Equal(("dd2_forest", "kill_boss", 5, "crow_map1", "crow_C"), (crow.Dungeon, crow.Type, crow.Difficulty, crow.MapName, crow.BossId));
+        Assert.False(crow.CanRetreat);
+        Assert.Contains(crow.Rewards, r => r.Type == "trinket" && r.Id == "crow");
+        h.StartTownEvent(new Rng(3));
+        Assert.Single(h.Estate.Quests, q => q.PlotId == "plot_crow_trinket");   // once on the board
+    }
+
+    [Fact]
+    public void TheWagonOffersRaritiesWithDd1sWeights()
+    {
+        var h = NewHamlet();
+        var table = h.Buildings.WagonRarities();
+        // nomad_wagon.building.json rarity_generation_table
+        Assert.Equal(new[] { ("very_common", 6f), ("common", 5f), ("uncommon", 4f), ("rare", 2f), ("very_rare", 1f) }, table);
+        var rng = new Rng(3);
+        var counts = Enumerable.Range(0, 18000).Select(_ => Hamlet.WagonRarity(table, rng)).GroupBy(r => r).ToDictionary(g => g.Key, g => g.Count());
+        Assert.InRange(counts["very_rare"], 800, 1200);    // 1 in 18 (the old list gave 1 in 7: ~2570)
+        Assert.InRange(counts["very_common"], 5600, 6400);
+        Assert.Equal(2, h.Buildings.WagonStock(h.Estate));  // number_of_trinkets_upgrades base
+    }
+
+    [Fact]
+    public void AtMostThreeLockedPositiveQuirks()
+    {
+        var h = NewHamlet();
+        var hero = h.Estate.Roster[0];
+        hero.Quirks.AddRange(new[] { "pos_a", "pos_b", "pos_c", "pos_d" });
+        hero.LockedQuirks.AddRange(new[] { "pos_a", "pos_b", "pos_c" });
+        Assert.Equal(3, h.Dd1.QuirkLimits.MaxLockedPositive);                 // DD1 quirks_max_locked_positive
+        Assert.NotNull(h.WhyCantLock(hero, "pos_d"));
+        Assert.False(h.StartTreatment(hero.Id, "pos_d"));                     // the Sanitarium refuses a fourth
+        hero.LockedQuirks.Remove("pos_c");
+        Assert.Null(h.WhyCantLock(hero, "pos_d"));
+    }
+
+    [Fact]
     public void TrinketsSellForFifteenPercentAndCanAllBeUnequipped()
     {
         var h = NewHamlet();
@@ -69,18 +171,18 @@ public class HamletTests
     }
 
     [Fact]
-    public void NewEstateHasFourHeroesRecruitsAndQuests()
+    public void NewEstateHasDd1sHeroesRecruitsAndQuests()
     {
         var h = NewHamlet();
-        Assert.Equal(4, h.Estate.Roster.Count);
+        Assert.Equal(2, h.Estate.Roster.Count);              // DD1's opening: Reynauld and Dismas
         Assert.Equal(2, h.Estate.Recruits.Count);           // DD1: 2 recruits before upgrades
         Assert.Equal(9, B.RosterSize(h.Estate));            // DD1: roster of 9 before upgrades
         Assert.Equal(2, h.Estate.WagonStock.Count);
         Assert.NotEmpty(h.Estate.Quests);
         Assert.All(h.Estate.Roster, hero => Assert.NotEmpty(hero.Quirks));
-        // DD1's skipped tutorial pays out: 500 base + 3000 gold, 4 crests.
-        Assert.Equal(3500, h.Estate.Get(Currency.Gold));
-        Assert.Equal(4, h.Estate.Get(Currency.Crest));
+        // DD1's starting save has no gold and 20 crests (the opening raid and the Ruins tutorial pay later).
+        Assert.Equal(0, h.Estate.Get(Currency.Gold));
+        Assert.Equal(20, h.Estate.Get(Currency.Crest));
     }
 
     [Fact]
@@ -181,9 +283,9 @@ public class HamletTests
         var h = NewHamlet();
         var recruit = h.Estate.Recruits[0];
         Assert.True(h.Recruit(recruit.Id));
-        Assert.Equal(5, h.Estate.Roster.Count);
+        Assert.Equal(3, h.Estate.Roster.Count);
         Assert.True(h.Dismiss(recruit.Id));
-        Assert.Equal(4, h.Estate.Roster.Count);
+        Assert.Equal(2, h.Estate.Roster.Count);
     }
     [Fact]
     public void Blacksmith_sells_dd1_weapon_ranks_behind_its_own_upgrades_and_resolve()
@@ -311,5 +413,25 @@ public class HamletTests
         var r = Assert.Single(report.Heroes);
         Assert.Equal(2, r.XpGained);
         Assert.Equal(3, r.Stress);
+    }
+
+    [Fact]
+    public void AbandoningAQuestCostsTheStressOfDefeat()
+    {
+        var h = NewHamlet(32);
+        var hero = h.Estate.Roster[0];
+        var exp = new DarkestDungeon3.Core.Expedition.ExpeditionState
+        {
+            Quest = new QuestOffer { Id = "q", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 },
+            Party = { hero.Id },
+            Retreated = true,
+        };
+        Assert.Equal(20f, Dd1.AbandonStressDd1);                  // DD1 quest.exit_penalty.json fail_penalty
+        var report = Homecoming.Report(h.Estate, Dd1, exp, new[] { new HeroOutcome { HeroId = hero.Id, Stress = 3 } });
+        Assert.Equal(5, Assert.Single(report.Heroes).Stress);     // 3 + 20/10
+        Assert.Equal(5, hero.Stress);
+        var exp2 = new DarkestDungeon3.Core.Expedition.ExpeditionState { Quest = exp.Quest, Party = { hero.Id }, Retreated = true };
+        Homecoming.Report(h.Estate, Dd1, exp2, new[] { new HeroOutcome { HeroId = hero.Id, Stress = 9 } });
+        Assert.Equal(10, hero.Stress);                            // capped at DD2's 10
     }
 }

@@ -61,6 +61,20 @@ public sealed class Provisioner
 /// <summary>Turning a quest, four heroes and a pack into an expedition.</summary>
 public static class Embark
 {
+    /// <summary>
+    /// DD1's warning before a harder quest (difficulty ≥ trinkets_equipped_warning_dungeon_min_difficulty, 3) when
+    /// fewer than trinkets_equipped_warning_min_percent (50%) of the party's trinket slots (two each) are filled.
+    /// </summary>
+    public static bool TrinketWarning(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party)
+    {
+        if (quest == null || party == null || party.Count == 0) return false;
+        int minDifficulty = (int?)dd1?.Rules?["trinkets_equipped_warning_dungeon_min_difficulty"] ?? 3;
+        float minShare = (float?)dd1?.Rules?["trinkets_equipped_warning_min_percent"] ?? 0.5f;
+        if (quest.Difficulty < minDifficulty) return false;
+        int worn = party.Sum(h => System.Math.Min(2, h.WornTrinkets.Count()));
+        return worn < minShare * 2 * party.Count;
+    }
+
     public static string WhyCantEmbark(Estate estate, QuestOffer quest, IReadOnlyList<HeroRecord> party, bool anyResolve = false)
     {
         if (quest == null) return "Choose a quest.";
@@ -80,8 +94,15 @@ public static class Embark
                                          Provisioner provisioner = null)
     {
         var goal = dd1.Goals?.For(quest);
-        var p = dd1.MapGen.Find(quest.Dungeon, quest.Size, quest.Type);
-        var map = MapGenerator.Generate(p, quest.MapSeed, dd1.Props(quest.Dungeon), goal);
+        DungeonMap map;
+        if (dd1.Install != null && PlotMap.Exists(dd1.Install, quest.MapName))
+        {
+            // DD1's hand-made map (the Darkest Dungeon's parts): its layout, set fights and the goal's curios.
+            map = PlotMap.Load(dd1.Install, quest.MapName, quest.Dungeon, quest.Type, quest.MapSeed, dd1.Props(quest.Dungeon),
+                               goalArea: goal?.Type == "tutorial_room" ? goal.RoomId : null);
+            PlotMap.PlaceGoal(map, goal);
+        }
+        else map = MapGenerator.Generate(dd1.MapGen.Find(quest.Dungeon, quest.Size, quest.Type), quest.MapSeed, dd1.Props(quest.Dungeon), goal);
 
         var state = new ExpeditionState
         {
@@ -105,7 +126,8 @@ public static class Embark
             if (h.PendingBuffs.Count > 0)
             {
                 state.PendingBuffs[h.Id] = new List<string>(h.PendingBuffs);
-                h.PendingBuffs.Clear();   // town buffs (hangovers...) last one expedition
+                // DD1 quest_complete buffs survive retreats; ordinary town buffs last one expedition.
+                h.PendingBuffs.RemoveAll(b => dd1.Buffs?.Get(b)?.DurationType != "quest_complete");
             }
         }
         return state;

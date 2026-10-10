@@ -31,9 +31,15 @@ public sealed class Dd1Campaign
     /// <summary>[difficulty][length] → gold.</summary>
     public JArray GoldTable { get; private set; }
     public JObject Rules { get; private set; }
+    /// <summary>DD1's quirk limits (quirks_max_*), with replacement over the cap.</summary>
+    public QuirkLimits QuirkLimits { get; private set; } = new();
+    /// <summary>DD1 stress (of 100) every hero takes when a quest is abandoned (quest.exit_penalty.json fail_penalty).</summary>
+    public float AbandonStressDd1 { get; private set; } = 20f;
     public QuestGoals Goals { get; private set; }
     public Town.HeroUpgrades HeroUpgrades { get; private set; }
     public Town.TownEvents TownEvents { get; private set; }
+    /// <summary>DD1's town backgrounds by state (town_render_data.json).</summary>
+    public Town.TownRenderData TownRender { get; private set; } = new();
     public Dd1Buffs Buffs { get; private set; }
     /// <summary>DD1's heirloom exchange (campaign/heirloom_exchange): give so many of one kind for so many of another.</summary>
     public List<(string From, int FromAmount, string To, int ToAmount)> HeirloomRates { get; } = new();
@@ -76,9 +82,13 @@ public sealed class Dd1Campaign
         c.ZoneLevelThresholds.AddRange(progression["dungeon"]["level_threshold_table"].Select(t => (int)t));
 
         c.Rules = (JObject)ReadJson(dd1.Rules);
+        c.QuirkLimits = QuirkLimits.FromDd1(c.Rules);
+        var exitPenalty = dd1.PathOf("campaign", "quest", "quest.exit_penalty.json");
+        if (File.Exists(exitPenalty)) c.AbandonStressDd1 = (float?)ReadJson(exitPenalty)["fail_penalty"]?["stress_damage"] ?? c.AbandonStressDd1;
         c.Goals = QuestGoals.Load(dd1);
         c.HeroUpgrades = Town.HeroUpgrades.Load(dd1);
         c.TownEvents = Town.TownEvents.Load(dd1);
+        c.TownRender = Town.TownRenderData.Load(dd1);
         c.Buffs = Dd1Buffs.Load(dd1);
         var roster = dd1.PathOf("campaign", "roster", "roster.variables.json");
         if (File.Exists(roster))

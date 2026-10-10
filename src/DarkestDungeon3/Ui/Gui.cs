@@ -99,6 +99,15 @@ internal static class Gui
     /// less, so headings came out small and thin. Sizes are scaled up to DD1's proportions here.</summary>
     public const float HeadingScale = 1.3f, BodyScale = 1.08f;
 
+    public static float TextHeight(string text, float size, float width, bool heading = false)
+    {
+        size *= heading ? HeadingScale : BodyScale;
+        var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
+        if (font != null) return font.Measure(text, size, width).y;
+        EnsureStyles();
+        return new GUIStyle(_label) { fontSize = (int)(size * 0.8f) }.CalcHeight(new GUIContent(text), width);
+    }
+
     public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
     {
         size *= heading ? HeadingScale : BodyScale;
@@ -141,27 +150,52 @@ internal static class Gui
 
     // ---- DD1 tooltips: one per frame by the mouse, drawn over everything (DrawTip at the end of the frame) ----
 
-    private static string _tip;
-    private static Color _tipTitle;
+    private sealed class TipLine
+    {
+        public string Text;
+        public Color Colour;
+        public float Size;
+        public bool Heading;
+        public float Height;
+    }
+    private static System.Collections.Generic.List<TipLine> _tip;
 
     /// <summary>A DD1 tooltip by the mouse this frame. Its first line is the title (in <paramref name="title"/>).</summary>
     public static void Tip(string text, Color? title = null)
     {
         if (Event.current.type != EventType.Repaint || string.IsNullOrEmpty(text)) return;
-        _tip = text;
-        _tipTitle = title ?? Dd1Name;
+        _tip = text.Split('\n').Select((line, i) => new TipLine
+            { Text = line, Size = i == 0 ? 20 : 17, Colour = i == 0 ? title ?? Dd1Name : Dd1Text, Heading = i == 0 }).ToList();
+    }
+
+    public static void EquipmentTip(string name, string rarity, Color rarityColour, string requirement, string effects, string hint = null)
+    {
+        if (Event.current.type != EventType.Repaint) return;
+        var neutral = Runtime.Dd1Palette.Get("equipment_tooltip_body", Dd1Class);
+        _tip = new System.Collections.Generic.List<TipLine>
+        {
+            new() { Text = name, Size = 20, Colour = Runtime.Dd1Palette.Get("equipment_tooltip_title", Gold) },
+            new() { Text = rarity, Size = 17, Colour = rarityColour },
+        };
+        foreach (string part in new[] { requirement, effects, hint }.Where(p => !string.IsNullOrEmpty(p)))
+            _tip.AddRange(part.Split('\n').Select(line => new TipLine { Text = line, Size = 17, Colour = neutral }));
     }
 
     public static void DrawTip()
     {
         if (_tip == null || Event.current.type != EventType.Repaint) return;
-        string[] lines = _tip.Split('\n');
-        const float width = 420f, lineH = 25f;
-        // Roughly 9 px per character at the body size: long lines wrap.
-        int rows = lines.Sum(l => Mathf.Max(1, Mathf.CeilToInt(l.Length * 9.5f / (width - 28))));
+        EnsureStyles();
+        const float width = 420f;
+        foreach (var line in _tip)
+        {
+            float size = line.Size * (line.Heading ? HeadingScale : BodyScale);
+            var font = line.Heading ? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Body;
+            var fallback = font == null ? new GUIStyle(_label) { fontSize = (int)(size * 0.8f) } : null;
+            line.Height = (font?.Measure(line.Text, size, width - 28).y ?? Mathf.Max(size, fallback.CalcHeight(new GUIContent(line.Text), width - 28))) + 5;
+        }
         var m = Event.current.mousePosition;
-        var r = new Rect(Mathf.Min(m.x + 20, W - width - 8), 0, width, 18 + rows * lineH + 8);
-        r.y = Mathf.Min(m.y + 20, H - r.height - 8);
+        var r = new Rect(Mathf.Clamp(m.x + 20, 8, W - width - 8), 0, width, 20 + _tip.Sum(l => l.Height));
+        r.y = Mathf.Max(8, Mathf.Min(m.y + 20, H - r.height - 8));
         Fill(r, new Color(0.02f, 0.016f, 0.012f, 0.96f));
         var edge = new Color(0.42f, 0.36f, 0.25f);
         Fill(new Rect(r.x, r.y, r.width, 2), edge);
@@ -169,11 +203,10 @@ internal static class Gui
         Fill(new Rect(r.x, r.y, 2, r.height), edge);
         Fill(new Rect(r.xMax - 2, r.y, 2, r.height), edge);
         float y = r.y + 10;
-        for (int i = 0; i < lines.Length; i++)
+        foreach (var line in _tip)
         {
-            int n = Mathf.Max(1, Mathf.CeilToInt(lines[i].Length * 9.5f / (width - 28)));
-            Text(new Rect(r.x + 14, y, width - 28, n * lineH), lines[i], i == 0 ? 20 : 17, i == 0 ? _tipTitle : Dd1Text, TextAnchor.UpperLeft, heading: i == 0);
-            y += n * lineH;
+            Text(new Rect(r.x + 14, y, width - 28, line.Height), line.Text, line.Size, line.Colour, TextAnchor.UpperLeft, heading: line.Heading);
+            y += line.Height;
         }
         _tip = null;
     }

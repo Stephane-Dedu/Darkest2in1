@@ -36,6 +36,10 @@ public sealed class Room
     /// <summary>Curio id for Curio/GuardedCurio/Treasure/GuardedTreasure rooms (from the zone's props table).</summary>
     public string CurioId;
     public bool IsQuestGoal;
+    /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
+    public string MashName;
+    /// <summary>A hidden branch room, excluded from the ordinary room graph and exploration quota.</summary>
+    public bool IsSecret;
     public List<int> CorridorIds = new();
 
     // Expedition state.
@@ -52,6 +56,11 @@ public sealed class HallTile
     public HallContent Content;
     public string ContentId;
     public bool IsQuestGoal;
+    /// <summary>A hand-made map's named battle (DD1 mash "named:" entry), else null (rolled from the zone).</summary>
+    public string MashName;
+    /// <summary>Plot-map secret door target; -1 for ordinary squares and older saves.</summary>
+    public int SecretRoomId = -1;
+    public bool SecretDoorAlwaysAccessible;
 
     // Expedition state.
     public bool Visited, Scouted, Resolved;
@@ -80,9 +89,19 @@ public sealed class DungeonMap
     public Corridor Corridor(int id) => Corridors[id];
 
     public IEnumerable<HallTile> AllTiles => Corridors.SelectMany(c => c.Tiles);
+    public IEnumerable<Room> QuestRooms => Rooms.Where(r => !r.IsSecret);
 
     public Corridor FindCorridor(int a, int b) =>
         Corridors.FirstOrDefault(c => (c.RoomA == a && c.RoomB == b) || (c.RoomA == b && c.RoomB == a));
+
+    public (Corridor Corridor, HallTile Tile) SecretEntrance(int roomId)
+    {
+        if (roomId < 0 || roomId >= Rooms.Count || !Room(roomId).IsSecret) return (null, null);
+        foreach (var corridor in Corridors)
+            foreach (var tile in corridor.Tiles)
+                if (tile.SecretRoomId == roomId) return (corridor, tile);
+        return (null, null);
+    }
 
     public IEnumerable<int> Neighbours(int roomId) => Rooms[roomId].CorridorIds.Select(cid => Corridors[cid].Other(roomId));
 
@@ -102,7 +121,51 @@ public sealed class DungeonMap
         return dist;
     }
 
-    public bool IsConnected() => Distances(EntranceRoomId).All(d => d >= 0);
+    public bool IsConnected()
+    {
+        var distances = Distances(EntranceRoomId);
+        return QuestRooms.All(r => distances[r.Id] >= 0);
+    }
+
+    /// <summary>DD1 scouting spends a square budget down each branch; reaching a corridor's end reveals its room.</summary>
+    public int ScoutFrom(int from, int squares, bool revealSecrets = false)
+    {
+        if (squares <= 0) return 0;
+        int revealed = 0;
+        var best = new Dictionary<int, int> { [from] = squares };
+        var queue = new Queue<(int Room, int Left)>();
+        queue.Enqueue((from, squares));
+        while (queue.Count > 0)
+        {
+            var (room, left) = queue.Dequeue();
+            foreach (int cid in Room(room).CorridorIds)
+            {
+                var corridor = Corridor(cid);
+                int count = System.Math.Min(left, corridor.Tiles.Count);
+                for (int i = 0; i < count; i++)
+                {
+                    var tile = corridor.Tiles[room == corridor.RoomA ? i : corridor.Tiles.Count - 1 - i];
+                    if (!tile.Scouted) { tile.Scouted = true; revealed++; }
+                    if (tile.SecretRoomId >= 0 && (revealSecrets || tile.SecretDoorAlwaysAccessible))
+                    {
+                        var secret = Room(tile.SecretRoomId);
+                        if (!secret.Scouted) { secret.Scouted = true; revealed++; }
+                    }
+                }
+                if (count < corridor.Tiles.Count) continue;
+                int other = corridor.Other(room);
+                var next = Room(other);
+                if (other != from && !next.Scouted) { next.Scouted = true; revealed++; }
+                int remaining = left - count;
+                if (remaining > 0 && (!best.TryGetValue(other, out var prior) || remaining > prior))
+                {
+                    best[other] = remaining;
+                    queue.Enqueue((other, remaining));
+                }
+            }
+        }
+        return revealed;
+    }
 
     /// <summary>ASCII picture for logs and tests: rooms as letters, hall tiles as symbols.</summary>
     public string ToAscii()

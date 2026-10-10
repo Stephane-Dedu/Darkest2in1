@@ -34,6 +34,8 @@ public class QuestGoalTests
     public void BossQuestsAppearAtZoneLevel()
     {
         var estate = new Estate { Seed = 1, QuestsCompleted = 5 };
+        estate.Toggles["zone.crypts"] = true;  // DD1 boss chains remain playable when the original area is enabled.
+        estate.CompletedPlotQuests.Add("plot_tutorial_crypts");   // the tutorial is played
         Assert.DoesNotContain(QuestBoard.Generate(estate, Dd1), q => q.IsPlot);
 
         estate.ZoneXp["crypts"] = 6;  // zone level 2: the Necromancer
@@ -52,7 +54,7 @@ public class QuestGoalTests
     public void DarkestDungeonOpensAtZoneLevelSixOnePartAtATime()
     {
         var estate = new Estate { Seed = 2, QuestsCompleted = 9 };
-        estate.ZoneXp["weald"] = 32;  // level 6
+        estate.ZoneXp["dd2_forest"] = 32;  // level 6
         var dd = QuestBoard.Generate(estate, Dd1).Where(q => q.Dungeon == QuestBoard.DarkestDungeon).ToList();
         Assert.Equal("plot_darkest_dungeon_1", Assert.Single(dd).PlotId);
         estate.CompletedPlotQuests.Add("plot_darkest_dungeon_1");
@@ -60,6 +62,32 @@ public class QuestGoalTests
         Assert.Equal("plot_darkest_dungeon_2", Assert.Single(dd).PlotId);
         Assert.False(Homecoming.WillEmbark(new HeroRecord { ResolveLevel = 4 }, dd[0]));
         Assert.True(Homecoming.WillEmbark(new HeroRecord { ResolveLevel = 5 }, dd[0]));
+    }
+
+    [Fact]
+    public void FullPackLootCanBeTakenAfterDroppingSomething()
+    {
+        var (crawl, state) = Expedition("explore", "crypts", 3);
+        // Fill the 16 slots with single torches' worth of stacks (DD1: 8 torches a stack).
+        state.Pack.Items.Clear();
+        state.Pack.Add(Supply.Torch, 8 * Inventory.Slots);
+        Assert.Equal(Inventory.Slots, state.Pack.SlotsUsed(Content.Items));
+        var gold = new LootDrop { Type = "gold", Id = "", Amount = 250 };
+        var left = new List<LootDrop> { gold };
+        var taken = new List<LootDrop>();
+
+        Assert.False(crawl.TakeLeftBehind(left, 0, taken));                 // no room yet
+        for (int i = 0; i < 8; i++) Assert.True(crawl.Discard(Supply.Torch));   // shift+click: drop one at a time
+        Assert.True(crawl.TakeLeftBehind(left, 0, taken));                  // a slot is free now
+        Assert.Empty(left);
+        Assert.Same(gold, Assert.Single(taken));
+        Assert.Equal(250, state.Pack.Count(gold.Key));
+
+        string quest = ItemCatalog.QuestKey("holy_water");
+        state.Pack.Add(quest, 1);
+        Assert.False(crawl.Discard(quest));                                   // quest items can't be thrown away
+        Assert.False(Crawl.CanLeave(new[] { new LootDrop { Type = "quest_item", Id = "holy_water", Amount = 1 } }));
+        Assert.True(Crawl.CanLeave(new[] { gold }));
     }
 
     private static (Crawl, ExpeditionState) Expedition(string type, string zone, int seed)
@@ -76,6 +104,146 @@ public class QuestGoalTests
         pack.Add(Supply.Shovel, 4);
         var state = Embark.Create(Dd1, quest, heroes, pack, Provisioner.Load(Install, Content.Items));
         return (new Crawl(state, CrawlRules.FromDd1(Dd1.Rules), new FakeParty("a", "b", "c", "d"), Content), state);
+    }
+
+    [Fact]
+    public void DarkestDungeonRetreatCostsAHero()
+    {
+        var dd1 = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.True(dd1.CanRetreat);
+        Assert.Equal(1, dd1.RetreatKillCount);                                        // DD1 retreat_party_kill_count
+        Assert.False(Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_4").CanRetreat);
+        Assert.Equal(0, Dd1.Goals.Plot.Single(p => p.Id == "plot_kill_necromancer_1").RetreatKillCount);
+
+        var quest = new QuestOffer { Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, RetreatKillCount = 1 };
+        var outcomes = new[] { "a", "b", "c", "d" }.Select(id => new HeroOutcome { HeroId = id }).ToList();
+        var after = Homecoming.RetreatSacrifices(quest, retreated: true, outcomes, new Rng(5));
+        var dead = Assert.Single(after, o => o.Died);
+        Assert.Equal("sacrificed to cover the retreat", dead.CauseOfDeath);
+        var kept = Homecoming.RetreatSacrifices(quest, retreated: false, new[] { new HeroOutcome { HeroId = "a" } }, new Rng(5));
+        Assert.DoesNotContain(kept, o => o.Died);                                     // only when abandoning
+        var normal = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 };
+        Assert.DoesNotContain(Homecoming.RetreatSacrifices(normal, true, new[] { new HeroOutcome { HeroId = "a" } }, new Rng(5)), o => o.Died);
+    }
+
+    [Fact]
+    public void DarkestDungeonHasNoSurpriseOrScoutingAndAWinClearsStress()
+    {
+        var dd = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.False(dd.SurpriseEnabled);                       // DD1 is_surprise_enabled
+        Assert.False(dd.ScoutingEnabled);                       // is_scouting_enabled
+        Assert.True(dd.ClearsRosterStress);                     // is_roster_stress_cleared_on_completion
+        Assert.True(Dd1.Goals.Plot.Single(p => p.Id == "plot_kill_necromancer_1").SurpriseEnabled);
+
+        var (crawl, state) = Expedition("explore", "crypts", 11);
+        state.Quest.SurpriseEnabled = false;
+        Assert.Equal((0f, 0f), crawl.SurpriseChances(corridor: true, known: false, ambush: false));
+
+        var estate = new Estate { Seed = 3 };
+        var inParty = new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", Stress = 1 };
+        var atHome = new HeroRecord { Id = "h", Name = "H", ClassId = "vestal", Stress = 7 };
+        estate.Roster.Add(inParty);
+        estate.Roster.Add(atHome);
+        var exp = new ExpeditionState
+        {
+            Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, ClearsRosterStress = true },
+            Party = { "p" },
+            QuestComplete = true,
+        };
+        Homecoming.Report(estate, Dd1, exp, new[] { new HeroOutcome { HeroId = "p", Stress = 6 } });
+        Assert.Equal(0, inParty.Stress);
+        Assert.Equal(0, atHome.Stress);
+    }
+
+    [Fact]
+    public void TownBackgroundFollowsDd1DisplayStates()
+    {
+        var render = Dd1.TownRender;
+        Assert.Equal("campaign/town/town_bg.png", render.Background(null, null));
+        Assert.Equal("campaign/town/town_bg_post_dd_1.png", render.Background("plot_darkest_dungeon_1", null));
+        Assert.Equal("campaign/town/town_bg_activity_stress_heal_buff.png", render.Background(null, "in_activity_buff_stress_heal_buff"));
+        Assert.Equal("campaign/town/town_bg.png", render.Background("plot_kill_necromancer_1", "some_event"));
+
+        var estate = new Estate { Seed = 4 };
+        var exp = new ExpeditionState { Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6, PlotId = "plot_darkest_dungeon_2" } };
+        Homecoming.Report(estate, Dd1, exp, new HeroOutcome[0]);
+        Assert.Equal("plot_darkest_dungeon_2", estate.LastReturnPlotId);
+    }
+
+    [Fact]
+    public void FailingTheDarkestDungeonWithSeasonedHeroesInspiresTheRoster()
+    {
+        var dd = Dd1.Goals.Plot.Single(p => p.Id == "plot_darkest_dungeon_1");
+        Assert.Equal(new[] { "darkest_dungeon_failure_roster_resolve_xp" }, dd.RosterBuffsOnFailure);
+        Assert.Equal(5, dd.RosterBuffMinResolve);
+
+        HomecomingReport Fail(int partyResolve, out Estate estate)
+        {
+            estate = new Estate { Seed = 5 };
+            estate.Roster.Add(new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", ResolveLevel = partyResolve });
+            estate.Roster.Add(new HeroRecord { Id = "h", Name = "H", ClassId = "vestal" });
+            var exp = new ExpeditionState
+            {
+                Quest = new QuestOffer { Id = "q", Dungeon = "darkestdungeon", Type = "explore", Length = 2, Difficulty = 6,
+                                         RosterBuffsOnFailure = dd.RosterBuffsOnFailure.ToList(), RosterBuffMinResolve = dd.RosterBuffMinResolve },
+                Party = { "p" },
+                Retreated = true,
+            };
+            return Homecoming.Report(estate, Dd1, exp, new[] { new HeroOutcome { HeroId = "p", Stress = 2 } });
+        }
+        Fail(5, out var seasoned);
+        Assert.All(seasoned.Roster, h => Assert.Contains("darkest_dungeon_failure_roster_resolve_xp", h.PendingBuffs));   // whole roster
+        Assert.Equal(1f, Dd1.Buffs.Get("darkest_dungeon_failure_roster_resolve_xp").Amount);                               // +100% resolve XP
+        Fail(4, out var green);
+        Assert.All(green.Roster, h => Assert.Empty(h.PendingBuffs));                                                     // below resolve 5
+    }
+
+    [Fact]
+    public void FailureResolveBonusSurvivesRetreatsUntilThatHeroCompletesAQuest()
+    {
+        const string buff = "darkest_dungeon_failure_roster_resolve_xp";
+        Assert.Equal("quest_complete", Dd1.Buffs.Get(buff).DurationType);
+        var hero = new HeroRecord { Id = "p", Name = "P", ClassId = "highwayman", PendingBuffs = { buff, "unknown_town_buff" } };
+        var idle = new HeroRecord { Id = "h", Name = "H", ClassId = "vestal", PendingBuffs = { buff } };
+        var estate = new Estate { Seed = 7, Roster = { hero, idle } };
+        var quest = new QuestOffer { Id = "q", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1, MapSeed = 5 };
+        var outcomes = new[] { new HeroOutcome { HeroId = "p" } };
+        for (int attempt = 0; attempt < 2; attempt++)
+        {
+            var exp = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+            Assert.Contains(buff, exp.PendingBuffs[hero.Id]);
+            Assert.Equal(new[] { buff }, hero.PendingBuffs);
+            exp.Retreated = true;
+            Homecoming.Report(estate, Dd1, exp, outcomes);
+            Assert.Equal(0, hero.ResolveXp);
+            Assert.Contains(buff, hero.PendingBuffs);
+        }
+        // Saving and reloading between attempts keeps the unused bonus.
+        estate = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        hero = estate.Hero("p");
+        var win = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+        win.QuestComplete = true;
+        var report = Homecoming.Report(estate, Dd1, win, outcomes);
+        Assert.Equal(4, Assert.Single(report.Heroes).XpGained);   // short quest: 2 XP, doubled
+        Assert.DoesNotContain(buff, hero.PendingBuffs);
+        Assert.Contains(buff, estate.Hero("h").PendingBuffs);    // idle hero hasn't completed a quest
+        var next = Embark.Create(Dd1, quest, new[] { hero }, new Inventory());
+        next.QuestComplete = true;
+        Assert.Equal(2, Assert.Single(Homecoming.Report(estate, Dd1, next, outcomes).Heroes).XpGained);
+    }
+
+    [Fact]
+    public void TrinketWarningOnHarderQuestsWithFewTrinkets()
+    {
+        var heroes = new[] { "a", "b", "c", "d" }.Select(id => new HeroRecord { Id = id, ClassId = "highwayman" }).ToList();
+        var veteran = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 3 };
+        var apprentice = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1 };
+        Assert.True(Embark.TrinketWarning(Dd1, veteran, heroes));          // 0 of 8 slots
+        Assert.False(Embark.TrinketWarning(Dd1, apprentice, heroes));      // DD1: only from difficulty 3
+        foreach (var h in heroes) h.Trinkets.Add("t_" + h.Id);
+        Assert.False(Embark.TrinketWarning(Dd1, veteran, heroes));         // 4 of 8: 50% is enough
+        heroes[0].Trinkets.Clear();
+        Assert.True(Embark.TrinketWarning(Dd1, veteran, heroes));          // 3 of 8
     }
 
     [Fact]
@@ -145,12 +313,14 @@ public class QuestGoalTests
                     foreach (var r in rooms)
                     {
                         state.RoomId = r.Id; state.CorridorId = -1; state.TileIndex = -1;
-                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        var report = crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        if (report != null) Assert.True(crawl.DismissCurio(report));
                     }
                     foreach (var (c, t) in tiles)
                     {
                         state.CorridorId = c.Id; state.TileIndex = t.Index; state.HeadingRoomId = c.RoomB;
-                        crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        var report = crawl.InteractCurio("a", crawl.QuestItemNeededHere, out _);
+                        if (report != null) Assert.True(crawl.DismissCurio(report));
                     }
                     if (!state.QuestComplete) problems.Add($"{where}: not complete after every quest curio ({state.GoalProgress}/{goal.Amount})");
                 }
@@ -164,6 +334,7 @@ public class QuestGoalTests
         int guard = 0;
         while (!state.QuestComplete && guard++ < 4000)
         {
+            if (crawl.LastSpoils != null) { Assert.True(crawl.DismissSpoils(crawl.LastSpoils)); continue; }
             if (crawl.IsBlocked)
             {
                 if (state.InRoom || crawl.CurrentTile.Content == HallContent.Battle) crawl.ResolveBattle();
@@ -174,7 +345,23 @@ public class QuestGoalTests
             if (crawl.CurioHere != null)
             {
                 var r = crawl.InteractCurio("a", crawl.QuestItemNeededHere ?? useItem, out _);
-                if (r?.OutcomeType == "Quest") _out.WriteLine(r.Text);
+                if (r?.OutcomeType == "Quest")
+                {
+                    _out.WriteLine(r.Text);
+                    // A full pack must make room on the loot scroll before continuing. The old walk
+                    // helper silently relied on gathering exceeding DD1's inventory capacity.
+                    while (r.LeftBehind.Count > 0)
+                    {
+                        if (crawl.TakeLeftBehind(r.LeftBehind, 0)) continue;
+                        var discard = state.Pack.Items.Where(kv => !kv.Key.StartsWith("quest_item+"))
+                            .OrderBy(kv => kv.Value).FirstOrDefault();
+                        Assert.False(string.IsNullOrEmpty(discard.Key));
+                        Assert.True(crawl.Discard(discard.Key));
+                    }
+                    Assert.True(crawl.DismissCurio(r));
+                    Assert.True(state.Pack.SlotsUsed(Content.Items) <= Inventory.Slots);
+                }
+                if (r != null && crawl.LastCurio == r) Assert.True(crawl.DismissCurio(r));
                 if (crawl.CurioHere != null) crawl.SkipCurio();
                 continue;
             }

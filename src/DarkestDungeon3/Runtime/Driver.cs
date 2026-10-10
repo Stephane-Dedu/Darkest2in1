@@ -14,6 +14,7 @@ internal enum Phase
     Off,         // plain DD2
     Hamlet,      // our town screens
     Embarking,   // waiting for the DD2 host run to reach the road
+    Recovery,    // a saved expedition needs a retry; preserve it instead of abandoning it
     Crawling,    // our dungeon screens
     Fighting,    // DD2 combat (our UI hidden)
     Homecoming,  // results screen before the Hamlet
@@ -32,9 +33,11 @@ internal sealed class Driver : MonoBehaviour
     public Dd2Party Party { get; private set; }
     public List<string> Log { get; } = new();
     public List<string> HomecomingLog { get; private set; } = new();
-    public CurioReport LastCurio { get; private set; }
+    public CurioReport LastCurio => Crawl?.LastCurio;
     /// <summary>How the last expedition ended (the results screen).</summary>
     public HomecomingReport LastReport { get; private set; }
+    public string RecoveryMessage { get; private set; }
+    public bool CanResumeSaved => ExpeditionRecovery.Inspect(S?.Save) == ExpeditionLoadRoute.Resume;
 
     /// <summary>The hero shown in the bottom-left banner (DD1: click a hero to select).</summary>
     public string SelectedHeroId;
@@ -56,7 +59,11 @@ internal sealed class Driver : MonoBehaviour
         Dd2Combat.Finished += OnFightFinished;
     }
 
-    private void OnDestroy() => Dd2Combat.Finished -= OnFightFinished;
+    private void OnDestroy()
+    {
+        Dd2Combat.Finished -= OnFightFinished;
+        RegionSceneryArt.Clear();
+    }
 
     public void Say(string line)
     {
@@ -73,8 +80,28 @@ internal sealed class Driver : MonoBehaviour
         if (Phase == Phase.Fighting) { Dd1Backdrop.Tick(); Dd1MonsterView.Render(); }
     }
 
+    private bool _townArtPrimed;
+
     private void Update()
     {
+        Dd2Run.Update();
+        if (!_townArtPrimed && S?.Dd1 != null)
+        {
+            _townArtPrimed = true;
+            Art.PrepareTown(S.Dd1);
+            // Resolve Unity's cache path on this thread; conversion/extraction only receives plain paths.
+            try { Ui.CinematicCache.Prepare(S.Dd1, Core.Dd1.Dd1Cinematic.Opening); }
+            catch (System.Exception e) { Plugin.Log.LogWarning("[cinematic] " + e.Message); }
+            // Common town art can bake while the player is still at the menu/estate picker.
+            foreach (var id in new[] { "ground", "stage_coach", "graveyard", "statue" })
+                SpineArt.Get(Core.Campaign.Town.TownLayout.ArtFolder(S.Dd1, id, true, 0), "idle",
+                    slot => Core.Campaign.Town.TownLayout.IdleSlot(slot.Name));
+        }
+        SpineArt.Update();
+        Art.Update();
+        Ui.CinematicCache.Update();
+        ItemText.Prime();
+        RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();
@@ -113,27 +140,63 @@ internal sealed class Driver : MonoBehaviour
 
     public void EnterHamlet(int slot)
     {
+        StopWalking();
+        Crawl = null; Party = null; SelectedHeroId = null; LastReport = null; RecoveryMessage = null;
+        HeroStage.Instance?.Clear(); Log.Clear(); HomecomingLog.Clear();
+        Phase = Phase.Off;
         LogDd2Libraries();
-        S.LoadOrCreate(slot);
-        if (S.Save.Expedition is { Started: false } stillborn)
+        try { S.LoadOrCreate(slot); }
+        catch (System.Exception e)
         {
+            Plugin.Log.LogError("[session] estate could not load: " + e);
+            RecoveryFailed("The saved estate could not be read. Its files have been kept. Return to the main menu and try again.");
+            return;
+        }
+        var route = ExpeditionRecovery.Inspect(S.Save);
+        if (route == ExpeditionLoadRoute.Refund)
+        {
+            var stillborn = Expedition;
             // The party never reached the dungeon (the game closed or failed during embark): call it off.
             S.Save.Estate.Add(Currency.Gold, stillborn.ProvisionCost);
             S.Save.Expedition = null;
             Say($"The expedition never left. {stillborn.ProvisionCost} gold of provisions refunded.");
             S.Persist();
         }
-        else if (S.Save.Expedition != null)
+        else if (route == ExpeditionLoadRoute.Resume)
         {
-            // An expedition was interrupted (the game closed mid-dungeon). DD1 counts that as a retreat.
-            Say("The last expedition was cut short. The party limps home.");
-            S.Save.Expedition.Retreated = true;
-            var outcomes = S.Save.Expedition.Party.Select(id => new HeroOutcome { HeroId = id, Stress = S.Save.Estate.Hero(id)?.Stress ?? 0 });
-            HomecomingLog = Homecoming.Apply(S.Save.Estate, S.Campaign, S.Save.Expedition, outcomes);
-            S.Save.Expedition = null;
-            S.Persist();
+            ResumeExpedition();
+            return;
+        }
+        else if (route == ExpeditionLoadRoute.Results)
+        {
+            Expedition.Ended = true;
+            CompleteHomecoming(ExpeditionParty.Outcomes(Expedition, S.Save.Estate));
+            return;
+        }
+        else if (route == ExpeditionLoadRoute.Invalid)
+        {
+            RecoveryFailed("The saved dungeon could not be restored. Your expedition has been kept.");
+            return;
         }
         Phase = Phase.Hamlet;
+    }
+
+    public void ResumeExpedition()
+    {
+        if (!CanResumeSaved || Phase is Phase.Embarking or Phase.Fighting or Phase.Crawling) return;
+        ExpeditionFight.RestoreParty(Expedition);
+        Phase = Phase.Embarking;
+        RegionSceneryArt.Prepare(Expedition.Quest.Dungeon);
+        Say("Returning to the saved expedition.");
+        if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Retry when the game is ready.")))
+            RecoveryFailed("The game is still changing scenes. Your expedition is saved; try again in a moment.");
+    }
+
+    private void RecoveryFailed(string message)
+    {
+        RecoveryMessage = message;
+        Phase = Phase.Recovery;
+        Say(message);
     }
 
     public void LeaveHamlet()
@@ -152,62 +215,132 @@ internal sealed class Driver : MonoBehaviour
 
     // ---------------- Embark ----------------
 
-    public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought)
+    public string Embark(QuestOffer quest, List<HeroRecord> party, Inventory bought, bool opening = false)
     {
+        if (Expedition != null) return "The saved expedition must be resumed before setting out again.";
         // This week's town event sets prices and who will go; it changes when the week ends below.
         var hamlet = S.Hamlet;
         var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party, hamlet.AnyResolveCanEmbark);
         if (why != null) return why;
-        int cost = bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);
+        int cost = opening ? 0 : bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);   // the opening's pack is DD1's, free
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
         S.Save.Estate.Add(Currency.Gold, -cost);
-        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, S.Provisioner);
+        // DD1's opening raid comes before the first week: no free supplies, no town event buffs, no week passing.
+        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner);
         exp.ProvisionCost = cost;
-        foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
-            foreach (var hero in exp.Party)
-            {
-                if (!exp.PendingBuffs.TryGetValue(hero, out var list)) exp.PendingBuffs[hero] = list = new List<string>();
-                if (!list.Contains(buff)) list.Add(buff);
-            }
+        if (!opening)
+            foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
+                foreach (var hero in exp.Party)
+                {
+                    if (!exp.PendingBuffs.TryGetValue(hero, out var list)) exp.PendingBuffs[hero] = list = new List<string>();
+                    if (!list.Contains(buff)) list.Add(buff);
+                }
         S.Save.Expedition = exp;
+        if (opening) S.Save.Estate.OpeningRaidPending = false;
         // DD1 resolves town activities while the party is away.
-        S.Hamlet.EndWeek();
+        else S.Hamlet.EndWeek();
+        CampaignJournal.Embark(S.Save.Estate, quest, party);
         S.Persist();
 
         Phase = Phase.Embarking;
+        RegionSceneryArt.Prepare(quest.Dungeon);
         Say($"The party sets out: {quest}.");
-        Dd2Run.Start(OnRoadReady);
+        if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.")))
+            RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.");
         return null;
+    }
+
+    /// <summary>A new estate still has DD1's opening raid to play (the road and its bandits).</summary>
+    public bool OpeningDue => Phase == Phase.Hamlet && S?.Save?.Estate is { OpeningRaidPending: true } && S.Save.Expedition == null;
+
+    /// <summary>
+    /// A new estate's opening, called by the UI once the cinematics are over and the Old Road's loading screen has been
+    /// up a moment: the party sets out exactly like any embark (it froze when started from Update right after the
+    /// cinematics), before the first week begins.
+    /// </summary>
+    public void EmbarkOpening()
+    {
+        if (!OpeningDue) return;
+        var opening = S.Hamlet.OpeningRaid();
+        if (opening is not { } o) { S.Save.Estate.OpeningRaidPending = false; S.Persist(); return; }
+        Plugin.Log.LogInfo($"[opening] {string.Join(" and ", o.Party.Select(h => h.Name))} set out on DD1's opening raid ({o.Quest.Dungeon}, {o.Quest.GoalId})");
+        string why = Embark(o.Quest, o.Party, o.Pack, opening: true);
+        if (why != null) { Plugin.Log.LogWarning("[opening] " + why); S.Save.Estate.OpeningRaidPending = false; S.Persist(); }
     }
 
     private void OnRoadReady()
     {
+        bool resuming = Expedition.Started;
         var heroes = Expedition.Party.Select(id => S.Save.Estate.Hero(id)).Where(h => h != null).ToList();
-        var guids = Dd2Heroes.BuildParty(heroes);
+        var conditions = resuming ? Expedition.PartyStates : null;
+        var expected = heroes.Count(h => ExpeditionParty.HeroForRestore(h,
+            conditions != null && conditions.TryGetValue(h.Id, out var saved) ? saved : null) != null);
+        var guids = Dd2Heroes.BuildParty(heroes, conditions);
+        if (guids.Count != expected || expected == 0)
+        {
+            RecoveryFailed("The party could not be restored. Your expedition is saved; try again.");
+            return;
+        }
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
-        LastCurio = null;
-        Handle(Crawl.Begin());
+        Crawl.EquipmentBuffs = id => S.Save.Estate.Hero(id)?.WornTrinkets.Select(Dd1TrinketData.Get).Where(t => t != null)
+            .SelectMany(t => t.BuffIds).Select(S.Content.Buffs.Get).Where(b => b != null);
+        Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
+        CapturePartyState();
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
-        Say($"Entered {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+        Say($"{(resuming ? "Returned to" : "Entered")} {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+        FadedMemoryController.Place(Expedition);
+        if (FadedMemory.Active(Expedition)) { StartFight(FightKind.Room, false); return; }
+        Handle(resuming ? Crawl.Resume() : Crawl.Begin());
+    }
+
+    public void CapturePartyState()
+    {
+        if (Party == null || Expedition == null || Crawl?.State != Expedition) return;
+        var snapshots = new List<ExpeditionHeroState>();
+        foreach (var id in Expedition.Party)
+            if (S.Save.Estate.Hero(id) is { } hero
+                && Dd2Heroes.TryCapture(hero, Party.Guid(id), Expedition.PartyStates.TryGetValue(id, out var previous) ? previous : null, out var snapshot))
+                snapshots.Add(snapshot);
+        ExpeditionParty.Capture(Expedition, snapshots);
     }
 
     // ---------------- Crawl ----------------
 
     public void Travel(int roomId)
     {
+        if (!Crawl.CanNavigate) return;
         MarkStep(+1);
         Handle(Crawl.Travel(roomId));
     }
 
     public void Step(bool forward)
     {
+        if (!Crawl.CanNavigate) return;
         if (Crawl.IsBlocked && !forward && Crawl.CurrentTile?.Content == Core.Dungeon.HallContent.Battle) return;
         MarkStep(forward ? +1 : -1);
         Handle(Crawl.Step(forward));
+    }
+
+    public bool EnterSecretRoom() => ChangeSecretRoom(enter: true);
+    public bool ExitSecretRoom() => ChangeSecretRoom(enter: false);
+
+    private bool ChangeSecretRoom(bool enter)
+    {
+        if (Phase != Phase.Crawling || Crawl == null || !Crawl.CanNavigate || Ui.UiRoot.ModalOpen || _travelTo >= 0
+            || (enter ? !Crawl.CanEnterSecretRoom : Crawl.CurrentRoom?.IsSecret != true)) return false;
+        StopWalking(); _mouseWalk = 0; _walkVelocity = 0; WalkProgress = 0;
+        int before = Expedition.RoomId;
+        Handle(enter ? Crawl.EnterSecretRoom() : Crawl.ExitSecretRoom());
+        if (Expedition.RoomId == before) return false;
+        _interruptsThisStep = false; // this explicit transition already stopped the route
+        _wasInRoom = Expedition.InRoom;
+        _fadeInFrom = Time.unscaledTime;
+        Dd1Audio.Play("/general/map/room_transition");
+        return true;
     }
 
     private void MarkStep(int dir)
@@ -239,6 +372,13 @@ internal sealed class Driver : MonoBehaviour
     private void Walk(UnityEngine.InputSystem.Keyboard kb)
     {
         _walkVelocity = 0;
+        if (!Crawl.CanNavigate || Ui.UiRoot.ModalOpen)
+        {
+            _mouseWalk = 0;
+            _travelTo = -1;
+            StopWalking();
+            return;
+        }
         if (Expedition.InRoom != _wasInRoom) { _wasInRoom = Expedition.InRoom; _fadeInFrom = Time.unscaledTime; }
         if (_travelTo >= 0)
         {
@@ -253,7 +393,6 @@ internal sealed class Driver : MonoBehaviour
             if (_interruptsThisStep) { StopWalking(); _interruptsThisStep = false; }
             return;
         }
-        if (Expedition.Camp != null || Ui.UiRoot.ModalOpen) { _mouseWalk = 0; return; }
         int mouse = MouseWalk();
         bool right = mouse > 0 || (kb != null && (kb.dKey.isPressed || kb.rightArrowKey.isPressed));
         bool left = mouse < 0 || (kb != null && (kb.aKey.isPressed || kb.leftArrowKey.isPressed));
@@ -267,6 +406,7 @@ internal sealed class Driver : MonoBehaviour
             bool up = kb != null && (kb.wKey.wasPressedThisFrame || kb.upArrowKey.wasPressedThisFrame);
             bool down = kb != null && (kb.sKey.wasPressedThisFrame || kb.downArrowKey.wasPressedThisFrame);
             Vector2 dir = rightNow ? Vector2.right : leftNow ? Vector2.left : up ? Vector2.down : down ? Vector2.up : Vector2.zero;
+            if (Crawl.CurrentRoom.IsSecret && dir != Vector2.zero) { ExitSecretRoom(); return; }
             if (dir != Vector2.zero && Crawl.CurioHere == null)
             {
                 int exit = ExitToward(dir);
@@ -419,7 +559,21 @@ internal sealed class Driver : MonoBehaviour
     public void WalkToRoom(int target)
     {
         StopWalking();
+        if (!Crawl.CanNavigate) return;
         var map = Expedition.Map;
+        if (target < 0 || target >= map.Rooms.Count || target == Expedition.RoomId) return;
+        if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
+        var destination = map.Room(target);
+        if (destination.IsSecret)
+        {
+            if (!destination.Scouted && !destination.Visited) return;
+            if (Crawl.CanEnterSecretRoom && Crawl.CurrentTile.SecretRoomId == target) { EnterSecretRoom(); return; }
+            var entrance = map.SecretEntrance(target);
+            if (entrance.Corridor == null) return;
+            WalkToTile(entrance.Corridor.Id, entrance.Tile.Index);
+            if (!IsWalking) Ui.Gui.Announce("Approach the marked corridor square to enter the secret room.");
+            return;
+        }
         int from = Expedition.InRoom ? Expedition.RoomId : NearestEnd(target);
         foreach (int r in RoomPath(map, from, target)) _route.Enqueue(r);
         _routeTargetRoom = target;
@@ -429,6 +583,8 @@ internal sealed class Driver : MonoBehaviour
     public void WalkToTile(int corridorId, int tileIndex)
     {
         StopWalking();
+        if (!Crawl.CanNavigate) return;
+        if (Crawl.CurrentRoom?.IsSecret == true && !ExitSecretRoom()) return;
         var c = Expedition.Map.Corridor(corridorId);
         if (Expedition.InRoom && c.RoomA != Expedition.RoomId && c.RoomB != Expedition.RoomId) return;
         if (!Expedition.InRoom && Expedition.CorridorId != corridorId) return;
@@ -485,24 +641,49 @@ internal sealed class Driver : MonoBehaviour
         var quest = Expedition.Quest;
         var rng = new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken);
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, rng, quest.BossId);
+        var checkpoint = ExpeditionFight.Current(Expedition);
+        bool memory = FadedMemory.Active(Expedition);
+        if (memory && !FadedMemoryController.TryPlan(Expedition, Party, out plan, out _))
+        {
+            RecoveryFailed("The memory is waiting for its encounter resources. Your return is saved.");
+            return;
+        }
         // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles,
         // and DD2's regions keep their own natives).
-        if (kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
+        if (!memory && checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
         {
             var monsters = Crawl.FightMonsters(kind == FightKind.Room ? "room" : "hall");
             plan.Enemies = S.Bestiary.Translate(monsters, rng, Dd2Combat.EnemySize);
             Plugin.Log.LogInfo($"[combat] DD1 encounter [{string.Join(", ", monsters)}] -> {(plan.Enemies != null ? string.Join(", ", plan.Enemies) : "zone table")}");
         }
+        if (checkpoint != null)
+        {
+            plan = checkpoint.Plan();
+            heroesSurprised = checkpoint.HeroesSurprised;
+            monstersSurprised = checkpoint.MonstersSurprised;
+        }
+        CapturePartyState();
         var guids = Expedition.Party.Select(Party.Guid).Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
         var buffs = Crawl.FightBuffs().Select(b => (Party.Guid(b.Hero), b.Buff)).Where(b => b.Item1 != 0).ToList();
-        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised))
+        if (Dd2Combat.Start(plan, guids, Expedition.Light, heroesSurprised, buffs, monstersSurprised,
+                (battle, arena) =>
+                {
+                    if (checkpoint == null && !ExpeditionFight.Record(Expedition, plan, battle, arena, heroesSurprised, monstersSurprised))
+                    {
+                        Say("The fight is waiting for a complete party checkpoint.");
+                        return false;
+                    }
+                    return S.Persist();
+                }))
         {
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
             Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
-            Dd1MonsterView.Prepare(plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            Dd1MonsterView.Prepare(memory ? new[] { Expedition.FadedMemory.BossId } : plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            if (memory) Dd1MonsterView.PrepareHeroes(FadedMemoryController.HeroArt(Expedition, Party));
             Phase = Phase.Fighting;
             S.Persist();
         }
+        else if (memory) RecoveryFailed("The memory could not open. Retry the saved expedition when the game is ready.");
         else Say("The fight could not start (see the log).");
     }
 
@@ -519,6 +700,7 @@ internal sealed class Driver : MonoBehaviour
         }
         if (Dd2Combat.Retreated)
         {
+            if (FadedMemory.Active(Expedition)) { ReturnFromMemory(false); return; }
             // DD1: the fight stays where it was; the party falls back the way it came.
             Handle(Crawl.FleeBattle());
             Dd1Audio.Play("/general/combat/retreat");
@@ -527,6 +709,7 @@ internal sealed class Driver : MonoBehaviour
             S.Persist();
             return;
         }
+        if (FadedMemory.Active(Expedition)) { ReturnFromMemory(true); return; }
         Handle(Crawl.ResolveBattle());
         Dd1Audio.Play("/general/combat/victory");
         if (Crawl.LastSpoils is { } spoils)
@@ -542,29 +725,94 @@ internal sealed class Driver : MonoBehaviour
 
     public void Investigate(string heroId, string itemId)
     {
-        LastCurio = Crawl.InteractCurio(heroId, itemId, out var overflow);
-        if (LastCurio != null)
+        if (Crawl?.CurioHere == FadedMemory.CurioId)
         {
-            Say($"{S.Save.Estate.Hero(heroId)?.Name}: {LastCurio.Text ?? LastCurio.OutcomeType}" +
-                (LastCurio.Loot.Count > 0 ? " Found " + string.Join(", ", LastCurio.Loot) + "." : ""));
-            foreach (var drop in overflow) Say($"No room for {drop}; left behind.");
+            if (Phase != Phase.Crawling || !Crawl.CanNavigate || Party?.Alive.Contains(heroId) != true) return;
+            if (itemId != null) { Say("No offering is required. Confront the past by hand."); return; }
+            if (!FadedMemoryController.Ready(Expedition, Party)) { Say("This memory cannot yet take form."); return; }
+            if (!FadedMemory.Enter(Expedition, heroId, null)) return;
+            if (!S.Persist()) { Expedition.FadedMemory.Stage = "ready"; return; }
+            StopWalking();
+            Say("What was buried has endured.");
+            StartFight(FightKind.Room, false);
+            return;
+        }
+        var report = Crawl.InteractCurio(heroId, itemId, out var overflow);
+        if (report != null)
+        {
+            Say($"{S.Save.Estate.Hero(heroId)?.Name}: {report.Text ?? report.OutcomeType}" +
+                (report.Loot.Count > 0 ? " Found " + string.Join(", ", report.Loot) + "." : ""));
+            foreach (var drop in overflow) Say($"No room for {drop}: make room in the pack to take it.");
             if (Expedition.QuestComplete) Say("The quest is complete! You may return to the Hamlet.");
         }
         S.Persist();
     }
 
+    private void ReturnFromMemory(bool victory)
+    {
+        if (!FadedMemory.Finish(Expedition, S.Content.Items, victory))
+        {
+            RecoveryFailed("The memory's return checkpoint needs repair. The expedition remains saved.");
+            return;
+        }
+        Phase = Phase.Crawling;
+        Dd1Audio.Play(victory ? "/general/combat/victory" : "/general/combat/retreat");
+        Say(Expedition.PendingCurio.Text);
+        S.Persist();
+        Plugin.Log.LogInfo($"[memory] returned: {Expedition.FadedMemory.Stage}; rewards {string.Join(",", Expedition.PendingCurio.Loot)}; quest complete {Expedition.QuestComplete}");
+    }
+
+    public void DebugMemory()
+    {
+        if (System.IO.Path.GetFileName(S?.SavePath) != "estate_2.json" || Phase != Phase.Crawling
+            || Crawl?.CanNavigate != true || !Expedition.InRoom || Crawl.IsBlocked || FadedMemory.Active(Expedition)) return;
+        Expedition.FadedMemory = null;
+        FadedMemory.Place(Expedition, "crypts", "necromancer_A", 1, test: true);
+        S.Persist();
+        Say("Faded Memory placed here. Click the mirror, then Confront the past.");
+    }
+
+    public void DismissCurio(CurioReport report)
+    {
+        if (Crawl?.DismissCurio(report) == true) S.Persist();
+    }
+
     public void SkipCurio() => Crawl.SkipCurio();
 
-    public void MakeCamp() { Dd1Audio.Play("/general/map/camp_start"); Handle(Crawl.MakeCamp()); }
-    public bool EatMeal(Meal meal) => Crawl.EatMeal(meal);
-    public bool UseCampSkill(string hero, string skill, string target) => Crawl.UseCampSkill(hero, skill, target);
-    public void BreakCamp() { Dd1Audio.Play("/general/map/camp_end"); Handle(Crawl.BreakCamp()); }
+    public void MakeCamp()
+    {
+        if (!Crawl.CanCamp) return;
+        Dd1Audio.Play("/general/map/camp_start");
+        Handle(Crawl.MakeCamp());
+    }
+    public bool EatMeal(Meal meal)
+    {
+        if (!Crawl.EatMeal(meal)) return false;
+        S.Persist();
+        return true;
+    }
+    public bool UseCampSkill(string hero, string skill, string target)
+    {
+        if (!Crawl.UseCampSkill(hero, skill, target)) return false;
+        S.Persist();
+        return true;
+    }
+    public void DismissSpoils(BattleSpoils report)
+    {
+        if (Crawl?.DismissSpoils(report) == true) S.Persist();
+    }
+    public void BreakCamp()
+    {
+        if (!Crawl.CanContinueCamp) return;
+        Dd1Audio.Play("/general/map/camp_end");
+        Handle(Crawl.BreakCamp());
+    }
 
     /// <summary>Leave the dungeon: after the quest is done, or as a retreat before it is.</summary>
     public void Leave()
     {
-        if (!Expedition.QuestComplete) { Crawl.Retreat(); Say("The party retreats."); }
-        Expedition.Ended = true;
+        if (Crawl?.TryLeave() != true) { Say("The expedition cannot be left yet."); return; }
+        if (Expedition.Retreated) Say("The party retreats.");
         FinishExpedition();
     }
 
@@ -590,7 +838,8 @@ internal sealed class Driver : MonoBehaviour
                     break;
                 case CrawlEventType.Ambush:
                     fight = e.ContentId == "camp" ? FightKind.CampAmbush : FightKind.Hall;
-                    surprised = true;
+                    surprised = e.HeroesSurprised;
+                    monstersSurprised = e.MonstersSurprised;
                     Announce(e.ContentId == "camp" ? "The camp is ambushed in the night!" : "Something stirs in the dark...");
                     break;
                 case CrawlEventType.TrapSprung:
@@ -629,14 +878,15 @@ internal sealed class Driver : MonoBehaviour
 
     private void FinishExpedition()
     {
+        CapturePartyState();
+        CompleteHomecoming(ExpeditionParty.Outcomes(Expedition, S.Save.Estate));
+    }
+
+    private void CompleteHomecoming(List<HeroOutcome> outcomes)
+    {
         var exp = Expedition;
-        var outcomes = exp.Party
-            .Select(id => (hero: S.Save.Estate.Hero(id), guid: Party?.Guid(id) ?? 0u))
-            .Where(x => x.hero != null)
-            .Select(x => Dd2Heroes.ReadBack(x.hero, x.guid))
-            .ToList();
         var rng = new Rng(exp.Seed * 31 + exp.StepsTaken);
-        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng));
+        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng), Crawl?.EquipmentBuffs);
         HomecomingLog = LastReport.Log;
         S.Save.Expedition = null;
         S.Persist();
@@ -644,7 +894,7 @@ internal sealed class Driver : MonoBehaviour
         Party = null;
         HeroStage.Instance?.Clear();
         Phase = Phase.Homecoming;
-        Dd2Run.End();
+        if (Dd2Run.Hosting) Dd2Run.End();
     }
 
     public void BackToHamlet() => Phase = Phase.Hamlet;

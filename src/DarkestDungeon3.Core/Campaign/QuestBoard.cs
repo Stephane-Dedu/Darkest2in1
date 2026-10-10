@@ -15,11 +15,11 @@ public static class QuestBoard
         var rng = estate.NextRng();
         int progress = Math.Max(0, estate.QuestsCompleted);
 
-        var zones = dd1.ZoneUnlocks.Where(z => estate.QuestsCompleted >= z.Value).Select(z => z.Key).ToList();
-        if (extraZones != null) zones.AddRange(extraZones.Where(z => !zones.Contains(z)));
+        var zones = CampaignRegions.Open(estate, dd1).ToList();
+        if (extraZones != null) zones.AddRange(extraZones.Where(z => !zones.Contains(z) && CampaignRegions.Enabled(estate, z) && CampaignRegions.Unlocked(estate, dd1, z)));
         if (zones.Count == 0) return new List<QuestOffer>();
 
-        int count = At(dd1.QuestsPerVisit, progress, 2);
+        int count = Math.Max(zones.Count, At(dd1.QuestsPerVisit, progress, 2));
         var offers = new List<QuestOffer>();
 
         // Deal zones round-robin from a shuffled order, so every open zone gets work before any gets a second.
@@ -33,6 +33,7 @@ public static class QuestBoard
     /// <summary>Quests for one zone switched on mid-week (an estate option): a couple of regular ones and its boss.</summary>
     public static List<QuestOffer> OffersFor(Estate estate, Dd1Campaign dd1, string zone, int count = 2)
     {
+        if (!CampaignRegions.Enabled(estate, zone) || !CampaignRegions.Unlocked(estate, dd1, zone)) return new List<QuestOffer>();
         var rng = estate.NextRng();
         int progress = Math.Max(0, estate.QuestsCompleted);
         var offers = new List<QuestOffer>();
@@ -53,6 +54,35 @@ public static class QuestBoard
 
     public const string DarkestDungeon = "darkestdungeon";
 
+    /// <summary>A DD1 plot quest as an offer on the board (its goal, boss, rewards, rules and hand-made map).</summary>
+    public static QuestOffer PlotOffer(Estate estate, Dd1Campaign dd1, PlotQuest p)
+    {
+        var goal = p.GoalIds.Select(g => dd1.Goals.Goals.TryGetValue(g, out var d) ? d : null).FirstOrDefault(g => g != null);
+        return new QuestOffer
+        {
+            Id = "plot:" + p.Id,
+            Dungeon = CampaignRegions.StoryRegion(estate, p),
+            Type = p.Type,
+            Length = Math.Min(3, p.Length),
+            Difficulty = p.Difficulty,
+            MapSeed = estate.NextSeed(),
+            IsPlot = true,
+            PlotId = p.Id,
+            GoalId = goal?.Id,
+            BossId = goal?.MonsterClasses.FirstOrDefault(),
+            ResolveXp = p.ResolveXp,
+            Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
+            CanRetreat = p.CanRetreat,
+            RetreatKillCount = p.RetreatKillCount,
+            SurpriseEnabled = p.SurpriseEnabled,
+            ScoutingEnabled = p.ScoutingEnabled,
+            ClearsRosterStress = p.ClearsRosterStress,
+            RosterBuffsOnFailure = p.RosterBuffsOnFailure.ToList(),
+            RosterBuffMinResolve = p.RosterBuffMinResolve,
+            MapName = p.MapName,
+        };
+    }
+
     /// <summary>
     /// DD1's boss quests appear when a zone reaches their level and stay until beaten. The Darkest Dungeon chain
     /// opens once any zone reaches level 6 (champion bosses), one part at a time.
@@ -66,30 +96,16 @@ public static class QuestBoard
             bestZoneLevel = Math.Max(bestZoneLevel, dd1.ZoneLevel(estate.ZoneXp.TryGetValue(z, out var x) ? x : 0));
 
         var nextDarkest = dd1.Goals.Plot.FirstOrDefault(p => p.Dungeon == DarkestDungeon && p.Progression && !estate.CompletedPlotQuests.Contains(p.Id));
-        foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && p.Type != "explore"))
+        // Explore plot quests run on DD1's hand-made maps (the Ruins tutorial, tutorial_crypts.dm).
+        foreach (var p in dd1.Goals.Plot.Where(p => p.Progression && (p.Type != "explore" || p.MapName != null)))
         {
             if (estate.CompletedPlotQuests.Contains(p.Id)) continue;
+            string destination = CampaignRegions.StoryRegion(estate, p);
             bool available = p.Dungeon == DarkestDungeon
                 ? p == nextDarkest && bestZoneLevel >= 6
-                : open.Contains(p.Dungeon) && dd1.ZoneLevel(estate.ZoneXp.TryGetValue(p.Dungeon, out var xp) ? xp : 0) >= p.ZoneLevel;
+                : open.Contains(destination) && dd1.ZoneLevel(estate.ZoneXp.TryGetValue(destination, out var xp) ? xp : 0) >= p.ZoneLevel;
             if (!available) continue;
-
-            var goal = p.GoalIds.Select(g => dd1.Goals.Goals.TryGetValue(g, out var d) ? d : null).FirstOrDefault(g => g != null);
-            yield return new QuestOffer
-            {
-                Id = "plot:" + p.Id,
-                Dungeon = p.Dungeon,
-                Type = p.Type,
-                Length = Math.Min(3, p.Length),
-                Difficulty = p.Difficulty,
-                MapSeed = estate.NextSeed(),
-                IsPlot = true,
-                PlotId = p.Id,
-                GoalId = goal?.Id,
-                BossId = goal?.MonsterClasses.FirstOrDefault(),
-                ResolveXp = p.ResolveXp,
-                Rewards = p.Rewards.Select(r => new Reward(r.Type, r.Amount, r.Id)).ToList(),
-            };
+            yield return PlotOffer(estate, dd1, p);
         }
 
         // Extra zones (DD2 regions): their lair boss, one tier at a time at zone levels 2, 4 and 6 like DD1's bosses,

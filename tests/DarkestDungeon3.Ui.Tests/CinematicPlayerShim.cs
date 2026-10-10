@@ -1,0 +1,91 @@
+using UnityEngine;
+
+namespace UnityEngine
+{
+    public enum ScaleMode { ScaleAndCrop, ScaleToFit }
+    public sealed class GameObject(string name)
+    {
+        public T AddComponent<T>() where T : new() => new T();
+    }
+}
+
+namespace UnityEngine.Video
+{
+    public enum VideoSource { Url }
+    public enum VideoRenderMode { RenderTexture }
+    public enum VideoAudioOutputMode { None }
+    public sealed class VideoPlayer
+    {
+        public static readonly List<VideoPlayer> Created = new();
+        public VideoPlayer() => Created.Add(this);
+        public bool playOnAwake, isLooping, isPlaying;
+        public VideoSource source;
+        public string url;
+        public VideoRenderMode renderMode;
+        public RenderTexture targetTexture;
+        public VideoAudioOutputMode audioOutputMode;
+        public uint width = 1920, height = 1080;
+        public double length = 5, time;
+        public event Action<VideoPlayer, string> errorReceived;
+        public event Action<VideoPlayer> loopPointReached, prepareCompleted;
+        public void Prepare() => prepareCompleted?.Invoke(this);
+        public void Play() => isPlaying = true;
+        public void Stop() => isPlaying = false;
+    }
+}
+
+namespace DarkestDungeon3.Runtime
+{
+    internal static class Art
+    {
+        public static Texture2D Dd1(params string[] parts) => null;
+        public static Texture2D MapIcon(string id) => null;
+    }
+    internal static class Dd1Audio
+    {
+        public static bool Hush;
+        public static readonly List<int> StartThreads = new();
+        public static Stream Last;
+        public sealed class Stream
+        {
+            public bool IsPlaying = true;
+            public void Stop() => IsPlaying = false;
+        }
+        public static Stream PlayStream(string file)
+        {
+            StartThreads.Add(Environment.CurrentManagedThreadId);
+            return Last = file != null && File.Exists(file) ? new Stream() : null;
+        }
+    }
+}
+
+namespace DarkestDungeon3.Ui
+{
+    internal static class ItemArt
+    {
+        public static readonly List<(Rect Rect, string Key, int Amount, bool Dim)> Cards = new();
+        public static void Stack(Rect rect, string key, int amount, int limit, bool dim = false) => Cards.Add((rect, key, amount, dim));
+    }
+
+    internal static class Gui
+    {
+        public static readonly Color Dd1Name = new(0.7f, 0.6f, 0.4f), Dim = new(0.4f, 0.4f, 0.4f);
+        public const float W = 1920, H = 1080;
+        public static readonly List<string> Texts = new();
+        public static readonly List<string> Tips = new();
+        public static void Tip(string text, Color? title = null)
+        {
+            if (Event.current.type == EventType.Repaint && !string.IsNullOrEmpty(text)) Tips.Add(text);
+        }
+        public static bool Hotspot(Rect rect) => GUI.enabled && Event.current.type == EventType.MouseUp
+            && Event.current.button == 0 && rect.Contains(Event.current.mousePosition);
+        public static bool DdButton(Rect rect, string text, bool enabled = true, int size = 24)
+        {
+            if (!enabled || !Hotspot(rect)) return false;
+            Event.current.Use();
+            return true;
+        }
+        public static void Fill(Rect rect, Color colour) { }
+        public static void Text(Rect rect, string text, float size, Color colour, TextAnchor align) => Texts.Add(text);
+    }
+}

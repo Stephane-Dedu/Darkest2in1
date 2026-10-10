@@ -58,7 +58,8 @@ public sealed class ItemCatalog
     /// <summary>Our item key: the id, except DD1's id-less types (food is "provision", gold is "gold") and quest items,
     /// which DD1 keeps apart from supplies of the same id (the altar quest's holy water isn't a supply).</summary>
     public static string KeyOf(string type, string id) =>
-        type == "provision" ? Supply.Food : type == "quest_item" ? QuestKey(id) : string.IsNullOrEmpty(id) ? type : id;
+        type == "provision" ? Supply.Food : type == "quest_item" ? QuestKey(id)
+        : type == "journal_page" ? Campaign.JournalPages.Prefix + id : string.IsNullOrEmpty(id) ? type : id;
 
     public static string QuestKey(string id) => "quest_item+" + id;
 
@@ -92,6 +93,29 @@ public sealed class Inventory
 
     public int SlotsUsed(ItemCatalog catalog) =>
         Items.Sum(kv => Stacks(kv.Value, catalog.StackLimit(kv.Key)));
+
+    /// <summary>Take a drop into the pack if it fits (DD1: everything, trinkets included, needs room; a trinket is
+    /// one per slot). Returns false when it stays behind.</summary>
+    public bool TryTake(LootDrop drop, ItemCatalog catalog)
+    {
+        if (drop == null || !HasRoomFor(drop.Key, drop.Amount, catalog)) return false;
+        Add(drop.Key, drop.Amount);
+        return true;
+    }
+
+    /// <summary>Fill matching stacks and empty slots, returning how much fit. The source drop stays unchanged;
+    /// its owner keeps the remainder on the loot scroll, like DD1's inventory stack merge.</summary>
+    public int TakePartial(LootDrop drop, ItemCatalog catalog)
+    {
+        if (drop == null || drop.Amount <= 0) return 0;
+        int stack = System.Math.Max(1, catalog.StackLimit(drop.Key));
+        int remainder = Count(drop.Key) % stack;
+        long capacity = (long)System.Math.Max(0, Slots - SlotsUsed(catalog)) * stack
+                        + (remainder > 0 ? stack - remainder : 0);
+        int amount = (int)System.Math.Min(drop.Amount, capacity);
+        if (amount > 0) Add(drop.Key, amount);
+        return amount;
+    }
 
     public bool HasRoomFor(string id, int amount, ItemCatalog catalog)
     {

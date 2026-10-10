@@ -34,6 +34,7 @@ public sealed class Dd2Trinket
     public List<string> Tags = new();
     /// <summary>The hero class it's made for (condition "performer_is_&lt;class&gt;"), or null.</summary>
     public string HeroClass;
+    public int EquipLimit;
     public bool IsForHero(string classId) => HeroClass == null || HeroClass == classId;
 }
 
@@ -120,6 +121,7 @@ public sealed class Dd2Tables
                 Rarity = Values(fields, "sub_type").FirstOrDefault() ?? "common",
                 Tags = Values(fields, "m_tags"),
                 HeroClass = cls?.Substring(prefix.Length),
+                EquipLimit = int.TryParse(Values(fields, "m_possessionLimit").FirstOrDefault(), out int limit) ? limit : 0,
             };
         }
         return t;

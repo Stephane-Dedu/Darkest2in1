@@ -14,12 +14,13 @@ namespace DarkestDungeon3.Ui;
 /// </summary>
 internal sealed class HamletUi
 {
-    private enum Panel { Town, StageCoach, Abbey, Tavern, Sanitarium, Wagon, Graveyard, Upgrades, Hero, Log, Guild, Blacksmith, Survivalist }
+    private enum Panel { Town, StageCoach, Abbey, Tavern, Sanitarium, Wagon, Graveyard, Memorial, Upgrades, Hero, Log, Guild, Blacksmith, Survivalist }
 
     private Panel _panel = Panel.Town;
     private string _building;          // the building whose window is open
     private string _heroId;
     private Vector2 _panelScroll, _logScroll;
+    private readonly ActivityLogUi _activityLog = new();
 
     public bool WantsEmbark;
 
@@ -39,6 +40,30 @@ internal sealed class HamletUi
     private string _hovered;
 
     public void Draw()
+    {
+        if (_panel != Panel.Memorial || _memorialEstate != E) Dd1Audio.StopNarration();
+        var recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
+        bool enabled = GUI.enabled;
+        try
+        {
+            if (recruit != null || _regionsOpen) GUI.enabled = false;
+            DrawPage();
+        }
+        finally { GUI.enabled = enabled; }
+        if (_regionsOpen)
+        {
+            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+            DrawRegions();
+            return;
+        }
+        recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
+        if (recruit == null) { _recruitSheet = false; return; }
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
+        HeroSheet.Draw(recruit, id => _heroId = id, () => _recruitSheet = false, readOnly: true,
+                       cycle: E.Recruits.Select(r => r.Id).ToList());
+    }
+
+    private void DrawPage()
     {
         var hamlet = S.Hamlet;
         _layout ??= TryLoadLayout();
@@ -145,8 +170,8 @@ internal sealed class HamletUi
 
     // ---------------------------------------------------------------- the town
 
-    private static bool IdleSlot(Core.Dd1.SpineSkeleton.Slot s) => s.Name != "active" && !s.Name.StartsWith("smoke");
-    private static bool ActiveSlot(Core.Dd1.SpineSkeleton.Slot s) => s.Name != "idle" && !s.Name.StartsWith("smoke");
+    private static bool IdleSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.IdleSlot(s.Name);
+    private static bool ActiveSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.HoverSlot(s.Name);   // outline + building
 
     private float Upgraded(string building)
     {
@@ -161,20 +186,21 @@ internal sealed class HamletUi
     private void DrawTown(bool interactive)
     {
         Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
-        Gui.Image(new Rect(0, 0, Gui.W, Gui.H), Art.TownBackdrop);
+        // DD1's display state: after a Darkest Dungeon part or during some town events the sky changes.
+        string sky = S.Campaign.TownRender.Background(E.LastReturnPlotId, E.TownEventId);
+        Gui.Image(new Rect(0, 0, Gui.W, Gui.H), Art.Dd1(sky.Split('/')) ?? Art.TownBackdrop);
         if (_layout == null) return;
 
         var mouse = Event.current.mousePosition;
         // Pictures: DD1 shows a highlighted ("active") version of the building under the mouse.
-        var pictures = new List<(TownLayout.Spot spot, SpineArt.Picture idle, SpineArt.Picture active)>();
+        var pictures = new List<(TownLayout.Spot spot, SpineArt.Picture idle, string folder)>();
         foreach (var spot in _layout.Spots)
         {
             if (spot.Id == "circus") continue;   // DLC
             bool ground = spot.Id == "ground";
             string folder = ground ? S.Dd1.PathOf("fx", "town_ground") : TownLayout.ArtFolder(S.Dd1, spot.Id, IsOpen(spot.Id), Upgraded(spot.Id));
             var idle = SpineArt.Get(folder, "idle", IdleSlot);
-            var active = ground ? null : SpineArt.Get(folder, "active", ActiveSlot);
-            pictures.Add((spot, idle, active));
+            pictures.Add((spot, idle, folder));
         }
 
         string hovered = null;
@@ -187,9 +213,9 @@ internal sealed class HamletUi
             }
         _hovered = hovered;
 
-        foreach (var (spot, idle, active) in pictures)
+        foreach (var (spot, idle, folder) in pictures)
         {
-            var pic = spot.Id == hovered && active != null ? active : idle;
+            var pic = spot.Id == hovered ? SpineArt.Get(folder, "active", ActiveSlot) ?? idle : idle;
             pic?.Draw(new Vector2(spot.X, spot.Y), spot.Scale);
         }
 
@@ -239,6 +265,7 @@ internal sealed class HamletUi
             Buildings.Sanitarium => Panel.Sanitarium,
             Buildings.NomadWagon => Panel.Wagon,
             Buildings.Graveyard => Panel.Graveyard,
+            Buildings.Memorial => Panel.Memorial,
             Buildings.Guild => Panel.Guild,
             Buildings.Blacksmith => Panel.Blacksmith,
             Buildings.Survivalist => Panel.Survivalist,
@@ -284,6 +311,16 @@ internal sealed class HamletUi
 
     private void DrawRoster()
     {
+        // Resolve a recruit's release before the roster's click handlers can change the open page.
+        if (_panel == Panel.StageCoach && Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired))
+        {
+            if (S.Hamlet.Recruit(hired.HeroId))
+            {
+                Runtime.Dd1Audio.Play("/ui/town/character_add");
+                S.Persist();
+            }
+            else Gui.Announce($"The roster is full ({E.Roster.Count}/{S.Buildings.RosterSize(E)}).");
+        }
         bool service = _panel is Panel.Blacksmith or Panel.Guild or Panel.Survivalist;
         bool slots = _panel is Panel.Abbey or Panel.Tavern or Panel.Sanitarium || service;
         var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h => new RosterColumn.Look(highlight: (_panel == Panel.Hero || service) && _heroId == h.Id), draggable: slots);
@@ -363,7 +400,6 @@ internal sealed class HamletUi
         var regionsButton = new Rect(14, BarY + 22, 110, 34);
         Gui.Text(regionsButton, "Regions", 20, regionsButton.Contains(Event.current.mousePosition) || _regionsOpen ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
         if (Gui.Hotspot(regionsButton)) _regionsOpen = !_regionsOpen;
-        if (_regionsOpen) DrawRegions();
         var leave = new Rect(14, BarY + 62, 110, 34);
         Gui.Text(leave, "Leave", 20, leave.Contains(Event.current.mousePosition) ? Color.white : Gui.Dd1Class, TextAnchor.MiddleLeft);
         if (Gui.Hotspot(leave)) Driver.Instance.LeaveHamlet();
@@ -384,22 +420,21 @@ internal sealed class HamletUi
     private bool _regionsOpen;
 
     /// <summary>
-    /// Estate option: DD2's regions as extra DD1-style zones. Each borrows a DD1 zone's maps, curios and loot, is
-    /// fought by its DD2 natives and has its lair boss at zone levels 2, 4 and 6. Switching one on puts its quests on
-    /// this week's board.
+    /// Estate region choices. Closed destinations keep their progress; enabling one adds its available contracts.
     /// </summary>
     private void DrawRegions()
     {
-        var zones = Core.Dungeon.ZoneBase.ExtraZones.ToList();
+        var zones = CampaignRegions.Options.ToList();
         var panel = new Rect(300, BarY - 120 - zones.Count * 74, 860, 110 + zones.Count * 74);
         Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
         Gui.Fill(new Rect(panel.x, panel.y, panel.width, 2), new Color(0.45f, 0.38f, 0.24f));
-        Gui.Text(new Rect(panel.x + 24, panel.y + 12, 600, 44), "DD2 regions", 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(panel.x + 24, panel.y + 54, panel.width - 48, 30), "Extra zones for this estate. Their quests join the board when switched on.", 18, Gui.Dd1Class);
+        Gui.Text(new Rect(panel.x + 24, panel.y + 12, 600, 44), "Campaign regions", 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(panel.x + 24, panel.y + 54, panel.width - 48, 30), "Choose available areas. Each keeps its own quests and progress.", 18, Gui.Dd1Class);
+        if (Gui.DdButton(new Rect(panel.xMax - 108, panel.y + 14, 84, 38), "Close", size: 18)) _regionsOpen = false;
         for (int i = 0; i < zones.Count; i++)
         {
             string z = zones[i];
-            bool on = E.IsToggled("zone." + z);
+            bool on = CampaignRegions.Enabled(E, z);
             var row = new Rect(panel.x + 24, panel.y + 96 + i * 74, panel.width - 48, 66);
             if (row.Contains(Event.current.mousePosition)) Gui.Fill(row, new Color(1, 1, 1, 0.04f));
             var box = new Rect(row.x + 4, row.y + 16, 32, 32);
@@ -408,16 +443,22 @@ internal sealed class HamletUi
             if (on) Gui.Fill(new Rect(box.x + 7, box.y + 7, 18, 18), Gui.Gold);
             E.ZoneXp.TryGetValue(z, out int xp);
             Gui.Text(new Rect(row.x + 52, row.y + 2, 400, 34), S.Zones.ZoneName(z), 26, on ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(row.x + 460, row.y + 2, 300, 34), on ? $"Level {S.Campaign.ZoneLevel(xp)}" : "Off", 20, Gui.Dd1Class, TextAnchor.MiddleRight);
+            string state = !on ? "Off" : CampaignRegions.Unlocked(E, S.Campaign, z)
+                ? $"Level {S.Campaign.ZoneLevel(xp)}" : $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, z)} quests";
+            Gui.Text(new Rect(row.x + 460, row.y + 2, 300, 34), state, 18, Gui.Dd1Class, TextAnchor.MiddleRight);
             Gui.Text(new Rect(row.x + 52, row.y + 34, row.width - 60, 28), S.Zones.Blurb(z), 17, Gui.Dd1Text, TextAnchor.MiddleLeft);
             if (Gui.Hotspot(row))
             {
                 S.Hamlet.SetZoneToggle(z, !on);
                 S.Persist();
-                Gui.Announce(!on ? $"{S.Zones.ZoneName(z)}: its quests are on the board." : $"{S.Zones.ZoneName(z)} is closed.");
+                Gui.Announce(!on ? $"{S.Zones.ZoneName(z)} is enabled." : $"{S.Zones.ZoneName(z)} is closed.");
             }
         }
-        if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape) _regionsOpen = false;
+        if (GUI.enabled && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
+        {
+            _regionsOpen = false;
+            Event.current.Use();
+        }
     }
 
     // ---------------------------------------------------------------- building windows
@@ -427,7 +468,8 @@ internal sealed class HamletUi
     private void DrawWindow(Hamlet hamlet)
     {
         string building = _panel == Panel.Hero || _panel == Panel.Log ? null : _building;
-        var bg = building != null ? Art.BuildingBackground(building) : null;
+        var bg = building != null ? Art.BuildingBackground(building)
+            : _panel == Panel.Log ? Art.Dd1("campaign", "town", "activity_log", "activitylog_bg.png") : null;
         if (bg != null) GUI.DrawTexture(Window, bg);
         else
         {
@@ -460,7 +502,7 @@ internal sealed class HamletUi
         var close = new Rect(Window.xMax - 58, Window.y + 12, 46, 46);
         var closeIcon = Art.Dd1("shared", "progression", "progression_close.png");
         if (closeIcon != null) GUI.DrawTexture(close, closeIcon); else Gui.Text(close, "X", 30, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        if (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape))
+        if (GUI.enabled && (Gui.Hotspot(close) || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)))
         {
             _panel = Panel.Town;
             _building = null;
@@ -470,13 +512,14 @@ internal sealed class HamletUi
         var area = Body;
         switch (_panel)
         {
-            case Panel.Log: DrawTownLog(new Rect(Window.x + 40, Window.y + 30, Window.width - 120, Window.height - 60)); break;
+            case Panel.Log: _activityLog.Draw(Window, E, ref _logScroll); break;
             case Panel.StageCoach: DrawStageCoach(area, hamlet); break;
             case Panel.Abbey: DrawActivities(area, hamlet, Buildings.Abbey); break;
             case Panel.Tavern: DrawActivities(area, hamlet, Buildings.Tavern); break;
             case Panel.Sanitarium: DrawSanitarium(area, hamlet); break;
             case Panel.Wagon: DrawWagon(area, hamlet); break;
             case Panel.Graveyard: DrawGraveyard(area); break;
+            case Panel.Memorial: DrawMemorial(); break;
             case Panel.Upgrades: break;   // a building not built yet: only its upgrades
             case Panel.Hero: DrawHero(area); break;
             case Panel.Blacksmith: DrawBlacksmith(area, hamlet); break;
@@ -646,63 +689,72 @@ internal sealed class HamletUi
         return $"{name}\n{(slot == Hamlet.Weapon ? "Weapon" : "Armor")} level {rank + 1}: {Dd2.Dd2Heroes.EquipmentText(slot, rank)}";
     }
 
+    private Vector2 _guildScroll;
+    private string _guildHero;
+
     private void DrawGuild(Rect area, Hamlet hamlet)
     {
-        Frame(area);
-        if (Drag.Hovering<HeroDrag>(area)) Gui.Fill(new Rect(area.x, area.y, area.width, 4), Gui.Gold);
-        if (Drag.Drop<HeroDrag>(area, out var dropped)) _heroId = dropped.HeroId;   // DD1: drop a hero on the building
-        var hero = E.Hero(_heroId);
-        if (hero == null)
-        {
-            Gui.Text(new Rect(area.x + 20, area.y + 60, area.width - 40, 120), "Choose a hero from the roster: the Guild teaches the skills they haven't unlocked, masters the ones they know, and sets the five they bring.", 24, Gui.Dd1Text);
-            return;
-        }
-        // The hero at the top (drop another hero from the roster to switch).
-        var icon = Art.HeroIcon(hero.ClassId);
-        if (icon != null) Art.DrawSprite(new Rect(646, 140, 72, 72), icon);
-        Gui.Text(new Rect(730, 140, 500, 40), hero.Name, 30, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        var hero = HeroSlot("str_help_town_guild_1", "[DRAG] a hero from your roster into the Guild to see their combat skills.");
+        if (hero == null) return;
+        HeroVerbose(hero, Buildings.Guild);
+        if (_guildHero != hero.Id) { _guildHero = hero.Id; _guildScroll = Vector2.zero; }
         var skills = Dd2.HeroSkills.ForClass(hero.ClassId);
         if (skills == null) return;
-        string loadout = hero.EquippedSkills.Count == 0 ? "DD2 chooses the skills they bring" : $"Brings {hero.EquippedSkills.Count}/{Dd2.HeroSkills.EquipLimit} chosen skills";
-        Gui.Text(new Rect(730, 178, 520, 30), $"{Pretty(hero.ClassId)}  ·  {loadout}", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
-        if (hero.EquippedSkills.Count > 0 && Gui.DdButton(new Rect(1290, 150, 186, 38), "DD2's choice", true, 18))
+        string loadout = hero.EquippedSkills.Count == 0 ? "Default skills" : $"Brings {hero.EquippedSkills.Count}/{Dd2.HeroSkills.EquipLimit} skills";
+        Gui.Text(W(926, 112, 230, 28), loadout, 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        if (hero.EquippedSkills.Count > 0 && Gui.DdButton(W(1172, 112, 180, 30), "Default skills", true, 18))
         {
             hero.EquippedSkills.Clear();
             S.Persist();
         }
 
         // DD1's Guild (guild.layout): a row per skill 91 apart, its ranks 75 apart with the cost under each (34,70).
-        // A DD2 skill has two: learning it and mastering it (its "+" form). Two columns of six.
+        // DD2 has more than DD1's seven skills, so the single skill column scrolls.
         var highlight = UpgradeArt("requirement_highlight_overlay.png");
+        var skillFrame = BuildingArt(Buildings.Guild, "skill_frame.png");
+        var purchased = UpgradeArt("requirement_purchased_icon.png");
+        var available = UpgradeArt("requirement_purchasable_icon.png");
+        var locked = UpgradeArt("requirement_locked_icon.png");
+        var purchasedBg = UpgradeArt("requirement_purchased_background.png");
+        var connector = UpgradeArt("requirement_purchased_background_connector.png");
+        var costFrame = Art.Dd1("campaign", "town", "buildings", "blg_townupgrade_costframe.png");
+        var goldIcon = Art.Dd1("shared", "estate", "currency.gold.icon.png");
         string tip = null;
-        for (int i = 0; i < skills.Count && i < 12; i++)
+        var view = W(909, 146, 453, 610);
+        bool overList = view.Contains(Event.current.mousePosition);
+        _guildScroll = GUI.BeginScrollView(view, _guildScroll, new Rect(0, 0, view.width - 18, Mathf.Max(view.height, skills.Count * 91 + 8)));
+        for (int i = 0; i < skills.Count; i++)
         {
             var skill = skills[i];
             bool known = Dd2.HeroSkills.Knows(hero, skill), mastered = hero.MasteredSkills.Contains(skill.Id);
             bool equipped = hero.EquippedSkills.Contains(skill.Id);
-            float x = 646 + (i / 6) * 450, y = 236 + (i % 6) * 91;
+            float x = 44, y = 4 + i * 91;
             string learnWhy = known ? null : hamlet.WhyCantLearnSkill(hero, skill.Id);
             string masterWhy = !known || mastered ? null : hamlet.WhyCantMasterSkill(hero, skill.Id, known);
+            if (mastered && connector != null) GUI.DrawTexture(new Rect(x + 32, y + 24, 75, 20), connector);
             for (int rank = 0; rank < 2; rank++)
             {
                 var r = new Rect(x + rank * 75, y, 64, 64);
                 bool has = rank == 0 ? known : mastered;
                 bool next = rank == 0 ? !known : known && !mastered;
                 string why = rank == 0 ? learnWhy : masterWhy;
+                bool canTry = next && (why == null || why == "Not enough gold");
+                var inner = new Rect(r.x + 7, r.y + 7, 50, 50);
+                if (has && purchasedBg != null) GUI.DrawTexture(r, purchasedBg);
+                if (canTry && costFrame != null) GUI.DrawTexture(new Rect(r.x, r.y - 3, 64, 86), costFrame);
+                if (rank == 0 && skillFrame != null) GUI.DrawTexture(new Rect(r.x - 4, r.y - 4, 72, 72), skillFrame);
                 var old = GUI.color;
-                if (!has) GUI.color = next ? new Color(0.65f, 0.65f, 0.65f, 1f) : new Color(0.3f, 0.3f, 0.3f, 1f);
-                if (skill.Icon != null) Art.DrawSprite(r, skill.Icon); else Gui.Fill(r, new Color(0.15f, 0.12f, 0.09f));
+                if (!has) GUI.color = canTry ? new Color(0.65f, 0.65f, 0.65f, 1f) : new Color(0.3f, 0.3f, 0.3f, 1f);
+                var marker = has ? purchased : canTry ? available : locked;
+                if (rank == 0 && skill.Icon != null) Art.DrawSprite(inner, skill.Icon);
+                else if (marker != null) GUI.DrawTexture(inner, marker);
+                else Gui.Fill(inner, new Color(0.15f, 0.12f, 0.09f));
                 GUI.color = old;
-                if (rank == 1) Gui.Text(new Rect(r.x + 36, r.y + 38, 28, 26), "+", 24, has ? Gui.Gold : Gui.Dim, TextAnchor.MiddleRight, heading: true);
-                if (next)
+                if (canTry)
                 {
                     int cost = rank == 0 ? hamlet.SkillLearnCost(hero, skill.Id) : hamlet.SkillMasterCost(hero, skill.Id);
-                    Gui.Text(new Rect(r.x - 6, r.yMax + 2, r.width + 12, 18), Gui.Num(cost, "#,0"), 14, why == null ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-                    if (r.Contains(Event.current.mousePosition))
-                    {
-                        if (highlight != null) GUI.DrawTexture(new Rect(r.x + 7, r.y + 7, 50, 50), highlight);
-                        tip = $"{(rank == 0 ? "Learn" : "Master")} {Dd2.HeroSkills.Name(skill.Id)}: {Gui.Num(cost, "#,0")} gold" + (why != null ? " - " + why : " - click to buy.");
-                    }
+                    if (goldIcon != null) GUI.DrawTexture(new Rect(r.x + 5, r.y + 63, 16, 16), goldIcon);
+                    Gui.Text(new Rect(r.x + 22, r.y + 61, 45, 20), Gui.Num(cost, "#,0"), 14, why == null ? Gui.Gold : Gui.Dd1Health, TextAnchor.MiddleLeft);
                     if (why == null && Gui.Hotspot(r))
                     {
                         if (rank == 0) hamlet.LearnSkill(hero.Id, skill.Id); else hamlet.MasterSkill(hero.Id, skill.Id, known);
@@ -710,8 +762,14 @@ internal sealed class HamletUi
                         S.Persist();
                     }
                 }
+                if (overList && r.Contains(Event.current.mousePosition))
+                {
+                    if (highlight != null) GUI.DrawTexture(inner, highlight);
+                    string status = has ? "Purchased." : next ? why ?? "Click to buy." : "Learn the skill first.";
+                    tip = $"{Dd2.HeroSkills.Name(skill.Id)}\n{(rank == 0 ? "Learn" : "Master")}: {status}";
+                }
             }
-            Gui.Text(new Rect(x + 156, y + 2, 280, 30), Dd2.HeroSkills.Name(skill.Id) + (mastered ? " +" : ""), 21, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(x + 156, y + 2, 230, 32), Dd2.HeroSkills.Name(skill.Id) + (mastered ? " +" : ""), 20, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
             if (known)
             {
                 bool full = !equipped && hero.EquippedSkills.Count >= Dd2.HeroSkills.EquipLimit;
@@ -725,15 +783,10 @@ internal sealed class HamletUi
                     S.Persist();
                 }
             }
-            else Gui.Text(new Rect(x + 156, y + 36, 280, 28), "Not yet learned", 16, Gui.Dim, TextAnchor.MiddleLeft);
+            else Gui.Text(new Rect(x + 156, y + 36, 230, 28), "Not yet learned", 16, Gui.Dim, TextAnchor.MiddleLeft);
         }
-        if (tip != null)
-        {
-            var m = Event.current.mousePosition;
-            var tr = new Rect(m.x + 18, m.y + 10, 360, 64);
-            Gui.Fill(tr, new Color(0.03f, 0.025f, 0.02f, 0.95f));
-            Gui.Text(new Rect(tr.x + 10, tr.y + 6, tr.width - 20, tr.height - 10), tip, 17, Gui.Dd1Text);
-        }
+        GUI.EndScrollView();
+        if (tip != null) Gui.Tip(tip);
     }
 
     private void DrawSurvivalist(Rect area, Hamlet hamlet)
@@ -799,17 +852,6 @@ internal sealed class HamletUi
         }
     }
 
-    private void DrawTownLog(Rect area)
-    {
-        Frame(area);
-        Gui.Text(new Rect(area.x + 20, area.y + 10, 900, 50), "The Hamlet's chronicle", 40, Gui.Dd1Name, heading: true);
-        var lines = E.TownLog.Concat(Driver.Instance.HomecomingLog).ToList();
-        _logScroll = GUI.BeginScrollView(new Rect(area.x + 20, area.y + 70, area.width - 40, area.height - 90), _logScroll, new Rect(0, 0, area.width - 70, lines.Count * 34 + 40));
-        if (lines.Count == 0) Gui.Label(new Rect(0, 0, area.width - 70, 30), "All is quiet. Choose a quest and embark when ready.");
-        for (int i = 0; i < lines.Count; i++) Gui.Label(new Rect(0, i * 34, area.width - 70, 32), lines[i]);
-        GUI.EndScrollView();
-    }
-
     /// <summary>
     /// DD1's stagecoach (stage_coach.layout): the recruits from body + (450,80), 100 apart, each on its dark band
     /// (hero_background at -100,-8) with the resolve level to the left of the portrait, the name at (100,12) and the
@@ -839,24 +881,14 @@ internal sealed class HamletUi
                 Drag.Source(row, new RecruitDrag(h.Id), r => { if (Art.HeroIcon(cls) is { } ic) Art.DrawSprite(new Rect(r.x + 100, r.y + 8, 86, 86), ic); });
             if (!(Drag.Payload is RecruitDrag carried && carried.HeroId == h.Id) && Art.HeroIcon(h.ClassId) is { } icon) Art.DrawSprite(portrait, icon);
             Gui.Text(new Rect(x + 100, y + 4, 380, 36), h.Name, 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-            Gui.Text(new Rect(x + 100, y + 38, 380, 28), Pretty(h.ClassId), 20, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            // DD1 "From Beyond": a fallen hero offered back; hiring one sends the others back to the grave.
+            Gui.Text(new Rect(x + 100, y + 38, 380, 28), h.FromGraveyard ? $"{Pretty(h.ClassId)} — {Dd1Text.Get("miscellaneous", "town_event_title_dead_recruit") ?? "From Beyond"}" : Pretty(h.ClassId),
+                20, h.FromGraveyard ? Gui.Blood : Gui.Dd1Class, TextAnchor.MiddleLeft);
             Gui.Text(new Rect(x + 100, y + 62, 390, 24), string.Join(", ", h.Quirks.Select(QuirkName)), 15, Gui.Dim, TextAnchor.MiddleLeft);
-            if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; }
+            if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; Drag.Cancel(); }
         }
         // Hiring: a recruit dropped on the roster.
         if (Drag.Hovering<RecruitDrag>(RosterColumn.Area)) Gui.Fill(new Rect(RosterColumn.Area.x, RosterColumn.Area.yMax, RosterColumn.Area.width, 4), Gui.Gold);
-        if (Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired) && hamlet.CanRecruit)
-        {
-            hamlet.Recruit(hired.HeroId);
-            Runtime.Dd1Audio.Play("/ui/town/character_add");
-            S.Persist();
-        }
-        if (_recruitSheet && E.Recruits.FirstOrDefault(r => r.Id == _heroId) is { } recruit)
-        {
-            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.55f));
-            HeroSheet.Draw(recruit, id => _heroId = id, () => _recruitSheet = false, readOnly: true, cycle: E.Recruits.Select(r => r.Id).ToList());
-        }
-        else _recruitSheet = false;
     }
 
     private bool _recruitSheet;
@@ -1011,7 +1043,9 @@ internal sealed class HamletUi
                 var row = new Rect(x, r.y + 60 + i * 38, 360, 32);
                 var cost = hamlet.TreatmentCost(hero, q);
                 bool lockedAlready = hero.LockedQuirks.Contains(q) && S.Catalog.IsPositive(q);
-                bool can = cost != null && E.Get(cost.Type) >= cost.Amount && !lockedAlready;
+                string noLock = lockedAlready ? null : hamlet.WhyCantLock(hero, q);   // DD1: at most 3 locked
+                bool can = cost != null && E.Get(cost.Type) >= cost.Amount && !lockedAlready && noLock == null;
+                if (noLock != null && row.Contains(Event.current.mousePosition)) Gui.Tip(noLock);
                 bool hover = can && row.Contains(Event.current.mousePosition);
                 var hl = BuildingArt(Buildings.Sanitarium, highlight);
                 if (hover && hl != null) GUI.DrawTexture(new Rect(row.x - 10, row.y, 380, 32), hl);
@@ -1033,7 +1067,6 @@ internal sealed class HamletUi
         // DD1's wagon grid (nomad_wagon.layout.darkest): background at body + (230,150), 6 columns 100 x 180 apart.
         var origin = new Vector2(596 + 230, 102 + 150);
         if (BuildingArt(Buildings.NomadWagon, "inventory_grid_background.png") is { } grid) GUI.DrawTexture(new Rect(origin.x, origin.y, 684, 360), grid);
-        string hovered = null;
         for (int i = 0; i < E.WagonStock.Count && i < 12; i++)
         {
             string t = E.WagonStock[i];
@@ -1045,7 +1078,7 @@ internal sealed class HamletUi
             HeroSheet.TrinketIcon(r, t);
             GUI.color = old;
             Gui.Text(new Rect(r.x - 14, r.yMax + 2, r.width + 28, 22), Gui.Num(price, "#,0"), 17, afford ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-            if (r.Contains(Event.current.mousePosition)) hovered = t;
+            if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(t);
             if (afford && Gui.Hotspot(r))
             {
                 hamlet.BuyTrinket(t);
@@ -1054,20 +1087,131 @@ internal sealed class HamletUi
             }
         }
         if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        string info = hovered != null ? HeroSheet.TrinketText(hovered).Replace('\n', ' ') + "  ·  click to buy" : $"Your stash: {E.Trinkets.Count} trinkets. Equip them from a hero's sheet (click a hero in the roster).";
-        Gui.Text(new Rect(origin.x, origin.y + 380, 684, 50), info, 18, Gui.Dd1Text, TextAnchor.UpperCenter);
     }
+
+    private Memorial _memorial;
+    private Vector2 _memorialScroll;
+    private bool _epiloguePrepared;
+    private Estate _memorialEstate;
+    private int _memorialJournalCount = -1;
+    private Dd1Font _memorialJournalFont;
+    private MemorialJournalLayout _memorialJournals;
+    private MemorialNarrationLayout _memorialNarrations;
+    private int _memorialPlotCount = -1, _memorialRegions;
+    private Dd1Campaign _memorialCampaign;
+
+    private void DrawMemorial()
+    {
+        _memorial ??= Memorial.Load(S.Dd1);
+        int regions = 17;
+        foreach (string region in CampaignRegions.Options) regions = unchecked(regions * 31 + (CampaignRegions.Enabled(E, region) ? 1 : 0));
+        if (_memorialEstate != E || _memorialCampaign != S.Campaign || _memorialRegions != regions || _memorialPlotCount != E.CompletedPlotQuests.Count
+            || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != Dd1Font.Body)
+        {
+            if (_memorialEstate != E) _memorialScroll = Vector2.zero;
+            _memorialEstate = E; _memorialJournalCount = E.CollectedJournalPages.Count; _memorialJournalFont = Dd1Font.Body;
+            _memorialCampaign = S.Campaign; _memorialRegions = regions; _memorialPlotCount = E.CompletedPlotQuests.Count;
+            _memorialJournals = MemorialJournalLayout.Build(Memorial.Journals(E, S.Lore),
+                title => Gui.TextHeight(title, 23, 560), text => Gui.TextHeight(text, 20, 560));
+            _memorialNarrations = MemorialNarrationLayout.Build(_memorial.Narrations(E, S.Campaign), S.Lore,
+                text => Gui.TextHeight(text, 20, 340));
+        }
+        Gui.Text(W(704, 74, 650, 64), Plain(S.Lore?.Text("str_statue_ancestor_quote")), 23, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        var entries = _memorial.Categories.Where(c => c.Name == "backerjournal" || _memorial.Videos.Any(v => v.Category == c.Name && v.Visible())
+            || _memorialNarrations.Rows.Any(r => r.Narration.Category == c.Name)).ToList();
+        int rows = _memorial.Videos.Count(v => v.Visible());
+        var view = W(704, 170, 648, 580);
+        var journals = _memorial.Categories.FirstOrDefault(c => c.Name == "backerjournal");
+        float height = entries.Count * 50 + rows * 130 + _memorialNarrations.Height + (journals != null ? Mathf.Max(80, _memorialJournals.Height) : 0);
+        _memorialScroll.y = Mathf.Clamp(_memorialScroll.y, 0, Mathf.Max(0, height - view.height));
+        _memorialScroll = GUI.BeginScrollView(view, _memorialScroll, new Rect(0, 0, 620, Mathf.Max(view.height, height)));
+        float y = 0;
+        string play = null;
+        string narration = null;
+        foreach (var category in entries)
+        {
+            if (Art.Dd1(category.LabelBackdrop) is { } titleBar) GUI.DrawTexture(new Rect(0, y, 600, 40), titleBar);
+            Gui.Text(new Rect(20, y, 560, 40), S.Lore?.Text(category.Label) ?? Pretty(category.Name), 25, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            y += 50;
+            foreach (var video in _memorial.Videos.Where(v => v.Category == category.Name && v.Visible()))
+            {
+                var row = new Rect(0, y, 600, 120);
+                if (Art.Dd1(category.EntryBackdrop) is { } bg) GUI.DrawTexture(row, bg);
+                if (BuildingArt(Buildings.Memorial, video.Name + ".png") is { } image) GUI.DrawTexture(new Rect(10, y + 10, 150, 100), image, ScaleMode.ScaleToFit);
+                bool allowed = video.CanPlay(E.CompletedPlotQuests);
+                Gui.Text(new Rect(176, y + 12, 340, 36), S.Lore?.Text("str_media_" + video.Name) ?? Pretty(video.Name), 27, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+                if (!allowed) Gui.Text(new Rect(176, y + 54, 340, 56), S.Lore?.Text("str_media_" + video.Name + "_locked") ?? "Locked", 18, Gui.Dd1Class);
+                var button = new Rect(530, y + 36, 54, 54);
+                if (BuildingArt(Buildings.Memorial, allowed ? "playmedia.png" : "lockedmedia.png") is { } marker) GUI.DrawTexture(button, marker, ScaleMode.ScaleToFit);
+                if (allowed && Gui.Hotspot(button)) play = video.VideoName;
+                if (allowed && video.Name == "epilog" && !_epiloguePrepared) { _epiloguePrepared = true; CinematicCache.Prepare(S.Dd1, new[] { video.VideoName }); }
+                y += 130;
+            }
+            foreach (var row in _memorialNarrations.Rows.Where(r => r.Narration.Category == category.Name))
+            {
+                var entry = row.Narration;
+                if (y + row.Height > _memorialScroll.y && y < _memorialScroll.y + view.height)
+                {
+                    if (Art.Dd1(category.EntryBackdrop) is { } bg) GUI.DrawTexture(new Rect(0, y, 600, row.Height), bg);
+                    if (BuildingArt(Buildings.Memorial, entry.Portrait) is { } portrait) GUI.DrawTexture(new Rect(10, y + 10, 150, 100), portrait, ScaleMode.ScaleToFit);
+                    Gui.Text(new Rect(176, y + 12, 340, row.TextHeight), row.Caption, 20, entry.Complete ? Gui.Dd1Text : Gui.Dd1Class);
+                    bool allowed = entry.Complete && Dd1Audio.HasNarration(entry.Sample);
+                    var button = new Rect(530, y + 36, 54, 54);
+                    var oldColor = GUI.color;
+                    if (Dd1Audio.NarrationSample == entry.Sample) GUI.color = Gui.Gold;
+                    if (BuildingArt(Buildings.Memorial, allowed ? "playmedia.png" : "lockedmedia.png") is { } marker) GUI.DrawTexture(button, marker, ScaleMode.ScaleToFit);
+                    GUI.color = oldColor;
+                    if (allowed && Gui.Hotspot(button)) narration = entry.Sample;
+                    if (button.Contains(Event.current.mousePosition)) Gui.Tip(!entry.Complete ? "Complete this quest to unlock its narration."
+                        : !allowed ? "DD1 narration audio is unavailable." : Dd1Audio.NarrationSample == entry.Sample ? "Stop narration" : "Play narration");
+                }
+                y += row.Height + 10;
+            }
+            if (category != journals) continue;
+            if (_memorialJournals.Rows.Count == 0)
+                Gui.Text(new Rect(20, y + 10, 560, 60), "No journal pages have been recovered.", 20, Gui.Dd1Class);
+            foreach (var row in _memorialJournals.Rows)
+            {
+                float top = y + row.Y;
+                if (top + row.Height <= _memorialScroll.y || top >= _memorialScroll.y + view.height) continue;
+                if (Art.Dd1(journals.EntryBackdrop) is { } bg) GUI.DrawTexture(new Rect(0, top, 600, row.Height), bg);
+                Gui.Text(new Rect(20, top + 12, 560, row.TitleHeight), row.Journal.Title, 23, Gui.Dd1Name, heading: true);
+                Gui.Text(new Rect(20, top + 20 + row.TitleHeight, 560, row.BodyHeight), row.Journal.Text, 20, Gui.Dd1Text);
+            }
+            y += Mathf.Max(80, _memorialJournals.Height);
+        }
+        GUI.EndScrollView();
+        if (narration != null) Dd1Audio.PlayNarration(narration);
+        if (play != null) { Dd1Audio.StopNarration(); CinematicPlayer.Play(play); }
+    }
+
+    private Vector2 _graveyardScroll;
 
     private void DrawGraveyard(Rect area)
     {
-        Frame(area);
+        // DD1's list uses its 600x118 record backdrop and 20 px between records.
+        var view = W(704, 148, 648, 600);
+        var backdrop = BuildingArt(Buildings.Graveyard, "dead_hero_backdrop.png");
+        _graveyardScroll = GUI.BeginScrollView(view, _graveyardScroll, new Rect(0, 0, 620, Mathf.Max(view.height, E.Graveyard.Count * 138)));
         for (int i = 0; i < E.Graveyard.Count; i++)
         {
             var h = E.Graveyard[i];
-            Gui.Text(new Rect(area.x + 20, area.y + 14 + i * 40, area.width - 40, 38),
-                $"{h.Name} the {Pretty(h.ClassId)}, resolve {h.ResolveLevel}: {h.CauseOfDeath} (week {h.WeekDied + 1})", 19, Gui.Dd1Text, TextAnchor.MiddleLeft);
+            float y = i * 138;
+            var row = new Rect(0, y, 600, 118);
+            if (backdrop != null) GUI.DrawTexture(row, backdrop);
+            else Gui.Fill(row, new Color(0.08f, 0.07f, 0.06f, 0.95f));
+            int resolve = Mathf.Clamp(h.ResolveLevel, 0, 6);
+            if (BuildingArt(Buildings.Graveyard, resolve <= 1 ? "0_1.png" : resolve + ".png") is { } tombstone)
+                GUI.DrawTexture(new Rect(0, y, 118, 118), tombstone);
+            if (Art.HeroIcon(h.ClassId) is { } portrait) Art.DrawSprite(new Rect(28, y + 18, 62, 62), portrait);
+            Gui.Text(new Rect(130, y + 8, 456, 30), h.Name, 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            string rank = S.Lore?.Text("str_resolve_" + resolve) ?? $"Resolve {resolve}";
+            Gui.Text(new Rect(130, y + 40, 456, 24), $"{rank} · {Pretty(h.ClassId)}", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            string cause = h.CauseOfDeath ?? S.Lore?.Text("str_death_unknown_unknown") ?? "An unknown peril";
+            Gui.Text(new Rect(130, y + 67, 456, 43), $"Week {h.WeekDied + 1}: {cause}", 17, Gui.Dd1Text);
         }
-        if (E.Graveyard.Count == 0) Gui.Text(new Rect(area.x + 20, area.y + 20, area.width - 40, 40), "No one rests here. Yet.", 24, Gui.Dd1Class);
+        if (E.Graveyard.Count == 0) Gui.Text(new Rect(20, 20, 580, 40), "No one rests here.", 24, Gui.Dd1Class);
+        GUI.EndScrollView();
     }
 
     /// <summary>
@@ -1084,12 +1228,11 @@ internal sealed class HamletUi
         if (frame != null) GUI.DrawTexture(panel, frame); else Gui.Fill(panel, new Color(0.04f, 0.035f, 0.03f, 0.97f));
         var lore = S.Lore;
         var trees = S.Buildings.Trees.Trees.Keys.Where(k => k.StartsWith(building + ".")).OrderBy(k => k).ToList();
-        int owned = trees.Sum(t => S.Buildings.Trees.Trees[t].Count(l => E.Upgrades.Contains(l.Key)));
         int total = trees.Sum(t => S.Buildings.Trees.Trees[t].Count);
         // The plaque at the panel's top right holds the title (upgrade_title_offset 458,36) and how far the building
         // is upgraded (upgrade_percent_offset 480,62); the description sits at verbose_offset (20,30), 380 wide.
         Gui.Text(new Rect(basePos.x + 458 - 100, basePos.y + 36 - 22, 200, 40), "Upgraded:", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
-        Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{owned * 100 / total}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(basePos.x + 480 - 100, basePos.y + 62 - 4, 200, 32), total == 0 ? "" : $"{S.Buildings.Trees.Percent(E, building)}%", 24, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
         Gui.Text(new Rect(basePos.x + 20, basePos.y + 30, 380, 110), lore?.Text("building_verbose_" + building) ?? "Spend heirlooms to improve the building. Hover a level for what it costs; click the next one when you can afford it.", 18, Gui.Dd1Class);
 
         var bought = UpgradeArt("requirement_purchased_icon.png");
@@ -1171,29 +1314,28 @@ internal sealed class HamletUi
             $"Stress {h.Stress}/10   ({h.ResolveXp} resolve xp)\n\n" +
             $"Quirks: {string.Join(", ", h.Quirks.Select(QuirkName))}\n\n" +
             $"Camp skills: {string.Join(", ", h.CampingSkills.Select(Pretty))}\n\n" +
-            $"Trinkets: {(h.Trinkets.Count == 0 ? "none" : string.Join(", ", h.Trinkets.Select(Pretty)))}" +
+            $"Trinkets: {(!h.WornTrinkets.Any() ? "none" : string.Join(", ", h.WornTrinkets.Select(Pretty)))}" +
             (h.Activity != null ? $"\n\nThis week: {Pretty(h.Activity)}" : ""), 19, Gui.Dd1Text);
 
         float y = area.y + 330;
-        foreach (var t in h.Trinkets.ToList())
+        foreach (var t in h.WornTrinkets.ToList())
         {
             if (Gui.DdButton(new Rect(area.x + 20, y, 330, 42), "Unequip " + Pretty(t), true, 18))
             {
-                h.Trinkets.Remove(t);
-                E.Trinkets.Add(t);
+                if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, h.Trinkets.IndexOf(t))) return;
                 S.Persist();
             }
             y += 48;
         }
-        if (h.Trinkets.Count < 2)
+        if (h.WornTrinkets.Count() < 2)
         {
             int x = 0;
             foreach (var t in E.Trinkets.Distinct().Where(t => S.Catalog.TrinketFits(t, h.ClassId)).Take(8).ToList())
             {
                 if (Gui.DdButton(new Rect(area.x + 20 + (x % 2) * 350, y + (x / 2) * 48, 340, 42), "Equip " + Pretty(t), true, 18))
                 {
-                    E.Trinkets.Remove(t);
-                    h.Trinkets.Add(t);
+                    int slot = h.TrinketAt(0) == null ? 0 : 1;
+                    if (!Core.Campaign.Town.TrinketEquipment.Transfer(E, S.Catalog, t, null, -1, h, slot)) return;
                     S.Persist();
                 }
                 x++;

@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsTestProject>true</IsTestProject>
+    <SpineArtSource Condition="'$(SpineArtSource)' == ''">../../src/DarkestDungeon3/Runtime/SpineArt.cs</SpineArtSource>
+    <ItemTextSource Condition="'$(ItemTextSource)' == ''">../../src/DarkestDungeon3/Dd2/ItemText.cs</ItemTextSource>
+    <Dd1FontSource Condition="'$(Dd1FontSource)' == ''">../../src/DarkestDungeon3/Runtime/Dd1Font.cs</Dd1FontSource>
+    <Dd1TextSource Condition="'$(Dd1TextSource)' == ''">../../src/DarkestDungeon3/Runtime/Dd1Text.cs</Dd1TextSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+    <ProjectReference Include="../../src/DarkestDungeon3.Core/DarkestDungeon3.Core.csproj" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/Drag.cs" Link="Drag.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CrawlInventoryInput.cs" Link="CrawlInventoryInput.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/EmbarkUi.Navigation.cs" Link="EmbarkUi.Navigation.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CrawlMapUi.cs" Link="CrawlMapUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CorridorGroundUi.cs" Link="CorridorGroundUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CorridorPanoramaUi.cs" Link="CorridorPanoramaUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/LootGridUi.cs" Link="LootGridUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/ActivityLogLayout.cs" Link="ActivityLogLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/MemorialJournalLayout.cs" Link="MemorialJournalLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/MemorialNarrationLayout.cs" Link="MemorialNarrationLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/DeferredPoll.cs" Link="DeferredPoll.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/ExpeditionActorRestore.cs" Link="ExpeditionActorRestore.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/Dd2Run.cs" Link="Dd2Run.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Runtime/SpriteArt.cs" Link="SpriteArt.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Runtime/RegionSceneryArt.cs" Link="RegionSceneryArt.cs" />
+    <Compile Include="$(SpineArtSource)" Link="SpineArt.cs" />
+    <Compile Include="$(ItemTextSource)" Link="ItemText.cs" />
+    <Compile Include="$(Dd1FontSource)" Link="Dd1Font.cs" />
+    <Compile Include="$(Dd1TextSource)" Link="Dd1Text.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Runtime/PngPreloader.cs" Link="PngPreloader.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CinematicCache.cs" Link="CinematicCache.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/CinematicPlayer.cs" Link="CinematicPlayer.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/EstatePickerSlot.cs" Link="EstatePickerSlot.cs" />
+  </ItemGroup>
+</Project>

@@ -23,6 +23,7 @@ internal static class Dd1Backdrop
     public static Mesh SharedQuad => QuadMesh();
     private static bool _failed;
     private static float _startedAt;
+    private static readonly DeferredPoll SetupPoll = new(0.1f);
     private static readonly List<Renderer> Hidden = new();
     private static RenderTexture _texture;
     private static Material _material;
@@ -36,19 +37,22 @@ internal static class Dd1Backdrop
     private static float _distance = 15f;
 
     /// <summary>A fight is about to start here: forget the last one.</summary>
-    public static void Reset()
+    public static void Reset(bool nativeArena = false)
     {
         End();
         Ready = false;
-        _failed = !Plugin.Dd1BackdropOn.Value;
+        _failed = nativeArena || !Plugin.Dd1BackdropOn.Value;
         _startedAt = -1f;
+        SetupPoll.Reset();
     }
 
     /// <summary>Called every frame of a fight until it is set up (DD2's arena and actors load over a few frames).</summary>
     public static void Update()
     {
         if (Ready || _failed) return;
+        if (!SetupPoll.Due(Time.unscaledTime, true)) return;
         if (_startedAt < 0) _startedAt = Time.unscaledTime;
+        var setupWatch = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             var arena = SingletonMonoBehaviour<ArenaBhv>.Instance;
@@ -67,10 +71,10 @@ internal static class Dd1Backdrop
             var spared = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI") };
             var scenes = Enumerable.Range(0, UnityEngine.SceneManagement.SceneManager.sceneCount)
                 .Select(UnityEngine.SceneManagement.SceneManager.GetSceneAt).Where(sc => sc.isLoaded).ToList();
-            var scenery = scenes.SelectMany(sc => sc.GetRootGameObjects())
+            var renderers = scenes.SelectMany(sc => sc.GetRootGameObjects())
                 .Where(g => !g.name.StartsWith("DD3", StringComparison.Ordinal))
-                .SelectMany(g => g.GetComponentsInChildren<Renderer>(true))
-                .Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
+                .SelectMany(g => g.GetComponentsInChildren<Renderer>(true)).ToList();
+            var scenery = renderers.Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
                             && !spared.Contains(r.gameObject.layer)
                             && r.GetComponentInParent<ActorBhv>() == null)
                 .ToList();
@@ -97,11 +101,16 @@ internal static class Dd1Backdrop
 
             foreach (var r in scenery)
                 if (r != null && r.enabled && !r.forceRenderingOff) { r.forceRenderingOff = true; Hidden.Add(r); }
-            // The arena's ambient particles (floating specks, embers) present now; skill effects spawn later and stay.
-            foreach (var sc in scenes)
-                foreach (var r in sc.GetRootGameObjects().SelectMany(g => g.GetComponentsInChildren<Renderer>(true)))
-                    if (r.GetType().Name == "ParticleSystemRenderer" && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
-                    { r.forceRenderingOff = true; Hidden.Add(r); }
+            // The arena's ambient particles (floating specks, embers) present now: particle systems and VFX Graph effects
+            // (DD2 draws its embers with VisualEffect / VFXRenderer). Skill effects spawn later and stay.
+            int ambient = 0;
+            foreach (var r in renderers)
+                {
+                    string type = r.GetType().Name;
+                    if ((type == "ParticleSystemRenderer" || type == "VFXRenderer") && r.enabled && !r.forceRenderingOff && r.GetComponentInParent<ActorBhv>() == null)
+                    { r.forceRenderingOff = true; Hidden.Add(r); ambient++; }
+                }
+            Plugin.Log.LogInfo($"[backdrop] {ambient} ambient particle/VFX renderers hidden");
             // DD2's fog is a full-screen pass after the transparent objects: with no depth behind our backdrop it
             // painted the fog colour over all of it (the red sky). Off while the DD1 scene is up.
             SetDd2Fog(false);
@@ -113,7 +122,9 @@ internal static class Dd1Backdrop
             // effects' or the UI's.
             var keep = new HashSet<int> { LayerMask.NameToLayer("Characters"), LayerMask.NameToLayer("Deferred"), LayerMask.NameToLayer("Foreground"),
                                           LayerMask.NameToLayer("ForUI"), LayerMask.NameToLayer("UI"), 0 };
-            foreach (var p in UnityEngine.Object.FindObjectsOfType<Renderer>()) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
+            foreach (var p in renderers) if (p.GetType().Name == "ParticleSystemRenderer") keep.Add(p.gameObject.layer);
+            // Camera masks also filter lights. Keep every arena light layer while hiding its scenery per renderer.
+            foreach (var light in UnityEngine.Object.FindObjectsOfType<Light>()) keep.Add(light.gameObject.layer);
             _sceneryMask = 0;
             _sceneryLayers = 0;
             foreach (var l in scenery.Select(r => r.gameObject.layer).Distinct())
@@ -122,12 +133,15 @@ internal static class Dd1Backdrop
                 if (!keep.Contains(l)) _sceneryMask |= 1 << l;
             }
             _sceneryCamera = cam;
+            foreach (var hidden in Hidden) Seen.Add(hidden.GetInstanceID());
+            _nextScan = Time.unscaledTime + 0.5f;
             // The backdrop goes on the scenery's own main layer: DD2's renderer draws that one (an unused layer was
             // filtered out by it). That layer stays drawn; its scenery is hidden renderer by renderer.
             _quadLayer = layer;
             _sceneryMask &= ~(1 << layer);
             Ready = true;
             Tick();
+            Plugin.Log.LogInfo($"[combat timing] DD1 backdrop setup {setupWatch.ElapsedMilliseconds} ms, ready after {(Time.unscaledTime - _startedAt) * 1000f:0} ms");
             Plugin.Log.LogInfo($"[backdrop] DD1 scene behind the fight: {Hidden.Count} arena renderers hidden, scenery layers 0x{_sceneryMask:X} culled, backdrop on layer {_quadLayer}, camera {cam.name}, distance {distance:0.0}, feet at {feetY:0}px");
         }
         catch (Exception e)
@@ -267,10 +281,13 @@ internal static class Dd1Backdrop
     // volume's own profile copy (PostProcessingManager.SetEffects), so they are held off every frame, on the shared
     // profile and on the copy, and put back as they were found when the fight ends.
     private static readonly string[] FlatArtSpoilers =
-        { "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain" };
-    private static readonly Dictionary<object, bool> EffectsBefore = new();
-    private static readonly List<System.Reflection.FieldInfo> EffectFlags = new();
-    private static readonly List<object> EffectsHeld = new();
+    {
+        "DepthOfField", "MotionBlur", "LensDistortion", "ChromaticAberration", "PaniniProjection", "FilmGrain",
+        // DD2's per-arena colour grading (the forest exterior's red cast): DD1 shows its art as painted.
+        "ColorLookup", "ChannelMixer", "ColorCurves", "LiftGammaGain", "ShadowsMidtonesHighlights",
+        "SplitToning", "WhiteBalance", "Bloom", "Vignette",
+    };
+    private static readonly PostEffectGuard Effects = new();
     private static float _nextVolumeScan;
     private static readonly Type VolumeType = Type.GetType("UnityEngine.Rendering.Volume, Unity.RenderPipelines.Core.Runtime");
 
@@ -280,10 +297,7 @@ internal static class Dd1Backdrop
         {
             if (restore)
             {
-                foreach (var kv in EffectsBefore) kv.Key?.GetType().GetField("active")?.SetValue(kv.Key, kv.Value);
-                EffectsBefore.Clear();
-                EffectsHeld.Clear();
-                EffectFlags.Clear();
+                Effects.Restore();
                 _nextVolumeScan = 0f;
                 return;
             }
@@ -291,7 +305,7 @@ internal static class Dd1Backdrop
             if (Time.unscaledTime >= _nextVolumeScan)
             {
                 _nextVolumeScan = Time.unscaledTime + 1f;
-                int before = EffectsHeld.Count;
+                int before = Effects.Count;
                 foreach (var volume in UnityEngine.Object.FindObjectsOfType(VolumeType))
                 {
                     // The shared profile and the volume's own copy (profileRef; reading "profile" would make a copy).
@@ -301,21 +315,23 @@ internal static class Dd1Backdrop
                         if (profile.GetType().GetField("components")?.GetValue(profile) is not System.Collections.IEnumerable components) continue;
                         foreach (var c in components)
                         {
-                            if (c == null || EffectsBefore.ContainsKey(c) || !FlatArtSpoilers.Contains(c.GetType().Name)) continue;
-                            var active = c.GetType().GetField("active");
-                            if (active == null) continue;
-                            EffectsBefore[c] = (bool)active.GetValue(c);
-                            EffectsHeld.Add(c);
-                            EffectFlags.Add(active);
+                            if (c == null) continue;
+                            if (c.GetType().Name == "ColorAdjustments")
+                            {
+                                // Keep native postExposure and active state: DD2 hero materials depend on them.
+                                Effects.NeutralParameter(c, "colorFilter", Color.white);
+                                Effects.NeutralParameter(c, "contrast", 0f);
+                                Effects.NeutralParameter(c, "hueShift", 0f);
+                                Effects.NeutralParameter(c, "saturation", 0f);
+                            }
+                            else if (FlatArtSpoilers.Contains(c.GetType().Name)) Effects.Disable(c);
                         }
                     }
                 }
-                if (EffectsHeld.Count != before)
-                    Plugin.Log.LogInfo($"[backdrop] holding off {EffectsHeld.Count} DD2 post effect(s): " +
-                                       string.Join(", ", EffectsHeld.Select(c => c.GetType().Name).Distinct()));
+                if (Effects.Count != before)
+                    Plugin.Log.LogInfo($"[backdrop] holding {Effects.Count} post-effect fields; native exposure preserved, bloom/vignette off");
             }
-            for (int i = 0; i < EffectsHeld.Count; i++)
-                if (EffectsHeld[i] != null && (bool)EffectFlags[i].GetValue(EffectsHeld[i])) EffectFlags[i].SetValue(EffectsHeld[i], false);
+            Effects.Apply();
         }
         catch (Exception e) { Plugin.Log.LogWarning("[backdrop] post effects: " + e.Message); }
     }
@@ -355,7 +371,8 @@ internal static class Dd1Backdrop
         var exp = d?.Expedition;
         var crawl = d?.Crawl;
         if (exp == null || crawl == null) return null;
-        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);
+        bool memory = Core.Expedition.FadedMemory.Active(exp);
+        string zone = Core.Dungeon.ZoneBase.Of(memory ? exp.FadedMemory.Dungeon : exp.Quest.Dungeon);
         var rt = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32) { name = "DD3Backdrop" };
         rt.Create();
         var prev = RenderTexture.active;
@@ -369,9 +386,11 @@ internal static class Dd1Backdrop
             if (tex == null) return;
             Graphics.DrawTexture(new Rect(x, y, w, h), tex, mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1), 0, 0, 0, 0);
         }
-        if (exp.InRoom)
+        if (memory || exp.InRoom)
         {
-            var wall = exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
+            var wall = memory ? Art.BossRoomWall(zone, exp.FadedMemory.BossId, exp.FadedMemory.Difficulty)
+                : exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
+            Plugin.Log.LogInfo("[backdrop] " + (memory ? "memory boss room " + exp.FadedMemory.BossId : "room " + exp.RoomId));
             Draw(wall, 0, top, 1920, 720);
         }
         else

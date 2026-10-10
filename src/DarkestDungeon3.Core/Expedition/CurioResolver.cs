@@ -8,6 +8,8 @@ namespace DarkestDungeon3.Core.Expedition;
 /// <summary>What happened when a hero touched a curio.</summary>
 public sealed class CurioReport
 {
+    /// <summary>The part of <see cref="Loot"/> the pack had no room for (still on DD1's loot scroll).</summary>
+    public List<LootDrop> LeftBehind = new();
     public string CurioId, HeroId, ItemUsed;
     public string OutcomeType;
     public string Text;
@@ -15,6 +17,23 @@ public sealed class CurioReport
     public List<string> Effects = new();
     public string QuirkGained, Purged;
     public bool Scouted;
+
+    /// <summary>JSON restores shared loot objects as copies. Rebind waiting drops to their display entries without
+    /// changing counts or producing rewards; identical entries are matched only once.</summary>
+    internal void RestoreLootLinks()
+    {
+        var matched = new HashSet<LootDrop>();
+        for (int i = 0; i < LeftBehind.Count; i++)
+        {
+            var waiting = LeftBehind[i];
+            if (Loot.Contains(waiting)) { matched.Add(waiting); continue; }
+            var display = Loot.FirstOrDefault(d => !matched.Contains(d)
+                && d.Type == waiting.Type && d.Id == waiting.Id && d.Amount == waiting.Amount);
+            if (display == null) continue;
+            LeftBehind[i] = display;
+            matched.Add(display);
+        }
+    }
 }
 
 /// <summary>DD1 curio resolution: pick an outcome by weight (or the item interaction), then apply it.</summary>
@@ -35,6 +54,7 @@ public sealed class CurioResolver
     }
 
     public CurioDef Def(string curioId) => _curios.Get(curioId);
+    public string SpriteOf(string curioId) => _curios.SpriteOf(curioId);
 
     /// <summary>Items that do something special on this curio (e.g. a skeleton key on a locked strongbox).</summary>
     public IEnumerable<string> UsefulItems(string curioId) => _curios.Get(curioId)?.Items.Select(i => i.Item) ?? Enumerable.Empty<string>();
@@ -88,8 +108,13 @@ public sealed class CurioResolver
                 report.Purged = party.PurgeNegative(heroId);
                 break;
             case "Scouting":
-                foreach (var room in state.Map.Rooms) room.Scouted = true;
-                foreach (var tile in state.Map.AllTiles) tile.Scouted = true;
+                foreach (var room in state.Map.QuestRooms) room.Scouted = true;
+                foreach (var tile in state.Map.AllTiles)
+                {
+                    tile.Scouted = true;
+                    if (tile.SecretRoomId >= 0 && tile.SecretDoorAlwaysAccessible)
+                        state.Map.Room(tile.SecretRoomId).Scouted = true;
+                }
                 report.Scouted = true;
                 break;
         }

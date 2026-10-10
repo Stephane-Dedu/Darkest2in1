@@ -13,6 +13,8 @@ public sealed class Dd1Buff
     public float Amount;
     public string DurationType;  // combat_end, quest_end, activity_end ... (null: for the expedition)
     public int Duration;
+    public string Rule = "always", RuleString = "";
+    public float RuleNumber;
 
     /// <summary>Battles this buff lasts in the dungeon, or 0 if it lasts the whole expedition.</summary>
     public int Battles => DurationType == "combat_end" ? System.Math.Max(1, Duration) : 0;
@@ -45,6 +47,9 @@ public sealed class Dd1Buffs
                     Amount = (float?)b["amount"] ?? 0f,
                     DurationType = (string)b["duration_type"],
                     Duration = (int?)b["duration"] ?? 0,
+                    Rule = (string)b["rule_type"] ?? "always",
+                    RuleString = (string)b["rule_data"]?["string"] ?? "",
+                    RuleNumber = (float?)b["rule_data"]?["float"] ?? 0,
                 };
             }
         return lib;

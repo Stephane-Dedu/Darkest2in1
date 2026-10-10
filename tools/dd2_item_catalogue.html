@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+<title>DD2 item research catalogue</title>
+<style>
+body{margin:0;background:#171a1f;color:#e5e8ee;font:15px/1.5 system-ui}header{padding:24px 32px;background:#232934}h1{margin:0}p{max-width:100ch}input,select,button{font:inherit;background:#292f38;color:inherit;border:1px solid #657386;border-radius:5px;padding:8px}input{width:min(40vw,420px)}button{cursor:pointer;text-align:left}main{display:grid;grid-template-columns:minmax(260px,30%) 1fr;gap:20px;padding:20px}#list{max-height:75vh;overflow:auto}#list button{display:block;width:100%;margin-bottom:6px}#list small{display:block;color:#b6c4d7}article{min-width:0}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.5 monospace;background:#101318;padding:14px}summary{cursor:pointer;color:#9ed9e8;padding:8px}details{border-top:1px solid #414a59}label{margin-right:12px}small{color:#bac4d3}.pills{display:flex;flex-wrap:wrap;gap:8px}.pill{padding:5px 9px;background:#303949;border-radius:12px}@media(max-width:750px){main{grid-template-columns:1fr}#list{max-height:35vh}}
+</style>
+<header><h1>DD2 item research catalogue</h1><p id="summary"></p>
+<p>Private native evidence. This maps installed definitions, including overrides and editor entries. It does not prove live availability or implement proposed curio interactions.</p>
+<label>Search <input id="query" placeholder="Item ID, field, effect or source"></label>
+<label>Type <select id="type"><option value="">All types</option></select></label>
+<label>Use <select id="use"><option value="">All contexts</option><option value="m_usedInCombat">Combat</option><option value="m_usedInInn">Inn</option><option value="m_usedInDriving">Driving</option></select></label>
+<small id="count" aria-live="polite"></small></header>
+<main><nav id="list" aria-label="Item definitions"></nav><article id="detail"><p>Select an item to inspect its rules and source evidence.</p></article></main>
+<script id="data" type="application/json">/*CATALOGUE_JSON*/</script>
+<script>
+const data=JSON.parse(document.getElementById('data').textContent), $=id=>document.getElementById(id);
+const text=(tag,value,parent)=>{const el=document.createElement(tag);el.textContent=value;parent.append(el);return el};
+$('summary').textContent=`${data.summary.unique_item_ids} item IDs · ${data.summary.item_records} definitions · ${data.summary.duplicate_item_ids} IDs with variants`;
+for(const type of Object.keys(data.summary.by_type_records)){const o=text('option',type,$('type'));o.value=type}
+const searchable=data.items.map(item=>JSON.stringify([item,data.records[item.key],...item.bindings.flatMap(b=>b.records.map(k=>data.records[k]))]).toLowerCase());
+function evidence(key,parent,open=false){const r=data.records[key];if(!r)return;const d=document.createElement('details');d.open=open;parent.append(d);text('summary',`${r.kind}: ${r.id} — ${r.source}:${r.line}`,d);text('pre',r.rows.map(row=>JSON.stringify(row)).join('\n'),d);for(const binding of data.skill_bindings[key]||[]){text('p',`Skill binding ${binding.field} → ${binding.kind}/${binding.id}`,d);binding.records.forEach(k=>evidence(k,d))}const links=data.candidate_links[key]||[];if(links.length){text('small','Exact-cell matches below are navigation candidates, not confirmed execution edges.',d);const wrap=text('div','',d);wrap.className='pills';for(const k of new Set(links.flatMap(x=>x.candidate_records))){const b=text('button',`${data.records[k].kind}: ${data.records[k].id}`,wrap);b.onclick=()=>{b.disabled=true;evidence(k,d)}}}}
+function show(item){const out=$('detail');out.replaceChildren();text('h2',item.id,out);text('p',`${item.type} · ${item.key}`,out);text('p',item.review,out);text('p','Curio and shop adaptations: not assigned yet.',out);
+text('h3','Native item fields',out);evidence(item.key,out,true);
+text('h3','Constructor bindings',out);text('small','Explicit fields or optional matching-ID lookups. Suppressed bindings are inactive when a skill takes precedence. All source variants are retained.',out);
+for(const b of item.bindings){text('p',`${b.field} → ${b.kind}/${b.id} [${b.lookup}${b.active?'':'; suppressed'}]`,out);if(!b.records.length)text('p','Unresolved explicit binding; inspect native library loading.',out);b.records.forEach(k=>evidence(k,out))}
+text('h3','Other same-ID / unlock candidates',out);item.same_id_candidates.forEach(k=>evidence(k,out));
+text('h3','Acquisition and shop research',out);text('p','Native loot entries and their parent tables retain conditions and source variants. Weights are not percentages. Scene-bound store roots, tag filters, DLC, unlocks and current stock need separate review. A buy cost does not guarantee an item is sold.',out);text('pre',JSON.stringify({direct_entries:item.loot_entries,parent_entries:item.loot_ancestors},null,2),out);for(const k of new Set([...item.acquisition_candidates.map(m=>m.record),...item.loot_ancestors.map(m=>m.record)]))evidence(k,out);
+const all=document.createElement('details');out.append(all);text('summary',`All exact-ID mentions (${item.exact_id_mentions.length})`,all);for(const k of new Set(item.exact_id_mentions.map(m=>m.record)))evidence(k,all);
+const limits=document.createElement('details');out.append(limits);text('summary','Catalogue limits',limits);data.limitations.forEach(s=>text('p',s,limits));}
+function filter(){const q=$('query').value.toLowerCase(),type=$('type').value,use=$('use').value;const list=$('list');list.replaceChildren();let count=0;data.items.forEach((item,i)=>{if(type&&type!==item.type||q&&!searchable[i].includes(q)||use&&!(item.native[use]||[]).flat().some(v=>v.toLowerCase()==='true'))return;count++;const b=text('button',item.id,list);text('small',`${item.type} · ${item.key}`,b);b.onclick=()=>show(item)});$('count').textContent=`${count} definitions`}
+['query','type','use'].forEach(id=>$(id).addEventListener('input',filter));filter();
+</script></html>

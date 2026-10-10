@@ -19,7 +19,6 @@ internal sealed class CrawlUi
     private static readonly float[] HeroX = { 788, 620, 452, 284 };   // rank 1..4 (DD1 overlays.hero_start_pos/spacing)
     private static readonly float[] CampX = { 1250, 1450, 670, 470 }; // at camp: two each side of the fire
     private const float Feet = 680;
-    private const float MapUnit = 40;                                  // map pixels per fine grid unit
 
     private bool _inventoryTab;
     private bool _confirmRetreat;
@@ -43,7 +42,7 @@ internal sealed class CrawlUi
         var crawl = D.Crawl;
         var exp = D.Expedition;
         if (crawl == null || exp == null) return;
-        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD2 regions use their DD1 zone's art
+        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);   // DD1 props and art fallback
         if (D.SelectedHeroId == null || !D.Party.Alive.Contains(D.SelectedHeroId)) D.SelectedHeroId = D.Party.Alive.FirstOrDefault();
         // While a hero sheet is open, the dungeon under it is only painted: clicks belong to the sheet.
         if (_sheetHeroId != null && Event.current.type != EventType.Repaint && S.Save.Estate.Hero(_sheetHeroId) is { } open)
@@ -62,7 +61,7 @@ internal sealed class CrawlUi
         DrawQuestInfo(crawl, exp);
         try { DrawHud(exp); }
         catch (NullReferenceException) { }   // DD2 tearing its actors down (leaving the dungeon)
-        if (_inventoryTab) DrawInventory(crawl, exp); else DrawMap(exp);
+        if (_inventoryTab || LootWaiting(crawl)) DrawInventory(crawl, exp); else DrawMap(exp);
         UiRoot.ModalOpen = false;
         if (_sheetHeroId != null && S.Save.Estate.Hero(_sheetHeroId) is { } sheetHero)
         {
@@ -72,9 +71,10 @@ internal sealed class CrawlUi
             Gui.DrawAnnouncement();
             return;
         }
-        if (exp.Camp != null) DrawCamp(crawl, exp);
-        else if (DrawSpoils(crawl) || DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
-        else DrawPrompt(crawl, exp);
+        if (DrawSpoils(crawl)) UiRoot.ModalOpen = true;
+        else if (DrawCurioResult(exp)) UiRoot.ModalOpen = true;   // a scroll to read first
+        else if (exp.Camp != null) DrawCamp(crawl, exp);
+        else { DrawPrompt(crawl, exp); DrawSecretControls(crawl, exp); }
         Gui.DrawAnnouncement();
     }
 
@@ -86,7 +86,7 @@ internal sealed class CrawlUi
         if (crawl == null || exp == null) return;
         var old = GUI.color;
         GUI.color = new Color(1, 1, 1, alpha);
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, alpha));
         DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
         DrawHeroes(exp);
         DrawHud(exp);
@@ -97,11 +97,41 @@ internal sealed class CrawlUi
 
     private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone)
     {
-        Gui.Fill(new Rect(0, 0, Gui.W, 720), Color.black);
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, GUI.color.a));
         float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
         float slide = t < 1f ? D.LastStepDir * 720f * (1f - Mathf.SmoothStep(0, 1, t)) : 0f;
         slide -= D.WalkProgress * 720f;   // held-key walking scrolls the hallway continuously
 
+        var regional = RegionalScenery.For(exp.Quest.Dungeon);
+        float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
+        if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
+        if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        if (regional != null && !exp.InRoom)
+        {
+            var corridor = crawl.CurrentCorridor;
+            bool reverse = exp.HeadingRoomId != corridor.RoomB;
+            var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
+            float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
+            CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
+                CorridorSceneryLayout.Camera(corridor.Id, exp.TileIndex, reverse, slide), reverse,
+                choice?.Mirror ?? false, panoramaAlpha);
+            DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
+        }
+        DrawProps(crawl, exp, slide);
+
+        // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
+        float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
+        if (dark > 0)
+        {
+            float opacity = GUI.color.a;
+            Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, dark * 0.55f * opacity));
+            Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f * opacity));
+            Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f * opacity));
+        }
+    }
+
+    private static void DrawLegacyScene(Crawl crawl, ExpeditionState exp, string zone, float slide)
+    {
         if (exp.InRoom)
         {
             var tex = exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
@@ -136,16 +166,98 @@ internal sealed class CrawlUi
                 if (bottom != null) GUI.DrawTexture(new Rect(x, 720 - bottom.height, 720, bottom.height), bottom);
             }
         }
-        DrawProps(crawl, exp, slide);
+    }
 
-        // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
-        float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
-        if (dark > 0)
+    private static void DrawRegionalScene(Crawl crawl, ExpeditionState exp, RegionalScenery plan, float slide, float alpha)
+    {
+        var old = GUI.color;
+        GUI.color = new Color(old.r, old.g, old.b, old.a * alpha);
+        uint ambient = plan.Ambient;
+        Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(((ambient >> 16) & 255) / 255f,
+            ((ambient >> 8) & 255) / 255f, (ambient & 255) / 255f, GUI.color.a));
+        bool reverse = !exp.InRoom && exp.HeadingRoomId != crawl.CurrentCorridor.RoomB;
+        float camera = exp.InRoom ? exp.RoomId * 13 * 720f - slide
+            : CorridorSceneryLayout.Camera(crawl.CurrentCorridor.Id, exp.TileIndex, reverse, slide);
+        float opening = exp.InRoom ? 1 : CorridorSceneryLayout.Opening(exp.TileIndex, crawl.CurrentCorridor.Tiles.Count, reverse, slide);
+        try
         {
-            Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, dark * 0.55f));
-            Gui.Fill(new Rect(0, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
-            Gui.Fill(new Rect(1660, 0, 260, 720), new Color(0, 0, 0, dark * 0.35f));
+            var sceneColor = GUI.color;
+            foreach (var layer in plan.Layers.Where(layer => !layer.Ground))
+            {
+                GUI.color = new Color(sceneColor.r, sceneColor.g, sceneColor.b,
+                    sceneColor.a * (layer.Parallax >= 0.35f ? 1 - 0.45f * opening : 1));
+                DrawSceneryLayer(layer, camera, reverse);
+            }
+            GUI.color = sceneColor;
+            // Open outdoor locations share the same walkway; no wall or doorway interrupts the landscape.
+            foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
+            // Existing room fade covers the scene switch; a half-visible panorama during walking would look ghosted.
+            if (exp.InRoom) DrawGeneratedRoom(plan, exp.Seed, exp.RoomId);
         }
+        finally { GUI.color = old; }
+    }
+
+    private static void DrawArrivalCue(Crawl crawl, ExpeditionState exp, RegionalScenery plan, float slide, float alpha)
+    {
+        int count = crawl.CurrentCorridor.Tiles.Count;
+        bool reverse = exp.HeadingRoomId != crawl.CurrentCorridor.RoomB;
+        float opening = CorridorSceneryLayout.Opening(exp.TileIndex, count, reverse, slide);
+        if (opening <= 0 || alpha <= 0) return;
+        int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
+        var cue = new Color(0.85f, 0.81f, 0.7f, GUI.color.a * alpha * opening * 0.8f);
+        foreach (float x in new[] { 600 + (-1 - here) * 720 + slide, 600 + (count - here) * 720 + slide })
+            if (x > -140 && x < Gui.W + 140)
+                Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
+    }
+
+    private static void DrawGeneratedRoom(RegionalScenery plan, int seed, int roomId)
+    {
+        var choice = RegionSceneryArt.RoomChoice(plan, seed, roomId);
+        var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
+        if (texture == null) return;
+        var old = GUI.color;
+        float opacity = old.a * RegionSceneryArt.RoomAlpha(choice.FileName);
+        float floorTop = plan.Layers.First(layer => layer.Ground).Top;
+        try
+        {
+            void Strip(float y, float height, float alpha)
+            {
+                GUI.color = new Color(old.r, old.g, old.b, opacity * alpha);
+                var uv = new Rect(choice.Mirror ? 1 : 0, 1 - (y + height) / 720f, choice.Mirror ? -1 : 1, height / 720f);
+                GUI.DrawTextureWithTexCoords(new Rect(0, y, Gui.W, height), texture, uv);
+            }
+            // Private arena extensions include their own continuous floor, including the Shroud's wharves.
+            if (RegionSceneryArt.PrivateRoom(choice.FileName)) { Strip(0, 720, 1); return; }
+            Strip(0, floorTop, 1);
+            // Blend the painted ground into the same native road instead of pasting a hard edge at the footline.
+            for (float y = floorTop; y < 720; y += 5)
+            {
+                float height = Mathf.Min(5, 720 - y);
+                Strip(y, height, 1 - (y + height / 2 - floorTop) / (720 - floorTop));
+            }
+        }
+        finally { GUI.color = old; }
+    }
+
+    private static void DrawSceneryLayer(SceneryLayer layer, float camera, bool reverse)
+    {
+        var tex = RegionSceneryArt.Texture(layer.AssetKey);
+        if (tex == null) return;
+        var old = GUI.color;
+        GUI.color = new Color(old.r * ((layer.Tint >> 16) & 255) / 255f,
+            old.g * ((layer.Tint >> 8) & 255) / 255f, old.b * (layer.Tint & 255) / 255f, old.a);
+        try
+        {
+            foreach (var tile in CorridorSceneryLayout.Tiles(camera * layer.Parallax, layer.Width, reverse))
+            {
+                var rect = new Rect(tile.X, layer.Top, layer.Width, layer.Height);
+                if (!layer.Ground)
+                    GUI.DrawTextureWithTexCoords(rect, tex, tile.Mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1));
+                else
+                    CorridorGroundUi.Draw(rect, tex, tile.Mirror);
+            }
+        }
+        finally { GUI.color = old; }
     }
 
     /// <summary>A 720-wide layer repeated across the screen, scrolled by <paramref name="offset"/> pixels.</summary>
@@ -171,7 +283,9 @@ internal sealed class CrawlUi
         if (exp.InRoom)
         {
             var room = crawl.CurrentRoom;
-            if (room?.CurioId != null) DrawProp("curios", room.CurioId, room.CurioTaken, PropX + slide, hoverable: true);
+            bool memory = FadedMemory.Here(exp);
+            if (room?.CurioId != null) DrawProp("curios", room.CurioId, room.CurioTaken, PropX + slide + (memory ? 260 : 0), hoverable: !memory);
+            if (memory) DrawProp("curios", FadedMemory.CurioId, false, PropX + slide, hoverable: true);
             return;
         }
         var c = crawl.CurrentCorridor;
@@ -196,8 +310,22 @@ internal sealed class CrawlUi
     private static void DrawProp(string kind, string id, bool used, float x, bool hoverable)
     {
         if (x < -400 || x > 2320) return;
+        if (id == FadedMemory.CurioId)
+        {
+            var texture = Art.Png(System.IO.Path.Combine(Session.SaveDir, "cache", "memory", "faded_memory.png"));
+            var area = new Rect(x - 110, Feet - 315, 220, 330);
+            if (texture != null) GUI.DrawTexture(area, texture, ScaleMode.ScaleToFit);
+            else { Gui.Fill(area, new Color(0.07f, 0.06f, 0.08f, 0.9f)); Gui.Text(area, "Faded Memory", 26, Gui.Dd1Name, TextAnchor.MiddleCenter); }
+            if (hoverable && area.Contains(Event.current.mousePosition))
+            {
+                Gui.Tip("Faded Memory\nA remnant of another age. Its horrors have not forgotten you.");
+                if (Gui.Hotspot(area)) CurioClicked = true;
+            }
+            return;
+        }
         var feet = new Vector2(x, Feet + 10);
-        string folder = S.Dd1.PathOf("props", "shared", kind, id ?? "");
+        string spriteId = kind == "curios" ? S.Content.Curios.SpriteOf(id) : id;
+        string folder = S.Dd1.PathOf("props", "shared", kind, spriteId ?? "");
         SpineArt.Picture pic;
         if (kind == "curios")
         {
@@ -376,13 +504,18 @@ internal sealed class CrawlUi
 
         if (exp.QuestComplete)
         {
+            bool canLeave = crawl.CanLeaveExpedition;
             var home = Art.Panel("quest_return_to_hamlet.png");
+            var old = GUI.color;
+            if (!canLeave) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1);
             var r = Gui.At(home, 16, 112);
+            GUI.color = old;
             if (home == null) r = new Rect(16, 112, 220, 50);
-            if (home == null ? Gui.DdButton(r, "Return home") : Gui.Hotspot(r)) D.Leave();
-            Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, Gui.Gold, heading: true);
+            if (home == null ? Gui.DdButton(r, "Return home", canLeave) : canLeave && Gui.Hotspot(r)) D.Leave();
+            Gui.Text(new Rect(r.xMax + 10, r.y + 18, 300, 30), "Return to the Hamlet", 22, canLeave ? Gui.Gold : Gui.Dim, heading: true);
+            if (!canLeave && r.Contains(Event.current.mousePosition)) Gui.Tip("Collect all quest items before returning.");
         }
-        else if (!crawl.IsBlocked)
+        else if (!crawl.IsBlocked && crawl.CanLeaveExpedition)   // DD1: no required loot can be left; some plot quests can't be abandoned
         {
             var retreat = Art.Panel("retreat_button.png");
             var r = Gui.At(retreat, 20, 112);
@@ -391,9 +524,11 @@ internal sealed class CrawlUi
             {
                 if (_confirmRetreat) { _confirmRetreat = false; D.Leave(); return; }
                 _confirmRetreat = true;
-                Gui.Announce("Retreat? Click again to abandon the quest.");
+                Gui.Announce(exp.Quest?.RetreatKillCount > 0
+                    ? S.Lore?.Text("retreat_raid_party_kill_darkestdungeon_confirm_question") ?? "The fiends are closing in and a random hero must give their life to ensure the others will escape from the Darkest Dungeon. Really abandon quest?"
+                    : S.Lore?.Text("retreat_confirm_raid_question") ?? "Are you sure you want to retreat? The heroes will suffer the stress of defeat...", 3.5f);
             }
-            Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : "Retreat", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
+            Gui.Text(new Rect(r.xMax + 10, r.y + 20, 300, 30), _confirmRetreat ? "Click again to retreat" : S.Lore?.Text("retreat_raid_tooltip") ?? "Abandon Quest", 22, _confirmRetreat ? Gui.Blood : Gui.Dim, heading: true);
         }
     }
 
@@ -404,13 +539,13 @@ internal sealed class CrawlUi
         switch (exp.Quest.Type)
         {
             case "explore":
-                return $"Explore rooms: {map.Rooms.Count(r => r.Visited)} / {Mathf.CeilToInt(map.Rooms.Count * 0.9f)}";
+                return $"Explore rooms: {map.QuestRooms.Count(r => r.Visited)} / {Crawl.ExploreRoomTarget(exp)}";
             case "cleanse":
                 return $"Clear room battles: {map.Rooms.Count(r => r.HasBattle && r.Cleared)} / {map.Rooms.Count(r => r.HasBattle)}";
             case "kill_boss":
                 return $"Slay {HamletUi.Pretty(Core.Expedition.ZoneEncounters.BossKey(exp.Quest.BossId))}";
             default:
-                return goal != null ? $"{HamletUi.Pretty(goal.CurioName)}: {exp.GoalProgress} / {goal.Amount}" : "";
+                return goal != null ? $"{HamletUi.Pretty(goal.CurioName)}: {Crawl.QuestCurioProgress(exp)} / {goal.Amount}" : "";
         }
     }
 
@@ -486,8 +621,9 @@ internal sealed class CrawlUi
         for (int i = 0; i < 2 && i < hero.Trinkets.Count; i++)
         {
             var r = new Rect(718 + i * 92, 906, 72, 144);
+            if (hero.TrinketAt(i) == null) continue;
             HeroSheet.TrinketIcon(r, hero.Trinkets[i]);
-            if (r.Contains(Event.current.mousePosition)) _hudTip = HeroSheet.TrinketText(hero.Trinkets[i]);
+            if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(hero.Trinkets[i]);
         }
         if (_hudTip != null && Event.current.type == EventType.Repaint)
         {
@@ -521,102 +657,9 @@ internal sealed class CrawlUi
 
     // ---------------- map ----------------
 
-    private static Vector2 Pos(int x, int y) => new(x * MapUnit, y * MapUnit);
+    private readonly CrawlMapUi _map = new();
 
-    private Vector2 _mapPan, _mapPress;
-    private bool _mapDragging, _mapPressed;
-    private string _mapSpot;
-
-    private void DrawMap(ExpeditionState exp)
-    {
-        var map = exp.Map;
-        var area = new Rect(976, 739, 649, 321);   // DD1 map clip region inside panel_map
-        Vector2 here;
-        if (exp.InRoom) here = Pos(map.Room(exp.RoomId).X, map.Room(exp.RoomId).Y);
-        else
-        {
-            var t = map.Corridor(exp.CorridorId).Tiles[exp.TileIndex];
-            here = HallPos(map, map.Corridor(exp.CorridorId), t.Index);
-        }
-        // DD1: drag the map to look around; it comes back to the party when the party moves.
-        string spot = exp.InRoom ? "r" + exp.RoomId : $"c{exp.CorridorId}:{exp.TileIndex}";
-        if (spot != _mapSpot) { _mapSpot = spot; _mapPan = Vector2.zero; }
-        var e = Event.current;
-        if (e.type == EventType.MouseDown && e.button == 0 && area.Contains(e.mousePosition)) { _mapPress = e.mousePosition; _mapDragging = false; _mapPressed = true; }
-        else if (e.type == EventType.MouseDrag && _mapPressed)
-        {
-            if (!_mapDragging && (e.mousePosition - _mapPress).magnitude > 5) _mapDragging = true;
-            if (_mapDragging) { _mapPan += e.delta; e.Use(); }
-        }
-        else if (e.rawType == EventType.MouseUp && _mapPressed)
-        {
-            _mapPressed = false;
-            if (_mapDragging) { _mapDragging = false; GUIUtility.hotControl = 0; e.Use(); }   // a drag is not a click
-        }
-        var offset = new Vector2(area.width / 2f, area.height / 2f) - here + _mapPan;
-
-        GUI.BeginGroup(area);
-        var visitedNear = new HashSet<int>(map.Rooms.Where(r => r.Visited).SelectMany(r => map.Neighbours(r.Id)));
-
-        foreach (var c in map.Corridors)
-        {
-            bool known = map.Room(c.RoomA).Visited || map.Room(c.RoomB).Visited || c.Tiles.Any(t => t.Scouted);
-            if (!known) continue;
-            foreach (var t in c.Tiles)
-            {
-                var p = HallPos(map, c, t.Index) + offset;
-                var r = new Rect(p.x - 12, p.y - 12, 24, 24);
-                string baseIcon = t.Visited ? "hall_clear" : t.Scouted ? "hall_dim" : "hall_dark";
-                GUI.DrawTexture(r, Art.MapIcon(baseIcon) ?? Texture2D.whiteTexture);
-                string marker = (t.Visited || t.Scouted) && !t.Resolved ? t.Content switch
-                {
-                    HallContent.Battle => "marker_battle",
-                    HallContent.Curio => "marker_curio",
-                    HallContent.Trap => "marker_trap",
-                    HallContent.Obstacle => "marker_obstacle",
-                    _ => null,
-                } : null;
-                if (marker != null && Art.MapIcon(marker) is { } m) GUI.DrawTexture(r, m);
-                if (Gui.Hotspot(r)) D.WalkToTile(c.Id, t.Index);
-            }
-        }
-
-        foreach (var room in map.Rooms)
-        {
-            bool known = room.Visited || room.Scouted || visitedNear.Contains(room.Id);
-            if (!known) continue;
-            var p = Pos(room.X, room.Y) + offset;
-            var r = new Rect(p.x - 32, p.y - 32, 64, 64);
-            bool seen = room.Visited || room.Scouted;
-            string icon = !seen ? "room_unknown"
-                : room.Id == map.EntranceRoomId ? "room_entrance"
-                : room.Content == RoomContent.Boss && !room.Cleared ? "room_boss"
-                : room.HasBattle && !room.Cleared ? "room_battle"
-                : room.CurioId != null && !room.CurioTaken && room.Content is RoomContent.Treasure or RoomContent.GuardedTreasure ? "room_treasure"
-                : room.CurioId != null && !room.CurioTaken ? "room_curio"
-                : "room_empty";
-            GUI.DrawTexture(r, Art.MapIcon(icon) ?? Texture2D.whiteTexture);
-            if (room.Visited && room.Id != map.EntranceRoomId && Art.MapIcon("marker_room_visited") is { } v) GUI.DrawTexture(r, v);
-            if (Gui.Hotspot(r)) D.WalkToRoom(room.Id);
-        }
-
-        var ind = Art.MapIcon("indicator");
-        var hp = here + offset;
-        if (ind != null) GUI.DrawTexture(new Rect(hp.x - 25, hp.y - (exp.InRoom ? 70 : 52), 51, 48), ind);
-        GUI.EndGroup();
-    }
-
-    /// <summary>Hall squares spaced evenly between the two rooms' icon edges.</summary>
-    private static Vector2 HallPos(DungeonMap map, Corridor c, int index)
-    {
-        var a = Pos(map.Room(c.RoomA).X, map.Room(c.RoomA).Y);
-        var b = Pos(map.Room(c.RoomB).X, map.Room(c.RoomB).Y);
-        var dir = (b - a).normalized;
-        var start = a + dir * 32f;
-        var end = b - dir * 32f;
-        float step = (end - start).magnitude / c.Tiles.Count;
-        return start + dir * (step * (index + 0.5f));
-    }
+    private void DrawMap(ExpeditionState exp) => _map.Draw(exp, D.WalkToTile, D.WalkToRoom);
 
     // ---------------- inventory ----------------
 
@@ -639,8 +682,20 @@ internal sealed class CrawlUi
             bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == i;
             if (!carried) ItemArt.Stack(r, key, count, limit);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
-                Gui.Text(new Rect(960, 1050, 960, 26), $"{HamletUi.Pretty(key)}: click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, or drag onto a hero.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (Gui.Hotspot(r) && !Drag.JustDropped) UseItem(key, crawl);
+                Gui.Text(new Rect(960, 1050, 960, 26), Core.Campaign.JournalPages.TryPage(key, out _)
+                    ? "Journal Page: bring it back to the Hamlet; shift+click to discard one."
+                    : _curioPanel != null && _curioPanel == CrawlInventoryInput.CurioPanelKey(crawl)
+                        ? $"{HamletUi.Pretty(key)}: right-click to use on this curio, or drag it into the item slot."
+                        : $"{HamletUi.Pretty(key)}: click or right-click to use on {S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "the party"}, drag onto a hero, shift+click to drop one.", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            bool shift = Event.current.shift;
+            if (CrawlInventoryInput.RightClick(r, crawl, _curioPanel,
+                    curio => UseOnCurio(crawl, curio, key), () => UseItem(key, crawl))) continue;
+            if (Gui.Hotspot(r) && !Drag.JustDropped)
+            {
+                // DD1: shift+click throws one away to make room (quest items can't be).
+                if (shift) { if (crawl.Discard(key)) { Runtime.Dd1Audio.Play("/gen/item/discard"); S.Persist(); } else Gui.Announce("That can't be left behind."); }
+                else UseItem(key, crawl);
+            }
         }
     }
 
@@ -657,11 +712,6 @@ internal sealed class CrawlUi
         if (done != null) { Gui.Announce(done); S.Persist(); return; }
         if (key == Supply.Torch) D.UseTorch();
         else if (key == Supply.Firewood && crawl.CanCamp) D.MakeCamp();
-        else if (key == Supply.Food && D.SelectedHeroId != null && crawl.State.Pack.TryUse(Supply.Food))
-        {
-            D.Party.Heal(D.SelectedHeroId, 0.05f);
-            Gui.Announce("A meagre meal.");
-        }
         else if (key is Supply.Bandage or Supply.Antivenom or Supply.Laudanum or Supply.Herbs)
             Gui.Announce("Nothing to treat now. Keep it for curios.");
     }
@@ -671,40 +721,31 @@ internal sealed class CrawlUi
     // ---------------- battle spoils (DD1's loot scroll) ----------------
 
     private BattleSpoils _spoilsDismissed;
+    private readonly LootGridUi _spoilsGrid = new(), _curioGrid = new();
 
     private bool DrawSpoils(Crawl crawl)
     {
         var spoils = crawl.LastSpoils;
         if (spoils == null || spoils == _spoilsDismissed) return false;
-        if (spoils.Taken.Count == 0 && spoils.LeftBehind.Count == 0) { _spoilsDismissed = spoils; return false; }
+        if (spoils.Taken.Count == 0 && spoils.LeftBehind.Count == 0) { _spoilsDismissed = spoils; D.DismissSpoils(spoils); return false; }
 
         float left = 1342 - 228, top = 140;
         var scroll = Scroll("event_scroll_loot.png");
         if (scroll != null) GUI.DrawTexture(new Rect(left, top, 456, 475), scroll);
         else Gui.Fill(new Rect(left, top, 456, 475), new Color(0.05f, 0.04f, 0.03f, 0.93f));
-        Gui.Text(new Rect(left + 40, top + 26, 376, 48), "Spoils", 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        string title = spoils.Kind == "camp" ? Dd1Text.Get("miscellaneous", "str_overlay_loot_chest_title") ?? "Treasure!" : "Spoils";
+        Gui.Text(new Rect(left + 40, top + 26, 376, 48), title, 34, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
 
-        var all = spoils.Taken.Select(d => (d, taken: true)).Concat(spoils.LeftBehind.Select(d => (d, taken: false))).ToList();
-        var items = S.Content.Items;
-        int perRow = Mathf.Min(5, all.Count);
-        for (int i = 0; i < all.Count && i < 10; i++)
+        int clicked = _spoilsGrid.DrawBattle(spoils, new Rect(left, top + 96, 456, 294), S.Content.Items);
+        if (clicked >= 0) TakeLeftBehind(crawl, spoils.LeftBehind, clicked, spoils.Taken);
+        if (spoils.LeftBehind.Count > 0) NoRoomHint(left, top + 475);
+        bool canLeave = Crawl.CanLeave(spoils.LeftBehind);
+        if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", canLeave, 24)
+            || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
         {
-            var (drop, taken) = all[i];
-            int row = i / 5, col = i % 5, inRow = row == 0 ? perRow : Mathf.Min(5, all.Count - 5);
-            var r = new Rect(left + 228 - inRow * 40 + col * 80 + 4, top + 96 + row * 150, 72, 144);
-            var old = GUI.color;
-            if (!taken) GUI.color = new Color(0.45f, 0.45f, 0.45f, 0.9f);
-            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
-            if (icon != null) GUI.DrawTexture(r, icon);
-            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            GUI.color = old;
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
-        }
-        if (spoils.LeftBehind.Count > 0)
-            Gui.Text(new Rect(left + 40, top + 400, 376, 26), "The pack is full: the greyed items stay behind.", 17, Gui.Blood, TextAnchor.MiddleCenter);
-        if (Gui.DdButton(new Rect(1342 - 110, top + 475 - 70, 220, 50), "Continue", true, 24)
-            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
             _spoilsDismissed = spoils;
+            D.DismissSpoils(spoils);
+        }
         return true;
     }
 
@@ -736,20 +777,45 @@ internal sealed class CrawlUi
         if (report.Scouted) lines.Add("The way ahead is revealed.");
         Gui.Text(new Rect(left + 50, top + 104, 356, 130), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
 
-        var items = S.Content.Items;
-        for (int i = 0; i < report.Loot.Count && i < 5; i++)
+        int clicked = _curioGrid.DrawCurio(report, new Rect(left, top + 236, 456, 144), S.Content.Items);
+        if (clicked >= 0) TakeLeftBehind(D.Crawl, report.LeftBehind, clicked);
+        if (report.LeftBehind.Count > 0) NoRoomHint(left, top + height);
+        bool canLeave = Crawl.CanLeave(report.LeftBehind);
+        if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", canLeave, 24)
+            || (canLeave && Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
         {
-            var drop = report.Loot[i];
-            var r = new Rect(left + 228 - Mathf.Min(5, report.Loot.Count) * 40 + i * 80 + 4, top + 236, 72, 144);
-            var icon = Art.InventoryIcon(drop.Key, drop.Amount, Mathf.Max(1, items.StackLimit(drop.Key)));
-            if (icon != null) GUI.DrawTexture(r, icon);
-            else Gui.Text(r, HamletUi.Pretty(drop.Id ?? drop.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), drop.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
-        }
-        if (Gui.DdButton(new Rect(1342 - 110, top + height - 92, 220, 50), "Continue", true, 24)
-            || (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.Return || Event.current.keyCode == KeyCode.Space)))
             _resultDismissed = report;
+            D.DismissCurio(report);
+        }
         return true;
+    }
+
+    /// <summary>Under a loot scroll: how to make room for what the pack couldn't take.</summary>
+    private static void NoRoomHint(float left, float y)
+    {
+        Gui.Fill(new Rect(left + 20, y + 4, 416, 50), new Color(0f, 0f, 0f, 0.75f));
+        Gui.Text(new Rect(left + 20, y + 4, 416, 50), "No room: shift+click a pack item to drop it,\nthen click a greyed item to take it.", 17, Gui.Blood, TextAnchor.MiddleCenter);
+    }
+
+    /// <summary>Loot the pack had no room for is waiting on a scroll (the pack stays in view to make room).</summary>
+    private bool LootWaiting(Crawl crawl) =>
+        (crawl.LastSpoils is { } sp && sp != _spoilsDismissed && sp.LeftBehind.Count > 0)
+        || (D.LastCurio is { } cr && cr != _resultDismissed && cr.LeftBehind.Count > 0);
+
+    private static void TakeLeftBehind(Crawl crawl, System.Collections.Generic.List<LootDrop> left, int index, System.Collections.Generic.List<LootDrop> taken = null)
+    {
+        if (crawl == null) return;
+        var drop = index >= 0 && index < left.Count ? left[index] : null;
+        bool complete = crawl.State.QuestComplete;
+        if (crawl.TakeLeftBehind(left, index, taken))
+        {
+            if (!complete && crawl.State.QuestComplete) Gui.Announce("Quest complete! You may return to the Hamlet.");
+            // DD1's per-kind loot sounds (ui_dun_loot_take_*).
+            string kind = drop?.Type switch { "gold" => "gold", "heirloom" => "heirloom", "gem" => "jewelry", "provision" or "supply" => "provisions", _ => "all" };
+            Runtime.Dd1Audio.Play("/ui/dun/loot_take_" + kind);
+            S.Persist();
+        }
+        else { Gui.Announce("No room in the pack."); Runtime.Dd1Audio.Play("/ui/shared/button_invalid"); }
     }
 
     // DD1's scrolls (scrolls/*.png) and where screen.raid.darkest puts them.
@@ -786,6 +852,18 @@ internal sealed class CrawlUi
         D.Investigate(D.SelectedHeroId, item);
     }
 
+    private static void DrawSecretControls(Crawl crawl, ExpeditionState exp)
+    {
+        if (exp.Camp != null || crawl.IsBlocked) return;
+        bool returning = crawl.CurrentRoom?.IsSecret == true;
+        if (!returning && !crawl.CanEnterSecretRoom) return;
+        var button = new Rect(1600, 630, 300, 56);
+        if (Gui.DdButton(button, returning ? "Return to Corridor" : "Enter Secret Room", size: 23))
+        {
+            if (returning) D.ExitSecretRoom(); else D.EnterSecretRoom();
+        }
+    }
+
     private void DrawPrompt(Crawl crawl, ExpeditionState exp)
     {
         if (exp.Camp != null) return;
@@ -794,7 +872,7 @@ internal sealed class CrawlUi
         bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
         bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
         bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
-        string here = curio == null ? null : (exp.InRoom ? "r" + exp.RoomId : $"c{exp.CorridorId}:{exp.TileIndex}") + ":" + curio;
+        string here = CrawlInventoryInput.CurioPanelKey(crawl);
         if (CurioDrop != null && curio != null) { string item = CurioDrop; CurioDrop = null; _curioPanel = here; UseOnCurio(crawl, curio, item); return; }
         if (CurioClicked && curio != null) _curioPanel = here;
         CurioClicked = false;
@@ -822,7 +900,14 @@ internal sealed class CrawlUi
         if (curio != null)
         {
             Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-            Gui.Text(body, $"{who} will investigate. Select another hero to send them instead, or drag an item from the inventory onto it.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+            if (curio == FadedMemory.CurioId)
+            {
+                Gui.Text(body, "A remnant of another age. Its horrors have not forgotten you. Enter the memory and face the horror within.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+                if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Confront the past.")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
+                if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) _curioPanel = null;
+                return;
+            }
+            Gui.Text(body, $"{who} will investigate. Select another hero, right-click an inventory item to use it here, or drag it into the slot.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
             if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Investigate")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
             if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { _curioPanel = null; return; }
 
@@ -953,7 +1038,7 @@ internal sealed class CrawlUi
             _campSkillPending = null;    // right-click cancels the targeting
             Event.current.Use();
         }
-        if (Gui.DdButton(new Rect(CampScrollX + 100, CampScrollY + 180, 256, 44), "Rest and break camp", true, 22))
+        if (Gui.DdButton(new Rect(CampScrollX + 100, CampScrollY + 180, 256, 44), "Rest and break camp", crawl.CanContinueCamp, 22))
         {
             _campSkillPending = null;
             D.BreakCamp();

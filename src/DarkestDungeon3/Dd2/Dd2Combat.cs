@@ -123,6 +123,8 @@ internal static class Dd2Combat
     }
 
     private static float _revealedAt = -1f, _revealStart = -1f;
+    private static float _requestedAt;
+    private static bool _nativePresentation;
 
     /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen, also while the DD1
     /// backdrop is being put in place), then 0..1 over half a second as the fight shows through.</summary>
@@ -131,7 +133,11 @@ internal static class Dd2Combat
         get
         {
             if (_revealedAt < 0 || Dd1Backdrop.Pending) return 0f;
-            if (_revealStart < 0) _revealStart = UnityEngine.Time.unscaledTime;
+            if (_revealStart < 0)
+            {
+                _revealStart = UnityEngine.Time.unscaledTime;
+                Plugin.Log.LogInfo($"[combat timing] reveal ready after {(_revealStart - _requestedAt) * 1000f:0} ms, presentation {(_nativePresentation ? "native" : Dd1Backdrop.Ready ? "DD1" : "fallback")}");
+            }
             return UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealStart) / 0.5f);
         }
     }
@@ -150,11 +156,14 @@ internal static class Dd2Combat
     private static List<uint> _buffed = new();
 
     public static bool Start(FightPlan plan, IReadOnlyList<uint> party, float torch, bool heroesSurprised,
-                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null, bool monstersSurprised = false)
+                             IReadOnlyList<(uint Guid, Core.Dd1.Dd1Buff Buff)> buffs = null, bool monstersSurprised = false,
+                             Func<string, string, bool> onPrepared = null)
     {
         var modes = Dd2Api.Modes;
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[combat] mode change in progress"); return false; }
         if (party == null || party.Count == 0) { Plugin.Log.LogError("[combat] no party"); return false; }
+        _requestedAt = UnityEngine.Time.unscaledTime;
+        var setupWatch = System.Diagnostics.Stopwatch.StartNew();
 
         string battle = RollBattle(plan);
         if (battle == null || !SingletonMonoBehaviour<Library<string, BattleConfigurationDefinition>>.Instance.GetHasLibraryKey(battle))
@@ -167,6 +176,9 @@ internal static class Dd2Combat
         // Not CAMP_AMBUSH: after its results DD2 goes to the Inn or the Embark screen instead of back to the road.
         var source = plan.Kind == FightKind.CampAmbush || heroesSurprised ? CombatSource.AMBUSH : CombatSource.DUNGEON;
         var scenario = new CombatScenarioData(battle, arena, source, party);
+        long scenarioMs = setupWatch.ElapsedMilliseconds;
+        // Save the actual rolled configuration before native combat can change either team.
+        if (onPrepared != null && !onPrepared(battle, scenario.BackgroundSceneName)) return false;
 
         Dd2Api.Torch = torch;
         LastBattleId = battle;
@@ -185,9 +197,15 @@ internal static class Dd2Combat
         // the DD1 scene until the fight is ready (see RevealProgress).
         _revealedAt = -1f;
         _revealStart = -1f;
-        Dd1Backdrop.Reset();
-        modes.OnNextGameModeEnterComplete(_ => _revealedAt = UnityEngine.Time.unscaledTime);
+        _nativePresentation = plan.NativePresentation;
+        Dd1Backdrop.Reset(plan.NativePresentation);
+        modes.OnNextGameModeEnterComplete(_ =>
+        {
+            _revealedAt = UnityEngine.Time.unscaledTime;
+            Plugin.Log.LogInfo($"[combat timing] combat entered after {(_revealedAt - _requestedAt) * 1000f:0} ms, arena {scenario.BackgroundSceneName}");
+        });
         modes.SetMode(GameModeType.COMBAT, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
+        Plugin.Log.LogInfo($"[combat timing] synchronous setup {setupWatch.ElapsedMilliseconds} ms, roll/scenario {scenarioMs} ms, native arena {plan.NativePresentation}");
         // The party's DD1 buffs go on once DD2 has entered the fight, and come off when it ends.
         _buffed = party.ToList();
         if (buffs != null && buffs.Count > 0)

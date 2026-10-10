@@ -15,27 +15,25 @@ namespace DarkestDungeon3.Runtime;
 internal static class Art
 {
     private static readonly Dictionary<string, Texture2D> Cache = new();
+    private static readonly PngPreloader TownImages = new();
 
     public static Texture2D Dd1(params string[] parts)
     {
         var session = Session.Current;
         if (session == null) return null;
-        string path = session.Dd1.PathOf(parts);
-        if (Cache.TryGetValue(path, out var tex)) return tex;
-
-        tex = null;
-        if (File.Exists(path))
-        {
-            tex = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false) { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
-            if (!tex.LoadImage(File.ReadAllBytes(path), markNonReadable: true))
-            {
-                Object.Destroy(tex);
-                tex = null;
-            }
-        }
-        Cache[path] = tex;
-        return tex;
+        return Png(session.Dd1.PathOf(parts));
     }
+
+    public static void PrepareTown(Dd1Install dd1)
+    {
+        foreach (string relative in PngPreloader.InitialTownImages)
+        {
+            string path = dd1.PathOf(relative.Split('/'));
+            if (!Cache.ContainsKey(path)) TownImages.Request(path);
+        }
+    }
+
+    public static void Update() => TownImages.Update();
 
     // ---- town ----
     public static Texture2D TownBackdrop => Dd1("campaign", "town", "town_bg.png");
@@ -69,6 +67,11 @@ internal static class Art
     {
         if (string.IsNullOrEmpty(path)) return null;
         if (Cache.TryGetValue(path, out var tex)) return tex;
+        if (TownImages.TryGet(path, out tex, out bool finished))
+        {
+            if (finished) Cache[path] = tex;
+            return tex;
+        }
         tex = null;
         if (System.IO.File.Exists(path))
         {
@@ -88,6 +91,9 @@ internal static class Art
     public static Texture2D ForegroundBottom(string zone) => Png(ZoneArtOf(zone)?.ForegroundBottom);
     public static Texture2D RoomWall(string zone, int roomId) => Png(ZoneArtOf(zone)?.Room(roomId)) ?? CorridorWall(zone, roomId);
     public static Texture2D EntranceWall(string zone) => Png(ZoneArtOf(zone)?.Entrance) ?? RoomWall(zone, 0);
+    public static Texture2D BossRoomWall(string zone, string boss, int difficulty) =>
+        Png(ZoneArtOf(zone)?.BossRoom(boss, "plot_kill_" + (boss?.Length > 2 ? boss.Substring(0, boss.Length - 2) : boss)
+            + "_" + (difficulty <= 1 ? 1 : difficulty <= 3 ? 2 : 3))) ?? RoomWall(zone, 0);
 
     // ---- HUD ----
     public static Texture2D Panel(string file) => Dd1("panels", file);
@@ -99,6 +105,7 @@ internal static class Art
     {
         int fill = stackLimit <= 1 ? 3 : Mathf.Clamp((int)(4f * count / stackLimit - 0.01f), 0, 3);
         if (key.StartsWith("quest_item+", System.StringComparison.Ordinal)) return Dd1("panels", "icons_equip", "quest_item", "inv_" + key + ".png");
+        if (Core.Campaign.JournalPages.TryPage(key, out _)) return Dd1("panels", "icons_equip", "journal_page", "inv_journal_page.png");
         return key switch
         {
             "food" => Dd1("panels", "icons_equip", "provision", $"inv_provision+_{fill}.png"),
@@ -118,7 +125,11 @@ internal static class Art
     {
         if (classId == null) return null;
         string key = classId + "/" + type;
-        if (Portraits.TryGetValue(key, out var s)) return s;
+        if (Portraits.TryGetValue(key, out var s))
+        {
+            if (s != null && s.texture != null) return s;
+            Portraits.Remove(key);
+        }
         // Outside a run (DD2's main menu) the portrait atlas may not be loaded yet: retry now and then.
         if (PortraitRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         try
@@ -137,6 +148,7 @@ internal static class Art
     // DD2's larger hero art lives behind addressable references; load once, asynchronously, and cache.
     private static readonly Dictionary<string, Sprite> Large = new();
     private static readonly HashSet<string> LargeRequested = new();
+    private static readonly Dictionary<string, float> LargeRetry = new();
 
     public enum LargeArt { Altar, HeroStory, Story }
 
@@ -145,7 +157,12 @@ internal static class Art
     {
         if (classId == null) return null;
         string key = classId + "/" + kind;
-        if (Large.TryGetValue(key, out var s)) return s;
+        if (Large.TryGetValue(key, out var s))
+        {
+            if (s != null && s.texture != null) return s;
+            RetryLarge(key);
+        }
+        if (LargeRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         if (LargeRequested.Add(key))
         {
             try
@@ -153,7 +170,7 @@ internal static class Art
                 var res = Dd2.ActorResources.Get(classId);
                 if (res == null)
                 {
-                    LargeRequested.Remove(key);   // still loading: ask again next time
+                    RetryLarge(key);   // native resources are still loading
                     return null;
                 }
                 var reference = kind switch
@@ -167,36 +184,40 @@ internal static class Art
                     var handle = UnityEngine.AddressableAssets.Addressables.LoadAssetAsync<Sprite>(reference.RuntimeKey);
                     handle.Completed += h =>
                     {
-                        Large[key] = h.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded ? h.Result : null;
-                        var r = Large[key]?.textureRect;
-                        Plugin.Log.LogInfo($"[art] {key}: {(r.HasValue ? $"{r.Value.width}x{r.Value.height}" : "none")}");
+                        if (h.Status == UnityEngine.ResourceManagement.AsyncOperations.AsyncOperationStatus.Succeeded && h.Result != null && h.Result.texture != null)
+                        {
+                            Large[key] = h.Result;
+                            LargeRetry.Remove(key);
+                            var r = h.Result.rect;
+                            Plugin.Log.LogInfo($"[art] {key}: {r.width}x{r.height}");
+                        }
+                        else
+                        {
+                            UnityEngine.AddressableAssets.Addressables.Release(h);
+                            RetryLarge(key);
+                        }
                     };
                 }
-                else Large[key] = null;
+                else RetryLarge(key);
             }
-            catch (System.Exception e) { Plugin.Log.LogWarning($"[art] {key}: {e.Message}"); Large[key] = null; }
+            catch (System.Exception e) { Plugin.Log.LogWarning($"[art] {key}: {e.Message}"); RetryLarge(key); }
         }
         return null;
     }
 
     /// <summary>The picture of a hero standing in the dungeon: the largest DD2 art available, else the portrait.</summary>
     public static Sprite HeroFigure(string classId) =>
-        LargePortrait(classId, Plugin.HeroArt.Value) ?? Portrait(classId);
+        LargePortrait(classId, Plugin.HeroArt.Value) ?? LargePortrait(classId, LargeArt.Story)
+        ?? Portrait(classId, ResourceActor.PortraitIconType.Story) ?? Portrait(classId);
+
+    private static void RetryLarge(string key)
+    {
+        Large.Remove(key);
+        LargeRequested.Remove(key);
+        LargeRetry[key] = Time.unscaledTime + 2;
+    }
 
     /// <summary>Draw a sprite (from an atlas) into a rect, keeping its aspect ratio.</summary>
     public static void DrawSprite(Rect r, Sprite s, bool fit = true, bool flipX = false)
-    {
-        if (s == null || s.texture == null) return;
-        var t = s.texture;
-        var tr = s.textureRect;
-        var uv = new Rect(tr.x / t.width, tr.y / t.height, tr.width / t.width, tr.height / t.height);
-        if (fit)
-        {
-            float k = Mathf.Min(r.width / tr.width, r.height / tr.height);
-            float w = tr.width * k, h = tr.height * k;
-            r = new Rect(r.x + (r.width - w) / 2f, r.yMax - h, w, h);   // bottom-aligned: heroes stand on the floor
-        }
-        if (flipX) uv = new Rect(uv.xMax, uv.y, -uv.width, uv.height);
-        GUI.DrawTextureWithTexCoords(r, t, uv, true);
-    }
+        => SpriteArt.Draw(r, s, fit, flipX);
 }

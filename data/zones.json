@@ -6,12 +6,13 @@
     "Arenas are DD2 combat_arena_* scenes; the plugin checks each one exists and skips any that don't.",
     "Faction choice follows DD2's own region natives: forest = Lost Battalion, farm = Plague Eaters,",
     "city = Fanatics, coast = Coastal crews, caves = Swine, mountain = the Cult.",
-    "dd2_* zones are DD2's regions as DD1-style zones (an estate option): 'dd1_zone' is the DD1 zone whose maps,",
+    "dd2_* zones are the main destinations, with DD1 areas optional: 'dd1_zone' is the DD1 zone whose maps,",
     "curios, quest tables and loot they borrow; 'region_boss' is the lair boss their kill-boss quests send you to."
   ],
   "zones": {
     "crypts": {
       "name": "The Ruins",
+      "blurb": "Abandoned halls haunted by the dead. Bosses: the Necromancer and Prophet.",
       "arenas": {
         "hall": ["combat_arena_forest_dungeon_exterior", "combat_arena_city_dungeon_exterior"],
         "room": ["combat_arena_forest_dungeon_interior", "combat_arena_city_dungeon_interior"]
@@ -28,6 +29,7 @@
     },
     "weald": {
       "name": "The Weald",
+      "blurb": "Blighted woodland and brigand roads. Bosses: the Hag and Brigand Pounder.",
       "arenas": {
         "hall": ["combat_arena_forest_pillager", "combat_arena_forest_faction"],
         "room": ["combat_arena_forest_dungeon_exterior", "combat_arena_farm_dungeon_exterior"]
@@ -39,11 +41,13 @@
       },
       "bosses": {
         "hag": { "battle": "config:farm_dungeon_3", "arena": "combat_arena_farm_dungeon_interior" },
-        "brigand_cannon": { "battle": "table:pillager_mashes_antiq", "arena": "combat_arena_forest_pillager" }
+        "brigand_cannon": { "battle": "table:pillager_mashes_antiq", "arena": "combat_arena_forest_pillager" },
+        "crow":           { "battle": "config:carrion_my_wayward_son_c", "arena": "combat_arena_forest_dungeon_exterior" }
       }
     },
     "warrens": {
       "name": "The Warrens",
+      "blurb": "A maze of swine tunnels. Bosses: the Swine Prince and Flesh.",
       "arenas": {
         "hall": ["combat_arena_caves_faction", "combat_arena_cave_faction"],
         "room": ["combat_arena_farm_dungeon_interior", "combat_arena_caves_faction"]
@@ -60,6 +64,7 @@
     },
     "cove": {
       "name": "The Cove",
+      "blurb": "Drowned caverns beneath the cliffs. Bosses: the Siren and Drowned Crew.",
       "arenas": {
         "hall": ["combat_arena_coast_dungeon_exterior", "combat_arena_coast_faction"],
         "room": ["combat_arena_coast_dungeon_interior"]
@@ -90,7 +95,7 @@
     },
     "dd2_city": {
       "name": "The Sprawl",
-      "blurb": "The Fanatics' burning streets, laid out like the Ruins. Lair boss: the Librarian.",
+      "blurb": "Burning streets ruled by the Fanatics. Lair boss: the Librarian.",
       "dd1_zone": "crypts",
       "region_boss": "librarian",
       "arenas": {
@@ -108,7 +113,7 @@
     },
     "dd2_farm": {
       "name": "The Foetor",
-      "blurb": "Plague Eaters on rotting farmland, laid out like the Warrens. Lair boss: the Harvest Child.",
+      "blurb": "Rotting farmland stalked by Plague Eaters. Lair boss: the Harvest Child.",
       "dd1_zone": "warrens",
       "region_boss": "harvest_child",
       "arenas": {
@@ -126,7 +131,7 @@
     },
     "dd2_forest": {
       "name": "The Tangle",
-      "blurb": "The Lost Battalion haunts these woods, laid out like the Weald. Lair boss: the Dreaming General.",
+      "blurb": "War-torn woods haunted by the Lost Battalion. Lair boss: the Dreaming General.",
       "dd1_zone": "weald",
       "region_boss": "dreaming_general",
       "arenas": {
@@ -139,14 +144,15 @@
         "5": { "hall": ["table:lost_battalion_mashes_hard_champions"], "room": ["table:lost_battalion_mashes_brutal_champions"] }
       },
       "bosses": {
-        "dreaming_general": { "battle": "config:forest_dungeon_3", "arena": "combat_arena_forest_dungeon_interior" }
+        "dreaming_general": { "battle": "config:forest_dungeon_3", "arena": "combat_arena_forest_dungeon_interior" },
+        "crow": { "battle": "config:carrion_my_wayward_son_c", "arena": "combat_arena_forest_dungeon_exterior" }
       }
     },
     "dd2_cave": {
       "name": "The Sluice",
-      "blurb": "Cave Swine in flooded tunnels, laid out like the Warrens. Lair boss: the Cult's Exemplar.",
+      "blurb": "Flooded tunnels infested with Swine. No lair boss.",
       "dd1_zone": "warrens",
-      "region_boss": "exemplar",
+      "region_boss": null,
       "arenas": {
         "hall": ["combat_arena_cave_faction", "combat_arena_caves_faction"],
         "room": ["combat_arena_cave_faction", "combat_arena_caves_faction"]
@@ -162,7 +168,7 @@
     },
     "dd2_coast": {
       "name": "The Shroud",
-      "blurb": "Coastal crews on a fog-bound shore, laid out like the Cove. Lair boss: the Leviathan.",
+      "blurb": "A fog-bound shore prowled by coastal crews. Lair boss: the Leviathan.",
       "dd1_zone": "cove",
       "region_boss": "leviathan",
       "arenas": {

@@ -36,10 +36,12 @@ internal static class HeroSheet
         var win = At(0, 0, 1395, 776);
         var bg = Ch("characterpanel_bg.png");
         if (bg != null) GUI.DrawTexture(win, bg); else Gui.Fill(win, new Color(0.04f, 0.035f, 0.03f, 0.97f));
-        var figure = Art.HeroFigure(h.ClassId);
-        if (figure != null) Art.DrawSprite(At(18, 250, 220, 450), figure);   // hero_pos 98,700
         var frames = Ch("characterpanel_frames.png");
         if (frames != null) GUI.DrawTexture(At(10, 10, 1395, 776), frames);
+        // The DD1 frame contains an opaque stained-glass background in the hero's entire area.
+        // Its character picture belongs above that art, otherwise the frame erases the picture.
+        var figure = Art.HeroFigure(h.ClassId);
+        if (figure != null) Art.DrawSprite(At(18, 250, 220, 450), figure);   // hero_pos 98,700
 
         // Header: name, class, resolve (campaign status).
         Gui.Text(At(76, 8, 600, 50), h.Name, 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
@@ -55,7 +57,10 @@ internal static class HeroSheet
 
         DrawQuirks(h);
         DrawStats(h);
-        DrawEquipment(h);
+        bool equipmentEnabled = GUI.enabled;
+        GUI.enabled = equipmentEnabled && (readOnly || (h.IsAvailable && E.Roster.Contains(h)));
+        try { DrawEquipment(h); }
+        finally { GUI.enabled = equipmentEnabled; }
         DrawSkills(h);
         DrawResistances(h);
         DrawDiseases(h);
@@ -152,26 +157,25 @@ internal static class HeroSheet
         for (int i = 0; i < 2; i++)
         {
             var r = TrinketCell(i);
-            string id = i < h.Trinkets.Count ? h.Trinkets[i] : null;
+            string id = h.TrinketAt(i);
             bool hover = Drag.Hovering<TrinketDrag>(r);
             if (hover && Drag.Payload is TrinketDrag over)
-                Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), S.Catalog.TrinketFits(over.TrinketId, h.ClassId) ? Gui.Gold : Gui.Blood);
+                Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, over.TrinketId, over.FromHero, over.FromSlot, h, i) == null ? Gui.Gold : Gui.Blood);
             if (!_readOnly && Drag.Drop<TrinketDrag>(r, out var dropped)) { Equip(h, dropped, i); return; }
             if (id == null) continue;
             string tid = id;
             if (_readOnly)
             {
                 TrinketIcon(r, tid);
-                if (r.Contains(Event.current.mousePosition)) Gui.Tip(TrinketText(tid), RarityColour(tid));
+                if (r.Contains(Event.current.mousePosition)) TrinketTip(tid);
                 continue;
             }
-            Drag.Source(r, new TrinketDrag(tid, h.Id), rect => TrinketIcon(rect, tid));
-            if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid)) TrinketIcon(r, tid);
-            if (r.Contains(Event.current.mousePosition) && !Drag.Active) Gui.Tip(TrinketText(tid) + "\nClick, or drag it to the Trinket Inventory, to unequip.", RarityColour(tid));
+            Drag.Source(r, new TrinketDrag(tid, h.Id, i), rect => TrinketIcon(rect, tid));
+            if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid && c.FromSlot == i)) TrinketIcon(r, tid);
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active) TrinketTip(tid, "Click, or drag it to the Trinket Inventory, to unequip.");
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
-                h.Trinkets.Remove(tid);
-                E.Trinkets.Add(tid);
+                if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, i)) return;
                 Dd1Audio.Play("/ui/dun/trink_unqeuip");
                 S.Persist();
                 return;
@@ -181,17 +185,9 @@ internal static class HeroSheet
 
     private static void Equip(HeroRecord h, TrinketDrag drag, int slot)
     {
-        if (!S.Catalog.TrinketFits(drag.TrinketId, h.ClassId)) { Gui.Announce($"Only {Dd2.Dd2Catalog.Tables.Trinkets[drag.TrinketId].HeroClass} can wear that."); return; }
-        if (drag.FromHero == h.Id) return;                       // already worn
-        if (drag.FromHero == null) { if (!E.Trinkets.Remove(drag.TrinketId)) return; }
-        else if (E.Hero(drag.FromHero) is { } other) other.Trinkets.Remove(drag.TrinketId);
-        if (slot < h.Trinkets.Count)
-        {
-            E.Trinkets.Add(h.Trinkets[slot]);                    // the one it replaces goes to the stash
-            h.Trinkets[slot] = drag.TrinketId;
-        }
-        else if (h.Trinkets.Count < 2) h.Trinkets.Add(drag.TrinketId);
-        else E.Trinkets.Add(drag.TrinketId);
+        string refusal = Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, drag.TrinketId, drag.FromHero, drag.FromSlot, h, slot);
+        if (refusal != null) { Gui.Announce(refusal); return; }
+        if (!Core.Campaign.Town.TrinketEquipment.Transfer(E, S.Catalog, drag.TrinketId, drag.FromHero, drag.FromSlot, h, slot)) return;
         Dd1Audio.Play("/ui/dun/trink_equip");
         S.Persist();
     }
@@ -263,6 +259,11 @@ internal static class HeroSheet
 
     public static void TrinketIcon(Rect r, string id)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory)
+        {
+            var png = Art.Dd1("panels", "icons_equip", "trinket", "inv_trinket+" + memory.Id + ".png");
+            if (png != null) { GUI.DrawTexture(r, png, ScaleMode.ScaleToFit); return; }
+        }
         var sprite = Dd2.ItemIcons.Get(id);
         if (sprite != null) Art.DrawSprite(r, sprite);
         else
@@ -274,6 +275,7 @@ internal static class HeroSheet
 
     public static string TrinketName(string id)
     {
+        if (Dd2.Dd1TrinketData.Name(id) is { } memoryName) return memoryName;
         try
         {
             var loc = Assets.Code.Utils.Singleton<Assets.Code.Locale.Localization>.Instance;
@@ -285,29 +287,33 @@ internal static class HeroSheet
         return HamletUi.Pretty(s.Replace("tiered_", ""));
     }
 
-    /// <summary>DD1's trinket tooltip: name, rarity, the class that can wear it, then its effects (DD2's own).</summary>
-    public static string TrinketText(string id)
+    /// <summary>DD1's trinket tooltip: name, rarity, class requirement, then DD2's effects.</summary>
+    public static void TrinketTip(string id, string hint = null)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory)
+        {
+            Gui.EquipmentTip(TrinketName(id), HamletUi.Pretty(memory.Rarity), Dd1Palette.Get(memory.Rarity, Gui.Dd1Class),
+                memory.HeroClasses.Count == 0 ? null : string.Join(", ", memory.HeroClasses.Select(HamletUi.Pretty)) + " only",
+                Dd2.Dd1TrinketData.Description(id), hint);
+            return;
+        }
         var t = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var tr) ? tr : null;
-        string rarity = t == null ? "" : HamletUi.Pretty(t.Rarity);
-        string forClass = t?.HeroClass != null ? $"  ·  {HamletUi.Pretty(t.HeroClass)} only" : "";
-        string effects = Dd2.ItemText.Effects(id);
-        return $"{TrinketName(id)}\n{rarity}{forClass}" + (effects != null ? "\n" + effects : "");
+        Gui.EquipmentTip(TrinketName(id), t == null ? "Trinket" : HamletUi.Pretty(t.Rarity), RarityColour(id),
+            t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only", Dd2.ItemText.Effects(id), hint);
     }
 
-    /// <summary>The trinket's rarity colour (DD1's tiers: common grey, rare blue, epic purple, ancestral gold,
-    /// cultist crimson).</summary>
+    /// <summary>DD2 rarity labels use the closest DD1 palette tier; the item name has its own title colour.</summary>
     public static Color RarityColour(string id)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory) return Dd1Palette.Get(memory.Rarity, Gui.Dd1Class);
         string rarity = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var t) ? t.Rarity : null;
-        return rarity switch
+        string colour = rarity switch
         {
-            "rare" => new Color(0.38f, 0.6f, 0.95f),
-            "epic" => new Color(0.68f, 0.45f, 0.9f),
-            "ancestral" => new Color(0.86f, 0.72f, 0.36f),
-            "cultist" => new Color(0.8f, 0.2f, 0.2f),
-            _ => new Color(0.82f, 0.82f, 0.8f),
+            "epic" => "very_rare",
+            "cultist" => "harmful",
+            _ => rarity ?? "common",
         };
+        return Dd1Palette.Get(colour, Gui.Dd1Class);
     }
 
     private static void Tip(string text) => Gui.Tip(text);

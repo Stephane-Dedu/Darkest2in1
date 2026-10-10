@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,23 @@ public sealed class LootDrop
     public string Key => Type == "trinket" ? "trinket:" + Id : ItemCatalog.KeyOf(Type, Id);
 
     public override string ToString() => Type == "trinket" ? $"{Id} trinket" : $"{Amount} {Key}";
+
+    /// <summary>DD1's trinket rarities (loot tables name a rarity, not a trinket).</summary>
+    public static readonly HashSet<string> TrinketRarities = new() { "very_common", "common", "uncommon", "rare", "very_rare", "ancestral", "crimson_court", "trophy", "kickstarter" };
+
+    public static bool IsTrinketRarity(string id) => id != null && TrinketRarities.Contains(id);
+
+    /// <summary>
+    /// DD1 rolls the trinket itself when loot drops (the spoils show it, and it rides in the pack as that trinket):
+    /// a "trinket of rarity X" drop becomes a concrete trinket picked by <paramref name="pick"/> (rarity, rng → id).
+    /// Anything else, or no picker, comes back unchanged.
+    /// </summary>
+    public static LootDrop ResolveTrinket(LootDrop drop, Func<string, Rng, string> pick, Rng rng)
+    {
+        if (drop?.Type != "trinket" || pick == null || !IsTrinketRarity(drop.Id)) return drop;
+        string id = pick(drop.Id, rng);
+        return id == null ? drop : new LootDrop { Type = "trinket", Id = id, Amount = 1 };
+    }
 }
 
 /// <summary>DD1's loot tables (<c>loot/*.loot.json</c>): weighted entries that nest by table id.</summary>
@@ -101,6 +119,13 @@ public sealed class LootTables
                 break;
             case "trinket":
                 drops.Add(new LootDrop { Type = "trinket", Id = (string)data["rarity"], Amount = 1 });
+                break;
+            case "journal_page":
+                int? page = (int?)data["specific_page_index"];
+                if (!page.HasValue && (int?)data["min_page_index"] is int min && (int?)data["max_page_index"] is int max
+                    && min >= 0 && max >= min && max < int.MaxValue)
+                    page = rng.Range(min, max);
+                if (page >= 0) drops.Add(new LootDrop { Type = "journal_page", Id = page.Value.ToString(System.Globalization.CultureInfo.InvariantCulture), Amount = 1 });
                 break;
         }
     }

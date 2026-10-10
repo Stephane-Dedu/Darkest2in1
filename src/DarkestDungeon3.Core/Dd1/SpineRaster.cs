@@ -19,7 +19,7 @@ public sealed class RgbaImage
 
 /// <summary>
 /// Draws a Spine setup pose (see <see cref="SpineSkeleton.SetupPose"/>) into a still image on the CPU: textured
-/// triangles, bilinear sampling, 2x2 supersampling, straight-alpha "over" compositing. Small pictures (a
+/// triangles, bilinear sampling, 2x2 supersampling, straight-alpha "over" compositing (additive slots brighten instead). Small pictures (a
 /// building, a curio) take a few milliseconds and need no GPU state.
 /// </summary>
 public static class SpineRaster
@@ -61,7 +61,7 @@ public static class SpineRaster
                     ToX(piece.Positions[i0 * 2]), ToY(piece.Positions[i0 * 2 + 1]), piece.PagePixels[i0 * 2] * su, piece.PagePixels[i0 * 2 + 1] * sv,
                     ToX(piece.Positions[i1 * 2]), ToY(piece.Positions[i1 * 2 + 1]), piece.PagePixels[i1 * 2] * su, piece.PagePixels[i1 * 2 + 1] * sv,
                     ToX(piece.Positions[i2 * 2]), ToY(piece.Positions[i2 * 2 + 1]), piece.PagePixels[i2 * 2] * su, piece.PagePixels[i2 * 2 + 1] * sv,
-                    tint);
+                    tint, piece.Additive);
             }
         }
         return new Result { Image = image, PivotX = ToX(0), PivotY = ToY(0) };
@@ -72,7 +72,7 @@ public static class SpineRaster
     private static void Triangle(RgbaImage dst, RgbaImage src,
                                  float x0, float y0, float u0, float v0,
                                  float x1, float y1, float u1, float v1,
-                                 float x2, float y2, float u2, float v2, uint tint)
+                                 float x2, float y2, float u2, float v2, uint tint, bool additive = false)
     {
         float area = (x1 - x0) * (y2 - y0) - (x2 - x0) * (y1 - y0);
         if (Math.Abs(area) < 1e-6f) return;
@@ -107,8 +107,24 @@ public static class SpineRaster
                 float alpha = a / 4f * ta;
                 if (alpha <= 0) continue;
                 float cr = r / a * tr, cg = g / a * tg, cb = b / a * tb;
-                Over(dst, px, py, cr, cg, cb, alpha);
+                if (additive) Add(dst, px, py, cr, cg, cb, alpha);
+                else Over(dst, px, py, cr, cg, cb, alpha);
             }
+    }
+
+    /// <summary>
+    /// Spine's additive slots (DD1's building lights and glows): they brighten what is already drawn instead of
+    /// painting over it, and add no coverage of their own (drawn "over", they came out as opaque white shapes).
+    /// </summary>
+    private static void Add(RgbaImage dst, int x, int y, float r, float g, float b, float a)
+    {
+        int i = (y * dst.Width + x) * 4;
+        var p = dst.Pixels;
+        float da = p[i + 3] / 255f;
+        if (da <= 0) return;
+        p[i] = (byte)Math.Min(255, p[i] + r * a * 255f + 0.5f);
+        p[i + 1] = (byte)Math.Min(255, p[i + 1] + g * a * 255f + 0.5f);
+        p[i + 2] = (byte)Math.Min(255, p[i + 2] + b * a * 255f + 0.5f);
     }
 
     private static void Over(RgbaImage dst, int x, int y, float r, float g, float b, float a)

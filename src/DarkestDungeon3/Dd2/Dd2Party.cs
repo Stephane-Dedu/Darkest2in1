@@ -59,6 +59,20 @@ internal sealed class Dd2Party : IParty
         var a = Dd2Api.Actor(Guid(heroId));
         var quirk = _catalog.QuirkFor(dd1QuirkId);
         if (a?.QuirkContainer == null || quirk == null) return null;
+        // DD1's limits (5 positive, 5 negative, 3 diseases): over the cap the new quirk replaces an unlocked one of
+        // its kind, or isn't gained if they're all locked.
+        var s = Runtime.Session.Current;
+        var instances = a.QuirkContainer.GetInstances().ToList();
+        var current = instances.Select(i => i.Definition.m_Id).ToList();
+        var locked = s?.Save.Estate.Hero(heroId)?.LockedQuirks ?? new List<string>();
+        var limits = s?.Campaign?.QuirkLimits ?? new Core.Campaign.QuirkLimits();
+        var (gained, replaced) = limits.Gain(current, locked, quirk.m_Id, _catalog.IsPositive, _catalog.IsDisease, new Core.Rng(System.Environment.TickCount));
+        if (!gained) return null;
+        if (replaced != null && instances.FirstOrDefault(i => i.Definition.m_Id == replaced) is { } old)
+        {
+            a.QuirkContainer.Remove(old, SourceType.DRIVING, "dd3", 0u);
+            Plugin.Log.LogInfo($"[quirks] {heroId}: {quirk.m_Id} replaces {replaced} (DD1 quirk limit)");
+        }
         a.QuirkContainer.Add(quirk, SourceType.DRIVING, dd1QuirkId, 0u);
         return quirk.m_Id;
     }

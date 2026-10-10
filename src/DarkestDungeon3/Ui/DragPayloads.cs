@@ -41,8 +41,9 @@ internal sealed class TrinketDrag
 {
     public readonly string TrinketId;
     public readonly string FromHero;
-    public TrinketDrag(string trinketId, string fromHero = null) { TrinketId = trinketId; FromHero = fromHero; }
-    public override bool Equals(object o) => o is TrinketDrag t && t.TrinketId == TrinketId && t.FromHero == FromHero;
+    public readonly int FromSlot;
+    public TrinketDrag(string trinketId, string fromHero = null, int fromSlot = -1) { TrinketId = trinketId; FromHero = fromHero; FromSlot = fromSlot; }
+    public override bool Equals(object o) => o is TrinketDrag t && t.TrinketId == TrinketId && t.FromHero == FromHero && t.FromSlot == FromSlot;
     public override int GetHashCode() => TrinketId?.GetHashCode() ?? 0;
 }
 
@@ -53,9 +54,29 @@ internal static class ItemArt
     {
         var old = GUI.color;
         if (dim) GUI.color = new Color(0.4f, 0.4f, 0.4f, old.a);
+        // A trinket rides in the pack as itself (DD1): its picture, and its details on hover.
+        if (key != null && key.StartsWith("trinket:", System.StringComparison.Ordinal))
+        {
+            string id = key.Substring(8);
+            if (Core.Expedition.LootDrop.IsTrinketRarity(id))
+            {
+                if (Art.Dd1("panels", "icons_equip", "trinket", "inv_trinket+_unknown.png") is { } unknown) GUI.DrawTexture(r, unknown);
+                else Gui.Text(r, HamletUi.Pretty(id), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            }
+            else
+            {
+                HeroSheet.TrinketIcon(r, id);
+                if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(id);
+            }
+            GUI.color = old;
+            return;
+        }
         var icon = Art.InventoryIcon(key, Mathf.Max(1, count), Mathf.Max(1, stackLimit));
         if (icon != null) GUI.DrawTexture(r, icon); else Gui.Text(r, HamletUi.Pretty(key), 16, Gui.Dd1Text, TextAnchor.MiddleCenter);
         GUI.color = old;
+        if (Core.Campaign.JournalPages.TryPage(key, out int page) && r.Contains(Event.current.mousePosition))
+            Gui.Tip((Session.Current.Lore.Text("journal_page_title_" + page) ?? "Journal Page")
+                + "\n\n" + (Session.Current.Lore.Text("str_inventory_description_journal_page") ?? "A snippet from the journal of a doomed expedition."));
         if (stackLimit > 1 || count > 1)
             Gui.Text(new Rect(r.x, r.yMax - 28, r.width - 4, 26), count.ToString(), 21, Color.white, TextAnchor.LowerRight);
     }

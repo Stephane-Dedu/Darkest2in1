@@ -27,23 +27,68 @@ public sealed class Hamlet
     /// <summary>A brand-new estate: DD1 starts you with two heroes, some gold, and the Ruins open.</summary>
     public static Estate NewEstate(int seed, Dd1Campaign dd1, Buildings buildings, IHeroCatalog catalog, CampingSkills camping = null)
     {
-        var estate = new Estate { Seed = seed };
-        estate.Add(Currency.Gold, 500);
-        // DD1 opens with the Ruins tutorial; we skip it but pay out what it pays (3000 gold, 4 crests).
-        var tutorial = dd1.Goals?.Plot.FirstOrDefault(p => p.Id == "plot_tutorial_crypts");
-        if (tutorial != null)
-        {
-            foreach (var r in tutorial.Rewards.Where(r => r.Type != "trinket")) estate.Add(r.Type, r.Amount);
-            estate.CompletedPlotQuests.Add(tutorial.Id);
-        }
+        var estate = new Estate { Seed = seed, RegionLayoutVersion = CampaignRegions.LayoutVersion };
+        CampaignJournal.Initialize(estate);
+        // DD1's new game (scripts/starting_save): the opening's wallet (heirlooms, no gold) and heroes.
+        var start = dd1.Install != null ? StartingSave.Load(dd1.Install) : null;
+        if (start != null && start.Wallet.Count > 0)
+            foreach (var (type, amount) in start.Wallet.Where(w => w.Amount > 0)) estate.Add(type, amount);
+        else estate.Add(Currency.Gold, 500);
+        // The Ruins tutorial (plot_tutorial_crypts) is DD1's first quest on the board, played like any plot quest.
         var hamlet = new Hamlet(estate, dd1, buildings, catalog, camping);
         var rng = estate.NextRng();
-        // DD1's first recruits are fixed (Crusader, Highwayman, Plague Doctor, Vestal). Use the DD2 classes
-        // that share those names, falling back to whatever DD2 offers.
-        foreach (var cls in new[] { "man_at_arms", "highwayman", "plague_doctor", "vestal" })
-            estate.Roster.Add(hamlet.MakeHero(catalog.RecruitableClasses.Contains(cls) ? cls : rng.Pick(catalog.RecruitableClasses), rng, level: 0));
-        hamlet.RefreshWeek();
+        if (start != null && start.Heroes.Count > 0)
+            foreach (var h in start.Heroes) estate.Roster.Add(hamlet.StartingHero(h, rng));
+        else
+            foreach (var cls in new[] { "man_at_arms", "highwayman" })
+                estate.Roster.Add(hamlet.MakeHero(catalog.RecruitableClasses.Contains(cls) ? cls : rng.Pick(catalog.RecruitableClasses), rng, level: 0));
+        estate.OpeningRaidPending = start?.Opening != null && estate.Roster.Count > 0;
+        hamlet.RefreshWeek(first: true);
         return estate;
+    }
+
+    /// <summary>
+    /// DD1's opening raid for this new estate (scripts/starting_save): the quest, its party in DD1's order (Reynauld in
+    /// front, then Dismas) and its pack (2 provisions). Null once it has been played.
+    /// </summary>
+    public (QuestOffer Quest, List<HeroRecord> Party, Expedition.Inventory Pack)? OpeningRaid()
+    {
+        if (!Estate.OpeningRaidPending || Dd1.Install == null) return null;
+        var start = StartingSave.Load(Dd1.Install);
+        var quest = start.OpeningQuest(Estate.NextSeed());
+        if (quest == null) return null;
+        var party = start.Opening.PartyOrder.Select(i => i < start.Heroes.Count ? Estate.Roster.FirstOrDefault(h => h.Name == start.Heroes[i].Name) : null)
+                         .Where(h => h != null).ToList();
+        if (party.Count == 0) party = Estate.Roster.Take(4).ToList();
+        var pack = new Expedition.Inventory();
+        if (start.Opening.Provisions > 0) pack.Add(Expedition.Supply.Food, start.Opening.Provisions);
+        return (quest, party, pack);
+    }
+
+    /// <summary>DD1 classes DD2 has no hero for, and the DD2 hero that plays them (the Crusader: a front-line protector).</summary>
+    public static readonly IReadOnlyDictionary<string, string> Dd2StandIn = new Dictionary<string, string>
+    {
+        ["crusader"] = "man_at_arms",
+    };
+
+    /// <summary>One of DD1's opening heroes (Reynauld, Dismas) with their own name, quirks and stress.</summary>
+    public HeroRecord StartingHero(StartingSave.Hero h, Rng rng)
+    {
+        string cls = h.Dd1Class;
+        if (!Catalog.RecruitableClasses.Contains(cls))
+            cls = Dd2StandIn.TryGetValue(cls ?? "", out var stand) && Catalog.RecruitableClasses.Contains(stand) ? stand : rng.Pick(Catalog.RecruitableClasses);
+        var hero = new HeroRecord
+        {
+            Id = Estate.NewId(),
+            ClassId = cls,
+            Name = h.Name,
+            ResolveXp = h.ResolveXp,
+            Stress = (int)Math.Round(h.Stress / 10f, MidpointRounding.AwayFromZero),   // DD1 stress (100 = full) -> DD2 pips (10)
+            WeekRecruited = Estate.Week,
+        };
+        foreach (var q in h.Quirks.Select(Catalog.MapDd1Quirk).Where(q => q != null).Distinct()) hero.Quirks.Add(q);
+        if (Camping != null) hero.CampingSkills = Camping.Starting(cls, rng);
+        return hero;
     }
 
     // ---------------- Stagecoach ----------------
@@ -72,6 +117,19 @@ public sealed class Hamlet
         var hero = Estate.Recruits.FirstOrDefault(h => h.Id == recruitId);
         if (hero == null || !CanRecruit) return false;
         Estate.Recruits.Remove(hero);
+        if (hero.FromGraveyard)
+        {
+            // Back from the grave; the others offered with them stay dead ("Only ONE ... can be returned").
+            foreach (var other in Estate.Recruits.Where(r => r.FromGraveyard).ToList())
+            {
+                other.FromGraveyard = false;
+                Estate.Recruits.Remove(other);
+            }
+            Estate.Graveyard.Remove(hero);
+            hero.FromGraveyard = false;
+            hero.IsDead = false;
+            hero.CauseOfDeath = null;
+        }
         hero.WeekRecruited = Estate.Week;
         Estate.Roster.Add(hero);
         return true;
@@ -81,8 +139,9 @@ public sealed class Hamlet
     {
         var hero = Estate.Hero(heroId);
         if (hero == null) return false;
+        CaretakerGoals.Record(Estate, hero);
         Estate.Roster.Remove(hero);
-        foreach (var t in hero.Trinkets) Estate.Trinkets.Add(t);
+        foreach (var t in hero.WornTrinkets) Estate.Trinkets.Add(t);
         return true;
     }
 
@@ -138,10 +197,21 @@ public sealed class Hamlet
         return Buildings.QuirkTreatmentCost(Estate, hero.LockedQuirks.Contains(quirkId) ? "permanent_negative" : "negative");
     }
 
+    /// <summary>Why the Sanitarium can't lock this positive quirk in (DD1: at most quirks_max_locked_positive 3
+    /// locked), or null.</summary>
+    public string WhyCantLock(HeroRecord hero, string quirkId)
+    {
+        if (hero == null || !Catalog.IsPositive(quirkId) || Catalog.IsDisease(quirkId)) return null;
+        if (hero.LockedQuirks.Contains(quirkId)) return "Already locked in";
+        int locked = hero.LockedQuirks.Count(q => Catalog.IsPositive(q) && !Catalog.IsDisease(q));
+        return locked >= Dd1.QuirkLimits.MaxLockedPositive ? $"{hero.Name} already has {Dd1.QuirkLimits.MaxLockedPositive} locked quirks" : null;
+    }
+
     public bool StartTreatment(string heroId, string quirkId)
     {
         var hero = Estate.Hero(heroId);
         if (hero == null || !hero.IsAvailable || !hero.Quirks.Contains(quirkId)) return false;
+        if (WhyCantLock(hero, quirkId) != null) return false;
         if (!Buildings.IsOpen(Buildings.Sanitarium, Estate)) return false;
         string activity = Catalog.IsDisease(quirkId) ? "sanitarium.disease_treatment" : "sanitarium.treatment";
         if (Estate.Roster.Count(h => h.Activity == activity) >= Buildings.SanitariumSlots(Estate, activity.Split('.')[1])) return false;
@@ -155,7 +225,13 @@ public sealed class Hamlet
 
     // ---------------- Upgrades ----------------
 
-    public bool BuyUpgrade(string treeId, string code) => Buildings.Trees.TryBuy(Estate, treeId, code);
+    public bool BuyUpgrade(string treeId, string code)
+    {
+        if (!Buildings.Trees.TryBuy(Estate, treeId, code)) return false;
+        string building = treeId.Split('.')[0];
+        CampaignJournal.BuildingUpgrade(Estate, building, treeId, code, Buildings.Trees.Percent(Estate, building));
+        return true;
+    }
 
     // ---- Guild: learn DD2 skills a hero hasn't unlocked, master (upgrade) the ones they know ----
     // Prices follow the DD1 skill tree that matches: learning is DD1's "code 0" (1000 gold for most), mastering
@@ -191,7 +267,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -SkillLearnCost(hero, skillId));
         hero.LearnedSkills.Add(skillId);
-        Estate.TownLog.Add($"The Guild teaches {hero.Name} a new technique.");
+        CampaignJournal.Town(Estate, $"The Guild teaches {hero.Name} a new technique.", hero);
         return true;
     }
 
@@ -214,7 +290,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantMasterSkill(hero, skillId, known) != null) return false;
         Estate.Add(Currency.Gold, -SkillMasterCost(hero, skillId));
         hero.MasteredSkills.Add(skillId);
-        Estate.TownLog.Add($"The Guild masters {hero.Name}'s technique.");
+        CampaignJournal.Town(Estate, $"The Guild masters {hero.Name}'s technique.", hero);
         return true;
     }
 
@@ -244,7 +320,7 @@ public sealed class Hamlet
         if (hero == null || WhyCantLearnCampSkill(hero, skillId) != null) return false;
         Estate.Add(Currency.Gold, -CampSkillCost(Camping.Get(skillId)));
         hero.CampingSkills.Add(skillId);
-        Estate.TownLog.Add($"The Survivalist teaches {hero.Name} a new camping skill.");
+        CampaignJournal.Town(Estate, $"The Survivalist teaches {hero.Name} a new camping skill.", hero);
         return true;
     }
 
@@ -294,7 +370,7 @@ public sealed class Hamlet
         Estate.Add(Currency.Gold, -EquipmentCost(NextEquipment(hero, slot)));
         if (FreeEquipment(slot)) Estate.TownEventFreeUpgrades--;
         if (slot == Weapon) hero.WeaponRank++; else hero.ArmorRank++;
-        Estate.TownLog.Add($"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).");
+        CampaignJournal.Town(Estate, $"The Blacksmith improves {hero.Name}'s {slot} (rank {Rank(hero, slot) + 1}).", hero);
         return true;
     }
 
@@ -306,14 +382,23 @@ public sealed class Hamlet
     /// </summary>
     public List<string> EndWeek()
     {
+        CampaignJournal.Initialize(Estate);
         var log = new List<string>();
+        var actors = new List<ActivityTownActor>();
         var rng = Estate.NextRng();
+
+        void Capture(HeroRecord hero, int first)
+        {
+            for (int i = first; i < log.Count; i++) actors.Add(CampaignJournal.Actor(hero, i));
+        }
 
         foreach (var hero in Estate.Roster.ToList())
         {
+            int first = log.Count;
             if (hero.MissingWeeks > 0)
             {
                 if (--hero.MissingWeeks == 0) log.Add($"{hero.Name} has returned to the Hamlet.");
+                Capture(hero, first);
                 continue;
             }
             if (hero.Activity == null)
@@ -327,6 +412,7 @@ public sealed class Hamlet
                     hero.Stress = Math.Max(0, hero.Stress - idleRelief);
                     log.Add($"{hero.Name} rested in the Hamlet: stress {was} → {hero.Stress}.");
                 }
+                Capture(hero, first);
                 continue;
             }
 
@@ -334,6 +420,8 @@ public sealed class Hamlet
                 FinishTreatment(hero, rng, log);
             else if (Buildings.Activity(hero.Activity) is { } activity)
                 FinishActivity(hero, activity, rng, log);
+
+            Capture(hero, first);
 
             if (!hero.ActivityLocked)
             {
@@ -345,7 +433,7 @@ public sealed class Hamlet
 
         Estate.Week++;
         RefreshWeek();
-        Estate.TownLog = log;
+        CampaignJournal.TownResults(Estate, log, actors);
         return log;
     }
 
@@ -383,11 +471,8 @@ public sealed class Hamlet
                 break;
             case "add_quirk":
                 var quirk = Catalog.MapDd1Quirk((string)pick?["quirk_library_name"]);
-                if (quirk != null && !hero.Quirks.Contains(quirk))
-                {
-                    hero.Quirks.Add(quirk);
-                    log.Add($"{hero.Name} gained a quirk: {quirk}.");
-                }
+                string replaced = Dd1.QuirkLimits.Apply(hero.Quirks, hero.LockedQuirks, quirk, Catalog.IsPositive, Catalog.IsDisease, rng, out bool gained);
+                if (gained) log.Add(replaced != null ? $"{hero.Name} gained a quirk: {quirk} (replacing {replaced})." : $"{hero.Name} gained a quirk: {quirk}.");
                 break;
             case "apply_buff":
                 foreach (var b in pick?["buff_library_ids"] ?? new JArray()) hero.PendingBuffs.Add((string)b);
@@ -403,10 +488,10 @@ public sealed class Hamlet
                 if (found != null) { Estate.Trinkets.Add(found); log.Add($"{hero.Name} came back with a trinket: {found}."); }
                 break;
             case "remove_trinket":
-                if (hero.Trinkets.Count > 0)
+                if (hero.WornTrinkets.Any())
                 {
-                    var lost = rng.Pick(hero.Trinkets);
-                    hero.Trinkets.Remove(lost);
+                    var lost = rng.Pick(hero.WornTrinkets.ToList());
+                    hero.SetTrinket(hero.Trinkets.IndexOf(lost), null);
                     log.Add($"{hero.Name} lost a trinket: {lost}.");
                 }
                 break;
@@ -438,14 +523,18 @@ public sealed class Hamlet
     }
 
     /// <summary>New recruits, a new wagon stock and a new quest board.</summary>
-    public void RefreshWeek()
+    public void RefreshWeek(bool first = false)
     {
         var rng = Estate.NextRng();
 
+        foreach (var r in Estate.Recruits) r.FromGraveyard = false;   // unclaimed fallen heroes rest again
         Estate.Recruits.Clear();
         var experienced = Buildings.ExperiencedRecruits(Estate).OrderByDescending(t => t.Level).ToList();
-        for (int i = 0; i < Buildings.RecruitsPerWeek(Estate); i++)
+        // DD1: the very first coach brings its fixed classes (first_hero_classes: the Plague Doctor and the Vestal).
+        var fixedClasses = first ? Buildings.FirstHeroClasses().Where(Catalog.RecruitableClasses.Contains).ToList() : new List<string>();
+        for (int i = 0; i < Math.Max(Buildings.RecruitsPerWeek(Estate), fixedClasses.Count); i++)
         {
+            if (i < fixedClasses.Count) { Estate.Recruits.Add(MakeHero(fixedClasses[i], rng, 0)); continue; }
             int level = 0;
             foreach (var (lvl, chance) in experienced)
                 if (rng.Chance(chance)) { level = lvl; break; }
@@ -472,36 +561,53 @@ public sealed class Hamlet
     public void RestockWagon(Rng rng)
     {
         Estate.WagonStock.Clear();
-        string[] rarities = { "very_common", "very_common", "common", "common", "uncommon", "rare", "very_rare" };
+        var rarities = Buildings.WagonRarities();
+        if (rarities.Count == 0) rarities = new List<(string, float)> { ("common", 1f) };
         for (int i = 0; i < Buildings.WagonStock(Estate); i++)
         {
-            var t = Catalog.RandomTrinket(rng.Pick(rarities), rng);
-            if (t != null && !Estate.WagonStock.Contains(t)) Estate.WagonStock.Add(t);
+            var t = Catalog.RandomTrinket(WagonRarity(rarities, rng), rng);
+            if (t != null) Estate.WagonStock.Add(t);
         }
+    }
+
+    /// <summary>A rarity drawn with DD1's wagon weights.</summary>
+    public static string WagonRarity(List<(string Rarity, float Chance)> table, Rng rng)
+    {
+        float pick = (float)rng.NextDouble() * table.Sum(t => t.Chance);
+        foreach (var (rarity, chance) in table)
+        {
+            pick -= chance;
+            if (pick <= 0) return rarity;
+        }
+        return table[table.Count - 1].Rarity;
     }
 
     /// <summary>Older builds rolled heroes without quirks and let any class wear hero-only trinkets: fix once.</summary>
     public List<string> RepairEstate()
     {
         var log = new List<string>();
-        var rng = Estate.NextRng();
+        if (CampaignJournal.Initialize(Estate)) log.Add("activity log initialized from surviving town messages");
+        if (CaretakerGoals.Sync(Estate)) log.Add("caretaker resolve goals recovered from roster and graveyard");
+        if (CampaignRegions.Migrate(Estate, Dd1)) log.Add("campaign regions updated; existing progress retained");
+        Rng rng = null;
+        Rng RepairRng() => rng ??= Estate.NextRng();
         if (!Estate.QuirksRepaired)
         {
             foreach (var hero in Estate.Roster.Concat(Estate.Recruits).Where(h => h.Quirks.Count == 0))
             {
-                hero.Quirks.AddRange(Catalog.StartingQuirks(hero.ClassId, rng, positives: 1 + hero.ResolveLevel / 2, negatives: 1 + hero.ResolveLevel / 3));
+                hero.Quirks.AddRange(Catalog.StartingQuirks(hero.ClassId, RepairRng(), positives: 1 + hero.ResolveLevel / 2, negatives: 1 + hero.ResolveLevel / 3));
                 if (hero.Quirks.Count > 0) log.Add($"{hero.Name}: quirks {string.Join(", ", hero.Quirks)}");
             }
             Estate.QuirksRepaired = true;
+            log.Add("hero quirk migration completed");
         }
         foreach (var hero in Estate.Roster)
-            foreach (var t in hero.Trinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
+            foreach (var t in hero.WornTrinkets.Where(t => !Catalog.TrinketFits(t, hero.ClassId)).ToList())
             {
-                hero.Trinkets.Remove(t);
+                hero.SetTrinket(hero.Trinkets.IndexOf(t), null);
                 Estate.Trinkets.Add(t);
                 log.Add($"{hero.Name} can't wear {t}: back in the stash");
             }
-        if (Estate.WagonStock.Count == 0) { RestockWagon(rng); log.Add($"wagon restocked: {Estate.WagonStock.Count} trinkets"); }
         return log;
     }
 
@@ -516,15 +622,49 @@ public sealed class Hamlet
     {
         var ev = Dd1.TownEvents?.Roll(Estate, rng);
         Estate.TownEventId = ev?.Id;
+        StartTownEvent(rng);
+    }
+
+    /// <summary>The current town event's effects that land as the visit starts.</summary>
+    public void StartTownEvent(Rng rng)
+    {
         Estate.TownEventFreeUpgrades = (int)EventData("upgrade_tag_free").Sum(d => d.Num);
-        if (ev == null) return;
-        // Effects that land as the visit starts.
+        if (CurrentEvent == null) return;
         foreach (var (cls, count) in EventData("bonus_recruit"))
             if (Catalog.RecruitableClasses.Contains(cls))
                 for (int i = 0; i < Math.Max(1, (int)count); i++) Estate.Recruits.Add(MakeHero(cls, rng, 0));
+        // DD1's plot-quest events (the crow's trinket): their quest joins the board for the week.
+        foreach (var (plotId, _) in EventData("plot_quest"))
+        {
+            var plot = Dd1.Goals?.Plot.FirstOrDefault(p => p.Id == plotId);
+            if (plot == null || (!plot.Repeatable && Estate.CompletedPlotQuests.Contains(plot.Id)) || Estate.Quests.Any(q => q.PlotId == plot.Id)) continue;
+            Estate.Quests.Add(QuestBoard.PlotOffer(Estate, Dd1, plot));
+        }
+        // DD1 "From Beyond": a few fallen heroes wait at the stagecoach; only one can be brought back.
+        foreach (var (_, count) in EventData("dead_recruit"))
+        {
+            var fallen = Estate.Graveyard.Where(h => !h.FromGraveyard).OrderBy(h => h.Id, StringComparer.Ordinal).ToList();
+            for (int i = 0; i < Math.Max(1, (int)count) && fallen.Count > 0; i++)
+            {
+                var hero = rng.Pick(fallen);
+                fallen.Remove(hero);
+                hero.FromGraveyard = true;
+                Estate.Recruits.Add(hero);
+            }
+        }
         foreach (var (cls, levels) in EventData("idle_resolve_level"))
             foreach (var hero in Estate.Roster.Where(h => h.ClassId == cls && h.MissingWeeks == 0))
-                hero.ResolveLevel = Math.Min(6, hero.ResolveLevel + Math.Max(1, (int)levels));
+            {
+                int before = hero.ResolveLevel;
+                hero.ResolveLevel = Math.Min(CaretakerGoals.ResolveTarget, before + Math.Max(1, (int)levels));
+                if (hero.ResolveLevel > before)
+                {
+                    // Core saves cumulative XP; grant only the amount needed to reach the awarded level.
+                    hero.ResolveXp = Math.Max(hero.ResolveXp, Dd1.HeroResolveThresholds[hero.ResolveLevel]);
+                    CampaignJournal.Town(Estate, $"{hero.Name} reached resolve level {hero.ResolveLevel}.", hero, ActivityEntryKind.LevelUp);
+                }
+                CaretakerGoals.Record(Estate, hero);
+            }
     }
 
     /// <summary>An activity's price this week (free or discounted by a town event).</summary>
@@ -595,10 +735,10 @@ public sealed class Hamlet
     public int UnequipAllTrinkets()
     {
         int n = 0;
-        foreach (var hero in Estate.Roster.Where(h => h.MissingWeeks == 0))
+        foreach (var hero in Estate.Roster.Where(h => h.IsAvailable))
         {
-            n += hero.Trinkets.Count;
-            Estate.Trinkets.AddRange(hero.Trinkets);
+            n += hero.WornTrinkets.Count();
+            Estate.Trinkets.AddRange(hero.WornTrinkets);
             hero.Trinkets.Clear();
         }
         return n;
@@ -622,14 +762,15 @@ public sealed class Hamlet
     /// </summary>
     public void SetZoneToggle(string zone, bool on)
     {
-        if (Estate.IsToggled("zone." + zone) == on) return;
+        if (!CampaignRegions.Options.Contains(zone) || CampaignRegions.Enabled(Estate, zone) == on) return;
         Estate.Toggles["zone." + zone] = on;
         Estate.Quests.RemoveAll(q => q.Dungeon == zone);
-        if (on) Estate.Quests.AddRange(QuestBoard.OffersFor(Estate, Dd1, zone));
+        if (on) Estate.Quests.AddRange(QuestBoard.OffersFor(Estate, Dd1, zone)
+            .Where(q => q.PlotId == null || !Estate.Quests.Any(old => old.PlotId == q.PlotId)));
     }
 
     public IEnumerable<string> ToggledZones() =>
-        Estate.Toggles.Where(t => t.Value && t.Key.StartsWith("zone.")).Select(t => t.Key.Substring(5));
+        CampaignRegions.Options.Where(z => CampaignRegions.Enabled(Estate, z));
 
     // ---------------- helpers ----------------
 

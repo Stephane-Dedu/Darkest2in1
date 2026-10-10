@@ -2,6 +2,7 @@ bin/
 obj/
 *.user
 .vs/
+__pycache__/
 # never commit game files or decompiled code
 decomp/
 extracted/

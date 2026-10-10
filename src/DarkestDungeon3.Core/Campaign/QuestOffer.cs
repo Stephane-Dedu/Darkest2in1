@@ -16,6 +16,13 @@ public sealed class QuestOffer
     public string BossId;           // for kill_boss: DD1 boss monster class (e.g. "necromancer_A")
     public string GoalId;           // DD1 quest goal id (gather_holy_relic, kill_hag_B ...)
     public int ResolveXp;           // 0 = by length
+    public bool CanRetreat = true;  // DD1 plot quests: the Darkest Dungeon's last part can't be abandoned
+    public int RetreatKillCount;    // heroes who die covering a retreat (Darkest Dungeon: 1)
+    public bool SurpriseEnabled = true, ScoutingEnabled = true;   // the Darkest Dungeon has neither
+    public bool ClearsRosterStress; // a Darkest Dungeon win clears the whole roster's stress
+    public List<string> RosterBuffsOnFailure = new();   // a seasoned party's failure inspires the roster (DD1)
+    public int RosterBuffMinResolve;
+    public string MapName;          // DD1's hand-made map (the Darkest Dungeon), else null: generated
     public List<Reward> Rewards = new();
 
     public string Size => Length switch { 1 => "short", 2 => "medium", _ => "long" };

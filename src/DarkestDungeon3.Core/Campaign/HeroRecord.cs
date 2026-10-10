@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DarkestDungeon3.Core.Campaign;
 
@@ -24,7 +25,16 @@ public sealed class HeroRecord
     // DD2 loadout.
     public string PathId;                                  // null = class default
     public List<string> EquippedSkills = new();            // empty = DD2 default kit
-    public List<string> Trinkets = new();                  // DD2 trinket ids, 2 slots
+    public List<string> Trinkets = new();                  // DD2 ids in left/right slots; null marks an empty left slot
+    [Newtonsoft.Json.JsonIgnore]
+    public IEnumerable<string> WornTrinkets => Trinkets.Where(t => !string.IsNullOrEmpty(t));
+    public string TrinketAt(int slot) => slot >= 0 && slot < Trinkets.Count ? Trinkets[slot] : null;
+    public void SetTrinket(int slot, string id)
+    {
+        while (Trinkets.Count <= slot) Trinkets.Add(null);
+        Trinkets[slot] = id;
+        while (Trinkets.Count > 0 && string.IsNullOrEmpty(Trinkets[Trinkets.Count - 1])) Trinkets.RemoveAt(Trinkets.Count - 1);
+    }
     public List<string> CampingSkills = new();             // DD1-style camp skills (ours)
     public List<string> LearnedSkills = new();             // DD2 combat skills learned at the Guild (were locked)
     public List<string> MasteredSkills = new();            // DD2 combat skills upgraded at the Guild (base ids)
@@ -44,6 +54,8 @@ public sealed class HeroRecord
 
     // Death.
     public bool IsDead;
+    /// <summary>Offered at the stagecoach by DD1's "From Beyond" event: a fallen hero who can return (only one).</summary>
+    public bool FromGraveyard;
     public string CauseOfDeath;
     public int WeekDied;
 

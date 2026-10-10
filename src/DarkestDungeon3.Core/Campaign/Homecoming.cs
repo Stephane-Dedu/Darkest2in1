@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DarkestDungeon3.Core.Expedition;
+using DarkestDungeon3.Core.Dd1;
 
 namespace DarkestDungeon3.Core.Campaign;
 
@@ -40,16 +41,39 @@ public static class Homecoming
     /// value (<paramref name="items"/>); trinkets found go to the estate (rarity-only ones are rolled with
     /// <paramref name="trinketOfRarity"/>).
     /// </summary>
+    /// <summary>
+    /// DD1: abandoning a quest with retreat_party_kill_count (the Darkest Dungeon) costs that many random living heroes,
+    /// who stay behind to hold off the fiends. Returns the outcomes with those heroes dead.
+    /// </summary>
+    public static List<HeroOutcome> RetreatSacrifices(QuestOffer quest, bool retreated, IEnumerable<HeroOutcome> outcomes, Rng rng)
+    {
+        var list = outcomes.ToList();
+        if (!retreated || quest == null || quest.RetreatKillCount <= 0) return list;
+        var living = list.Where(o => !o.Died).OrderBy(o => o.HeroId, StringComparer.Ordinal).ToList();
+        for (int i = 0; i < quest.RetreatKillCount && living.Count > 0; i++)
+        {
+            var o = rng.Pick(living);
+            living.Remove(o);
+            o.Died = true;
+            o.CauseOfDeath = "sacrificed to cover the retreat";
+        }
+        return list;
+    }
+
     public static HomecomingReport Report(Estate estate, Dd1Campaign dd1, ExpeditionState expedition, IEnumerable<HeroOutcome> outcomes,
-                                          ItemCatalog items = null, Func<string, string> trinketOfRarity = null)
+                                          ItemCatalog items = null, Func<string, string> trinketOfRarity = null,
+                                          Func<string, IEnumerable<Dd1Buff>> equipmentBuffs = null)
     {
         var report = new HomecomingReport { Quest = expedition.Quest };
         var log = report.Log;
         var quest = expedition.Quest;
-        var outcomeList = outcomes.ToList();
+        estate.LastReturnPlotId = quest?.PlotId;   // DD1's town background after a Darkest Dungeon part
+        var outcomeList = RetreatSacrifices(quest, expedition.Retreated, outcomes, estate.NextRng());
         bool success = expedition.QuestComplete && !expedition.Retreated;
         bool wiped = outcomeList.Count > 0 && outcomeList.All(o => o.Died);
         report.Result = success ? "complete" : wiped ? "defeat" : "retreat";
+        report.JournalPages = JournalPages.Collect(estate, expedition.Pack, survived: outcomeList.Any(o => !o.Died));
+        foreach (int page in report.JournalPages) log.Add($"Brought home journal page {page}.");
 
         // Loot carried out of the dungeon always counts, success or not.
         foreach (var kv in expedition.Pack.Items.ToList())
@@ -74,7 +98,7 @@ public static class Homecoming
                 string id = kv.Key.Substring(8);
                 for (int i = 0; i < kv.Value; i++)
                 {
-                    string trinket = TrinketRarities.Contains(id) ? trinketOfRarity?.Invoke(id) : id;
+                    string trinket = LootDrop.IsTrinketRarity(id) ? trinketOfRarity?.Invoke(id) : id;
                     if (trinket == null) continue;
                     estate.Trinkets.Add(trinket);
                     report.Trinkets.Add(trinket);
@@ -83,13 +107,20 @@ public static class Homecoming
             }
         }
 
+        if (success && quest.ClearsRosterStress)
+        {
+            // DD1: a Darkest Dungeon win clears the stress of every hero on the roster (is_roster_stress_cleared_on_completion).
+            foreach (var h in estate.Roster) h.Stress = 0;
+            log.Add("The victory lifts every heart in the Hamlet: all stress is gone.");
+        }
+
         if (success)
         {
             foreach (var r in quest.Rewards)
             {
                 if (r.Type == "trinket")
                 {
-                    string trinket = r.Id != null && TrinketRarities.Contains(r.Id) ? trinketOfRarity?.Invoke(r.Id) : r.Id;
+                    string trinket = LootDrop.IsTrinketRarity(r.Id) ? trinketOfRarity?.Invoke(r.Id) : r.Id;
                     if (trinket != null) { estate.Trinkets.Add(trinket); report.Trinkets.Add(trinket); }
                 }
                 else estate.Add(r.Type, r.Amount);
@@ -106,10 +137,12 @@ public static class Homecoming
         {
             var hero = estate.Hero(o.HeroId);
             if (hero == null) continue;
+            CaretakerGoals.Record(estate, hero);
             var result = new HeroResult { Id = hero.Id, Name = hero.Name, ClassId = hero.ClassId, ResolveBefore = hero.ResolveLevel };
             report.Heroes.Add(result);
             if (o.Died)
             {
+                if (o.Quirks != null) hero.Quirks = o.Quirks.ToList();
                 result.Died = true;
                 result.Cause = o.CauseOfDeath;
                 hero.IsDead = true;
@@ -121,9 +154,15 @@ public static class Homecoming
                 continue;
             }
             var quirksBefore = hero.Quirks.ToList();
-            hero.Stress = o.Stress;
+            hero.Stress = success && quest.ClearsRosterStress ? 0 : o.Stress;   // the party too, after a Darkest Dungeon win
+            if (expedition.Retreated && dd1 != null && dd1.AbandonStressDd1 > 0)
+            {
+                // DD1: "The heroes will suffer the stress of defeat" (20 of 100 = 2 of DD2's 10 points).
+                hero.Stress = Math.Min(10, hero.Stress + (int)Math.Round(dd1.AbandonStressDd1 / 10f, MidpointRounding.AwayFromZero));
+                log.Add($"{hero.Name} suffers the stress of defeat.");
+            }
             if (o.Quirks != null) hero.Quirks = o.Quirks;
-            if (o.Trinkets != null) hero.Trinkets = o.Trinkets;
+            if (o.Trinkets != null) hero.Trinkets = Town.TrinketEquipment.RestoreSlots(hero.Trinkets, o.Trinkets);
             result.Stress = hero.Stress;
             result.NewQuirks = hero.Quirks.Except(quirksBefore).ToList();
             result.LostQuirks = quirksBefore.Except(hero.Quirks).ToList();
@@ -132,22 +171,41 @@ public static class Homecoming
                 // Town events can send a party off with a resolve bonus (DD1 resolve_xp_bonus_percent).
                 float bonus = expedition.PendingBuffs.TryGetValue(hero.Id, out var buffs)
                     ? buffs.Select(b => dd1.Buffs?.Get(b)).Where(b => b?.Stat == "resolve_xp_bonus_percent").Sum(b => b.Amount) : 0f;
+                bonus += equipmentBuffs?.Invoke(hero.Id)?.Where(b => b?.Stat == "resolve_xp_bonus_percent" && b.Rule == "always").Sum(b => b.Amount) ?? 0f;
                 result.XpGained = (int)Math.Round(ResolveXp(quest) * (1f + bonus));
                 hero.ResolveXp += result.XpGained;
+                if (buffs != null)
+                    hero.PendingBuffs.RemoveAll(b => buffs.Contains(b) && dd1.Buffs?.Get(b)?.DurationType == "quest_complete");
                 int before = hero.ResolveLevel;
                 hero.ResolveLevel = Math.Max(before, Math.Min(6, dd1.HeroResolveLevel(hero.ResolveXp)));
-                if (hero.ResolveLevel > before) log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");
+                if (hero.ResolveLevel > before)
+                {
+                    report.MessageActors.Add(CampaignJournal.Actor(hero, log.Count, ActivityEntryKind.LevelUp));
+                    log.Add($"{hero.Name} reached resolve level {hero.ResolveLevel}.");
+                }
             }
             result.ResolveAfter = hero.ResolveLevel;
+            CaretakerGoals.Record(estate, hero);
             result.ResolveXp = hero.ResolveXp;
+        }
+
+        // DD1: when a seasoned party fails a Darkest Dungeon quest, the roster learns from it
+        // (roster_buffs_to_apply_on_failure: +100% resolve XP on the next completed quest).
+        var party = outcomeList.Select(o => estate.Hero(o.HeroId) ?? estate.Graveyard.FirstOrDefault(g => g.Id == o.HeroId)).Where(h => h != null).ToList();
+        if (!success && quest.RosterBuffsOnFailure.Count > 0 && party.Count > 0 && party.Min(h => h.ResolveLevel) >= quest.RosterBuffMinResolve)
+        {
+            foreach (var h in estate.Roster)
+                foreach (var b in quest.RosterBuffsOnFailure.Where(b => !h.PendingBuffs.Contains(b)))
+                    h.PendingBuffs.Add(b);
+            log.Add("The survivors' tales steel the Hamlet's heroes for their next quest.");
         }
 
         estate.Quests.RemoveAll(q => q.Id == quest.Id);
         log.Add(success ? $"Quest complete: {quest}." : expedition.Retreated ? $"The party retreated from {quest}." : $"Quest failed: {quest}.");
+        CampaignJournal.Return(estate, report);
         return report;
     }
 
-    private static readonly HashSet<string> TrinketRarities = new() { "very_common", "common", "uncommon", "rare", "very_rare", "ancestral", "crimson_court", "trophy", "kickstarter" };
 }
 
 /// <summary>How an expedition ended, for the results screen.</summary>
@@ -160,8 +218,10 @@ public sealed class HomecomingReport
     public Dictionary<string, int> Gems = new();
     public int GemGold;
     public List<string> Trinkets = new();
+    public List<int> JournalPages = new();
     public List<Reward> Rewards = new();
     public List<string> Log = new();
+    public List<ActivityTownActor> MessageActors = new();
 }
 
 public sealed class HeroResult

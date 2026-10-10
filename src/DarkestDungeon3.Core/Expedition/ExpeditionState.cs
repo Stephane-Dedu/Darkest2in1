@@ -12,7 +12,18 @@ public sealed class ExpeditionState
     public int GoalProgress;
     public DungeonMap Map;
     public List<string> Party = new();           // hero ids, rank order
+    public Dictionary<string, ExpeditionHeroState> PartyStates = new();
     public Inventory Pack = new();
+    /// <summary>Resolved battle/camping loot awaiting dismissal, saved with its exact taken/remainder amounts.</summary>
+    public BattleSpoils PendingSpoils;
+    /// <summary>A resolved curio/quest result awaiting dismissal; its effects have already been applied.</summary>
+    public CurioReport PendingCurio;
+    /// <summary>The already-rolled encounter at the current spot, including surprise and camp-ambush identity.</summary>
+    public CrawlEvent PendingEncounter;
+    /// <summary>Resolved native fight and pre-fight party condition, retained until its outcome is known.</summary>
+    public FightCheckpoint FightCheckpoint;
+    /// <summary>Optional Faded Memory identity/return checkpoint; absent in existing expeditions.</summary>
+    public FadedMemoryEncounter FadedMemory;
     public float Light = 100f;
 
     /// <summary>Room the party stands in, or -1 while in a corridor.</summary>
@@ -23,6 +34,8 @@ public sealed class ExpeditionState
     public int HeadingRoomId = -1;
     /// <summary>The corridor square the party last stepped off into the current room (where a retreat leads).</summary>
     public int CameFromCorridorId = -1, CameFromTileIndex = -1;
+    /// <summary>Exact corridor position/direction to resume after a secret-room detour.</summary>
+    public int SecretReturnCorridorId = -1, SecretReturnTileIndex = -1, SecretReturnHeadingRoomId = -1;
     /// <summary>The DD1 monsters of the fight at <see cref="FightAt"/> (rolled when it starts, kept through a
     /// retreat so the same group waits there; its loot is theirs).</summary>
     public List<string> FightMonsters;

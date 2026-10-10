@@ -21,6 +21,8 @@ public sealed class BattleLoot
 
     // zone -> level -> kind (hall/room/boss) -> encounters
     private readonly Dictionary<string, Dictionary<int, Dictionary<string, List<Encounter>>>> _mash = new();
+    // DD1's "named:" rows (the hand-made maps' set fights): zone -> level -> name -> entries.
+    private readonly Dictionary<string, Dictionary<int, Dictionary<string, List<Encounter>>>> _named = new();
     private readonly Dictionary<string, List<(string Code, int Count)>> _monsterLoot = new();
 
     public int MonsterCount => _monsterLoot.Count;
@@ -54,6 +56,15 @@ public sealed class BattleLoot
                     foreach (var r in DarkestFile.Load(file))
                     {
                         if (!r.Has("types")) continue;
+                        if (r.Type == "named")
+                        {
+                            if (!loot._named.TryGetValue(zone, out var byLevel)) loot._named[zone] = byLevel = new Dictionary<int, Dictionary<string, List<Encounter>>>();
+                            if (!byLevel.TryGetValue(level, out var byName)) byLevel[level] = byName = new Dictionary<string, List<Encounter>>();
+                            string name = r.Str("name", "");
+                            if (!byName.TryGetValue(name, out var same)) byName[name] = same = new List<Encounter>();
+                            same.Add(new Encounter { Weight = r.Float("chance", 0, 1f), Monsters = r.Values("types").ToList() });
+                            continue;
+                        }
                         if (!kinds.TryGetValue(r.Type, out var list)) kinds[r.Type] = list = new List<Encounter>();
                         list.Add(new Encounter { Weight = r.Float("chance", 0, 1f), Monsters = r.Values("types").ToList() });
                     }
@@ -67,11 +78,33 @@ public sealed class BattleLoot
     {
         zone = Core.Dungeon.ZoneBase.Of(zone);
         if (zone == null || !_mash.TryGetValue(zone, out var levels) || levels.Count == 0) return new List<string>();
-        int want = difficulty >= 6 ? 5 : System.Math.Max(1, difficulty);
-        int level = levels.Keys.OrderBy(l => System.Math.Abs(l - want)).ThenBy(l => l).First();
-        var kinds = levels[level];
+        var kinds = levels[Level(levels.Keys, difficulty)];
         if (!kinds.TryGetValue(kind, out var list) || list.Count == 0)
             if (!kinds.TryGetValue(kind == "boss" ? "room" : "hall", out list) || list.Count == 0) return new List<string>();
+        return Pick(list, rng);
+    }
+
+    /// <summary>A hand-made map's set fight: DD1's <c>named:</c> mash row of that name, from the level file closest to
+    /// the quest difficulty that has it (the crow's lair is crow_A, B or C by level). Null when the zone has no such row.</summary>
+    public List<string> NamedEncounter(string zone, int difficulty, string name, Rng rng)
+    {
+        zone = Core.Dungeon.ZoneBase.Of(zone);
+        if (zone == null || string.IsNullOrEmpty(name) || !_named.TryGetValue(zone, out var levels)) return null;
+        var withName = levels.Where(l => l.Value.ContainsKey(name)).Select(l => l.Key).ToList();
+        if (withName.Count == 0) return null;
+        return Pick(levels[Level(withName, difficulty)][name], rng);
+    }
+
+    // DD1 quest difficulty -> mash level file (6, the Darkest Dungeon, reads level 5's when a zone has no level 6).
+    private static int Level(IEnumerable<int> levels, int difficulty)
+    {
+        int want = difficulty >= 6 ? 5 : System.Math.Max(1, difficulty);
+        var list = levels.ToList();
+        return list.Contains(difficulty) ? difficulty : list.OrderBy(l => System.Math.Abs(l - want)).ThenBy(l => l).First();
+    }
+
+    private static List<string> Pick(List<Encounter> list, Rng rng)
+    {
         float total = list.Sum(e => e.Weight), pick = (float)rng.NextDouble() * total;
         foreach (var e in list)
         {
@@ -119,7 +152,7 @@ public sealed class BattleLoot
     }
 }
 
-/// <summary>What the party picked up after a fight, and what didn't fit.</summary>
+/// <summary>What the party picked up from a battle or camping skill, and what didn't fit.</summary>
 public sealed class BattleSpoils
 {
     public string Kind;

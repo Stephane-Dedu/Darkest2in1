@@ -83,6 +83,159 @@ public class CrawlTests
     }
 
     [Fact]
+    public void EatingAProvisionHealsFivePercent()
+    {
+        var (crawl, party) = NewCrawl("crypts", "short", "explore", 5, food: 2);
+        crawl.Begin();
+        string hero = party.Alive[0];
+        party.Hp[hero] = 0.5f;
+        Assert.NotNull(crawl.UseSupply(hero, Supply.Food));
+        Assert.Equal(0.55f, party.Hp[hero], 3);                 // DD1 provision_hp_heal 0.05
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+        party.Hp[hero] = 1f;
+        Assert.Null(crawl.UseSupply(hero, Supply.Food));        // nothing to heal: the food stays
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+        Assert.Null(crawl.UseSupply(null!, Supply.Food));
+        Assert.Null(crawl.UseSupply("not_in_the_party", Supply.Food));
+        party.Hp[hero] = 0f;
+        Assert.Null(crawl.UseSupply(hero, Supply.Food));        // stale selected dead hero
+        Assert.Equal(1, crawl.State.Pack.Count(Supply.Food));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void OnlyDeliberateDisarmingCanAvoidATrap(bool scouted)
+    {
+        var content = CrawlContent.Load(Dd1Install.Find());
+        int disarmed = 0;
+        for (int seed = 1; seed <= 32; seed++)
+        {
+            var tile = new HallTile { Index = 0, Content = HallContent.Trap, ContentId = "spikes", Scouted = scouted };
+            var map = new DungeonMap
+            {
+                Rooms = { new Room { Id = 0, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
+                Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles = { tile } } },
+            };
+            var state = new ExpeditionState
+            {
+                Quest = new QuestOffer { Dungeon = "crypts", Type = "explore", Difficulty = 1, ScoutingEnabled = false },
+                Map = map, Seed = seed, Party = { "a", "b" },
+            };
+            var party = new FakeParty("a", "b");
+            var crawl = new Crawl(state, Rules, party, content) { HeroDd1Class = _ => "highwayman" };
+            crawl.Begin();
+            var events = crawl.Travel(1);
+            if (scouted)
+            {
+                Assert.True(crawl.IsBlocked);
+                Assert.Equal(1f, party.Hp["a"]);
+                Assert.Equal(1f, party.Hp["b"]);
+                events = crawl.DisarmTrap("b");
+                Assert.All(events.Where(e => e.Type == CrawlEventType.TrapSprung || e.Type == CrawlEventType.TrapDisarmed), e => Assert.Equal("b", e.HeroId));
+            }
+            else
+            {
+                Assert.Contains(events, e => e.Type == CrawlEventType.TrapSprung);
+                Assert.DoesNotContain(events, e => e.Type == CrawlEventType.TrapDisarmed);
+                Assert.Equal(0.75f, party.Hp["a"]);   // DD1 spikes: health -0.25
+            }
+            Assert.True(tile.Resolved);
+            Assert.False(crawl.IsBlocked);
+            if (events.Any(e => e.Type == CrawlEventType.TrapDisarmed)) disarmed++;
+        }
+        Assert.Equal(scouted, disarmed > 0);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void PassingASpottedTrapSpringsItButBackingAwayDoesNot(bool forward)
+    {
+        var tile = new HallTile { Index = 0, Content = HallContent.Trap, ContentId = "spikes", Scouted = true, Visited = true };
+        var map = new DungeonMap
+        {
+            Rooms = { new Room { Id = 0, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
+            Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1, Tiles = { tile, new HallTile { Index = 1 } } } },
+        };
+        var state = new ExpeditionState
+        {
+            Quest = new QuestOffer { Dungeon = "crypts", Type = "explore", Difficulty = 1, ScoutingEnabled = false },
+            Map = map, Seed = 8, Party = { "a" }, RoomId = -1, CorridorId = 0, TileIndex = 0, HeadingRoomId = 1,
+        };
+        var party = new FakeParty("a");
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        Assert.True(crawl.IsBlocked);
+        var events = crawl.Step(forward);
+        Assert.Equal(forward, tile.Resolved);
+        Assert.Equal(forward ? 0.75f : 1f, party.Hp["a"]);
+        Assert.DoesNotContain(events, e => e.Type == CrawlEventType.TrapDisarmed);
+        if (forward)
+        {
+            Assert.Contains(events, e => e.Type == CrawlEventType.TrapSprung);
+            Assert.Equal(0, state.TileIndex);   // interaction first, then movement
+            crawl.Step(true);
+            Assert.Equal(1, state.TileIndex);
+        }
+        else
+        {
+            Assert.True(state.InRoom);
+            Assert.Equal(0, state.RoomId);
+        }
+    }
+
+    [Theory]
+    [InlineData("rubble", 0, 0.95f, 1, 80f, 0)]
+    [InlineData("rubble", 1, 1f, 0, 100f, 0)]
+    [InlineData("ancestor", 0, 1f, 0, 100f, 0)]
+    [InlineData("ancestor", 1, 1f, 0, 100f, 1)]
+    public void ObstaclesUseDd1sInheritedCostsAndAncestorOverrides(string id, int shovels, float hp, int stress, float light, int left)
+    {
+        var tile = new HallTile { Content = HallContent.Obstacle, ContentId = id };
+        var state = new ExpeditionState
+        {
+            Quest = new QuestOffer { Dungeon = "crypts", Difficulty = 1 },
+            Map = new DungeonMap { Corridors = { new Corridor { Tiles = { tile } } } },
+            RoomId = -1, CorridorId = 0, TileIndex = 0, Party = { "a", "b" },
+        };
+        state.Pack.Add(Supply.Shovel, shovels);
+        var party = new FakeParty("a", "b");
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        Assert.True(crawl.IsBlocked);
+        Assert.Contains(crawl.ClearObstacle(), e => e.Type == CrawlEventType.ObstacleCleared);
+        Assert.False(crawl.IsBlocked);
+        Assert.All(party.Hp.Values, v => Assert.Equal(hp, v, 3));
+        // DD1's "Stress 2" effect is 15 stress, stochastically rounded to one or two DD2 points.
+        Assert.All(party.Stress.Values, v => Assert.InRange(v, stress, stress == 0 ? 0 : 2));
+        Assert.Equal(light, state.Light);
+        Assert.Equal(left, state.Pack.Count(Supply.Shovel));
+        crawl.ClearObstacle();
+        Assert.Equal(left, state.Pack.Count(Supply.Shovel));   // already cleared: no second cost
+    }
+
+    [Fact]
+    public void SurpriseFollowsDd1ByKnowledge()
+    {
+        var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);
+        crawl.Begin();
+        crawl.State.Light = 100f;
+        var band = Rules.Band(100f);
+        Assert.Equal(25f, band.MonstersSurprisedIncrease, 3);   // DD1's radiant band: monsters +25%, heroes +0
+        Assert.Equal(0f, band.HeroesSurprisedIncrease, 3);
+        var unknown = crawl.SurpriseChances(corridor: true, known: false, ambush: false);
+        Assert.Equal(0.1f, unknown.Heroes, 3);
+        Assert.Equal(0.35f, unknown.Monsters, 3);   // 0.1 + 0.25
+        var known = crawl.SurpriseChances(corridor: false, known: true, ambush: false);
+        Assert.Equal(0f, known.Heroes, 3);          // DD1: surprise_known_room_party_base_chance -1.0
+        Assert.Equal(0.5f, known.Monsters, 3);      // surprise_known_room_monsters_base_chance 0.25 + 0.25
+        var ambush = crawl.SurpriseChances(corridor: true, known: false, ambush: true);
+        Assert.Equal(1f, ambush.Heroes, 3);         // surprise_ambush_party_base_chance 1.0: always
+        Assert.Equal(0f, ambush.Monsters, 3);       // native forced branch bypasses torch/buff modifiers
+        crawl.State.Light = 0f;                     // darkness raises the party's chance, never above 65%
+        Assert.True(crawl.SurpriseChances(corridor: true, known: false, ambush: false).Heroes <= 0.65f);
+    }
+
+    [Fact]
     public void MonsterDarknessLowersTheTorch()
     {
         var (crawl, _) = NewCrawl("crypts", "short", "explore", 5);
@@ -107,6 +260,7 @@ public class CrawlTests
         float afterFirst = crawl.State.Light;
         Assert.Equal(94f, afterFirst);
         if (crawl.IsBlocked) crawl.ResolveBattle();
+        if (crawl.LastSpoils != null) Assert.True(crawl.DismissSpoils(crawl.LastSpoils));
         crawl.Step(forward: false); // back into the entrance room
         Assert.True(crawl.State.InRoom);
         crawl.Travel(other);        // the first square again: already visited
@@ -159,6 +313,7 @@ public class CrawlTests
 
             while (!crawl.State.QuestComplete && guard++ < 5000)
             {
+                if (crawl.LastSpoils != null) { Assert.True(crawl.DismissSpoils(crawl.LastSpoils)); continue; }
                 if (crawl.IsBlocked)
                 {
                     if (crawl.State.InRoom || crawl.CurrentTile.Content == HallContent.Battle) { crawl.ResolveBattle(); battles++; }
@@ -215,21 +370,25 @@ public class CrawlTests
     [Fact]
     public void HallwayStressAveragesLikeDd1()
     {
-        // DD1: 30% per square of 2 stress (of 100) per hero. In DD2 points that's 0.06 per hero per square.
+        // DD1: 30% per empty forward square of 2 stress on one hero. DD2 mean: 0.06 for the party.
         int squares = 0, stress = 0;
-        for (int seed = 0; seed < 300; seed++)
+        for (int seed = 0; seed < 1000; seed++)
         {
             var (crawl, party) = NewCrawl("crypts", "medium", "explore", seed, torches: 0);
             crawl.Begin();
             crawl.State.Light = 100;
             var map = crawl.State.Map;
             int target = map.Neighbours(map.EntranceRoomId).First();
+            var corridor = map.FindCorridor(map.EntranceRoomId, target);
+            var destination = corridor.RoomA == map.EntranceRoomId ? corridor.Tiles.First() : corridor.Tiles.Last();
+            destination.Content = HallContent.Empty;
+            destination.Resolved = true;
             crawl.Travel(target);
             squares++;
             stress += party.Stress.Values.Sum();
         }
-        double perHeroPerSquare = stress / (double)(squares * 4);
-        _out.WriteLine($"stress per hero per new square at full light: {perHeroPerSquare:F3}");
-        Assert.InRange(perHeroPerSquare, 0.03, 0.10);
+        double perPartyPerSquare = stress / (double)squares;
+        _out.WriteLine($"stress per party per empty forward square at full light: {perPartyPerSquare:F3}");
+        Assert.InRange(perPartyPerSquare, 0.03, 0.10);
     }
 }

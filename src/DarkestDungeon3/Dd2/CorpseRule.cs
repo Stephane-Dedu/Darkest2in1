@@ -6,23 +6,34 @@ using HarmonyLib;
 namespace DarkestDungeon3.Dd2;
 
 /// <summary>
-/// DD1's corpse rule in our fights: a monster killed by a critical hit or by bleed/blight (damage over time) leaves
-/// no corpse. DD2 turns a dead actor into its death class (its "_corpse" actor) in Kill, asking
-/// GetIsDeathClassValid; we remember how the killing damage was dealt and veto ordinary corpses. Boss parts
-/// ("boss_..._corpse") and other death classes (phases like the Dreaming General's cadaver) are left alone.
+/// DD1's corpse rule in our fights: a DD1 monster leaves a corpse only if its class has one (death_class in its
+/// info.darkest; maggots don't), and never after a critical hit or bleed/blight (damage over time). DD2 turns a dead
+/// actor into its death class (its "_corpse" actor) in Kill, asking GetIsDeathClassValid; we remember how the killing
+/// damage was dealt and veto ordinary corpses. Boss parts ("boss_..._corpse") and other death classes (phases like the
+/// Dreaming General's cadaver) are left alone.
 /// </summary>
 internal static class CorpseRule
 {
     [System.ThreadStatic] private static uint _hitActor;
     [System.ThreadStatic] private static bool _hitIsCrit, _hitIsDot;
 
+    private static Core.Dd1.Dd1Corpse _corpses;
+
     public static bool NoCorpse(ActorInstance actor)
     {
-        if (!Dd2Combat.InFight || actor == null || actor.ActorGuid != _hitActor || !(_hitIsCrit || _hitIsDot)) return false;
+        if (!Dd2Combat.InFight || actor == null) return false;
         if (System.Linq.Enumerable.Contains(Dd2Api.Party, actor.ActorGuid)) return false;   // heroes: DD2's own rules
         string death = actor.DeathActorDataId;
         if (death == null || !death.EndsWith("_corpse") || death.StartsWith("boss_")) return false;
-        Plugin.Log.LogInfo($"[combat] {actor.ActorDataId} slain by {(_hitIsCrit ? "a critical hit" : "bleed or blight")}: no corpse");
+        bool hit = actor.ActorGuid == _hitActor, crit = hit && _hitIsCrit, dot = hit && _hitIsDot;
+        // The DD1 monster drawn over this stand-in decides (its death_class); other enemies get DD1's usual rule.
+        string dd1 = Dd1MonsterView.Dd1Of(actor.ActorGuid);
+        var install = Runtime.Session.Current?.Dd1;
+        if (_corpses == null && install != null) _corpses = new Core.Dd1.Dd1Corpse(install);
+        bool leaves = (dd1 != null ? _corpses?.LeavesCorpse(dd1, crit, dot) : null) ?? !(crit || dot);
+        if (leaves) return false;
+        string why = crit ? "a critical hit" : dot ? "bleed or blight" : "DD1 gives it no corpse";
+        Plugin.Log.LogInfo($"[combat] {dd1 ?? actor.ActorDataId} slain ({why}): no corpse");
         return true;
     }
 

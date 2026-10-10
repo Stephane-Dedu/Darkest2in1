@@ -31,9 +31,11 @@ internal sealed class Session
     public Provisioner Provisioner;
     public ZoneEncounters Zones;
     public Dd1Bestiary Bestiary;
+    public Dd1Trinkets MemoryTrinkets;
 
-    public SaveFile Save;
-    public string SavePath;
+    private readonly CampaignSaveSlot _slot = new();
+    public SaveFile Save { get => _slot.Save; set => _slot.Save = value; }
+    public string SavePath => _slot.Path;
 
     /// <summary>Start loading DD1 content in the background. Safe to call more than once.</summary>
     public static void BeginLoad(string configuredDd1Path, string pluginDir)
@@ -53,6 +55,7 @@ internal sealed class Session
                 s.Campaign = Dd1Campaign.Load(dd1);
                 s.Buildings = Buildings.Load(dd1);
                 s.Content = CrawlContent.Load(dd1);
+                s.MemoryTrinkets = Dd1Trinkets.LoadBase(dd1);
                 s.Rules = CrawlRules.FromDd1(s.Campaign.Rules);
                 s.Lore = Dd1Lore.Load(dd1);
                 s.Provisioner = Provisioner.Load(dd1, s.Content.Items);
@@ -85,38 +88,43 @@ internal sealed class Session
 
     public void LoadOrCreate(int slot)
     {
-        SavePath = SlotPath(slot);
-        Save = SaveFile.Load(SavePath);
+        _slot.Select(SlotPath(slot));
         if (Save == null)
         {
             Save = new SaveFile { Estate = Hamlet.NewEstate(Environment.TickCount, Campaign, Buildings, Catalog, Content.Camping) };
             Plugin.Log.LogInfo($"[session] new estate in slot {slot}");
             Persist();
+            // DD1 opens a new campaign with its cinematics: "House of Ruin", then "The Old Road".
+            Ui.CinematicPlayer.Play(Core.Dd1.Dd1Cinematic.Opening);
         }
-        else Plugin.Log.LogInfo($"[session] loaded slot {slot}: week {Save.Estate.Week}, {Save.Estate.Roster.Count} heroes");
+        else
+        {
+            if (Save.RecoveredFromBackup) Plugin.Log.LogWarning($"[session] slot {slot} recovered from its previous-save backup");
+            Plugin.Log.LogInfo($"[session] loaded slot {slot}: week {Save.Estate.Week}, {Save.Estate.Roster.Count} heroes");
+        }
         Migrate(Save.Estate);
     }
 
     /// <summary>One-time fixes for estates saved by older builds of the mod.</summary>
     private void Migrate(Estate estate)
     {
-        // 0.2.0 started estates without the skipped tutorial's payout.
-        var tutorial = Campaign.Goals?.Plot.Find(p => p.Id == "plot_tutorial_crypts");
-        if (tutorial != null && !estate.CompletedPlotQuests.Contains(tutorial.Id))
-        {
-            foreach (var r in tutorial.Rewards) if (r.Type != "trinket") estate.Add(r.Type, r.Amount);
-            estate.CompletedPlotQuests.Add(tutorial.Id);
-            Plugin.Log.LogInfo("[session] migrated estate: added the tutorial's rewards");
-            Persist();
-        }
+        // Campaign/layout migration is owned by Core. Loading must not complete or pay the tutorial.
         var repairs = Hamlet.RepairEstate();
         foreach (var line in repairs) Plugin.Log.LogInfo("[session] repaired: " + line);
         if (repairs.Count > 0) Persist();
     }
 
-    public void Persist()
+    public bool Persist()
     {
-        try { Save?.Save(SavePath); }
-        catch (Exception e) { Plugin.Log.LogError("Saving failed: " + e); }
+        try
+        {
+            var driver = Driver.Instance;
+            if (Save?.Expedition != null && driver?.Crawl?.State == Save.Expedition
+                && driver.Party != null && driver.Phase is Phase.Crawling or Phase.Fighting)
+                driver.CapturePartyState();
+            Save?.Save(SavePath);
+            return Save != null;
+        }
+        catch (Exception e) { Plugin.Log.LogError("Saving failed: " + e); return false; }
     }
 }

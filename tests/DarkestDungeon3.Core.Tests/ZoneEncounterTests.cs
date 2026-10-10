@@ -39,7 +39,8 @@ public class ZoneEncounterTests
     [Fact]
     public void EveryDd1BossHasADd2Fight()
     {
-        foreach (var plot in Dd1.Goals.Plot.Where(p => p.Type == "kill_boss" && p.Progression))
+        // The progression bosses and the crow (its quest comes with a town event).
+        foreach (var plot in Dd1.Goals.Plot.Where(p => p.Type == "kill_boss" && (p.Progression || p.Id == "plot_crow_trinket")))
         {
             var goal = Dd1.Goals.Goals[plot.GoalIds[0]];
             string boss = goal.MonsterClasses.First();
