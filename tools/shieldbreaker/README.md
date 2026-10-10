@@ -68,10 +68,10 @@ retain their DD1 sprite presentation regardless of this setting.
 
 ## Native checks still required
 
-No game was launched for this implementation. Offline build, tests and renders pass;
-the native model loader, final palette, scale and animation timing are unobserved.
-When the owner authorizes a game test, use estate 2 with the project's backup/restore
-procedure. Recruit or use Shieldbreaker and check:
+The implementation was built without launching. The owner later authorized a launch
+and requested Shieldbreaker in a roster. Estate 2 now contains Hachet; native logs confirm
+the revised mesh and corridor rig bind. Final palette, scale and animation timing still
+need visual review. Use estate 2 with the project's backup/restore procedure and check:
 
 - Corridor idle, forward/backwards walk, turns, room transitions and camp framing.
 - A normal Hellion beside her, to verify that shared assets remain unchanged.

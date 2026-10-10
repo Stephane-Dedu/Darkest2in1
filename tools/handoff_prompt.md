@@ -10,6 +10,8 @@ Latest task, round205: Shieldbreaker's model reworked against her actual DD1 des
 tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
 The model is built and checked offline; native appearance and combat timing remain unverified.
 The implementation was completed without launching. The owner then requested a launch of the updated install.
+Estate 2 now includes Shieldbreaker Hachet for the owner's test; her revised pack and corridor rig bound
+successfully in native logs. Keep the roster addition, and do not automatically restore its pre-test backup.
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.
 Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/trinket ideas are in PARITY.md.

@@ -4699,3 +4699,17 @@ enter Git; derived meshes, textures, extracted reference art and Blender/preview
 Owner: "you can launch the game". Launched C:\Users\Piral\darkestwithdlc\game\Darkest Dungeon II.exe
 at 20:08 local time, PID 52396. This supersedes the no-launch instruction above. No game input or estate
 selection was sent; Shieldbreaker's native appearance and timing still need review.
+
+### Shieldbreaker added for the owner's test
+
+Owner asked to add her to a roster. Estate 2's two save files were backed up first at
+C:\Users\Piral\.universal-modder\backups\shieldbreaker-roster-20261010-201207. Ctrl+F4's existing
+slot-2-only helper offered Shieldbreaker Hachet, plus the missing Bounty Hunter and Crusader. The native
+roster and saved estate then confirmed Hachet (1de29d310d3b, shieldbreaker, resolve 0), with all six prior
+heroes retained. The test roster now has nine heroes, including the Crusader and Bounty Hunter. These
+additions are intentionally kept for the owner's test; do not restore this backup automatically.
+
+The owner continued interacting with the game and embarked; agent input stopped. Runtime logged
+`[shieldbreaker-3d] 7: 30480 vertices, native rig, idle/attack/defend ready` and her corridor gait ready.
+This verifies native binding of the revised pack, not final visual quality or combat skill timing.
+No restart, deployment or protected-save file access was performed for the roster request.
