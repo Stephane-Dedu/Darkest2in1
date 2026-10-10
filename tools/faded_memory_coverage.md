@@ -318,3 +318,24 @@ after all equipment samples; its cause is unverified. This probe was not excepti
 Before the planned second icon probe, another owner chat began corridor animation work and launched
 its estate2 test in the same checkout. No icon patch, second probe, deployment or game shutdown was
 performed here. Resume that gap after the other chat has finished and restored its test save.
+
+## Native reward icon adapter: round188
+
+The corridor chat finished at fb55eca and restored its test save. Dd1TrinketIcons now adapts only
+InventoryUiUtils.GetItemIconPrefab/IsItemIconLoaded, both ItemDefinition and IReadOnlyItemInstance
+overloads. Known DD1 items use their installed panels/icons_equip/trinket/inv_trinket+ID.png, matching
+Unity WagonSlot's identity lookup. A separately cached clone of DD2's default icon prefab keeps its
+VariableAppearanceBhv structure and native pooling. The original resource/prefab remains unchanged;
+missing local art and unrelated items retain ordinary native behaviour. Loading waits asynchronously
+for the template. No generic resource method is patched and no game art is shipped.
+
+Native PID35496 verifies two reward identities, both overloads, loaded state, appearance0/1, native
+pool recycle/re-spawn and unchanged original sprites. The first screenshot's test canvas was covered
+by the mod's IMGUI. Second PID2944 fails only its private harness at FindObjectOfType<UiRoot>(), before
+drawing the canvas. Stop after two attempts. Full native inventory visual/interaction acceptance is
+still open; next harness should use the retained UI component or include DontSave objects explicitly.
+No native panel screenshot is claimed from these method/pool checks.
+
+All917 Core +131 UI tests pass; normal Release Rebuild/deploy passes, deployed assembly hashes match.
+Both exact test PIDs stopped/waited, estate2 main/.bak and DebugKeys restored with SHA256 checks.
+Private evidence is in round188/round188b. The owner paused work after these checks; do not auto-resume.

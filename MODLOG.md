@@ -4041,3 +4041,33 @@ estate_2.json and .bak copied back and independently SHA256-verified; protected
 slots not read/changed by this workflow. Native footage, logs and backups remain
 outside Git at C:\Users\Piral\.universal-modder\inspection\corridor-walk-20261010;
 corridor-walk.mp4 is the revised owner-review preview. No pending save restore.
+
+## Round188: DD1 reward icons through native inventory methods
+
+Dd1TrinketIcons patches only the four concrete InventoryUiUtils icon/load methods. Known custom
+items use installed inv_trinket+ID.png, consistent with Unity WagonSlot. A separate cached clone of
+DD2's default prefab retains VariableAppearanceBhv and pool support; native resources/shared prefabs
+remain untouched. Missing local art and unrelated items fall through. Template loading is asynchronous.
+
+First native estate2 probe PID35496 verifies definition/instance overload equality, loaded=True,
+appearance0/1, pooled recycle/re-spawn and unchanged default sprite IDs for Pistol/Seal. Canvas was
+covered by mod IMGUI, so no native-panel visual acceptance. Second PID2944 fails its private harness
+at FindObjectOfType<UiRoot>() before drawing; likely DontSave lookup exclusion, not established as a
+production icon failure. Two-attempt limit reached. Keep full native inventory visual/interaction [?].
+
+All917 Core +131 UI tests pass; parallel test builds initially collided on the shared Core output,
+then sequential rerun passed. Final normal Release Rebuild/deploy passes; both deployed DLL hashes
+match. Both exact PIDs stopped/waited; estate2 main/.bak and DebugKeys restored/SHA256 checked.
+Evidence and raw native data remain private in rea-workbench/evidence/round188 and round188b.
+
+## Status 2026-10-10: owner explicitly paused; round188 ready for later resume
+
+- Owner said "pause for now" after the round188 checks. Stop the iteration loop and pause the resume
+  automation. Do not resume on quota reset or a stale heartbeat without a later owner instruction.
+- Main includes corridor work fb55eca, preserved here. Round188 adds native DD1 icon loading/pooling;
+  full native panel screenshot/interaction remains [?]. Next harness should use the retained UiRoot
+  reference or include DontSave objects, rather than FindObjectOfType's default lookup.
+- No game or probe remains active, estate2/source restored/hash checked, normal Release deployed with
+  matching DLL hashes. Commit/push only this completed slice and handoff, then remain paused.
+- Later O3 candidates: native class-restricted equip validation, saved memory restart/retreat, then
+  complete boss/region/tier expansion. O6 follows O3. Global guarantee/coverage remains incomplete.
