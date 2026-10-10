@@ -4864,3 +4864,14 @@ pale: 297 cut-out triangles dropped, 1297 two-sided triangles doubled, transpare
 Ink from normal-map gradients (top 9%, one pixel wider) instead of blurred dark areas. Colour gain 1.0.
 961 Core tests pass. Estate 2 restored (2f230b7f/dd18f310). Next: armour speckle, waist cloth flap, maybe a
 little larger, then the death animation and multiple-fight cleanup.
+
+## Round210: exported boss polish (2026-10-10, /loop iteration 2)
+
+Ink: the export's normal maps carry fine surface grain, so gradient ink speckled the armour; a 3x3 smoothing
+first and the top 6% of turns (was 9%) give plate lines; the waist cloth now reads as a dark flap. Size 1.5x the
+knight's chain length: towers over the party with the head clear of the HUD, and stays framed in DD2's close-up
+attack shots (seen in Cardonell's Collect Bounty). Death: the first F10 triggers the knight's Armor Break phase
+(raised-sword stance, followed), the second kills it; the fight returns in place at once, so no death animation
+shows (true of every enemy with the in-place return). A second F1 fight after the spoils builds the model again
+from cached textures; nothing is left behind. Estate 2 restored (2f230b7f/dd18f310); deployed build matches
+(65452369). The loop ends here: size, animation and look are in place within the stand-in approach.

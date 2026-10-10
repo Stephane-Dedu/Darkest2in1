@@ -23,7 +23,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed class ExportedBoss : MonoBehaviour
 {
     public const string Donor = "lost_battalion_knight";
-    private const float Size = 1.35f, ColourGain = 1.0f, EdgeShare = 0.09f;
+    private const float Size = 1.5f, ColourGain = 1.0f, EdgeShare = 0.06f;
 
     private sealed class Pair
     {
@@ -386,7 +386,7 @@ internal sealed class ExportedBoss : MonoBehaviour
         var normals = Load(normalPath);
         if (normals == null) return Textures[key] = White();
         int w = normals.width, h = normals.height;
-        var n = normals.GetPixels32();
+        var n = Smooth(normals.GetPixels32(), w, h);   // the export's fine surface grain would otherwise ink as speckle
         Destroy(normals);
         var turn = new int[n.Length];
         var histogram = new int[766];
@@ -413,6 +413,27 @@ internal sealed class ExportedBoss : MonoBehaviour
         texture.SetPixels32(ink);
         texture.Apply(updateMipmaps: true, makeNoLongerReadable: true);
         return Textures[key] = texture;
+    }
+
+    /// <summary>Each texel averaged with its eight neighbours.</summary>
+    private static Color32[] Smooth(Color32[] p, int w, int h)
+    {
+        var result = new Color32[p.Length];
+        for (int y = 0; y < h; y++)
+            for (int x = 0; x < w; x++)
+            {
+                int r = 0, g = 0, b = 0, count = 0;
+                for (int dy = -1; dy <= 1; dy++)
+                    for (int dx = -1; dx <= 1; dx++)
+                    {
+                        int xx = x + dx, yy = y + dy;
+                        if (xx < 0 || yy < 0 || xx >= w || yy >= h) continue;
+                        var c = p[yy * w + xx];
+                        r += c.r; g += c.g; b += c.b; count++;
+                    }
+                result[y * w + x] = new Color32((byte)(r / count), (byte)(g / count), (byte)(b / count), 255);
+            }
+        return result;
     }
 
     private static Texture2D Load(string path)
