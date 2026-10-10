@@ -4396,3 +4396,39 @@ after the fade, then hold D/A or the corridor edges to walk; wheel-zoom and drag
 map, check tooltips/clicks at both limits and enter/return through a secret door.
 Round196 upper-body animation still awaits owner visual review. No running game,
 temporary probe or save restore pending. The parity loop remains paused.
+
+## Round198: register the owner's combined DLC source and compare versions (2026-10-10)
+
+Owner supplied C:\Users\Piral\darkestwithdlc\game with DD1 and DD2 DLC files,
+then asked whether using it would break the existing reverse-engineering bases.
+Read-only inventory finds DD1 data plus folders 1117860_arena_mp, 445700_musketeer,
+4964110_fires_edge, 580100_crimson_court, 702540_shieldbreaker and
+735730_color_of_madness. Fire's Edge contains Duelist and Runaway hero folders.
+DD2 StreamingAssets/Excel includes dlc_dul_cru, dlc_catacombs, dlc_origin_skins and
+dlc_supporter data. File presence does not establish runtime DLC ownership/loading.
+
+The DD2 executable, UnityPlayer.dll and all164 managed DLLs match the current modded
+install by SHA256, with no added/missing DLLs. IronCrown also matches C:\Users\Piral\dd2-decomp\refs:
+DD97E30F2F37E2A287633AB322B8FD18BCFE9E240903713A5C2AE00C894692E6.
+The Unity runtime remains 2022.3.62. The new DD1 shared/rules.json,
+scripts/map_generator.darkest, campaign/quest/quest.types.json,
+campaign/quest/quest.plot_quests.json and trinkets/base.entries.trinkets.json
+match the Steam source exactly. This is sampled data compatibility, not a claim
+that every DD1 DLC rule matches the existing native code map. The svn_revision.txt
+bytes differ and neither file is a readable version string.
+
+Existing C:\Users\Piral\dd2-decomp and D:\dd1-decomp stay intact. The DD1 native
+manifest still identifies its original executable as 4d78fbfa...; DLC-specific rules
+can extend the evidence without replacing that baseline. The new folder has no
+BepInEx loader yet. No active build/runtime paths or mod settings were changed,
+and no game was launched or campaign save accessed. No code/test changes this round.
+
+## Status 2026-10-10: DLC folder inventoried, active paths unchanged
+
+Round197 remains deployed in C:\Users\Piral\DarkestDungeon3\game, with round196/197
+native review pending. The owner has not yet chosen whether the new DLC folder
+becomes the active install; their response asked about preserving reverse-engineering
+work. DD2's checked binaries match and DD1's sampled core data match, so the existing
+references can remain the baseline. If the new folder is selected, configure local
+build/deployment, the loader, DD1 source and private art paths together. Preserve the
+old install and both research workspaces. No game, probe or restore pending; loop paused.
