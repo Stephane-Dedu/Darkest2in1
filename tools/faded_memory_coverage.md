@@ -293,3 +293,28 @@ All910 Core +125 UI =1035 tests and normal Release Rebuild pass. Exact PIDs stop
 .bak and DebugKeys restored/hash checked; normal DLLs rebuilt/deployed with stopped game. Private
 evidence in round185 and round185b. Native restart, retreat, unreplaced corpse expiry, conditional
 equipment and additional bosses/tiers remain required before claiming global feature completion.
+
+## Native reward equipment evaluation: round187
+
+An isolated estate2 fixture cold-restored Ancestor's Pistol and Martyr's Seal on Leper. Native
+TrinketItemInventory removal gives max HP44/speed2; native re-equipment gives HP51/speed5. Refreshing
+BuffContainer with actual skill definitions gives melee crit0, ranged crit0.05. At fixture HP0,
+Martyr's Seal gives melee crit0.14 and damage multiplier1.6; restoring HP removes those conditions.
+These are native equipment/stat queries with supplied condition inputs, not a new skill/victory test.
+The DD1 installed buff definitions and the existing adapter remain unchanged in this acceptance round.
+
+Both items appear with their correct locally loaded DD1 PNGs in the mod HeroSheet. Native
+ResourceDatabaseItem has no entry for either custom ID and InventoryUiUtils.IsItemIconLoaded returns
+false. Native inventory art therefore remains missing. Use narrow concrete inventory-method patches
+and a cloned native icon prefab retaining VariableAppearanceBhv; avoid shared generic resource patches.
+Native class-restricted equip validation also remains a separate gap from Core catalogue restrictions.
+
+Evidence is private at rea-workbench/evidence/round187. Exact PID4776 stopped; DebugKeys and estate2
+main/.bak were restored and SHA256 checked. Source matches its original hash. The probe Release build
+passed. Existing baseline validation is917 Core +125 UI; this documentation slice changes no runtime
+code. A later ordinary hall-fight transition logged native IMainInstaller uninstall KeyNotFoundException
+after all equipment samples; its cause is unverified. This probe was not exception-free.
+
+Before the planned second icon probe, another owner chat began corridor animation work and launched
+its estate2 test in the same checkout. No icon patch, second probe, deployment or game shutdown was
+performed here. Resume that gap after the other chat has finished and restored its test save.

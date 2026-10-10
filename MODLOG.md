@@ -3971,3 +3971,38 @@ Keep the old branch as history; no deletion requested. DD2 stopped and original 
   then broaden regional/tier coverage. Actual Necromancer skill victory/return and owner rendering
   fixes are accepted; full-health balance and global guarantee remain incomplete. Portrait XP now
   applies in Core; native results presentation remains [?]. Keep region switch and protected saves.
+
+## Round187: native DD1 reward equipment acceptance
+
+Cold estate2 restoration retains Ancestor's Pistol and Martyr's Seal. Native inventory removal and
+re-equipment give baseline HP44/speed2 versus equipped HP51/speed5. Native BuffContainer evaluation
+with actual skill definitions gives melee crit0/ranged crit0.05, and fixture Death's Door gives melee
+crit0.14/damage1.6. Restored HP removes the conditional effect. This verifies stat/condition evaluation,
+not an additional native skill or return. Installed DD1 effects and runtime code did not change.
+
+Native ResourceDatabaseItem lacks both custom icon entries; InventoryUiUtils.IsItemIconLoaded is
+false. Mod HeroSheet already draws the correct local DD1 art. Native icon adapter remains the next
+slice, scoped to concrete inventory UI methods and a cloned native prefab retaining appearance
+components. Never patch shared generic resource getters. Native class-restricted equip policy is a
+separate newly recorded gap; Core catalogue restrictions alone do not establish native enforcement.
+
+Probe Release build passed. Existing baseline tests917 Core +125 UI passed before this acceptance
+round. Exact test PID4776 stopped; estate2 main/.bak and DebugKeys restored with matching SHA256.
+Later ordinary hall-fight transition logs native Globals.InvokeUninstallCallbacks<IMainInstaller>
+KeyNotFoundException after equipment samples. Cause/reproducibility unverified, recorded separately;
+do not label this probe exception-free. Evidence and probe scripts remain private in round187.
+
+## Status 2026-10-10: round187 stats accepted; another chat owns active corridor test
+
+- Main merge269640b is pushed. Round187 records native conditional equipment acceptance only; no
+  icon runtime patch or second native attempt yet. Next O3 gap is native item icons, then saved
+  memory restart/retreat and broader complete boss/region/tier adapters. Global O3 remains incomplete.
+- Another owner chat, "Add corridor-ready walking models", is actively editing HeroStage, Driver,
+  project files and corridor motion/tests in this same checkout. Its DD2 PID35780 is running estate2.
+  Leave those changes, game and save alone. Avoid another build/deploy/native probe until it finishes
+  and restores its own estate2 backup. This chat's earlier estate2/DebugKeys restoration completed.
+- Normal DebugKeys source SHA256 remains3342e5b2e37c5d37c46fb35e887f332cc58238800228605741bd25de209e7ba2.
+  The other chat rebuilt/deployed and launched after this round's temporary probe was removed.
+- Resume automation should first check usage and other active work. Usage68%, ordinary allowed at
+  this boundary; quota reset1791624236. Record only this round's documentation in its commit; preserve
+  all unrelated corridor changes. Do not stop the other chat's game or claim its acceptance here.
