@@ -6,6 +6,41 @@ namespace DarkestDungeon3.Ui.Tests;
 public class CorridorWalkCycleTests
 {
     [Fact]
+    public void BodyRisesOverTheSupportingFootAndSettlesAtTheHandover()
+    {
+        const float leg = 0.76f, nativeHeight = 0.60f;
+        double handover = (CorridorWalkCycle.Stance - 0.5) / 2;
+        float atHandover = CorridorWalkCycle.PelvisLift(leg, nativeHeight, handover);
+        float overLeft = CorridorWalkCycle.PelvisLift(leg, nativeHeight, handover + 0.25);
+        float overRight = CorridorWalkCycle.PelvisLift(leg, nativeHeight, handover + 0.75);
+        Assert.True(overLeft > atHandover);
+        Assert.Equal(overLeft, overRight, 5);
+        Assert.InRange(Math.Abs(CorridorWalkCycle.SupportShift(handover)), 0, 0.00001);
+        Assert.True(CorridorWalkCycle.SupportShift(handover + 0.25) > CorridorWalkCycle.SupportShift(handover + 0.20));
+        Assert.True(CorridorWalkCycle.SupportShift(handover + 0.25) > CorridorWalkCycle.SupportShift(handover + 0.30));
+        Assert.Equal(-CorridorWalkCycle.SupportShift(handover + 0.25), CorridorWalkCycle.SupportShift(handover + 0.75), 5);
+    }
+
+    [Fact]
+    public void WalkingRelaxesTheBattleCrouchWithoutLockingTheKnees()
+    {
+        // Leper's native stance: about 0.60 units of hip clearance on a 0.76-unit leg.
+        // A planted leg should retain a modest bend throughout the weight shift.
+        const float leg = 0.76f, nativeHeight = 0.60f;
+        for (int i = 0; i < 100; i++)
+        {
+            double phase = i / 100.0;
+            float height = nativeHeight + CorridorWalkCycle.PelvisLift(leg, nativeHeight, phase);
+            var foot = CorridorWalkCycle.Sample(phase);
+            if (!foot.Planted) continue;
+            double reach = Math.Sqrt(height * height + Math.Pow(foot.Forward * leg, 2)) / leg;
+            // Equal-length thigh/shin approximation: 35..52 degrees of flexion, rather than ~80.
+            double bend = 2 * Math.Acos(Math.Min(1, reach)) * 180 / Math.PI;
+            Assert.InRange(bend, 30, 55);
+        }
+    }
+
+    [Fact]
     public void ContactFootStaysOnTheGroundAndTravelsAtConstantSpeed()
     {
         var a = CorridorWalkCycle.Sample(0.1);

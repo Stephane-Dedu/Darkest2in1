@@ -13,6 +13,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed class CorridorHeroMotion
 {
     private readonly Transform _slot, _pelvis, _spine, _chest, _head;
+    private readonly Transform _sword, _swordHand;
     private readonly Transform[] _driven;
     private readonly Animator _animator;
     private readonly Leg _left, _right;
@@ -92,7 +93,8 @@ internal sealed class CorridorHeroMotion
         animator.applyRootMotion = false;
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-        var result = new CorridorHeroMotion(slot, pelvis, Find("Spine_01SHJnt"), Find("Spine_TopSHJnt"), Find("Head_TopSHJnt"), animator, left, right,
+        var result = new CorridorHeroMotion(slot, pelvis, Find("Spine_01SHJnt"), Find("Spine_TopSHJnt"), Find("Head_TopSHJnt"),
+            Find("Sword_AuxSHJnt"), Find("r_Arm_WristSHJnt"), animator, left, right,
             currentForward, currentSide, rank);
         result._unturned = unturned;
         result._modelForward = currentForward;
@@ -100,15 +102,20 @@ internal sealed class CorridorHeroMotion
         return result;
     }
 
-    private CorridorHeroMotion(Transform slot, Transform pelvis, Transform spine, Transform chest, Transform head, Animator animator,
+    private CorridorHeroMotion(Transform slot, Transform pelvis, Transform spine, Transform chest, Transform head,
+        Transform sword, Transform swordHand, Animator animator,
         Leg left, Leg right, Vector3 forward, Vector3 side, int rank)
     {
         _slot = slot; _pelvis = pelvis; _spine = spine; _chest = chest; _head = head; _animator = animator;
+        // Leper's sword is a separate pelvis child, not a child of either hand. Preserve the native
+        // grip through the procedural chest motion without reparenting or changing his combat rig.
+        _sword = sword != null && swordHand != null && !sword.IsChildOf(swordHand) ? sword : null;
+        _swordHand = swordHand;
         _left = left; _right = right; _forward = forward; _side = side;
         _legLength = (slot.InverseTransformVector(left.Knee.position - left.Hip.position).magnitude
                     + slot.InverseTransformVector(left.Ankle.position - left.Knee.position).magnitude);
         _homeCenter = slot.InverseTransformPoint((left.Hip.position + right.Hip.position) * 0.5f);
-        _driven = new[] { pelvis, spine, chest, head, left.Hip, left.Knee, left.Ankle, right.Hip, right.Knee, right.Ankle }
+        _driven = new[] { pelvis, spine, chest, head, left.Hip, left.Knee, left.Ankle, right.Hip, right.Knee, right.Ankle, _sword }
             .Where(t => t != null).Distinct().ToArray();
         _cycle = new CorridorWalkCycle(rank * 0.23);
     }
@@ -142,31 +149,42 @@ internal sealed class CorridorHeroMotion
         float weight = _cycle.Weight;
         if (weight <= 0) return;
         foreach (var bone in _driven) _saved.Add(new SavedBone(bone));
+        var gripPosition = _sword != null ? _swordHand.InverseTransformPoint(_sword.position) : Vector3.zero;
+        var gripRotation = _sword != null ? Quaternion.Inverse(_swordHand.rotation) * _sword.rotation : Quaternion.identity;
 
-        float angle = (float)(_cycle.Phase * Math.PI * 2);
+        var leftFoot = CorridorWalkCycle.Sample(_cycle.Phase);
+        var rightFoot = CorridorWalkCycle.Sample(_cycle.Phase + 0.5);
         var worldForward = _slot.TransformDirection(_forward);
         var worldSide = _slot.TransformDirection(_side);
         // Hip compression and weight shift happen above fixed foot contacts, not by bouncing the whole model.
-        float shift = Mathf.Sin(angle);
-        var displacement = Vector3.up * (_legLength * (-0.045f + 0.02f * Mathf.Cos(angle * 2)))
+        float shift = CorridorWalkCycle.SupportShift(_cycle.Phase);
+        // Hip yaw follows the separation of the feet, while sway follows the supporting foot.
+        // Using the same sine for both twisted the shoulders most when the feet were passing.
+        float twist = Mathf.Clamp((rightFoot.Forward - leftFoot.Forward) / CorridorWalkCycle.Stride, -1f, 1f);
+        var displacement = Vector3.up * CorridorWalkCycle.PelvisLift(_legLength, _homeCenter.y - _left.AnkleY, _cycle.Phase)
                          - _side * (_legLength * 0.024f * shift);
         _pelvis.localPosition += _pelvis.parent.InverseTransformVector(_slot.TransformVector(displacement * weight));
-        _pelvis.rotation = Quaternion.AngleAxis(3.5f * shift * weight, Vector3.up)
-                         * Quaternion.AngleAxis(3f * shift * weight, worldForward) * _pelvis.rotation;
+        _pelvis.rotation = Quaternion.AngleAxis(3.5f * twist * weight, Vector3.up)
+                         * Quaternion.AngleAxis(2f * shift * weight, worldForward) * _pelvis.rotation;
         if (_spine != null)
-            _spine.rotation = Quaternion.AngleAxis(-2f * shift * weight, worldForward)
+            _spine.rotation = Quaternion.AngleAxis(-0.5f * shift * weight, worldForward)
                             * Quaternion.AngleAxis(3f * weight, worldSide) * _spine.rotation;
         // The shoulders counter the pelvis, carrying arms and held weapons together. Do not swing two-handed
         // weapon arms independently. A small head counter-motion keeps the gaze steady over the moving chest.
         if (_chest != null)
-            _chest.rotation = Quaternion.AngleAxis(-7f * shift * weight, Vector3.up)
-                            * Quaternion.AngleAxis(-2f * shift * weight, worldForward) * _chest.rotation;
+            _chest.rotation = Quaternion.AngleAxis(-2f * twist * weight, Vector3.up)
+                            * Quaternion.AngleAxis(-0.5f * shift * weight, worldForward) * _chest.rotation;
         if (_head != null)
-            _head.rotation = Quaternion.AngleAxis(2f * shift * weight, Vector3.up)
+            _head.rotation = Quaternion.AngleAxis(-1.5f * twist * weight, Vector3.up)
                            * Quaternion.AngleAxis(-1.5f * weight, worldSide) * _head.rotation;
 
-        PoseLeg(_left, CorridorWalkCycle.Sample(_cycle.Phase), weight, worldForward, worldSide);
-        PoseLeg(_right, CorridorWalkCycle.Sample(_cycle.Phase + 0.5), weight, worldForward, worldSide);
+        PoseLeg(_left, leftFoot, weight, worldForward, worldSide);
+        PoseLeg(_right, rightFoot, weight, worldForward, worldSide);
+        if (_sword != null)
+        {
+            _sword.position = _swordHand.TransformPoint(gripPosition);
+            _sword.rotation = _swordHand.rotation * gripRotation;
+        }
     }
 
     private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side)

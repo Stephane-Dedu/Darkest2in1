@@ -24,6 +24,7 @@ internal sealed class HeroCombatPalette
     // its 1.6 grey tint intensity and 1.5 brightness wash out the ungraded models. Keep the warm shadow palette,
     // lower the lift and retain a little more texture colour in both presentations.
     private readonly MaterialPropertyOverride[] _ungraded;
+    private readonly MaterialPropertyOverride _corridorTint;
 
     internal HeroCombatPalette(Object source, bool corridor = false)
     {
@@ -37,8 +38,21 @@ internal sealed class HeroCombatPalette
         // The isolated camera still renders neutral cloth blue with the arena's warm shadow preset.
         // Balance its final material tint against the native fight view. Keep this off fight actors:
         // they already receive the arena lighting, and would be warmed a second time.
-        if (corridor) values.Add(new MaterialPropertyOverride("_ColorTintColor", new Color(0.96f, 0.90f, 0.74f, 1f), MaterialPropertyBlendType.Override));
+        if (corridor)
+        {
+            _corridorTint = new MaterialPropertyOverride("_ColorTintColor", new Color(0.96f, 0.90f, 0.74f, 1f), MaterialPropertyBlendType.Override);
+            values.Add(_corridorTint);
+        }
         _ungraded = values.ToArray();
+    }
+
+    internal void SetArenaLighting(bool arenaLoaded)
+    {
+        // Stage heroes remain visible while the arena loads behind the cover. Its render environment
+        // changes before the crossfade; continuing to compensate for the road then makes them yellow.
+        // Mutate the registered override: AddOverride with the same source only updates its weight.
+        if (_corridorTint != null)
+            _corridorTint.Color = arenaLoaded ? new Color(0.89f, 0.89f, 0.89f, 1f) : new Color(0.96f, 0.90f, 0.74f, 1f);
     }
 
     private static IResourceLocation FindPreset()

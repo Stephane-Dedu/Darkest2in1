@@ -60,6 +60,8 @@ internal sealed class HeroStage : MonoBehaviour
     private readonly List<(uint guid, Transform slot, ActorBhv actor)> _heroes = new();
     private string _partyKey;
     private HeroCombatPalette _palette;
+    private Vector3 _roadEnvironment, _roadShadow;
+    private bool _haveRoadLighting;
 
     public static float HeroScale = 1f;
     /// <summary>Signed corridor speed: 1 forward, -0.5 backing up, 0 stopped.</summary>
@@ -380,7 +382,28 @@ internal sealed class HeroStage : MonoBehaviour
 
     private void Update()
     {
+        UpdatePaletteLighting(); // Before MaterialPropertyBhv's LateUpdate writes the renderer blocks.
         foreach (var motion in _motion.Values) motion.Restore();
+    }
+
+    private void UpdatePaletteLighting()
+    {
+        // Scene load/unload precedes DD2's lighting change. Follow the actual environment instead,
+        // so neither entry nor return briefly combines the road correction with arena lighting.
+        var probe = RenderSettings.ambientProbe;
+        var environment = new Vector3(probe[0, 0], probe[1, 0], probe[2, 0]);
+        var shadowColor = Shader.GetGlobalColor("_GlobalShadowColor");
+        var shadow = new Vector3(shadowColor.r, shadowColor.g, shadowColor.b);
+        if (!Dd2Combat.InFight)
+        {
+            _roadEnvironment = environment;
+            _roadShadow = shadow;
+            _haveRoadLighting = true;
+        }
+        bool arenaLighting = Dd2Combat.InFight && (!_haveRoadLighting
+            || (environment - _roadEnvironment).sqrMagnitude > 0.000001f
+            || (shadow - _roadShadow).sqrMagnitude > 0.000001f);
+        (_palette ??= new HeroCombatPalette(this, corridor: true)).SetArenaLighting(arenaLighting);
     }
 
     private void LateUpdate()
@@ -400,7 +423,7 @@ internal sealed class HeroStage : MonoBehaviour
             slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
-            (_palette ??= new HeroCombatPalette(this, corridor: true)).Apply(actor);
+            _palette.Apply(actor);
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
                 && _checked && !RendersBlack && bindMotion)
             {

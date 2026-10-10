@@ -4310,3 +4310,46 @@ Protected estates were not read. Fresh estate2 files are backed up in that folde
 - Selector prompt memory remains in tools/art-prompts and tools/expedition_selector_design.md.
   Selector interaction checks and battle crossfade pose matching remain as recorded
   in PARITY. The parity loop stays paused.
+
+## Round195: Leper grip, combat colour handoff and connected walking posture (2026-10-10)
+
+Owner accepted the corrected walking colours, then reported Leper's sword sliding
+out of his hands and a yellow tint on combat entry. Follow-up review requested
+less bent knees, then better correlation between the upper body and the stride.
+
+Native rig inspection reproduces the sword bug: Sword_AuxSHJnt is under the pelvis,
+while both wrists follow the chest. The old procedural layer changes their relative
+pose by up to 8.78 bone-local units and 8.68 degrees. Capture the native sword pose
+relative to the right wrist each frame and carry it through the torso motion; save
+and restore its original local transform before the next Animator evaluation.
+Both wrists pass 180-frame native comparisons after the change: maximum drift
+0.059 units, angular drift zero (the remaining positional noise is at the far-away
+stage's float precision). No rig reparenting or shared animation changes.
+
+The walk previously compressed a battle crouch further. It now raises that pose
+toward 93% of leg length with smaller compression. Native Leper planted-knee flexion
+is 31.4–57.6 degrees. Torso rise/sway is centred on foot support, with the high point
+over each planted foot and the low point in double support. Hip yaw follows foot
+separation; reduced chest counter-rotation keeps the shoulders moving with the body.
+Two production-source posture tests fail with the old crouch/bob and pass after the
+change. The accepted cadence, stride, lift and camera angle remain.
+
+Native transition capture reproduces yellow neutral cloth while the corridor tint
+remains active under the newly loaded arena environment. The existing tint override
+is now mutated to the neutral combat colour when the actual ambient-probe/shadow
+lighting differs from the road reference. HeroStage updates it before material
+blocks' LateUpdate. Using art-scene load/unload alone was too early and introduced
+a brief return mismatch; final entry/return captures follow the lighting itself.
+The private read-only hood check fails before (RGB45.07/42.93/31.90, R/B1.413) and
+passes after (RGB60.42/59.84/54.57, R/B1.107). The native renderer and frame captures
+remain the colour/grip regression seam; there is no faithful offline GPU/rig seam
+in the UI shims. Fight actors keep their current combat palette.
+
+Release, 920 Core and 149 UI tests pass (1069 total). The four-hero walk, combat entry
+and a debug-forced return were captured and inspected. Final subjective gait feel
+and other classes remain for owner review. Evidence/helper/checks are private under
+C:\Users\Piral\.universal-modder\inspection\hero-grip-transition-20261010.
+The detached fixture blocks persistence. Protected estates were not read; both
+estate2 files match their fresh backups (3C260376... and BB8068C0...), so no restore
+was needed. The temporary helper was removed and the deployed DLL matches the build.
+The parity loop remains paused.
