@@ -285,11 +285,15 @@ internal sealed class Driver : MonoBehaviour
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
+        Crawl.EquipmentBuffs = id => S.Save.Estate.Hero(id)?.WornTrinkets.Select(Dd1TrinketData.Get).Where(t => t != null)
+            .SelectMany(t => t.BuffIds).Select(S.Content.Buffs.Get).Where(b => b != null);
         Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
         CapturePartyState();
         Dd2Api.Torch = Expedition.Light;
         Phase = Phase.Crawling;
         Say($"{(resuming ? "Returned to" : "Entered")} {S.Zones.ZoneName(Expedition.Quest.Dungeon)}.");
+        FadedMemoryController.Place(Expedition);
+        if (FadedMemory.Active(Expedition)) { StartFight(FightKind.Room, false); return; }
         Handle(resuming ? Crawl.Resume() : Crawl.Begin());
     }
 
@@ -638,9 +642,15 @@ internal sealed class Driver : MonoBehaviour
         var rng = new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken);
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, rng, quest.BossId);
         var checkpoint = ExpeditionFight.Current(Expedition);
+        bool memory = FadedMemory.Active(Expedition);
+        if (memory && !FadedMemoryController.TryPlan(Expedition, Party, out plan, out _))
+        {
+            RecoveryFailed("The memory is waiting for its encounter resources. Your return is saved.");
+            return;
+        }
         // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles,
         // and DD2's regions keep their own natives).
-        if (checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
+        if (!memory && checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
         {
             var monsters = Crawl.FightMonsters(kind == FightKind.Room ? "room" : "hall");
             plan.Enemies = S.Bestiary.Translate(monsters, rng, Dd2Combat.EnemySize);
@@ -668,10 +678,12 @@ internal sealed class Driver : MonoBehaviour
         {
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
             Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
-            Dd1MonsterView.Prepare(plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            Dd1MonsterView.Prepare(memory ? new[] { Expedition.FadedMemory.BossId } : plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            if (memory) Dd1MonsterView.PrepareHeroes(FadedMemoryController.HeroArt(Expedition, Party));
             Phase = Phase.Fighting;
             S.Persist();
         }
+        else if (memory) RecoveryFailed("The memory could not open. Retry the saved expedition when the game is ready.");
         else Say("The fight could not start (see the log).");
     }
 
@@ -688,6 +700,7 @@ internal sealed class Driver : MonoBehaviour
         }
         if (Dd2Combat.Retreated)
         {
+            if (FadedMemory.Active(Expedition)) { ReturnFromMemory(false); return; }
             // DD1: the fight stays where it was; the party falls back the way it came.
             Handle(Crawl.FleeBattle());
             Dd1Audio.Play("/general/combat/retreat");
@@ -696,6 +709,7 @@ internal sealed class Driver : MonoBehaviour
             S.Persist();
             return;
         }
+        if (FadedMemory.Active(Expedition)) { ReturnFromMemory(true); return; }
         Handle(Crawl.ResolveBattle());
         Dd1Audio.Play("/general/combat/victory");
         if (Crawl.LastSpoils is { } spoils)
@@ -711,6 +725,18 @@ internal sealed class Driver : MonoBehaviour
 
     public void Investigate(string heroId, string itemId)
     {
+        if (Crawl?.CurioHere == FadedMemory.CurioId)
+        {
+            if (Phase != Phase.Crawling || !Crawl.CanNavigate || Party?.Alive.Contains(heroId) != true) return;
+            if (itemId != null) { Say("No offering is required. Confront the past by hand."); return; }
+            if (!FadedMemoryController.Ready(Expedition, Party)) { Say("This memory cannot yet take form."); return; }
+            if (!FadedMemory.Enter(Expedition, heroId, null)) return;
+            if (!S.Persist()) { Expedition.FadedMemory.Stage = "ready"; return; }
+            StopWalking();
+            Say("What was buried has endured.");
+            StartFight(FightKind.Room, false);
+            return;
+        }
         var report = Crawl.InteractCurio(heroId, itemId, out var overflow);
         if (report != null)
         {
@@ -720,6 +746,30 @@ internal sealed class Driver : MonoBehaviour
             if (Expedition.QuestComplete) Say("The quest is complete! You may return to the Hamlet.");
         }
         S.Persist();
+    }
+
+    private void ReturnFromMemory(bool victory)
+    {
+        if (!FadedMemory.Finish(Expedition, S.Content.Items, victory))
+        {
+            RecoveryFailed("The memory's return checkpoint needs repair. The expedition remains saved.");
+            return;
+        }
+        Phase = Phase.Crawling;
+        Dd1Audio.Play(victory ? "/general/combat/victory" : "/general/combat/retreat");
+        Say(Expedition.PendingCurio.Text);
+        S.Persist();
+        Plugin.Log.LogInfo($"[memory] returned: {Expedition.FadedMemory.Stage}; rewards {string.Join(",", Expedition.PendingCurio.Loot)}; quest complete {Expedition.QuestComplete}");
+    }
+
+    public void DebugMemory()
+    {
+        if (System.IO.Path.GetFileName(S?.SavePath) != "estate_2.json" || Phase != Phase.Crawling
+            || Crawl?.CanNavigate != true || !Expedition.InRoom || Crawl.IsBlocked || FadedMemory.Active(Expedition)) return;
+        Expedition.FadedMemory = null;
+        FadedMemory.Place(Expedition, "crypts", "necromancer_A", 1, test: true);
+        S.Persist();
+        Say("Faded Memory placed here. Click the mirror, then Confront the past.");
     }
 
     public void DismissCurio(CurioReport report)

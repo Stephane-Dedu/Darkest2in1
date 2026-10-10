@@ -259,6 +259,11 @@ internal static class HeroSheet
 
     public static void TrinketIcon(Rect r, string id)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory)
+        {
+            var png = Art.Dd1("panels", "icons_equip", "trinket", "inv_trinket+" + memory.Id + ".png");
+            if (png != null) { GUI.DrawTexture(r, png, ScaleMode.ScaleToFit); return; }
+        }
         var sprite = Dd2.ItemIcons.Get(id);
         if (sprite != null) Art.DrawSprite(r, sprite);
         else
@@ -270,6 +275,7 @@ internal static class HeroSheet
 
     public static string TrinketName(string id)
     {
+        if (Dd2.Dd1TrinketData.Name(id) is { } memoryName) return memoryName;
         try
         {
             var loc = Assets.Code.Utils.Singleton<Assets.Code.Locale.Localization>.Instance;
@@ -284,6 +290,13 @@ internal static class HeroSheet
     /// <summary>DD1's trinket tooltip: name, rarity, class requirement, then DD2's effects.</summary>
     public static void TrinketTip(string id, string hint = null)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory)
+        {
+            Gui.EquipmentTip(TrinketName(id), HamletUi.Pretty(memory.Rarity), Dd1Palette.Get(memory.Rarity, Gui.Dd1Class),
+                memory.HeroClasses.Count == 0 ? null : string.Join(", ", memory.HeroClasses.Select(HamletUi.Pretty)) + " only",
+                Dd2.Dd1TrinketData.Description(id), hint);
+            return;
+        }
         var t = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var tr) ? tr : null;
         Gui.EquipmentTip(TrinketName(id), t == null ? "Trinket" : HamletUi.Pretty(t.Rarity), RarityColour(id),
             t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only", Dd2.ItemText.Effects(id), hint);
@@ -292,6 +305,7 @@ internal static class HeroSheet
     /// <summary>DD2 rarity labels use the closest DD1 palette tier; the item name has its own title colour.</summary>
     public static Color RarityColour(string id)
     {
+        if (Dd2.Dd1TrinketData.Get(id) is { } memory) return Dd1Palette.Get(memory.Rarity, Gui.Dd1Class);
         string rarity = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var t) ? t.Rarity : null;
         string colour = rarity switch
         {

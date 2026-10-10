@@ -39,7 +39,12 @@ internal static class Dd1EnemyData
         // One audited boss, its two summon candidates and their corpse. Broaden only after mechanic coverage.
         if (tier != 'A' || family is not ("necromancer" or "skeleton_common" or "skeleton_militia" or "corpse")) return false;
         string id = ActorId(family + "_" + tier);
-        if (Entries.TryGetValue(id, out entry)) return true;
+        if (Entries.TryGetValue(id, out entry))
+        {
+            var classes = SingletonMonoBehaviour<Library<string, ActorDataClass>>.Instance;
+            if (classes?.GetHasLibraryKey(id) == true && entry.Resource != null) return true;
+            Entries.Remove(id); entry = null;
+        }
         var session = Runtime.Session.Current;
         var kit = Dd1EnemyKit.Read(session?.Dd1, family, tier);
         if (kit == null || kit.Protection < 0 || kit.Protection > 1 || (!kit.Corpse && kit.Dodge != 0) || session?.Content?.Effects == null) return false;

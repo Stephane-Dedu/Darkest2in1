@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using DarkestDungeon3.Core.Dd1;
 using DarkestDungeon3.Core.Dungeon;
 
 namespace DarkestDungeon3.Core.Expedition;
@@ -11,6 +13,86 @@ public sealed class FadedMemoryEncounter
     public int Difficulty;
     public Dictionary<string, string> HeroSprites = new();
     public MemoryReturnPosition ReturnPosition;
+    public int CurioRoomId = -1;
+    public string Stage = "ready";
+    public List<string> Rewards = new();
+    public string HeroId;
+}
+
+/// <summary>A separate room prop, so guaranteed placement cannot erase a quest item or ordinary curio.</summary>
+public static class FadedMemory
+{
+    public const string CurioId = "faded_memory";
+    public const string TrinketPrefix = "dd3_dd1_";
+    public static bool Active(ExpeditionState state) => state?.FadedMemory?.Stage == "fighting";
+    public static bool Here(ExpeditionState state) => state is { InRoom: true, Ended: false }
+        && state.FadedMemory is { Stage: "ready" } memory && memory.CurioRoomId == state.RoomId;
+
+    public static bool Place(ExpeditionState state, string dungeon, string boss, int difficulty, bool test = false)
+    {
+        if (state?.Map == null || state.Quest == null || state.FadedMemory != null
+            || (!test && state.Quest.Type != "kill_boss") || string.IsNullOrEmpty(dungeon) || string.IsNullOrEmpty(boss)) return false;
+        int entrance = state.Map.EntranceRoomId;
+        if (entrance < 0 || entrance >= state.Map.Rooms.Count || state.Map.Room(entrance).IsSecret) return false;
+        state.FadedMemory = new FadedMemoryEncounter
+        {
+            Id = state.Quest.Id + "/memory", Dungeon = dungeon, BossId = boss, Difficulty = difficulty,
+            CurioRoomId = test && state.InRoom ? state.RoomId : entrance
+        };
+        return true;
+    }
+
+    /// <summary>Roll once before entry. Prefer unowned limited items; exhaustion still honours the two-item reward.</summary>
+    public static bool PrepareRewards(FadedMemoryEncounter memory, Dd1Trinkets items, IEnumerable<string> owned, Rng rng)
+    {
+        if (memory == null || items == null || rng == null) return false;
+        if (memory.Rewards.Count != 0) return memory.Rewards.Count == 2;
+        var counts = (owned ?? Enumerable.Empty<string>()).GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+        var selected = new List<string>();
+        foreach (string rarity in new[] { "very_rare", "ancestral" })
+        {
+            var pool = items.ForRarity(rarity);
+            var available = pool.Where(t => t.Limit == 0 || !counts.TryGetValue(TrinketPrefix + t.Id, out int n) || n < t.Limit).ToList();
+            if (available.Count == 0) available = pool.ToList();
+            if (available.Count == 0) return false;
+            selected.Add(TrinketPrefix + rng.Pick(available).Id);
+        }
+        memory.Rewards = selected;
+        return true;
+    }
+
+    public static bool Enter(ExpeditionState state, string hero, string item)
+    {
+        if (!Here(state) || item != null || !state.Started || !state.Party.Contains(hero)
+            || state.PendingCurio != null || state.PendingSpoils != null || state.PendingEncounter != null
+            || state.Camp != null || state.FightCheckpoint != null || state.FadedMemory.Rewards.Count != 2) return false;
+        var position = MemoryReturnPosition.Capture(state);
+        if (position == null) return false;
+        state.FadedMemory.ReturnPosition = position;
+        state.FadedMemory.HeroId = hero;
+        state.FadedMemory.Stage = "fighting";
+        return true;
+    }
+
+    public static bool Finish(ExpeditionState state, ItemCatalog items, bool victory)
+    {
+        if (!Active(state) || state.FadedMemory.ReturnPosition?.TryRestore(state) != true
+            || state.FadedMemory.Rewards.Count != 2 || state.PendingCurio != null || items == null) return false;
+        var memory = state.FadedMemory;
+        var report = new CurioReport { CurioId = CurioId, HeroId = memory.HeroId, OutcomeType = victory ? "Victory" : "Retreat",
+            Text = victory ? "The vision recedes. Its spoils remain." : "The past releases its hold. This memory is spent." };
+        if (victory)
+            foreach (string id in memory.Rewards)
+            {
+                var drop = new LootDrop { Type = "trinket", Id = id, Amount = 1 };
+                report.Loot.Add(drop);
+                if (!state.Pack.TryTake(drop, items)) report.LeftBehind.Add(drop);
+            }
+        state.FightCheckpoint = null;
+        memory.Stage = victory ? "complete" : "fled";
+        state.PendingCurio = report;
+        return true;
+    }
 }
 
 /// <summary>Only expedition location is restored after a memory; combat consequences belong to the current party.</summary>

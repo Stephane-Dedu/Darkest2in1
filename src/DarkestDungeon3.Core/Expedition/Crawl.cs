@@ -31,7 +31,7 @@ public sealed class Crawl
     /// <summary>The untouched curio where the party stands (room or hall square), if any.</summary>
     public string CurioHere =>
         State.InRoom
-            ? (CurrentRoom.CurioId != null && !CurrentRoom.CurioTaken && !IsBlocked ? CurrentRoom.CurioId : null)
+            ? (!IsBlocked && FadedMemory.Here(State) ? FadedMemory.CurioId : CurrentRoom.CurioId != null && !CurrentRoom.CurioTaken && !IsBlocked ? CurrentRoom.CurioId : null)
             : (CurrentTile is { Content: HallContent.Curio, Resolved: false } t ? t.ContentId : null);
 
     /// <summary>
@@ -44,6 +44,7 @@ public sealed class Crawl
         if (!CanNavigate || heroId == null || !_party.Alive.Contains(heroId)) return null;
         string curio = CurioHere;
         if (curio == null) return null;
+        if (curio == FadedMemory.CurioId) return null; // the encounter controller owns entry; supplies cannot consume it
 
         bool isGoal = State.InRoom ? CurrentRoom.IsQuestGoal : CurrentTile.IsQuestGoal;
         if (isGoal && State.Goal != null)
@@ -175,6 +176,7 @@ public sealed class Crawl
     public void SkipCurio()
     {
         if (!CanNavigate) return;
+        if (CurioHere == FadedMemory.CurioId) return;
         // A quest curio is never skipped for good: the quest needs it.
         if (State.InRoom) { if (CurrentRoom.CurioId != null && !CurrentRoom.IsQuestGoal) CurrentRoom.CurioTaken = true; }
         else if (CurrentTile is { Content: HallContent.Curio, IsQuestGoal: false } t) t.Resolved = true;
@@ -568,6 +570,8 @@ public sealed class Crawl
 
     /// <summary>A hero's DD1 class (for its trap disarm chance); the plugin sets this.</summary>
     public Func<string, string> HeroDd1Class;
+    public Func<string, IEnumerable<Dd1Buff>> EquipmentBuffs;
+    private IEnumerable<Dd1Buff> TrinketBuffs(string hero) => EquipmentBuffs?.Invoke(hero)?.Where(b => b?.Rule == "always") ?? Enumerable.Empty<Dd1Buff>();
 
     /// <summary>DD1's chance: the class's trap stat, +40% for a spotted trap, minus the difficulty's penalty.</summary>
     public float TrapDisarmChance(string heroId, bool scouted)
@@ -575,6 +579,7 @@ public sealed class Crawl
         int difficulty = Math.Min(State.Quest?.Difficulty ?? 1, _rules.TrapDifficultyPenalty.Length - 1);
         float chance = (_content?.Traps?.DisarmBase(HeroDd1Class?.Invoke(heroId)) ?? 0.4f)
                        + (scouted ? _rules.TrapScoutDisarmBonus : 0f) - _rules.TrapDifficultyPenalty[difficulty];
+        chance += TrinketBuffs(heroId).Where(b => b.Stat == "resistance" && b.Sub == "trap").Sum(b => b.Amount);
         return Math.Max(0f, Math.Min(0.95f, chance));
     }
 
@@ -890,6 +895,7 @@ public sealed class Crawl
         var rng = NextRng();
         float chance = enteringDungeon ? _rules.ScoutEntryChance
             : _rules.ScoutChanceBase + _rules.Band(State.Light).ScoutingIncrease / 100f;
+        chance += _party.Alive.SelectMany(TrinketBuffs).Where(b => b.Stat == "scouting_chance").Sum(b => b.Amount);
         if (chance <= 1f && !rng.Chance(chance)) return;
         bool critical = rng.Chance(_rules.ScoutCriticalChance * (chance > 1f ? chance : 1f));
         int revealed = Map.ScoutFrom(room.Id, critical ? 12 : 6, revealSecrets: critical);
@@ -912,6 +918,11 @@ public sealed class Crawl
         if (_party.Alive.Count == 1) heroes = 0f;
         heroes += band.HeroesSurprisedIncrease / 100f;
         monsters += band.MonstersSurprisedIncrease / 100f;
+        foreach (var buff in _party.Alive.SelectMany(TrinketBuffs))
+        {
+            if (buff.Stat == "party_surprise_chance") heroes += buff.Amount;
+            if (buff.Stat == "monsters_surprise_chance") monsters += buff.Amount;
+        }
         foreach (var (_, buff) in FightBuffs())
         {
             if (buff.Stat == "party_surprise_chance") heroes += buff.Amount;

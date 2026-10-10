@@ -283,7 +283,9 @@ internal sealed class CrawlUi
         if (exp.InRoom)
         {
             var room = crawl.CurrentRoom;
-            if (room?.CurioId != null) DrawProp("curios", room.CurioId, room.CurioTaken, PropX + slide, hoverable: true);
+            bool memory = FadedMemory.Here(exp);
+            if (room?.CurioId != null) DrawProp("curios", room.CurioId, room.CurioTaken, PropX + slide + (memory ? 260 : 0), hoverable: !memory);
+            if (memory) DrawProp("curios", FadedMemory.CurioId, false, PropX + slide, hoverable: true);
             return;
         }
         var c = crawl.CurrentCorridor;
@@ -308,6 +310,19 @@ internal sealed class CrawlUi
     private static void DrawProp(string kind, string id, bool used, float x, bool hoverable)
     {
         if (x < -400 || x > 2320) return;
+        if (id == FadedMemory.CurioId)
+        {
+            var texture = Art.Png(System.IO.Path.Combine(Session.SaveDir, "cache", "memory", "faded_memory.png"));
+            var area = new Rect(x - 110, Feet - 315, 220, 330);
+            if (texture != null) GUI.DrawTexture(area, texture, ScaleMode.ScaleToFit);
+            else { Gui.Fill(area, new Color(0.07f, 0.06f, 0.08f, 0.9f)); Gui.Text(area, "Faded Memory", 26, Gui.Dd1Name, TextAnchor.MiddleCenter); }
+            if (hoverable && area.Contains(Event.current.mousePosition))
+            {
+                Gui.Tip("Faded Memory\nA remnant of another age. Its horrors have not forgotten you.");
+                if (Gui.Hotspot(area)) CurioClicked = true;
+            }
+            return;
+        }
         var feet = new Vector2(x, Feet + 10);
         string spriteId = kind == "curios" ? S.Content.Curios.SpriteOf(id) : id;
         string folder = S.Dd1.PathOf("props", "shared", kind, spriteId ?? "");
@@ -885,6 +900,13 @@ internal sealed class CrawlUi
         if (curio != null)
         {
             Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            if (curio == FadedMemory.CurioId)
+            {
+                Gui.Text(body, "A remnant of another age. Its horrors have not forgotten you. Enter the memory and face the horror within.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+                if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Confront the past.")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
+                if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) _curioPanel = null;
+                return;
+            }
             Gui.Text(body, $"{who} will investigate. Select another hero, right-click an inventory item to use it here, or drag it into the slot.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
             if (ScrollButton(SidebarX - 152, top + 240, "byhand.png", "Investigate")) { _curioPanel = null; D.Investigate(D.SelectedHeroId, null); return; }
             if (ScrollButton(SidebarX + 75, top + 240, "pass.png", "Leave it")) { _curioPanel = null; return; }

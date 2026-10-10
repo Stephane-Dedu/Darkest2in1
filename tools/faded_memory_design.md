@@ -132,6 +132,18 @@ destinations even after their manual UI switch is retired.
 
 ## Implementation slices and acceptance
 
+Round184 implementation defaults: base very_rare and ancestral pools only, uniform selection within
+each, prefer unowned limited items and fall back to duplicates when exhausted. Exclude Shambler and
+DLC pools. Retreat spends the curio without rewards; wipe follows normal expedition loss. Duelist's
+visual counterpart is Grave Robber and Runaway's is Houndmaster, without changing player mechanics.
+These defaults use the owner's standing authorization to decide implementation choices; they replace
+the earlier pending-policy notes above. Current playable coverage is crypts/Sprawl apprentice Necromancer
+only, with global region/tier coverage and native hero-skill victory acceptance still required.
+
+Estate2 test: enter an unblocked exploration room, press Ctrl+F6, click the mirror, select a living
+hero and choose Confront the past. It uses the normal encounter controller. F10 is a debug win and
+does not establish acceptance of a real skill kill. Original expedition progress must remain intact.
+
 1. Define boss/zone/hero-visual mappings and exact reward pools. Audit DD1 trinket effect support.
 2. Add guaranteed, reachable placement to all boss-quest generation paths, with stable saved
    identity and no duplication after reload. Verify this does not displace required quest props.

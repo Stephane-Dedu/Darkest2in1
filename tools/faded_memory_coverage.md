@@ -233,8 +233,36 @@ Pistol retains ranged accuracy, speed and stress buff references plus limit1; Le
 very_rare with limit0; Sacred Scroll retains its Vestal restriction. Ten cases bring the suite to
 892 Core +125 UI =1017 passing tests, with Release deployed while DD2 stopped.
 
-This reader has no gameplay caller yet. A complete effect adapter must retain and evaluate buff
+At round183 this reader had no gameplay caller. A complete effect adapter must retain and evaluate buff
 conditions; the existing Dd1Buffs loader only captures scalar stat/duration fields and is insufficient
 for conditional trinket effects. DD2 has no direct accuracy stat, so these references must not be
 advertised as already applied. Identity/effect/equipment/art, two retained draws and atomic grant
 integration remain required before the curio can be exposed. No native data files enter Git.
+
+## First playable encounter: round184
+
+Crypts/Sprawl currently supports apprentice Necromancer only. Separate entrance-room placement retains
+ordinary/required props; Ctrl+F6 places the same curio in an unblocked estate2 room for testing.
+Click the mirror, select a living hero, and choose Confront the past. Hand entry persists fighting
+state, return position, exact hero sprite mapping and both reward draws before native combat starts.
+Saved fighting state reuses the existing native fight checkpoint; return restores location only.
+Victory retains two concrete DD1 trinkets in the pack/report without completing the ordinary boss quest.
+Retreat spends the memory without rewards; wipe uses the ordinary expedition-loss path.
+
+Defaults chosen within the owner's autonomous implementation scope: uniform base very_rare24 and
+ancestral9 pools, no ancestral_shambler/DLC; prefer unowned limited items, allow a duplicate only when
+that pool is exhausted to preserve two rewards. Duelist uses Grave Robber art and Runaway Houndmaster
+art; player class/stats/skills remain DD2. These policies can be refined independently.
+
+Trinket buff rule metadata is retained. Native equipment receives supported scalar/ranged/melee/rank/
+Death's Door effects and stress modifiers. Tooltips label explicit DD2 adaptations (accuracy to crit,
+dodge to damage reduction, virtue to Resolute, Eldritch to Cultist), unsupported rules remain inactive.
+Trap/scouting/surprise bonuses are integrated in Core. XP and unsupported legacy mode rules remain
+pending; native conditional equipment/icon coverage is not yet accepted. Real DD1 inventory art is
+loaded locally. Generated mirror art is private in the save cache; no game-derived art enters Git.
+
+All906 Core +125 UI tests pass, Release rebuilt/deployed. Native estate2 observes the hand encounter,
+DD1 hero sprites, Necromancer and summons. F10 debug victory returns two actual items and leaves
+QuestComplete false; this is not actual hero-skill lethal presentation acceptance. Owner reported
+oversized heroes/boss and the wrong room; round185 addresses those before regional expansion.
+Estate2 main/.bak and temporary source probe restored/hash checked; no protected slot accessed.

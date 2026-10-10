@@ -77,8 +77,11 @@ internal static class Dd2Heroes
         var items = SingletonMonoBehaviour<Library<string, ItemDefinition>>.Instance;
         if (trinkets != null && items != null)
             foreach (var id in hero.WornTrinkets)
+            {
+                if (Dd1TrinketData.Get(id) != null) Dd1TrinketData.Register(id);
                 if (items.TryGetLibraryElement(id, out var t))
                     trinkets.AddItems(t, 1, false);
+            }
 
         ApplyEquipment(hero, actor, fillHealth: condition == null);
         HeroSkills.Apply(hero, actor);

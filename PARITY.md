@@ -1,5 +1,8 @@
 # Campaign parity and refactor checklist
 
+- [?] O3 round184: first playable crypts/Sprawl Necromancer memory, saved separate placement/hand entry, hero sprites, two actual DD1 trinkets and location-only return. Native estate2 entry, summons and F10 return verified; actual hero-skill victory/reload/equipment remain pending. All906 Core +125 UI tests and Release pass. Ctrl+F6 places the same curio in an unblocked estate2 room. Regional/tier coverage remains incomplete; see tools/faded_memory_coverage.md.
+- [ ] O3 round185 owner feedback: heroes and Necromancer are oversized; summon sizes are good. Memory inherits the entrance room instead of boss scenery. Separate encounter art from saved return position, resolve installed final-room art with explicit fallback, and correct only memory hero/Necromancer sizing. Verify live before marking accepted.
+
 Owner priority 2026-10-08: full DD1 quest lifecycle mapping and implementation. Native phase contracts, Core/bridge
 locations, acceptance cases and unresolved evidence are in [tools/quest_parity_map.md](tools/quest_parity_map.md).
 Its Q01-Q23 gaps are the active implementation backlog; DD2 native combat and primary regions remain the design.

@@ -94,6 +94,7 @@ public class DebugKeys : MonoBehaviour
             }
             if (kb.f6Key.wasPressedThisFrame)
             {
+                if (kb.ctrlKey.isPressed) { Runtime.Driver.Instance?.DebugMemory(); return; }
                 // Cycle through DD1's curios (Shift+F6 clears the preview).
                 var dir = Runtime.Session.Current?.Dd1.PathOf("props", "shared", "curios");
                 var all = dir != null && System.IO.Directory.Exists(dir) ? System.IO.Directory.GetDirectories(dir).Select(System.IO.Path.GetFileName).OrderBy(n => n).ToList() : new System.Collections.Generic.List<string>();

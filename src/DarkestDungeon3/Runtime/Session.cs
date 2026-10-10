@@ -31,6 +31,7 @@ internal sealed class Session
     public Provisioner Provisioner;
     public ZoneEncounters Zones;
     public Dd1Bestiary Bestiary;
+    public Dd1Trinkets MemoryTrinkets;
 
     private readonly CampaignSaveSlot _slot = new();
     public SaveFile Save { get => _slot.Save; set => _slot.Save = value; }
@@ -54,6 +55,7 @@ internal sealed class Session
                 s.Campaign = Dd1Campaign.Load(dd1);
                 s.Buildings = Buildings.Load(dd1);
                 s.Content = CrawlContent.Load(dd1);
+                s.MemoryTrinkets = Dd1Trinkets.LoadBase(dd1);
                 s.Rules = CrawlRules.FromDd1(s.Campaign.Rules);
                 s.Lore = Dd1Lore.Load(dd1);
                 s.Provisioner = Provisioner.Load(dd1, s.Content.Items);

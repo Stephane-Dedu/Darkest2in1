@@ -371,7 +371,7 @@ internal static class Dd1Backdrop
         var exp = d?.Expedition;
         var crawl = d?.Crawl;
         if (exp == null || crawl == null) return null;
-        string zone = Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon);
+        string zone = Core.Dungeon.ZoneBase.Of(Core.Expedition.FadedMemory.Active(exp) ? exp.FadedMemory.Dungeon : exp.Quest.Dungeon);
         var rt = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32) { name = "DD3Backdrop" };
         rt.Create();
         var prev = RenderTexture.active;

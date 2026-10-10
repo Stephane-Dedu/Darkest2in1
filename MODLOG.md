@@ -3875,3 +3875,34 @@ as DD1 accuracy versus DD2's engine. No effects or native equipment/grants are c
   reported reset2026-10-10 03:56:01 UTC (1791604561); recheck ordinary availability/session at resume.
 - Resume automation remains ACTIVE/hourly and now records confirmed Very Rare and current acceptance
   limitations; it follows this Status instead of repeating completed audits. No duplicate native jobs.
+
+## Round184: first playable Faded Memory and retained DD1 rewards
+
+Owner resumed full implementation. Added saved separate curio placement, hand-only entry, exact hero
+sprite mappings, retained reward draws, native combat routing/checkpoint recovery and location-only
+return. First coverage is crypts/Sprawl apprentice Necromancer; other regions/tiers remain incomplete.
+Ctrl+F6 uses the same controller in estate2. Generated transparent mirror art stays in the private
+save cache. Real DD1 trinket identities/art and supported conditional effects are used, with explicit
+DD2 adaptations and inactive unsupported rules documented in tools/faded_memory_coverage.md.
+
+Defaults: very_rare24/ancestral9 base pools, prefer unowned limited items then duplicate fallback;
+no Shambler/DLC. Retreat spends the curio without rewards, wipe uses expedition loss. Duelist uses
+Grave Robber sprites and Runaway Houndmaster sprites only; skills/stats/class stay unchanged.
+
+All906 Core +125 UI =1031 tests and normal Release Rebuild pass. Native estate2 hand entry, temporary
+sprites and real summons observed. Owner used F10: return save has one blasphemous_vial and one
+ancestors_moustache_cream, stage complete, ordinary QuestComplete false. Actual hero-skill lethal
+presentation, reload and conditional equipment effects remain unaccepted. No exceptions seen.
+Exact test PID stopped; estate2 main/.bak and DebugKeys probe restored/hash checked; normal binaries
+rebuilt/deployed. Evidence remains private at rea-workbench/evidence/round184.
+
+## Status 2026-10-10: round184 playable slice; owner rendering defects next
+
+- First playable memory slice implemented; do not claim global Faded Memory completion.
+- Owner reports heroes/boss too large, summons good, and wrong Necromancer room. Round185 takes
+  priority: isolate boss scenery from return location and correct hero/boss scale only.
+- Native installed DD1 room selection and Unity reference are being checked. No named Necromancer
+  wall found so far; do not mislabel a chosen generic Ruins wall as dedicated original boss art.
+- DD2 stopped, estate2/source restored, normal Release deployed. Verify hashes at commit boundary.
+- Next acceptance uses reachable party ranks and native skill targeting; F10 is debug-only evidence.
+  Broaden regional/tier adapters afterward; keep region switch. Usage29%, ordinary available.

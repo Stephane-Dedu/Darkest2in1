@@ -127,7 +127,9 @@ internal sealed class Dd2Catalog : IHeroCatalog
     }
 
     public bool TrinketFits(string trinketId, string classId) =>
-        trinketId == null || !Tables.Trinkets.TryGetValue(trinketId, out var t) || t.IsForHero(classId);
+        Dd1TrinketData.Get(trinketId) is { } memory ? memory.HeroClasses.Count == 0
+            || memory.HeroClasses.Contains(Runtime.Session.Current.Campaign.HeroUpgrades.Dd1Class(classId))
+            : trinketId == null || !Tables.Trinkets.TryGetValue(trinketId, out var t) || t.IsForHero(classId);
 
     public int TrinketEquipLimit(string trinketId) =>
         Tables.Trinkets.TryGetValue(trinketId, out var t) ? t.EquipLimit : 1;
@@ -135,6 +137,7 @@ internal sealed class Dd2Catalog : IHeroCatalog
     /// <summary>DD1 prices by rarity (the Nomad Wagon sells DD2 trinkets at DD1 prices).</summary>
     public int TrinketPrice(string trinketId)
     {
+        if (Dd1TrinketData.Get(trinketId) is { } memory) return memory.Price;
         string dd2 = trinketId != null && Tables.Trinkets.TryGetValue(trinketId, out var t) ? t.Rarity : "common";
         string rarity = dd2 switch { "epic" => "very_rare", "ancestral" => "very_rare", "rare" => "rare", _ => "common" };
         return _lore.TrinketPriceByRarity.TryGetValue(rarity, out var p) ? p : 7500;
