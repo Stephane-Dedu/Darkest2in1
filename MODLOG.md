@@ -4071,3 +4071,15 @@ Evidence and raw native data remain private in rea-workbench/evidence/round188 a
   matching DLL hashes. Commit/push only this completed slice and handoff, then remain paused.
 - Later O3 candidates: native class-restricted equip validation, saved memory restart/retreat, then
   complete boss/region/tier expansion. O6 follows O3. Global guarantee/coverage remains incomplete.
+
+## Owner decisions, 2026-10-10
+
+Owner answered four open [user] questions; recorded in PARITY.md and CLAUDE.md. Direction only;
+nothing is scheduled or built by this entry.
+- Party-wipe trinkets: DD1's direction, recovered through the crow (bird) plot quest. A custom DD2
+  version of that quest comes later, when the owner says the time is right.
+- Afflictions: DD1 afflictions/virtues replace DD2 meltdown, except the Flagellant keeps DD2's Toxic
+  overstress (DD2 hero_flg `overstresses,toxic`). Audit and design the stress-scale mapping first.
+- DLC: DD1 and DD2 DLC hero classes are in scope, deferred until 3D models and related work are
+  possible. Other DD1 DLC content and the game modes remain open [user] questions.
+- Mountain (Darkest Dungeon) quests: heroes who finish one may return. Implement later with O4.

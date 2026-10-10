@@ -20,6 +20,15 @@ Owner focus, 2026-10-08: first match Hamlet, quest selection, room/hallway trave
 transitions. Reported rendering/input defects outrank numeric return-phase tuning. Later ideas recorded in
 PARITY.md: DD1 resolve levels and tiered skill damage/utility upgrades, both games' trinkets, and a DD1-style
 trinket panel with a central main button. Audit existing progression before changing it; preserve campaigns.
+Owner main focus, 2026-10-10: optimize the game's overall feel and performance. First issue: a battle starts
+with DD2's battle-start transition and a loading screen, which breaks the UX. Start battles the DD1 way: no map
+load, stay in the current corridor or room, and the battle begins there.
+Owner decisions, 2026-10-10 (direction only; details in PARITY.md):
+- Party-wipe trinkets: DD1's direction, won back through the crow (bird) plot quest; a custom DD2 version later, when
+  the owner says the time is right.
+- Afflictions: DD1 afflictions/virtues replace DD2 meltdown; the Flagellant keeps DD2's Toxic overstress.
+- DLC hero classes from DD1 and DD2 are in scope, but not now: they need 3D models and related work.
+- Heroes who finish a Mountain (Darkest Dungeon) quest may return; implement later with the Mountain work.
 Owner's map design: pair Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at the same map positions.
 Keep DD1's area names with their quests directly beneath each area. A single existing next-arrow beside the name on
 its right switches enabled areas at that position, such as Foetor/Warrens. Every area's XP, quests and bosses stay
