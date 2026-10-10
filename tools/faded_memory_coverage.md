@@ -266,3 +266,30 @@ DD1 hero sprites, Necromancer and summons. F10 debug victory returns two actual 
 QuestComplete false; this is not actual hero-skill lethal presentation acceptance. Owner reported
 oversized heroes/boss and the wrong room; round185 addresses those before regional expansion.
 Estate2 main/.bak and temporary source probe restored/hash checked; no protected slot accessed.
+
+## Boss scenery, proportions and real skill return: round185
+
+Native DD1 FUN_1407544f0 prefers zone.final_room_wall.plotId.png then zone.final_room_wall.png;
+FUN_1407530e0 loads the room variations. Unity DungeonGenerator.LoadRoomEnvironment assigns an
+ordinary variation to boss rooms; RaidRoom loads that texture. Installed crypts has no Necromancer
+final-room file. The mod explicitly chooses crypts.room_wall.library.png when dedicated final art
+is absent, and always composes a room independently of the source room/hall/entrance. ZoneArt also
+accepts explicit boss/tier/family art before generic final art for future coverage. No claim that
+the chosen library is a separate original Necromancer asset. Four tests verify selection and real files.
+
+Heroes use0.68 of native model-bound calibration; only memory Necromancer uses0.85 of monster scale.
+Minions/corpses/ordinary fights retain existing sizes. First native boss300px was too small for the
+owner; revised check gives417px, summon242px, heroes approximately250px, with camera zoom retained.
+These are presentation sizes, independent of DD1 rank footprint.
+
+Two native attempts. The first was interrupted by owner F10 and excluded. The second disables F10
+only in its private probe, arranges Leper/Flagellant/Jester/Vestal ranks, lowers boss HP to1 as a
+fixture, then uses native skill selection and a delayed target event. Chop misses; Judgement kills.
+Native death presentation removes Necromancer, linked militia dies/removes, victory exits combat,
+and the controller returns both DD1 trinkets with ordinary QuestComplete false. No direct damage,
+Kill or death event substitutes for that skill result. Full-health balance is still untested.
+
+All910 Core +125 UI =1035 tests and normal Release Rebuild pass. Exact PIDs stopped, estate2 main/
+.bak and DebugKeys restored/hash checked; normal DLLs rebuilt/deployed with stopped game. Private
+evidence in round185 and round185b. Native restart, retreat, unreplaced corpse expiry, conditional
+equipment and additional bosses/tiers remain required before claiming global feature completion.

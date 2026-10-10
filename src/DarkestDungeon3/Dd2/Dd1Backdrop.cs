@@ -371,7 +371,8 @@ internal static class Dd1Backdrop
         var exp = d?.Expedition;
         var crawl = d?.Crawl;
         if (exp == null || crawl == null) return null;
-        string zone = Core.Dungeon.ZoneBase.Of(Core.Expedition.FadedMemory.Active(exp) ? exp.FadedMemory.Dungeon : exp.Quest.Dungeon);
+        bool memory = Core.Expedition.FadedMemory.Active(exp);
+        string zone = Core.Dungeon.ZoneBase.Of(memory ? exp.FadedMemory.Dungeon : exp.Quest.Dungeon);
         var rt = new RenderTexture(1920, 1080, 0, RenderTextureFormat.ARGB32) { name = "DD3Backdrop" };
         rt.Create();
         var prev = RenderTexture.active;
@@ -385,9 +386,11 @@ internal static class Dd1Backdrop
             if (tex == null) return;
             Graphics.DrawTexture(new Rect(x, y, w, h), tex, mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1), 0, 0, 0, 0);
         }
-        if (exp.InRoom)
+        if (memory || exp.InRoom)
         {
-            var wall = exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
+            var wall = memory ? Art.BossRoomWall(zone, exp.FadedMemory.BossId, exp.FadedMemory.Difficulty)
+                : exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);
+            Plugin.Log.LogInfo("[backdrop] " + (memory ? "memory boss room " + exp.FadedMemory.BossId : "room " + exp.RoomId));
             Draw(wall, 0, top, 1920, 720);
         }
         else

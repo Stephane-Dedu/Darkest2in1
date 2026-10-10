@@ -3906,3 +3906,36 @@ rebuilt/deployed. Evidence remains private at rea-workbench/evidence/round184.
 - DD2 stopped, estate2/source restored, normal Release deployed. Verify hashes at commit boundary.
 - Next acceptance uses reachable party ranks and native skill targeting; F10 is debug-only evidence.
   Broaden regional/tier adapters afterward; keep region switch. Usage29%, ordinary available.
+
+## Round185: separate memory boss scenery and correct relative sprite size
+
+Round184 pushed atabdb5b9. Owner reported oversized heroes/boss and wrong room, but good summons.
+Memory used return-position InRoom/Entrance and could inherit a corridor. It now always composes a
+boss room in its DD1 zone. Native DD1 FUN_1407544f0 chooses plot-specific final wall then generic;
+Unity LoadRoomEnvironment instead assigns a normal variation to bosses. Installed Ruins has no
+dedicated Necromancer final PNG. Use crypts library as an explicit fallback, not a claimed original
+unique boss asset. ZoneArt retains plot/boss/tier/family/generic final selection for other coverage.
+
+Only memory hero/Necromancer scales change: heroes0.68, boss initially0.65. Owner requested a larger
+boss after that300px check, so final boss0.85 gives417px in the second native view, summon unchanged
+242px, heroes roughly250px. Sprite proportions do not alter rank footprint or combat stats.
+
+Two native attempts: first owner F10 contaminated victory acceptance. Second private binary disables
+F10, uses reachable party ranks, logs skill/target validity and delays target selection one second.
+Boss HP1 fixture: Leper Chop misses, Vestal Judgement kills, linked militia dies, native victory
+returns both DD1 items without completing the ordinary quest. This is actual native skill/death/
+victory/return evidence, but not full-health balance. No direct damage/death shortcut used.
+No exceptions found. Four art tests plus all910 Core +125 UI =1035 tests and Release pass.
+Exact PIDs24652/33448 stopped/waited. Both attempts' estate2 main/.bak and DebugKeys restored and
+hash checked, normal Release rebuilt/deployed; protected slots unread. Evidence outside Git.
+
+## Status 2026-10-10: round185 rendering and normal skill return verified
+
+- Round184 pushed atabdb5b9; round185 ready to commit/push. Memory boss/library scene, corrected
+  hero sizes, enlarged boss silhouette and unchanged summons verified natively.
+- Actual Judgement kill, skeleton linked death, native victory and retained two-reward return pass.
+  Full-health boss balance, reload/retreat, corpse expiry and conditional equipment remain pending.
+- Current live coverage still crypts/Sprawl apprentice Necromancer only; global guarantee remains
+  incomplete. Broaden encounters/tiers after checking reward equipment and saved recovery.
+- DD2 stopped, no probe active. Estate2/source restored/hash matched, normal Release deployed.
+  Do not reopen protected picker or duplicate analysis. Usage38% at native boundary.

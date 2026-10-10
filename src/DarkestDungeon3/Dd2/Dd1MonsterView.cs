@@ -724,6 +724,10 @@ internal static class Dd1MonsterView
             _worldPerUnit = ratios.Count > 0 ? ratios[ratios.Count / 2] * 0.8f : m.WorldRatio * 0.8f;
         }
         float scale = (m.HeroArt != null ? m.WorldRatio : _worldPerUnit * Plugin.Dd1MonsterScale.Value) * pixelsPerUnit;
+        // Bishop's body and DD2 hero bounds are much taller than the DD1 lineup. Correct only memory
+        // heroes and Necromancer; leave the accepted skeleton/corpse proportions and ordinary fights alone.
+        if (FadedMemory.Active(Driver.Instance?.Expedition))
+            scale *= m.HeroArt != null ? 0.68f : m.Family == "necromancer" ? 0.85f : 1f;
         float bodyPx = (idle?.Height ?? 0) * scale;
         m.Scale = scale;
         m.Feet = feet;

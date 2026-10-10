@@ -91,6 +91,9 @@ internal static class Art
     public static Texture2D ForegroundBottom(string zone) => Png(ZoneArtOf(zone)?.ForegroundBottom);
     public static Texture2D RoomWall(string zone, int roomId) => Png(ZoneArtOf(zone)?.Room(roomId)) ?? CorridorWall(zone, roomId);
     public static Texture2D EntranceWall(string zone) => Png(ZoneArtOf(zone)?.Entrance) ?? RoomWall(zone, 0);
+    public static Texture2D BossRoomWall(string zone, string boss, int difficulty) =>
+        Png(ZoneArtOf(zone)?.BossRoom(boss, "plot_kill_" + (boss?.Length > 2 ? boss.Substring(0, boss.Length - 2) : boss)
+            + "_" + (difficulty <= 1 ? 1 : difficulty <= 3 ? 2 : 3))) ?? RoomWall(zone, 0);
 
     // ---- HUD ----
     public static Texture2D Panel(string file) => Dd1("panels", file);
