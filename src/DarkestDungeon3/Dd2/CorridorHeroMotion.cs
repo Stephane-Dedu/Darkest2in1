@@ -167,15 +167,15 @@ internal sealed class CorridorHeroMotion
         _pelvis.rotation = Quaternion.AngleAxis(3.5f * twist * weight, Vector3.up)
                          * Quaternion.AngleAxis(2f * shift * weight, worldForward) * _pelvis.rotation;
         if (_spine != null)
-            _spine.rotation = Quaternion.AngleAxis(-0.5f * shift * weight, worldForward)
+            _spine.rotation = Quaternion.AngleAxis(-0.25f * shift * weight, worldForward)
                             * Quaternion.AngleAxis(3f * weight, worldSide) * _spine.rotation;
-        // The shoulders counter the pelvis, carrying arms and held weapons together. Do not swing two-handed
-        // weapon arms independently. A small head counter-motion keeps the gaze steady over the moving chest.
+        // A small shoulder counter-motion leaves 2.25 degrees of torso yaw and 1.5 degrees of sway,
+        // following the hips. Carry arms and held weapons together; keep the gaze steady above the chest.
         if (_chest != null)
-            _chest.rotation = Quaternion.AngleAxis(-2f * twist * weight, Vector3.up)
-                            * Quaternion.AngleAxis(-0.5f * shift * weight, worldForward) * _chest.rotation;
+            _chest.rotation = Quaternion.AngleAxis(-1.25f * twist * weight, Vector3.up)
+                            * Quaternion.AngleAxis(-0.25f * shift * weight, worldForward) * _chest.rotation;
         if (_head != null)
-            _head.rotation = Quaternion.AngleAxis(-1.5f * twist * weight, Vector3.up)
+            _head.rotation = Quaternion.AngleAxis(-2.25f * twist * weight, Vector3.up)
                            * Quaternion.AngleAxis(-1.5f * weight, worldSide) * _head.rotation;
 
         PoseLeg(_left, leftFoot, weight, worldForward, worldSide);

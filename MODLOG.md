@@ -4353,3 +4353,13 @@ The detached fixture blocks persistence. Protected estates were not read; both
 estate2 files match their fresh backups (3C260376... and BB8068C0...), so no restore
 was needed. The temporary helper was removed and the deployed DLL matches the build.
 The parity loop remains paused.
+
+## Round196: slightly stronger upper-body walking motion (2026-10-10)
+
+Owner requested a little more upper-body movement and explicitly no game launch.
+Reduce spine/chest counter-rotation so net torso yaw increases from 1.5 to 2.25
+degrees and sway from 1 to 1.5 degrees, on the existing support/stride curves.
+Head counter-yaw follows the new total to keep the gaze steady. Hip/leg motion,
+knee posture, timing, wrist-relative sword grip and colour handoff are unchanged.
+Release build and the eight gait tests pass; deployed while DD2 is stopped.
+No native run this round, per the owner's instruction. Visual review remains pending.

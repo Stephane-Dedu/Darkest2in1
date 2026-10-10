@@ -59,7 +59,9 @@ speed is not claimed to match the fast 720-pixel-per-square scenery exactly.
 Weight shifts toward the supporting leg. The pelvis rises over that foot and
 settles during double support; yaw follows the separation of the feet. Smaller
 chest counter-rotation lets the shoulders follow the hips, with steadying head
-motion. Walking raises the native combat crouch toward 93% of leg length, with
+motion. Round196 increases the torso's net yaw/sway by 50%, to 2.25/1.5 degrees,
+by reducing shoulder counter-motion. The phase and hip/leg motion stay the same.
+Walking raises the native combat crouch toward 93% of leg length, with
 only 0.7–2.3% compression, keeping a cautious bend without a low squat.
 Leper's Sword_AuxSHJnt is a pelvis child, so it needs explicit grip preservation:
 capture its native pose relative to the right wrist before the walk layer, then
