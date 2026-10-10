@@ -19,10 +19,6 @@ namespace DarkestDungeon3.Dd2;
 /// </summary>
 internal sealed class Dd2Catalog : IHeroCatalog
 {
-    /// <summary>Used if DD2's library can't be read yet (e.g. before the game finished loading).</summary>
-    private static readonly string[] FallbackClasses =
-        { "flagellant", "grave_robber", "hellion", "highwayman", "jester", "leper", "man_at_arms", "occultist", "plague_doctor", "runaway", "vestal" };
-
     /// <summary>DD1 rarity → DD2 trinket tags that count as that rarity.</summary>
     private static readonly Dictionary<string, string[]> RarityTags = new()
     {
@@ -35,23 +31,26 @@ internal sealed class Dd2Catalog : IHeroCatalog
     };
 
     private readonly Dd1Lore _lore;
-    private List<string> _classes;
+    private IReadOnlyList<string> _classes;
+    private bool _classesWithCrusader;
 
     public Dd2Catalog(Dd1Lore lore) => _lore = lore;
 
-    public IReadOnlyList<string> RecruitableClasses => _classes ??= ReadClasses();
-
-    private static List<string> ReadClasses()
+    /// <summary>The stagecoach's classes (<see cref="RecruitClasses"/>): the Crusader once DD2's owned resources show
+    /// his DLC.</summary>
+    public IReadOnlyList<string> RecruitableClasses
     {
-        try
+        get
         {
-            var lib = SingletonMonoBehaviour<Library<string, ActorDataClass>>.Instance;
-            var classes = lib?.GetLibraryElements(c => c.IsPopulateInRoster && c.GetPotentialTags().Contains("hero"))
-                              .Select(c => c.Id).Distinct().ToList();
-            if (classes != null && classes.Count >= 4) return classes;
+            bool crusader = ActorResources.Has(RecruitClasses.Crusader) == true;
+            if (_classes == null || crusader != _classesWithCrusader)
+            {
+                _classes = RecruitClasses.For(crusader);
+                _classesWithCrusader = crusader;
+                Plugin.Log.LogInfo("[stagecoach] classes: " + string.Join(", ", _classes));
+            }
+            return _classes;
         }
-        catch (Exception e) { Plugin.Log.LogWarning($"Hero class list unavailable, using defaults: {e.Message}"); }
-        return FallbackClasses.ToList();
     }
 
     public string RandomName(string classId, Rng rng) => _lore.RandomName(rng);

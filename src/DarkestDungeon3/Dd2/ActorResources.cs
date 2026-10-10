@@ -54,6 +54,13 @@ internal static class ActorResources
         return null;
     }
 
+    /// <summary>Whether DD2's owned resources include this class (a DLC hero); null until they are known.</summary>
+    public static bool? Has(string classId)
+    {
+        if (_locations == null) { FindLocations(); return null; }
+        return classId != null && _locations.ContainsKey(classId);
+    }
+
     private static void FindLocations()
     {
         if (_locating) return;

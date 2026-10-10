@@ -44,7 +44,23 @@ public class DebugKeys : MonoBehaviour
                     Plugin.Log.LogInfo("[F3] walking to battle room " + (target?.Id.ToString() ?? "none"));
                 }
             }
-            if (kb.f4Key.wasPressedThisFrame && kb.shiftKey.isPressed)
+            if (kb.f4Key.wasPressedThisFrame && kb.ctrlKey.isPressed)
+            {
+                // Ctrl+F4, test estate only: one recruit of each class added on 2026-10-10 waits at the stagecoach.
+                var session = Runtime.Session.Current;
+                if (session?.SavePath != null && System.IO.Path.GetFileName(session.SavePath) == "estate_2.json")
+                {
+                    var e = session.Save.Estate;
+                    var rng = new Core.Rng(e.Week * 7919 + e.Recruits.Count);
+                    var added = session.Catalog.RecruitableClasses.Where(c => c == Core.Campaign.Town.RecruitClasses.BountyHunter || c == Core.Campaign.Town.RecruitClasses.Crusader)
+                        .Where(c => e.Recruits.All(r => r.ClassId != c)).ToList();
+                    foreach (var cls in added) e.Recruits.Add(session.Hamlet.MakeHero(cls, rng, level: 0));
+                    session.Persist();
+                    Plugin.Log.LogInfo($"[F4] stagecoach recruits added: {(added.Count > 0 ? string.Join(", ", added) : "none")}");
+                }
+                else Plugin.Log.LogInfo("[F4] only works on the test estate (slot 2)");
+            }
+            else if (kb.f4Key.wasPressedThisFrame && kb.shiftKey.isPressed)
             {
                 // Shift+F4, test estate only: open the Darkest Dungeon (a zone at level 6, the roster at resolve 5).
                 var session = Runtime.Session.Current;

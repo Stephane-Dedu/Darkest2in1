@@ -75,6 +75,8 @@ internal static class Dd2Heroes
 
         var trinkets = actor.GetTrinketInventory();
         var items = SingletonMonoBehaviour<Library<string, ItemDefinition>>.Instance;
+        // A new actor may spawn with trinkets of its own (DD2's hired Bounty Hunter); the record says what is worn.
+        trinkets?.RemoveItemsThatMeetCondition(_ => true);
         if (trinkets != null && items != null)
             foreach (var id in hero.WornTrinkets)
             {

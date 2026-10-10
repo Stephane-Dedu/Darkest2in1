@@ -65,7 +65,8 @@ public sealed class Hamlet
         return (quest, party, pack);
     }
 
-    /// <summary>DD1 classes DD2 has no hero for, and the DD2 hero that plays them (the Crusader: a front-line protector).</summary>
+    /// <summary>DD1 classes DD2 may have no hero for, and the DD2 hero that plays them (the Crusader, without DD2's DLC:
+    /// a front-line protector).</summary>
     public static readonly IReadOnlyDictionary<string, string> Dd2StandIn = new Dictionary<string, string>
     {
         ["crusader"] = "man_at_arms",

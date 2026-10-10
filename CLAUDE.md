@@ -27,7 +27,8 @@ Owner decisions, 2026-10-10 (direction only; details in PARITY.md):
 - Party-wipe trinkets: DD1's direction, won back through the crow (bird) plot quest; a custom DD2 version later, when
   the owner says the time is right.
 - Afflictions: DD1 afflictions/virtues replace DD2 meltdown; the Flagellant keeps DD2's Toxic overstress.
-- DLC hero classes from DD1 and DD2 are in scope, but not now: they need 3D models and related work.
+- DLC hero classes from DD1 and DD2 are in scope; most wait for 3D models and related work. Owner exceptions, 2026-10-10: DD2's DLC
+  Crusader and the Bounty Hunter (permanent hire) at the stagecoach, and DD1's Shieldbreaker with her DD1 2D art and DD1 skills.
 - Heroes who finish a Mountain (Darkest Dungeon) quest may return; implement later with the Mountain work.
 Owner's map design: pair Sprawl/Ruins, Foetor/Warrens, Tangle/Weald and Shroud/Cove at the same map positions.
 Keep DD1's area names with their quests directly beneath each area. A single existing next-arrow beside the name on

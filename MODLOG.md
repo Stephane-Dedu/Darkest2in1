@@ -4546,3 +4546,31 @@ to launch its exe or repoint the shortcut. The old copy was left untouched.
 
 The DLC install's config still holds the orphaned Dd2DestinationMenu = true entry (BepInEx keeps unknown
 entries; harmless). Deploy the removal build once DD2 (PID 40252, launched for the owner) is closed.
+
+## Round203: the DD2 DLC Crusader and a permanent Bounty Hunter at the stagecoach (2026-10-10)
+
+Owner: "can you introduce back from dd1 the shieldbreaker and from dd2 dlc the crusader", then "i will iterate
+later on the spells, also enable permanant hiring from stagecoach of the bounty hunter from dd2". Owner choices
+for the Shieldbreaker: DD1 2D art over a hidden DD2 stand-in, DD1 skills translated.
+
+Facts: the Hamlet runs before DD2's ActorDataClass library exists, so Dd2Catalog always used its fallback list
+of the 11 base classes. DD2's Crusader (dlc_dul_cru, hero_cru_data_export) is ActorDataClass `crusader`, the
+same id as DD1's; the Bounty Hunter (expedition/hero_bh_data_export) has m_StartingRosterStatusType hire and
+m_SpawnLootIds trinket_bounty_hunter_hire, a loot table rolled into his trinket inventory by every new
+ActorInstance (ActorInstance ~2579). DD1's Shieldbreaker lives in <dd1>/dlc/702540_shieldbreaker/heroes/
+shieldbreaker (info/art darkest, anim, A-D skins, ability icons).
+
+Built: Core RecruitClasses (base 11 + bounty_hunter + crusader when owned; 3 tests incl. Reynauld as a
+Crusader with the DLC and the Man-at-Arms without). Dd2Catalog uses it (logs "[stagecoach] classes: ...");
+ActorResources.Has(classId) reads the owned ResourceActor locations. Dd2Heroes.Apply clears spawned trinkets
+before adding the record's. Ctrl+F4 (test estate only) puts a Bounty Hunter and a Crusader on the stagecoach.
+
+Verified on estate 2 (DLC install, PID 2476): class list includes bounty_hunter and crusader; Cardonell
+(Bounty Hunter) and Neot (Crusader) hired with DD2 portraits, embarked (Ruins), DD2 models in the corridor,
+the Crusader's DD2 skills and DD1 crusader weapon/armour in the panel, a DD1 spider fight in native combat
+ending with spoils. The provisioner's Shift+click bought full stacks (12 food, 8 torches). The owner was also
+at the game (four F10 presses that were not ours), so driving stopped there; the spawn-trinket clearing was not
+observed. Estate 2 restored from this round's backup (c2758d23... / 496b2dfb...), temporary F2 removed, clean
+build deployed with matching hashes. 923 Core + 168 UI tests pass.
+
+Next: the Shieldbreaker (PARITY).
