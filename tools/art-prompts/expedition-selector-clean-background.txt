@@ -1,0 +1,10 @@
+Use case: precise-object-edit.
+Asset type: clean 16:9 background artwork for the approved in-game expedition selector. This asset will sit BEHIND real, interactive game UI.
+Edit target: the supplied approved full-screen mockup. Preserve the exact terrain composition, positions, scale, regional palette and angular inked painterly DD2 style.
+
+Remove ALL UI and ALL text from this image. Remove the title, five region names, arrows, medallions, selection rings, the entire left quest-detail panel including its separate coastal preview, the entire right hero roster including all portraits, the bottom party title and four slot frames, the bottom two buttons and all borders belonging to those widgets. Reconstruct unobtrusive natural landscape and sky where UI was removed. No symbols, lettering or placeholders anywhere. Left side and far right are calm subdued scenery as real UI panels will be drawn over them.
+
+Keep the approved main landscape intact: the massive red-lit jagged Mountain at top center-right, burning Sprawl upper left of center, golden Foetor farm middle left with barn/windmill/fields and modest fleshy infestation, cold drowned Shroud piers and towers middle right, teal Tangle forest and bannered fort lower center. Keep every primary landmark at the same coordinates. The quest-label areas should now simply show the terrain behind them. Maintain the lighter, thinner branch framing at the screen edges, the open cloudy sky, the simplified broad foreground terrain shapes and the sparse purposeful detail. Do not add dense tiny stones, twigs or rubble. Keep the scene continuous. Do not replace this with separated region cards or an overhead route map.
+
+Output ONLY the finished background painting, no UI, no text, no labels, no portraits, no borders for panels, no watermarks. Exact same widescreen aspect ratio.
+

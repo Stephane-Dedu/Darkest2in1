@@ -1,0 +1,36 @@
+Expedition selector visual draft v01
+Generated with the built-in ImageGen tool. Design concept only; no game UI implementation changes.
+
+Initial generation prompt
+
+Use case: ui-mockup.
+Asset type: first visual design draft of an in-game expedition selector for a personal Darkest Dungeon 1 gameplay mod running inside Darkest Dungeon 2.
+Primary request: redesign the existing single-screen DD1 expedition selector in the visual language of DD2. Keep DD1 as the layout and functional base. Replace the upper Darkest Dungeon destination's castle imagery with the Mountain from DD2. Keep every existing region accessible through the existing paired region switches, in this same menu.
+
+Input images:
+Image 1 is the current game menu, used as the layout reference. Preserve its main composition and approximate usable space: quest details on the left, a large connected destination landscape in the center, vertical hero roster on the right, four party portraits along the bottom, back action bottom left, embark/provision action below the map. Keep the heroes' existing appearance.
+Images 2 through 5 are regional art style and environment references for the Sprawl, Foetor, Tangle and Shroud respectively. Integrate their recognizable environments into the central painted landscape; do not paste rectangular scenes or split the map into panels.
+
+Art direction: polished dark fantasy game UI concept, convincing DD2 angular inked and painterly rendering, bold fractured black silhouettes, sharp planar shading, hand-painted gouache texture, smoky atmospheric depth. Charcoal and bone interface with restrained worn bronze and crimson selection accents. DD1 composition, DD2 materials and illustration. Subtle branch/iron vignette at the screen edges without blocking usable UI.
+
+Central landscape:
+At the very top of the central map, below the title, make the Mountain the most prominent distant landmark: a massive ominous jagged dark peak, hostile spired silhouette, faint reddish light splitting the clouds. Give it a clear summit destination emblem and label "The Mountain". It replaces the Darkest Dungeon upper destination visually.
+Below it keep four stable regional hubs in their familiar relative positions from image 1: the Sprawl upper left, the Foetor middle left, the Shroud middle right, the Tangle lower center. Give each hub its own substantial recognizable environment art around its marker: burning gothic city rooftops and ember-lit streets for the Sprawl; sickly golden farmland, collapsing barn and fleshy infestation for the Foetor; blue-green woodland, overgrown ruined fort and hanging banners for the Tangle; cold blue coastal ruins, docks, jagged rocks and mist for the Shroud. Blend all four through mist, terrain and broken roads into ONE continuous landscape with no card borders between regions. Keep sufficient calm space immediately around each label and quest markers.
+
+Interface and exact main text:
+Top centered title "Choose a quest".
+Four readable map labels "The Sprawl", "The Foetor", "The Shroud", "The Tangle".
+Each regional label has ONE small right-arrow switch beside it, as in the existing menu. These retain the paired destinations Sprawl/Ruins, Foetor/Warrens, Tangle/Weald, Shroud/Cove. Only the currently active region name and its art is visible at each hub. Do not draw eight regions or add tabs, extra destinations, navigation screens or a carousel.
+Quest medallions sit just beneath each regional name, clearly separate from the region switch. Keep the currently selected Shroud quest marked with a restrained crimson ring.
+Left quest detail panel should keep a portrait-sized regional illustration and readable hierarchy with "The Shroud", "Apprentice", "Medium", "Explore", "Explore 90% of rooms", and "Rewards". Preserve the information density and approximate size of the original.
+Right roster heading "Hero roster", keep six portrait rows with character portraits and short names drawn from image 1, restrained bone text, stress/health marks.
+Four party portraits on the bottom, as in the original, with room around them.
+Bottom-left action "Back to Hamlet", bottom-right primary action "Provision".
+Use readable condensed serif lettering; do not fill the screen with invented statistics.
+
+Composition: finished widescreen 16:9 menu mockup filling the canvas edge-to-edge, straight-on screenshot view, no monitor frame, no photographic desk, no annotation arrows, no comparison panels, no design explanation or watermark. Prioritize convincing cohesive DD2-style central environment art, clear Mountain at the top, and the existing DD1 one-menu usability. This is a concept image, not a new branching road-route selector.
+
+Targeted correction prompt
+
+Edit this expedition-selector concept image with one precise correction: remove ONLY the small rectangular right-arrow button immediately beside the top "The Mountain" label. The Mountain is a fixed destination and must not have a region switch. Leave the readable "The Mountain" label and the quest emblem underneath it intact. Fill the removed button area naturally with the same dark painted mountain/background. Preserve everything else exactly: the overall composition, environment artwork, UI panels, text, four other region arrow buttons, quest medallions, roster, party slots and bottom actions. Do not add new elements.
+

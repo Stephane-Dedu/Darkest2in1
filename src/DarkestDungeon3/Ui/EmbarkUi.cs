@@ -77,16 +77,29 @@ internal sealed partial class EmbarkUi
 
     private void DrawQuestSelect()
     {
-        var bg = Qs("quest_select.background.png");
-        if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg); else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
-        Gui.Text(new Rect(560, 24, 900, 60), "Choose a quest", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-
         if (_quest != null && !E.Quests.Contains(_quest)) _quest = null;
         if (_focusedZone == null || (_focusedZone != QuestBoard.DarkestDungeon && !CampaignRegions.Enabled(E, _focusedZone)))
             FocusArea(_quest?.Dungeon ?? E.Quests.FirstOrDefault()?.Dungeon);
 
+        var paintedMap = ExpeditionMapArt.Background;
+        _expeditionStyle = paintedMap != null;
+        foreach (var location in CampaignRegions.Legacy)
+        {
+            var areas = CampaignRegions.AtLocation(E, location);
+            if (areas.Count > 0 && (!_mapAreas.TryGetValue(location, out var selected) || !areas.Contains(selected)))
+                _mapAreas[location] = areas[0];
+        }
+        if (_expeditionStyle) DrawPaintedMap(paintedMap);
+        else
+        {
+            var bg = Qs("quest_select.background.png");
+            if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg);
+            else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
+        }
+        Gui.Text(new Rect(560, 24, 900, 60), "Choose a quest", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+
         // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
-        var spots = MapSpots();
+        var spots = _expeditionStyle ? PaintedMapSpots : MapSpots();
         foreach (var location in CampaignRegions.Legacy)
         {
             var areas = CampaignRegions.AtLocation(E, location);
@@ -95,7 +108,7 @@ internal sealed partial class EmbarkUi
                 _mapAreas[location] = zone = areas[0];
             DrawDungeon(zone, pos, areas);
         }
-        if (E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
+        if ((_expeditionStyle || E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon)) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
             DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
 
         if (_quest != null) DrawQuestScroll(_quest);
@@ -111,16 +124,20 @@ internal sealed partial class EmbarkUi
                 : _quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark) ? "Refuses this quest"
                 : null;
             return new RosterColumn.Look(dim: inParty || note != null, note: inParty ? null : note, highlight: inParty);
-        }, draggable: true);
+        }, draggable: true, expeditionStyle: _expeditionStyle);
         if (clicked != null) Toggle(clicked);
         if (RosterColumn.RightClickedHero != null) _sheetHeroId = RosterColumn.RightClickedHero.Id;
         // A hero dragged out of the party back onto the roster leaves it.
         if (Drag.Drop<HeroDrag>(RosterColumn.Area, out var back) && back.FromSlot >= 0) _party.Remove(back.HeroId);
 
-        if (Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the Hamlet", size: 24)) WantsBack = true;
+        var backRect = new Rect(30, 1000, 300, 60);
+        if (_expeditionStyle ? ExpeditionButton(backRect, "Back to Hamlet", size: 24)
+            : Gui.DdButton(backRect, "Back to the Hamlet", size: 24)) WantsBack = true;
         var heroes = Heroes();
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
-        if (Gui.DdButton(new Rect(1190, 905, 330, 90), why == null ? "Provision" : why, why == null, why == null ? 40 : 18))
+        var provisionRect = new Rect(1190, 905, 330, 90);
+        if (_expeditionStyle ? ExpeditionButton(provisionRect, why ?? "Provision", why == null, why == null ? 40 : 18)
+            : Gui.DdButton(provisionRect, why ?? "Provision", why == null, why == null ? 40 : 18))
         {
             _provisioning = true;
             _error = null;
@@ -183,17 +200,19 @@ internal sealed partial class EmbarkUi
     private void DrawDungeon(string zone, Vector2 pos, IReadOnlyList<string> areas)
     {
         var plate = Qs("dungeon_progressionbar.png");
-        if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
+        if (_expeditionStyle) ExpeditionFrame(new Rect(pos.x - 5, pos.y - 10, 300, 58), 0.78f);
+        else if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
         else Gui.Fill(new Rect(pos.x - 5, pos.y - 10, 282, 84), new Color(0, 0, 0, 0.8f));
-        string name = S.Zones.ZoneName(zone);
+        string name = AreaName(zone);
         bool canSwitch = areas.Count > 1;
         Gui.Text(new Rect(pos.x + 4, pos.y - 6, canSwitch ? 156 : 190, 30), name, 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
 
         E.ZoneXp.TryGetValue(zone, out int xp);
         int level = S.Campaign.ZoneLevel(xp);
         var thresholds = S.Campaign.ZoneLevelThresholds;
-        Gui.Text(new Rect(pos.x + 199, pos.y + 2, 40, 36), level.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
-        if (thresholds.Count > level + 1)
+        bool mountain = _expeditionStyle && zone == QuestBoard.DarkestDungeon;
+        if (!mountain) Gui.Text(new Rect(pos.x + (_expeditionStyle ? 250 : 199), pos.y + 2, 40, 36), level.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+        if (!mountain && thresholds.Count > level + 1)
         {
             float from = thresholds[level], to = thresholds[level + 1];
             Gui.Fill(new Rect(pos.x + 14, pos.y + 32, 194 * Mathf.Clamp01((xp - from) / Mathf.Max(1, to - from)), 6), new Color(0.75f, 0.62f, 0.3f));
@@ -206,7 +225,7 @@ internal sealed partial class EmbarkUi
             float nameWidth = Dd1Font.Heading?.Measure(name, 24 * Gui.HeadingScale).x ?? 156;
             var next = new Rect(pos.x + 4 + Mathf.Min(nameWidth + 8, 164), pos.y - 6, 24, 30);
             Gui.Image(next, Art.Dd1("shared", "character", "next_hero.png"), ScaleMode.ScaleToFit);
-            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Switch to " + S.Zones.ZoneName(nextZone));
+            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Switch to " + AreaName(nextZone));
             if (Gui.Hotspot(next)) FocusArea(nextZone);
         }
 
@@ -221,7 +240,7 @@ internal sealed partial class EmbarkUi
         int rows = Mathf.Max(1, (quests.Count + 3) / 4);
         _questRows.TryGetValue(zone, out int row);
         row = Mathf.Clamp(row, 0, rows - 1);
-        var questArea = new Rect(pos.x + 68, pos.y + 52, 356, 80);
+        var questArea = _expeditionStyle ? new Rect(pos.x - 4, pos.y + 54, 300, 100) : new Rect(pos.x + 68, pos.y + 52, 356, 80);
         if (rows > 1 && questArea.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
         {
             row = Mathf.Clamp(row + (Event.current.delta.y > 0 ? 1 : Event.current.delta.y < 0 ? -1 : 0), 0, rows - 1);
@@ -231,13 +250,14 @@ internal sealed partial class EmbarkUi
         {
             var q = quests[i];
             // Keep DD1's first-row positions. Extra rows scroll here instead of covering the next area.
-            var c = new Vector2(pos.x + 160 + (i % 4) * 76, pos.y + 92);
+            var c = new Vector2(pos.x + (_expeditionStyle ? 34 : 160) + (i % 4) * 76, pos.y + (_expeditionStyle ? 100 : 92));
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
             bool hover = r.Contains(Event.current.mousePosition);
             if (q == _quest)
             {
                 var selected = Qs("quest_select_selected.png");
-                if (selected != null) GUI.DrawTexture(new Rect(c.x - 72, c.y - 72, 144, 144), selected);
+                float radius = _expeditionStyle ? 56 : 72;
+                if (selected != null) GUI.DrawTexture(new Rect(c.x - radius, c.y - radius, radius * 2, radius * 2), selected);
             }
             var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png") ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
             if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8) : r, ring);
@@ -249,8 +269,9 @@ internal sealed partial class EmbarkUi
         }
         if (rows > 1)
         {
-            var up = new Rect(pos.x + 86, pos.y + 56, 26, 20);
-            var down = new Rect(pos.x + 86, pos.y + 108, 26, 20);
+            float scrollX = pos.x + (_expeditionStyle ? -34 : 86);
+            var up = new Rect(scrollX, pos.y + 56, 26, 20);
+            var down = new Rect(scrollX, pos.y + 108, 26, 20);
             if (row > 0)
             {
                 Gui.Image(up, Art.Dd1("shared", "widgets", "scrollbar_uparrow.png"), ScaleMode.ScaleToFit);
@@ -261,8 +282,8 @@ internal sealed partial class EmbarkUi
                 Gui.Image(down, Art.Dd1("shared", "widgets", "scrollbar_downarrow.png"), ScaleMode.ScaleToFit);
                 if (Gui.Hotspot(down)) row++;
             }
-            Gui.Text(new Rect(pos.x + 68, pos.y + 80, 60, 20), $"{row + 1} / {rows}", 14, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (new Rect(pos.x + 68, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
+            Gui.Text(new Rect(scrollX - 18, pos.y + 80, 60, 20), $"{row + 1} / {rows}", 14, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (new Rect(scrollX - 18, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
         }
         _questRows[zone] = row;
     }
@@ -284,6 +305,7 @@ internal sealed partial class EmbarkUi
 
     private void DrawQuestScroll(QuestOffer q)
     {
+        if (_expeditionStyle) { DrawPaintedQuestScroll(q); return; }
         var at = new Vector2(125, 132);
         var scroll = Qs("quest_select.questverbose_bg.png");
         if (scroll != null) GUI.DrawTexture(new Rect(at.x, at.y, 400, 843), scroll);
@@ -319,7 +341,9 @@ internal sealed partial class EmbarkUi
     private void DrawPartySlots(Vector2 at)
     {
         var plate = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
-        if (plate != null) GUI.DrawTexture(new Rect(at.x, at.y, 412, 113), plate); else Gui.Fill(new Rect(at.x, at.y, 412, 113), new Color(0, 0, 0, 0.8f));
+        if (_expeditionStyle) ExpeditionFrame(new Rect(at.x, at.y, 412, 113));
+        else if (plate != null) GUI.DrawTexture(new Rect(at.x, at.y, 412, 113), plate);
+        else Gui.Fill(new Rect(at.x, at.y, 412, 113), new Color(0, 0, 0, 0.8f));
         Gui.Text(new Rect(at.x, at.y - 40, 412, 36), "The party", 28, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         var slotBg = Art.Dd1("campaign", "town", "hero_slot", "hero_slot.background.png");
         // DD1 lines the party up facing right: rank 4 on the left, rank 1 on the right.

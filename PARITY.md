@@ -403,6 +403,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Footsteps per zone, curio/trap/door/loot/UI sounds, building sounds.
 
 ## UI look
+
+- [?] Approved DD2-style expedition selector, 2026-10-10: private landscape with Mountain above four regional hubs; lighter frame and simpler close terrain. Paired switches, local region overlays/previews, live quest details/XP, party and provisioner retained. Exact prompts and reusable art direction: tools/expedition_selector_design.md. Native layout, switches and interaction verification pending.
 - [?] Crawl HUD: DD1 hallway, hero row, stat column, inventory bag tab (672,252), minimap.
 - [?] Hero sheet (`shared/character`), right-click everywhere.
 - [?] Fonts at DD1's native sizes (nothing overflows).

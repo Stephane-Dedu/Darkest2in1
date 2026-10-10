@@ -67,15 +67,17 @@ internal static class RosterColumn
     /// <summary>The hero right-clicked during the last Draw (DD1 opens their sheet), or null.</summary>
     public static HeroRecord RightClickedHero { get; private set; }
 
-    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false)
+    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false, bool expeditionStyle = false)
     {
         var grad = Art.Dd1("campaign", "town", "roster", "roster_bggrad.png");
-        if (grad != null) GUI.DrawTexture(new Rect(X, 0, 373, 1080), grad);
+        if (expeditionStyle) Gui.Fill(new Rect(X - 12, 72, 382, Spacing * Visible + 60), new Color(0.025f, 0.028f, 0.03f, 0.93f));
+        else if (grad != null) GUI.DrawTexture(new Rect(X, 0, 373, 1080), grad);
         else Gui.Fill(new Rect(X, 0, 370, 1080), new Color(0, 0, 0, 0.7f));
 
         var topFrame = Art.Dd1("campaign", "town", "roster", "roster_topframe.png");
-        if (topFrame != null) GUI.DrawTexture(new Rect(X - 6, FirstY - 60, 383, 60), topFrame);
-        Gui.Text(new Rect(X + 20, 40, 130, 40), $"{estate.Roster.Count}/{capacity}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        if (topFrame != null && !expeditionStyle) GUI.DrawTexture(new Rect(X - 6, FirstY - 60, 383, 60), topFrame);
+        if (expeditionStyle) Gui.Text(new Rect(X + 4, 32, 220, 40), "Hero roster", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(X + (expeditionStyle ? 246 : 20), 40, 130, 40), $"{estate.Roster.Count}/{capacity}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         DrawSortButtons(estate);
 
         var area = new Rect(X, FirstY, 370, Spacing * Visible);

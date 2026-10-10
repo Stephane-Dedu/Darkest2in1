@@ -4072,6 +4072,19 @@ Evidence and raw native data remain private in rea-workbench/evidence/round188 a
 - Later O3 candidates: native class-restricted equip validation, saved memory restart/retreat, then
   complete boss/region/tier expansion. O6 follows O3. Global guarantee/coverage remains incomplete.
 
+## Round189: approved expedition-selector artwork
+
+Owner approved the lighter, clearer expedition-selector v02 on 2026-10-10, retained the paired region
+switches, and explicitly requested reusable prompts. Exact original/readability prompts and the art
+direction are recorded in tools/art-prompts and tools/expedition_selector_design.md. This is scoped
+selector work; the separate parity-loop pause and Mountain gameplay proposals remain in force.
+
+Route: retain IMGUI and the DD1 quest/provisioning rules, draw real controls over a private ImageGen
+painting, and register local feathered overlays for DD1 destinations and Sluice. Runtime uses PNG,
+1920x1080 canvas, bilinear sampling and soft alpha; previews are 512x256. No game assets enter Git.
+Original DD1 background/layout remain the fallback when the optional private map is unavailable.
+Native verification pending. Use estate2 only, with backup/restore and no normal estate picker.
+
 ## Owner decisions, 2026-10-10
 
 Owner answered four open [user] questions; recorded in PARITY.md and CLAUDE.md. Direction only;
