@@ -4259,3 +4259,54 @@ The exact selector prompts remain in tools/art-prompts and tools/expedition_sele
 - Owner first asked to wait before launching, then explicitly authorized a launch when the work is
   done. Finish checks/deploy while stopped and open the normal game once, without the test helper.
   Further test launches should follow the owner's current instructions. The parity loop stays paused.
+
+## Round194: correct the final walking image against the battle appearance
+
+Owner still reported blue heroes and asked to use the battle model as the walk's
+base while preserving the finished gait and angle. HeroStage already creates
+the native battle actor with no starting-state override and calls ActorBhv.Show;
+CorridorHeroMotion layers the accepted skeletal walk on that combat idle. No new
+mesh, rig, animation controller or angle change is needed.
+
+The previous successful preset-application log was insufficient evidence for
+colour. A native corridor PNG reproduces blue neutral cloth while its material
+block already has the warm Farm shadow colour. A private read-only image check
+of the test Leper's hood gives RGB75.29/78.04/84.48 and fails the neutral criterion.
+The first broad material check also counted enemy Hero-shader renderers; restrict
+that check to the actual party before using it. Native ambient and fake-light
+colour experiments did not visibly change the cast; none enter product code.
+An unmistakable red material tint did change the rendered image, establishing
+the working seam for a corridor colour balance.
+
+HeroCombatPalette now accepts a corridor flag. Only the stage instances add
+`_ColorTintColor=(0.96,0.90,0.74)` at the existing presentation override priority.
+Fight actors keep their current native combat tint, avoiding a second warm pass.
+The existing handle/override cleanup also removes the new tint. No shared asset
+edits, new scene scans, per-frame allocations or global rendering patches.
+
+Native test covers the four fixture heroes, idle and the existing walk, plus a
+scripted in-place battle. Final selected tint was tested through the same native
+material override path; neutral-hood pixels become RGB81.65/75.16/67.97 and pass.
+Captured walking and battle views were inspected. Full subjective colour matching
+and the other classes remain for owner review. Release, 920 Core and 147 UI tests
+pass. No meaningful Core test seam exists for rendered colour; the native PNG
+check, not a duplicated constants test, is the regression oracle for this fixture.
+
+Private evidence, test helper and check scripts are under
+C:\Users\Piral\.universal-modder\inspection\hero-palette-20261010. The owner
+authorized restarting the open game for this test. It used a detached estate2
+fixture with persistence blocked. Human input entered fights during the first
+captures; the final isolated run freezes navigation and drives the gait in place.
+Protected estates were not read. Fresh estate2 files are backed up in that folder.
+
+## Status 2026-10-10: round194 walking colour balance
+
+- Native battle models remain the walking base, with the accepted gait and angle.
+  Corridor-only material colour balance verified in native captures; owner review
+  of the exact appearance and other hero classes remains pending.
+- Release deployed while stopped; installed DLL hash matches the build. Private
+  helper removed. Both estate2 files match this round's fresh backup, so no restore
+  was needed. Normal game reopened for owner review, PID13220, without the helper.
+- Selector prompt memory remains in tools/art-prompts and tools/expedition_selector_design.md.
+  Selector interaction checks and battle crossfade pose matching remain as recorded
+  in PARITY. The parity loop stays paused.

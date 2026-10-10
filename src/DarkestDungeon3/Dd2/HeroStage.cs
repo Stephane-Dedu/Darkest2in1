@@ -400,7 +400,7 @@ internal sealed class HeroStage : MonoBehaviour
             slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
-            (_palette ??= new HeroCombatPalette(this)).Apply(actor);
+            (_palette ??= new HeroCombatPalette(this, corridor: true)).Apply(actor);
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
                 && _checked && !RendersBlack && bindMotion)
             {

@@ -23,14 +23,23 @@ internal sealed class HeroCombatPalette
     // The arena preset assumes DD2's final scene grading. Fights in place and the corridor omit that grading:
     // its 1.6 grey tint intensity and 1.5 brightness wash out the ungraded models. Keep the warm shadow palette,
     // lower the lift and retain a little more texture colour in both presentations.
-    private readonly MaterialPropertyOverride[] _ungraded =
-    {
-        new("_Brightness", 1.25f),
-        new("_ColorTintIntensity", 1f),
-        new("_Saturation", 1.10f),
-    };
+    private readonly MaterialPropertyOverride[] _ungraded;
 
-    internal HeroCombatPalette(Object source) => _source = source;
+    internal HeroCombatPalette(Object source, bool corridor = false)
+    {
+        _source = source;
+        var values = new List<MaterialPropertyOverride>
+        {
+            new("_Brightness", 1.25f),
+            new("_ColorTintIntensity", 1f),
+            new("_Saturation", 1.10f),
+        };
+        // The isolated camera still renders neutral cloth blue with the arena's warm shadow preset.
+        // Balance its final material tint against the native fight view. Keep this off fight actors:
+        // they already receive the arena lighting, and would be warmed a second time.
+        if (corridor) values.Add(new MaterialPropertyOverride("_ColorTintColor", new Color(0.96f, 0.90f, 0.74f, 1f), MaterialPropertyBlendType.Override));
+        _ungraded = values.ToArray();
+    }
 
     private static IResourceLocation FindPreset()
     {

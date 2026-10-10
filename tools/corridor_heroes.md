@@ -16,12 +16,18 @@ the preset by catalog InternalId because DD2 exposes GUID load keys. The locatio
 is cached; load handles and actor overrides are released when their presentation
 ends. Shared materials, textures, normal DD2 battles and enemy palettes stay native.
 
-The owner confirmed that this removed the blue tint, then reported faded colours.
-The final ungraded presentation uses brightness1.25, tint intensity1.0 and
-saturation1.10, instead of the arena preset's brightness1.5 and grey tint intensity1.6.
-This final contrast pass is built but still needs visual review. Existing model
-brightness configuration remains available. The unsuccessful global-lighting and
-viewing-angle experiments were removed; the camera-facing walk is retained.
+The owner subsequently still saw blue walking heroes. Native captures confirmed
+that the warm shadow preset alone did not neutralize the final corridor image.
+The corridor now additionally uses material tint0.96/0.90/0.74. Fight actors keep
+the arena tint because they already have the native battle lighting. Both retain
+brightness1.25, tint intensity1.0 and saturation1.10. Native neutral-hood pixels
+changed from RGB75.29/78.04/84.48 to81.65/75.16/67.97; walking and battle captures
+were inspected. The exact subjective match still needs the owner's review.
+
+The same battle meshes, textures, native combat stance, gait and camera-facing
+angle remain in use. Rebuilding or re-rigging those models was unnecessary.
+The unsuccessful global-lighting experiments remain outside the product. Existing
+model brightness configuration remains available.
 
 ## Facing and rig
 
