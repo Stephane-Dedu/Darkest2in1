@@ -453,8 +453,9 @@ internal sealed partial class EmbarkUi
             var e = Event.current;
             if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped)
             {
-                if (e.button == 0 && left > 0) _cart.Add(id, 1);
-                else if (e.button == 1 && have > 0) _cart.Add(id, -1);
+                // Shift buys up to a full stack, and puts the last stack back.
+                if (e.button == 0 && left > 0) _cart.Add(id, e.shift ? _cart.ToFullStack(id, left, items) : 1);
+                else if (e.button == 1 && have > 0) _cart.Add(id, -(e.shift ? _cart.LastStack(id, items) : 1));
                 e.Use();
             }
         }
@@ -467,7 +468,7 @@ internal sealed partial class EmbarkUi
         }
         if (Drag.Hovering<PackStack>(StoreArea)) Gui.Fill(new Rect(StoreArea.x, StoreArea.yMax - 6, StoreArea.width, 4), Gui.Gold);
         string tip = hovered != null
-            ? $"{HamletUi.Pretty(hovered)}: {S.Hamlet.ProvisionPrice(S.Provisioner, items, hovered)} gold each. Click or drag to buy, right-click to put one back."
+            ? $"{HamletUi.Pretty(hovered)}: {S.Hamlet.ProvisionPrice(S.Provisioner, items, hovered)} gold. Click buys, Shift+click buys a stack, right-click returns."
             : "Drag supplies into your pack. Drag a stack back to the shelf to return it.";
         Gui.Text(new Rect(StorePos.x, StorePos.y + 352, 680, 30), tip, 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
     }

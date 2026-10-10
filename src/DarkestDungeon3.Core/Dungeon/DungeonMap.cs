@@ -127,7 +127,9 @@ public sealed class DungeonMap
         return QuestRooms.All(r => distances[r.Id] >= 0);
     }
 
-    /// <summary>DD1 scouting spends a square budget down each branch; reaching a corridor's end reveals its room.</summary>
+    /// <summary>DD1 scouting spends a square budget down each branch. Owner rule (2026-10-10): a branch the budget
+    /// reaches is always shown to its end, so the party can see where it leads; only fully paid corridors carry the rest
+    /// of the budget on to the next room.</summary>
     public int ScoutFrom(int from, int squares, bool revealSecrets = false)
     {
         if (squares <= 0) return 0;
@@ -141,18 +143,18 @@ public sealed class DungeonMap
             foreach (int cid in Room(room).CorridorIds)
             {
                 var corridor = Corridor(cid);
-                int count = System.Math.Min(left, corridor.Tiles.Count);
+                int count = corridor.Tiles.Count;
                 for (int i = 0; i < count; i++)
                 {
                     var tile = corridor.Tiles[room == corridor.RoomA ? i : corridor.Tiles.Count - 1 - i];
                     if (!tile.Scouted) { tile.Scouted = true; revealed++; }
-                    if (tile.SecretRoomId >= 0 && (revealSecrets || tile.SecretDoorAlwaysAccessible))
+                    // Only the path goes past the budget: a secret door still needs the scouting to reach it.
+                    if (i < left && tile.SecretRoomId >= 0 && (revealSecrets || tile.SecretDoorAlwaysAccessible))
                     {
                         var secret = Room(tile.SecretRoomId);
                         if (!secret.Scouted) { secret.Scouted = true; revealed++; }
                     }
                 }
-                if (count < corridor.Tiles.Count) continue;
                 int other = corridor.Other(room);
                 var next = Room(other);
                 if (other != from && !next.Scouted) { next.Scouted = true; revealed++; }

@@ -4192,3 +4192,24 @@ hashes. Recordings private in C:\Users\Piral\.universal-modder\inspection\round1
   Remaining time: ~0.5 s DD2 arena load and actor spawn stall, now hidden behind the heroes' turn.
 - No game running; estate2 restored and hash-checked; normal Release deployed with matching hashes.
 - Owner's main focus stays feel and performance; the parity loop stays paused. Ask what they feel next.
+
+## Round192: provisioner Shift+click, corpse rule at Kill, scouting to the room
+
+Owner requests while playing (2026-10-10):
+- Provisioner: Shift+left-click buys up to a full stack, Shift+right-click returns the last stack (Core
+  Inventory.ToFullStack/LastStack, bounded by shelf stock and pack room; 3 Core cases).
+- Corpses after crit/bleed/blight kills stayed. CorpseRule only recorded the hit in ApplyHealthDamage, but a
+  lethal skill hit never goes there: SkillCalculation.ApplyActorResults kills IsDamageKill targets directly
+  with ActorInstance.Kill(DeathType.SKILL...). CombatPresentationBhv also re-asks GetIsDeathClassValid
+  (DeathType.SKILL) when it plays the death, after any per-call memory is gone. Now RememberLethalCrits
+  reads the skill's ActorResults (IsDamageKill && IsCrit by target), DecideAtDeath prefixes the main Kill
+  overload (DOT from its SourceType) and calls DD2's SetDeathClassIgnored, which both checks honour.
+- Scouting: owner rule, a reached branch is shown to its end with its room; secret doors stay
+  budget-bound. Scouting tests updated to the rule; the SecretBranch case still requires reach.
+- Quests: owner says they are not coherent with DD1 (explore 90% of rooms, all battle rooms). Core goals,
+  selector text and quest curio placement already follow quest.types.json; asked the owner for examples.
+
+Owner's own DD2 session (PID 26780) was running: an earlier build in this round deployed over the
+plugin while it ran (BepInEx had not locked it; the running game kept its loaded build). That broke the
+"deploy only while DD2 is stopped" rule; later builds used -p:Deploy=false. Corpse and scouting builds
+are not deployed yet: deploy when the game is closed. 920 Core + 147 UI tests pass.

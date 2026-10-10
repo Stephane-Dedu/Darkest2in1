@@ -27,12 +27,14 @@ public class ScoutingTests
         map.Room(b).CorridorIds.Add(c.Id);
     }
 
+    // Owner rule, 2026-10-10: a branch the budget reaches is shown to its end (its room included), so the party can
+    // see where it leads; only fully paid corridors carry the rest of the budget further.
     [Theory]
-    [InlineData(6, 6, false, false)]
+    [InlineData(6, 8, true, false)]
     [InlineData(8, 8, true, false)]
-    [InlineData(11, 11, true, false)]
+    [InlineData(9, 12, true, true)]
     [InlineData(12, 12, true, true)]
-    public void ScoutingSpendsSquaresBeforeRevealingTheFarRoom(int budget, int tiles, bool room1, bool room2)
+    public void ScoutingAlwaysShowsABranchToItsRoom(int budget, int tiles, bool room1, bool room2)
     {
         var map = Line();
         int revealed = map.ScoutFrom(0, budget);
@@ -47,12 +49,14 @@ public class ScoutingTests
     public void ScoutingFromTheOtherEndRevealsTheCorrectSquares()
     {
         var map = Line();
-        map.ScoutFrom(2, 6);
+        map.ScoutFrom(2, 4);                       // exactly the first corridor: nothing carries on
         Assert.True(map.Room(1).Scouted);
         Assert.False(map.Room(0).Scouted);
-        Assert.All(map.Corridor(0).Tiles.Take(6), t => Assert.False(t.Scouted));
-        Assert.All(map.Corridor(0).Tiles.Skip(6), t => Assert.True(t.Scouted));
+        Assert.All(map.Corridor(0).Tiles, t => Assert.False(t.Scouted));
         Assert.All(map.Corridor(1).Tiles, t => Assert.True(t.Scouted));
+        map.ScoutFrom(2, 6);                       // two squares left: the next branch is shown to its room
+        Assert.True(map.Room(0).Scouted);
+        Assert.All(map.Corridor(0).Tiles, t => Assert.True(t.Scouted));
     }
 
     [Fact]
@@ -66,7 +70,7 @@ public class ScoutingTests
     }
 
     [Theory]
-    [InlineData(0f, 6)]
+    [InlineData(0f, 8)]   // six squares reach the eight-square hall: it is shown whole, with its room
     [InlineData(1f, 8)]
     public void CrawlUsesNormalOrCriticalScoutingDistance(float critical, int expected)
     {

@@ -117,6 +117,25 @@ public sealed class Inventory
         return amount;
     }
 
+    /// <summary>How many to buy so the item's last stack is full (shift-click at the provisioner): the rest of a
+    /// partial stack, or a whole new stack when the last one is full. Never more than <paramref name="available"/>
+    /// or than the pack can hold.</summary>
+    public int ToFullStack(string id, int available, ItemCatalog catalog)
+    {
+        int stack = System.Math.Max(1, catalog.StackLimit(id));
+        int remainder = Count(id) % stack;
+        int room = remainder > 0 ? stack - remainder : Slots - SlotsUsed(catalog) > 0 ? stack : 0;
+        return System.Math.Max(0, System.Math.Min(available, room));
+    }
+
+    /// <summary>The item's last stack (shift-right-click puts it back): the partial one, or a full one.</summary>
+    public int LastStack(string id, ItemCatalog catalog)
+    {
+        int stack = System.Math.Max(1, catalog.StackLimit(id));
+        int remainder = Count(id) % stack;
+        return remainder > 0 ? remainder : System.Math.Min(stack, Count(id));
+    }
+
     public bool HasRoomFor(string id, int amount, ItemCatalog catalog)
     {
         int stack = catalog.StackLimit(id);

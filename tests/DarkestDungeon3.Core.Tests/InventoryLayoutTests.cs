@@ -35,4 +35,42 @@ public class InventoryLayoutTests
         pack.Add(Supply.Shovel, 1);
         Assert.Equal(1, pack.Arrange(Items).Single(s => s.Key == Supply.Shovel).Slot);
     }
+
+    [Fact]
+    public void Shift_click_buys_up_to_a_full_stack()
+    {
+        int stack = Items.StackLimit(Supply.Food);   // 12 in DD1
+        var pack = new Inventory();
+        Assert.Equal(stack, pack.ToFullStack(Supply.Food, 50, Items));         // an empty pack: one whole stack
+        pack.Add(Supply.Food, 5);
+        Assert.Equal(stack - 5, pack.ToFullStack(Supply.Food, 50, Items));     // tops up the partial stack
+        pack.Add(Supply.Food, stack - 5);
+        Assert.Equal(stack, pack.ToFullStack(Supply.Food, 50, Items));         // last stack full: a new one
+        Assert.Equal(3, pack.ToFullStack(Supply.Food, 3, Items));              // never more than the shelf holds
+        Assert.Equal(0, pack.ToFullStack(Supply.Food, 0, Items));
+    }
+
+    [Fact]
+    public void Shift_click_never_buys_a_stack_the_pack_cannot_hold()
+    {
+        int stack = Items.StackLimit(Supply.Food);
+        var pack = new Inventory();
+        pack.Add(Supply.Food, 5);
+        pack.Add(Supply.Torch, (Inventory.Slots - 1) * Items.StackLimit(Supply.Torch));   // every other slot full
+        Assert.Equal(stack - 5, pack.ToFullStack(Supply.Food, 50, Items));     // topping up needs no new slot
+        pack.Add(Supply.Food, stack - 5);
+        Assert.Equal(0, pack.ToFullStack(Supply.Food, 50, Items));             // a new stack would not fit
+    }
+
+    [Fact]
+    public void Shift_right_click_returns_the_last_stack()
+    {
+        int stack = Items.StackLimit(Supply.Food);
+        var pack = new Inventory();
+        Assert.Equal(0, pack.LastStack(Supply.Food, Items));
+        pack.Add(Supply.Food, stack + 4);
+        Assert.Equal(4, pack.LastStack(Supply.Food, Items));                   // the partial stack first
+        pack.Add(Supply.Food, -4);
+        Assert.Equal(stack, pack.LastStack(Supply.Food, Items));               // then a whole one
+    }
 }
