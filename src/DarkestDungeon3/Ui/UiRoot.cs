@@ -98,10 +98,9 @@ internal sealed class UiRoot : MonoBehaviour
                     // back into it when it ends.
                     if (Dd2.Dd1Backdrop.WantsSnapshot && Event.current.type == EventType.Repaint)
                         Dd2.Dd1Backdrop.TakeSnapshot(_crawl.CaptureScene());
-                    float leaving = Dd2.Dd2Combat.ReturnProgress;
-                    float cover = Mathf.Max(1f - Dd2.Dd2Combat.RevealProgress, leaving);
-                    if (cover > 0f && Event.current.type == EventType.Repaint) _crawl.DrawBackdrop(cover);
-                    if (leaving <= 0f)
+                    float cover = Dd2.Dd2Combat.CoverAlpha;
+                    if (cover > 0f && Event.current.type == EventType.Repaint) _crawl.DrawBackdrop(cover, Dd2.Dd2Combat.LayoutBlend);
+                    if (!Dd2.Dd2Combat.Returning)
                     {
                         Dd2.Dd1MonsterView.Draw();
                         DrawRetreatButton();

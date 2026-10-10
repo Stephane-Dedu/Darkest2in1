@@ -129,44 +129,86 @@ internal static class Dd2Combat
     /// <summary>The current fight started DD1's way, where the party stands (Look.FightStartsInPlace).</summary>
     public static bool InPlace { get; private set; }
 
-    private const float ReturnFade = 0.3f;
     private static float _returnStart = -1f;
     private static bool _returnPending;
+    private static float Now => UnityEngine.Time.unscaledTime;
 
-    /// <summary>0 while the fight shows, then 0..1 over 0.3 s as a fight that started in place hands back the
-    /// corridor or room (DD1 never leaves it). It stays at 1 while DD2 returns to the road underneath.</summary>
-    public static float ReturnProgress => _returnStart < 0 ? 0f : UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _returnStart) / ReturnFade);
+    // The transition's own clock: real time, except that one frame never moves it on by more than 1/30 s. While DD2
+    // loads, the game can stall for a fifth of a second; the heroes' turn and glide then pause instead of jumping.
+    private static float _clock, _readyClock = -1f, _returnClock = -1f;
+    private static int _clockFrame = -1;
 
-    /// <summary>The fight is over: cover it with the party's own scene first, then go back to the road (see Tick).</summary>
-    internal static void ReturnInPlace()
+    private static void AdvanceClock()
     {
-        _returnStart = UnityEngine.Time.unscaledTime;
-        _returnPending = true;
+        if (_clockFrame == UnityEngine.Time.frameCount) return;
+        _clockFrame = UnityEngine.Time.frameCount;
+        _clock += UnityEngine.Mathf.Min(UnityEngine.Time.unscaledDeltaTime, 1f / 30f);
     }
 
-    /// <summary>Every frame of a fight: once the scene covers it, DD2 returns to the road without its fade.</summary>
-    public static void Tick()
+    /// <summary>DD2's side of the fight is set up (combat entered, backdrop in place or given up; in place, the battle
+    /// itself running too). The first time it is, the moment is kept: the reveal is timed from it.</summary>
+    private static bool Ready()
     {
-        if (!_returnPending || ReturnProgress < 1f) return;
-        _returnPending = false;
-        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.SKIP, showTransitionThrobberOverride: false);
+        if (_revealedAt < 0 || Dd1Backdrop.Pending) return false;
+        if (_revealStart < 0)
+        {
+            if (InPlace && SingletonMonoBehaviour<CombatBhv>.Instance is not { IsBattleRunning: true }) return false;
+            _revealStart = Now;
+            _readyClock = _clock;
+            string presentation = Dd1Backdrop.Ready ? _nativePresentation ? "in place" : "DD1" : _nativePresentation ? "native" : "fallback";
+            Plugin.Log.LogInfo($"[combat timing] reveal ready after {(_revealStart - _requestedAt) * 1000f:0} ms, presentation {presentation}");
+        }
+        return true;
     }
 
-    /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen, also while the DD1
-    /// backdrop is being put in place), then 0..1 over half a second as the fight shows through.</summary>
-    public static float RevealProgress
+    /// <summary>How opaque the party's DD1 scene is over the fight: whole while DD2 sets the fight up, then the fight
+    /// shows through (see FightTransition); and back over it when a fight that started in place ends.</summary>
+    public static float CoverAlpha
     {
         get
         {
-            if (_revealedAt < 0 || Dd1Backdrop.Pending) return 0f;
-            if (_revealStart < 0)
-            {
-                _revealStart = UnityEngine.Time.unscaledTime;
-                string presentation = Dd1Backdrop.Ready ? _nativePresentation ? "in place" : "DD1" : _nativePresentation ? "native" : "fallback";
-                Plugin.Log.LogInfo($"[combat timing] reveal ready after {(_revealStart - _requestedAt) * 1000f:0} ms, presentation {presentation}");
-            }
-            return UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealStart) / 0.5f);
+            if (!InFight) return 0f;
+            if (_returnClock >= 0) return FightTransition.CoverAtReturn(_clock - _returnClock);
+            if (!Ready()) return 1f;
+            return InPlace ? FightTransition.CoverAtStart(_clock - _readyClock)
+                : 1f - UnityEngine.Mathf.Clamp01((_clock - _readyClock) / 0.5f);
         }
+    }
+
+    /// <summary>In place: how far heroes and scene have moved from the corridor layout to the fight's (0..1).</summary>
+    public static float LayoutBlend =>
+        !InFight || !InPlace ? 0f
+        : _returnClock >= 0 ? FightTransition.MoveAtReturn(_clock - _returnClock)
+        : Ready() ? FightTransition.MoveAtStart(_clock - _readyClock) : 0f;
+
+    /// <summary>In place: how far the corridor heroes have turned from the camera to the enemy (0..1).</summary>
+    public static float TurnBlend =>
+        !InFight || !InPlace ? 0f
+        : _returnClock >= 0 ? FightTransition.MoveAtReturn(_clock - _returnClock)
+        : FightTransition.TurnAtStart(_clock);
+
+    /// <summary>A fight that started in place has ended and is handing the party's scene back.</summary>
+    public static bool Returning => InFight && _returnClock >= 0;
+
+    /// <summary>The fight is over: cover it with the party's own scene, glide back to the corridor layout, then go
+    /// back to the road (see Tick).</summary>
+    internal static void ReturnInPlace()
+    {
+        Dd1Backdrop.RefreshHeroTargets();
+        _returnStart = Now;
+        _returnClock = _clock;
+        _returnPending = true;
+    }
+
+    /// <summary>Every frame of a fight: the transition clock moves on, and once the party's scene and layout are back,
+    /// DD2 returns to the road under them, without its fade.</summary>
+    public static void Tick()
+    {
+        AdvanceClock();
+        Ready();
+        if (!_returnPending || !FightTransition.ReturnDone(_clock - _returnClock)) return;
+        _returnPending = false;
+        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.SKIP, showTransitionThrobberOverride: false);
     }
 
     public static string RollBattle(FightPlan plan)
@@ -225,11 +267,16 @@ internal static class Dd2Combat
             Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true);
         });
         // DD1 starts a fight where the party stands: no DD2 stagecoach loading screen. The DD1 scene covers DD2's
-        // switch until the fight is ready (see RevealProgress). In place, DD2 neither fades nor plays its battle
-        // intro, and DD2 regions fight in front of the corridor or room the crawl was showing.
+        // switch until the fight is ready (see CoverAlpha). In place, DD2 neither fades nor plays its battle intro,
+        // every fight happens in front of the corridor or room the crawl was showing, and the heroes turn to the
+        // enemy and step to their battle places before the fight shows (FightTransition).
         InPlace = Plugin.FightInPlace.Value;
         _returnStart = -1f;
         _returnPending = false;
+        _clock = 0f;
+        _readyClock = -1f;
+        _returnClock = -1f;
+        _clockFrame = UnityEngine.Time.frameCount;
         _revealedAt = -1f;
         _revealStart = -1f;
         _nativePresentation = plan.NativePresentation;
@@ -339,6 +386,25 @@ internal static class NoDd2BattleIntroInPlace
         catch (Exception e) { Plugin.Log.LogWarning("[combat] battle intro skip: " + e.Message); }
         yield break;
     }
+}
+
+/// <summary>
+/// DD2 runs Resources.UnloadUnusedAssets and a full GC.Collect on every mode change (GameModeMgr.MemoryCleanup), a
+/// visible part of a fight's start. A fight that starts in place skips it on the way in; the way back to the road,
+/// hidden under the party's scene, still runs it, so nothing piles up between fights.
+/// </summary>
+[HarmonyPatch(typeof(GameModeMgr), nameof(GameModeMgr.MemoryCleanup))]
+internal static class NoMemoryCleanupIntoAFightInPlace
+{
+    private static bool Prefix(ref System.Collections.IEnumerator __result)
+    {
+        if (!Dd2Combat.InFight || !Dd2Combat.InPlace || GameModeMgr.CurrentMode != GameModeType.COMBAT) return true;
+        __result = Nothing();
+        Plugin.Log.LogInfo("[combat timing] memory cleanup left to the return");
+        return false;
+    }
+
+    private static System.Collections.IEnumerator Nothing() { yield break; }
 }
 
 /// <summary>

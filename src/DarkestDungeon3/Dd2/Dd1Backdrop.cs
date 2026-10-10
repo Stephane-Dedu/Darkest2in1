@@ -23,7 +23,8 @@ internal static class Dd1Backdrop
     public static Mesh SharedQuad => QuadMesh();
     private static bool _failed;
     private static float _startedAt;
-    private static readonly DeferredPoll SetupPoll = new(0.1f);
+    // Every other frame or so: the fight shows as soon as DD2's heroes are in place (the scan is cheap until then).
+    private static readonly DeferredPoll SetupPoll = new(0.03f);
     private static readonly List<Renderer> Hidden = new();
     private static RenderTexture _texture;
     private static Material _material;
@@ -54,6 +55,53 @@ internal static class Dd1Backdrop
 
     /// <summary>The scene the fight started in, or null (see <see cref="TakeSnapshot"/>).</summary>
     public static RenderTexture Snapshot => _snapshot;
+
+    /// <summary>How far down (virtual px) the fight shows the crawl's scene: its floor sits at DD2's heroes' feet.</summary>
+    public static float SceneShift { get; private set; }
+
+    private static readonly Dictionary<uint, Vector3> Targets = new();
+
+    /// <summary>Where DD2's fight shows each hero (by actor guid), in virtual px: the pelvis's x, the lower ankle's y
+    /// from the top, and the height from that ankle to the top of the head (see HeroBones). The corridor heroes glide
+    /// there before the fight shows (HeroStage.SetBattleBlend).</summary>
+    public static IReadOnlyDictionary<uint, Vector3> HeroTargets => Targets;
+
+    /// <summary>Measure the heroes where DD2's fight shows them now (they move during a fight; see HeroTargets).</summary>
+    public static void RefreshHeroTargets()
+    {
+        if (!Ready || _sceneryCamera == null) return;
+        try
+        {
+            var heroes = Driver.Instance?.Party?.Guids?.ToHashSet() ?? new HashSet<uint>();
+            MeasureHeroes(_sceneryCamera, UnityEngine.Object.FindObjectsOfType<CombatActorBhv>()
+                .Where(a => a != null && a.ActorInstance != null && heroes.Contains(a.GetActorGuid())));
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[backdrop] hero places: " + e.Message); }
+    }
+
+    private static void MeasureHeroes(Camera cam, IEnumerable<CombatActorBhv> heroes)
+    {
+        Targets.Clear();
+        float s = Mathf.Min(Screen.width / 1920f, Screen.height / 1080f);
+        float ox = (Screen.width - 1920f * s) / 2f, oy = (Screen.height - 1080f * s) / 2f;
+        foreach (var hero in heroes)
+        {
+            // The same bones HeroStage measures on its models: pelvis, lower ankle and top of the head.
+            var points = HeroBones.Find(hero.GetComponentsInChildren<Transform>());
+            if (points == null) continue;
+            Vector3 Screen(Vector3 world)
+            {
+                var p = cam.WorldToScreenPoint(world);
+                return new Vector3((p.x - ox) / s, (UnityEngine.Screen.height - p.y - oy) / s, p.z);
+            }
+            var (root, head, leftAnkle, rightAnkle) = points.Value;
+            Vector3 r = Screen(root.position), h = Screen(head.position), a = Screen(leftAnkle.position), b = Screen(rightAnkle.position);
+            if (r.z <= 0 || h.z <= 0) continue;
+            float ankle = Mathf.Max(a.y, b.y);
+            Targets[hero.GetActorGuid()] = new Vector3(r.x, ankle, ankle - h.y);
+        }
+        Plugin.Log.LogInfo("[backdrop] heroes in the fight: " + string.Join(", ", Targets.Select(t => $"{t.Key}@{t.Value.x:0},{t.Value.y:0} h{t.Value.z:0}")));
+    }
 
     /// <summary>The crawl's scene at the moment the fight started (screen-sized, drawn on the letterboxed
     /// 1920x1080 canvas). Null keeps DD2's arena.</summary>
@@ -116,6 +164,22 @@ internal static class Dd1Backdrop
                 $"{sc.name} ({scenery.Count(r => r.gameObject.scene == sc)})")));
             if (scenery.Count == 0) { GiveUpAfter(15f, "no scenery found"); return; }
             int layer = scenery.GroupBy(r => r.gameObject.layer).OrderByDescending(g => g.Count()).First().Key;
+            if (_snapshot != null)
+            {
+                // In place the party's scene is the whole background: the arena's own props drawn on the characters'
+                // layer (posts and fences at the screen edges) go too. Actors and the interface stay.
+                int characters = LayerMask.NameToLayer("Characters");
+                var props = renderers.Where(r => r is MeshRenderer or SkinnedMeshRenderer or SpriteRenderer
+                        && r.gameObject.layer == characters && r.GetComponentInParent<ActorBhv>() == null
+                        && r.gameObject.scene.name.StartsWith("combat_arena", StringComparison.Ordinal)).ToList();
+                if (props.Count > 0)
+                    Plugin.Log.LogInfo($"[backdrop] {props.Count} arena props on the characters' layer hidden: " + string.Join(", ", props.Select(p => p.name).Distinct().Take(12)));
+                scenery.AddRange(props);
+                var kept = renderers.Where(r => spared.Contains(r.gameObject.layer) && r.GetComponentInParent<ActorBhv>() == null
+                        && !props.Contains(r) && r.enabled && r.gameObject.activeInHierarchy).ToList();
+                Plugin.Log.LogInfo($"[backdrop] {kept.Count} non-actor renderers kept on the characters/UI layers: " + string.Join(", ",
+                    kept.Select(r => $"{r.name} ({LayerMask.LayerToName(r.gameObject.layer)}, {r.gameObject.scene.name})").Distinct().Take(15)));
+            }
             var cam = Camera.allCameras.Where(c => c.enabled && c.targetTexture == null && (c.cullingMask & (1 << layer)) != 0)
                                        .OrderBy(c => c.depth).FirstOrDefault() ?? Camera.main;
             if (cam == null) { GiveUpAfter(15f, "no camera"); return; }
@@ -132,6 +196,7 @@ internal static class Dd1Backdrop
             _texture = Compose(1080f - feetY * 1080f / Screen.height);
             if (_texture == null) { _failed = true; return; }
             material.mainTexture = _texture;
+            MeasureHeroes(cam, actors.Where(a => heroes.Contains(a.GetActorGuid())));
 
             foreach (var r in scenery)
                 if (r != null && r.enabled && !r.forceRenderingOff) { r.forceRenderingOff = true; Hidden.Add(r); }
@@ -149,6 +214,9 @@ internal static class Dd1Backdrop
             // painted the fog colour over all of it (the red sky). Off while the DD1 scene is up.
             SetDd2Fog(false);
             SetDepthOfField(false);
+            // In place, the party's scene must look exactly as it did a moment ago: DD2's own colour grading (its LUT
+            // pass) is off too, and the exposure DD2 keeps for its models is taken back out of the backdrop (Tick).
+            if (_snapshot != null) SetDd2Lut(false);
             if (UrpCameraData != null && cam.GetComponent(UrpCameraData) is { } camData)
                 Plugin.Log.LogInfo("[backdrop] fight camera anti-aliasing: " + UrpCameraData.GetProperty("antialiasing")?.GetValue(camData));
 
@@ -193,6 +261,7 @@ internal static class Dd1Backdrop
         if (!Ready || _material == null) return;
         HideNewScenery();
         SetDepthOfField(false);
+        UndoExposure();
         try
         {
             foreach (var cam in Camera.allCameras)
@@ -221,7 +290,9 @@ internal static class Dd1Backdrop
                 quad.transform.localPosition = new Vector3(0, 0, d);
                 quad.transform.localRotation = Quaternion.identity;
                 float h = cam.orthographic ? cam.orthographicSize * 2f : 2f * d * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad);
-                quad.transform.localScale = new Vector3(h * cam.aspect * 1.02f, h * 1.02f, 1f);
+                // DD1's art may run a little past the screen edges; the party's own scene sits exactly where it was.
+                float over = _snapshot != null ? 1.002f : 1.02f;
+                quad.transform.localScale = new Vector3(h * cam.aspect * over, h * over, 1f);
             }
         }
         catch (Exception e) { Plugin.Log.LogWarning("[backdrop] tick: " + e.Message); }
@@ -288,6 +359,65 @@ internal static class Dd1Backdrop
     private static readonly System.Reflection.FieldInfo FogPassEnabled =
         typeof(ActorBhv).Assembly.GetType("Assets.Code.Rendering.DDFog")?.GetField("FogPassEnabled", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
     private static bool? _fogWas;
+
+    private static readonly System.Reflection.FieldInfo LutPassEnabled =
+        typeof(ActorBhv).Assembly.GetType("Assets.Code.Rendering.LUT")?.GetField("LutPassEnabled", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+    private static bool? _lutWas;
+
+    /// <summary>DD2's colour grading pass (LUT.LutPassEnabled, the per-region tint applied after post-processing) off
+    /// while a fight in place shows the party's scene, back to what it was after.</summary>
+    private static void SetDd2Lut(bool restore)
+    {
+        if (LutPassEnabled == null) return;
+        if (!restore)
+        {
+            _lutWas ??= (bool)LutPassEnabled.GetValue(null);
+            LutPassEnabled.SetValue(null, false);
+            Plugin.Log.LogInfo($"[backdrop] DD2 colour grading off for the fight in place (was {(_lutWas == true ? "on" : "off")})");
+        }
+        else if (_lutWas is bool was)
+        {
+            LutPassEnabled.SetValue(null, was);
+            _lutWas = null;
+        }
+    }
+
+    private static readonly Type VolumeManagerType = Type.GetType("UnityEngine.Rendering.VolumeManager, Unity.RenderPipelines.Core.Runtime");
+    private static readonly Type ColorAdjustmentsType = Type.GetType("UnityEngine.Rendering.Universal.ColorAdjustments, Unity.RenderPipelines.Universal.Runtime");
+    private static float _loggedExposure = float.NaN;
+
+    /// <summary>The post exposure DD2's volumes apply this frame (EV), which our unlit backdrop must not receive.</summary>
+    private static float PostExposure()
+    {
+        try
+        {
+            var manager = VolumeManagerType?.GetProperty("instance")?.GetValue(null);
+            var stack = manager?.GetType().GetProperty("stack")?.GetValue(manager);
+            var adjustments = stack?.GetType().GetMethod("GetComponent", new[] { typeof(Type) })?.Invoke(stack, new object[] { ColorAdjustmentsType });
+            if (adjustments == null) return 0f;
+            if (adjustments.GetType().GetProperty("active")?.GetValue(adjustments) is false) return 0f;
+            var parameter = adjustments.GetType().GetField("postExposure")?.GetValue(adjustments);
+            if (parameter?.GetType().GetProperty("overrideState")?.GetValue(parameter) is false) return 0f;
+            return parameter?.GetType().GetProperty("value")?.GetValue(parameter) is float ev ? ev : 0f;
+        }
+        catch { return 0f; }
+    }
+
+    /// <summary>In place: the backdrop is drawn 2^-EV as bright, so DD2's exposure brings it back to the scene's own
+    /// colours (HDR camera target; DD2's tone mapping is off for these fights).</summary>
+    private static void UndoExposure()
+    {
+        if (_snapshot == null || _material == null) return;
+        float ev = PostExposure();
+        float gain = Mathf.Pow(2f, -ev);
+        _material.color = new Color(gain, gain, gain, 1f);
+        if (float.IsNaN(_loggedExposure) || Mathf.Abs(ev - _loggedExposure) > 0.01f)
+        {
+            _loggedExposure = ev;
+            bool hdr = _sceneryCamera != null && _sceneryCamera.allowHDR;
+            Plugin.Log.LogInfo($"[backdrop] DD2 post exposure {ev:0.00} EV: backdrop drawn x{gain:0.00} (camera HDR {hdr})");
+        }
+    }
 
     /// <summary>DD2's fog pass (DDFog.FogPassEnabled) off while our backdrop shows, back to what it was after.</summary>
     private static void SetDd2Fog(bool restore)
@@ -359,6 +489,8 @@ internal static class Dd1Backdrop
                                 Effects.NeutralParameter(c, "saturation", 0f);
                             }
                             else if (FlatArtSpoilers.Contains(c.GetType().Name)) Effects.Disable(c);
+                            // In place the backdrop must keep the scene's own colours: no tone curve either.
+                            else if (_snapshot != null && c.GetType().Name == "Tonemapping") Effects.Disable(c);
                         }
                     }
                 }
@@ -385,7 +517,10 @@ internal static class Dd1Backdrop
     {
         Seen.Clear();
         SetDd2Fog(true);
+        SetDd2Lut(true);
         SetDepthOfField(true);
+        if (_material != null) _material.color = Color.white;
+        _loggedExposure = float.NaN;
         foreach (var r in Hidden) if (r != null) r.forceRenderingOff = false;
         Hidden.Clear();
         foreach (var kv in Masks) if (kv.Key != null) kv.Key.cullingMask = kv.Value;
@@ -418,6 +553,10 @@ internal static class Dd1Backdrop
         GL.PushMatrix();
         GL.LoadPixelMatrix(0, 1920, 1080, 0);
         float top = feetY - 680f;
+        // The party's own scene stays exactly where it was on screen; DD2's heroes stand within a few pixels of
+        // the corridor's floor line, and the stage heroes step onto them (HeroStage.SetBattleBlend).
+        if (_snapshot != null && !memory) top = 0f;
+        SceneShift = top;
         void Draw(Texture2D tex, float x, float y, float w, float h, bool mirror = false)
         {
             if (tex == null) return;

@@ -26,6 +26,7 @@
     <Compile Include="../../src/DarkestDungeon3/Dd2/PostEffectGuard.cs" Link="PostEffectGuard.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/DeferredPoll.cs" Link="DeferredPoll.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/FightBackdropLayout.cs" Link="FightBackdropLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Dd2/FightTransition.cs" Link="FightTransition.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/CorridorWalkCycle.cs" Link="CorridorWalkCycle.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/ExpeditionActorRestore.cs" Link="ExpeditionActorRestore.cs" />
     <Compile Include="../../src/DarkestDungeon3/Dd2/Dd2Run.cs" Link="Dd2Run.cs" />

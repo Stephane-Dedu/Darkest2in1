@@ -87,12 +87,15 @@ internal sealed class CorridorHeroMotion
             leg.FlatRotation = bindToPose * bind[leg.Ankle].rotation;
         }
         // The camera is at -Z. Show the front as well as the right-facing profile, irrespective of the prefab yaw.
-        slot.localRotation *= Quaternion.FromToRotation(currentForward, new Vector3(1, 0, -0.48f).normalized);
+        var unturned = slot.localRotation;
+        slot.localRotation *= Quaternion.FromToRotation(currentForward, CorridorFacing);
         animator.applyRootMotion = false;
         animator.updateMode = AnimatorUpdateMode.UnscaledTime;
         animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         var result = new CorridorHeroMotion(slot, pelvis, Find("Spine_01SHJnt"), Find("Spine_TopSHJnt"), Find("Head_TopSHJnt"), animator, left, right,
             currentForward, currentSide, rank);
+        result._unturned = unturned;
+        result._modelForward = currentForward;
         Plugin.Log.LogInfo($"[stage-walk] {actor.GetActorGuid()}: native rig ready, leg {result._legLength:0.00}, camera-facing corridor gait");
         return result;
     }
@@ -108,6 +111,21 @@ internal sealed class CorridorHeroMotion
         _driven = new[] { pelvis, spine, chest, head, left.Hip, left.Knee, left.Ankle, right.Hip, right.Knee, right.Ankle }
             .Where(t => t != null).Distinct().ToArray();
         _cycle = new CorridorWalkCycle(rank * 0.23);
+    }
+
+    // Walking the corridor, heroes show their front as well as their right-facing profile; in a fight DD2 shows them
+    // nearly in profile, facing the enemy.
+    private static readonly Vector3 CorridorFacing = new Vector3(1, 0, -0.48f).normalized;
+    private static readonly Vector3 BattleFacing = new Vector3(1, 0, -0.18f).normalized;
+    private Quaternion _unturned;
+    private Vector3 _modelForward;
+
+    /// <summary>DD1's battle start: 0 faces the corridor camera, 1 faces the enemy as DD2's fight shows the hero.</summary>
+    internal void Turn(float toBattle)
+    {
+        if (_slot == null) return;
+        var facing = Vector3.Slerp(CorridorFacing, BattleFacing, Mathf.Clamp01(toBattle));
+        _slot.localRotation = _unturned * Quaternion.FromToRotation(_modelForward, facing);
     }
 
     // Run before Animator evaluation. This also restores unkeyed transforms, preventing accumulated offsets.

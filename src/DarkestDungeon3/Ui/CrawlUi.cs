@@ -79,7 +79,9 @@ internal sealed class CrawlUi
     }
 
     /// <summary>The dungeon scene and the party only (painted while DD2 sets up a fight), at this opacity.</summary>
-    public void DrawBackdrop(float alpha)
+    /// <param name="layout">A fight in place: 0 the crawl's layout, 1 the fight's (the scene sits where the fight shows
+    /// it, the stage heroes stand where DD2 put them).</param>
+    public void DrawBackdrop(float alpha, float layout = 0f)
     {
         var crawl = D.Crawl;
         var exp = D.Expedition;
@@ -89,15 +91,18 @@ internal sealed class CrawlUi
         if (Dd1Backdrop.Snapshot is { } snapshot)
         {
             // A fight in place: the fight shows this same scene, so one opaque copy crossfades without darkening.
-            Gui.Fill(new Rect(0, 720, Gui.W, Gui.H - 720), new Color(0, 0, 0, alpha));
-            GUI.DrawTextureWithTexCoords(new Rect(0, 0, Gui.W, 720), snapshot, FightBackdropLayout.SceneStrip(snapshot.width, snapshot.height));
+            // Only what the scene leaves uncovered is filled, as the fight's backdrop does.
+            float top = Dd1Backdrop.SceneShift * layout;
+            if (top > 0f) Gui.Fill(new Rect(0, 0, Gui.W, top), new Color(0, 0, 0, alpha));
+            Gui.Fill(new Rect(0, top + 720, Gui.W, Gui.H - top - 720), new Color(0, 0, 0, alpha));
+            GUI.DrawTextureWithTexCoords(new Rect(0, top, Gui.W, 720), snapshot, FightBackdropLayout.SceneStrip(snapshot.width, snapshot.height));
         }
         else
         {
             Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, alpha));
             DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
         }
-        DrawHeroes(exp);
+        DrawHeroes(exp, overlays: layout <= 0f);
         DrawHud(exp);
         GUI.color = old;
     }
@@ -433,7 +438,9 @@ internal sealed class CrawlUi
 
     // ---------------- party ----------------
 
-    private void DrawHeroes(ExpeditionState exp)
+    /// <param name="overlays">Shadows, bars and pips at the DD1 rank positions: off while a fight in place moves the
+    /// stage heroes to their battle places.</param>
+    private void DrawHeroes(ExpeditionState exp, bool overlays = true)
     {
         var shadow = Art.Overlay("charactershadow_med.png");
         var selected = Art.Overlay("selected_1.png");
@@ -441,6 +448,7 @@ internal sealed class CrawlUi
         // DD2's hero models once the stage has found a way to light them; DD2's hero art until then.
         var models = Plugin.HeroModels.Value && Dd2.HeroStage.Lit ? Dd2.HeroStage.Instance?.Texture : null;
         if (models != null) GUI.DrawTexture(new Rect(0, 0, 1920, 720), Dd2.HeroStage.Instance.Brightened ?? models);
+        if (models != null && !overlays) return;
         for (int rank = 0; rank < exp.Party.Count && rank < 4; rank++)
         {
             string id = exp.Party[rank];

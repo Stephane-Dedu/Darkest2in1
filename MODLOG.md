@@ -4149,3 +4149,46 @@ combat_results preload); DD1-region fights now use the snapshot too, unverified 
   SkipDd2ResultsView is on), match backdrop brightness, smooth the heroes' move into combat positions,
   check DD1-region in-place fights. Ask the owner which issue they feel next.
 - No game running; estate2 restored and hash-checked; normal Release deployed with matching hashes.
+
+## Round191: in-place fights feel the same (owner: fluidity and coherent terrain/brightness)
+
+Owner asked for the three round190 follow-ups, stressing fluidity into battle and terrain/brightness
+coherence. Recorded frames compared crawl vs fight on background pixels: lifted darks, darker mids, green
+pulled down (DD2 grading). Also found the backdrop sat ~50 px higher than the crawl (aligned to DD2 feet).
+
+Look: DD2's custom LUT ScriptableRendererFeature has a static LUT.LutPassEnabled (like DDFog); it is off
+for in-place fights and restored after. URP Tonemapping joins the held effects for them. Post exposure is
+read from VolumeManager.instance.stack ColorAdjustments and undone on the backdrop material (2^-EV; 0 EV
+in the Foetor, camera HDR). The snapshot is drawn at its crawl position (SceneShift 0) with 1.002
+overscan. Arena-scene renderers on the Characters layer that are not actors are hidden in place: the
+left black post was farm_fence/signpost/grass tufts. Result: sky, houses and wall unchanged in game.
+
+Feel: FightTransition (UI-tested) times the start: heroes turn to the enemy for 0.35 s from the start,
+glide for 0.3 s once DD2 is ready (backdrop ready and CombatBhv.IsBattleRunning), then 0.15 s crossfade;
+the return is 0.15 s cover then a 0.3 s glide back, then DRIVING with SKIP. HeroStage renders during the
+cover; CorridorHeroMotion.Turn slerps the slot facing from (1,0,-0.48) to (1,0,-0.18). Targets come
+from bones both rigs share (ROOTSHJnt, Head_TopSHJnt, l/r_Leg_AnkleSHJnt): FightTransition.Land puts the
+stage slot so pelvis, lower ankle and height match DD2's. The first try used SkinnedMeshRenderer bounds,
+which don't follow the pose: heroes shrank in the glide (owner saw it). A capped clock (max 1/30 s per
+frame) replaced wall time after frames showed a ~200 ms stall at load collapsing the glide into 2 frames.
+
+Load: GameModeMgr.MemoryCleanup (UnloadUnusedAssets + GC.Collect) is skipped on DRIVING->COMBAT for fights
+in place; the return still runs it under the cover. Setup poll 0.1 -> 0.03 s. Entered 527-633 ms (was
+627-733), ready 760-843 ms (was 883-967). Tried skipping the combat_results preload: the battle then
+never ended (owner: "battle isn't finishing, locked"). CombatPresentationBhv ends a battle only via
+RegisteredCombatResultsPresentation, which that scene registers. Reverted; recorded in PARITY.
+
+Native estate2 checks (backup + SHA256, temporary F2 entry, no picker): three hall-fight runs in the
+Foetor. Battle ends and returns 752-769 ms after the last blow, no black; heroes land within a few px
+at DD2's size. LogOutput.log shows only DD2's known IMainInstaller teardown exception when the game was
+closed. Estate2 and DebugKeys.cs restored and hash-matched, clean Release rebuild deployed with matching
+hashes. Recordings private in C:\Users\Piral\.universal-modder\inspection\round191. 917 Core + 147 UI.
+
+## Status 2026-10-10: round191 in-place fights match the corridor
+
+- Fights in place keep terrain and colours, heroes turn and glide onto DD2's places, returns mirror it.
+  Committed and verified in the Foetor (DD2 region). DD1-region in-place fights remain [?].
+- Remaining visible change: the heroes' pose and lighting in the last 0.15 s crossfade (PARITY).
+  Remaining time: ~0.5 s DD2 arena load and actor spawn stall, now hidden behind the heroes' turn.
+- No game running; estate2 restored and hash-checked; normal Release deployed with matching hashes.
+- Owner's main focus stays feel and performance; the parity loop stays paused. Ask what they feel next.

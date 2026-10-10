@@ -106,7 +106,13 @@ internal sealed class Driver : MonoBehaviour
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) { Dd1Backdrop.Update(); Dd2Combat.Tick(); }
         var stage = HeroStage.Instance;
-        stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
+        // A fight in place keeps showing the corridor heroes until the fight itself shows through: they stop, turn to
+        // the enemy and step to their battle places (and back when it ends).
+        bool fighting = Phase == Phase.Fighting;
+        bool fightCover = fighting && Dd2Combat.InPlace && Dd2Combat.CoverAlpha > 0f;
+        if (fighting) HeroStage.WalkSpeed = 0f;
+        stage?.SetVisible((Phase == Phase.Crawling || fightCover) && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
+        stage?.SetBattleBlend(Dd1Backdrop.HeroTargets, fighting ? Dd2Combat.LayoutBlend : 0f, fighting ? Dd2Combat.TurnBlend : 0f);
         if (Phase != Phase.Crawling || Crawl == null) return;
         LockRoadInput();
         if (stage != null && Plugin.HeroModels.Value)

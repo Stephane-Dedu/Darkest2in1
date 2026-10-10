@@ -252,12 +252,82 @@ internal sealed class HeroStage : MonoBehaviour
             if (slot != null) Destroy(slot.gameObject);
         _heroes.Clear();
         _keyLights.Clear();
+        _corridorPlaces.Clear();
+        _feet.Clear();
+        _blending = false;
         _partyKey = null;
     }
 
     public void SetVisible(bool visible)
     {
         if (_camera != null && _camera.enabled != visible) _camera.enabled = visible;
+    }
+
+    // Each hero's corridor place, measured on the first frame it glides: slot x (units) and scale, and where its pelvis,
+    // lower ankle and head top are on the stage (virtual px), so it can land on the same bones in DD2's fight.
+    private readonly Dictionary<Transform, (float X, float Scale, float RootX, float AnkleY, float Height)> _corridorPlaces = new();
+    private readonly Dictionary<Transform, float> _feet = new();
+    private bool _blending;
+
+    /// <summary>
+    /// DD1's battle start where the party stands: the heroes turn to the enemy (<paramref name="turn"/> 0..1) and glide
+    /// onto the places DD2's fight shows them (<paramref name="move"/> 0..1; Dd1Backdrop.HeroTargets), pelvis, ankle and
+    /// head on DD2's. The fight then shows through with nothing jumping. 0, 0 is the corridor layout again.
+    /// </summary>
+    public void SetBattleBlend(IReadOnlyDictionary<uint, Vector3> targets, float move, float turn)
+    {
+        if (move <= 0f && turn <= 0f)
+        {
+            if (!_blending) return;
+            _blending = false;
+            foreach (var (_, slot, actor) in _heroes)
+            {
+                if (slot == null) continue;
+                if (_corridorPlaces.TryGetValue(slot, out var home))
+                {
+                    slot.localPosition = new Vector3(home.X, slot.localPosition.y, slot.localPosition.z);
+                    slot.localScale = Vector3.one * home.Scale;
+                }
+                if (actor != null && _motion.TryGetValue(actor, out var motion)) motion.Turn(0f);
+            }
+            _corridorPlaces.Clear();
+            _feet.Clear();
+            return;
+        }
+        _blending = true;
+        foreach (var (guid, slot, actor) in _heroes)
+        {
+            if (slot == null) continue;
+            if (actor != null && _motion.TryGetValue(actor, out var motion)) motion.Turn(turn);
+            if (!_corridorPlaces.TryGetValue(slot, out var home))
+            {
+                if (move <= 0f) continue;
+                _corridorPlaces[slot] = home = Measure(slot, actor);
+            }
+            if (home.Height <= 1f || targets == null || !targets.TryGetValue(guid, out var target) || target.z <= 1f) continue;
+            var (x, feet, grow) = FightTransition.Land(home.X * PixelsPerUnit, FeetY, home.RootX, home.AnkleY, home.Height,
+                                                        target.x, target.y, target.z);
+            slot.localPosition = new Vector3(Mathf.Lerp(home.X, x / PixelsPerUnit, move), slot.localPosition.y, slot.localPosition.z);
+            slot.localScale = Vector3.one * home.Scale * Mathf.Lerp(1f, grow, move);
+            _feet[slot] = Mathf.Lerp(FeetY, feet, move);
+        }
+    }
+
+    /// <summary>A stage hero's place now: slot x and scale, and its pelvis x, lower ankle y and ankle-to-head height in
+    /// virtual px (the stage camera shows 1920x720 virtual px as 19.2 x 7.2 units). Height 0 if its rig is unknown.</summary>
+    private (float X, float Scale, float RootX, float AnkleY, float Height) Measure(Transform slot, ActorBhv actor)
+    {
+        var place = (slot.localPosition.x, slot.localScale.x, 0f, 0f, 0f);
+        var points = actor != null && _root != null ? HeroBones.Find(actor.GetComponentsInChildren<Transform>()) : null;
+        if (points == null) return place;
+        Vector2 Virtual(Vector3 world)
+        {
+            var local = _root.InverseTransformPoint(world);
+            return new Vector2(local.x * PixelsPerUnit, 720f - local.y * PixelsPerUnit);
+        }
+        var (root, head, leftAnkle, rightAnkle) = points.Value;
+        float ankle = Mathf.Max(Virtual(leftAnkle.position).y, Virtual(rightAnkle.position).y);
+        return (slot.localPosition.x, slot.localScale.x, Virtual(root.position).x, ankle, ankle - Virtual(head.position).y);
     }
 
     private float _nextLayerFix;
@@ -323,7 +393,8 @@ internal sealed class HeroStage : MonoBehaviour
             var slot = _heroes[i].slot;
             if (slot == null) continue;
             var p = slot.localPosition;
-            slot.localPosition = new Vector3(p.x, (720f - FeetY) / PixelsPerUnit, p.z);
+            float feet = _feet.TryGetValue(slot, out var battleFeet) ? battleFeet : FeetY;
+            slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
