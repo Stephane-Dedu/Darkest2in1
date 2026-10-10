@@ -22,6 +22,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> NativeRoomSceneryPath;
     internal static ConfigEntry<string> ExpeditionArtPath;
     internal static ConfigEntry<bool> DebugKeysEnabled;
+    internal static ConfigEntry<string> ExportedBossModel;
     internal static ConfigEntry<Runtime.Art.LargeArt> HeroArt;
     internal static ConfigEntry<bool> HeroModels;
     internal static ConfigEntry<float> HeroModelScale;
@@ -51,6 +52,8 @@ public class Plugin : BaseUnityPlugin
             "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
             "Use the experimental rigged Shieldbreaker model in corridors and fights. Missing or incompatible files retain her DD1 art. Off restores DD1 combat sprites.");
+        ExportedBossModel = Config.Bind("Paths", "ExportedBossModel", Path.Combine(Paths.GameRootPath, "PrivateBossModels", "soul_of_cinder", "soul_of_cinder.gltf"),
+            "Testing: a private glTF export (with its .bin and textures beside it) that stands in for a Lost Battalion knight in the F1 test fight. Never shipped.");
         DebugKeysEnabled = Config.Bind("Debug", "DebugKeys", true, "F8 dumps state, F9 test fight from the road, F10 wins a fight, F11 starts a fight in the dungeon.");
         HeroModels = Config.Bind("Look", "Dd2HeroModelsInDungeon", true, "DD2's animated hero models in the DD1 dungeon (falls back to DD2's flat hero art by itself if they render black).");
         Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");
@@ -89,7 +92,11 @@ public class Plugin : BaseUnityPlugin
         host.AddComponent<Driver>();
         host.AddComponent<Dd2.HeroStage>();
         host.AddComponent<UiRoot>();
-        if (DebugKeysEnabled.Value) host.AddComponent<DebugKeys>();
+        if (DebugKeysEnabled.Value)
+        {
+            host.AddComponent<DebugKeys>();
+            host.AddComponent<Dd2.ExportedBoss>();   // F1: the exported-model test fight
+        }
 
         Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location));
         Log.LogInfo($"{Name} {Version} loaded");

@@ -556,6 +556,17 @@ internal sealed partial class Driver : MonoBehaviour
     }
 
     private int _debugFights;
+    private bool _exportedBossFight;
+
+    /// <summary>Testing (F1): a hall fight against a lone Lost Battalion knight, which the private exported model
+    /// (<see cref="ExportedBoss"/>) stands in for.</summary>
+    public void DebugExportedBossFight()
+    {
+        if (Phase != Phase.Crawling || FadedMemory.Active(Expedition)) return;
+        _exportedBossFight = true;
+        try { StartFight(FightKind.Hall, heroesSurprised: false); }
+        finally { _exportedBossFight = false; }
+    }
 
     /// <summary>Testing (F11): start a hall fight right here; alternately the heroes and the monsters are surprised.</summary>
     public void DebugFight()
@@ -570,7 +581,8 @@ internal sealed partial class Driver : MonoBehaviour
         var quest = Expedition.Quest;
         var rng = new Rng(Expedition.Seed * 7 + Expedition.BattlesWon * 131 + Expedition.StepsTaken);
         var plan = S.Zones.Plan(quest.Dungeon, quest.Difficulty, kind, rng, quest.BossId);
-        var checkpoint = ExpeditionFight.Current(Expedition);
+        if (_exportedBossFight) plan.Enemies = new List<string> { ExportedBoss.Donor };
+        var checkpoint = _exportedBossFight ? null : ExpeditionFight.Current(Expedition);
         bool memory = FadedMemory.Active(Expedition);
         if (memory && !FadedMemoryController.TryPlan(Expedition, Party, out plan, out _))
         {
@@ -579,7 +591,7 @@ internal sealed partial class Driver : MonoBehaviour
         }
         // DD1's encounter tables pick the monsters; DD2 look-alikes fight in their place (bosses keep DD2's battles,
         // and DD2's regions keep their own natives).
-        if (!memory && checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
+        if (!memory && !_exportedBossFight && checkpoint == null && kind != FightKind.Boss && S.Bestiary != null && !Core.Dungeon.ZoneBase.IsExtra(quest.Dungeon))
         {
             var monsters = Crawl.FightMonsters(kind == FightKind.Room ? "room" : "hall");
             plan.Enemies = S.Bestiary.Translate(monsters, rng, Dd2Combat.EnemySize);
@@ -607,7 +619,8 @@ internal sealed partial class Driver : MonoBehaviour
         {
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
             Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
-            Dd1MonsterView.Prepare(memory ? new[] { Expedition.FadedMemory.BossId } : plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            Dd1MonsterView.Prepare(memory ? new[] { Expedition.FadedMemory.BossId } : !_exportedBossFight && plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
+            if (_exportedBossFight) ExportedBoss.Arm();
             // Heroes drawn with DD1's art: a memory's whole party, and DD1-only classes (the Shieldbreaker) always.
             var heroArt = Dd1HeroClasses.Dd1Art(Expedition.Party, Party.Guid);
             if (memory && FadedMemoryController.HeroArt(Expedition, Party) is { } memoryArt)

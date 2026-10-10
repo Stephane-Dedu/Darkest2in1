@@ -4802,3 +4802,27 @@ received -> add_1_vulnerable, unstealth -> remove_all_stealth, clearguarded -> r
 health_damage_blocks N -> add_N_block (max 3). DD1 monsters with these effects benefit too. Dd1HeroClasses
 logs her DD1 effects with no DD2 counterpart (Block Guard, SB Dmg Marked). Tests: base effect mapping and real
 DD2 ids, token ignores and limits in skill text, her flags and every skill's effects (954 Core pass).
+
+## Round208: an exported Dark Souls III boss in a DD2 fight (2026-10-10)
+
+Owner: "can you put C:\Users\Piral\ds3-extract\soul_of_cinder\ as a fightable boss in the game, for now just try to
+put his 3D model etc so it fits the game and pressing a FKEY to launch his battle, goal is to see if we can use these
+kind of exports in the game", then "you can even place him like that (his exported model) if the model can render".
+
+The export (the owner's own DS3 install, personal use, README in the folder): glTF 2.0 with external .bin, 15 meshes
+(five overlapping weapon forms, #01# shown in game), 54,468 triangles, a 123-bone DS3 biped skin (Pelvis, Spine..Spine2,
+L/R_Clavicle..Hand, Thigh..Toe0, twists, fingers, mant cape bones), T-pose, Y-up facing +Z, ~3.1 m; PBR textures as PNG
+(base, mr, normal, em), alphaMode MASK; no animations (Havok), cloth or particles.
+
+DD2 donor: lost_battalion_knight (Excel lost_battalion_knight_data_export: size 2, tags large/knight, 36 HP; mesh
+msh_lost_battalion_knight with a 184-bone rig and a sword). DD2's character shader takes _Base and _Ink textures
+(ShieldbreakerModel). A later step could rebind the DS3 mesh to the knight's rig so DD2's animations move it.
+
+Built: Core GltfModel (accessors of float/ushort/ubyte/uint, nodes TRS, skin, materials, external images kept inside
+the model folder) + 3 tests on the real export. Plugin ExportedBoss (MonoBehaviour, debug keys only): F1 ->
+Driver.DebugExportedBossFight (hall fight, plan.Enemies = [lost_battalion_knight], no checkpoint resume, no DD1 sprite
+view) -> on combat, once the knight's renderers have bounds: build nodes/bones and one SkinnedMeshRenderer per mesh
+(bindposes from the glTF), materials cloned from the knight's body material, place/scale/face, parent to the knight,
+forceRenderingOff on the knight's renderers; cleared when combat ends. Paths/ExportedBossModel defaults to
+<game>/PrivateBossModels/soul_of_cinder/soul_of_cinder.gltf; gltf, bin and the base/em PNGs (13 MB) were copied there.
+957 Core + 168 UI pass; not deployed or launched yet (the owner and another agent are using the game).
