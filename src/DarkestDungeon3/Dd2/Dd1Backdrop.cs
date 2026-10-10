@@ -36,20 +36,54 @@ internal static class Dd1Backdrop
     private static Camera _sceneryCamera;
     private static float _distance = 15f;
 
-    /// <summary>A fight is about to start here: forget the last one.</summary>
-    public static void Reset(bool nativeArena = false)
+    /// <summary>A fight is about to start here: forget the last one. A fight that starts in place keeps the scene the
+    /// crawl last drew (see <see cref="TakeSnapshot"/>), also in DD2's regions instead of their arenas.</summary>
+    public static void Reset(bool nativeArena = false, bool inPlace = false)
     {
         End();
         Ready = false;
-        _failed = nativeArena || !Plugin.Dd1BackdropOn.Value;
+        _failed = nativeArena ? !inPlace : !Plugin.Dd1BackdropOn.Value;
+        WantsSnapshot = inPlace && !_failed;
         _startedAt = -1f;
         SetupPoll.Reset();
+    }
+
+    /// <summary>The fight waits for the crawl to hand over the corridor or room it is drawing.</summary>
+    public static bool WantsSnapshot { get; private set; }
+    private static RenderTexture _snapshot;
+
+    /// <summary>The scene the fight started in, or null (see <see cref="TakeSnapshot"/>).</summary>
+    public static RenderTexture Snapshot => _snapshot;
+
+    /// <summary>The crawl's scene at the moment the fight started (screen-sized, drawn on the letterboxed
+    /// 1920x1080 canvas). Null keeps DD2's arena.</summary>
+    public static void TakeSnapshot(RenderTexture scene)
+    {
+        if (!WantsSnapshot) { Release(scene); return; }
+        WantsSnapshot = false;
+        Release(_snapshot);
+        _snapshot = scene;
+        if (scene == null) { _failed = true; Plugin.Log.LogInfo("[backdrop] no scene snapshot: DD2's arena stays"); }
+    }
+
+    private static void Release(RenderTexture rt)
+    {
+        if (rt == null) return;
+        rt.Release();
+        UnityEngine.Object.Destroy(rt);
     }
 
     /// <summary>Called every frame of a fight until it is set up (DD2's arena and actors load over a few frames).</summary>
     public static void Update()
     {
         if (Ready || _failed) return;
+        if (WantsSnapshot)
+        {
+            // The crawl hands it over on its next repaint; without one the arena stays.
+            if (_startedAt < 0) _startedAt = Time.unscaledTime;
+            else if (Time.unscaledTime - _startedAt > 2f) TakeSnapshot(null);
+            return;
+        }
         if (!SetupPoll.Due(Time.unscaledTime, true)) return;
         if (_startedAt < 0) _startedAt = Time.unscaledTime;
         var setupWatch = System.Diagnostics.Stopwatch.StartNew();
@@ -360,6 +394,9 @@ internal static class Dd1Backdrop
         Quads.Clear();
         if (_texture != null) { _texture.Release(); UnityEngine.Object.Destroy(_texture); }
         _texture = null;
+        Release(_snapshot);
+        _snapshot = null;
+        WantsSnapshot = false;
         Ready = false;
     }
 
@@ -386,7 +423,14 @@ internal static class Dd1Backdrop
             if (tex == null) return;
             Graphics.DrawTexture(new Rect(x, y, w, h), tex, mirror ? new Rect(1, 0, -1, 1) : new Rect(0, 0, 1, 1), 0, 0, 0, 0);
         }
-        if (memory || exp.InRoom)
+        if (_snapshot != null && !memory)
+        {
+            // The scene exactly as the crawl showed it, its floor at the heroes' feet like DD1's own art.
+            var strip = FightBackdropLayout.SceneStrip(_snapshot.width, _snapshot.height);
+            Graphics.DrawTexture(new Rect(0, top, 1920, 720), _snapshot, strip, 0, 0, 0, 0);
+            Plugin.Log.LogInfo($"[backdrop] {(exp.InRoom ? "room " + exp.RoomId : "corridor " + crawl.CurrentCorridor.Id)} where the fight started ({_snapshot.width}x{_snapshot.height} snapshot)");
+        }
+        else if (memory || exp.InRoom)
         {
             var wall = memory ? Art.BossRoomWall(zone, exp.FadedMemory.BossId, exp.FadedMemory.Difficulty)
                 : exp.RoomId == exp.Map.EntranceRoomId ? Art.EntranceWall(zone) : Art.RoomWall(zone, exp.RoomId);

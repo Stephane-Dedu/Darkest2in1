@@ -86,11 +86,64 @@ internal sealed class CrawlUi
         if (crawl == null || exp == null) return;
         var old = GUI.color;
         GUI.color = new Color(1, 1, 1, alpha);
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, alpha));
-        DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
+        if (Dd1Backdrop.Snapshot is { } snapshot)
+        {
+            // A fight in place: the fight shows this same scene, so one opaque copy crossfades without darkening.
+            Gui.Fill(new Rect(0, 720, Gui.W, Gui.H - 720), new Color(0, 0, 0, alpha));
+            GUI.DrawTextureWithTexCoords(new Rect(0, 0, Gui.W, 720), snapshot, FightBackdropLayout.SceneStrip(snapshot.width, snapshot.height));
+        }
+        else
+        {
+            Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, alpha));
+            DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
+        }
         DrawHeroes(exp);
         DrawHud(exp);
         GUI.color = old;
+    }
+
+    /// <summary>The corridor or room as the crawl draws it now, without the party or the HUD: DD1 fights happen where
+    /// the party stands, so the fight keeps it as its backdrop. Repaint only; screen-sized, null on failure.</summary>
+    public RenderTexture CaptureScene()
+    {
+        var crawl = D.Crawl;
+        var exp = D.Expedition;
+        if (crawl == null || exp == null || Event.current.type != EventType.Repaint) return null;
+        var rt = new RenderTexture(Screen.width, Screen.height, 0, RenderTextureFormat.ARGB32) { name = "DD3SceneSnapshot" };
+        var previous = RenderTexture.active;
+        var color = GUI.color;
+        var canvas = GUI.matrix;
+        bool pushed = false;
+        try
+        {
+            rt.Create();
+            RenderTexture.active = rt;
+            // A pixel matrix set up for the texture (as the backdrop's own composition does), then the canvas again.
+            GL.PushMatrix();
+            pushed = true;
+            GL.LoadPixelMatrix(0, Screen.width, Screen.height, 0);
+            GUI.matrix = Matrix4x4.identity;
+            GUI.matrix = canvas;
+            GL.Clear(true, true, Color.black);
+            GUI.color = Color.white;
+            DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
+            return rt;
+        }
+        catch (Exception e)
+        {
+            Plugin.Log.LogWarning("[backdrop] scene snapshot failed: " + e.Message);
+            rt.Release();
+            UnityEngine.Object.Destroy(rt);
+            return null;
+        }
+        finally
+        {
+            GUI.color = color;
+            if (pushed) GL.PopMatrix();
+            RenderTexture.active = previous;
+            GUI.matrix = Matrix4x4.identity;
+            GUI.matrix = canvas;
+        }
     }
 
     // ---------------- scene ----------------

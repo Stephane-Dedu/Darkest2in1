@@ -4096,3 +4096,56 @@ nothing is scheduled or built by this entry.
 - DLC: DD1 and DD2 DLC hero classes are in scope, deferred until 3D models and related work are
   possible. Other DD1 DLC content and the game modes remain open [user] questions.
 - Mountain (Darkest Dungeon) quests: heroes who finish one may return. Implement later with O4.
+
+## Round190: fights start in place (owner main focus: feel and performance)
+
+Owner: a battle played DD2's battle start with a loading; start it DD1's way, in the current corridor or
+room. Native trace (Player.log + DD2 decomp GameModeMgr.ChangeModeAndNotify/ExitMode/EnterInNewMode):
+our SetMode(COMBAT, FADE_IN_AND_OUT) faded DRIVING to black, destroyed pools, ran MemoryCleanup
+(Resources.UnloadUnusedAssets ~84 ms, then GC.Collect), loaded combat_arena_*, entered COMBAT, faded in,
+then CombatPresentationBhv.RunIntroTimeline played m_DefaultIntroTimeline (camera, battle-start stamp).
+The "combat" scene itself stays loaded from the first DRIVING entry. WaitForCombatStart also preloads
+combat_results each fight. DD2 regions fought in native arenas unlike the painted corridor; our IMGUI
+cover then crossfaded from the corridor into a fading-in, different arena. Throbber: ScreenFaderBhv only
+opens it when fading to black with showThrobber, so the override already kept it hidden.
+
+Change (Look.FightStartsInPlace, default on; off restores the old path):
+- Dd2Combat.Start uses SceneTransition.SKIP; the cover hides DD2's switch. Exit/enter timings logged.
+- NoDd2BattleIntroInPlace ends the intro timeline exactly like DD2's battle_skip_intro pref (reflection:
+  the build has no DirectorModule reference) and still sets the battle modifier icon.
+- UiRoot hands Dd1Backdrop a screen-sized snapshot of CrawlUi.DrawScene (scene only, no heroes/HUD) on
+  the fight's first repaint. Compose draws its virtual 0..720 strip (FightBackdropLayout.SceneStrip,
+  letterbox-aware, 5 UI tests) with the floor at the heroes' feet. DD2 regions now use it too; Faded
+  Memory boss rooms keep their own composition. No snapshot within 2 s keeps DD2's arena.
+- The cover crossfades with the snapshot itself (the old black fill + scene at partial alpha darkened
+  the midpoint). After the fight, StraightBackToTheDungeon fades the scene back in over 0.3 s, then
+  Dd2Combat.Tick switches to DRIVING with SKIP under it.
+
+IMGUI into a RenderTexture: activate the screen-sized RT, GL.PushMatrix + LoadPixelMatrix(0,W,H,0),
+re-apply GUI.matrix, draw, restore. The result is upright on this D3D11 build (verified in game).
+
+Native verification, estate2 only (backup + SHA256, temporary F2 EnterHamlet(2) entry so the picker
+never read protected slots, then source/save restored and hash-matched, forced Release rebuild deployed,
+DLL hashes match). Resumed Foetor expedition: hall fight plague_eater_mash_204 entered 733 ms, visible
+967 ms; room fight plague_eater_mash_206 entered 667 ms, visible 883 ms (before: 1134-1433 ms entered,
+plus fade-in and intro). Both show the same corridor/room behind the fight, no black, no intro; DD2's
+combat UI and turns work. Return: back in the dungeon 601 ms after the fight ended, no black. No
+exceptions in LogOutput.log or Player.log. Exact PIDs 10016 and 38548 stopped. Recordings and frames
+are private in C:\Users\Piral\.universal-modder\inspection\round190. All 917 Core + 136 UI pass.
+
+Follow-ups recorded in PARITY: backdrop slightly darker/warmer than the crawl (DD2 grading on the quad);
+heroes jump to DD2 combat positions in the crossfade; ~0.9 s still hold (MemoryCleanup, arena load,
+combat_results preload); DD1-region fights now use the snapshot too, unverified [?].
+
+## Status 2026-10-10: round190 in-place fights verified; feel/performance is the main focus
+
+- Owner's new main focus: overall feel and performance. Round190 (in-place fight start and return) is
+  verified in game for DD2 regions and committed. The parity loop stays paused; the owner directs work.
+- Owner decisions recorded 2026-10-10 (CLAUDE.md, PARITY): crow-quest trinket recovery with a later DD2
+  version, DD1 afflictions except the Flagellant's Toxic, DLC classes later, Mountain veterans may return.
+- Round189 selector art is committed but not yet seen in game ([?]).
+- Next candidates for feel/performance: cut the remaining ~0.9 s fight-start hold (skip per-fight
+  MemoryCleanup for crawl fights with a safe periodic cleanup, skip the combat_results preload when
+  SkipDd2ResultsView is on), match backdrop brightness, smooth the heroes' move into combat positions,
+  check DD1-region in-place fights. Ask the owner which issue they feel next.
+- No game running; estate2 restored and hash-checked; normal Release deployed with matching hashes.

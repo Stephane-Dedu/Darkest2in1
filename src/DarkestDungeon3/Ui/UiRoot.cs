@@ -94,10 +94,18 @@ internal sealed class UiRoot : MonoBehaviour
                     break;
                 case Phase.Fighting:
                     // Until DD2's fight is ready the DD1 scene stays, then it fades into the fight (DD1's battle start).
-                    float reveal = Dd2.Dd2Combat.RevealProgress;
-                    if (reveal < 1f && Event.current.type == EventType.Repaint) _crawl.DrawBackdrop(1f - reveal);
-                    Dd2.Dd1MonsterView.Draw();
-                    DrawRetreatButton();
+                    // A fight starting in place first takes the scene the party stands in as its backdrop, and fades
+                    // back into it when it ends.
+                    if (Dd2.Dd1Backdrop.WantsSnapshot && Event.current.type == EventType.Repaint)
+                        Dd2.Dd1Backdrop.TakeSnapshot(_crawl.CaptureScene());
+                    float leaving = Dd2.Dd2Combat.ReturnProgress;
+                    float cover = Mathf.Max(1f - Dd2.Dd2Combat.RevealProgress, leaving);
+                    if (cover > 0f && Event.current.type == EventType.Repaint) _crawl.DrawBackdrop(cover);
+                    if (leaving <= 0f)
+                    {
+                        Dd2.Dd1MonsterView.Draw();
+                        DrawRetreatButton();
+                    }
                     Gui.DrawAnnouncement();
                     break;
                 case Phase.Homecoming:

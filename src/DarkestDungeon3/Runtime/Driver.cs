@@ -104,7 +104,7 @@ internal sealed class Driver : MonoBehaviour
         RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
-        if (Phase == Phase.Fighting && Dd2Combat.InFight) Dd1Backdrop.Update();
+        if (Phase == Phase.Fighting && Dd2Combat.InFight) { Dd1Backdrop.Update(); Dd2Combat.Tick(); }
         var stage = HeroStage.Instance;
         stage?.SetVisible(Phase == Phase.Crawling && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
         if (Phase != Phase.Crawling || Crawl == null) return;

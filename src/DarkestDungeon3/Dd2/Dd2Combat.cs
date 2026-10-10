@@ -126,6 +126,32 @@ internal static class Dd2Combat
     private static float _requestedAt;
     private static bool _nativePresentation;
 
+    /// <summary>The current fight started DD1's way, where the party stands (Look.FightStartsInPlace).</summary>
+    public static bool InPlace { get; private set; }
+
+    private const float ReturnFade = 0.3f;
+    private static float _returnStart = -1f;
+    private static bool _returnPending;
+
+    /// <summary>0 while the fight shows, then 0..1 over 0.3 s as a fight that started in place hands back the
+    /// corridor or room (DD1 never leaves it). It stays at 1 while DD2 returns to the road underneath.</summary>
+    public static float ReturnProgress => _returnStart < 0 ? 0f : UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _returnStart) / ReturnFade);
+
+    /// <summary>The fight is over: cover it with the party's own scene first, then go back to the road (see Tick).</summary>
+    internal static void ReturnInPlace()
+    {
+        _returnStart = UnityEngine.Time.unscaledTime;
+        _returnPending = true;
+    }
+
+    /// <summary>Every frame of a fight: once the scene covers it, DD2 returns to the road without its fade.</summary>
+    public static void Tick()
+    {
+        if (!_returnPending || ReturnProgress < 1f) return;
+        _returnPending = false;
+        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.SKIP, showTransitionThrobberOverride: false);
+    }
+
     /// <summary>0 while DD2 is still setting up the fight (the DD1 scene stays on screen, also while the DD1
     /// backdrop is being put in place), then 0..1 over half a second as the fight shows through.</summary>
     public static float RevealProgress
@@ -136,7 +162,8 @@ internal static class Dd2Combat
             if (_revealStart < 0)
             {
                 _revealStart = UnityEngine.Time.unscaledTime;
-                Plugin.Log.LogInfo($"[combat timing] reveal ready after {(_revealStart - _requestedAt) * 1000f:0} ms, presentation {(_nativePresentation ? "native" : Dd1Backdrop.Ready ? "DD1" : "fallback")}");
+                string presentation = Dd1Backdrop.Ready ? _nativePresentation ? "in place" : "DD1" : _nativePresentation ? "native" : "fallback";
+                Plugin.Log.LogInfo($"[combat timing] reveal ready after {(_revealStart - _requestedAt) * 1000f:0} ms, presentation {presentation}");
             }
             return UnityEngine.Mathf.Clamp01((UnityEngine.Time.unscaledTime - _revealStart) / 0.5f);
         }
@@ -192,20 +219,29 @@ internal static class Dd2Combat
         Plugin.Log.LogInfo($"[combat] {plan.Kind} fight {battle} in {scenario.BackgroundSceneName ?? "(default arena)"}, source {source.GetName()}, torch {torch}");
 
         SingletonMonoBehaviour<ScreenStackBhv>.Instance.Clear();
-        modes.OnNextGameModeExitComplete(_ => Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true));
-        // DD1 starts a fight where the party stands: no DD2 stagecoach loading screen, just a fade we cover with
-        // the DD1 scene until the fight is ready (see RevealProgress).
+        modes.OnNextGameModeExitComplete(_ =>
+        {
+            Plugin.Log.LogInfo($"[combat timing] road exited after {(UnityEngine.Time.unscaledTime - _requestedAt) * 1000f:0} ms");
+            Singleton<GameTypeMgr>.Instance.SetCombatScenario(scenario, isLoad: true);
+        });
+        // DD1 starts a fight where the party stands: no DD2 stagecoach loading screen. The DD1 scene covers DD2's
+        // switch until the fight is ready (see RevealProgress). In place, DD2 neither fades nor plays its battle
+        // intro, and DD2 regions fight in front of the corridor or room the crawl was showing.
+        InPlace = Plugin.FightInPlace.Value;
+        _returnStart = -1f;
+        _returnPending = false;
         _revealedAt = -1f;
         _revealStart = -1f;
         _nativePresentation = plan.NativePresentation;
-        Dd1Backdrop.Reset(plan.NativePresentation);
+        Dd1Backdrop.Reset(plan.NativePresentation, InPlace);
         modes.OnNextGameModeEnterComplete(_ =>
         {
             _revealedAt = UnityEngine.Time.unscaledTime;
             Plugin.Log.LogInfo($"[combat timing] combat entered after {(_revealedAt - _requestedAt) * 1000f:0} ms, arena {scenario.BackgroundSceneName}");
         });
-        modes.SetMode(GameModeType.COMBAT, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
-        Plugin.Log.LogInfo($"[combat timing] synchronous setup {setupWatch.ElapsedMilliseconds} ms, roll/scenario {scenarioMs} ms, native arena {plan.NativePresentation}");
+        var transition = InPlace ? Assets.Code.UI.Transitions.SceneTransition.SKIP : Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT;
+        modes.SetMode(GameModeType.COMBAT, isLoad: false, transition, showTransitionThrobberOverride: false);
+        Plugin.Log.LogInfo($"[combat timing] synchronous setup {setupWatch.ElapsedMilliseconds} ms, roll/scenario {scenarioMs} ms, native arena {plan.NativePresentation}, in place {InPlace}");
         // The party's DD1 buffs go on once DD2 has entered the fight, and come off when it ends.
         _buffed = party.ToList();
         if (buffs != null && buffs.Count > 0)
@@ -225,6 +261,7 @@ internal static class Dd2Combat
         FightBuffs.Remove(_buffed);
         Dd1MonsterView.Clear();
         Dd1Backdrop.End();
+        if (_returnStart >= 0) Plugin.Log.LogInfo($"[combat timing] back in the dungeon {(UnityEngine.Time.unscaledTime - _returnStart) * 1000f:0} ms after the fight ended");
         Plugin.Log.LogInfo($"[combat] fight over, party wiped: {partyWiped}");
         Finished?.Invoke(partyWiped);
     }
@@ -259,6 +296,48 @@ internal static class RoadResultsCopyStaysQuiet
     {
         if (enter != GameModeType.RESULTS || !Dd2Combat.InFight) return true;
         return __instance.gameObject.scene.name != GameModeType.DRIVING.m_sceneName;
+    }
+}
+
+/// <summary>
+/// DD1's battle starts without DD2's intro (its camera sweep and battle-start stamp): a fight that starts in place
+/// ends the intro timeline at once, exactly as DD2's own battle_skip_intro preference does, and keeps the battle
+/// modifier icon the intro would have set.
+/// </summary>
+[HarmonyPatch(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "RunIntroTimeline")]
+internal static class NoDd2BattleIntroInPlace
+{
+    private static readonly System.Reflection.FieldInfo Director = AccessTools.Field(typeof(Assets.Code.Combat.Presentation.CombatPresentationBhv), "m_PlayableDirector");
+
+    private static bool Prefix(Assets.Code.Combat.Presentation.CombatPresentationBhv __instance, ref System.Collections.IEnumerator __result)
+    {
+        if (!Dd2Combat.InFight || !Dd2Combat.InPlace || Director == null) return true;
+        __result = SkipIntro(__instance);
+        return false;
+    }
+
+    private static System.Collections.IEnumerator SkipIntro(Assets.Code.Combat.Presentation.CombatPresentationBhv presentation)
+    {
+        try { SingletonMonoBehaviour<Assets.Code.UI.Managers.CombatUiBhv>.Instance?.SetBattleModifierIcon(); }
+        catch (Exception e) { Plugin.Log.LogWarning("[combat] battle modifier icon: " + e.Message); }
+        // PlayableDirector lives in UnityEngine.DirectorModule, which the build doesn't reference: by reflection.
+        var director = Director.GetValue(presentation);
+        var type = director?.GetType();
+        var asset = type?.GetProperty("playableAsset");
+        var time = type?.GetProperty("time");
+        try
+        {
+            if (asset?.GetValue(director) != null && time != null)
+            {
+                time.SetValue(director, type.GetProperty("duration").GetValue(director));
+                type.GetMethod("Evaluate", Type.EmptyTypes).Invoke(director, null);
+                asset.SetValue(director, null);
+                time.SetValue(director, 0.0);
+            }
+            Plugin.Log.LogInfo("[combat] DD2 battle intro skipped (the fight starts in place)");
+        }
+        catch (Exception e) { Plugin.Log.LogWarning("[combat] battle intro skip: " + e.Message); }
+        yield break;
     }
 }
 
@@ -303,8 +382,9 @@ internal static class StraightBackToTheDungeon
             Assets.Code.Loading.RedHookSceneManagerBhv.UnloadAdditiveSceneByForce(scene);
             ResultsScene.SetValue(__instance, null);
         }
-        Plugin.Log.LogInfo("[combat] straight back to the dungeon (DD2 results view skipped)");
-        Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
+        Plugin.Log.LogInfo("[combat] straight back to the dungeon (DD2 results view skipped)" + (Dd2Combat.InPlace ? ", in place" : ""));
+        if (Dd2Combat.InPlace) Dd2Combat.ReturnInPlace();
+        else Dd2Api.Modes.SetMode(GameModeType.DRIVING, isLoad: false, Assets.Code.UI.Transitions.SceneTransition.FADE_IN_AND_OUT, showTransitionThrobberOverride: false);
         return false;
     }
 }
