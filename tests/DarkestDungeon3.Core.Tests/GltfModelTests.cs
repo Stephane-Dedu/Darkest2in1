@@ -41,6 +41,40 @@ public class GltfModelTests
         Assert.Contains(Cinder.Materials, m => m.Mask);          // DS3's cut-out cloth
     }
 
+    private static GltfModel.Primitive Quad() => new()
+    {
+        Mesh = "quad",
+        // Two triangles: the left half of UV space (u < 0.5) and the right half.
+        Positions = new float[] { 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 2, 0, 0, 2, 1, 0 },
+        Normals = new float[] { 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1 },
+        Uv = new float[] { 0, 0, 0.4f, 0, 0.4f, 1, 0, 1, 0.6f, 0, 1, 1 },
+        Joints = new int[24], Weights = Enumerable.Repeat(0.25f, 24).ToArray(),
+        Triangles = new[] { 0, 1, 2, 4, 5, 1 },
+    };
+
+    [Fact]
+    public void CutOutTrianglesAreDropped()
+    {
+        // Transparent on the left half of the texture, opaque on the right.
+        var cut = Quad().CutOut((u, v) => u < 0.5f ? 0f : 1f, 0.5f);
+        Assert.Equal(new[] { 4, 5, 1 }, cut.Triangles);
+        Assert.Equal(Quad().VertexCount, cut.VertexCount);
+        // A triangle crossing into the opaque part (its edge middle or corner reaches it) is kept.
+        var keep = Quad().CutOut((u, v) => u > 0.35f ? 1f : 0f, 0.5f);
+        Assert.Equal(6, keep.Triangles.Length);
+    }
+
+    [Fact]
+    public void BackFacesAreTheTrianglesTurnedAround()
+    {
+        var both = Quad().WithBackFaces();
+        Assert.Equal(12, both.VertexCount);
+        Assert.Equal(new[] { 0, 1, 2, 4, 5, 1, 6, 8, 7, 10, 7, 11 }, both.Triangles);
+        Assert.Equal(-1f, both.Normals[6 * 3 + 2]);       // the copy faces the other way
+        Assert.Equal(both.Uv.Length / 2, both.VertexCount);
+        Assert.Equal(both.Joints.Length / 4, both.VertexCount);
+    }
+
     [Fact]
     public void MirroringKeepsAMatrixInTheSameSpace()
     {

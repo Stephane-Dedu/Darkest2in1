@@ -30,11 +30,57 @@ public sealed class GltfModel
         public float[] Positions, Normals, Uv, Weights;
         public int[] Joints, Triangles;
         public int VertexCount => Positions.Length / 3;
+
+        /// <summary>
+        /// Without its cut-out triangles: those whose texture is transparent (alpha below the cutoff) at every point
+        /// sampled (corners, edge middles, centre), for shaders that can't clip. <paramref name="alpha"/> reads the
+        /// base texture's alpha at a UV.
+        /// </summary>
+        public Primitive CutOut(Func<float, float, float> alpha, float cutoff)
+        {
+            if (Uv == null) return this;
+            var kept = new List<int>(Triangles.Length);
+            for (int i = 0; i + 2 < Triangles.Length; i += 3)
+            {
+                int a = Triangles[i], b = Triangles[i + 1], c = Triangles[i + 2];
+                float au = Uv[a * 2], av = Uv[a * 2 + 1], bu = Uv[b * 2], bv = Uv[b * 2 + 1], cu = Uv[c * 2], cv = Uv[c * 2 + 1];
+                bool seen = alpha(au, av) >= cutoff || alpha(bu, bv) >= cutoff || alpha(cu, cv) >= cutoff
+                    || alpha((au + bu) / 2, (av + bv) / 2) >= cutoff || alpha((bu + cu) / 2, (bv + cv) / 2) >= cutoff
+                    || alpha((au + cu) / 2, (av + cv) / 2) >= cutoff || alpha((au + bu + cu) / 3, (av + bv + cv) / 3) >= cutoff;
+                if (seen) { kept.Add(a); kept.Add(b); kept.Add(c); }
+            }
+            return With(Positions, Normals, Uv, Joints, Weights, kept.ToArray());
+        }
+
+        /// <summary>Seen from both sides, for shaders that cull back faces: each vertex again with its normal turned
+        /// around, each triangle again the other way round on those.</summary>
+        public Primitive WithBackFaces()
+        {
+            int n = VertexCount;
+            float[] Twice(float[] a) => a == null ? null : a.Concat(a).ToArray();
+            int[] TwiceInts(int[] a) => a == null ? null : a.Concat(a).ToArray();
+            var normals = Normals == null ? null : Normals.Concat(Normals.Select(x => -x)).ToArray();
+            var triangles = new int[Triangles.Length * 2];
+            Array.Copy(Triangles, triangles, Triangles.Length);
+            for (int i = 0; i + 2 < Triangles.Length; i += 3)
+            {
+                triangles[Triangles.Length + i] = Triangles[i] + n;
+                triangles[Triangles.Length + i + 1] = Triangles[i + 2] + n;
+                triangles[Triangles.Length + i + 2] = Triangles[i + 1] + n;
+            }
+            return With(Twice(Positions), normals, Twice(Uv), TwiceInts(Joints), Twice(Weights), triangles);
+        }
+
+        private Primitive With(float[] positions, float[] normals, float[] uv, int[] joints, float[] weights, int[] triangles) => new()
+        {
+            Mesh = Mesh, Material = Material, Node = Node,
+            Positions = positions, Normals = normals, Uv = uv, Joints = joints, Weights = weights, Triangles = triangles,
+        };
     }
 
     public sealed class MaterialInfo
     {
-        public string Name, BaseColor, Emissive;
+        public string Name, BaseColor, Emissive, Normal;
         public bool Mask, DoubleSided;
         public float Cutoff = 0.5f;
     }
@@ -113,6 +159,7 @@ public sealed class GltfModel
                 Name = (string)m["name"],
                 BaseColor = Image(m["pbrMetallicRoughness"]?["baseColorTexture"]),
                 Emissive = Image(m["emissiveTexture"]),
+                Normal = Image(m["normalTexture"]),
                 Mask = (string)m["alphaMode"] == "MASK",
                 Cutoff = m["alphaCutoff"] != null ? (float)m["alphaCutoff"] : 0.5f,
                 DoubleSided = m["doubleSided"] != null && (bool)m["doubleSided"],

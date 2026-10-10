@@ -4841,3 +4841,26 @@ material Red Hook/Lit/Hero"; the hero shader's textures are _Base and _Ink). Ite
 - The enemy takes the export's name ("Soul Of Cinder"). F10 needed three presses (the knight's cadaver phase), then
   the fight returned in place with spoils and the model was cleared. No exceptions.
 The shared working tree also built the other agent's uncommitted Shieldbreaker files into these test builds.
+
+## Round209: the exported boss moves with DD2's animations (2026-10-10, /loop iteration 1)
+
+Owner (/loop): "improve the model of soul of cinder until he renders well within the game as a boss sizewise,
+animationwise etc"; another agent is extracting Gael and Vilhelm under ds3-extract (context only).
+
+Knight rig (UnityPy dump to the private inspection folder exported-boss-20261010/knight_rig.json): 184 bones,
+root TrajectorySHJnt, ROOTSHJnt (pelvis), Spine_01/02/Top, Neck_01_01, Head_Top, l/r_Arm_Clavicle/Shoulder/
+Elbow/Wrist, Finger_01-04_01-03, Thumb_01_01-03, l/r_Leg_Hip/Knee/Ankle/Ball/Toe, cloth/coat/grass aux bones,
+Sword_AuxSHJnt; one material on msh_lost_battalion_knight_b.
+
+Retargeting: first try used the knight's bindposes as its rest: the export came out upside down (the bind
+space is not the renderer's as assumed). Working method: at bind, size by chain length (L_Foot..Head), turn to
+the knight's hips line, set pelvis on pelvis, bend each mapped export bone (parents first) so it points where
+the knight's bone does now; record both poses; then every LateUpdate (DefaultExecutionOrder 32000) each export
+bone turns as its knight bone has turned since (rotation delta in the actor's frame), pelvis follows ROOTSHJnt.
+Seen: idle stance, a hit reaction in DD2's close-up shot, and the knight's sword attack lunging at Hachet.
+
+Look: Size 1.05 looked hero-sized; 1.35 now. MASK materials (mantle 67% transparent, BD02 28%) rendered solid and
+pale: 297 cut-out triangles dropped, 1297 two-sided triangles doubled, transparent texels painted dark (16,12,10).
+Ink from normal-map gradients (top 9%, one pixel wider) instead of blurred dark areas. Colour gain 1.0.
+961 Core tests pass. Estate 2 restored (2f230b7f/dd18f310). Next: armour speckle, waist cloth flap, maybe a
+little larger, then the death animation and multiple-fight cleanup.
