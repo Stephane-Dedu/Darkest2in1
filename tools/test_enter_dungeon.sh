@@ -4,8 +4,8 @@
 # Coordinates are client pixels of a 1600x900 window (virtual 1920x1080 * 0.8333).
 set -u
 UM=/c/Users/Piral/DarkestDungeon3/mod/tools/um
-GAME='C:\Users\Piral\DarkestDungeon3\game\Darkest Dungeon II.exe'
-L="/c/Users/Piral/DarkestDungeon3/game/BepInEx/LogOutput.log"
+GAME='C:\Users\Piral\darkestwithdlc\game\Darkest Dungeon II.exe'
+L="/c/Users/Piral/darkestwithdlc/game/BepInEx/LogOutput.log"
 P="/c/Users/Piral/AppData/LocalLow/RedHook/Darkest Dungeon II/Player.log"
 d() { $UM win drive --proc "Darkest Dungeon II" "$@" 2>&1 | grep -v "^ready" | tail -1 >/dev/null; }
 
@@ -13,7 +13,7 @@ old=$(powershell -NoProfile -Command "(Get-Process | Where-Object { \$_.ProcessN
 for pid in $old; do powershell -NoProfile -Command "Stop-Process -Id $pid -Force -Confirm:\$false"; done
 sleep 3
 (cd /c/Users/Piral/DarkestDungeon3/mod && dotnet build src/DarkestDungeon3 -c Release 2>&1 | grep -E "Deployed|error CS" | head -3)
-powershell -NoProfile -Command "\$p = Start-Process -FilePath '$GAME' -ArgumentList '-screen-fullscreen 0 -screen-width 1600 -screen-height 900' -WorkingDirectory 'C:\Users\Piral\DarkestDungeon3\game' -PassThru; 'pid=' + \$p.Id"
+powershell -NoProfile -Command "\$p = Start-Process -FilePath '$GAME' -ArgumentList '-screen-fullscreen 0 -screen-width 1600 -screen-height 900' -WorkingDirectory 'C:\Users\Piral\darkestwithdlc\game' -PassThru; 'pid=' + \$p.Id"
 sleep 5
 for i in $(seq 1 90); do grep -q "Finished loading scene main_menu_kingdom" "$P" 2>/dev/null && break; sleep 2; done; sleep 4
 d "click 190 754"; sleep 2; d "click 800 468"; sleep 4

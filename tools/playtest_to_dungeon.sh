@@ -2,7 +2,7 @@
 # Playtest helper: from DD2's main menu (game already launched windowed 1600x900), open Estate 2 (the test
 # estate), take the first Ruins quest with the first four heroes, buy food/torches/shovels/keys and embark.
 UM=/c/Users/Piral/DarkestDungeon3/mod/tools/um
-L=/c/Users/Piral/DarkestDungeon3/game/BepInEx/LogOutput.log
+L=/c/Users/Piral/darkestwithdlc/game/BepInEx/LogOutput.log
 P="/c/Users/Piral/AppData/LocalLow/RedHook/Darkest Dungeon II/Player.log"
 w() { powershell -NoProfile -Command "Start-Sleep -Milliseconds $1"; }
 d() { $UM win drive --proc "Darkest Dungeon II" "focus" "$@" 2>&1 | tail -1 >/dev/null; }

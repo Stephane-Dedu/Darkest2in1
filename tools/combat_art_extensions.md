@@ -85,7 +85,7 @@ first candidate path are recorded in the local manifest.
 ## Local runtime pack
 
 Final PNGs, manifest and README are copied separately into
-`C:\Users\Piral\DarkestDungeon3\game\PrivateScenery`. The config entry
+`C:\Users\Piral\darkestwithdlc\game\PrivateScenery`. The config entry
 `Paths/NativeRoomSceneryFolder` defaults to this folder. Empty disables the
 private pack; missing or invalid files retain the distributed public scenes.
 No private image is copied into the repository or the distributable plugin data.

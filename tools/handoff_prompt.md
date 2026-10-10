@@ -3,6 +3,9 @@ You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
 preserve campaign progress. CLAUDE.md is authoritative for this direction and the latest launch permission.
+Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
+The machine-local build override and playtest helpers target it. Preserve the previous install and both
+reverse-engineering workspaces; their references remain valid. The owner's latest instruction is no game launch.
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.
 Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/trinket ideas are in PARITY.md.

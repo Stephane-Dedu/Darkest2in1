@@ -4,7 +4,7 @@
 # (F10) and wait until the party is back in the dungeon.
 set -u
 UM=/c/Users/Piral/DarkestDungeon3/mod/tools/um
-L="/c/Users/Piral/DarkestDungeon3/game/BepInEx/LogOutput.log"
+L="/c/Users/Piral/darkestwithdlc/game/BepInEx/LogOutput.log"
 d() { $UM win drive --proc "Darkest Dungeon II" "$@" 2>&1 | grep -v "^ready" | tail -1 >/dev/null; }
 f0=$(grep -c "DRIVING -> COMBAT" "$L")
 for i in $(seq 1 60); do

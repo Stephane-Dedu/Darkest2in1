@@ -65,12 +65,12 @@ independent. Do not move contracts into a separate strip below the map.
 ## This machine
 | What | Where |
 |---|---|
-| DD2 (the modded game) | `C:\Users\Piral\DarkestDungeon3\game` (the E:/D: copies are old or broken) |
-| DD1 install (read at runtime) | `C:\Program Files (x86)\Steam\steamapps\common\DarkestDungeon` |
+| DD2 (active modded game) | `C:\Users\Piral\darkestwithdlc\game`; local build override and playtest helpers target this folder. The previous `DarkestDungeon3\game` is retained. |
+| DD1 data read at runtime | `C:\Users\Piral\darkestwithdlc\game`, explicitly set in the active BepInEx config. Steam DD1 remains the native-code baseline and default test source. |
 | DD2 decomp / data / compile refs | `C:\Users\Piral\dd2-decomp` (`IronCrown/`, `data/Excel/`, `refs/`) |
 | DD1 code map (Ghidra, private) | `D:\dd1-decomp` (`decomp/`, `map/`, `ghidra/DD1.gpr`); query with `tools/dd1re/dd1q.py` |
 | Unity port of DD1 | `C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity` |
-| Logs | `game\BepInEx\LogOutput.log`, `%USERPROFILE%\AppData\LocalLow\RedHook\Darkest Dungeon II\Player.log` |
+| Logs | `C:\Users\Piral\darkestwithdlc\game\BepInEx\LogOutput.log`, `%USERPROFILE%\AppData\LocalLow\RedHook\Darkest Dungeon II\Player.log` |
 | Cinematics cache (webm/ogg) | saves folder `\cache` (made with the owner's ffmpeg, WinGet) |
 
 ## Build, test, drive

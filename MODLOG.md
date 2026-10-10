@@ -4432,3 +4432,39 @@ work. DD2's checked binaries match and DD1's sampled core data match, so the exi
 references can remain the baseline. If the new folder is selected, configure local
 build/deployment, the loader, DD1 source and private art paths together. Preserve the
 old install and both research workspaces. No game, probe or restore pending; loop paused.
+
+## Round199: activate the DLC install while preserving existing references (2026-10-10)
+
+After the owner accepted the compatibility assessment, made
+C:\Users\Piral\darkestwithdlc\game the active install. Copied Doorstop/BepInEx core,
+config and the current DarkestDungeon3 plugin, plus PrivateScenery and
+PrivateExpeditionArt. Empty probe folders, old caches and logs were excluded.
+The original install and research workspaces were retained without edits.
+
+Directory.Build.local.props sets GameDir to the new folder and remains ignored.
+MSBuild confirms compile references still use C:\Users\Piral\dd2-decomp\refs,
+while deployment targets the new BepInEx/plugins/DarkestDungeon3. The copied mod
+config sets DarkestDungeon1Folder to the combined root and both art paths to their
+new local copies. All other settings match the old config. Five playtest helpers
+now use the new executable/log/working-directory paths; handoff, machine and
+current DD2 inspection-path notes are updated. The native DD1 code baseline and
+Steam-based default tests remain unchanged. No new DLC gameplay was implemented.
+
+Verification: all90 copied loader/plugin/art files match SHA256. Release builds
+and deploys successfully, and plugin/Core DLL hashes match the build. All five
+changed shell helpers pass bash -n without being executed. A private offline audit
+uses the production Dd1Install, Dd1Campaign, CrawlContent and Dd1HeroArt readers
+against the explicit new root, with no fallback: campaign/crawl content loads,
+and Vestal, Flagellant, Leper, Jester, Musketeer, Shieldbreaker, Duelist and Runaway
+art definitions resolve. Audit source is private under
+C:\Users\Piral\.universal-modder\inspection\dlc-install-20261010\InstallAudit.
+No gameplay code changed; no game launch, protected-save access or save writes.
+
+## Status 2026-10-10: DLC install active, game left closed
+
+Build/deploy and future launch helpers now target C:\Users\Piral\darkestwithdlc\game.
+DD1 runtime data comes from the same combined folder. Current mod/settings/art
+are installed and checked offline. The old game and both reverse-engineering
+workspaces remain intact. Native loader startup, DLC availability and round196/197
+visual/input checks await a permitted launch. No running game, probe or restore
+pending. DLC implementation deferrals and the paused parity loop are unchanged.

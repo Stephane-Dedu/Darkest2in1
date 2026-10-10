@@ -47,7 +47,7 @@ From the mod repository, with Python 3.10 or newer:
 
 ```powershell
 python tools/map_dd2_items.py `
-  --excel 'C:\Users\Piral\DarkestDungeon3\game\Darkest Dungeon II_Data\StreamingAssets\Excel' `
+  --excel 'C:\Users\Piral\darkestwithdlc\game\Darkest Dungeon II_Data\StreamingAssets\Excel' `
   --output 'C:\Users\Piral\rea-workbench\evidence\dd2-items-NEW'
 python -m unittest discover -s tools -p test_map_dd2_items.py -v
 ```

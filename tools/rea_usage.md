@@ -31,7 +31,7 @@ recipe rather than a second copy of the upstream skill.
 | Managed build comparison | `compare-managed-members` | `compare_managed_members` |
 
 The DD2 assembly path on this machine is
-`C:/Users/Piral/DarkestDungeon3/game/Darkest Dungeon II_Data/Managed/IronCrown.dll`.
+`C:/Users/Piral/darkestwithdlc/game/Darkest Dungeon II_Data/Managed/IronCrown.dll`.
 The native DD1 target is
 `C:/Program Files (x86)/Steam/steamapps/common/DarkestDungeon/_windows/win64/Darkest.exe`.
 Use the current install's exact bytes and hash. The compile reference is under
@@ -67,7 +67,7 @@ For a new artifact, these PowerShell commands inspect identity without loading
 or executing the assembly:
 
 ```powershell
-$dd2Assembly = 'C:/Users/Piral/DarkestDungeon3/game/Darkest Dungeon II_Data/Managed/IronCrown.dll'
+$dd2Assembly = 'C:/Users/Piral/darkestwithdlc/game/Darkest Dungeon II_Data/Managed/IronCrown.dll'
 $dd2Digest = (Get-FileHash -LiteralPath $dd2Assembly -Algorithm SHA256).Hash.ToLowerInvariant()
 $reaEvidence = Join-Path $reaWorkbench "evidence/$dd2Digest"
 New-Item -ItemType Directory -Path $reaEvidence -Force | Out-Null

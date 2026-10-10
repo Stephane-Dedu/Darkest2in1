@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # Playtest helper: keep walking (D) until the party stands at a curio; wins any fight on the way (F10).
-# Optional first argument: a map click "x y" (window pixels) to start walking toward a room.
+# Optional first argument: a map click "x y" (window pixels) to choose the next corridor exit.
 set -u
 UM=/c/Users/Piral/DarkestDungeon3/mod/tools/um
-L="/c/Users/Piral/DarkestDungeon3/game/BepInEx/LogOutput.log"
+L="/c/Users/Piral/darkestwithdlc/game/BepInEx/LogOutput.log"
 d() { $UM win drive --proc "Darkest Dungeon II" "$@" 2>&1 | grep -v "^ready" | tail -1 >/dev/null; }
 count() { grep -c "$1" "$L"; }
 curios0=$(count "something here"); fights0=$(count "fight over")
