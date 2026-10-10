@@ -404,5 +404,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Fonts at DD1's native sizes (nothing overflows).
 - [?] Quest select / provisioner / loot scroll / camp screens.
 - [x] Corridor heroes as DD2 3D models in the combat pose (ActorBhv.Show), portrait fallback — round 1 screenshot, log "4343 visible samples -> shown".
+- [x] Corridor skeletal walk, 2026-10-10: Vestal, Flagellant, Leper and Jester shown at a camera-facing three-quarter angle, with alternating IK steps, smooth starts/stops, slower backwards gait and coordinated hips/chest/head. Owner review prompted shorter strides, lower foot lift and slower cadence. Native forward/back/idle and corridor reload captured in private corridor-walk-20261010 evidence; both test-estate files restored/hash verified. Six gait tests, 917 Core +131 UI tests and Release pass. Existing DD2 appearance retained; no game assets distributed.
+- [?] Other corridor hero classes and alternate art modes: required leg/torso bones found in all 12 installed base-game hero bundles plus Crusader, Duelist and human Abomination, but individual garment/weapon/facing reviews remain. Stylized foot cadence does not exactly match the fast scenery scroll. See tools/corridor_heroes.md.
 - [user] DD1 game modes (Radiant / Darkest / Stygian: `modes/`, new_game_plus_* rules) — which, if any.
 - [user] DD1 DLC content (Crimson Court, Color of Madness, Shieldbreaker: `dlc/`) — in scope or not.

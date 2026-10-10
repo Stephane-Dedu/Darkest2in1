@@ -13,6 +13,7 @@ namespace DarkestDungeon3.Dd2;
 /// DD2's deferred pass only lights renderers on the layers of its DeferredRenderFeature mask (a private layer came
 /// out black). If they still render black, the stage notices and the crawl falls back to DD2's flat hero art.
 /// </summary>
+[DefaultExecutionOrder(10000)]
 internal sealed class HeroStage : MonoBehaviour
 {
     public static HeroStage Instance { get; private set; }
@@ -60,8 +61,11 @@ internal sealed class HeroStage : MonoBehaviour
     private string _partyKey;
 
     public static float HeroScale = 1f;
-    /// <summary>The party is walking: each hero bobs a little, out of step (DD1's walk).</summary>
-    public static bool Walking;
+    /// <summary>Signed corridor speed: 1 forward, -0.5 backing up, 0 stopped.</summary>
+    public static float WalkSpeed;
+    private readonly Dictionary<ActorBhv, CorridorHeroMotion> _motion = new();
+    private readonly HashSet<ActorBhv> _motionUnavailable = new();
+    private float _nextMotionBind;
     public static float FeetY = 680f;
 
     /// <summary>The rendered party, or null while nothing has loaded.</summary>
@@ -239,6 +243,10 @@ internal sealed class HeroStage : MonoBehaviour
 
     public void Clear()
     {
+        foreach (var motion in _motion.Values) motion.Restore();
+        _motion.Clear();
+        _motionUnavailable.Clear();
+        WalkSpeed = 0;
         _shown.Clear();
         foreach (var (_, slot, _) in _heroes)
             if (slot != null) Destroy(slot.gameObject);
@@ -297,6 +305,11 @@ internal sealed class HeroStage : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        foreach (var motion in _motion.Values) motion.Restore();
+    }
+
     private void LateUpdate()
     {
         ShowCombatPose();
@@ -304,14 +317,32 @@ internal sealed class HeroStage : MonoBehaviour
         if (_light != null) _light.intensity = LightIntensity * _exposure;
         foreach (var k in _keyLights) if (k != null) k.intensity = LightIntensity * 2f * _exposure;
         CheckNotBlack();
+        bool bindMotion = Time.unscaledTime >= _nextMotionBind;
         for (int i = 0; i < _heroes.Count; i++)
         {
             var slot = _heroes[i].slot;
             if (slot == null) continue;
-            float bob = Walking ? Mathf.Abs(Mathf.Sin(Time.unscaledTime * 7f + i * 1.3f)) * 0.09f : 0f;
             var p = slot.localPosition;
-            slot.localPosition = new Vector3(p.x, (720f - FeetY) / PixelsPerUnit + bob, p.z);
+            slot.localPosition = new Vector3(p.x, (720f - FeetY) / PixelsPerUnit, p.z);
+            var actor = _heroes[i].actor;
+            if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
+            if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
+                && _checked && !RendersBlack && bindMotion)
+            {
+                try
+                {
+                    motion = CorridorHeroMotion.TryCreate(actor, slot, i);
+                    if (motion != null) _motion.Add(actor, motion);
+                }
+                catch (System.Exception e)
+                {
+                    _motionUnavailable.Add(actor);
+                    Plugin.Log.LogWarning($"[stage-walk] {actor.GetActorGuid()}: {e.Message}; retaining native pose");
+                }
+            }
+            motion?.Apply(WalkSpeed, Time.unscaledDeltaTime, _camera != null && _camera.enabled);
         }
+        if (bindMotion) _nextMotionBind = Time.unscaledTime + 0.5f;
         // Actor parts load asynchronously and may arrive on other layers: keep everything on ours.
         if (_root == null || Time.unscaledTime < _nextLayerFix) return;
         _nextLayerFix = Time.unscaledTime + 0.5f;

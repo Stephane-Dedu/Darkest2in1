@@ -4006,3 +4006,38 @@ do not label this probe exception-free. Evidence and probe scripts remain privat
 - Resume automation should first check usage and other active work. Usage68%, ordinary allowed at
   this boundary; quota reset1791624236. Record only this round's documentation in its commit; preserve
   all unrelated corridor changes. Do not stop the other chat's game or claim its acceptance here.
+
+## 2026-10-10: camera-facing corridor heroes and skeletal walk
+
+Owner reported away-facing models and no walk, then chose to retain DD2 appearances.
+HeroStage previously only bounced whole slots while native combat/road idle played.
+Added corridor-only motion on the existing separate stage actors. Native anatomical
+axes and mesh bind matrices determine yaw, hip spacing and flat ankle orientations;
+no shared mesh/controller or combat actor is modified. Driver supplies actual signed
+hallway speed. Two-bone leg IK, continuous foot-contact/swing trajectories, phased
+ranks, unscaled timing and start/stop/reverse blending replace slot bouncing.
+
+Owner saw the first live slice and reported a leg-running feel under rigid busts.
+Reduced stride 0.64->0.46 leg lengths, lift 0.15->0.08, and lengthened cycle
+1.05->1.28 seconds. Added supporting-leg weight shift, pelvis compression/rotation,
+chest counter-motion and head stabilization. Weapon arms follow the torso together
+to retain two-handed grips. Per-frame bone restoration prevents accumulated offsets.
+Final supporting-leg sway sign reviewed after the revised capture; other motion is
+as captured. This is an adaptation of native meshes, not newly generated hero art.
+
+Installed UnityPy inspection found compatible leg/torso suffixes in all 12 base
+heroes plus Crusader, Duelist and human Abomination. Native estate2 captures show
+Vestal, Flagellant, Leper and Jester, forward/back walking, stopping and saved hall
+reload. No stage animation exceptions. First capture's reverse-input attempt was
+blocked when ChatGPT took foreground; keys released. Owner explicitly authorized
+the short follow-up, and revised capture completed. Other heroes/garments/art modes
+still require visual checks. In-place gait does not claim exact ground-speed match
+to the existing fast scenery scroll. See tools/corridor_heroes.md.
+
+Six production-source gait tests and all917 Core +131 UI tests passed; final Release
+build deployed with no DD2 process, plugin hashes match. Initial test PID35780 had
+already ended when stopping it; revised exact PID14016 stopped/waited. Original
+estate_2.json and .bak copied back and independently SHA256-verified; protected
+slots not read/changed by this workflow. Native footage, logs and backups remain
+outside Git at C:\Users\Piral\.universal-modder\inspection\corridor-walk-20261010;
+corridor-walk.mp4 is the revised owner-review preview. No pending save restore.

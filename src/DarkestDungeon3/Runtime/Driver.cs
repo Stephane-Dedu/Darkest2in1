@@ -121,7 +121,7 @@ internal sealed class Driver : MonoBehaviour
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
         Walk(kb);
-        HeroStage.Walking = IsMovingNow && Expedition.Camp == null;
+        HeroStage.WalkSpeed = Expedition.Camp == null && !Expedition.InRoom ? _walkVelocity * SecondsPerSquare : 0f;
         if (kb != null && kb.tKey.wasPressedThisFrame) UseTorch();
     }
 
