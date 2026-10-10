@@ -21,7 +21,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed class ExportedBoss : MonoBehaviour
 {
     public const string Donor = "lost_battalion_knight";
-    private const float Taller = 1.2f, ColourGain = 2.2f;
+    private const float Taller = 1.2f, ColourGain = 0.85f, InkShare = 0.12f;
 
     private static GltfModel _model;
     private static string _modelPath;
@@ -88,13 +88,22 @@ internal sealed class ExportedBoss : MonoBehaviour
         var heroes = actors.Where(a => party.Contains(a.GetActorGuid())).Select(a => a.transform.position).ToList();
         var toward = heroes.Count > 0 ? heroes.Aggregate(Vector3.zero, (s, p) => s + p) / heroes.Count - knight.transform.position : Vector3.left;
         toward.y = 0;
+        toward = toward.sqrMagnitude > 0.0001f ? toward.normalized : Vector3.left;
+        // Three-quarters toward the camera, as DD2's enemies stand.
+        var camera = Camera.main;
+        var facing = camera != null ? Vector3.ProjectOnPlane(-camera.transform.forward, Vector3.up).normalized : Vector3.zero;
+        var look = (toward + facing * 0.9f).sqrMagnitude > 0.0001f ? (toward + facing * 0.9f).normalized : toward;
         _root.transform.localScale = Vector3.one * scale;
-        _root.transform.rotation = Quaternion.LookRotation(toward.sqrMagnitude > 0.0001f ? toward.normalized : Vector3.left, Vector3.up);
+        _root.transform.rotation = Quaternion.LookRotation(look, Vector3.up);
         _root.transform.position = new Vector3(bounds.center.x, bounds.min.y - bottom * scale, bounds.center.z);
         _root.transform.SetParent(knight.transform, worldPositionStays: true);
 
         foreach (var r in natives) { r.forceRenderingOff = true; Hidden.Add(r); }
+        knight.ActorInstance.SetActorName(Path.GetFileNameWithoutExtension(path).Replace('_', ' ') is var name && name.Length > 0
+            ? System.Globalization.CultureInfo.InvariantCulture.TextInfo.ToTitleCase(name) : Donor);
         _armed = false;
+        if (body?.sharedMaterial != null)
+            Plugin.Log.LogInfo("[exported boss] knight material textures: " + string.Join(", ", body.sharedMaterial.GetTexturePropertyNames()));
         Plugin.Log.LogInfo($"[exported boss] {Path.GetFileName(path)} stands in for {Donor}: {_model.Primitives.Count(include)} meshes, "
             + $"{_model.TriangleCount} triangles, {_model.Joints.Length} bones, {height:0.00} m x{scale:0.###} (knight {bounds.size.y:0.00}), "
             + $"{(body != null ? "knight material " + body.sharedMaterial?.shader?.name : "fallback shader")}");
@@ -139,7 +148,8 @@ internal sealed class ExportedBoss : MonoBehaviour
             mesh.vertices = vertices;
             if (normals != null) mesh.normals = normals;
             if (uv != null) mesh.uv = uv;
-            mesh.colors = Enumerable.Repeat(Color.white, count).ToArray();
+            // DD2's character meshes carry (1, 0, 0) almost everywhere: red is their shading, green and blue stay off.
+            mesh.colors = Enumerable.Repeat(new Color(1f, 0f, 0f, 1f), count).ToArray();
             mesh.boneWeights = weights;
             mesh.bindposes = bindposes;
             mesh.triangles = p.Triangles;
@@ -160,9 +170,19 @@ internal sealed class ExportedBoss : MonoBehaviour
             smr.sharedMaterial = material;
         }
 
-        // No animation comes with the export: lower the arms out of its T-pose (model space, before placing).
+        // No animation comes with the export: lower the arms out of its T-pose (model space, before placing), and
+        // point the held weapon down in front instead of along the arm.
+        var blade = BladeTip(m, nodes, include);
         Lower(nodes, m, "L_UpperArm", "L_Forearm");
         Lower(nodes, m, "R_UpperArm", "R_Forearm");
+        int hand = m.Nodes.FindIndex(n => n.Name == "R_Hand");
+        if (blade != null && hand >= 0)
+        {
+            var tip = nodes[hand].TransformPoint(blade.Value);
+            var now = tip - nodes[hand].position;
+            var want = (Vector3.forward * 0.45f + Vector3.down).normalized;
+            if (now.sqrMagnitude > 1e-6f) nodes[hand].rotation = Quaternion.FromToRotation(now, want) * nodes[hand].rotation;
+        }
         return root;
     }
 
@@ -174,6 +194,24 @@ internal sealed class ExportedBoss : MonoBehaviour
         if (dir.sqrMagnitude < 1e-8f) return;
         var want = Vector3.Slerp(dir.normalized, Vector3.down, 0.8f);
         nodes[u].rotation = Quaternion.FromToRotation(dir, want) * nodes[u].rotation;
+    }
+
+    /// <summary>The shown weapon's farthest point from the right hand, in the hand's space (rest pose), or null.</summary>
+    private static Vector3? BladeTip(GltfModel m, Transform[] nodes, Func<GltfModel.Primitive, bool> include)
+    {
+        int hand = m.Nodes.FindIndex(n => n.Name == "R_Hand");
+        var weapon = m.Primitives.FirstOrDefault(p => include(p) && p.Mesh.Contains("#01#"));
+        if (hand < 0 || weapon == null) return null;
+        var at = nodes[hand].position;
+        Vector3 best = at;
+        float far = 0;
+        for (int i = 0; i + 2 < weapon.Positions.Length; i += 3)
+        {
+            var v = new Vector3(weapon.Positions[i], weapon.Positions[i + 1], weapon.Positions[i + 2]);
+            float d = (v - at).sqrMagnitude;
+            if (d > far) { far = d; best = v; }
+        }
+        return far > 0 ? nodes[hand].InverseTransformPoint(best) : (Vector3?)null;
     }
 
     /// <summary>Up to four strongest influences, renormalised (Unity's default skin quality).</summary>
@@ -196,13 +234,13 @@ internal sealed class ExportedBoss : MonoBehaviour
     private static Material MaterialFor(GltfModel m, int index, Material template)
     {
         var info = index >= 0 && index < m.Materials.Count ? m.Materials[index] : null;
-        var colours = Colours(info?.BaseColor, info?.Emissive);
+        var (colours, ink) = Paint(info?.BaseColor, info?.Emissive);
         Material material;
         if (template != null)
         {
             material = new Material(template) { name = "DD3 exported " + info?.Name };
             if (material.HasProperty("_Base")) material.SetTexture("_Base", colours);
-            if (material.HasProperty("_Ink")) material.SetTexture("_Ink", White());
+            if (material.HasProperty("_Ink")) material.SetTexture("_Ink", ink);
             if (material.HasProperty("_MainTex")) material.SetTexture("_MainTex", colours);
         }
         else material = new Material(Shader.Find("Sprites/Default") ?? Shader.Find("UI/Default")) { name = "DD3 exported " + info?.Name, mainTexture = colours };
@@ -210,27 +248,78 @@ internal sealed class ExportedBoss : MonoBehaviour
         return material;
     }
 
-    /// <summary>The base colour brightened (DS3's armour is near-black under DD2's light) with its embers added.</summary>
-    private static Texture2D Colours(string basePath, string emissivePath)
+    private static readonly Dictionary<string, Texture2D> Inks = new();
+
+    /// <summary>
+    /// DD2's two character maps from the export's colours: _Base, its colour toned to DD2's own darker albedo with the
+    /// embers added; _Ink (black = drawn lines), its darkest shades inked, as DD2's painted characters are.
+    /// </summary>
+    private static (Texture2D Colour, Texture2D Ink) Paint(string basePath, string emissivePath)
     {
         string key = basePath + "|" + emissivePath;
-        if (Textures.TryGetValue(key, out var cached) && cached != null) return cached;
+        if (Textures.TryGetValue(key, out var cached) && cached != null && Inks.TryGetValue(key, out var cachedInk) && cachedInk != null)
+            return (cached, cachedInk);
         var colours = Load(basePath);
-        if (colours == null) return Textures[key] = White();
+        if (colours == null) return (White(), White());
         var pixels = colours.GetPixels32();
         var embers = Load(emissivePath);
         var glow = embers != null && embers.width == colours.width && embers.height == colours.height ? embers.GetPixels32() : null;
+
+        // The darkest share of the texture becomes ink, read from a blurred brightness so the export's fine grain
+        // gives bold shapes rather than speckle; a luminance histogram gives the cut.
+        var light = Blur(pixels, colours.width, colours.height, Math.Max(2, colours.width / 256));
+        var histogram = new int[256];
+        foreach (byte l in light) histogram[l]++;
+        int cut = 0;
+        for (int sum = 0; cut < 255 && sum + histogram[cut] < pixels.Length * InkShare; cut++) sum += histogram[cut];
+
+        var inkPixels = new Color32[pixels.Length];
         for (int i = 0; i < pixels.Length; i++)
         {
             var c = pixels[i];
             int r = (int)(c.r * ColourGain), g = (int)(c.g * ColourGain), b = (int)(c.b * ColourGain);
             if (glow != null) { r += glow[i].r; g += glow[i].g; b += glow[i].b; }
             pixels[i] = new Color32((byte)Math.Min(255, r), (byte)Math.Min(255, g), (byte)Math.Min(255, b), c.a);
+            byte v = light[i] <= cut ? (byte)0 : (byte)255;
+            inkPixels[i] = new Color32(v, v, v, 255);
         }
         colours.SetPixels32(pixels);
         colours.Apply(updateMipmaps: true, makeNoLongerReadable: true);
+        var ink = new Texture2D(colours.width, colours.height, TextureFormat.RGBA32, mipChain: true) { name = colours.name + " ink", wrapMode = TextureWrapMode.Repeat };
+        ink.SetPixels32(inkPixels);
+        ink.Apply(updateMipmaps: true, makeNoLongerReadable: true);
         if (embers != null) Destroy(embers);
-        return Textures[key] = colours;
+        Textures[key] = colours;
+        Inks[key] = ink;
+        return (colours, ink);
+    }
+
+    /// <summary>Each pixel's brightness averaged over a (2r+1)² box (a summed-area table).</summary>
+    private static byte[] Blur(Color32[] pixels, int width, int height, int radius)
+    {
+        var sum = new long[(width + 1) * (height + 1)];
+        for (int y = 0; y < height; y++)
+        {
+            long row = 0;
+            for (int x = 0; x < width; x++)
+            {
+                var c = pixels[y * width + x];
+                row += (c.r * 54 + c.g * 183 + c.b * 19) >> 8;
+                sum[(y + 1) * (width + 1) + x + 1] = sum[y * (width + 1) + x + 1] + row;
+            }
+        }
+        var result = new byte[pixels.Length];
+        for (int y = 0; y < height; y++)
+        {
+            int y0 = Math.Max(0, y - radius), y1 = Math.Min(height, y + radius + 1);
+            for (int x = 0; x < width; x++)
+            {
+                int x0 = Math.Max(0, x - radius), x1 = Math.Min(width, x + radius + 1);
+                long total = sum[y1 * (width + 1) + x1] - sum[y0 * (width + 1) + x1] - sum[y1 * (width + 1) + x0] + sum[y0 * (width + 1) + x0];
+                result[y * width + x] = (byte)(total / ((y1 - y0) * (x1 - x0)));
+            }
+        }
+        return result;
     }
 
     private static Texture2D Load(string path)

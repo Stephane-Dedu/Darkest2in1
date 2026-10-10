@@ -4826,3 +4826,18 @@ view) -> on combat, once the knight's renderers have bounds: build nodes/bones a
 forceRenderingOff on the knight's renderers; cleared when combat ends. Paths/ExportedBossModel defaults to
 <game>/PrivateBossModels/soul_of_cinder/soul_of_cinder.gltf; gltf, bin and the base/em PNGs (13 MB) were copied there.
 957 Core + 168 UI pass; not deployed or launched yet (the owner and another agent are using the game).
+
+In game (estate 2, owner: "You test it"; DD2 closed between builds, estate 2 backed up c. 2f230b7f/dd18f310 and
+restored after): F1 started the hall fight; the export bound in a few frames ("[exported boss] soul_of_cinder.gltf
+stands in for lost_battalion_knight: 11 meshes, 54468 triangles, 123 bones, 3.12 m x1.151 (knight 3.00), knight
+material Red Hook/Lit/Hero"; the hero shader's textures are _Base and _Ink). Iterations:
+- White vertex colours made it pale: DD2 hero meshes carry (1,0,0) almost everywhere (Hellion donor dump: R mean 0.8,
+  G=B=0), now used.
+- DD2's _Base is an ordinary dark albedo (tex_hellion_col) and _Ink black lines on white (tex_hellion_ink); the DS3
+  base maps average 66-87/255, so the x2.2 gain washed it white: now x0.85 plus the dim ember maps.
+- Ink from the raw albedo speckled (DS3 grain); now the darkest 12% of a box-blurred brightness (radius width/256).
+- Facing the party showed a profile: now three-quarters toward the camera; the T-pose sword pointed at the heroes:
+  now down in front (rotating the hand onto the blade tip measured from the #01# mesh).
+- The enemy takes the export's name ("Soul Of Cinder"). F10 needed three presses (the knight's cadaver phase), then
+  the fight returned in place with spoils and the model was cleared. No exceptions.
+The shared working tree also built the other agent's uncommitted Shieldbreaker files into these test builds.
