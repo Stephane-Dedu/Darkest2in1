@@ -675,6 +675,15 @@ internal static class Dd1MonsterView
 
     private static bool DrawOne(Monster m, Camera cam, float light)
     {
+        // Keep the DD1 rig prepared as a fallback. Only a successfully bound 3D
+        // Shieldbreaker suppresses it; memory encounters retain their DD1 art.
+        if (m.HeroArt?.ClassId == "shieldbreaker" && !FadedMemory.Active(Driver.Instance?.Expedition)
+            && ShieldbreakerModel.IsReady(m.Actor?.CachedActorBhv))
+        {
+            if (m.Hidden) Show(m);
+            ShieldbreakerModel.HideDonorWeapons(m.Actor.CachedActorBhv);
+            return true;
+        }
         CheckCorpse(m);
         // Where DD2 draws the stand-in: the bottom and top of its body, on screen.
         var body = Body(m);

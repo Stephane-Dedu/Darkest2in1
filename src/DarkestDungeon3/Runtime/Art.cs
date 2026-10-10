@@ -124,6 +124,7 @@ internal static class Art
     public static Sprite Portrait(string classId, ResourceActor.PortraitIconType type = ResourceActor.PortraitIconType.Color)
     {
         if (classId == null) return null;
+        if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId)) return Dd2.Dd1HeroClasses.Portrait(classId);
         string key = classId + "/" + type;
         if (Portraits.TryGetValue(key, out var s))
         {
@@ -206,9 +207,21 @@ internal static class Art
     }
 
     /// <summary>The picture of a hero standing in the dungeon: the largest DD2 art available, else the portrait.</summary>
-    public static Sprite HeroFigure(string classId) =>
-        LargePortrait(classId, Plugin.HeroArt.Value) ?? LargePortrait(classId, LargeArt.Story)
-        ?? Portrait(classId, ResourceActor.PortraitIconType.Story) ?? Portrait(classId);
+    private static readonly Dictionary<string, Sprite> Dd1Figures = new();
+    public static Sprite HeroFigure(string classId)
+    {
+        if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId))
+        {
+            if (Dd1Figures.TryGetValue(classId, out var saved)) return saved;
+            var picture = SpineArt.GetHero(Dd1HeroArt.Find(Session.Current?.Dd1, classId));
+            if (picture?.Texture != null)
+                return Dd1Figures[classId] = Sprite.Create(picture.Texture,
+                    new Rect(0, 0, picture.Texture.width, picture.Texture.height), new Vector2(.5f, .5f), 100f);
+            return Portrait(classId);
+        }
+        return LargePortrait(classId, Plugin.HeroArt.Value) ?? LargePortrait(classId, LargeArt.Story)
+            ?? Portrait(classId, ResourceActor.PortraitIconType.Story) ?? Portrait(classId);
+    }
 
     private static void RetryLarge(string key)
     {

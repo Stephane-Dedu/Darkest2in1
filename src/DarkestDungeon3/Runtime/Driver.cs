@@ -608,7 +608,11 @@ internal sealed partial class Driver : MonoBehaviour
             // DD1's own monster art over the DD2 stand-ins (only for a translated DD1 encounter).
             Dd1Audio.Play(heroesSurprised ? "/general/combat/ambush" : "/general/combat/start");
             Dd1MonsterView.Prepare(memory ? new[] { Expedition.FadedMemory.BossId } : plan.Enemies != null && Dd2Combat.LastBattleId == "dd3_dd1_encounter" ? Expedition.FightMonsters : null, plan.Enemies);
-            if (memory) Dd1MonsterView.PrepareHeroes(FadedMemoryController.HeroArt(Expedition, Party));
+            // Heroes drawn with DD1's art: a memory's whole party, and DD1-only classes (the Shieldbreaker) always.
+            var heroArt = Dd1HeroClasses.Dd1Art(Expedition.Party, Party.Guid);
+            if (memory && FadedMemoryController.HeroArt(Expedition, Party) is { } memoryArt)
+                foreach (var pair in memoryArt) heroArt[pair.Key] = pair.Value;
+            if (heroArt.Count > 0 && !Dd1MonsterView.PrepareHeroes(heroArt)) Plugin.Log.LogWarning("[dd1art] DD1 hero sprites could not be prepared");
             Phase = Phase.Fighting;
             S.Persist();
         }

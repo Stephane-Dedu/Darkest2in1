@@ -41,7 +41,7 @@ public sealed class Dd1HeroArt
         return null;
     }
 
-    private static IEnumerable<string> Candidates(Dd1Install dd1, string classId)
+    internal static IEnumerable<string> Candidates(Dd1Install dd1, string classId)
     {
         yield return dd1.PathOf("heroes", classId);
         string dlcs = dd1.PathOf("dlc");

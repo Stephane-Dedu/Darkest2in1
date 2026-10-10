@@ -29,6 +29,9 @@ internal static class HeroSkills
     /// <summary>The class's combat skills (starting first), or null while its resource loads.</summary>
     public static List<Skill> ForClass(string classId)
     {
+        // A DD1-only class (the Shieldbreaker): her DD1 skills as their DD2 ids, all known from the start.
+        if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId))
+            return Dd1HeroClasses.Skills(classId).Select(s => new Skill { Id = s.Id, Icon = Dd1HeroClasses.SkillIcon(classId, s.Dd1Skill), Starting = true }).ToList();
         var res = ActorResources.Get(classId);
         if (res == null) return null;
         var list = new List<Skill>();

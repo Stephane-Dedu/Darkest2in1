@@ -52,7 +52,8 @@ public class DebugKeys : MonoBehaviour
                 {
                     var e = session.Save.Estate;
                     var rng = new Core.Rng(e.Week * 7919 + e.Recruits.Count);
-                    var added = session.Catalog.RecruitableClasses.Where(c => c == Core.Campaign.Town.RecruitClasses.BountyHunter || c == Core.Campaign.Town.RecruitClasses.Crusader)
+                    var added = session.Catalog.RecruitableClasses.Where(c => c == Core.Campaign.Town.RecruitClasses.BountyHunter || c == Core.Campaign.Town.RecruitClasses.Crusader
+                            || c == Core.Campaign.Town.RecruitClasses.Shieldbreaker)
                         .Where(c => e.Recruits.All(r => r.ClassId != c)).ToList();
                     foreach (var cls in added) e.Recruits.Add(session.Hamlet.MakeHero(cls, rng, level: 0));
                     session.Persist();

@@ -6,6 +6,10 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
 The machine-local build override and playtest helpers target it. Preserve the previous install and both
 reverse-engineering workspaces; their references remain valid. The owner's latest instruction is no game launch.
+Latest task, round204: Shieldbreaker's first 3D model and animation prototype. Read
+tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
+The model is built and checked offline; native appearance and combat timing remain unverified.
+The owner explicitly requested no game launch for this implementation.
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.
 Use tools/quest_parity_map.md and the latest MODLOG Status; later progression/trinket ideas are in PARITY.md.

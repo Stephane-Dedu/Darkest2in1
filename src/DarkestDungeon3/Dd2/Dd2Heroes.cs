@@ -41,6 +41,12 @@ internal static class Dd2Heroes
             var hero = ExpeditionParty.HeroForRestore(original, condition);
             if (hero == null) continue;
             if (condition?.Outcome?.HeroId != hero.Id || !ExpeditionParty.IsValid(condition)) condition = null;
+            // DD1 classes DD2 has no hero for (the Shieldbreaker) are made into DD2 classes first.
+            if (Core.Campaign.Town.RecruitClasses.IsDd1Only(hero.ClassId) && !Dd1HeroClasses.TryRegister(hero.ClassId))
+            {
+                Plugin.Log.LogError($"Could not make the DD1 class {hero.ClassId} for {hero.Name}");
+                continue;
+            }
             uint guid = LibraryActors.LibraryActorsInstance.CreateActor(hero.ClassId);
             var actor = Dd2Api.Actor(guid);
             if (actor == null) { Plugin.Log.LogError($"Could not create a DD2 {hero.ClassId} for {hero.Name}"); continue; }

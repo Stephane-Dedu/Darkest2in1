@@ -95,6 +95,23 @@ internal static class SpineArt
         return null;
     }
 
+    /// <summary>A DD1 hero's combat figure; skeleton and outfit pages live in different directories.</summary>
+    public static Picture GetHero(Dd1HeroArt art)
+    {
+        if (art == null) return null;
+        string key = "hero:" + art.Root;
+        if (Cache.TryGetValue(key, out var pic)) return pic;
+        if (!Pending.ContainsKey(key))
+            Pending[key] = new Job { Key = key, Folder = art.Root, Variant = "combat", PixelsPerUnit = 1,
+                Reading = Task.Run(() => {
+                    string stem = Path.Combine(art.AnimationDirectory, art.Stem("combat"));
+                    var skeleton = SpineSkeleton.Load(stem + ".skel");
+                    var atlas = SpineAtlas.Parse(File.ReadAllText(stem + ".atlas"));
+                    return new Prepared { Directory = art.TextureDirectory, Atlas = atlas, Pieces = skeleton.Pose(atlas, "combat", 0) };
+                }) };
+        return null;
+    }
+
     /// <summary>Only PNG decoding and texture upload use Unity, on the main thread, in a small per-frame budget.
     /// At most one CPU raster runs at once; it owns its page snapshot and never touches Unity or the caches.</summary>
     public static void Update()

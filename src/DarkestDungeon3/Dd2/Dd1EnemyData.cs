@@ -146,9 +146,9 @@ internal static class Dd1MemoryEnemyCreation
 {
     private static bool Prefix(LibraryActors __instance, string actorDataId, ref uint __result)
     {
-        var entry = Dd1EnemyData.Get(actorDataId);
-        if (entry == null) return true;
-        __result = __instance.CreateActor(entry.Resource);
+        var resource = Dd1EnemyData.Get(actorDataId)?.Resource ?? Dd1HeroClasses.Resource(actorDataId);
+        if (resource == null) return true;
+        __result = __instance.CreateActor(resource);
         return false;
     }
 }

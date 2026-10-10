@@ -68,6 +68,9 @@ internal sealed class HeroStage : MonoBehaviour
     public static float WalkSpeed;
     private readonly Dictionary<ActorBhv, CorridorHeroMotion> _motion = new();
     private readonly HashSet<ActorBhv> _motionUnavailable = new();
+    private readonly Dictionary<Renderer, bool> _fallbackVisibility = new();
+    internal bool HasHeroModel(uint guid) => _heroes.Any(h => h.guid == guid && h.actor != null
+        && (!ShieldbreakerModel.IsShieldbreaker(h.actor) || ShieldbreakerModel.IsReady(h.actor)));
     private float _nextMotionBind;
     public static float FeetY = 680f;
 
@@ -247,6 +250,8 @@ internal sealed class HeroStage : MonoBehaviour
 
     public void Clear()
     {
+        foreach (var p in _fallbackVisibility) if (p.Key != null) p.Key.forceRenderingOff = p.Value;
+        _fallbackVisibility.Clear();
         _palette?.Clear();
         foreach (var motion in _motion.Values) motion.Restore();
         _motion.Clear();
@@ -423,6 +428,15 @@ internal sealed class HeroStage : MonoBehaviour
             slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
+            if (ShieldbreakerModel.IsShieldbreaker(actor))
+            {
+                bool fallback = !ShieldbreakerModel.IsReady(actor);
+                foreach (var r in actor.GetComponentsInChildren<Renderer>(true))
+                {
+                    if (fallback) { if (!_fallbackVisibility.ContainsKey(r)) _fallbackVisibility[r] = r.forceRenderingOff; r.forceRenderingOff = true; }
+                    else if (_fallbackVisibility.TryGetValue(r, out bool original)) { r.forceRenderingOff = original; _fallbackVisibility.Remove(r); }
+                }
+            }
             _palette.Apply(actor);
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
                 && _checked && !RendersBlack && bindMotion)
@@ -461,7 +475,9 @@ internal sealed class HeroStage : MonoBehaviour
             var body = actor.GetComponentsInChildren<Renderer>().Where(r => r is SkinnedMeshRenderer)
                             .OrderByDescending(r => r.bounds.size.x * r.bounds.size.y).FirstOrDefault();
             if (body == null) continue;
-            float unscaled = body.bounds.size.y / Mathf.Max(0.01f, slot.lossyScale.y);
+            var shieldbreaker = actor.GetComponent<ShieldbreakerModel>();
+            float height = shieldbreaker is { Ready: true } ? shieldbreaker.BodyHeight : body.bounds.size.y;
+            float unscaled = height / Mathf.Max(0.01f, slot.lossyScale.y);
             float fit = Mathf.Clamp(4.0f / Mathf.Max(0.1f, unscaled), 0.5f, 6f);
             slot.localScale = Vector3.one * HeroScale * fit;
             Plugin.Log.LogInfo($"[stage] hero {actor.GetActorGuid()}: body {unscaled:0.00} units -> scale {fit:0.00}");

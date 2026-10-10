@@ -464,7 +464,8 @@ internal sealed class CrawlUi
 
             var old = GUI.color;
             if (dead) GUI.color = new Color(0.3f, 0.3f, 0.3f, 0.6f);
-            var sprite = models != null && !dead ? null : Art.HeroFigure(hero?.ClassId);
+            bool shownModel = models != null && !dead && Dd2.HeroStage.Instance.HasHeroModel(guid);
+            var sprite = shownModel ? null : Art.HeroFigure(hero?.ClassId);
             bool large = sprite != null && sprite != Art.Portrait(hero?.ClassId);
             // At camp the two front ranks sit on the far side of the fire, facing back toward it.
             bool facingLeft = camping && rank < 2;

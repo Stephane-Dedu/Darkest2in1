@@ -4574,3 +4574,75 @@ observed. Estate 2 restored from this round's backup (c2758d23... / 496b2dfb...)
 build deployed with matching hashes. 923 Core + 168 UI tests pass.
 
 Next: the Shieldbreaker (PARITY).
+
+## Round204: Shieldbreaker 3D model and animation prototype (2026-10-10)
+
+Owner: Shieldbreaker has been added; make her a 3D model and animations, possibly by remodeling an existing
+hero to her DD1 design. Then: "don't launch the game, you can start implementing". No DD2 launch or save
+access in this round. The existing uncommitted Shieldbreaker class/skill integration is included as a
+dependency of this presentation work, with its DD1 art retained as fallback.
+
+Existing class integration: RecruitClasses includes Shieldbreaker when her installed DD1 kit exists;
+Dd1HeroKit reads her info/art, equipment, ranks and seven skills. Dd1HeroClasses clones Hellion's resource
+and creates separate native class/stats/skill data, portraits and icons. DLC effect/buff folders are read
+after base data. Dd2Heroes registers the class before party creation; Driver prepares DD1 hero sprites in
+ordinary fights as well as memories. Ctrl+F4's test-estate recruit helper includes her. Native skills,
+recruitment and persistence were not observed here; six actual-data Core cases pass.
+
+Model: locally authored body, costume, turban, veil, visible eye opening, spear and round shield, fitted
+to Hellion's existing native rig. Donor boot detail remains. Actual DD1 in-game anatomy is spear in the
+right hand, missing left hand and shield strapped to the left forearm; promotional art can be mirrored.
+The pack has 20,922 split vertices, 6,974 triangles, 130 native bones and 86 named mesh parts. Native
+bone order and all bind matrices remain exact. Two 4096x2048 painted atlases use DD2's existing shader.
+The current geometry is an early art pass, with proportions, cloth and material detail still to refine.
+
+Runtime: ShieldbreakerModel attaches only to a true Shieldbreaker ActorBhv after its presentation loads.
+It replaces that instance's body mesh/material and hides the donor glaive, preserving DD2's material
+property/palette system and the existing camera angle and corridor gait. Spear vertices have weight 1 on
+the right wrist, shield vertices weight 1 on the left elbow. Chest-relative two-bone arm solves provide
+an idle loop, one shared offensive thrust and a shield raise for Serpent's Sway or an incoming target
+presentation. Native animation still supplies the lower body and death. Prior local rotations restore
+before the next Animator evaluation. Generated meshes/materials/textures are owned and released, with
+textures shared between her stage/combat instances. JSON parsing runs on a worker; validated geometry
+and PNG decode/upload stay on the Unity thread.
+
+DD2 fact: _global/MaterialPropertyBhv.RefreshRenderers clears m_materialInstancesCache but retains
+m_materialSharedCache. ClearRenderer later restores that cached shared baseline. Update the changed
+renderer entry as well as refreshing renderer caches, or actor disable/reenable can restore Hellion's
+texture on the new mesh. Release restores the original mesh, materials and local bounds. No global
+lighting or shared hero asset edits. Native material lifecycle still needs a game check.
+
+Look/Shieldbreaker3D defaults true. Paths/HeroModelFolder defaults to <active game>/PrivateHeroModels.
+Missing, oversized or incompatible model/texture files retain DD1 art; disabling the option and restarting
+restores the same fallback. Faded Memory encounters retain their DD1 sprites. HeroStage/CrawlUi handle
+individual missing models, use body height excluding weapons for the model's stage fit, and request an
+actual DD1 combat figure for flat fallback instead of stretching the roster portrait.
+
+Reproducible pipeline and acceptance steps: tools/shieldbreaker/README.md. build_model.py extracts the
+owned Hellion rig into a private folder, model_blender.py authors the fitted mesh and exports its pack,
+ModelAudit reads that pack through the production Core reader and samples the actual CorridorWalkCycle,
+and preview_walk.py renders those samples in Blender. Stills read back the written mesh. Blender's bone
+edit basis differs from the original bind rotations; preserve each rig's own rest basis for preview wrist
+rotation. Blender needs --python-exit-code 1 to propagate a Python failure.
+
+Verified offline: Release build, 944 Core +168 UI tests, model audit (exact bind matrices and bone order,
+rigid weapon weights, bounded PNGs, attack/defence ending at idle), three exported pose stills and a
+24-frame walk preview. New Core coverage rejects invalid model/clip data and checks loop continuity.
+Private assets/scene/previews: C:\Users\Piral\.universal-modder\inspection\shieldbreaker-3d-20261010\model.
+The Blender preview approximates the runtime pose solver; it does not verify DD2's rendering or timeline.
+
+Deployed while DD2 was stopped to C:\Users\Piral\darkestwithdlc\game. Only shieldbreaker.json,
+shieldbreaker_base.png and shieldbreaker_ink.png copied into PrivateHeroModels; all three SHA256 match.
+Deployed plugin/Core hashes match the Release outputs (E4C28BEC... / DDB1F37C...). Prior four plugin
+binaries and config backed up at C:\Users\Piral\.universal-modder\backups\shieldbreaker-3d-20261010-190602.
+Generated meshes, textures, donor dumps, Blender files and previews remain outside Git.
+
+## Status 2026-10-10: round204 installed, game left closed
+
+- Shieldbreaker's first 3D mesh and idle/walk/thrust/defence prototype is built, checked offline and deployed.
+- Native actor binding, final palette/scale, combat timing, return from combat, camp framing and DD1 fallback
+  remain [?]. Use tools/shieldbreaker/README.md for estate-2 acceptance when launching is authorized.
+- Art still needs refinement; offensive skills currently share a thrust. No claim of finished DD2 hero quality.
+- No game running, no saves read or modified, and no pending save restore. Owner explicitly forbids a launch
+  for this implementation. Preserve that constraint until the owner changes it.
+- The approved DD1 expedition selector remains. Do not resume the removed round200-201 menu.

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.IO;
 using Newtonsoft.Json.Linq;
 
@@ -32,9 +33,9 @@ public sealed class Dd1Buffs
     public static Dd1Buffs Load(Dd1Install dd1)
     {
         var lib = new Dd1Buffs();
-        string dir = dd1.PathOf("shared", "buffs");
-        if (!Directory.Exists(dir)) return lib;
-        foreach (var file in Directory.GetFiles(dir, "*.json"))
+        // The base game's buffs first, then campaign DLCs' own (the Shieldbreaker's); the first id read wins.
+        var dirs = new[] { dd1.PathOf("shared", "buffs") }.Concat(dd1.DlcFolders().Select(d => Path.Combine(d, "shared", "buffs")));
+        foreach (var file in dirs.Where(Directory.Exists).SelectMany(d => Directory.GetFiles(d, "*.json").OrderBy(f => f, System.StringComparer.Ordinal)))
             foreach (var b in JToken.Parse(File.ReadAllText(file))["buffs"] ?? new JArray())
             {
                 string id = (string)b["id"];

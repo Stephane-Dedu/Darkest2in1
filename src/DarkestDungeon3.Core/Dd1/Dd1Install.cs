@@ -18,6 +18,15 @@ public sealed class Dd1Install
 
     public string PathOf(params string[] parts) => Path.Combine(new[] { Root }.Concat(parts).ToArray());
 
+    /// <summary>DD1's DLC folders (dlc/&lt;id&gt;, sorted), without the multiplayer arena.</summary>
+    public IEnumerable<string> DlcFolders()
+    {
+        string dlcs = PathOf("dlc");
+        if (!Directory.Exists(dlcs)) yield break;
+        foreach (var dir in Directory.GetDirectories(dlcs).OrderBy(p => p, StringComparer.Ordinal))
+            if (Path.GetFileName(dir).IndexOf("arena", StringComparison.OrdinalIgnoreCase) < 0) yield return dir;
+    }
+
     public string MapGenerator => PathOf("scripts", "map_generator.darkest");
 
     /// <summary>The Spine skeleton and atlas in a DD1 animation folder (named x.sprite.skel or x.skel), or null.</summary>

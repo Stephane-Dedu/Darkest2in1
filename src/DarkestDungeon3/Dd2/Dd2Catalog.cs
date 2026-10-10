@@ -45,7 +45,7 @@ internal sealed class Dd2Catalog : IHeroCatalog
             bool crusader = ActorResources.Has(RecruitClasses.Crusader) == true;
             if (_classes == null || crusader != _classesWithCrusader)
             {
-                _classes = RecruitClasses.For(crusader);
+                _classes = RecruitClasses.For(crusader, Dd1HeroClasses.Available(RecruitClasses.Shieldbreaker));
                 _classesWithCrusader = crusader;
                 Plugin.Log.LogInfo("[stagecoach] classes: " + string.Join(", ", _classes));
             }

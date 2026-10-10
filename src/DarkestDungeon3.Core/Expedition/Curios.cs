@@ -187,6 +187,15 @@ public sealed class EffectLibrary
         foreach (var file in Directory.GetFiles(dd1.PathOf("effects"), "*.effects.darkest"))
             foreach (var r in DarkestFile.Load(file).Where(r => r.Type == "effect" && r.Str("name") != null))
                 lib.Effects[r.Str("name")] = r;
+        // Campaign DLCs (the Shieldbreaker's skills) add their own; the base game's win a shared name.
+        foreach (var dlc in dd1.DlcFolders())
+        {
+            string dir = Path.Combine(dlc, "effects");
+            if (!Directory.Exists(dir)) continue;
+            foreach (var file in Directory.GetFiles(dir, "*.effects.darkest").OrderBy(f => f, System.StringComparer.Ordinal))
+                foreach (var r in DarkestFile.Load(file).Where(r => r.Type == "effect" && r.Str("name") != null))
+                    if (!lib.Effects.ContainsKey(r.Str("name"))) lib.Effects[r.Str("name")] = r;
+        }
         return lib;
     }
 
