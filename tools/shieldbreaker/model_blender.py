@@ -48,8 +48,8 @@ def part(name, verts, faces, weights, colour=None, uv=None):
             else:
                 co = m.vertices[m.loops[li].vertex_index].co
                 s = (co.x - xmin) / max(.01, xmax - xmin); t = (co.y - ymin) / max(.01, ymax - ymin)
-                layer.data[li].uv = (.5 + (colour + .1 + .8 * s) / 32, .05 + .9 * t)
-        poly.use_smooth = name == 'body'
+                layer.data[li].uv = (.5 + (colour + .1 + .8 * s) / 32, .76 + .22 * t)
+        poly.use_smooth = name == 'body' or name.startswith(('skin_', 'spear_palm', 'spear_finger', 'spear_thumb', 'shield_painted'))
     PARTS.append(o)
     return o
 
@@ -84,155 +84,8 @@ def ellipsoid(name, centre, scale, group, colour, rings=8, sides=16):
     return tube(name, points, radii, [group] * len(points), colour, sides)
 
 
-# Retain weighted donor boot detail. Rebuild the body, clothing, covered face and
-# weapons to the donor's proportions and binds. The left hand is absent, matching
-# her DD1 in-game design; the shield is bound to that forearm instead.
-dominant = [BONES[max(zip(ii, ww), key=lambda x: x[1])[0]] for ii, ww in zip(D['indices'], D['weights'])]
-remove = ('hair', 'skirt', 'ribbon', 'leaf', 'bone_', 'scarf', 'sleeve', 'Tailbone')
-faces = []
-for j in range(0, len(D['triangles']), 3):
-    tri = D['triangles'][j:j + 3]
-    ns = [dominant[i] for i in tri]
-    if any(any(t in n for t in remove) for n in ns): continue
-    if any(n.startswith(('l_Finger', 'l_Thumb')) or n == 'l_Arm_WristSHJnt' for n in ns): continue
-    def keep(i):
-        x, y, z = D['vertices'][i]; n = dominant[i]
-        return y < 12
-    if not all(keep(i) for i in tri): continue
-    faces.append(tuple(reversed(tri)))
-body = part('body', D['vertices'], faces,
-            [[(b, w) for b, w in zip(ii, ww) if w > .00001] for ii, ww in zip(D['indices'], D['weights'])], uv=D['uv'])
-
-# Smooth connections under the clothing. Keep the original rig and boot detail
-# while replacing the donor's arm armour and face silhouette.
-for side in ('l', 'r'):
-    shoulder, elbow, wrist = [POS[f'{side}_Arm_{n}SHJnt'] for n in ('Shoulder', 'Elbow', 'Wrist')]
-    tube(side + '_arm', [shoulder, shoulder.lerp(elbow, .35), elbow, elbow.lerp(wrist, .55), wrist],
-         [5.8, 5.6, 4.3, 4.2, 3.5], [rigid(f'{side}_Arm_ShoulderSHJnt')] * 2 +
-         [[(bone(f'{side}_Arm_ShoulderSHJnt'), .2), (bone(f'{side}_Arm_ElbowSHJnt'), .8)],
-          rigid(f'{side}_Arm_ElbowSHJnt'), rigid(f'{side}_Arm_ElbowSHJnt')], 12, 12)
-tube('neck', [(0, 143, 4), (0, 155, 4), (0, 164, 4)], [6, 5, 5],
-     [rigid('Spine_TopSHJnt'), rigid('Head_TopSHJnt'), rigid('Head_TopSHJnt')], 12, 12)
-ellipsoid('head', POS['Head_TopSHJnt'] + Vector((0, 3, 0)), (8.4, 11, 8.2), rigid('Head_TopSHJnt'), 12, 10, 16)
-# A clear eye opening between the turban and veil.
-for x in (-3.4, 3.4):
-    ellipsoid('eye_socket', POS['Head_TopSHJnt'] + Vector((x, 3.3, 8.0)), (2.7, 1.1, 1), rigid('Head_TopSHJnt'), 11, 4, 8)
-    ellipsoid('eye', POS['Head_TopSHJnt'] + Vector((x, 3.3, 8.9)), (.55, .6, .3), rigid('Head_TopSHJnt'), 6, 4, 8)
-
-# Brown sleeveless tunic, broad folded white scarf and ochre sash.
-ys = [94, 102, 109, 120, 131, 141, 146]
-tube('tunic', [(0, y, 3) for y in ys], [(17, 12), (16, 11), (15, 10), (13, 9), (16, 10), (20, 10), (14, 8)],
-     [rigid('ROOTSHJnt'), rigid('ROOTSHJnt'), rigid('ROOTSHJnt'), rigid('Spine_01SHJnt'), rigid('Spine_02SHJnt'), rigid('Spine_TopSHJnt'), rigid('Spine_TopSHJnt')], 1, 16)
-for j in range(5):
-    y = 105 + j * 2
-    tube('sash_fold_' + str(j), [(0, y, 3), (0, y + 1.7, 3)], [(16.4, 11.6)] * 2, [rigid('ROOTSHJnt')] * 2, 3 if j % 2 else 4, 16)
-for side in ('l', 'r'):
-    hip, knee, ankle = [POS[f'{side}_Leg_{n}SHJnt'] for n in ('Hip', 'Knee', 'Ankle')]
-    points = [hip, hip.lerp(knee, .35), knee, knee.lerp(ankle, .45), ankle + Vector((0, 4, 0))]
-    groups = [rigid(f'{side}_Leg_HipSHJnt'), rigid(f'{side}_Leg_HipSHJnt'),
-              [(bone(f'{side}_Leg_HipSHJnt'), .25), (bone(f'{side}_Leg_KneeSHJnt'), .75)],
-              rigid(f'{side}_Leg_KneeSHJnt'), rigid(f'{side}_Leg_AnkleSHJnt')]
-    tube(side + '_trousers', points, [(12, 11), (13, 11), (10, 9), (9, 7), (5, 5)], groups, 3, 12)
-    for j in range(6):
-        p = ankle.lerp(knee, .05 + j * .035)
-        tube(side + '_ankle_wrap_' + str(j), [p, p + Vector((0, 1.1, 0))], [5.6, 5.6], [rigid(f'{side}_Leg_AnkleSHJnt')] * 2, 5 if j % 2 else 6, 10)
-    tube(side + '_boot_collar', [ankle + Vector((0, -6, 0)), ankle + Vector((0, 5, 0))], [5, 5],
-         [rigid(f'{side}_Leg_AnkleSHJnt')] * 2, 11, 10)
-
-# Turban and layered fabric bands. Its lower edge leaves a narrow eye opening.
-head = POS['Head_TopSHJnt']
-ellipsoid('turban', head + Vector((0, 13, 0)), (11.3, 8, 10.8), rigid('Head_TopSHJnt'), 5)
-for j in range(6):
-    points = []
-    for k in range(33):
-        a = k * 2 * math.pi / 32
-        points.append(head + Vector((math.cos(a) * 10.3, 7 + j * 1.5 + math.sin(a + j * .3) * 1.2, math.sin(a) * 10.1)))
-    tube('turban_fold_' + str(j), points, [.8] * len(points), [rigid('Head_TopSHJnt')] * len(points), 6 if j % 2 else 5, 5)
-tube('veil', [head + Vector((0, 1, 7)), head + Vector((0, -5, 8)), head + Vector((0, -13, 5))],
-     [(8, 2.8), (7, 3), (4, 2)], [rigid('Head_TopSHJnt')] * 3, 4, 12)
-for j in range(4):
-    tube('scarf_fold_' + str(j), [(-10 - j, 150 - j * 4, 8), (-5, 139 - j * 3, 15),
-                               (8, 143 - j * 3, 14), (15, 154 - j * 2, 4)], [2.5] * 4,
-         [rigid('Spine_TopSHJnt')] * 4, 6 if j % 2 else 5, 6)
-# Left forearm bandages and sealed stump, right-hand green bangles.
-for side in ('l', 'r'):
-    elbow, wrist = POS[f'{side}_Arm_ElbowSHJnt'], POS[f'{side}_Arm_WristSHJnt']
-    for j in range(7 if side == 'l' else 3):
-        p = elbow.lerp(wrist, .25 + j * .075 if side == 'l' else .78 + j * .06)
-        tube(side + '_arm_wrap_' + str(j), [p, p + (wrist - elbow).normalized() * 1.4], [4.5, 4.5],
-             [rigid(f'{side}_Arm_ElbowSHJnt')] * 2, (5 if j % 2 else 6) if side == 'l' else 7, 10)
-ellipsoid('left_stump', POS['l_Arm_WristSHJnt'] + Vector((1.5, 3, -3)), (4.2, 4.2, 4.2), rigid('l_Arm_ElbowSHJnt'), 5, 5, 10)
-
-# Wooden spear, wrapped grip and angular steel leaf blade. Rigidly bound to the
-# right wrist, so animation cannot slide the weapon away from the hand.
-grip = POS['r_Arm_WristSHJnt'] + Vector((0, -1, 2))
-ellipsoid('spear_hand', grip + Vector((0, 0, -1.4)), (3.2, 4.2, 2.6), rigid('r_Arm_WristSHJnt'), 12, 6, 10)
-tube('spear_shaft', [grip + Vector((0, -72, 0)), grip + Vector((0, 115, 0))], [1.2, 1.0], [rigid('r_Arm_WristSHJnt')] * 2, 1, 8)
-for j in range(14):
-    p = grip + Vector((0, -8 + j * 1.1, 0))
-    tube('spear_grip_' + str(j), [p, p + Vector((0, .65, 0))], [1.55, 1.55], [rigid('r_Arm_WristSHJnt')] * 2, 11 if j % 2 else 2, 6)
-base = grip + Vector((0, 114, 0))
-verts = [base + Vector(v) for v in [(-1.7, 0, 0), (-5, 11, 0), (0, 34, 0), (5, 11, 0), (0, 11, 1.4), (0, 11, -1.4)]]
-part('spear_blade', verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4), (1, 0, 5), (2, 1, 5), (3, 2, 5), (0, 3, 5)], [rigid('r_Arm_WristSHJnt')] * 6, 10)
-
-# Shield strapped to the left forearm, with a dark rim, inset wood and green boss.
-shield_c = POS['l_Arm_ElbowSHJnt'].lerp(POS['l_Arm_WristSHJnt'], .62) + Vector((0, 0, 9))
-shield_group = rigid('l_Arm_ElbowSHJnt')
-def disk(name, radius, depth, colour, z=0):
-    return tube(name, [shield_c + Vector((0, 0, z)), shield_c + Vector((0, 0, z + depth))],
-                [radius, radius], [shield_group] * 2, colour, 24)
-disk('shield_rim', 22, 2.5, 9)
-disk('shield_wood', 20, 1.2, 2, 2.5)
-disk('shield_boss_rim', 7.5, 1.4, 11, 3.7)
-disk('shield_boss', 6.5, 2, 7, 5)
-for j in range(8):
-    a = j * math.pi / 4
-    ellipsoid('shield_rivet_' + str(j), shield_c + Vector((math.cos(a) * 20.7, math.sin(a) * 20.7, 4)),
-              (1.0, 1.0, .7), shield_group, 10, 4, 6)
-# Stylized serpent slash on the boss and wood plank seams.
-for j, pts in enumerate([[(-3, -4), (3, -2), (-3, 1), (2, 4)], [(-11, -15), (-11, 15)], [(11, -15), (11, 15)]]):
-    points = [shield_c + Vector((x, y, 7.2 if j == 0 else 4)) for x, y in pts]
-    tube('shield_mark_' + str(j), points, [.65] * len(points), [shield_group] * len(points), 8 if j == 0 else 0, 5)
-
-# Atlas: preserve donor skin detail on the left, use painted colour swatches on
-# the right. No original game textures or geometry are written into the repo.
-base = bpy.data.images.load(str(OUT / 'tex_hellion_col.png'))
-ink = bpy.data.images.load(str(OUT / 'tex_hellion_ink.png'))
-import numpy as np
-for source, filename, is_ink in [(base, 'shieldbreaker_base.png', False), (ink, 'shieldbreaker_ink.png', True)]:
-    if source.size[0] > 2048: source.scale(2048, 2048)
-    w, h = source.size
-    old = np.array(source.pixels[:], dtype=np.float32).reshape(h, w, 4)
-    result = np.ones((h, w * 2, 4), dtype=np.float32)
-    if not is_ink:
-        # Remove Hellion's blue war paint, darken the skin, leave its painted value detail.
-        blue = (old[:, :, 2] > old[:, :, 0] * 1.05) & (old[:, :, 1] > old[:, :, 0] * 1.05)
-        value = old[:, :, :3].max(axis=2)
-        old[blue, :3] = value[blue, None] * np.array([.76, .48, .28])
-        old[:, :, :3] *= np.array([.82, .76, .68])
-    result[:, :w] = old
-    for i, c in enumerate(PALETTE):
-        x0 = w + int(i * w / 16); x1 = w + int((i + 1) * w / 16)
-        if is_ink:
-            result[:, x0:x1] = (1, 1, 1, 1)
-        else:
-            yy, xx = np.mgrid[0:h, 0:x1-x0]; u = xx / (x1-x0); v = yy / h
-            fold = np.exp(-((u - .22 - .035 * np.sin(v * 18)) / .018) ** 2)
-            fold += .7 * np.exp(-((u - .72 - .04 * np.sin(v * 11)) / .012) ** 2)
-            shade = .83 + .15 * u + .06 * np.sin(v * 31 + u * 3) - (.25 if i != 12 else .07) * fold
-            shade += .025 * np.sin(yy * .073 + xx * .24) * np.sin(xx * .31 - yy * .022)
-            result[:, x0:x1, :3] = np.array(c[:3])[None, None, :] * shade[:, :, None]
-            result[:, x0:x1, 3] = 1
-    image = bpy.data.images.new(filename, width=w * 2, height=h)
-    image.pixels.foreach_set(result.ravel()); image.filepath_raw = str(OUT / filename); image.file_format = 'PNG'; image.save()
-    if not is_ink: ATLAS = image
-
-mat = bpy.data.materials.new('Shieldbreaker painted'); mat.use_nodes = True
-nodes = mat.node_tree.nodes
-tex = nodes.new('ShaderNodeTexImage'); tex.image = ATLAS
-mat.node_tree.links.new(tex.outputs['Color'], nodes.get('Principled BSDF').inputs['Base Color'])
-nodes.get('Principled BSDF').inputs['Roughness'].default_value = 1
-for o in PARTS: o.data.materials.append(mat)
+# Keep the costume authoring separate from native export and preview logic.
+exec((Path(__file__).with_name('design_mesh.py')).read_text(), globals())
 
 # Export split vertices at UV/normal seams. All weights reference the untouched
 # native bone order and bind poses; the runtime validates that order by name.
@@ -243,7 +96,7 @@ for o in PARTS:
     for tri in m.loop_triangles:
         for li in reversed(tri.loops):
             vi = m.loops[li].vertex_index
-            V.append(list(m.vertices[vi].co)); N.append(list(m.vertices[vi].normal if o.name == 'body' else tri.normal))
+            V.append(list(m.vertices[vi].co)); N.append(list(m.corner_normals[li].vector if m.polygons[tri.polygon_index].use_smooth else tri.normal))
             UV.append(list(m.uv_layers.active.data[li].uv))
             weights = sorted([(g.group, g.weight) for g in m.vertices[vi].groups if g.weight > .00001], key=lambda x: -x[1])[:4]
             total = sum(w for _, w in weights)
@@ -280,6 +133,8 @@ packed = part('Shieldbreaker exported package', loaded['vertices'],
               [[(b,w) for b,w in zip(ii,ww) if w > .00001] for ii,ww in zip(loaded['indices'],loaded['weights'])], uv=loaded['uv'])
 for loop in packed.data.loops: packed.data.uv_layers.active.data[loop.index].uv = loaded['uv'][loop.vertex_index]
 packed.data.materials.append(mat)
+for polygon in packed.data.polygons: polygon.use_smooth = True
+packed.data.normals_split_custom_set_from_vertices(loaded['normals'])
 
 # Build a rig for editable offline inspection. Scene units are centimetres, Y up,
 # matching the source mesh and runtime instead of silently rescaling its binds.

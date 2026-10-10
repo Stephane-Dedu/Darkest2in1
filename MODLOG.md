@@ -4646,3 +4646,50 @@ Generated meshes, textures, donor dumps, Blender files and previews remain outsi
 - No game running, no saves read or modified, and no pending save restore. Owner explicitly forbids a launch
   for this implementation. Preserve that constraint until the owner changes it.
 - The approved DD1 expedition selector remains. Do not resume the removed round200-201 menu.
+
+## Round205: Shieldbreaker costume rebuilt against her DD1 design (2026-10-10)
+
+Owner showed the first POC and asked to make it look like Shieldbreaker. The first mesh's brown tunic,
+narrow trousers, plain wooden shield and cap did not match her base outfit. No game launch or save access.
+
+Reference: the owned Shieldbreaker DLC combat atlas, guild header and portrait. ModelAudit --reference
+assembles her actual combat pose with the production Core Spine reader/raster. The revised mesh has
+cropped gold chest wraps, exposed brown midriff, full gathered gold trousers, green sash and spear ties,
+a cream headcloth around a dark helmet, yellow face veil, left shoulder/knee/shin armour, hip tassets,
+and an olive shield with silver crescents and her green serpent emblem. The spear stays in her right
+hand; the shield stays strapped to her left forearm, with no left hand. Shaped anatomy, gripping fingers,
+folded cloth and a convex shield replace the initial blockout. Donor boot geometry remains.
+
+Pipeline: reference_parts.py unwraps the owner's native paint into private tiles; design_mesh.py owns
+costume geometry and projections separately from model_blender.py's native export/rig. Rotated atlas
+regions need clockwise 90-degree unrotation, checked against the assembled Spine pose. Painted panels
+follow source alpha at their edges. Trousers retain gold paint and small ink creases while broad empty
+fields from the bent source pose are filled before projection. Export preserves smooth corner normals;
+the roundtrip preview reads them back. Native shader, runtime code, bind poses and clips are unchanged.
+
+Verified offline: 30,480 split vertices, 10,160 triangles, 130 native bones and 117 named parts. The
+production reader audit passes exact native bone order/bind matrices, rigid wrist/forearm weapon weights,
+4096x2048 texture bounds and attack/defence recovery to idle. Three exported pose stills and a 24-frame
+walk were rendered and inspected. Release build and 944 Core tests pass. UI code is unchanged; its
+168 tests passed in round204. No native lighting, actor binding or combat timeline check was made.
+
+Private assets, editable Blender scene and review images:
+C:\Users\Piral\.universal-modder\inspection\shieldbreaker-refine-20261010\model.
+preview_outputs.py produces comparison.png, pose/walk sheets and walk.gif from actual mesh renders.
+The offline preview approximates the pose solver and uses Blender lighting; it is not DD2 footage.
+The mesh remains an early art pass, with individual skill animation and further art polish pending.
+Rebuild recipe and native acceptance steps: tools/shieldbreaker/README.md.
+
+Installed while DD2 was stopped. Previous three private model files, four plugin binaries and config
+backed up at C:\Users\Piral\.universal-modder\backups\shieldbreaker-design-20261010-194743.
+All three installed assets match SHA256 (mesh 57148171..., base 4CD29E7E..., ink 1E8668F0...). Release
+deploy's four binaries match their outputs (plugin E75D1D5B..., Core 948CDF0A...). Only scripts and notes
+enter Git; derived meshes, textures, extracted reference art and Blender/previews remain private.
+
+## Status 2026-10-10: round205 installed, game left closed
+
+- The revised Shieldbreaker design is installed and checked through exported pose/walk previews.
+- Native palette, scale, model lifecycle, combat timing and fallback remain [?]. Use the README's
+  estate-2 acceptance steps only when the owner authorizes launching again.
+- No saves read or modified, no pending restore, and no game launched. Preserve the no-launch constraint.
+- The approved DD1 expedition selector remains; do not resume the removed round200-201 menu.

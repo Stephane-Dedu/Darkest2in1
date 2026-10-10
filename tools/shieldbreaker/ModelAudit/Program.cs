@@ -2,6 +2,24 @@ using DarkestDungeon3.Core.Presentation;
 using DarkestDungeon3.Dd2;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using DarkestDungeon3.Core.Dd1;
+
+if (args.Length == 3 && args[0] == "--reference")
+{
+    string root = args[1], output = args[2];
+    using var input = new BinaryReader(File.OpenRead(Path.Combine(output, "combat.rgba")));
+    int width = input.ReadInt32(), height = input.ReadInt32();
+    var page = new RgbaImage(width, height, input.ReadBytes(width * height * 4));
+    string stem = Path.Combine(root, "anim", "shieldbreaker.sprite.combat");
+    var skel = SpineSkeleton.Load(stem + ".skel");
+    var atlas = SpineAtlas.Parse(File.ReadAllText(stem + ".atlas"));
+    var pieces = skel.Pose(atlas, "combat", 0);
+    var image = SpineRaster.Render(pieces, _ => page, pixelsPerUnit: 2).Image;
+    using var saved = new BinaryWriter(File.Create(Path.Combine(output, "reference.rgba")));
+    saved.Write(image.Width); saved.Write(image.Height); saved.Write(image.Pixels);
+    Console.WriteLine($"Rendered owned DD1 combat reference: {image.Width}x{image.Height}");
+    return;
+}
 
 if (args.Length != 2) throw new ArgumentException("ModelAudit <private model folder> <private donor.json>");
 var model = ShieldbreakerModelData.Read(Path.Combine(args[0], "shieldbreaker.json"));

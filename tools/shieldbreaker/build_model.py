@@ -44,6 +44,7 @@ def extract(game, output):
 if __name__ == '__main__':
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--game', type=Path, required=True)
+    p.add_argument('--dd1', type=Path, help='DD1 asset root; defaults to --game for the combined install')
     p.add_argument('--output', type=Path, required=True, help='Private output directory, outside the repository')
     p.add_argument('--blender', type=Path, required=True)
     a = p.parse_args()
@@ -52,6 +53,12 @@ if __name__ == '__main__':
     if output == repo or repo in output.parents:
         p.error('Derived game assets must be written outside the repository')
     output.mkdir(parents=True, exist_ok=True)
+    from reference_parts import unpack
+    dd1 = a.dd1 or a.game
+    root = dd1 / 'dlc/702540_shieldbreaker/heroes/shieldbreaker'
+    if not root.is_dir():
+        p.error('Shieldbreaker DLC art missing; pass the owned DD1 install with --dd1')
+    unpack(root, output / 'reference')
     extract(a.game, output)
     subprocess.run([str(a.blender), '--background', '--factory-startup', '--python-exit-code', '1', '--python',
                     str(Path(__file__).with_name('model_blender.py')), '--', str(output)], check=True)

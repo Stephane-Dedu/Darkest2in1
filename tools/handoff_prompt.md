@@ -6,7 +6,7 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
 The machine-local build override and playtest helpers target it. Preserve the previous install and both
 reverse-engineering workspaces; their references remain valid. The owner's latest instruction is no game launch.
-Latest task, round204: Shieldbreaker's first 3D model and animation prototype. Read
+Latest task, round205: Shieldbreaker's model reworked against her actual DD1 design. Read
 tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
 The model is built and checked offline; native appearance and combat timing remain unverified.
 The owner explicitly requested no game launch for this implementation.
