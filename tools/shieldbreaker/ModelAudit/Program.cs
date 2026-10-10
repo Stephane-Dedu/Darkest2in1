@@ -3,6 +3,7 @@ using DarkestDungeon3.Dd2;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using DarkestDungeon3.Core.Dd1;
+using System.Numerics;
 
 if (args.Length == 3 && args[0] == "--reference")
 {
@@ -27,6 +28,18 @@ var donor = JObject.Parse(File.ReadAllText(args[1]));
 if (!model.Bones.SequenceEqual(donor["bones"]!.ToObject<string[]>())) throw new Exception("Bone order changed");
 var binds = donor["bindposes"]!.ToObject<float[][]>()!;
 if (!model.Bindposes.SelectMany(r => r).SequenceEqual(binds.SelectMany(r => r))) throw new Exception("Bind matrices changed");
+Vector3 Point(float[] a) => new(a[0], a[1], a[2]);
+int inverted = 0, measured = 0;
+for (int j = 0; j < model.Triangles.Length; j += 3)
+{
+    int a = model.Triangles[j], b = model.Triangles[j + 1], c = model.Triangles[j + 2];
+    var face = Vector3.Cross(Point(model.Vertices[b]) - Point(model.Vertices[a]), Point(model.Vertices[c]) - Point(model.Vertices[a]));
+    var normal = Point(model.Normals[a]) + Point(model.Normals[b]) + Point(model.Normals[c]);
+    if (face.LengthSquared() < 1e-8f || normal.LengthSquared() < 1e-8f) continue;
+    measured++;
+    if (Vector3.Dot(Vector3.Normalize(face), Vector3.Normalize(normal)) < -.1f) inverted++;
+}
+if (inverted > measured * .05) throw new Exception($"Triangle winding opposes the native outward normals: {inverted}/{measured}");
 foreach (string texture in new[] { "shieldbreaker_base.png", "shieldbreaker_ink.png" })
     if (!ShieldbreakerModelData.ValidTexturePng(File.ReadAllBytes(Path.Combine(args[0], texture)))) throw new Exception("Invalid texture: " + texture);
 foreach (var part in model.Parts)
@@ -50,4 +63,6 @@ var frames = Enumerable.Range(0, 24).Select(i => {
 File.WriteAllText(Path.Combine(args[0], "walk_samples.json"), JsonConvert.SerializeObject(frames));
 Console.WriteLine(JsonConvert.SerializeObject(new { Verified = true, Vertices = model.Vertices.Length, Triangles = model.Triangles.Length / 3,
     Bones = model.Bones.Length, BodyHeight = model.BodyHeight, Parts = model.Parts.Length, Clips = model.Clips.Keys,
-    TextureBounds = "4096x2048", NativeBindMatrices = "exact", Weapons = "right wrist / left forearm, weight 1", SavesAccessed = false }));
+    TextureBounds = "4096x2048", NativeBindMatrices = "exact", InvertedTriangles = inverted,
+    NativeVertexChannels = model.Tangents != null && model.Colors != null,
+    Weapons = "right wrist / left forearm, weight 1", SavesAccessed = false }));

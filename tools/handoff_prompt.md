@@ -6,11 +6,13 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
 The machine-local build override and playtest helpers target it. Preserve the previous install and both
 reverse-engineering workspaces; their references remain valid. The owner authorized launching again after round205.
-Latest task, round205: Shieldbreaker's model reworked against her actual DD1 design. Read
+Latest task, round206: Shieldbreaker remodeled from Hellion's actual native body surfaces. Read
 tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
-The model is built and checked offline; native appearance and combat timing remain unverified.
-The implementation was completed without launching. The owner then requested a launch of the updated install.
-Estate 2 now includes Shieldbreaker Hachet for the owner's test; her revised pack and corridor rig bound
+The native-body remodel is installed, with corrected triangle winding, native outline materials and
+vertex channels. Offline model/pose/walk checks pass; the game is reopened for the owner's review.
+Its appearance and combat timing remain unverified in DD2. Do not open the normal estate picker for
+an automated check: it reads protected slots. Use an isolated estate-2 entry for future agent tests.
+Estate 2 includes Shieldbreaker Hachet for the owner's test; the previous pack and corridor rig bound
 successfully in native logs. Keep the roster addition, and do not automatically restore its pre-test backup.
 Owner focus (2026-10-08): reverse engineer and match the main DD1 quest flow first: Hamlet, selection,
 room/hallway travel and curios, battles and proper transitions. Fix reported defects before return-XP tuning.

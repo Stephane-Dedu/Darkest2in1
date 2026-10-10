@@ -13,6 +13,7 @@ REST = [Matrix([m[i:i + 4] for i in range(0, 16, 4)]).inverted() for m in D['bin
 POS = {n: REST[i].translation for i, n in enumerate(BONES)}
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
 PARTS = []
+NATIVE_CHANNELS = {}
 PALETTE = [(0.13, .10, .075, 1), (.31, .23, .14, 1), (.48, .36, .21, 1),
            (.62, .46, .18, 1), (.82, .64, .29, 1), (.56, .54, .44, 1),
            (.76, .74, .62, 1), (.21, .26, .13, 1), (.48, .57, .24, 1),
@@ -28,7 +29,7 @@ def rigid(n):
     return [(bone(n), 1.0)]
 
 
-def part(name, verts, faces, weights, colour=None, uv=None):
+def part(name, verts, faces, weights, colour=None, uv=None, normals=None, tangents=None, colors=None):
     m = bpy.data.meshes.new(name)
     m.from_pydata(verts, [], faces); m.update()
     o = bpy.data.objects.new(name, m); bpy.context.collection.objects.link(o)
@@ -51,6 +52,11 @@ def part(name, verts, faces, weights, colour=None, uv=None):
                 layer.data[li].uv = (.5 + (colour + .1 + .8 * s) / 32, .76 + .22 * t)
         poly.use_smooth = name == 'body' or name.startswith(('skin_', 'spear_palm', 'spear_finger', 'spear_thumb', 'shield_painted'))
     PARTS.append(o)
+    if normals is not None:
+        for poly in m.polygons: poly.use_smooth=True
+        m.normals_split_custom_set_from_vertices(normals)
+    if tangents is not None or colors is not None:
+        NATIVE_CHANNELS[o.name]=(tangents,colors)
     return o
 
 
@@ -89,15 +95,18 @@ exec((Path(__file__).with_name('design_mesh.py')).read_text(), globals())
 
 # Export split vertices at UV/normal seams. All weights reference the untouched
 # native bone order and bind poses; the runtime validates that order by name.
-V, N, UV, IX, W, TRI, SEGMENTS = [], [], [], [], [], [], []
+V, N, UV, IX, W, TRI, SEGMENTS, TANGENTS, COLORS = [], [], [], [], [], [], [], [], []
 for o in PARTS:
     start = len(V)
     m = o.data; m.calc_loop_triangles()
     for tri in m.loop_triangles:
-        for li in reversed(tri.loops):
+        for li in tri.loops:
             vi = m.loops[li].vertex_index
             V.append(list(m.vertices[vi].co)); N.append(list(m.corner_normals[li].vector if m.polygons[tri.polygon_index].use_smooth else tri.normal))
             UV.append(list(m.uv_layers.active.data[li].uv))
+            tangents,colors=NATIVE_CHANNELS.get(o.name,(None,None))
+            TANGENTS.append(list(tangents[vi]) if tangents else N[-1]+[0])
+            COLORS.append(list(colors[vi]) if colors else [1,0,0,1])
             weights = sorted([(g.group, g.weight) for g in m.vertices[vi].groups if g.weight > .00001], key=lambda x: -x[1])[:4]
             total = sum(w for _, w in weights)
             IX.append([b for b, _ in weights] + [0] * (4 - len(weights)))
@@ -121,7 +130,8 @@ clips = {
         {'t': .65, 'right': [26, 125, 23], 'left': [-10, 140, 33], 'spear': [.1, .96, .25]},
         {'t': 1.1, 'right': [30, 117, 32], 'left': [-24, 125, 30], 'spear': [.16, .98, .10]}]}}
 model = dict(version=1, donor='hellion', bones=BONES, bindposes=D['bindposes'], vertices=V, normals=N, uv=UV,
-             indices=IX, weights=W, triangles=TRI, clips=clips, parts=SEGMENTS)
+             indices=IX, weights=W, triangles=TRI, clips=clips, parts=SEGMENTS,
+             tangents=TANGENTS, colors=COLORS)
 (OUT / 'shieldbreaker.json').write_text(json.dumps(model, separators=(',', ':')), encoding='utf-8')
 print('Shieldbreaker exported:', len(V), 'vertices,', len(TRI) // 3, 'triangles,', len(BONES), 'bones')
 
@@ -129,7 +139,7 @@ print('Shieldbreaker exported:', len(V), 'vertices,', len(TRI) // 3, 'triangles,
 loaded = json.loads((OUT / 'shieldbreaker.json').read_text(encoding='utf-8'))
 for o in PARTS: o.hide_render = True; o.hide_set(True)
 packed = part('Shieldbreaker exported package', loaded['vertices'],
-              [tuple(reversed(loaded['triangles'][i:i+3])) for i in range(0, len(loaded['triangles']), 3)],
+              [tuple(loaded['triangles'][i:i+3]) for i in range(0, len(loaded['triangles']), 3)],
               [[(b,w) for b,w in zip(ii,ww) if w > .00001] for ii,ww in zip(loaded['indices'],loaded['weights'])], uv=loaded['uv'])
 for loop in packed.data.loops: packed.data.uv_layers.active.data[loop.index].uv = loaded['uv'][loop.vertex_index]
 packed.data.materials.append(mat)

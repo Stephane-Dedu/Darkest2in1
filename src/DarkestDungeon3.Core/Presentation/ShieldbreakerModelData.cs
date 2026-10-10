@@ -14,6 +14,7 @@ public sealed class ShieldbreakerModelData
     public string Donor;
     public string[] Bones;
     public float[][] Bindposes, Vertices, Normals, Uv, Weights;
+    public float[][] Tangents, Colors;
     public int[][] Indices;
     public int[] Triangles;
     public Dictionary<string, ModelClip> Clips;
@@ -46,6 +47,9 @@ public sealed class ShieldbreakerModelData
             || Triangles == null || Triangles.Length < 3 || Triangles.Length > 450000 || Triangles.Length % 3 != 0
             || Triangles.Any(i => i < 0 || i >= n))
             throw new FormatException("Invalid Shieldbreaker geometry or skin weights");
+        if (Tangents != null && !Rows(Tangents, n, 4)
+            || Colors != null && (!Rows(Colors, n, 4) || Colors.Any(row => row.Any(c => c < 0 || c > 1))))
+            throw new FormatException("Invalid Shieldbreaker tangent or colour channels");
         if (Clips == null || Clips.Count > 16 || new[] { "idle", "attack", "defend" }.Any(k => !Clips.ContainsKey(k)))
             throw new FormatException("Shieldbreaker idle, attack and defend clips are required");
         foreach (var clip in Clips.Values) clip?.Validate();

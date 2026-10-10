@@ -32,6 +32,31 @@ public class ShieldbreakerModelTests
         } finally { File.Delete(file); }
     }
 
+    [Fact]
+    public void NativeOutlineChannelsRoundTripAndOldPacksRemainReadable()
+    {
+        var model = Model();
+        model.Validate(); // Earlier packs omit these optional native channels.
+        model.Tangents = Enumerable.Range(0, 3).Select(_ => new[] { 0f, 0f, 1f, 0f }).ToArray();
+        model.Colors = Enumerable.Range(0, 3).Select(_ => new[] { 1f, 0f, 0f, 1f }).ToArray();
+        var read = JsonConvert.DeserializeObject<ShieldbreakerModelData>(JsonConvert.SerializeObject(model))!;
+        read.Validate();
+        Assert.Equal(model.Tangents[1], read.Tangents[1]);
+        Assert.Equal(model.Colors[2], read.Colors[2]);
+    }
+
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)]
+    public void MalformedNativeChannelsCannotReachUnity(int bad)
+    {
+        var model = Model();
+        if (bad == 0) model.Tangents = new[] { new[] { 0f, 0f, 1f, 0f } };
+        if (bad == 1) model.Tangents = Enumerable.Range(0, 3).Select(_ => new[] { float.NaN, 0f, 1f, 0f }).ToArray();
+        if (bad == 2) model.Colors = Enumerable.Range(0, 3).Select(_ => new[] { 2f, 0f, 0f, 1f }).ToArray();
+        if (bad == 3) model.Colors = Enumerable.Range(0, 3).Select(_ => new[] { 1f, 0f, 0f }).ToArray();
+        Assert.Throws<FormatException>(model.Validate);
+    }
+
     [Theory]
     [InlineData(0)] [InlineData(1)] [InlineData(2)] [InlineData(3)] [InlineData(4)] [InlineData(5)] [InlineData(6)]
     public void InvalidGeometryCannotReachUnity(int bad)

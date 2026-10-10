@@ -114,6 +114,8 @@ internal sealed class ShieldbreakerModel : MonoBehaviour
         _mesh = new Mesh { name = "DD3 Shieldbreaker", indexFormat = IndexFormat.UInt32 };
         _mesh.vertices = d.Vertices.Select(V).ToArray();
         _mesh.normals = d.Normals.Select(V).ToArray();
+        if (d.Tangents != null) _mesh.tangents = d.Tangents.Select(a => new Vector4(a[0], a[1], a[2], a[3])).ToArray();
+        if (d.Colors != null) _mesh.colors = d.Colors.Select(a => new Color(a[0], a[1], a[2], a[3])).ToArray();
         _mesh.uv = d.Uv.Select(a => new Vector2(a[0], a[1])).ToArray();
         _mesh.bindposes = binds;
         _mesh.boneWeights = Enumerable.Range(0, d.Vertices.Length).Select(i => new BoneWeight {
@@ -125,7 +127,11 @@ internal sealed class ShieldbreakerModel : MonoBehaviour
         _material.SetTexture("_Ink", Texture("shieldbreaker_ink.png"));
         _body = body; _originalMesh = body.sharedMesh; _originalMaterials = body.sharedMaterials; _originalBounds = body.localBounds;
         var bounds = _mesh.bounds; bounds.Expand(bounds.size * .5f);
-        body.sharedMesh = _mesh; body.sharedMaterials = new[] { _material }; body.localBounds = bounds;
+        // Native heroes draw the body and its outline with separate materials.
+        // Preserve the outline pass when replacing the painted body material.
+        var materials = (Material[])_originalMaterials.Clone();
+        materials[0] = _material;
+        body.sharedMesh = _mesh; body.sharedMaterials = materials; body.localBounds = bounds;
         RefreshMaterials();
         _ready = true; _since = Time.unscaledTime;
         EventManager.AddListener<EventCombatSkillPresentation>(OnSkill);

@@ -9,6 +9,8 @@ PALETTE[:] = [(.045,.035,.027,1), (.16,.105,.065,1), (.32,.235,.11,1),
              (.78,.76,.64,1), (.16,.23,.045,1), (.36,.52,.08,1),
              (.20,.25,.25,1), (.49,.58,.56,1), (.018,.019,.015,1),
              (.39,.215,.12,1), (.48,.70,.10,1), (.56,.335,.185,1), (.92,.87,.71,1)]
+# The palette numbers describe paint in sRGB; Blender's pixel buffer is linear.
+PALETTE[:]=[tuple(x/12.92 if x<=.04045 else ((x+.055)/1.055)**2.4 for x in c[:3])+(1,) for c in PALETTE]
 TILES = ['shield','mask','face','helmet','chest','belt',
          'left_pauldron','left_knee_guard','sash','pants','turban','left_tassets02']
 PAINT_ALPHA = {}
@@ -82,66 +84,50 @@ def inkline(name, points, group, width=.35, colour=11):
     return tube(name,points,[width]*len(points),[group]*len(points),colour,5)
 
 
-# Weighted donor foot detail; all exposed anatomy and costume are rebuilt.
-faces=[]
-for j in range(0,len(D['triangles']),3):
-    tri=D['triangles'][j:j+3]
-    if all(D['vertices'][i][1]<11 for i in tri): faces.append(tuple(reversed(tri)))
-part('body',D['vertices'],faces,
-     [[(b,w) for b,w in zip(ii,ww) if w>.00001] for ii,ww in zip(D['indices'],D['weights'])],uv=D['uv'])
+# Remodel the native hero's actual surfaces, preserving skin weights and paint.
+namespace={'__name__':'native_body'}
+exec(Path(__file__).with_name('native_body.py').read_text(),namespace)
+categories=namespace['select'](D)
+for kind in ('skin','hand','pants','boots'):
+    ids=[i for i in range(len(D['vertices'])) if categories.get(i)==kind]
+    remap={old:new for new,old in enumerate(ids)}
+    points=[Vector(D['vertices'][i]) for i in ids]
+    if kind=='pants':
+        for p in points:
+            side='l' if p.x<0 else 'r'
+            hip,knee,ankle=[POS[f'{side}_Leg_{n}SHJnt'] for n in ('Hip','Knee','Ankle')]
+            upper=p.y>=knee.y; a,b=(hip,knee) if upper else (knee,ankle)
+            centre=a.lerp(b,max(0,min(1,(a.y-p.y)/(a.y-b.y))))
+            # Broaden the native cloth silhouette, keeping its original folds/topology.
+            factor=1+.85*max(0,min(1,(108-p.y)/20)) if upper else 1.25+.6*max(0,min(1,(p.y-ankle.y)/(knee.y-ankle.y)))
+            p.x=centre.x+(p.x-centre.x)*factor; p.z=centre.z+(p.z-centre.z)*1.35
+    faces=[tuple(remap[i] for i in D['triangles'][j:j+3]) for j in range(0,len(D['triangles']),3)
+           if all(i in remap for i in D['triangles'][j:j+3])]
+    o=part('native_'+kind,points,faces,
+           [[(b,w) for b,w in zip(D['indices'][i],D['weights'][i]) if w>.00001] for i in ids],
+           uv=[D['uv'][i] for i in ids],normals=[D['normals'][i] for i in ids],
+           tangents=[D['tangents'][i] for i in ids],colors=[D['colors'][i] for i in ids])
 
-# Shaped abdomen, rib cage and shoulders, with the cropped gold cross-wrap above.
-ys=[94,101,109,116,123,130,137,143,148]
-radii=[(19,12),(17.5,10),(14.8,8.3),(14.5,8.5),(17,10),(19.7,12),(20.8,11.7),(19,10),(11,7)]
-torso_groups=[rigid('ROOTSHJnt')]*3+[rigid('Spine_01SHJnt')]*2+[rigid('Spine_02SHJnt')]*4
-loft('skin_torso',[(0,y,2) for y in ys],radii,torso_groups,12)
-loft('skin_neck',[(0,145,2),(0,151,2),(0,158,3)],[(6,5),(5,4.5),(5.5,5)],
-     [rigid('Spine_02SHJnt'),rigid('Head_TopSHJnt'),rigid('Head_TopSHJnt')],12)
+pelvis=namespace['clip_surface'](D,{i for i,k in categories.items() if k=='pelvis'},94)
+part('native_pelvis',pelvis['vertices'],pelvis['faces'],pelvis['weights'],uv=pelvis['uv'],
+     normals=pelvis['normals'],tangents=pelvis['tangents'],colors=pelvis['colors'])
+# A gathered waistband closes the donor's open-front skirt behind the belt.
+loft('gold_waist_underwrap',[(0,90,0),(0,95,0),(0,100,0),(0,104,0)],
+     [(20,12.5),(20.5,12.5),(19.5,12),(18.5,11.5)],
+     [rigid('ROOTSHJnt')]*4,3,folds=.035)
+
+# Gold wraps follow the donor's sculpted torso rather than hiding it in a tube.
+skin=next(o for o in PARTS if o.name=='native_skin')
+wrap_ids=[v.index for v in skin.data.vertices if 123.5<=v.co.y<=144 and abs(v.co.x)<19]
+remap={old:new for new,old in enumerate(wrap_ids)}
+wrap=part('gold_chest_wrap',[skin.data.vertices[i].co+Vector((0,0,.7)) for i in wrap_ids],
+          [tuple(remap[i] for i in p.vertices) for p in skin.data.polygons if all(i in remap for i in p.vertices)],
+          [[(g.group,g.weight) for g in skin.data.vertices[i].groups] for i in wrap_ids],3)
+painted(wrap,'chest',[(max(0,min(1,(v.co.x+18)/36)),max(0,min(1,(v.co.y-123.5)/20.5))) for v in wrap.data.vertices])
+
+# Ankle wraps join the widened native trousers to the boots.
 for side in ('l','r'):
-    shoulder,elbow,wrist=[POS[f'{side}_Arm_{n}SHJnt'] for n in ('Shoulder','Elbow','Wrist')]
-    points=[shoulder,shoulder.lerp(elbow,.18),shoulder.lerp(elbow,.4),shoulder.lerp(elbow,.75),elbow,
-            elbow.lerp(wrist,.2),elbow.lerp(wrist,.55),elbow.lerp(wrist,.85),wrist]
-    groups=[rigid(f'{side}_Arm_ShoulderSHJnt')]*4+[
-        [(bone(f'{side}_Arm_ShoulderSHJnt'),.2),(bone(f'{side}_Arm_ElbowSHJnt'),.8)]]+[rigid(f'{side}_Arm_ElbowSHJnt')]*4
-    loft('skin_'+side+'_arm',points,[6.4,7,6.3,4.8,3.9,5.3,4.7,3.5,3.2],groups,12)
-    # Painted anatomical crease, weighted to the same forearm.
-    across=(wrist-elbow).cross(Vector((0,0,1))).normalized()
-    line=[elbow.lerp(wrist,t)+Vector((0,0,3.8))+across*1.7 for t in (.15,.33,.52,.67)]
-    inkline('skin_'+side+'_forearm_crease',line,rigid(f'{side}_Arm_ElbowSHJnt'),.28)
-
-loft('gold_chest_wrap',[(0,y,2.3) for y in (124,129,136,143)],[(17.5,10.5),(20.2,12.5),(21.2,12.1),(19.5,10.3)],
-     [rigid('Spine_02SHJnt')]*4,3,folds=.025)
-front('gold_chest_painted',[(0,143,10.9,19.5,2.2),(0,137,12.4,21,2.4),(0,129,12.8,20.2,2.1),(0,124,10.8,17.2,2)],
-      rigid('Spine_02SHJnt'),4,'chest')
-inkline('abdomen_shadow',[(-8,121,10.1),(-3,115,11),(-1,111,10.5)],rigid('Spine_01SHJnt'),.48)
-inkline('abdomen_flank',[(10,121,9.7),(9,115,9.8),(13,111,8.8)],rigid('Spine_01SHJnt'),.35)
-
-# Harem trousers, wide above the knees, gathered into wrapped ankles.
-for side in ('l','r'):
-    hip,knee,ankle=[POS[f'{side}_Leg_{n}SHJnt'] for n in ('Hip','Knee','Ankle')]
-    points=[hip,hip.lerp(knee,.16),hip.lerp(knee,.4),hip.lerp(knee,.7),knee,
-            knee.lerp(ankle,.2),knee.lerp(ankle,.5),knee.lerp(ankle,.75),ankle+Vector((0,6,0))]
-    group=[rigid(f'{side}_Leg_HipSHJnt')]*4+[
-        [(bone(f'{side}_Leg_HipSHJnt'),.2),(bone(f'{side}_Leg_KneeSHJnt'),.8)]]+[rigid(f'{side}_Leg_KneeSHJnt')]*3+[rigid(f'{side}_Leg_AnkleSHJnt')]
-    radii=[(13.5,12),(15.8,13),(16.2,12.5),(14,11),(12.3,10.3),(12,9.7),(10.5,8.7),(8.5,7),(5.1,5.3)]
-    trousers=loft(side+'_harem_trousers',points,radii,group,3,folds=.17)
-    # Project the original broad gold/black fold shapes onto the front of each leg.
-    paint_uv=[]
-    for v in trousers.data.vertices:
-        t=max(0,min(1,(hip.y-v.co.y)/(hip.y-ankle.y-6)))
-        centre=hip.lerp(ankle,t)
-        u=max(0,min(1,.5+(v.co.x-centre.x)/31))
-        paint_uv.append((.04+.46*u if side=='r' else .52+.44*u,1-t))
-    saved_uv=[loop.uv.copy() for loop in trousers.data.uv_layers.active.data]
-    painted(trousers,'pants',paint_uv)
-    for polygon in trousers.data.polygons:
-        if polygon.normal.z<.35:
-            for li in polygon.loop_indices: trousers.data.uv_layers.active.data[li].uv=saved_uv[li]
-    # Large black slashes match the deliberately broad folds in her DD1 painting.
-    for k in range(3):
-        sign=-1 if side=='l' else 1
-        base=hip.lerp(knee,.24+k*.18)
-        inkline(side+'_trouser_fold_'+str(k),[base+Vector((sign*4,3,11)),base+Vector((sign*9,-1,8.5)),base+Vector((sign*10,-6,7))],rigid(f'{side}_Leg_HipSHJnt'),.6)
+    knee,ankle=[POS[f'{side}_Leg_{n}SHJnt'] for n in ('Knee','Ankle')]
     for j in range(8):
         p=ankle.lerp(knee,.03+j*.026)
         loft(side+'_ankle_wrap_'+str(j),[p,p+Vector((0,1.25,0))],[5.8,5.9],[rigid(f'{side}_Leg_AnkleSHJnt')]*2,6 if j%3 else 5,sides=16)
@@ -163,10 +149,7 @@ for side in ('l','r'):
         painted(o,'left_tassets02',[(0,1),(1,1),(1,0),(0,0)])
 
 # Head, painted eye shadow and the folded yellow mask.
-head=POS['Head_TopSHJnt']+Vector((0,-6,1))
-ellipsoid('skin_head',head+Vector((0,3,0)),(10.2,12,9),rigid('Head_TopSHJnt'),12,12,24)
-front('skin_face_painted',[(0,head.y+7,head.z+7.3,9,2),(0,head.y+2.3,head.z+9,9.2,1),
-                         (0,head.y-2,head.z+8,8.7,1.4)],rigid('Head_TopSHJnt'),12,'face')
+head=POS['Head_TopSHJnt']+Vector((0,-2,6))
 front('yellow_mask',[(0,head.y+1.8,head.z+8.7,10.4,3.8),(0,head.y-3,head.z+9.5,10,4),
                      (1,head.y-8,head.z+8.5,8.2,3.2),(2,head.y-13,head.z+7,5.4,1.5)],
       rigid('Head_TopSHJnt'),4,'mask')
@@ -218,15 +201,8 @@ for side in ('l','r'):
              (6 if j%3 else 5) if side=='l' else (8 if j%2 else 7),sides=16)
 ellipsoid('left_stump',POS['l_Arm_WristSHJnt'],(3.8,4,3.6),rigid('l_Arm_ElbowSHJnt'),5,7,16)
 
-# The fingers curl around the spear, rather than a sphere standing in for the fist.
-grip=POS['r_Arm_WristSHJnt']+Vector((0,-1,2))
-ellipsoid('spear_palm',grip+Vector((0,0,-2)),(3,4.1,2.4),rigid('r_Arm_WristSHJnt'),12,8,16)
-for j in range(4):
-    y=-2.8+j*1.7
-    points=[grip+Vector(v) for v in [(2.1,y,-2),(3,y,.2),(1.9,y,2),(-.3,y,2.4),(-1.6,y,.7)]]
-    loft('spear_finger_'+str(j),points,[1,1.05,1,.85,.7],[rigid('r_Arm_WristSHJnt')]*5,12,sides=10)
-loft('spear_thumb',[grip+Vector(v) for v in [(-2.2,3,-1),(-2.5,1.2,1),(-1.5,-.5,2.5),(1,-1,2.1)]],
-     [1.2,1.2,1,.8],[rigid('r_Arm_WristSHJnt')]*4,14,sides=10)
+# The donor's native hand and finger surfaces grip the new spear.
+grip=POS['r_Arm_WristSHJnt']+Vector((1,-5,8))
 loft('spear_shaft',[grip+Vector((0,-65,0)),grip+Vector((0,105,0))],[1.3,1.15],[rigid('r_Arm_WristSHJnt')]*2,1,sides=12)
 for j in range(20):
     p=grip+Vector((0,-16+j*5.7,0))
@@ -260,14 +236,13 @@ painted(part('shield_painted_face',verts,faces,[shield_group]*len(verts),7),'shi
 points=[shield_c+Vector((math.cos(k*math.pi*2/64)*24.2,math.sin(k*math.pi*2/64)*24.2,3)) for k in range(65)]
 inkline('shield_rim_edge',points,shield_group,.48,9)
 
-# Build the private atlas: donor boot page on the left, native painted tiles below
+# Build the private atlas: remodeled donor body page on the left, painted tiles below
 # sixteen hand-painted material swatches on the right. All UVs have gutter space.
 for filename,is_ink in [('shieldbreaker_base.png',False),('shieldbreaker_ink.png',True)]:
-    source=bpy.data.images.load(str(OUT/('tex_hellion_ink.png' if is_ink else 'tex_hellion_col.png')))
+    source=bpy.data.images.load(str(OUT/('tex_hellion_ink.png' if is_ink else 'tex_hellion_remodel_col.png')))
     source.scale(2048,2048)
     old=np.array(source.pixels[:],dtype=np.float32).reshape(2048,2048,4)
     result=np.ones((2048,4096,4),dtype=np.float32)
-    if not is_ink: old[:,:,:3]*=np.array([.78,.72,.63])
     result[:,:2048]=old
     for i,c in enumerate(PALETTE):
         x0=2048+i*128; x1=x0+128
@@ -277,10 +252,16 @@ for filename,is_ink in [('shieldbreaker_base.png',False),('shieldbreaker_ink.png
         shade+=.025*np.sin(xx*.57+yy*.13)*np.cos(yy*.075)
         result[1536:,x0:x1,:3]=np.array(c[:3])*shade[:,:,None]
     for i,tile in enumerate(TILES):
-        if is_ink: continue
         image=bpy.data.images.load(str(OUT/'reference'/(tile+'.png')))
         image.scale(512,512)
         pixels=np.array(image.pixels[:],dtype=np.float32).reshape(512,512,4)
+        if is_ink:
+            # Native _Ink carries the black painted shading, not an all-white page.
+            value=np.clip((pixels[:,:,:3].max(2)-.015)/.085,0,1)
+            pixels[:,:,:3]=value[:,:,None]; pixels[:,:,3]=1
+            x=2048+(i%4)*512; y=(i//4)*512
+            result[y:y+512,x:x+512]=pixels
+            continue
         if tile=='pants':
             # The source legs are painted in a bent pose. Carry over gold texture and
             # small ink creases, filling broad empty/shadow fields before projecting

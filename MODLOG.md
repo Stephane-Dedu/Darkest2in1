@@ -4713,3 +4713,73 @@ The owner continued interacting with the game and embarked; agent input stopped.
 `[shieldbreaker-3d] 7: 30480 vertices, native rig, idle/attack/defend ready` and her corridor gait ready.
 This verifies native binding of the revised pack, not final visual quality or combat skill timing.
 No restart, deployment or protected-save file access was performed for the roster request.
+
+## Round206: Shieldbreaker remodeled from an actual DD2 hero body (2026-10-10)
+
+Owner showed the model glowing and losing its painted fronts in the corridor, and asked to
+use another hero as the base. Compared private native Hellion, Grave Robber and Runaway
+mesh renders. Retained Hellion because her body and existing 130-bone presentation are
+suitable for this costume. This pass uses the actual native torso, arms, face, right hand,
+cloth topology and boots; the preceding pass mostly used a native skeleton with newly
+constructed anatomy. There is no native Shieldbreaker model in the active DD2 asset set.
+
+native_body.py selects native surfaces by topology, bone influence, bounds and UV region.
+Hair, feathers, bone jewellery, long skirt and the left hand are removed. Native leg cloth
+is widened and recoloured gold; the pelvis is clipped from the native skirt with interpolated
+UVs, normals, tangents, colours and normalized skin weights. A gathered underwrap closes
+the open-front skirt under the belt. Chest wraps follow the donor torso, the headcloth fits
+the native head, and the native right hand replaces the authored fingers. Her original
+DD1 veil, helmet, serpent shield, left-side armour, sash and spear remain fitted over it.
+
+Two rendering defects were found in the old pack. The exporter reversed authored triangles,
+although their cross products already agreed with native outward normals. The old pack
+fails the new ModelAudit winding check at 10,120 /10,160 reversed triangles; the corrected
+pack has six imperfect native triangles /10,168. Do not reverse native import, authored
+export or roundtrip preview faces. The runtime also reduced the renderer's material array
+to one material, dropping its separate native outline pass. It now preserves the array and
+replaces only the painted body material. Native smooth-outline tangents and vertex colours
+are extracted, validated, exported and uploaded. Older packs may omit these optional channels.
+
+The private atlas preserves native ink and recolours native fabric/warpaint/midriff, while
+DD1 painted tiles supply costume details. Authored sRGB paint values are converted to Blender's
+linear image buffer before PNG encoding; painted ink tiles now carry dark creases instead
+of all-white shading. These changes are local to Shieldbreaker's isolated actor. No global
+light, shared hero asset, gameplay or save migration changes. Offensive skills still share
+one thrust; further art polish and individual skill animations remain future work.
+
+Verified: Release build; 949 Core and 168 UI tests; production-reader model audit with exact
+native bone order and bind matrices, optional-channel validation, rigid wrist/forearm weapons,
+4096x2048 texture bounds and clip recovery; three exported pose stills and a 24-frame walk.
+Final pack: 30,504 split vertices, 10,168 triangles, 97 parts, 130 bones, body height 192.51256.
+The costume comparison and final walk sheet were inspected. Blender is an offline preview
+and does not reproduce the native DD2 shader or combat timeline.
+
+Private assets/scenes/derived donor dumps/previews remain outside Git:
+C:\Users\Piral\.universal-modder\inspection\shieldbreaker-donor-20261010\model.
+Only scripts, Core/runtime changes, tests and documentation enter the repository.
+Backup before installation, including the three previous private assets, four plugin binaries,
+config and only estate 2's two save files, with SHA256 verification:
+C:\Users\Piral\.universal-modder\backups\shieldbreaker-native-20261010-203725.
+Installed while DD2 was stopped. All three asset hashes match the private outputs:
+mesh 878DBB18..., base 21339E6F..., ink 4B873D0D.... All four deployed DLL/PDB hashes
+match Release outputs (plugin 138342AE..., Core 539D89B2...).
+
+Reopened the active install with standing owner permission for interactive review. The initial
+hidden launch had no visible window and was replaced by an interactive launch before entering
+any estate. No game input or estate selection was sent in this round. The normal estate picker
+reads all three slots; avoid it during agent testing and use an isolated estate-2 entry instead.
+No protected saves were read/modified. Hachet's existing roster addition is intentionally retained.
+Final launch PID 50196 has a visible, responding Darkest Dungeon II window at the main menu;
+startup logs confirm the updated plugin loaded. Read-only window capture saved privately as
+shieldbreaker-donor-20261010/game-open.png. Both estate-2 files still match their backup hashes.
+
+## Status 2026-10-10: round206 installed, game reopened for owner review
+
+- Shieldbreaker uses an actual native DD2 body remodeled into her costume; export, outline and
+  palette defects are corrected and offline rig/pose/walk checks pass. Private pack installed.
+- Native visual appearance, grip through animation, final scale/material lifecycle, individual
+  skill timing and fallback remain [?]. Use tools/shieldbreaker/README.md for acceptance steps.
+- DD2 is running for the owner. No estate selected or game input sent by the agent this round.
+  No save changes or pending restore; the pre-install estate-2 backup is precautionary.
+- Estate 2 retains Shieldbreaker Hachet for testing. Do not restore the earlier pre-recruit backup.
+- The approved DD1 expedition selector remains; do not resume the removed round200-201 menu.

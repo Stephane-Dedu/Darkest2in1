@@ -9,13 +9,13 @@ import subprocess
 from pathlib import Path
 
 
-def extract(game, output):
+def extract(game, output, hero='hellion'):
     import UnityPy
     from UnityPy.helpers.MeshHelper import MeshHandler
 
-    bundle = game / 'Darkest Dungeon II_Data/StreamingAssets/aa/hero_hellion_assets_basegame.bundle'
+    bundle = game / f'Darkest Dungeon II_Data/StreamingAssets/aa/hero_{hero}_assets_basegame.bundle'
     env = UnityPy.load(str(bundle))
-    mesh = next(o.read() for o in env.objects if o.type.name == 'Mesh' and o.read().m_Name == 'msh_hellion')
+    mesh = next(o.read() for o in env.objects if o.type.name == 'Mesh' and o.read().m_Name == f'msh_{hero}')
     renderer = next(o.read() for o in env.objects if o.type.name == 'SkinnedMeshRenderer'
                     and o.read().m_Mesh.m_PathID == mesh.object_reader.path_id)
     h = MeshHandler(mesh); h.process()
@@ -32,12 +32,13 @@ def extract(game, output):
                 triangles=[i for sub in h.get_triangles() for tri in sub for i in tri],
                 bones=names, parents=parents,
                 bindposes=[[getattr(m, f'e{r}{c}') for r in range(4) for c in range(4)] for m in mesh.m_BindPose],
-                indices=h.m_BoneIndices, weights=h.m_BoneWeights)
+                indices=h.m_BoneIndices, weights=h.m_BoneWeights,
+                tangents=h.m_Tangents, colors=[[c/255 for c in color] for color in h.m_Colors])
     (output / 'donor.json').write_text(json.dumps(data), encoding='utf-8')
     for o in env.objects:
         if o.type.name == 'Texture2D':
             t = o.read()
-            if t.m_Name in ('tex_hellion_col', 'tex_hellion_ink'):
+            if t.m_Name in (f'tex_{hero}_col', f'tex_{hero}_ink'):
                 t.image.save(output / (t.m_Name + '.png'))
 
 
@@ -60,5 +61,7 @@ if __name__ == '__main__':
         p.error('Shieldbreaker DLC art missing; pass the owned DD1 install with --dd1')
     unpack(root, output / 'reference')
     extract(a.game, output)
-    subprocess.run([str(a.blender), '--background', '--factory-startup', '--python-exit-code', '1', '--python',
+    from native_body import paint_atlas
+    paint_atlas(output)
+    subprocess.run([str(a.blender), '--background', '--factory-startup', '--threads', '4', '--python-exit-code', '1', '--python',
                     str(Path(__file__).with_name('model_blender.py')), '--', str(output)], check=True)
