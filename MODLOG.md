@@ -3861,14 +3861,17 @@ as DD1 accuracy versus DD2's engine. No effects or native equipment/grants are c
 
 ## Status 2026-10-10: round183 reward data ready; complete encounter pending
 
-- Round182 pushed. Round183 installed DD1 identity reader passes1017 tests/Release and is deployed
-  with DD2 stopped; commit/push before stopping. No game, native analysis, test/build or probe running.
-- Estate2 main/.bak and both native probe source files restored/hash-matched after round182.
-  No pending save restore; protected slots were not read. Confirm final deployed DLL hashes.
+- Round182 pushed atdfd4b04; round183 pushed atfb2fca0. Installed DD1 identity reader passes1017
+  tests/Release and is deployed with DD2 stopped. No game, native analysis, test/build or probe running.
+- Estate2 main/.bak and both native probe source files restored/hash-matched after round182 and
+  rechecked at finalization. Both deployed DLL hashes match. No pending restore; protected slots unread.
 - Next O3: real hero skill lethal/victory/return acceptance with reachable boss rank and per-skill
   target-validity logging, plus unreplaced corpse expiry. Specific brains/initiative remain pending.
 - Rewards: Dd1Trinkets supplies exact base identities only; implement conditional effect/equipment/art
   adapter, then saved once-only two draws/grant and complete hand interaction/return. Never expose an
   incomplete curio. Owner confirmed Very Rare; Ancestor subpool/DLC/unique and retreat rules stay open.
-- Keep region switch and Q04 Back/reopen acceptance. Usage90% before finalization; leave a clean
-  committed handoff and continue at the next permitted run. Do not duplicate completed native jobs.
+- Keep region switch and Q04 Back/reopen acceptance. Final usage92%; reserve the remaining headroom
+  for the95% stopping rule rather than starting another native slice. Quota headroom pause until
+  reported reset2026-10-10 03:56:01 UTC (1791604561); recheck ordinary availability/session at resume.
+- Resume automation remains ACTIVE/hourly and now records confirmed Very Rare and current acceptance
+  limitations; it follows this Status instead of repeating completed audits. No duplicate native jobs.
