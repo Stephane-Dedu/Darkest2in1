@@ -219,3 +219,22 @@ use a reachable boss rank for the next native acceptance test. No exceptions wer
 Both exact PIDs stopped/waited; estate2 main/.bak and both probe sources restored/hash-matched.
 Normal Release Rebuild/deploy completed with DD2 stopped. Private evidence stays outside Git under
 rea-workbench/evidence/round182; the initial hidden boot PID30128 was stopped before any scene test.
+
+## DD1 trinket identities: round183
+
+Dd1Trinkets reads the installed base entries at runtime, retaining all seven native entry fields:
+id, rarity, buffs, hero_class_requirements, price, limit and origin_dungeon. Definitions and lists
+are read-only; duplicate IDs, incomplete fields and unknown entry fields reject the catalogue rather
+than silently substituting items. Exact rarity queries remain separate and deterministically ordered.
+This does not select reward weights, ownership filters or DLC inclusion.
+
+The installed file has490 entries, with24 very_rare,9 ancestral and5 ancestral_shambler. Ancestor's
+Pistol retains ranged accuracy, speed and stress buff references plus limit1; Legendary Bracer is
+very_rare with limit0; Sacred Scroll retains its Vestal restriction. Ten cases bring the suite to
+892 Core +125 UI =1017 passing tests, with Release deployed while DD2 stopped.
+
+This reader has no gameplay caller yet. A complete effect adapter must retain and evaluate buff
+conditions; the existing Dd1Buffs loader only captures scalar stat/duration fields and is insufficient
+for conditional trinket effects. DD2 has no direct accuracy stat, so these references must not be
+advertised as already applied. Identity/effect/equipment/art, two retained draws and atomic grant
+integration remain required before the curio can be exposed. No native data files enter Git.

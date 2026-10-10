@@ -3842,3 +3842,33 @@ verified all hashes. Forced normal Release Rebuild/deploy. Evidence private unde
   until every required encounter can finish. Very Rare confirmed; other reward/retreat choices open.
 - Region switch and Q04 Back/reopen acceptance remain. Usage88% at this boundary; reserve headroom
   for finalization before95%. Resume from this Status, never duplicate native jobs or touch estates1/3.
+
+## Round183: exact installed DD1 trinket identities for memory rewards
+
+Round182 pushed atdfd4b04. Added independent runtime Dd1Trinkets reader for the base entries file,
+retaining all seven native fields and read-only lists. Exact rarity queries separate very_rare,
+ancestral and ancestral_shambler, without assuming DLC/duplicate/weight policy. Duplicate identity,
+missing fields and unknown entry fields fail closed. No DD2 trinket relabeling or gameplay grant.
+
+Ten cases verify installed490 identities and24/9/5 pools, no legendary rarity alias, Ancestor's
+Pistol's exact buffs/limit1, Legendary Bracer's very_rare/limit0, Sacred Scroll's Vestal restriction,
+and invalid/duplicate rejection. All892 Core +125 UI =1017 tests and Release pass; deployed with
+DD2 stopped. No native launch needed for this dormant data reader; no saves/source probes touched.
+
+Existing Dd1Buffs drops conditional rule fields, so it cannot by itself equip these items accurately.
+The next reward adapter must retain conditions and explicitly handle combat-stat differences such
+as DD1 accuracy versus DD2's engine. No effects or native equipment/grants are claimed here.
+
+## Status 2026-10-10: round183 reward data ready; complete encounter pending
+
+- Round182 pushed. Round183 installed DD1 identity reader passes1017 tests/Release and is deployed
+  with DD2 stopped; commit/push before stopping. No game, native analysis, test/build or probe running.
+- Estate2 main/.bak and both native probe source files restored/hash-matched after round182.
+  No pending save restore; protected slots were not read. Confirm final deployed DLL hashes.
+- Next O3: real hero skill lethal/victory/return acceptance with reachable boss rank and per-skill
+  target-validity logging, plus unreplaced corpse expiry. Specific brains/initiative remain pending.
+- Rewards: Dd1Trinkets supplies exact base identities only; implement conditional effect/equipment/art
+  adapter, then saved once-only two draws/grant and complete hand interaction/return. Never expose an
+  incomplete curio. Owner confirmed Very Rare; Ancestor subpool/DLC/unique and retreat rules stay open.
+- Keep region switch and Q04 Back/reopen acceptance. Usage90% before finalization; leave a clean
+  committed handoff and continue at the next permitted run. Do not duplicate completed native jobs.
