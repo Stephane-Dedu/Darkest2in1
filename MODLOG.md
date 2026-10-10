@@ -4783,3 +4783,22 @@ shieldbreaker-donor-20261010/game-open.png. Both estate-2 files still match thei
   No save changes or pending restore; the pre-install estate-2 backup is precautionary.
 - Estate 2 retains Shieldbreaker Hachet for testing. Do not restore the earlier pre-recruit backup.
 - The approved DD1 expedition selector remains; do not resume the removed round200-201 menu.
+
+## Round207: the Shieldbreaker's combat mechanics in DD2 terms (2026-10-10)
+
+Owner, while another agent remeshes her: "you can get current context and git state to implement her combat
+mecanics"; she was not launched. Another agent committed round 203's uncommitted Shieldbreaker integration with
+its model work (3a28467); its in-progress model files were left untouched.
+
+DD2 facts: skills ignore tokens through token_ignores (TokenIgnore til_ignore_block_buff = block+block_plus,
+til_ignore_guard, til_ignore_stealth) and cap uses per battle with m_Limit (hel_adrenaline_rush has 2, like
+Serpent Sway). Effects exist for add_1_daze (Token daze: consume delay_turn, inverse of speed), add_1/2/3_block,
+remove_all_guard, remove_all_stealth, add_1_vulnerable.
+
+Built (Core, general rules): SkillShape carries IgnoreProtection/IgnoreGuard/IgnoreStealth/PerBattleLimit;
+Dd1HeroKit reads them from a hero's combat_skill; SkillText adds the token ignores (kept with the base skill's)
+and DD1's limit (the base skill's stays when DD1 has none). Map: negative speed buffs -> add_1_daze, crits
+received -> add_1_vulnerable, unstealth -> remove_all_stealth, clearguarded -> remove_all_guard,
+health_damage_blocks N -> add_N_block (max 3). DD1 monsters with these effects benefit too. Dd1HeroClasses
+logs her DD1 effects with no DD2 counterpart (Block Guard, SB Dmg Marked). Tests: base effect mapping and real
+DD2 ids, token ignores and limits in skill text, her flags and every skill's effects (954 Core pass).

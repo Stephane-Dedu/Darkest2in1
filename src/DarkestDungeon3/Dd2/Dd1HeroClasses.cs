@@ -86,6 +86,7 @@ internal static class Dd1HeroClasses
         if (standIn == null) return false;
 
         var made = new List<ResourceSkillBase>();
+        var unmapped = new List<string>();
         ResourceActor clone = null;
         bool ok = false;
         try
@@ -94,8 +95,10 @@ internal static class Dd1HeroClasses
             {
                 var shape = kit.Shape(dd1Skill);
                 string baseSkill = Dd1SkillToDd2.BaseOf(skillId);
-                var effects = Dd1SkillToDd2.Effects(shape, session.Content.Effects.Get, new List<string>(),
+                var missing = new List<string>();
+                var effects = Dd1SkillToDd2.Effects(shape, session.Content.Effects.Get, missing,
                     session.Content.Buffs != null ? session.Content.Buffs.Get : null);
+                unmapped.AddRange(missing.Select(m => dd1Skill + ": " + m));
                 var baseResource = Singleton<ResourceDatabaseSkills>.Instance.GetResource(baseSkill);
                 if (baseResource == null || !Dd1SkillData.Make(skillId, baseSkill, shape, 1f, effects.Target, effects.Performer))
                 {
@@ -136,7 +139,8 @@ internal static class Dd1HeroClasses
             locations[classId] = locations[StandIn];
             Registered[classId] = clone;
             ok = true;
-            Plugin.Log.LogInfo($"[dd1 hero] registered {classId} on {StandIn}: {made.Count} DD1 skills, hp x{hpScale:0.##}, {kit.SelectedMax} to equip");
+            Plugin.Log.LogInfo($"[dd1 hero] registered {classId} on {StandIn}: {made.Count} DD1 skills, hp x{hpScale:0.##}, {kit.SelectedMax} to equip"
+                + (unmapped.Count > 0 ? "; DD1 effects without a DD2 counterpart: " + string.Join(", ", unmapped) : ""));
             return true;
         }
         catch (Exception e)

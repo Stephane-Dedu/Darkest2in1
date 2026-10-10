@@ -132,6 +132,7 @@ public static class Dd1SkillToDd2
             if (damage < 0) dd2.Add("add_1_weak");
             if (defense < 0 || protection < 0) dd2.Add("add_1_vulnerable");
             if (accuracy < 0) dd2.Add("add_1_blind");
+            if (speed < 0) dd2.Add("add_1_daze");      // DD2's daze delays the turn: its inverse of speed
             if (damage > 0) dd2.Add("add_1_strength");
             if (defense > 0) dd2.Add("add_1_dodge");
             if (protection > 0) dd2.Add("add_1_block");
@@ -139,6 +140,13 @@ public static class Dd1SkillToDd2
             if (crit > 0) dd2.Add("add_1_crit");
         }
         else if (e.Int("tag") > 0) dd2.Add("add_1_vulnerable");   // DD1's mark: DD2's vulnerable makes the next hit hurt more
+        // More crits taken (the Shieldbreaker's Expose): DD2's vulnerable, its "hit harder" token.
+        if (e.Str("buff_type") == "crit_received_chance" && e.Float("buff_amount") > 0 && !dd2.Contains("add_1_vulnerable")) dd2.Add("add_1_vulnerable");
+        if (e.Int("unstealth") > 0) dd2.Add("remove_all_stealth");
+        if (e.Int("clearguarded") > 0) dd2.Add("remove_all_guard");
+        // Damage blocks (Serpent Sway's aegis): as many of DD2's block tokens (it has one to three).
+        int blocks = e.Int("health_damage_blocks");
+        if (blocks > 0) dd2.Add($"add_{Math.Min(3, blocks)}_block");
 
         string on = e.Str("target", "target");
         bool self = on.StartsWith("performer", StringComparison.Ordinal);
@@ -182,6 +190,22 @@ public static class Dd1SkillToDd2
         if (dd1.TargetRanks.Count > 0)
             lines.Insert(2, ("target_ranks", dd1.TargetRanks.Select(r => r.ToString(CultureInfo.InvariantCulture)).ToList()));
         lines.Add(("m_IsMultiHit", new List<string> { dd1.AllTargets ? "True" : "False" }));
+        // What the attack goes through, as DD2's token ignores (kept with the base skill's own).
+        var ignores = new List<string>();
+        if (dd1.IgnoreProtection) ignores.Add("til_ignore_block_buff");   // DD1's protection: DD2's block tokens
+        if (dd1.IgnoreGuard) ignores.Add("til_ignore_guard");
+        if (dd1.IgnoreStealth) ignores.Add("til_ignore_stealth");
+        if (ignores.Count > 0)
+        {
+            int at = lines.FindIndex(l => l.Key == "token_ignores");
+            if (at >= 0) lines[at] = ("token_ignores", lines[at].Values.Concat(ignores).Distinct().ToList());
+            else lines.Add(("token_ignores", ignores));
+        }
+        if (dd1.PerBattleLimit > 0)
+        {
+            lines.RemoveAll(l => l.Key == "m_Limit");
+            lines.Add(("m_Limit", new List<string> { dd1.PerBattleLimit.ToString(CultureInfo.InvariantCulture) }));
+        }
         return Text(lines);
     }
 

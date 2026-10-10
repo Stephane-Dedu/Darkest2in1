@@ -25,7 +25,7 @@ public sealed class Dd1HeroKit
         public string Id, Type, TargetText;
         public int Level, MoveBack, MoveForward, PerBattleLimit;
         public float DamageMod, Crit;
-        public bool CritValid = true;
+        public bool CritValid = true, IgnoreProtection, IgnoreGuard, IgnoreStealth;
         public List<int> Launch = new();
         public List<string> Effects = new();
     }
@@ -105,6 +105,9 @@ public sealed class Dd1HeroKit
                 MoveBack = move.Count > 0 && int.TryParse(move[0], out int back) ? back : 0,
                 MoveForward = move.Count > 1 && int.TryParse(move[1], out int forward) ? forward : 0,
                 PerBattleLimit = r.Int("per_battle_limit"),
+                IgnoreProtection = Flag(r, "ignore_protection"),
+                IgnoreGuard = Flag(r, "ignore_guard"),
+                IgnoreStealth = Flag(r, "ignore_stealth"),
             };
             skills[(id, s.Level)] = s;
             if (!order.Contains(id)) order.Add(id);
@@ -130,6 +133,8 @@ public sealed class Dd1HeroKit
             _skills = skills,
         };
     }
+
+    private static bool Flag(DarkestRecord r, string key) => string.Equals(r.Str(key), "true", StringComparison.OrdinalIgnoreCase);
 
     private static List<int> Ranks(string s) => s.Where(c => c >= '1' && c <= '4').Select(c => c - '0').Distinct().OrderBy(x => x).ToList();
 
@@ -158,6 +163,10 @@ public sealed class Dd1HeroKit
             Effects = s.Effects.ToList(),
             MoveBack = s.MoveBack,
             MoveForward = s.MoveForward,
+            IgnoreProtection = s.IgnoreProtection,
+            IgnoreGuard = s.IgnoreGuard,
+            IgnoreStealth = s.IgnoreStealth,
+            PerBattleLimit = s.PerBattleLimit,
         };
     }
 

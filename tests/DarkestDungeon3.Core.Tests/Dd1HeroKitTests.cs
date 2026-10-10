@@ -70,6 +70,42 @@ public class Dd1HeroKitTests
     }
 
     [Fact]
+    public void HerSkillFlagsAreKept()
+    {
+        if (Shieldbreaker == null) return;
+        Assert.True(Shieldbreaker.Shape("pierce").IgnoreProtection);
+        Assert.True(Shieldbreaker.Shape("break_guard").IgnoreGuard);
+        Assert.True(Shieldbreaker.Shape("expose").IgnoreStealth);
+        Assert.Equal(2, Shieldbreaker.Shape("serpents_sway").PerBattleLimit);
+        Assert.Equal(0, Shieldbreaker.Shape("pierce").PerBattleLimit);
+    }
+
+    [Fact]
+    public void HerEffectsBecomeDd2Tokens()
+    {
+        if (Shieldbreaker == null) return;
+        var effects = EffectLibrary.Load(Install);
+        var buffs = Dd1Buffs.Load(Install);
+        (System.Collections.Generic.List<string> Target, System.Collections.Generic.List<string> Performer) Of(string skill) =>
+            Dd1SkillToDd2.Effects(Shieldbreaker.Shape(skill), effects.Get, new System.Collections.Generic.List<string>(), buffs.Get);
+
+        var puncture = Of("break_guard");
+        Assert.Contains("remove_all_guard", puncture.Target);       // Clear Guarded Target
+        Assert.Contains("move_pull_2", puncture.Target);            // Pull 2A
+        Assert.Contains("add_1_daze", puncture.Target);             // Daze Slowdown 1
+        Assert.Contains("skill_dot_large_blight", Of("adders_kiss").Target);
+        var expose = Of("expose");
+        Assert.Contains("add_1_vulnerable", expose.Target);         // more crits taken
+        Assert.Contains("remove_all_stealth", expose.Target);
+        Assert.Contains("add_1_daze", expose.Target);               // SB Slow 1
+        var sway = Of("serpents_sway");
+        Assert.Contains("add_2_block", sway.Performer);             // SB Aegis: two damage blocks
+        Assert.Contains("add_1_speed", sway.Performer);
+        Assert.Contains("move_forward_1", sway.Performer);
+        Assert.Contains("move_backward_1", Of("adders_kiss").Performer);
+    }
+
+    [Fact]
     public void HerStatsStandOnTheStandInsBlock()
     {
         if (Shieldbreaker == null) return;

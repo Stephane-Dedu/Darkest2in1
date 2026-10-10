@@ -19,6 +19,10 @@ public sealed class SkillShape
     public bool AllTargets, CritValid = true;
     public List<string> Effects = new();
 
+    // DD1 skill flags (heroes' info files): what the attack goes through, and uses per battle (0: no limit).
+    public bool IgnoreProtection, IgnoreGuard, IgnoreStealth;
+    public int PerBattleLimit;
+
     /// <summary>"friendly", "ranged" or "melee".</summary>
     public string Kind => Friendly ? "friendly" : Ranged ? "ranged" : "melee";
 

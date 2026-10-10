@@ -96,6 +96,29 @@ public class SkillConversionTests
         Assert.Equal(10, Dd1SkillToDd2.TorchDecrease(new SkillShape { Effects = { "Darkness 2" } }, Dd1Effects.Get));
     }
 
+    [Fact]
+    public void GuardStealthAndBlockEffectsMapToRealDd2Tokens()
+    {
+        Assert.Equal(new[] { "remove_all_stealth" }, Dd1SkillToDd2.Map(Dd1Effects.Get("Destealth")).Target);
+        Assert.Equal(new[] { "remove_all_guard" }, Dd1SkillToDd2.Map(Dd1Effects.Get("Clear Guarded Target")).Target);
+        foreach (string id in new[] { "add_1_daze", "remove_all_stealth", "remove_all_guard", "add_1_block", "add_2_block", "add_3_block", "add_1_vulnerable" })
+            Assert.True(Element("Effect", id).Length > 0, id + " is not a DD2 effect");
+        foreach (string id in new[] { "til_ignore_block_buff", "til_ignore_guard", "til_ignore_stealth" })
+            Assert.True(Element("TokenIgnore", id).Length > 0, id + " is not a DD2 token ignore");
+    }
+
+    [Fact]
+    public void SkillFlagsBecomeDd2TokenIgnoresAndAPerBattleLimit()
+    {
+        var shape = new SkillShape { Id = "x", LaunchRanks = { 1 }, TargetRanks = { 1 }, IgnoreProtection = true, IgnoreGuard = true, PerBattleLimit = 2 };
+        var lines = Dd1SkillToDd2.Lines(Dd1SkillToDd2.SkillText("token_ignores,til_ignore_crit,\nm_Limit,3,\nm_Tags,melee,\n", shape)).ToDictionary(l => l.Key, l => l.Values);
+        Assert.Equal(new[] { "til_ignore_crit", "til_ignore_block_buff", "til_ignore_guard" }, lines["token_ignores"]);
+        Assert.Equal(new[] { "2" }, lines["m_Limit"]);
+        var plain = Dd1SkillToDd2.Lines(Dd1SkillToDd2.SkillText("m_Limit,3,\n", new SkillShape { Id = "y", LaunchRanks = { 1 } })).ToDictionary(l => l.Key, l => l.Values);
+        Assert.False(plain.ContainsKey("token_ignores"));
+        Assert.Equal(new[] { "3" }, plain["m_Limit"]);      // no DD1 limit: the base skill's stays
+    }
+
     /// <summary>Every DD1 monster we stand in for converts: each generated effect is a real DD2 effect; the DD1
     /// effects with no DD2 counterpart are listed.</summary>
     [Fact]
