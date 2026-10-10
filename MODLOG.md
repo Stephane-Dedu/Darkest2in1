@@ -4363,3 +4363,36 @@ Head counter-yaw follows the new total to keep the gaze steady. Hip/leg motion,
 knee posture, timing, wrist-relative sword grip and colour handoff are unchanged.
 Release build and the eight gait tests pass; deployed while DD2 is stopped.
 No native run this round, per the owner's instruction. Visual review remains pending.
+
+## Round197: manual corridor entry from room clicks and map zoom (2026-10-10)
+
+Owner requested removal of automatic corridor walking after selecting the next room,
+plus map zoom. CrawlUi now dispatches room clicks to Driver.SelectMapRoom. It cancels
+queued walking and selects only the first exit toward the destination through the
+existing fade. In a corridor it leaves the party in place for held keyboard/mouse
+movement. A discovered secret room can still be entered at its door; distant secret
+clicks give manual approach guidance. Explicit hall-square travel and F3 developer
+room routing retain their existing behavior. Map navigation methods are grouped in
+Driver.MapNavigation.cs so tests run the production selection and route state.
+
+The map accepts wheel input inside its enabled panel, bounded to 50–200%, anchored
+under the pointer. Room/hall icons, markers, indicator, tooltips and click geometry
+share the scale. Panning stays in screen pixels. Moving the party recenters without
+changing zoom; a new map resets to 100%. Wheel input during a press suppresses the
+release click so zoom cannot accidentally select a room.
+
+Nineteen new cases cover manual room/secret selection, cancellation, event blocking,
+zoom anchoring/bounds, scaled hover/clicks, pan/recenter/reset, disabled/outside input
+and press-plus-wheel cancellation. All920 Core +168 UI tests and Release pass.
+The tests replace Unity's fade/audio wrapper, not the production navigation methods;
+native IMGUI capture, rendering and movement timing still need a game check.
+Deployed while DD2 is stopped; plugin/Core DLL hashes match the build. No game launch
+or campaign-save access this round, per the owner's instruction.
+
+## Status 2026-10-10: round197 ready, game left closed
+
+Round197 built and deployed. Native review pending: select the next room, wait idle
+after the fade, then hold D/A or the corridor edges to walk; wheel-zoom and drag the
+map, check tooltips/clicks at both limits and enter/return through a secret door.
+Round196 upper-body animation still awaits owner visual review. No running game,
+temporary probe or save restore pending. The parity loop remains paused.

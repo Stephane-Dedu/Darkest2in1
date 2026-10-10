@@ -720,7 +720,7 @@ internal sealed class CrawlUi
 
     private readonly CrawlMapUi _map = new();
 
-    private void DrawMap(ExpeditionState exp) => _map.Draw(exp, D.WalkToTile, D.WalkToRoom);
+    private void DrawMap(ExpeditionState exp) => _map.Draw(exp, D.WalkToTile, D.SelectMapRoom);
 
     // ---------------- inventory ----------------
 

@@ -73,6 +73,7 @@ namespace DarkestDungeon3.Ui
         public const float W = 1920, H = 1080;
         public static readonly List<string> Texts = new();
         public static readonly List<string> Tips = new();
+        public static void Announce(string text) => Texts.Add(text);
         public static void Tip(string text, Color? title = null)
         {
             if (Event.current.type == EventType.Repaint && !string.IsNullOrEmpty(text)) Tips.Add(text);

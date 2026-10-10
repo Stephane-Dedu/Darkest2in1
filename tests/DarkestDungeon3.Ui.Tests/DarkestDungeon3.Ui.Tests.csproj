@@ -17,6 +17,7 @@
     <Compile Include="../../src/DarkestDungeon3/Ui/CrawlInventoryInput.cs" Link="CrawlInventoryInput.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/EmbarkUi.Navigation.cs" Link="EmbarkUi.Navigation.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CrawlMapUi.cs" Link="CrawlMapUi.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Runtime/Driver.MapNavigation.cs" Link="Driver.MapNavigation.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CorridorGroundUi.cs" Link="CorridorGroundUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CorridorPanoramaUi.cs" Link="CorridorPanoramaUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/LootGridUi.cs" Link="LootGridUi.cs" />

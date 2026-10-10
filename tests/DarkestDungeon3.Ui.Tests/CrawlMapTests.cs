@@ -196,7 +196,7 @@ public class CrawlMapTests : IDisposable
     }
 
     [Fact]
-    public void OrdinaryClicksStillRequestRoomAndHallTravelWithoutHoverChangingTheRaid()
+    public void OrdinaryClicksRequestRoomSelectionAndHallTravelWithoutHoverChangingTheRaid()
     {
         var raid = Raid(RoomContent.Curio);
         Draw(raid, 1420, 900, EventType.MouseDown);
@@ -221,5 +221,94 @@ public class CrawlMapTests : IDisposable
         Assert.Equal("Battle", Assert.Single(Gui.Tips));
         Draw(raid, 1340, 900); // plot X=1 is not the generated hall's location
         Assert.Empty(Gui.Tips);
+    }
+
+    [Fact]
+    public void WheelZoomAnchorsToPointerAndScalesRoomAndHallClickTargets()
+    {
+        var raid = Raid(RoomContent.Curio);
+        raid.Map.Corridor(0).Tiles[0].Content = HallContent.Battle;
+        Draw(raid, 1420.5f, 899.5f, EventType.ScrollWheel, new Vector2(0, -100));
+        Assert.Equal(EventType.Used, Event.current.type);
+        Draw(raid, 1475, 900); // room stays under the pointer, now with a 128px icon
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Draw(raid, 1475, 900, EventType.MouseDown);
+        Draw(raid, 1475, 900, EventType.MouseUp);
+        Assert.Equal(1, Assert.Single(_roomMoves));
+        Draw(raid, 1260.5f, 900); // hallway follows the same anchored scale
+        Assert.Equal("Battle", Assert.Single(Gui.Tips));
+        Draw(raid, 1260.5f, 900, EventType.MouseDown);
+        Draw(raid, 1260.5f, 900, EventType.MouseUp);
+        Assert.Equal((0, 0), Assert.Single(_tileMoves));
+        Assert.Equal(0, raid.RoomId);
+    }
+
+    [Theory]
+    [InlineData(-100, 1600, 1610)] // maximum: 200%, room center 1540.5, half width 64
+    [InlineData(100, 1375, 1380)] // minimum: 50%, room center 1360.5, half width 16
+    public void ZoomIsBoundedAndWheelDoesNotRequestTravel(float scroll, float inside, float outside)
+    {
+        var raid = Raid(RoomContent.Curio);
+        for (int i = 0; i < 3; i++) Draw(raid, 1300.5f, 899.5f, EventType.ScrollWheel, new Vector2(0, scroll));
+        Draw(raid, inside, 900);
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Draw(raid, outside, 900);
+        Assert.Empty(Gui.Tips);
+        Assert.Empty(_roomMoves);
+        Assert.Empty(_tileMoves);
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void WheelOutsideMapOrOnDisabledPageDoesNotZoomOrConsumeInput(bool disabled)
+    {
+        var raid = Raid(RoomContent.Curio);
+        GUI.enabled = !disabled;
+        Draw(raid, disabled ? 1300.5f : 1700, 900, EventType.ScrollWheel, new Vector2(0, -100));
+        Assert.Equal(EventType.ScrollWheel, Event.current.type);
+        GUI.enabled = true;
+        Draw(raid, 1420, 900);
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Draw(raid, 1475, 900);
+        Assert.Empty(Gui.Tips);
+    }
+
+    [Fact]
+    public void ZoomedMapPansInScreenPixelsAndKeepsZoomWhenRecenteringOnParty()
+    {
+        var raid = Raid(RoomContent.Curio);
+        Draw(raid, 1300.5f, 899.5f, EventType.ScrollWheel, new Vector2(0, -100));
+        Draw(raid, 1540.5f, 900, EventType.MouseDown);
+        Draw(raid, 1440.5f, 900, EventType.MouseDrag, new Vector2(-100, 0));
+        Draw(raid, 1440.5f, 900, EventType.MouseUp);
+        Draw(raid, 1440.5f, 900);
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Assert.Empty(_roomMoves);
+        raid.RoomId = 1;
+        Draw(raid, 1360, 900); // recentered icon retains its 64px half width
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Draw(raid, 1370, 900);
+        Assert.Empty(Gui.Tips);
+        // A different expedition starts at normal zoom, even if its room ID matches.
+        raid = Raid(RoomContent.Curio);
+        Draw(raid, 1420, 900);
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
+        Draw(raid, 1475, 900);
+        Assert.Empty(Gui.Tips);
+    }
+
+    [Fact]
+    public void ZoomDuringAPressCancelsThatClickOnRelease()
+    {
+        var raid = Raid(RoomContent.Curio);
+        Draw(raid, 1420, 900, EventType.MouseDown);
+        Draw(raid, 1420, 900, EventType.ScrollWheel, new Vector2(0, -2));
+        Draw(raid, 1420, 900, EventType.MouseUp);
+        Assert.Equal(EventType.Used, Event.current.type);
+        Assert.Empty(_roomMoves);
+        Assert.Empty(_tileMoves);
+        Draw(raid, 1420, 900);
+        Assert.Equal("Curio", Assert.Single(Gui.Tips));
     }
 }

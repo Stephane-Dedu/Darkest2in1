@@ -3,7 +3,7 @@
 [assembly: Xunit.CollectionBehavior(DisableTestParallelization = true)]
 namespace UnityEngine;
 
-public enum EventType { MouseDown, MouseDrag, MouseUp, MouseMove, Repaint, Layout, Used, KeyDown }
+public enum EventType { MouseDown, MouseDrag, MouseUp, MouseMove, Repaint, Layout, Used, KeyDown, ScrollWheel }
 public enum KeyCode { None, Escape, Space, Return }
 public sealed class Event
 {
