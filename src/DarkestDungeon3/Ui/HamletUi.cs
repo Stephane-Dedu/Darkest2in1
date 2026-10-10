@@ -425,7 +425,8 @@ internal sealed class HamletUi
     private void DrawRegions()
     {
         var zones = CampaignRegions.Options.ToList();
-        var panel = new Rect(300, BarY - 120 - zones.Count * 74, 860, 110 + zones.Count * 74);
+        // One more row under the areas: which quest select Embark opens.
+        var panel = new Rect(300, BarY - 120 - (zones.Count + 1) * 74, 860, 110 + (zones.Count + 1) * 74);
         Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.96f));
         Gui.Fill(new Rect(panel.x, panel.y, panel.width, 2), new Color(0.45f, 0.38f, 0.24f));
         Gui.Text(new Rect(panel.x + 24, panel.y + 12, 600, 44), "Campaign regions", 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
@@ -436,11 +437,7 @@ internal sealed class HamletUi
             string z = zones[i];
             bool on = CampaignRegions.Enabled(E, z);
             var row = new Rect(panel.x + 24, panel.y + 96 + i * 74, panel.width - 48, 66);
-            if (row.Contains(Event.current.mousePosition)) Gui.Fill(row, new Color(1, 1, 1, 0.04f));
-            var box = new Rect(row.x + 4, row.y + 16, 32, 32);
-            Gui.Fill(box, new Color(0.12f, 0.1f, 0.07f));
-            Gui.Fill(new Rect(box.x, box.y, box.width, 2), new Color(0.45f, 0.38f, 0.24f));
-            if (on) Gui.Fill(new Rect(box.x + 7, box.y + 7, 18, 18), Gui.Gold);
+            DrawToggleRow(row, on);
             E.ZoneXp.TryGetValue(z, out int xp);
             Gui.Text(new Rect(row.x + 52, row.y + 2, 400, 34), S.Zones.ZoneName(z), 26, on ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
             string state = !on ? "Off" : CampaignRegions.Unlocked(E, S.Campaign, z)
@@ -454,11 +451,35 @@ internal sealed class HamletUi
                 Gui.Announce(!on ? $"{S.Zones.ZoneName(z)} is enabled." : $"{S.Zones.ZoneName(z)} is closed.");
             }
         }
+
+        // Ours: the quest select Embark opens. A display preference (BepInEx config), not campaign state.
+        var menu = new Rect(panel.x + 24, panel.y + 96 + zones.Count * 74, panel.width - 48, 66);
+        bool cards = Plugin.Dd2DestinationMenu.Value;
+        Gui.Fill(new Rect(menu.x, menu.y - 4, menu.width, 1), new Color(0.45f, 0.38f, 0.24f, 0.6f));
+        DrawToggleRow(menu, cards);
+        Gui.Text(new Rect(menu.x + 52, menu.y + 2, 400, 34), "DD2 destination cards", 26, cards ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(menu.x + 460, menu.y + 2, 300, 34), cards ? "On (preview)" : "Off", 18, Gui.Dd1Class, TextAnchor.MiddleRight);
+        Gui.Text(new Rect(menu.x + 52, menu.y + 34, menu.width - 60, 28), "Embark shows DD2's region cards with each region's quests, instead of the DD1 quest map.", 17, Gui.Dd1Text, TextAnchor.MiddleLeft);
+        if (Gui.Hotspot(menu))
+        {
+            Plugin.Dd2DestinationMenu.Value = !cards;
+            Gui.Announce(!cards ? "Embark opens DD2's destination cards." : "Embark opens the DD1 quest map.");
+        }
         if (GUI.enabled && Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)
         {
             _regionsOpen = false;
             Event.current.Use();
         }
+    }
+
+    /// <summary>A Regions panel row's hover shade and its checkbox.</summary>
+    private static void DrawToggleRow(Rect row, bool on)
+    {
+        if (row.Contains(Event.current.mousePosition)) Gui.Fill(row, new Color(1, 1, 1, 0.04f));
+        var box = new Rect(row.x + 4, row.y + 16, 32, 32);
+        Gui.Fill(box, new Color(0.12f, 0.1f, 0.07f));
+        Gui.Fill(new Rect(box.x, box.y, box.width, 2), new Color(0.45f, 0.38f, 0.24f));
+        if (on) Gui.Fill(new Rect(box.x + 7, box.y + 7, 18, 18), Gui.Gold);
     }
 
     // ---------------------------------------------------------------- building windows

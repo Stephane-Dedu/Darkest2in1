@@ -30,3 +30,11 @@ When producing runtime backgrounds, omit all text, portraits, buttons, quest ico
 Load the private art pack from `PrivateExpeditionArt` beside the game, or the configured `Paths.ExpeditionArtFolder`. Missing art retains the existing DD1 selector. Keep the artwork outside the public repository. The preparation tool builds registered soft-edged regional overlays and quest previews from the locally generated paintings.
 
 This approval covers the selector's presentation. The Mountain gameplay overhaul in `overhaul_roadmap.md` is a separate design.
+
+## DD2 destination cards (preview, round 200)
+
+An alternative quest select, switched in the Hamlet's Regions panel or with the top-left link on either quest
+screen. It borrows DD2's innkeeper region choice: one card per map position with DD2's own region painting, and
+the region's quests where DD2 shows its modifier. The Mountain is a banner above the cards. Paired areas keep the
+arrow beside the name. Quest details stay on the left, the roster on the right, the party below. The painted map
+above remains the default.

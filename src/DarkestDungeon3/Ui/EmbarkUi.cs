@@ -34,7 +34,7 @@ internal sealed partial class EmbarkUi
         // While a hero sheet is open, the screen under it is only painted: clicks belong to the sheet.
         if (_sheetHeroId == null || Event.current.type == EventType.Repaint)
         {
-            if (_provisioning) DrawProvisioner(); else DrawQuestSelect();
+            if (_provisioning) DrawProvisioner(); else if (Destinations) DrawDestinations(); else DrawQuestSelect();
         }
         DrawSheet();
         if (_error != null) Gui.Text(new Rect(560, 1040, 900, 36), _error, 22, Gui.Blood, TextAnchor.MiddleCenter);
@@ -75,20 +75,26 @@ internal sealed partial class EmbarkUi
         return true;
     }
 
-    private void DrawQuestSelect()
+    /// <summary>Drop a quest that left the board, keep the focus on an enabled area and give every map position an
+    /// enabled area to show.</summary>
+    private void PrepareAreas()
     {
         if (_quest != null && !E.Quests.Contains(_quest)) _quest = null;
         if (_focusedZone == null || (_focusedZone != QuestBoard.DarkestDungeon && !CampaignRegions.Enabled(E, _focusedZone)))
             FocusArea(_quest?.Dungeon ?? E.Quests.FirstOrDefault()?.Dungeon);
-
-        var paintedMap = ExpeditionMapArt.Background;
-        _expeditionStyle = paintedMap != null;
         foreach (var location in CampaignRegions.Legacy)
         {
             var areas = CampaignRegions.AtLocation(E, location);
             if (areas.Count > 0 && (!_mapAreas.TryGetValue(location, out var selected) || !areas.Contains(selected)))
                 _mapAreas[location] = areas[0];
         }
+    }
+
+    private void DrawQuestSelect()
+    {
+        PrepareAreas();
+        var paintedMap = ExpeditionMapArt.Background;
+        _expeditionStyle = paintedMap != null;
         if (_expeditionStyle) DrawPaintedMap(paintedMap);
         else
         {
@@ -112,7 +118,13 @@ internal sealed partial class EmbarkUi
             DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
 
         if (_quest != null) DrawQuestScroll(_quest);
+        DrawEmbarkControls();
+        DrawMenuSwitch();
+    }
 
+    /// <summary>What both quest selects share: the party slots, the roster and the two buttons.</summary>
+    private void DrawEmbarkControls()
+    {
         DrawPartySlots(new Vector2(754, 900));
 
         var clicked = RosterColumn.Draw(E, S.Buildings.RosterSize(E), h =>
@@ -132,7 +144,11 @@ internal sealed partial class EmbarkUi
 
         var backRect = new Rect(30, 1000, 300, 60);
         if (_expeditionStyle ? ExpeditionButton(backRect, "Back to Hamlet", size: 24)
-            : Gui.DdButton(backRect, "Back to the Hamlet", size: 24)) WantsBack = true;
+            : Gui.DdButton(backRect, "Back to the Hamlet", size: 24))
+        {
+            WantsBack = true;
+            RegionCardArt.Release();
+        }
         var heroes = Heroes();
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         var provisionRect = new Rect(1190, 905, 330, 90);
@@ -192,6 +208,7 @@ internal sealed partial class EmbarkUi
             _mapAreas[ZoneBase.Of(quest.Dungeon)] = quest.Dungeon;
             int index = E.Quests.Where(q => q.Dungeon == quest.Dungeon).ToList().IndexOf(quest);
             _questRows[quest.Dungeon] = Mathf.Max(0, index / 4);
+            _cardPages[quest.Dungeon] = Mathf.Max(0, index / DestinationLayout.PerPage);
             _party.RemoveAll(id => !Homecoming.WillEmbark(E.Hero(id), quest, S.Hamlet.AnyResolveCanEmbark));
         }
         _error = null;
@@ -253,17 +270,7 @@ internal sealed partial class EmbarkUi
             var c = new Vector2(pos.x + (_expeditionStyle ? 34 : 160) + (i % 4) * 76, pos.y + (_expeditionStyle ? 100 : 92));
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
             bool hover = r.Contains(Event.current.mousePosition);
-            if (q == _quest)
-            {
-                var selected = Qs("quest_select_selected.png");
-                float radius = _expeditionStyle ? 56 : 72;
-                if (selected != null) GUI.DrawTexture(new Rect(c.x - radius, c.y - radius, radius * 2, radius * 2), selected);
-            }
-            var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png") ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
-            if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8) : r, ring);
-            int tier = q.Difficulty >= 6 ? 6 : q.Difficulty >= 5 ? 5 : q.Difficulty >= 3 ? 3 : 1;
-            var badge = Qs($"quest_select_{q.Type}_{tier}.png") ?? Qs($"quest_select_explore_{tier}.png");
-            if (badge != null) GUI.DrawTexture(new Rect(c.x - 20, c.y - 20, 40, 40), badge);
+            DrawQuestMedal(r, q, hover, _expeditionStyle ? 56 : 72);
             if (hover) Gui.Tip($"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}");
             if (Gui.Hotspot(r)) SelectQuest(q);
         }
@@ -286,6 +293,24 @@ internal sealed partial class EmbarkUi
             if (new Rect(scrollX - 18, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
         }
         _questRows[zone] = row;
+    }
+
+    /// <summary>DD1's quest medallion: the length ring (plot or generated), the type badge of its difficulty tier and,
+    /// for the chosen quest, the red selection behind it.</summary>
+    private void DrawQuestMedal(Rect r, QuestOffer q, bool hover, float selectedRadius)
+    {
+        var c = r.center;
+        float k = r.width / 72f;
+        if (q == _quest)
+        {
+            var selected = Qs("quest_select_selected.png");
+            if (selected != null) GUI.DrawTexture(new Rect(c.x - selectedRadius, c.y - selectedRadius, selectedRadius * 2, selectedRadius * 2), selected);
+        }
+        var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png") ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
+        if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 4 * k, r.y - 4 * k, r.width + 8 * k, r.height + 8 * k) : r, ring);
+        int tier = q.Difficulty >= 6 ? 6 : q.Difficulty >= 5 ? 5 : q.Difficulty >= 3 ? 3 : 1;
+        var badge = Qs($"quest_select_{q.Type}_{tier}.png") ?? Qs($"quest_select_explore_{tier}.png");
+        if (badge != null) GUI.DrawTexture(new Rect(c.x - 20 * k, c.y - 20 * k, 40 * k, 40 * k), badge);
     }
 
     private static string GoalLine(QuestOffer q)
@@ -425,7 +450,7 @@ internal sealed partial class EmbarkUi
             var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);
             _error = Driver.Instance.Embark(_quest, heroes, bought);
-            if (_error == null) { _party.Clear(); _cart.Items.Clear(); _quest = null; _provisioning = false; }
+            if (_error == null) { _party.Clear(); _cart.Items.Clear(); _quest = null; _provisioning = false; RegionCardArt.Release(); }
         }
     }
 

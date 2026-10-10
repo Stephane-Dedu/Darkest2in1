@@ -4468,3 +4468,30 @@ are installed and checked offline. The old game and both reverse-engineering
 workspaces remain intact. Native loader startup, DLC availability and round196/197
 visual/input checks await a permitted launch. No running game, probe or restore
 pending. DLC implementation deferrals and the paused parity loop are unchanged.
+
+## Round200: DD2 destination cards as a quest select preview (2026-10-10)
+
+Owner request (via the other agent's session, which ran out of tokens before writing code): try DD2's
+destination choice instead of the DD1 quest map, with an option to swap between the two like the region
+switches. Design as agreed there: Mountain above four visible regional cards, paired-area arrows, compact
+quest rows, the roster and party on the same screen, DD2 art drawn in our IMGUI (no inn scene).
+
+DD2 facts (decomp): the inn's route screen is SubScreenBiomeChoiceBhv spawning BiomeChoiceBhv cards
+(280 px wide, the END/Mountain card 800). A card shows the biome painting and frame, its name, the biome
+goal with its reward and the modifier ("biome_mutator_<id>") with a tooltip; hover scales 1.1 and lifts a
+grey veil, sounds AudioPathsBhv.InnBiomeHoverLeft / InnBiomeSelect. InnPresentationBhv loads the
+paintings from BiomeData.GetChoiceSprite()/GetChoiceFrameSprite() (AssetReferenceSprite), so they load
+without the inn. ResourceDatabaseBiomeData is registered by PostMainMenuSystemsInstaller; RegionCardArt
+uses it when it is up, else loads BiomeData under the owned DLC labels (as the database does). Biomes:
+City/Farm/Forest/Coast/Cave = dd2_city/farm/forest/coast/cave; MountainBrain..MountainBody (END).
+
+Built: EmbarkUi.Destinations (cards, Mountain banner, quest tooltip, party line-up, menu switch),
+DestinationLayout (geometry, paging, cover crop; 12 UI tests), RegionCardArt (own Addressables handles,
+released on Back/embark/switch), DrawQuestMedal shared with the DD1 map, PrepareAreas and
+DrawEmbarkControls shared by both quest selects. Switch: BepInEx Look/Dd2DestinationMenu (default off),
+toggled by a row under the areas in the Hamlet's Regions panel and a top-left link on both quest screens.
+The DD1 map path is unchanged. The frame sprites are not drawn yet (their shape is unseen).
+
+920 Core + 180 UI tests pass; built and deployed with DD2 closed (plugin hash 02068171...). Not yet seen
+in game: whether the database or the label path supplies the paintings in the Hamlet, the Mountain art,
+crop anchors, and the hero line-up's look.

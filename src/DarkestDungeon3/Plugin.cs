@@ -35,6 +35,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> HeroModelBrightness;
     internal static ConfigEntry<string> HeroModelPose;
     internal static ConfigEntry<float> Dd1MonsterScale;
+    internal static ConfigEntry<bool> Dd2DestinationMenu;
 
     private void Awake()
     {
@@ -45,6 +46,8 @@ public class Plugin : BaseUnityPlugin
             "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery.");
         ExpeditionArtPath = Config.Bind("Paths", "ExpeditionArtFolder", Path.Combine(Paths.GameRootPath, "PrivateExpeditionArt"),
             "Optional private expedition selector artwork. Contains map.png, regional overlays and preview images. Empty or missing map.png retains the DD1 selector.");
+        Dd2DestinationMenu = Config.Bind("Look", "Dd2DestinationMenu", false,
+            "Preview: Embark opens DD2's destination cards (the innkeeper's region choice, each region's quests in place of its modifier) instead of the DD1 quest map. Also switched in the Hamlet's Regions panel and on the quest screen.");
         DebugKeysEnabled = Config.Bind("Debug", "DebugKeys", true, "F8 dumps state, F9 test fight from the road, F10 wins a fight, F11 starts a fight in the dungeon.");
         HeroModels = Config.Bind("Look", "Dd2HeroModelsInDungeon", true, "DD2's animated hero models in the DD1 dungeon (falls back to DD2's flat hero art by itself if they render black).");
         Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");
