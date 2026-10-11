@@ -11,6 +11,8 @@ The DD2 kit supplies actual painted meshes, roof/stone/timber surfaces and props
 missing architecture. The buildings have depth, pitched/curved roofs and distinct sides and backs;
 there is no full-building picture mounted on a camera-facing plane.
 
+The first pass establishes these service shapes and source parts:
+
 | Location | DD1 reference | DD2 parts and authored structure |
 |---|---|---|
 | Abbey | Raised church, steep slate nave, rear bell tower, pointed windows and front stair | Sprawl `city_tower_02`; new nave, porch, buttresses, rose tracery, lancets and steps |
@@ -29,6 +31,20 @@ LODs and native runtime materials/placement remain subsequent work. Generic door
 some small sculpted details need further art fitting. The renders establish geometry and service identity;
 they do not establish in-game acceptance.
 
+The second pass (`v02`) keeps the first gallery for comparison and adds native DD2 painted meshwork:
+the Abbey's carved shrine entrance, the Academic house for the Sanitarium, Sprawl gateway masonry and
+individual inn roof/wing components for the Guild, and Hoarder cart joinery for the Nomad Wagon.
+Fitted parts retain their original UV coordinates and atlas textures. Broad native cloth panels replace
+the tent/wagon's thatch-derived fabric; wider painted timber panels replace the tiny wood sample.
+Neutral masonry, corner courses, stitching, ropes, forge tools and small service emblems add detail.
+The Ancestor gains carved facial features, hands and coat seams with gray stone rather than brick-patterned
+clothing. Its sculpt remains coarse compared with DD2's finished character art. Repeating masonry/roof
+samples and some inferred architecture still need individual painting and fitting.
+
+This is closer to DD2's painted direction, not a claim of identical production quality. The offline material
+conversion preserves native paint brightness and alpha cutouts; it does not reproduce DD2's native lighting,
+fog, outline shaders or animation. Both private galleries remain available; neither replaces the live town.
+
 For integration, `src/DarkestDungeon3.Core/Presentation/GltfModel.cs` currently reads JSON glTF with external `.bin` and image
 files. It does not read these packed GLBs or apply their painted color factors. Convert the package or extend
 that loader, fit the materials to DD2's native shaders, and verify axes/scale before replacing HamletStage parts.
@@ -44,27 +60,32 @@ $hamletPython = 'C:\Users\Piral\DarkestDungeon3\universal-modder\.venv\Scripts\p
 $hamletBlender = 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe'
 $hamletKit = 'C:\Users\Piral\DarkestDungeon3\local-art\dd2-native-kit'
 $hamletDd1 = 'C:\Users\Piral\DarkestDungeon3\local-art\dd1-reference-kit'
-$hamletOutput = 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-buildings-v01'
+$hamletOutput = 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-buildings-v02'
 & $hamletPython tools/hamlet_models/prepare.py --kit $hamletKit --dd1 $hamletDd1 --out $hamletOutput
-& $hamletBlender --background --factory-startup --python-exit-code 1 --python tools/hamlet_models/render.py -- --kit $hamletKit --out $hamletOutput
-& $hamletBlender --background --factory-startup --python-exit-code 1 --python tools/hamlet_models/verify.py -- --kit $hamletKit --out $hamletOutput
-& $hamletPython tools/hamlet_models/gallery.py --kit $hamletKit --out $hamletOutput
+& $hamletBlender --background --factory-startup --threads 8 --python-exit-code 1 --python tools/hamlet_models/render.py -- --kit $hamletKit --out $hamletOutput --detail-pass v02
+& $hamletBlender --background --factory-startup --threads 8 --python-exit-code 1 --python tools/hamlet_models/verify.py -- --kit $hamletKit --out $hamletOutput
+& $hamletPython tools/hamlet_models/gallery.py --kit $hamletKit --out $hamletOutput --previous 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-buildings-v01'
 ```
 
 `render.py --only abbey,guild` rebuilds selected buildings. Every model gets four 1024px camera renders,
 a textured GLB and a packed, editable Blender document. Source inputs use Unity X/right, Y/up, Z/back axes.
 The GLB exporter uses glTF's Y-up convention; re-import into Blender restores the authoring coordinates.
 The presentation floor/lights/camera are excluded from the GLB. Inspect the packed `.blend` to edit parts.
+For the original architecture, select `--detail-pass v01` and a separate output directory. Quick previews
+can use `--views hero --resolution 512 --samples 8`; restore all four views before verification/gallery creation.
 
 `verify.py` re-imports every GLB, compares topology and bounds, requires finite geometry with real depth,
-checks embedded texture data, compares painted color factors with the packed authoring materials, and renders
+checks embedded texture data, compares painted base/emission factors and native alpha thresholds with the packed authoring materials, and renders
 the exported file itself. Current Blender Mix nodes preserve the glass/cloth tints that legacy MixRGB nodes lose
-in Blender 5's glTF exporter. `verified.json` records the results and SHA256 per model. The gallery rejects a
+in Blender 5's glTF exporter. Native emission is converted to explicit Principled emission and glTF's
+`KHR_materials_emissive_strength`, retaining painted brightness above one. `verified.json` records the results and SHA256 per model. The gallery rejects a
 GLB changed after verification. Its opening pictures and model contact sheet use these re-imported renders.
 Other gallery buttons show the authoring scene from the front, three-quarter, rear and side cameras.
 
-Private outputs include `gallery.html`, `hamlet-building-models-v01.png`, `dd1-to-dd2-comparison-v01.png`,
+Private outputs include `gallery.html`, `hamlet-building-models-v02.png`, `dd1-to-dd2-comparison-v02.png`,
 `models.json`, `texture-sources.json`, `dd1-sources.json` and each building's model/render directory.
+With `--previous`, the gallery also copies the previous exported renders for its First pass buttons and
+creates `before-after-v02.png`. This comparison needs no browser server or network connection.
 No exported model, game texture, reference image or packed Blender file belongs in Git or a release.
 The scripts never read saves, launch DD2 or change the installed game. The independent corridor and
 Shieldbreaker pipelines are untouched.

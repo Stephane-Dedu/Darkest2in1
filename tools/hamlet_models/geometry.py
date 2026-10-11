@@ -4,11 +4,12 @@ import random
 from pathlib import Path
 import bpy
 import numpy as np
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 KIT = OUT = LIB = None
 MATERIALS = {}
 SOURCES = []
+DETAIL_PASS = 'v01'
 
 
 def multiply_node(tree, color):
@@ -33,11 +34,29 @@ def exportable_native_materials(objects):
             for link in list(old.outputs[0].links):
                 tree.links.new(node.outputs[2],link.to_socket)
             tree.nodes.remove(old)
+        # Export painted emission explicitly, retaining brightness above one through glTF's emissive extension.
+        old=next((n for n in tree.nodes if n.type=='EMISSION'),None)
+        if old:
+            shader=tree.nodes.new('ShaderNodeBsdfPrincipled')
+            shader.inputs['Base Color'].default_value=(0,0,0,1)
+            shader.inputs['Roughness'].default_value=1
+            shader.inputs['Specular IOR Level'].default_value=0
+            shader.inputs['Emission Strength'].default_value=old.inputs['Strength'].default_value
+            shader.inputs['Emission Color'].default_value=old.inputs['Color'].default_value
+            for link in list(old.inputs['Color'].links):
+                tree.links.new(link.from_socket,shader.inputs['Emission Color'])
+            cutoff=next((n for n in tree.nodes if n.type=='MATH' and n.operation=='GREATER_THAN'),None)
+            if cutoff:
+                tree.links.new(cutoff.outputs[0],shader.inputs['Alpha'])
+            output=next(n for n in tree.nodes if n.type=='OUTPUT_MATERIAL')
+            tree.links.new(shader.outputs[0],output.inputs['Surface'])
+            tree.nodes.remove(old)
 
 
-def configure(kit, out, lib):
-    global KIT, OUT, LIB
+def configure(kit, out, lib, detail_pass='v01'):
+    global KIT, OUT, LIB, DETAIL_PASS
     KIT, OUT, LIB = Path(kit), Path(out), lib
+    DETAIL_PASS=detail_pass
     MATERIALS.clear()
     SOURCES.clear()
 
@@ -83,10 +102,14 @@ def ink():
 
 
 def wood():
+    if DETAIL_PASS=='v02':
+        return material('DD2 painted wood panels',(.8,.73,.65,1),'timber_native',.6)
     return material('DD2 weathered timber', (1.15, 1.0, .85, 1), 'timber', .3)
 
 
 def stone():
+    if DETAIL_PASS=='v02':
+        return material('DD2 carved masonry',(.8,.84,.89,1),'masonry_native',.55)
     return material('DD2 weathered stone', (1.25, 1.22, 1.18, 1), 'stone', .3)
 
 
@@ -265,6 +288,47 @@ def native(asset, pos=(0,0,0), width=None, scale=1, rotation=0, include=None, ex
             bpy.ops.object.modifier_apply(modifier=mod.name)
     SOURCES.append({'asset':asset,'position':pos,'width':width,'scale':scale,'rotation':rotation,'include':include,'exclude':exclude,'height_scale':height_scale,'solidify':solidify})
     return objs
+
+
+def native_fit(asset, center, size, keep_above=None, **kwargs):
+    """Fit real painted mesh parts into an architectural envelope without changing their UVs."""
+    if min(size)<=0 or (keep_above is not None and not 0<=keep_above<1):
+        raise ValueError('Invalid native component envelope: '+asset)
+    objects=native(asset,**kwargs)
+    bpy.context.view_layer.update()
+    points=np.array([tuple(ob.matrix_world@v.co) for ob in objects for v in ob.data.vertices])
+    lo,hi=points.min(0),points.max(0)
+    if keep_above is not None:
+        import bmesh
+        threshold=lo[2]+(hi[2]-lo[2])*keep_above
+        kept=[]
+        for ob in objects:
+            bm=bmesh.new(); bm.from_mesh(ob.data)
+            bmesh.ops.delete(bm,geom=[f for f in bm.faces if (ob.matrix_world@f.calc_center_median()).z<threshold],context='FACES')
+            bmesh.ops.delete(bm,geom=[v for v in bm.verts if not v.link_faces],context='VERTS')
+            bm.to_mesh(ob.data); bm.free(); ob.data.update()
+            if len(ob.data.polygons):
+                kept.append(ob)
+            else:
+                bpy.data.objects.remove(ob,do_unlink=True)
+        objects=kept
+        if not objects:
+            raise ValueError('Native component trim removed all geometry: '+asset)
+        points=np.array([tuple(ob.matrix_world@v.co) for ob in objects for v in ob.data.vertices])
+        lo,hi=points.min(0),points.max(0)
+    target=np.array(p(size)); origin=np.array(p(center))
+    if min(hi-lo)<1e-5:
+        raise ValueError('Cannot fit a flat native component: '+asset)
+    for ob in objects:
+        coords=[tuple((np.array(ob.matrix_world@v.co)-(lo+hi)/2)*target/(hi-lo)+origin) for v in ob.data.vertices]
+        ob.matrix_world=Matrix.Identity(4)
+        for v,co in zip(ob.data.vertices,coords):
+            v.co=co
+        ob.data.update()
+    SOURCES[-1]['fitted_center']=list(center)
+    SOURCES[-1]['fitted_size']=list(size)
+    SOURCES[-1]['keep_above']=keep_above
+    return objects
 
 
 def wheel(x,y,z,radius):

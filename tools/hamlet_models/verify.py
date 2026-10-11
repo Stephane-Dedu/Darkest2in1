@@ -30,20 +30,39 @@ def check_painted_factors(path):
     exported={m['name']:m for m in doc['materials']}
     checked=0
     for mat in bpy.data.materials:
-        if not mat.use_nodes:
+        if not mat.use_nodes or mat.name not in exported:
             continue
         shader=next((n for n in mat.node_tree.nodes if n.type=='BSDF_PRINCIPLED'),None)
-        if shader is None or not shader.inputs['Base Color'].is_linked:
+        if shader is None:
             continue
-        node=shader.inputs['Base Color'].links[0].from_node
-        if node.type!='MIX' or node.data_type!='RGBA' or node.blend_type!='MULTIPLY':
-            continue
-        expected=np.clip(node.inputs[7].default_value[:3],0,1)
-        record=exported[mat.name].get('pbrMetallicRoughness',{})
-        actual=record.get('baseColorFactor',[1,1,1,1])[:3]
-        if 'baseColorTexture' not in record or not np.allclose(expected,actual,atol=1e-6):
-            raise ValueError('Painted color factor lost during export: '+mat.name)
-        checked+=1
+        record=exported[mat.name]
+        for channel in ['Base Color','Emission Color']:
+            socket=shader.inputs[channel]
+            if not socket.is_linked:
+                continue
+            node=socket.links[0].from_node
+            if node.type!='MIX' or node.data_type!='RGBA' or node.blend_type!='MULTIPLY':
+                continue
+            expected=np.array(node.inputs[7].default_value[:3])
+            if channel=='Base Color':
+                expected=np.clip(expected,0,1)
+                pbr=record.get('pbrMetallicRoughness',{})
+                actual=pbr.get('baseColorFactor',[1,1,1,1])[:3]
+                texture='baseColorTexture' in pbr
+            else:
+                expected*=shader.inputs['Emission Strength'].default_value
+                strength=record.get('extensions',{}).get('KHR_materials_emissive_strength',{}).get('emissiveStrength',1)
+                actual=np.array(record.get('emissiveFactor',[0,0,0]))*strength
+                texture='emissiveTexture' in record
+            if not texture or not np.allclose(expected,actual,atol=1e-6):
+                raise ValueError('Painted '+channel+' factor lost during export: '+mat.name)
+            checked+=1
+        alpha=shader.inputs['Alpha']
+        if alpha.is_linked and alpha.links[0].from_node.type=='MATH':
+            node=alpha.links[0].from_node
+            if node.operation=='GREATER_THAN' and (record.get('alphaMode')!='MASK' or
+                    abs(record.get('alphaCutoff',.5)-node.inputs[1].default_value)>1e-6):
+                raise ValueError('Native alpha cutout lost during export: '+mat.name)
     if checked==0:
         raise ValueError('No painted material factors checked: '+str(path))
     return checked

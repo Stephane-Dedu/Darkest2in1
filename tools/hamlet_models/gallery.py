@@ -8,12 +8,16 @@ from PIL import Image, ImageDraw, ImageFont
 from references import BUILDINGS
 
 
-def gallery(out,kit):
+def gallery(out,kit,previous=None):
     out,kit=out.resolve(),kit.resolve()
     repo=Path(__file__).resolve().parents[2]
     if out==repo or repo in out.parents:
         raise ValueError('Private model artwork must stay outside Git.')
-    models=json.loads((out/'models.json').read_text())['models']
+    manifest=json.loads((out/'models.json').read_text())
+    version=manifest.get('detail_pass','v01')
+    if version not in ['v01','v02']:
+        raise ValueError('Unknown model pass: '+version)
+    models=manifest['models']
     checks=json.loads((out/'verified.json').read_text())
     sources=json.loads((out/'dd1-sources.json').read_text())
     if set(models)!=set(BUILDINGS) or set(checks)!=set(BUILDINGS):
@@ -32,6 +36,13 @@ def gallery(out,kit):
     comparison=Image.new('RGB',(2000,2700),'#192027')
     d=ImageDraw.Draw(sheet)
     dc=ImageDraw.Draw(comparison)
+    before_after=Image.new('RGB',(2000,2700),'#192027') if previous else None
+    if previous:
+        previous=previous.resolve()
+        prior_checks=json.loads((previous/'verified.json').read_text())
+        if set(prior_checks)!=set(BUILDINGS):
+            raise ValueError('Previous gallery must contain all ten verified models.')
+        db=ImageDraw.Draw(before_after)
     for i,(key,label) in enumerate(BUILDINGS.items()):
         x,y=i%5*440,i//5*510
         model=Image.open(out/checks[key]['render']).convert('RGB')
@@ -50,13 +61,30 @@ def gallery(out,kit):
         comparison.paste(model,(cx+360+(620-model.width)//2,cy+50))
         dc.text((cx+30,cy+500),'DD1 installed exterior',font=small,fill='#a89e89')
         dc.text((cx+400,cy+500),'3D model, rendered from exported GLB',font=small,fill='#a89e89')
-    sheet.save(out/'hamlet-building-models-v01.png')
-    comparison.save(out/'dd1-to-dd2-comparison-v01.png')
+        if previous:
+            prior=Image.open(previous/prior_checks[key]['render']).convert('RGB')
+            prior.save(out/key/'previous.png')
+            db.text((cx+25,cy+15),label,font=font,fill='#e1d3b7')
+            current=Image.open(out/checks[key]['render']).convert('RGB')
+            for column,im in enumerate([prior,current]):
+                im.thumbnail((480,440))
+                before_after.paste(im,(cx+column*500+(500-im.width)//2,cy+50))
+            db.text((cx+30,cy+500),'First pass',font=small,fill='#a89e89')
+            db.text((cx+530,cy+500),'Native detail pass',font=small,fill='#a89e89')
+    sheet_name=f'hamlet-building-models-{version}.png'
+    comparison_name=f'dd1-to-dd2-comparison-{version}.png'
+    sheet.save(out/sheet_name)
+    comparison.save(out/comparison_name)
+    if previous:
+        before_after.save(out/f'before-after-{version}.png')
     cards=[]
     for key,label in BUILDINGS.items():
         info=models[key]
+        views=[('exported','3D export'),('front','Front'),('hero','Three-quarter'),('rear','Rear'),('side','Side')]
+        if previous:
+            views.append(('previous','First pass'))
         buttons=''.join(f'<button class="{"active" if view=="exported" else ""}" data-view="{view}" onclick="view(this,\'{key}/{view}.png\')">{title}</button>'
-            for view,title in [('exported','3D export'),('front','Front'),('hero','Three-quarter'),('rear','Rear'),('side','Side')])
+            for view,title in views)
         cards.append(f'''<article id="{key}"><h2>{html.escape(label)}</h2><img src="{key}/exported.png" alt="{html.escape(label)} three-dimensional model">
         <nav>{buttons}</nav><p>{html.escape(info['design'])}</p><p class="files">{info['triangles']:,} triangles ·
         <a href="{info['glb']}">3D GLB</a> · <a href="{info['blend']}">Editable Blender model</a></p></article>''')
@@ -71,7 +99,12 @@ def gallery(out,kit):
     </style><header><h1>Hamlet building models</h1><p>Ten distinct 3D studies based on DD1's repaired exteriors, built with native DD2 parts and painted surfaces.
     The first view is rendered after re-importing the exported GLB. Other buttons show the authoring scene from four camera angles.
     These private assets are ready for further modeling; they have not replaced the in-game town.</p>
-    <p><a href="dd1-to-dd2-comparison-v01.png">DD1 comparison sheet</a> · <a href="hamlet-building-models-v01.png">All ten models</a></p></header><main>'''
+    <p>GALLERY_LINKS</p></header><main>'''
+    links=f'<a href="{comparison_name}">DD1 comparison sheet</a> · <a href="{sheet_name}">All ten models</a>'
+    if previous:
+        links+=f' · <a href="before-after-{version}.png">Before and after</a>'
+        document=document.replace('<h1>Hamlet building models</h1>','<h1>Hamlet buildings — native detail pass</h1>')
+    document=document.replace('GALLERY_LINKS',links)
     document+='\n'.join(cards)
     document+='''</main><script>function view(button,path){const card=button.closest('article');card.querySelector('img').src=path;
     card.querySelectorAll('button').forEach(b=>b.classList.remove('active'));button.classList.add('active');}</script></html>'''
@@ -83,5 +116,6 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out',required=True,type=Path)
     parser.add_argument('--kit',required=True,type=Path)
+    parser.add_argument('--previous',type=Path,help='Previous verified model gallery for before/after images.')
     args=parser.parse_args()
-    gallery(args.out,args.kit)
+    gallery(args.out,args.kit,args.previous)

@@ -5243,3 +5243,53 @@ buffers/images, not packed GLB, and does not apply painted color factors. Conver
 binding these models into HamletStage; retain the existing feature flag and immediate painted rollback.
 No game process was launched/stopped, no deploy occurred and no save/estate was read or changed in this round.
 The independently edited Expedition Map3D and Shieldbreaker files remain outside this commit.
+
+## Round218 (2026-10-11): native painted detail pass for the Hamlet model library
+
+Owner requested improving the textures/details toward DD2 accuracy, with an honest assessment of capability.
+Built a separate v02 offline library while retaining v01 for comparison. Reused more native painted geometry
+rather than upscaling the first pass's small repeating samples: hero_shrine for the Abbey entrance,
+valley_academic_house for the Sanitarium, city_bigwall_main plus individual inn_lvl_01 roof/wing meshes for
+the Guild, and the_hoarder_main cart joinery for the Nomad Wagon. Fitted parts keep their UVs and native
+atlas textures. The inn prefab contains two separated buildings: selecting a single wing avoids two small
+houses perched on the Guild roof. Existing source kits and the independent extraction pipeline are untouched.
+
+Prepared original-resolution native cloth (591x453), timber (490x160), neutral masonry (125x270) and subtle
+sculpture weathering panels with crop/tone provenance. Tent/wagon fabric now has real painted folds and
+stitching instead of thatch grain. Added corner courses, carved cornices, sewn seams, pegs, tankard/coach
+sign reliefs, forge tools, ironwork and grave accents. Ancestor facial planes, fingers and coat seams improve
+readability; gray weathering replaces the brick-like robe. The custom sculpt remains coarse relative to DD2
+character art. Corrected the Sanitarium cone's radial UV islands so shingle courses wrap around the cap.
+Retained a physically closed pointed cap after native spire cutouts produced disconnected decorative faces.
+
+Native-kit preview materials use emission. Converting those to explicit Principled emission preserves their
+painted brightness in GLB, including values above one via KHR_materials_emissive_strength. Native alpha
+cutoffs are retained. Verification now compares base and emission texture factors against the packed Blender
+document and checks native MASK thresholds. Offline lighting is still an approximation of DD2's shaders,
+outlines/fog and scene lighting; valid export does not establish an indistinguishable in-game result.
+
+render.py selects v01/v02 and supports cheaper view/sample previews, with separate output directories per
+pass. gallery.py produces versioned model/DD1 comparison sheets, a before-after sheet and First pass buttons
+using copies of v01's verified exported renders. All generated models, textures, packed Blender files,
+reference images and private manifests stay outside Git/releases. Rebuild workflow: tools/hamlet_models/README.md.
+
+Validation: eight Python modules parse. Ten GLBs and packed editable Blender scenes, forty 1024px authoring
+views and ten independently re-imported GLB renders complete. All ten exports pass exact topology, zero
+bounds change, finite geometry, embedded texture decoding, 99 painted base/emission factor checks and native
+alpha thresholds. Total 101,646 triangles. Authoring versus re-imported hero renders have RGB mean absolute
+errors 0.022-0.182 on the 0-255 scale; this checks export appearance, not DD2 artistic acceptance. Gallery
+generation validates hashes/current images; all 93 image/file/button paths resolve and all PNGs decode.
+Visually reviewed the final model/before-after sheets and corrective detail views. Game tests/build were
+not rerun for these offline-only tools. No game process/deploy or save access occurred in this round.
+
+## Status 2026-10-11: round218 Hamlet native detail library verified; runtime unchanged
+
+Private v02 output: local-art/ui-overhaul/hamlet-buildings-v02/gallery.html,
+hamlet-building-models-v02.png, dd1-to-dd2-comparison-v02.png, before-after-v02.png and model subdirectories.
+The first pass remains intact. Native portal/façade/roof/joinery and painted fabric improve the main art
+weaknesses; the Ancestor still needs a finer sculpt, and repeated masonry/roof samples, small signs/trim,
+lower upgrades and event variants remain. Native outline shaders, lighting/fog, animation, collision/LODs
+and actual game integration are separate acceptance work. Current GltfModel loader requires external JSON
+glTF/buffers/images and lacks painted factors; adapt it before installing the new GLBs into HamletStage.
+Keep Look.Hamlet3D and immediate painted rollback. Independent Expedition Map3D/Shieldbreaker files were
+preserved outside this round. No game or save state was changed by this modeling work.

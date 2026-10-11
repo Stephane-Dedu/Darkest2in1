@@ -80,13 +80,25 @@ def build(args):
         raise ValueError('Run prepare.py first.')
     sys.path.insert(0,str(kit/'tools'))
     import bl_lib as L
+    builders,design=BUILDERS,DESIGN
+    if args.detail_pass=='v02':
+        from buildings_v02 import BUILDERS as builders, DESIGN as design
     selected=args.only.split(',') if args.only else list(BUILDERS)
+    if not set(selected)<=set(builders):
+        raise ValueError('Unknown building selection.')
+    angles={'front':0,'hero':35,'rear':145,'side':-75}
+    views=args.views.split(',')
+    if not set(views)<=set(angles) or args.samples<1 or args.resolution<1:
+        raise ValueError('Invalid camera views, resolution or sample count.')
     path=out/'models.json'
     manifest=json.loads(path.read_text()) if path.exists() else {'version':1,'models':{}}
+    if manifest['models'] and manifest.get('detail_pass','v01')!=args.detail_pass:
+        raise ValueError('Use separate output directories for different modeling passes.')
+    manifest['detail_pass']=args.detail_pass
     for key in selected:
         L.reset()
-        G.configure(kit,out,L)
-        BUILDERS[key]()
+        G.configure(kit,out,L,args.detail_pass)
+        builders[key]()
         bpy.context.view_layer.update()
         objects=[o for o in bpy.data.objects if o.type=='MESH']
         points=np.array([tuple(o.matrix_world@v.co) for o in objects for v in o.data.vertices])
@@ -103,11 +115,13 @@ def build(args):
         bpy.ops.export_scene.gltf(filepath=str(folder/f'{key}.glb'),export_format='GLB',use_selection=True,
             export_apply=True,export_yup=True,export_materials='EXPORT',export_animations=False)
         finish_scene()
+        bpy.context.scene.cycles.samples=args.samples
         centre=(lo+hi)/2
         target=(centre[0],centre[1],lo[2]+(hi[2]-lo[2])*.43)
         radius=max(hi[0]-lo[0],hi[1]-lo[1],hi[2]-lo[2])*2.15
         cam=None
-        for view,angle in [('front',0),('hero',35),('rear',145),('side',-75)]:
+        for view in views:
+            angle=angles[view]
             a=math.radians(angle)
             location=(target[0]+math.sin(a)*radius,target[1]-math.cos(a)*radius,target[2]+radius*.47)
             if cam is None:
@@ -124,10 +138,10 @@ def build(args):
         cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
         bpy.ops.file.pack_all()
         bpy.ops.wm.save_as_mainfile(filepath=str(folder/f'{key}.blend'))
-        manifest['models'][key]={'design':DESIGN[key],'mesh_objects':len(objects),'triangles':triangles,
+        manifest['models'][key]={'design':design[key],'mesh_objects':len(objects),'triangles':triangles,
             'bounds_blender':[lo.tolist(),hi.tolist()],'native_parts':list(G.SOURCES),
             'glb':f'{key}/{key}.glb','blend':f'{key}/{key}.blend',
-            'views':{name:f'{key}/{name}.png' for name in ['front','hero','rear','side']}}
+            'views':{name:f'{key}/{name}.png' for name in views}}
         path.write_text(json.dumps(manifest,indent=2),encoding='utf-8')
         print('MODEL COMPLETE',key,len(objects),triangles,flush=True)
 
@@ -138,5 +152,8 @@ if __name__=='__main__':
     parser.add_argument('--out',required=True,type=Path)
     parser.add_argument('--only')
     parser.add_argument('--resolution',type=int,default=1024)
+    parser.add_argument('--samples',type=int,default=20)
+    parser.add_argument('--views',default='front,hero,rear,side')
+    parser.add_argument('--detail-pass',choices=['v01','v02'],default='v01')
     args=parser.parse_args(sys.argv[sys.argv.index('--')+1:])
     build(args)

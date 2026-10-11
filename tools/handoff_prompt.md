@@ -36,16 +36,16 @@ The two corridor-check processes ended; v02 logged the previously observed nativ
 exception after PASS. No estate was selected. Use the latest MODLOG Status for the restored normal process.
 The extraction pipeline is untouched, all game-derived assets remain private, and prior generated scenery
 has a complete rollback backup. No new generated art is needed before fixing native layout/materials/depth.
-Round217 completes an offline first modeling pass for all ten Hamlet buildings, based on the private DD1
-repaired exteriors and native DD2 parts/surfaces. Read tools/hamlet_models/README.md. Private gallery and
-DD1 comparison: local-art/ui-overhaul/hamlet-buildings-v01. Ten GLBs/.blend documents, forty angle PNGs and
-ten re-imported GLB renders pass geometry, embedded texture and 37 painted-factor checks (73,081 triangles,
-zero bounds change). Current RGBA Mix nodes preserve tints lost by legacy MixRGB in Blender 5's exporter.
-The model set is not installed: coarse statue detail, texture/trim fitting, upgrades/locked variants and
-native materials/placement remain. GltfModel.Load currently requires external JSON glTF/buffers/images
-and lacks painted color factors; adapt that seam before binding the assets into HamletStage. Keep the
-existing Look.Hamlet3D flag and painted fallback. No launch, deploy or save access in this offline round;
-independent Expedition Map3D and Shieldbreaker changes remain outside its commit.
+Round218 refines all ten offline Hamlet building models with native DD2 painted geometry, original UVs,
+cloth/timber panels and service details. Read tools/hamlet_models/README.md before rebuilding/integrating.
+Private gallery: local-art/ui-overhaul/hamlet-buildings-v02; v01 is retained for before/after comparison.
+Ten GLBs/.blend documents and fifty renders pass topology/bounds/textures, 99 base/emission factor checks
+and native alpha thresholds (101,646 triangles, zero bounds change). Explicit Principled emission and
+KHR_materials_emissive_strength preserve native preview paint brightness. The model set is not installed:
+coarse Ancestor sculpt, repeating surfaces/trim, upgrades/locked variants and native materials/lighting
+remain. GltfModel.Load requires external JSON glTF/buffers/images and lacks painted color factors; adapt
+that seam before binding models into HamletStage. Keep Look.Hamlet3D and the painted fallback. This round
+did not launch/deploy/access saves; independent Expedition Map3D and Shieldbreaker work remains separate.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without

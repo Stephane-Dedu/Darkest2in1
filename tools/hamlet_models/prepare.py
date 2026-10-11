@@ -36,6 +36,24 @@ def prepare(kit, dd1, out):
     canvas=Image.open(textures/'thatch.png').convert('L')
     ImageOps.colorize(canvas,'#171717','#bdbdbd').convert('RGBA').save(textures/'canvas.png')
     sources['canvas']={**sources['thatch'],'kind':'DD2 painted surface, desaturated for cloth tint'}
+    for name,file,rect in [
+        ('cloth_native','_tex/tex--2939372573094424405-2048x2048.png',(24,22,615,475)),
+        ('timber_native','_tex/tex--2939372573094424405-2048x2048.png',(920,1830,1410,1990)),
+        ('masonry_native','_tex/tex-6758881876594892305-2048x1024.png',(155,160,280,430)),
+        ('sculpture_native','_tex/tex--7451768689147877690-1024x1024.png',(797,620,835,670)),
+    ]:
+        source=kit/'exp'/file
+        image=Image.open(source).convert('RGBA').crop(rect)
+        if name in ['cloth_native','masonry_native','sculpture_native']:
+            image=ImageOps.grayscale(image).convert('RGBA')
+        if name=='sculpture_native':
+            image=ImageOps.colorize(ImageOps.grayscale(image),'#747878','#a9adad').convert('RGBA')
+        image.putalpha(255)
+        image.save(textures/f'{name}.png')
+        sources[name]={'source':str(source),'crop':list(rect),'kind':'DD2 painted panel, original resolution',
+            'desaturated':name in ['cloth_native','masonry_native','sculpture_native']}
+        if name=='sculpture_native':
+            sources[name]['tone_range']=['#747878','#a9adad']
     details = {
         'guild_banner': ('guild', (.18, .415, .30, .665)),
         'forge_sign': ('blacksmith', (.065, .43, .235, .56)),
