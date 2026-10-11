@@ -32,7 +32,10 @@ Then `dotnet build src/DarkestDungeon3 -c Release` builds and copies the plugin 
 Tests (they read your DD1 install): `dotnet test tests/DarkestDungeon3.Core.Tests`.
 
 ## Playing
-In DD2's main menu, **The Hamlet** opens the DD1 campaign (estates are saved next to DD2's saves). Options are in
+In DD2's main menu, **The Hamlet** opens estate selection. Choose an estate and return to the Hamlet, or establish
+a named estate to begin on the Old Road. The burning torch stays visible while campaign assets prepare; saved
+expeditions resume through the existing recovery flow. Estate slots extend beyond three. **Delete estate** asks for
+confirmation and removes that estate's save and recovery backup. Estates are saved next to DD2's saves. Options are in
 `BepInEx/config/` (look: DD1 monsters in fights, DD1 backdrop, DD2 hero models; sound: DD1 music and sounds).
 
 ## Layout

@@ -98,7 +98,7 @@ public class Plugin : BaseUnityPlugin
             host.AddComponent<Dd2.ExportedBoss>();   // F1: the exported-model test fight
         }
 
-        Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location));
+        Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location), Application.streamingAssetsPath);
         Log.LogInfo($"{Name} {Version} loaded");
     }
 }

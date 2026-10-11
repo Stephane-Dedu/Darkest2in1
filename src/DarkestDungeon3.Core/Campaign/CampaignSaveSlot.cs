@@ -6,9 +6,11 @@ public sealed class CampaignSaveSlot
     public SaveFile Save { get; set; }
     public string Path { get; private set; }
 
+    public void Clear() { Save = null; Path = null; }
+
     public void Select(string path)
     {
-        Save = null; Path = null;
+        Clear();
         var loaded = SaveFile.Load(path);
         Save = loaded; Path = path;
     }

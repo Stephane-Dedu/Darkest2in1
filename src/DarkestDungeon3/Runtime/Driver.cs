@@ -75,23 +75,10 @@ internal sealed partial class Driver : MonoBehaviour
         if (Phase == Phase.Fighting) { Dd1Backdrop.Tick(); Dd1MonsterView.Render(); }
     }
 
-    private bool _townArtPrimed;
-
     private void Update()
     {
         Dd2Run.Update();
-        if (!_townArtPrimed && S?.Dd1 != null)
-        {
-            _townArtPrimed = true;
-            Art.PrepareTown(S.Dd1);
-            // Resolve Unity's cache path on this thread; conversion/extraction only receives plain paths.
-            try { Ui.CinematicCache.Prepare(S.Dd1, Core.Dd1.Dd1Cinematic.Opening); }
-            catch (System.Exception e) { Plugin.Log.LogWarning("[cinematic] " + e.Message); }
-            // Common town art can bake while the player is still at the menu/estate picker.
-            foreach (var id in new[] { "ground", "stage_coach", "graveyard", "statue" })
-                SpineArt.Get(Core.Campaign.Town.TownLayout.ArtFolder(S.Dd1, id, true, 0), "idle",
-                    slot => Core.Campaign.Town.TownLayout.IdleSlot(slot.Name));
-        }
+        CampaignAssets.Update();
         SpineArt.Update();
         Art.Update();
         Ui.CinematicCache.Update();
@@ -139,14 +126,14 @@ internal sealed partial class Driver : MonoBehaviour
 
     // ---------------- Hamlet ----------------
 
-    public void EnterHamlet(int slot)
+    public void EnterHamlet(int slot, string newEstateName = null)
     {
         StopWalking();
         Crawl = null; Party = null; SelectedHeroId = null; LastReport = null; RecoveryMessage = null;
         HeroStage.Instance?.Clear(); Log.Clear(); HomecomingLog.Clear();
         Phase = Phase.Off;
         LogDd2Libraries();
-        try { S.LoadOrCreate(slot); }
+        try { S.LoadOrCreate(slot, newEstateName); }
         catch (System.Exception e)
         {
             Plugin.Log.LogError("[session] estate could not load: " + e);

@@ -28,7 +28,13 @@ public class PngPreloaderTests
             Assert.False(finished);
         }
         Assert.Empty(Texture2D.ApiThreads);
+        Assert.Equal(paths.Length, loader.Total);
+        Assert.Equal(0, loader.Completed);
+        Assert.False(loader.IsComplete);
         PumpUntil(loader, () => paths.All(path => loader.TryGet(path, out _, out bool done) && done));
+        Assert.True(loader.IsComplete);
+        Assert.Equal(paths.Length, loader.Completed);
+        Assert.Equal(0, loader.Failed);
         Assert.Equal(paths.Length, Texture2D.RoomDecodeCount - decodes);
         Assert.All(Texture2D.ApiThreads, id => Assert.Equal(Environment.CurrentManagedThreadId, id));
         foreach (string path in paths)
@@ -65,6 +71,9 @@ public class PngPreloaderTests
             Assert.Null(broken);
             Assert.True(loader.TryGet(valid, out var texture, out _));
             Assert.NotNull(texture);
+            Assert.True(loader.IsComplete);
+            Assert.Equal(3, loader.Completed);
+            Assert.Equal(2, loader.Failed);
         });
     }
 

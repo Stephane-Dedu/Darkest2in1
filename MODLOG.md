@@ -4907,3 +4907,67 @@ clips/moveset); 973 Core pass; Release builds with -p:Deploy=false. Not deployed
 at the campaign menu with the owner at the PC. The game copy (<game>/PrivateBossModels/soul_of_cinder) still holds the
 pre-fix static export; replace it with ds3-extract/soul_of_cinder/dd2/* (gltf, bin, moveset, textures) while DD2 is
 stopped.
+
+## Round212: native campaign entry, estate management and torch loading (2026-10-11)
+
+Owner request: replace the old IMGUI main-menu buttons with a coherent DD2 entry into an actual DD1 campaign,
+then align trinkets/quest HUDs. Refinement: create more estates and delete them, choose an estate before loading,
+replace the progress bar with a burning torch, and remove the rigid modal look. Applied the owner's pasted
+dd2-native-kit skill using installed native art/fonts; no extracted assets copied into Git or the plugin.
+
+CampaignMenu clones DD2's Kingdoms banner but removes localization and all persistent start/submit callbacks.
+The added Hamlet row ignores the native horizontal layout, sits above Confessions, and joins its explicit
+navigation. The front end uses TMP's loaded NDDunkelD-Bold/AlegreyaSans fonts, ink banners, ivory/brass/red text,
+a scrolling estate list and separate details/actions. Main menu input/canvas state is restored on Back. The
+Mountain's world-space title sprite (Darkest_Dungeon_Horizontal_TItle_Sprite) is hidden/restored while the estate
+screen is up, so it does not cross estate details. Naming and delete confirmation have their own full screens.
+
+EstateSlots discovers positive numeric estate IDs beyond3, including backup-only saves, without parsing files.
+The picker then reads summaries only when the player opens it. New estate IDs follow the highest occupied ID;
+creation names the new estate, refuses an occupied slot and must persist successfully before continuing.
+Delete confirmation removes the recovery copy and then the primary; a selected runtime save is cleared to avoid
+resurrection through later persistence. Corrupt slots remain visible, cannot be entered and can be explicitly
+deleted. Tests only use checked temporary directories, never the installed estate folder.
+
+Session's worker now also prepares DD2 data tables and the town layout, publishes with Volatile, and can retry
+failure. Choosing an estate requests town PNGs, idle town renders, exact selected upgrades/sky and owned native
+hero resources. PNG decoding remains one upload/update; Spine raster work stays on workers. Completion counts
+come from real uploads/resource callbacks, including completed fallback art, rather than elapsed time. The
+animated native orange torch material and ui_profile_torch sprite are loaded through Addressables and released
+with the UI. No bar/percentage or fixed loading duration. Retry/cancel remain available. The existing
+Driver.EnterHamlet recovery/resume/new-estate cinematic path handles the actual entry. Old Road's artificial
+three-second delay is removed; its existing loading art now covers the actual DD2 host handoff.
+
+Native checks at1600x900: real button callback opened the torch, loaded12 PNGs/18 town renders/13 owned heroes,
+and cancel/reopen reached ready. Native animated flame visually verified. Synthetic estate banners inspected;
+the subsequent world-title removal/row ink alignment is compiled/deployed but not yet visually inspected.
+Private evidence: local-art/ui-overhaul/campaign-torch-v01.png and campaign-estates-v04.png. No protected slots
+were opened by the agent. The owner clicked a synthetic preview and reported infinite torch loading: this was
+the intentional read-only handoff guard after assets completed in2.85s. Relaunched normally without either
+debug flag, and changed the preview's terminal text to "Asset check complete" so a held test cannot masquerade
+as loading. Never leave -dd3-menu-check or -dd3-menu-preview enabled for ordinary play.
+
+Release build/deploy passes with3 existing warnings. All979 Core+175 UI tests pass; six added Core cases cover
+slot discovery beyond3, no parsing/writes during discovery, safe creation paths, deleting primary/backup and
+backup-only saves, invalid IDs and clearing an active selection. Seven UI readiness cases verify each pending
+resource group, failure/recovery and immediate completion without a fake timer. Initial parallel test builds
+contended on Core's obj cache; rerunning Core sequentially passed. Tests did not access campaign saves.
+Unverified: live name entry/delete controls, lists beyond one viewport, selected upgraded-town loading, and
+saved-expedition resume. These are marked [?]; native asset completion is verified separately. After the normal
+relaunch the owner's session passed the gate in2.88s, rendered the Hamlet's hover assets and the approved quest
+map, then reached native combat. A read-only main-menu screenshot also exposed the copied Kingdoms tooltip and
+blue Button.colors; removed the tooltip component and replaced the cloned button colour blocks with warm
+ivory/brass/red states. This last cosmetic fix was built/deployed after DD2 closed; native hover acceptance remains.
+The gate also counts images already in the synchronous cache (a direct debug entry may have primed them),
+waits for the selected-estate queue to be installed, and times out a stalled data worker as well as art uploads.
+
+## Status 2026-10-11: round212 deployed; normal DD2 launch restored
+
+DD2 PID3596 was launched normally at1600x900, without QA flags. The owner's session reached the campaign and
+combat, then DD2 closed. The final normal build, including tooltip/colour cleanup, was deployed while it was
+stopped; the game is left closed. Do not open the ordinary picker in an automated test: it reads protected
+estates1 and3. Create/delete acceptance can be checked by the owner, or through an isolated estate2 test after its usual
+backup. No actual saves were read/modified by agent tools. Pre-change plugin backup is
+C:\Users\Piral\.universal-modder\backups\dd3-main-menu-before-20261011\20261011-062238.zip.
+Existing dirty Shieldbreaker model/tools/tests were preserved outside this UI change. Following UI work is the
+trinket HUD and quest-selection cohesion; preserve the owner's approved map/region-switch layout.

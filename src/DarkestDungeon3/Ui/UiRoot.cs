@@ -13,9 +13,11 @@ internal sealed class UiRoot : MonoBehaviour
     private readonly HamletUi _hamlet = new();
     private readonly EmbarkUi _embark = new();
     private readonly CrawlUi _crawl = new();
-    private bool _embarking, _slotPicker;
+    private bool _embarking;
 
-    private float? _openingSince;
+    private void Awake() => gameObject.AddComponent<CampaignMenu>();
+
+    private int? _openingFrame;
 
     /// <summary>DD1's loading screen for the opening raid (starting_save/persist.loading_screen.json: loading_screen.old_road.png).</summary>
     private static void DrawOldRoad()
@@ -36,7 +38,7 @@ internal sealed class UiRoot : MonoBehaviour
         GUI.depth = -1000;
 
         bool fullscreen = d.Phase is Phase.Hamlet or Phase.Crawling or Phase.Homecoming or Phase.Recovery;
-        Gui.BlockInput(fullscreen || _slotPicker || CinematicPlayer.Active);
+        Gui.BlockInput(fullscreen || CinematicPlayer.Active);
         if (CinematicPlayer.Active)
         {
             Drag.Cancel();
@@ -49,13 +51,13 @@ internal sealed class UiRoot : MonoBehaviour
             switch (d.Phase)
             {
                 case Phase.Off:
-                    if (GameModeMgr.CurrentMode == GameModeType.MAIN_MENU) DrawMainMenuEntry(d);
+                    // CampaignMenu owns the native menu entry and loading gate.
                     break;
                 case Phase.Hamlet when d.OpeningDue:
                     // DD1's opening: the Old Road's loading screen, then the raid (the same embark as any quest).
-                    _openingSince ??= Time.unscaledTime;
+                    _openingFrame ??= Time.frameCount;
                     DrawOldRoad();
-                    if (Time.unscaledTime - _openingSince.Value > 3f && Event.current.type == EventType.Repaint) { _openingSince = null; d.EmbarkOpening(); }
+                    if (Time.frameCount > _openingFrame.Value && Event.current.type == EventType.Repaint) { _openingFrame = null; d.EmbarkOpening(); }
                     break;
                 case Phase.Hamlet:
                     if (_embarking)
@@ -119,85 +121,6 @@ internal sealed class UiRoot : MonoBehaviour
         }
         Drag.Overlay();
         Gui.DrawTip();
-    }
-
-    // Estate summaries for the picker, read once each time it opens.
-    private readonly EstatePickerSlot[] _slots = new EstatePickerSlot[4];
-
-    private void ReadSlots()
-    {
-        for (int slot = 1; slot <= 3; slot++) _slots[slot] = EstatePickerSlot.Read(Session.SlotPath(slot));
-    }
-
-    private void DrawMainMenuEntry(Driver d)
-    {
-        if (!_slotPicker)
-        {
-            string introLabel = Session.Current != null
-                ? Dd1Text.Get("miscellaneous", "menu_base_element_watch_intro") ?? "Watch Intro Cinematic"
-                : "Watch Intro Cinematic";
-            if (Gui.DdButton(new Rect(40, 758, 380, 78), introLabel, Session.Current != null, 26))
-            {
-                // Replay stays at the menu: no estate selection, phase change or opening raid.
-                Dd1Audio.StopNarration();
-                CinematicPlayer.Play(Core.Dd1.Dd1Cinematic.Opening);
-                return;
-            }
-            string label = Session.LoadError != null ? "DD1 Hamlet unavailable"
-                : Session.Current == null ? "Loading Darkest Dungeon 1..."
-                : "The Hamlet";
-            if (Gui.DdButton(new Rect(40, 860, 380, 90), label, Session.Current != null, 36))
-            {
-                _slotPicker = true;
-                ReadSlots();
-            }
-            if (Session.Current != null) Gui.Text(new Rect(40, 950, 380, 30), "Campaign expeditions", 18, Gui.Dd1Class, TextAnchor.MiddleCenter);
-            if (Session.LoadError != null) Gui.Text(new Rect(40, 986, 900, 60), Session.LoadError, 18, Gui.Blood);
-            return;
-        }
-
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0, 0, 0, 0.85f));
-        Gui.Text(new Rect(460, 150, 1000, 70), "Choose an estate", 52, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        var plate = Art.Dd1("campaign", "town", "estate_title", "estate_nameplate.png");
-        for (int slot = 1; slot <= 3; slot++)
-        {
-            var entry = _slots[slot];
-            var save = entry?.Save;
-            var r = new Rect(960 - 446, 230 + (slot - 1) * 230, 893, 220);
-            bool hover = r.Contains(Event.current.mousePosition);
-            var old = GUI.color;
-            if (!hover) GUI.color = new Color(0.8f, 0.8f, 0.8f, 1f);
-            if (plate != null) GUI.DrawTexture(new Rect(r.x, r.y - 30, 893, 281), plate);
-            else Gui.Fill(r, new Color(0.08f, 0.07f, 0.06f, 0.95f));
-            GUI.color = old;
-            float tx = r.x + 286;
-            if (entry?.Error != null)
-            {
-                Gui.Text(new Rect(tx, r.y + 30, 560, 52), "Estate unavailable", 40, Gui.Blood, TextAnchor.MiddleLeft, heading: true);
-                Gui.Text(new Rect(tx, r.y + 84, 560, 64), "Its files have been kept. Refresh to try again.", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            }
-            else if (save?.Estate != null)
-            {
-                var e = save.Estate;
-                Gui.Text(new Rect(tx, r.y + 30, 560, 52), e.Name, 40, hover ? Color.white : Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-                Gui.Text(new Rect(tx, r.y + 84, 560, 32), $"Week {e.Week + 1}  ·  {e.Roster.Count} heroes  ·  {Gui.Num(e.Get(Core.Campaign.Currency.Gold), "#,0")} gold  ·  {e.QuestsCompleted - 1} quests", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
-                if (save.Expedition != null) Gui.Text(new Rect(tx, r.y + 118, 560, 28), "A party is still out there.", 19, Gui.Blood, TextAnchor.MiddleLeft);
-                if (save.RecoveredFromBackup) Gui.Text(new Rect(tx, r.y + 147, 560, 28), "Recovered from the previous save.", 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            }
-            else
-            {
-                Gui.Text(new Rect(tx, r.y + 30, 560, 52), "A new estate", 40, hover ? Color.white : Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-                Gui.Text(new Rect(tx, r.y + 84, 560, 32), "Return to the Hamlet and begin the campaign.", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
-            }
-            if (entry?.CanOpen == true && Gui.Hotspot(r))
-            {
-                _slotPicker = false;
-                d.EnterHamlet(slot);
-            }
-        }
-        if (Gui.DdButton(new Rect(1100, 940, 260, 56), "Refresh", true, 24)) ReadSlots();
-        if (Gui.DdButton(new Rect(860, 940, 200, 56), "Cancel", true, 24)
-            || (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Escape)) _slotPicker = false;
     }
 
     /// <summary>DD1's retreat during our fights (DD2 hides its own outside Kingdoms).</summary>

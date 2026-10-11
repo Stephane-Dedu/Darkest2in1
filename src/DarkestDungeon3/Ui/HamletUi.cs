@@ -66,7 +66,7 @@ internal sealed class HamletUi
     private void DrawPage()
     {
         var hamlet = S.Hamlet;
-        _layout ??= TryLoadLayout();
+        _layout ??= S.TownLayout ?? TryLoadLayout();
 
         // DD1's town crier announces the week's event once per visit.
         bool eventOpen = E.TownEventId != null && _eventSeenWeek != E.Week;

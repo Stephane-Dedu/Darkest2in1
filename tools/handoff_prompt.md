@@ -6,7 +6,17 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
 The machine-local build override and playtest helpers target it. Preserve the previous install and both
 reverse-engineering workspaces; their references remain valid. The owner authorized launching again after round205.
-Latest task, round206: Shieldbreaker remodeled from Hellion's actual native body surfaces. Read
+Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
+creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
+built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without
+opening estate files. The owner mistook the intentionally held read-only preview for infinite loading; the game
+was relaunched normally without any QA flags. Debug preview now explicitly says "Asset check complete".
+Do not leave -dd3-menu-check or -dd3-menu-preview active for the owner to play: both prohibit gameplay handoff.
+The owner's normal session subsequently passed the gate in2.88s and reached the Hamlet, quest map and combat.
+Actual create/delete controls, long lists and saved-expedition resume remain live-acceptance items; see Round212 and
+the latest Status in MODLOG. Next UI scope: trinket HUD and quest-selection cohesion, preserving the approved map.
+Existing Shieldbreaker work was left untouched and outside the UI commit.
+Shieldbreaker task, round206: remodeled from Hellion's actual native body surfaces. Read
 tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
 The native-body remodel is installed, with corrected triangle winding, native outline materials and
 vertex channels. Offline model/pose/walk checks pass; the game is reopened for the owner's review.

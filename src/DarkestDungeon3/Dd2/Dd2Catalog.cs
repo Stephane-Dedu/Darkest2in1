@@ -57,7 +57,7 @@ internal sealed class Dd2Catalog : IHeroCatalog
 
     // DD2's quirk and item libraries only exist inside a run; the Hamlet reads DD2's data tables instead.
     private static Core.Dd2Data.Dd2Tables _tables;
-    public static Core.Dd2Data.Dd2Tables Tables => _tables ??= LoadTables();
+    public static Core.Dd2Data.Dd2Tables Tables => Runtime.Session.Current?.Dd2Data ?? (_tables ??= LoadTables());
 
     private static Core.Dd2Data.Dd2Tables LoadTables()
     {

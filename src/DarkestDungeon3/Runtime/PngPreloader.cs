@@ -34,6 +34,10 @@ internal sealed class PngPreloader
     }
 
     private readonly Dictionary<string, Job> _jobs = new(StringComparer.OrdinalIgnoreCase);
+    public int Total => _jobs.Count;
+    public int Completed { get; private set; }
+    public int Failed { get; private set; }
+    public bool IsComplete => Total > 0 && Completed == Total;
 
     public void Request(string path)
     {
@@ -83,6 +87,8 @@ internal sealed class PngPreloader
             finally
             {
                 job.Finished = true;
+                Completed++;
+                if (job.Texture == null) Failed++;
                 job.Reading = null; // release encoded bytes after the upload or failure
             }
             if (texture != null) return;

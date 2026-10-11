@@ -79,6 +79,9 @@ internal static class SpineArt
     private static Task<Baked> _worker;
     private const double UploadBudgetMs = 4;
 
+    public static bool IsFinished(string folder, string variant = "idle", float pixelsPerUnit = 1f) =>
+        folder == null || Cache.ContainsKey($"{folder}|{variant}|{pixelsPerUnit:0.00}");
+
     /// <summary>Queue file parsing and CPU rasterization; return null until Update has uploaded the picture.
     /// The slot predicate must use only skeleton data, never Unity APIs.</summary>
     public static Picture Get(string folder, string variant, Func<SpineSkeleton.Slot, bool> include, float pixelsPerUnit = 1f)

@@ -16,6 +16,7 @@ internal static class Art
 {
     private static readonly Dictionary<string, Texture2D> Cache = new();
     private static readonly PngPreloader TownImages = new();
+    private static readonly HashSet<string> PreparedPaths = new(System.StringComparer.OrdinalIgnoreCase);
 
     public static Texture2D Dd1(params string[] parts)
     {
@@ -29,11 +30,21 @@ internal static class Art
         foreach (string relative in PngPreloader.InitialTownImages)
         {
             string path = dd1.PathOf(relative.Split('/'));
-            if (!Cache.ContainsKey(path)) TownImages.Request(path);
+            PrepareImage(path);
         }
     }
 
     public static void Update() => TownImages.Update();
+    public static void PrepareImage(string path)
+    {
+        if (string.IsNullOrEmpty(path)) return;
+        PreparedPaths.Add(path);
+        if (!Cache.ContainsKey(path)) TownImages.Request(path);
+    }
+    public static int PreparedImages => PreparedPaths.Count(ImageFinished);
+    public static int RequestedImages => PreparedPaths.Count;
+    private static bool ImageFinished(string path) => Cache.ContainsKey(path)
+        || (TownImages.TryGet(path, out _, out bool finished) && finished);
 
     // ---- town ----
     public static Texture2D TownBackdrop => Dd1("campaign", "town", "town_bg.png");
