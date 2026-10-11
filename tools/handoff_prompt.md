@@ -1,5 +1,9 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Owner launch pause, 2026-10-11: no game launches for 30 minutes from 16:26:44 UTC. Do not launch DD2 before
+16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction. The owned Hamlet QA process was closed.
+Continue offline work during the pause. Do not restore a normal game process until launches are allowed.
+
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
 preserve campaign progress. CLAUDE.md is authoritative for this direction and the latest launch permission.
@@ -41,11 +45,21 @@ cloth/timber panels and service details. Read tools/hamlet_models/README.md befo
 Private gallery: local-art/ui-overhaul/hamlet-buildings-v02; v01 is retained for before/after comparison.
 Ten GLBs/.blend documents and fifty renders pass topology/bounds/textures, 99 base/emission factor checks
 and native alpha thresholds (101,646 triangles, zero bounds change). Explicit Principled emission and
-KHR_materials_emissive_strength preserve native preview paint brightness. The model set is not installed:
+KHR_materials_emissive_strength preserve native preview paint brightness. At round218 the model set was not installed:
 coarse Ancestor sculpt, repeating surfaces/trim, upgrades/locked variants and native materials/lighting
 remain. GltfModel.Load requires external JSON glTF/buffers/images and lacks painted color factors; adapt
 that seam before binding models into HamletStage. Keep Look.Hamlet3D and the painted fallback. This round
 did not launch/deploy/access saves; independent Expedition Map3D and Shieldbreaker work remains separate.
+Round219 integrates v02 into HamletStage through a private `PrivateScenery/HamletModels` package, preserving
+painted factors, node transforms, original UVs and cutouts. Core HamletLayout defines level foundations on
+three rising terraces; a curved road/approaches, retaining stone and a higher camera replace broad flat paving.
+Read tools/hamlet_3d.md and tools/hamlet_models/README.md. First native unsaved run fully passed interaction,
+controls, rollback/reload, Embark, cleanup and return. Second brightness/front-wagon framing pass passed all
+ten services, controls, rollback/reload and Embark cleanup before the owner's pause; final return/overview
+capture remain. All1028 Core+182 UI and Release pass. Private evidence: local-art/ui-overhaul/hamlet-ingame-v02.
+DD2 is stopped. Source flag stays off by default; owner's existing local Hamlet3D=true is retained. No estates
+were selected/read/saved. Existing Map3D/Shieldbreaker dirty files stay outside this round. Ancestor/trim,
+upgrades/event exteriors, final visual acceptance and repeated native URP RTHandle reallocation need follow-up.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without

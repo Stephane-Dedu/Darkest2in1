@@ -43,12 +43,26 @@ samples and some inferred architecture still need individual painting and fittin
 
 This is closer to DD2's painted direction, not a claim of identical production quality. The offline material
 conversion preserves native paint brightness and alpha cutouts; it does not reproduce DD2's native lighting,
-fog, outline shaders or animation. Both private galleries remain available; neither replaces the live town.
+fog, outline shaders or animation. Both private galleries remain available. Round219 installs v02 through the 3D town flag.
 
-For integration, `src/DarkestDungeon3.Core/Presentation/GltfModel.cs` currently reads JSON glTF with external `.bin` and image
-files. It does not read these packed GLBs or apply their painted color factors. Convert the package or extend
-that loader, fit the materials to DD2's native shaders, and verify axes/scale before replacing HamletStage parts.
-Keep `Look.Hamlet3D` and the painted rollback throughout that work.
+`package.py` converts the verified GLBs to the runtime's external JSON glTF/buffers/PNG format. It preserves
+node transforms, UVs, painted factors and alpha thresholds, deduplicates PNGs and carries base alpha into RGB
+emission paint maps when needed. It requires all ten verified model hashes and refuses output inside Git.
+`GltfModel` now reads base/emission factors and emissive strength. `HamletStage.Models` applies them to owned
+DD2 environment materials, restores the authored front, sizes each exterior to its terrace and batches by
+material while retaining separate picking bounds. All resources release with `Look.Hamlet3D` rollback.
+Native check scope and remaining acceptance are in [the Hamlet guide](../hamlet_3d.md).
+
+To package the existing v02 output, run from the repository:
+
+```powershell
+& 'C:\Users\Piral\DarkestDungeon3\universal-modder\.venv\Scripts\python.exe' tools/hamlet_models/package.py --source 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-buildings-v02' --out 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-ingame-v02\HamletModels'
+```
+
+Copy the resulting `HamletModels` folder into the configured private scenery folder only while DD2 is
+stopped, after backing up any previous package. Verify all `manifest.json` file hashes after copying.
+Current package: ten models, 54 hashed files, 59.5 MB, plus its manifest. It is installed privately in the
+owner's active `game/PrivateScenery/HamletModels`. Source feature default stays off; local config is on.
 
 ## Rebuild privately
 
@@ -87,7 +101,7 @@ Private outputs include `gallery.html`, `hamlet-building-models-v02.png`, `dd1-t
 With `--previous`, the gallery also copies the previous exported renders for its First pass buttons and
 creates `before-after-v02.png`. This comparison needs no browser server or network connection.
 No exported model, game texture, reference image or packed Blender file belongs in Git or a release.
-The scripts never read saves, launch DD2 or change the installed game. The independent corridor and
+The scripts never read saves, launch DD2 or install the package themselves. The independent corridor and
 Shieldbreaker pipelines are untouched.
 
 Additional public visual reference: [Red Hook's DD1 media gallery](https://www.darkestdungeon.com/darkest-dungeon/media/).

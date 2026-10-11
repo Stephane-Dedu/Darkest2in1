@@ -5293,3 +5293,51 @@ and actual game integration are separate acceptance work. Current GltfModel load
 glTF/buffers/images and lacks painted factors; adapt it before installing the new GLBs into HamletStage.
 Keep Look.Hamlet3D and immediate painted rollback. Independent Expedition Map3D/Shieldbreaker files were
 preserved outside this round. No game or save state was changed by this modeling work.
+
+## Round219 (2026-10-11): install the ten v02 buildings on a terraced 3D Hamlet
+
+Owner request: apply the building library in game and replace the flat ground with a better perspective.
+The ten v02 GLBs are now a private runtime package at active `PrivateScenery/HamletModels`, 54 hashed files
+plus manifest, 59.5 MB. tools/hamlet_models/package.py verifies the ten source hashes, unpacks external
+glTF/buffers/images, deduplicates PNGs and puts base alpha into emission paint maps where the RGB export
+lost it. Original geometry, node transforms, UVs, factors and alpha cutoffs remain. No game assets enter Git.
+
+GltfModel reads base/emission factors and KHR_materials_emissive_strength. HamletStage.Models parses and
+hashes files on a worker, uploads one texture per frame and constructs one exterior per frame. It restores
+the authored front after coordinate conversion, normalises ground pivots and batches by material using
+owned meshes and copies of DD2's painted environment shader. Original primitive bounds remain separate
+for picking, so batching does not turn a whole building's empty space into one click box. All uploaded
+textures/meshes/materials release with the existing stage rollback, including after failed loads.
+
+Core HamletLayout places the coach/market below the workshops, then the Guild and Abbey on higher levels.
+Terrain rises 15 units with level foundations, a winding road, branch approaches, low retaining walls
+and steps. A higher three-quarter camera and native Valley trees/rocks frame the town. The first native
+capture showed dark earth and a front wagon hidden by the footer; the second pass brightens earth/paving,
+moves coach/market farther into the scene and eases the camera framing. Old service placeholders are removed;
+native surrounding scenery and its material templates remain. Service rules and UI dispatch are unchanged.
+
+Validation: Release builds, 1028 Core and 182 UI tests pass. Four focused terrain/material cases pass again
+after final layout/loader cleanup. Package Python parses and all 54 installed file hashes match. Native
+unsaved QA PID67776 fully passed ten service clicks/Escape, pan/zoom/reset, painted rollback/resource release,
+reload/re-entry click, footer Embark, stage cleanup and return. PID71468 with the brighter terrain/framing
+passed all ten clicks, controls, rollback/reload and Embark cleanup. The owner asked to stop launching games
+for 30 minutes before that run's final return-to-town check. Its logs and current capture were saved, then
+only the owned QA process was closed. No normal relaunch. No estate was selected or saved; protected slots
+were never read. Pre-change plugin/config snapshots: universal-modder hamlet-v02-plugin/hamlet-v02-config.
+
+Private package/evidence: local-art/ui-overhaul/hamlet-ingame-v02/HamletModels and native/*.png/*.log.
+first-check.png is the complete native run's town capture before the brightness/framing adjustment.
+second-framing.png caught the painted fallback while models loaded; second-check.png caught the quest UI.
+Neither second capture should be presented as a final 3D overview. Final overview/return acceptance remains.
+Player.log repeats URP RTHandle reallocations between the native and stage camera targets; investigate
+render-target churn before claiming performance acceptance. No speculative camera changes were made for it.
+
+## Status 2026-10-11: round219 v02 buildings installed; owner game-launch pause
+
+DD2 is stopped. Do not launch before 2026-10-11 16:56:44 UTC / 18:56:44 Paris unless the owner changes the
+instruction. This overrides normal-game relaunch at the end of QA for now. Continue offline work. The
+owner's existing local Hamlet3D=true is retained; source feature default stays false and Painted town
+releases the full stage immediately. Ten models and the hillside are installed, with a full first native
+PASS and partial second framing run as described above. Coarse Ancestor/trim, upgrades/events/NPC animation,
+saved-campaign transaction acceptance, final bright-terrain overview and native render-target churn remain.
+Independent Expedition Map3D, Shieldbreaker and corridor work was preserved outside the Hamlet commit.

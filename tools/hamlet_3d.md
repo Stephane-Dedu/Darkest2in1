@@ -13,14 +13,22 @@ is baked once into owned static meshes. DD2's native shader/material copies reta
 cutouts, with road-specific lighting, fog, distance darkening and dithering disabled. Shared native objects
 are never edited. Any temporary camera shader globals are restored immediately after rendering.
 
-The scene contains the Hoarder, Field Hospital/nurse, level-three inn, Watchtower, cathedral entrance,
-coach, camp shelter, graves and Altar of Hope. A shorter inn component forms the forge. DD1's installed
-blacksmith anvil/forge, guild banners and abbey windows are atlas-mapped onto fixed world surfaces. These
-details move in perspective with the buildings. Continuous sloped native foundation paving, camp/street props,
-Valley scenery and native mountain/sky assets connect the locations. The source road plates supply a fallback
-material and are hidden after the shared ground is ready. No extracted game art is committed.
+Round219 replaces the ten service placeholders with the verified v02 building library. Install its private
+runtime package under `Paths.NativeRoomSceneryFolder/HamletModels`; see [the packaging steps](hamlet_models/README.md).
+The package includes all ten exteriors, their original UVs and paint, DD1 architectural details and service
+emblems. Disk parsing and SHA256 verification run on a worker. Unity uploads one texture per frame, then builds
+one service per frame. Node transforms and painted base/emission factors survive import; primitives are batched
+by material and two-sided cloth retains back faces. Every uploaded texture, mesh and material is owned by the
+stage and released on rollback. No native shop behaviours or campaign save paths are instantiated.
 
-World picking selects the nearest service renderer bounds and calls the existing `HamletUi.Open` dispatch.
+`Core/Presentation/HamletLayout` places the coach and market below the workshops, then Guild and Abbey on
+higher terraces. The hillside rises 15 world units with level building foundations. A curved road and separate
+approaches follow that surface, with downhill retaining walls and stone steps. A higher three-quarter camera,
+native Valley trees/rocks, camp props and mountain/sky assets provide depth. The loaded road plates supply a
+material and are hidden once the terrain is ready. No extracted game art is committed.
+
+World picking selects the nearest original primitive bounds and calls the existing `HamletUi.Open` dispatch.
+Picking keeps those smaller bounds even when material batching combines a whole building into a few renderers.
 Unlocks, treatments, stock, upgrades, roster and campaign rules remain those of the ordinary Hamlet.
 The wheel zooms, middle-drag pans, Reset view restores the overview, and opening/closing a service smoothly
 moves the camera. Navigation, roster/footer and modal overlays block world input over their pixels.
@@ -33,13 +41,14 @@ Escape closes; zoom, pan and reset; painted rollback/resource release; reload an
 footer Embark; stage cleanup; Back to Hamlet and another successful scene load. The preview flag overrides
 the feature setting only in memory. Close the owned test process and relaunch without QA flags for play.
 
-Private captures, native logs and the pre-change plugin/config backup are under
-`local-art/ui-overhaul/hamlet-3d-v01/`, outside Git. The exterior is a first static composition: NPC idles,
-upgrade-dependent geometry, special event skies and further building-specific texture work remain art scope.
-Service transactions and saved-campaign embark need separate campaign acceptance; this preview checks the
-presentation, routing and resource lifecycle.
+Private round219 package, captures and logs are under `local-art/ui-overhaul/hamlet-ingame-v02/`, outside Git.
+Pre-change plugin/config snapshots are named `hamlet-v02-plugin` and `hamlet-v02-config` in the local
+universal-modder backup store. The first native run passed the complete check. A brighter terrain/front-wagon
+framing pass then passed all ten clicks, controls, rollback, reload and Embark cleanup. The owner stopped
+launches for 30 minutes before its final return-to-town check. The QA process was closed; DD2 was not relaunched.
+Do not launch before 2026-10-11 16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction.
 
-Round217 adds a separate [offline building model library](hamlet_models/README.md): ten DD1-referenced
-exteriors with native DD2 parts/surfaces, GLB and editable Blender outputs, four camera angles and exported-file
-validation. Private gallery: `local-art/ui-overhaul/hamlet-buildings-v01/gallery.html`. These first model studies
-have not replaced the stage's native scenery. Runtime import/material/placement and further art fitting remain.
+NPC idles, upgrade/event exteriors, the coarse Ancestor sculpt, individual trim painting and final lighting
+still need art work. Player.log also repeats URP RTHandle reallocations while the staged and native cameras
+render different targets; performance tuning remains. Saved-campaign transactions/embark need separate
+acceptance. This preview checks presentation, routing and resource lifecycle without selecting an estate.

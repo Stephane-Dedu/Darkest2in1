@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DarkestDungeon3.Core.Presentation;
 using DarkestDungeon3.Runtime;
 using DarkestDungeon3.Ui;
 using UnityEngine;
@@ -30,6 +31,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private const string Models = "Assets/Art/Models/Environments/Common/Models/Nodes/";
     private const string Valley = "Assets/Data/Biome/ValleyCommon/Map/";
     private const string Mountains = "Assets/Art/Models/Environments/Common/Models/MainMenu/";
+    private const string PaintTemplate = Models + "inn_lvl_03_prefab.prefab";
     private sealed class Piece
     {
         public readonly string Id, Path, Include;
@@ -38,24 +40,18 @@ internal sealed partial class HamletStage : MonoBehaviour
         public Piece(string id, string path, float x, float y, float z, float width, float rotation = 0, string include = null, float heightScale = 1)
         { Id = id; Path = path; Position = new(x, y, z); Width = width; Rotation = rotation; Include = include; HeightScale = heightScale; }
     }
-    // Separate paths and visual instances let several services share a native model without sharing UI state.
+    // Surrounding native scenery is separate from the ten private building models.
     private static readonly Piece[] Pieces =
     {
-        new("tavern", Models + "inn_lvl_03_prefab.prefab", -20, 0, 21, 15, 10),
-        new("abbey", "Assets/Art/Models/Environments/Mountain/Models/Nodes/cathedral_entrance.fbx", -12, 0, 46, 8),
-        new("guild", Common + "common_watchtower_prefab.prefab", 13, 0, 39, 10, -8),
-        new("sanitarium", Common + "common_field_hospital_prefab.prefab", 24, 0, 21, 12, -18, "node_02|nurse|planks|torch"),
-        new("nomad_wagon", Common + "common_hoarder_prefab.prefab", 12, 0, -3, 12, -15),
-        new("blacksmith", Models + "inn_lvl_02_prefab.prefab", -3, 0, 20, 11, 5, "inn_small_building", .65f),
-        new("stage_coach", "Assets/Data/Stagecoach/wagon/skins/skin_base/prefabs/wagon_art_embark_skin_base.prefab", -18, 0, -4, 10, 90),
-        new("camping_trainer", "Assets/Art/Models/Environments/Camp/camp_building.fbx", -30, 0, 7, 10, 10),
-        new("graveyard", Common + "common_field_hospital_prefab.prefab", 28, 0, 43, 10, -15, "gravestones"),
-        new("statue", Common + "common_altar_of_hope_prefab.prefab", -38, 0, 35, 7),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", -16, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 0, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 16, .04f, 8, 16, 90),
         new(null, Valley + "DecorTiles/valley_tile_01.prefab", -40, -.4f, 57, 25),
         new(null, Valley + "DecorTiles/valley_tile_02.prefab", 36, -.4f, 66, 24),
+        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -61, -.4f, 29, 22, 30),
+        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 56, -.4f, 31, 20, -20),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -49, 0, -6, 9, 15),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 40, 0, -7, 8, -25),
         new(null, Models + "inn_lvl_01_prefab.prefab", -42, 0, 53, 10, 15),
         new(null, Models + "inn_lvl_01_prefab.prefab", 39, 0, 57, 10, -15),
         new(null, Mountains + "mainmenu_mountain_mdl.fbx", 0, -24, 123, 100),
@@ -72,6 +68,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         public string Id;
         public Bounds Bounds;
         public readonly List<Renderer> Renderers = new();
+        public readonly List<Bounds> HitBounds = new();
         public bool Available = true;
     }
     private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assets = new();
@@ -103,7 +100,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
     internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _details.Count != 0
-        || _texture != null || _groundTexture != null || _groundMesh != null || _groundMaterial != null;
+        || _texture != null || _groundTexture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
 
@@ -161,8 +158,10 @@ internal sealed partial class HamletStage : MonoBehaviour
         _look = Overview;
         ResetView();
         MoveCamera(1);
+        BeginModels();
         foreach (var piece in Pieces)
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
+        _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
         _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/foundation_ground.mat");
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
@@ -182,14 +181,13 @@ internal sealed partial class HamletStage : MonoBehaviour
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null) Build(piece, handle.Result);
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
-                if (_piece == Pieces.Length)
-                {
-                    if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
-                    BuildGround();
-                    BuildDd1Details();
-                    _camera.enabled = true;
-                    Plugin.Log.LogInfo($"[hamlet 3d] built {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers");
-                }
+            }
+            else if (!_camera.enabled && AdvanceModels())
+            {
+                if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
+                BuildGround();
+                _camera.enabled = true;
+                Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; hillside rises 15 metres");
             }
             MoveCamera(1 - Mathf.Exp(-Time.unscaledDeltaTime * 5));
         }
@@ -257,57 +255,18 @@ internal sealed partial class HamletStage : MonoBehaviour
         foreach (Transform child in group) child.localPosition -= shift;
         group.localScale = new Vector3(scale, scale * piece.HeightScale, scale);
         group.localRotation = Quaternion.Euler(0, piece.Rotation, 0);
-        group.localPosition = piece.Position + Vector3.up * GroundHeight(piece.Position.z);
+        group.localPosition = piece.Position + Vector3.up * HamletLayout.Height(piece.Position.x, piece.Position.z);
         if (piece.Id != null)
         {
             var building = new Building { Id = piece.Id, Bounds = renderers[0].bounds };
             building.Renderers.AddRange(renderers);
             foreach (var renderer in renderers.Skip(1)) building.Bounds.Encapsulate(renderer.bounds);
+            building.HitBounds.AddRange(renderers.Select(r => r.bounds));
             _buildings.Add(building);
         }
         Plugin.Log.LogInfo($"[hamlet 3d] {piece.Id ?? "scenery"}: {renderers.Count} visual meshes ({prefab.name})");
     }
-    private static float GroundHeight(float z) => Mathf.Max(0, z - 24) * .12f;
-    private static readonly Vector3 Overview = new(5, 2, 19);
-
-    private void BuildGround()
-    {
-        var source = _root.GetComponentsInChildren<MeshRenderer>().FirstOrDefault(r => r.sharedMaterials.Any(m => m != null && m.name.Contains("valley_road_main")));
-        if (source == null) throw new InvalidOperationException("Native road surface is unavailable.");
-        var baseMaterial = source.sharedMaterials.First(m => m != null && m.name.Contains("valley_road_main"));
-        var texture = _terrainAsset.Status == AsyncOperationStatus.Succeeded ? BaseTexture(_terrainAsset.Result) : null;
-        texture ??= BaseTexture(baseMaterial);
-        _groundMaterial = new Material(baseMaterial) { name = "Hamlet continuous native stone ground" };
-        if (texture != null)
-        {
-            // Repeat an owned GPU copy; never change a native shared texture's sampler settings.
-            _groundTexture = new RenderTexture(512, 512, 0, RenderTextureFormat.ARGB32) { wrapMode = TextureWrapMode.Repeat, name = "Hamlet repeatable native road" };
-            _groundTexture.Create(); Graphics.Blit(texture, _groundTexture);
-            _groundMaterial.SetTexture("_BaseMap_texture", _groundTexture);
-        }
-        const int side = 33;
-        var vertices = new Vector3[side * side]; var uv = new Vector2[vertices.Length]; var colors = new Color[vertices.Length];
-        var triangles = new int[(side - 1) * (side - 1) * 6];
-        for (int z = 0; z < side; z++) for (int x = 0; x < side; x++)
-        {
-            int i = z * side + x; float px = -140 + x * 280f / (side - 1), pz = -100 + z * 210f / (side - 1);
-            vertices[i] = new Vector3(px, GroundHeight(pz) - .15f, pz);
-            uv[i] = new Vector2(px / 8, pz / 8); colors[i] = Color.white;
-            if (x == side - 1 || z == side - 1) continue;
-            int t = (z * (side - 1) + x) * 6;
-            triangles[t] = i; triangles[t + 1] = i + side; triangles[t + 2] = i + 1;
-            triangles[t + 3] = i + 1; triangles[t + 4] = i + side; triangles[t + 5] = i + side + 1;
-        }
-        _groundMesh = new Mesh { name = "Hamlet hillside", vertices = vertices, uv = uv, colors = colors, triangles = triangles };
-        _groundMesh.RecalculateNormals(); _groundMesh.RecalculateBounds();
-        var ground = new GameObject("Continuous hillside"); ground.layer = source.gameObject.layer; ground.transform.SetParent(_root, false);
-        ground.AddComponent<MeshFilter>().sharedMesh = _groundMesh;
-        var renderer = ground.AddComponent<MeshRenderer>(); renderer.sharedMaterial = _groundMaterial;
-        renderer.shadowCastingMode = ShadowCastingMode.Off; renderer.receiveShadows = false;
-        // The continuous paving replaces the small road plates; retain their owned material as a fallback.
-        foreach (var road in _root.GetComponentsInChildren<MeshRenderer>())
-            if (road.name.Contains("road_valley_straight_single")) road.enabled = false;
-    }
+    private static readonly Vector3 Overview = new(9, 7, 27);
 
     private Material BackdropMaterial(Material source)
     {
@@ -350,7 +309,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         var target = focused == null ? Overview : Vector3.Lerp(Overview, focused.Bounds.center - Origin, .4f);
         target += new Vector3(_pan.x, 0, _pan.y);
         _look = Vector3.Lerp(_look, target, blend);
-        var offset = new Vector3(8, 28, -76) * (_zoom * (focused == null ? 1 : .87f));
+        var offset = new Vector3(20, 52, -94) * (_zoom * (focused == null ? 1 : .87f));
         _camera.transform.localPosition = _look + offset;
         _camera.transform.LookAt(Origin + _look);
     }
@@ -368,8 +327,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         var ray = _camera.ViewportPointToRay(new Vector3(point.x / 1920, 1 - point.y / 1080, 0));
         string id = null; float nearest = float.MaxValue;
         foreach (var building in _buildings)
-            foreach (var renderer in building.Renderers)
-                if (renderer.bounds.IntersectRay(ray, out float distance) && distance < nearest) { nearest = distance; id = building.Id; }
+            foreach (var bounds in building.HitBounds)
+                if (bounds.IntersectRay(ray, out float distance) && distance < nearest) { nearest = distance; id = building.Id; }
         return id;
     }
     public Vector2 Anchor(string id)
@@ -383,9 +342,9 @@ internal sealed partial class HamletStage : MonoBehaviour
     {
         var b = _buildings.FirstOrDefault(x => x.Id == id);
         if (b == null || !Ready) return null;
-        foreach (var renderer in b.Renderers)
+        foreach (var bounds in b.HitBounds)
         {
-            var p = _camera.WorldToViewportPoint(renderer.bounds.center);
+            var p = _camera.WorldToViewportPoint(bounds.center);
             var point = new Vector2(p.x * 1920, (1 - p.y) * 1080);
             if (point.x > 120 && point.x < 1540 && point.y > 180 && point.y < 940 && Pick(point) == id) return point;
         }
@@ -445,6 +404,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_terrainAsset.IsValid()) Addressables.Release(_terrainAsset);
         _terrainAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
+        ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null; _groundTexture = null;
         _piece = 0; _rendered = false; _focus = null; _hover = null;
     }

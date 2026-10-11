@@ -7,10 +7,10 @@ using Newtonsoft.Json.Linq;
 namespace DarkestDungeon3.Core.Presentation;
 
 /// <summary>
-/// A skinned glTF 2.0 model (.gltf with external .bin and PNG images), read into plain arrays in Unity's
+/// A static or skinned glTF 2.0 model (.gltf with external .bin and PNG images), read into plain arrays in Unity's
 /// coordinates: glTF is right-handed and Unity left-handed, so X is mirrored (positions, normals, rotations,
 /// bind matrices), triangles are rewound, and V is flipped (glTF's texture origin is the top left).
-/// Used to try exported characters from other games in DD2's fights; the files stay private.
+/// Used for exported fight characters and Hamlet buildings; the files stay private.
 /// </summary>
 public sealed class GltfModel
 {
@@ -101,6 +101,8 @@ public sealed class GltfModel
         public string Name, BaseColor, Emissive, Normal;
         public bool Mask, DoubleSided;
         public float Cutoff = 0.5f;
+        public float[] BaseColorFactor = { 1, 1, 1, 1 }, EmissiveFactor = { 0, 0, 0 };
+        public bool Blend;
     }
 
     public string Directory { get; private set; }
@@ -207,6 +209,12 @@ public sealed class GltfModel
                 Mask = (string)m["alphaMode"] == "MASK",
                 Cutoff = m["alphaCutoff"] != null ? (float)m["alphaCutoff"] : 0.5f,
                 DoubleSided = m["doubleSided"] != null && (bool)m["doubleSided"],
+                BaseColorFactor = m["pbrMetallicRoughness"]?["baseColorFactor"] is JArray colour
+                    ? colour.Select(v => (float)v).ToArray() : new float[] { 1, 1, 1, 1 },
+                EmissiveFactor = m["emissiveFactor"] is JArray emission
+                    ? emission.Select(v => (float)v * (m["extensions"]?["KHR_materials_emissive_strength"]?["emissiveStrength"] is { } strength ? (float)strength : 1)).ToArray()
+                    : new float[] { 0, 0, 0 },
+                Blend = (string)m["alphaMode"] == "BLEND",
             });
 
         var meshNodes = new Dictionary<int, int>();
