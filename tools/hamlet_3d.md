@@ -38,3 +38,8 @@ Private captures, native logs and the pre-change plugin/config backup are under
 upgrade-dependent geometry, special event skies and further building-specific texture work remain art scope.
 Service transactions and saved-campaign embark need separate campaign acceptance; this preview checks the
 presentation, routing and resource lifecycle.
+
+Round217 adds a separate [offline building model library](hamlet_models/README.md): ten DD1-referenced
+exteriors with native DD2 parts/surfaces, GLB and editable Blender outputs, four camera angles and exported-file
+validation. Private gallery: `local-art/ui-overhaul/hamlet-buildings-v01/gallery.html`. These first model studies
+have not replaced the stage's native scenery. Runtime import/material/placement and further art fitting remain.

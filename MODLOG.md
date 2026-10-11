@@ -5196,3 +5196,50 @@ active for the four existing DD2 campaign regions; rooms/arena art and the defau
 Next visual work: distant-ground edges, reflected repetition, Tangle readability, foreground props and native
 lighting/emission, followed by real estate 2 quest acceptance. Keep protected estates 1/3 off limits. The separate
 Shieldbreaker and new hamlet_models work remains outside this round's commit.
+
+## Round217 (2026-10-11): ten individual Hamlet building model studies
+
+Owner requested modeling each DD1 Hamlet building as a DD2-style 3D exterior, reusing native prefabs where
+useful. This is an offline asset-authoring round. The installed town and Look.Hamlet3D implementation from
+round215 are unchanged. Used the pasted dd2-native-kit and asset-pipeline skills, the owner's installed DD1
+town FX/atlas artwork through the private dd1-reference-kit, and the existing dd2-native-kit mesh/texture
+exports. Compared all ten fully repaired exteriors; retained level01/02/03/locked contact sheets for reference.
+DD1 gives fronts/silhouettes/details; unseen sides and backs are inferred. No generated bitmap buildings.
+
+New tools/hamlet_models builds separate Abbey, Tavern, Sanitarium, Guild, Blacksmith, Survivalist, Stage Coach,
+Nomad Wagon, Graveyard and Ancestor statue models. Reused native inn/cottage/coach/tower/graves/nurse/camp props;
+authored the missing nave, turret, hall, forge bay, tent, caravan and sculpture. Real roof volumes, stairs,
+buttresses, window frames, wheels/spokes, grave thickness and service details establish depth across four
+camera views. The Ancestor follows the DD1 bare head, long coat/cape and hands on staff. Native painted
+surfaces plus selected DD1 banners, forge sign, eye crest, glass grain and stone weathering supply materials.
+Corrected stretched roof UVs, the hidden Sanitarium turret, Nomad awning/door overlap and thin native graves.
+
+Blender 5.2's glTF exporter silently loses constant color factors through legacy MixRGB nodes. A round-trip
+render exposed white Sanitarium windows and missing cloth tint despite valid embedded images. Replaced
+the authored/native material multiply nodes with current RGBA Mix nodes, rebuilt all ten, and added a
+packed-Blender-to-GLB factor comparison. Imported images are lazily decoded: validate packed data and actual
+pixel lengths instead of rejecting has_data=False before decoding. The shared native-kit tools are untouched.
+
+Validation: all seven Python modules parse; Blender built ten textured GLBs and ten packed editable .blend
+documents with forty 1024x1024 angle renders. Re-imported and rendered every GLB independently: all ten pass,
+73,081 triangles total, exact topology and zero bounds change, finite three-dimensional geometry, embedded
+texture data, and 37 painted material-factor checks. Private verified.json records SHA256 and results.
+Gallery generation validates all fifty PNGs and rejects any GLB changed after verification. Visually reviewed
+the model sheet, DD1 comparison and individual corrective views. No game build/test suite was rerun for
+these offline-only tools; this establishes exported asset validity, not native game acceptance.
+
+Private outputs: local-art/ui-overhaul/hamlet-buildings-v01/gallery.html,
+hamlet-building-models-v01.png, dd1-to-dd2-comparison-v01.png and each building's GLB/.blend/five PNGs.
+Only original authoring scripts and documentation belong in Git. All models, packed documents, extracted
+textures, reference art and manifests remain outside the repository/releases. See tools/hamlet_models/README.md.
+
+## Status 2026-10-11: round217 offline Hamlet models verified; runtime unchanged
+
+The first modeling pass covers all ten services and has an offline gallery with DD1 comparisons. It needs
+further art fitting: coarse Ancestor sculpture, repeated stone/wood grain, generic small doors/sign faces,
+Guild side-wing detail and native material/lighting fit. Lower upgrade/locked geometry, event variants,
+NPC animation, collision and LODs are not built. Current Core GltfModel.Load reads JSON glTF with external
+buffers/images, not packed GLB, and does not apply painted color factors. Convert/extend that seam before
+binding these models into HamletStage; retain the existing feature flag and immediate painted rollback.
+No game process was launched/stopped, no deploy occurred and no save/estate was read or changed in this round.
+The independently edited Expedition Map3D and Shieldbreaker files remain outside this commit.
