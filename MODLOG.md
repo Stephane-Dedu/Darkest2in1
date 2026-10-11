@@ -5129,3 +5129,70 @@ native Hamlet entry. `Look.Hamlet3D=false` remains the owner's default. The inde
 and Shieldbreaker work remain unstaged. No estate was opened during this round. During the final commit,
 the corridor agent rebuilt/redeployed and started its own `-dd3-corridor-preview -dd3-corridor-check` process
 (PID60456); leave that independently owned session running. The normal launch above predates that test.
+
+
+## Round216 (2026-10-11): install native DD2 corridor scenery in all four primary regions
+
+Owner requested beginning integration of the newly extracted road scenery, with an honest audit of missing
+assets. Installed 24 road/decor/skirt/skybox-derived panoramas, six each for Sprawl, Foetor, Tangle and Shroud,
+replacing the eight generated round171 corridor images. No new generated art. The room pack is untouched:
+all 24 room PNGs byte-match the pre-change backup. Valley's four images stay uninstalled because it has no
+campaign region plan; Caves/Tundra/Mountain are not invented as aliases onto existing campaign quests.
+The 95 exported battle arenas were not installed in this corridor round.
+
+New tools/prepare_native_corridors.py validates the full native source set and packages canonical names,
+source/output hashes and fitting metadata outside Git. Live CrawlUi/HeroStage feet are y=680 in 1920x720,
+source y=1020 in 2880x1080. Raw Tangle's band was nearly black under the feet (mean luma 0.2; 98.8% near-black);
+Foetor also fell below its road (mean 8.7). Uniform top-anchored crops at 1.15x/1.08x respectively bring real
+textured road under that line; no synthetic floor is painted. Prepared foot-band means: city 34.1, farm 42.1,
+forest 12.2, coast 34.9-36.2. These statistics identify the black-border issue; they are not visual acceptance.
+Sprawl/Shroud keep 1.00x framing. All 24 PNGs decode RGB 2880x1080 and installed SHA256 values match the manifest.
+The kit's independently maintained extraction/render scripts were not changed.
+
+Existing filename discovery, bounded worker IO, one texture upload/update, deterministic selection, reflected
+scroll joins and regional teardown already support six variants; no gameplay/save changes were needed.
+Changed the loader log from "generated panorama" to "private panorama" to describe either art source correctly.
+The installed pack is local-art/corridors-native-v01 copied to the active darkestwithdlc/game/PrivateScenery.
+Whole original 35-file scenery backup: .universal-modder/backups/dd3-scenery-before-native-corridors-20261011/
+20261011-133022.zip. Pre-change 17-file DLL/config/data backup: dd3-plugin-before-native-corridors-20261011/
+20261011-133328.zip under the same backup root. Restore the whole scenery folder, not an overlay which would
+leave variants 03-06 behind. All native-derived art/private manifests remain outside Git/releases.
+
+Added explicit -dd3-corridor-preview and optional -dd3-corridor-check QA fixture. It owns only an Off-phase
+native main menu with Session.Save/SavePath null; no estate selection/creation, persistence, gameplay spawning
+or OS input. Harmony redirects the ordinary Off-phase loader cleanup to its selected active region. The actual
+CorridorPanoramaUi renderer scrolls forward/reverse over gold y=680 marks. Initial figure references were Story
+portrait crops, unsuitable for feet; v02 uses full-body DD1 combat silhouettes via the existing SpineArt worker.
+These are framing references, not native 3D actor acceptance. Close restores ordinary menu input/background mode.
+Both native 1600x900 checks decoded/adopted six corridors per region and rendered all 24 choices, logging PASS.
+Private evidence: local-art/corridors-native-v01/native-check/ (initial 24 captures/log) and native-check-v02/
+(23 captures, complete 24-choice log, and post-exit log), plus native-regions-in-dd2.jpg. The capture loop started
+after the second run's first city choice; it is not a missing decoder/render result.
+
+Visual audit: Sprawl's distant maroon ground edge and mirrored houses are obvious; Foetor has reflected flesh
+arches/flat light; Tangle retains dark base slabs and tree masses; Shroud posts/candles are baked into the lane
+and cannot occlude actors. The six variants reuse one floor per region. Native shader lighting/fog/emission/VFX
+are absent in the flat offline renders. First fix composition/ground coverage, quiet repeat ends, material
+interpretation and foreground/depth passes with the existing assets. No generated replacement textures are
+needed for the four primary regions yet. Road index 555 assets/58 empty; Tundra 44/46 empty needs dependency-aware
+re-export before use. Mountain's three organ arenas and separately supplied Sprawl/Tangle arena floors remain
+extraction gaps for later work. Detailed per-biome counts/priorities: tools/native_corridor_audit.md.
+
+After v02 logged PASS, native shutdown logged the previously observed KeyNotFoundException for IMainInstaller
+in Globals.InvokeUninstallCallbacks/GameInstaller.OnUninstallFinished. No scenery exception was logged; cause
+and reproducibility remain unverified. Do not call this whole session exception-free or infer a scenery cause.
+Real estate 2 DD2 hero foot contact, curio/trap/obstacle interaction, torch levels, room entry, in-place battle
+snapshot/return and repeated-expedition memory remain [?]. No campaign save was read or changed by these checks.
+
+Release build/deploy passed with three existing warnings; all 995 Core + 182 UI tests pass. Final deployed/source
+plugin SHA256: 72546C54AFE0F4457ECFDDA6B50DBC878C2E9D117BC9814A03785649D43A7E25.
+The other agent's round215 3D Hamlet and unrelated Shieldbreaker/hamlet_models work were preserved.
+
+## Status 2026-10-11: round216 native corridors deployed; normal launch restored
+
+The corridor QA processes have ended. Normal DD2 PID 58148 runs at 1600x900 with no QA flags, reached MAIN_MENU
+and attached the native Hamlet button. No ordinary estate picker was opened. Private native corridors are
+active for the four existing DD2 campaign regions; rooms/arena art and the default painted Hamlet are retained.
+Next visual work: distant-ground edges, reflected repetition, Tangle readability, foreground props and native
+lighting/emission, followed by real estate 2 quest acceptance. Keep protected estates 1/3 off limits. The separate
+Shieldbreaker and new hamlet_models work remains outside this round's commit.

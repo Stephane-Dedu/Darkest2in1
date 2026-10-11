@@ -27,6 +27,15 @@ Normal DD2 was restored without QA flags (PID37708), reached MAIN_MENU and attac
 `Look.Hamlet3D=false` remains the default. Dirty Shieldbreaker and independent corridor changes remain outside
 the Hamlet commit. The corridor agent subsequently started its own native QA (PID60456, corridor preview/check
 flags); do not stop that session or redeploy over its test. Trinket HUD remains later scope.
+Round216 supersedes that process status: native corridors are installed in the active `PrivateScenery`,
+six each for Sprawl/Foetor/Tangle/Shroud, replacing the eight generated hallways. Existing rooms/arenas
+are unchanged. Read tools/corridor_art.md and tools/native_corridor_audit.md before replacing the pack.
+Native unsaved QA rendered all 24 choices through the real loader; corrected Foetor/Tangle framing is
+shown with DD1 reference bodies, not live DD2 actors. Real quest/curio/battle acceptance remains pending.
+The two corridor-check processes ended; v02 logged the previously observed native IMainInstaller shutdown
+exception after PASS. No estate was selected. Use the latest MODLOG Status for the restored normal process.
+The extraction pipeline is untouched, all game-derived assets remain private, and prior generated scenery
+has a complete rollback backup. No new generated art is needed before fixing native layout/materials/depth.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without

@@ -139,7 +139,7 @@ internal static class RegionSceneryArt
             if (!texture.LoadImage(image.Data, markNonReadable: true) || texture.width > 4096 || texture.height > 2048)
                 throw new InvalidDataException("invalid or oversized room image");
             Rooms.Add(image.FileName, new RoomTexture { Texture = texture, ReadyAt = Time.unscaledTime });
-            Plugin.Log.LogInfo($"[scenery] {image.FileName}: generated panorama ready ({texture.width}x{texture.height})");
+            Plugin.Log.LogInfo($"[scenery] {image.FileName}: private panorama ready ({texture.width}x{texture.height})");
         }
         catch (Exception e)
         {

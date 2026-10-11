@@ -1,4 +1,63 @@
-# Generated DD2 corridor scenery
+# Private DD2 corridor scenery
+
+## Current pack: native DD2 roads, round216
+
+The active install now uses 24 panoramas made from the owner's DD2 road, decor,
+skirt and skybox assets: six each for Sprawl (`city`), Foetor (`farm`), Tangle
+(`forest`) and Shroud (`coast`). These replace the eight generated corridors
+described below. No generated artwork was used in this pack. Room panoramas and
+their manifest are unchanged; the new battle-arena exports are not installed.
+
+Sources remain in `local-art/dd2-native-kit/corridor-renders/`. Prepare them with
+a Python environment containing Pillow:
+
+```powershell
+python tools/prepare_native_corridors.py <private-kit> <private-output>
+```
+
+The script validates all 24 sources before writing, uniformly fits them to the
+live scene and writes canonical PNGs plus `corridors-manifest.json`. Output must
+stay outside Git. Current pack: `C:\Users\Piral\DarkestDungeon3\local-art\corridors-native-v01`.
+Its manifest records source/output SHA256, fitting, source paths and limitations.
+The independently maintained kit extraction/render scripts are untouched.
+
+The live scene is 1920x720 with hero feet at y=680 (source y1020 in 2880x1080).
+Raw Foetor and Tangle left this band below the textured road. Foetor is uniformly
+enlarged 1.08x and Tangle 1.15x, centred horizontally and anchored at the top;
+surplus is cropped below. Sprawl/Shroud retain 1.00x. This preserves aspect and
+moves road under the footline without painting it.
+
+With DD2 stopped, back up `PrivateScenery`, then copy the 24 canonical PNGs and
+their corridor manifest to `C:\Users\Piral\darkestwithdlc\game\PrivateScenery`.
+Replace old same-name corridor files; retain all room PNGs and `manifest.json`.
+Do not leave old corridor variants numbered 07+ in the pool unintentionally.
+The existing naming, bounds, selection and loader contract below is unchanged.
+Increasing the pool from two to six can change a continuing expedition's art
+selection, but does not change its map or gameplay state.
+
+Rollback backup (complete original 35-file folder):
+`C:\Users\Piral\.universal-modder\backups\dd3-scenery-before-native-corridors-20261011\20261011-133022.zip`.
+Stop DD2, move the current private folder aside, then restore the complete backup;
+overlaying it would leave native variants 03-06 behind. Prior generated sources
+and prompts remain in `local-art/corridors`.
+
+With debug keys enabled, `-dd3-corridor-preview` opens an unsaved native-menu
+scenery fixture; add `-dd3-corridor-check` to cycle all 24 choices automatically.
+It uses the actual loader and panorama draw, forward/reverse travel, gold y=680
+footline marks and full-body DD1 reference figures. It requires Phase.Off and
+no selected Save or SavePath. It opens/creates no estate, performs no campaign
+persistence and sends no OS input. Close returns to the menu. Do not leave these
+flags active for normal play.
+
+Round216 native 1600x900 checks loaded/adopted six corridors per region and
+rendered every choice. Private logs/captures are in the pack's `native-check/`
+and `native-check-v02/`. The initial revision used portrait crops; only v02 is
+useful for full-body framing. Release and 995 Core + 182 UI tests pass. This
+fixture does not establish native 3D actor contact, curio input, room entry or
+battle handoff with the new art. Those remain live-quest acceptance. See
+[native_corridor_audit.md](native_corridor_audit.md) for art gaps/extraction order.
+
+## Historical round171 generated pack
 
 Round 171 adds a separate private panorama pool for hallways in the Sprawl,
 Foetor, Tangle and Shroud. Rooms retain their own arena-extension pool.
