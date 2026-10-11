@@ -269,7 +269,7 @@ internal sealed partial class EmbarkUi
             if (_expeditionStyle)
             {
                 DrawQuestMarker(r, q, hover);
-                if (Gui.Hotspot(r)) SelectQuest(q);
+                if (Gui.Hotspot(r)) { SelectQuest(q); ZoomToQuest(q); }
                 continue;
             }
             if (q == _quest)

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using DarkestDungeon3.Core.Campaign;
+using DarkestDungeon3.Core.Dungeon;
 using DarkestDungeon3.Core.Presentation;
 using DarkestDungeon3.Runtime;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace DarkestDungeon3.Ui;
 
 /// <summary>
 /// The pre-rendered 3D expedition map: one overview frame of the valley and one closer frame per map position,
-/// rendered privately from installed DD2 scenery. Clicking a region's scenery flies toward it: the overview
+/// rendered privately from installed DD2 scenery. Clicking a region's scenery or one of its quests flies toward it: the overview
 /// grows about the region and cross-fades into its own frame, where only that position's name and quests show.
 /// Quests, region pairing, party, roster and provisioning are the ordinary selector's. Experimental and
 /// reversible: the Painted map button, a missing pack or an invalid layout all retain the painted map.
@@ -138,6 +139,16 @@ internal sealed partial class EmbarkUi
                 : _mapAreas.TryGetValue(location, out var shown) ? shown : null;
             if (zone != null && zone != _focusedZone) FocusArea(zone);
         }
+    }
+
+    /// <summary>Choosing a quest on the 3D map also flies to its region; already there, nothing moves.</summary>
+    private void ZoomToQuest(QuestOffer quest)
+    {
+        if (quest == null || !Map3DWanted || !Map3DAvailable) return;
+        string location = quest.Dungeon == QuestBoard.DarkestDungeon ? QuestBoard.DarkestDungeon : ZoneBase.Of(quest.Dungeon);
+        if (location == null || !ExpeditionMapArt.Map3DLayout.Spots.ContainsKey(location)) return;
+        if (_zoomLocation == location) { _zoomIn = true; return; }
+        _zoomLocation = location; _zoomIn = true; _zoomT = 0;
     }
 
     /// <summary>Pixels of the map itself: right of the quest dossier, left of the roster, above the party bar.</summary>

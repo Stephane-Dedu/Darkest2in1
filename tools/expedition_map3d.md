@@ -2,7 +2,7 @@
 
 `Look.ExpeditionMap3D` is an experimental presentation flag, off by default. With it on, the quest selector
 draws a private pre-rendered overview of a valley built from installed DD2 scenery in place of the painted map,
-and clicking a region's scenery flies toward it. The selector's **3D map / Painted map** button (top right of the
+and clicking a region's scenery, or one of its quest markers, flies toward it. The selector's **3D map / Painted map** button (top right of the
 map, shown only when the pack is usable) switches immediately; the choice persists in the mod config, not the
 estate. A missing image, a missing or invalid `map3d.json`, or the flag off all retain the painted map.
 
