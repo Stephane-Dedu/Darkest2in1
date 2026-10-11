@@ -17,6 +17,9 @@ native acceptance. See Round213 for evidence and tools/expedition_selector_desig
 was relaunched without QA flags (PID59072). Do not automatically open the ordinary estate picker.
 Another agent owns Hamlet scenery; trinket HUD is the following presentation scope. Dirty Shieldbreaker
 changes remain outside this HUD commit.
+Owner's later idea, 2026-10-11: reuse DD2 Hoarder/Hospital/inn geometry for a true perspective 3D Hamlet.
+Read tools/hamlet_3d_feasibility.md for verified assets, native road-script dependencies and a proposed isolated
+two-location proof. This is feasibility research only; no replacement of the Hamlet agent's work was authorized.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without

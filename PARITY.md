@@ -1,5 +1,7 @@
 # Campaign parity and refactor checklist
 
+- [user] Owner idea 2026-10-11: a true perspective 3D Hamlet using DD2 road encounters. Local kit verifies Hoarder, Field Hospital and inn model assemblies; existing Hamlet service dispatch can be retained. Another agent owns the current Hamlet overhaul. This feasibility check does not replace its work or establish native runtime acceptance. Proposed two-location proof and constraints: tools/hamlet_3d_feasibility.md.
+
 - [x] Round188 native icon methods/pool: installed inv_trinket+ID.png is bound to a separate default icon prefab clone. Native estate2 confirms both definition/instance overloads agree, loaded=True, appearance0/1 retain the DD1 sprite, recycle/re-spawn works and original default sprites stay unchanged. All917 Core/131 UI tests and normal Release pass; saves/source restored/hash matched and normal DLLs deployed.
 - [?] Round188 native icon visual acceptance: first harness canvas was covered by mod IMGUI; second harness failed at FindObjectOfType<UiRoot>() before drawing. Stop after two attempts. Next check should hide the test overlay using its actual retained component reference or include inactive/DontSave objects. No successful native inventory screenshot yet; method/pool evidence alone does not establish full native panel interaction.
 

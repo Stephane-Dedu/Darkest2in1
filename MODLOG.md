@@ -5017,3 +5017,15 @@ flags for ordinary owner play. Do not open the estate picker automatically: prot
 The deployed HUD includes the DD1 placement refinement and outlined regional headings. Next presentation scope
 is the trinket HUD; retain the approved map hubs, inline region arrows and regional quest rows. Plugin backup:
 C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\expedition-native-hud\plugin-before\DarkestDungeon3.dll.
+
+## Research 2026-10-11: owner idea for a perspective 3D Hamlet
+
+Read-only feasibility check while another agent owns Hamlet presentation. The private kit has real Hoarder,
+Field Hospital and three inn-level model assemblies, including merchant/nurse and surrounding props. Inspected
+their exported geometry metadata and three-quarter reference renders. Installed TriggerHospitalBhv/TriggerStoreBhv
+expect TileNodeBhv, driving UI and native encounter inventory, so reuse visuals with Hamlet-owned interactions
+instead of enabling the road scripts. HamletUi.Open already maps building IDs to DD1 town panels. A dedicated
+perspective stage is feasible in principle; renderer/material/fog dependencies, camera angles, NPC animation,
+missing buildings and repeated loading/cleanup still need an isolated runtime proof. This is an owner proposal,
+not authorization to replace the other agent's work. Details, source paths and official Unity references:
+tools/hamlet_3d_feasibility.md. No code, game process, private assets or campaign saves changed.
