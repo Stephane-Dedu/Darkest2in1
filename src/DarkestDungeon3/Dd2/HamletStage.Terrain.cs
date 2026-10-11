@@ -24,16 +24,16 @@ internal sealed partial class HamletStage
             _groundMaterial.SetTexture("_BaseMap_texture",_groundTexture);
         }
         var paving=new Material(_groundMaterial) { name="Hamlet worn stone paths" };
-        paving.SetColor(Tint,new Color(.78f,.73f,.62f)); _details.Add(paving);
+        Grade(paving,HamletPalette.Paving); _details.Add(paving);
         var rock=new Material(_groundMaterial) { name="Hamlet exposed cliff rock" };
-        rock.SetColor(Tint,new Color(.90f,.92f,.94f)); _details.Add(rock);
+        Grade(rock,HamletPalette.Rock); _details.Add(rock);
         var stone=new Material(paving) { name="Hamlet terrace masonry" };
-        stone.SetColor(Tint,new Color(.62f,.63f,.61f)); _details.Add(stone);
-        _groundMaterial.SetColor(Tint,new Color(2.7f,1.3f,1.0f));
+        Grade(stone,HamletPalette.Masonry); _details.Add(stone);
+        Grade(_groundMaterial,HamletPalette.Soil);
         if (_earthAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_earthAsset.Result) is { } earthTexture)
-            _groundMaterial.SetTexture("_BaseMap_texture",TileTexture(earthTexture,"Hamlet native soil"));
+            _groundMaterial.SetTexture("_BaseMap_texture",TileTexture(earthTexture,"Hamlet native soil",HamletPalette.Soil));
         if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
-            rock.SetTexture("_BaseMap_texture",TileTexture(rockTexture,"Hamlet native cliff paint"));
+            rock.SetTexture("_BaseMap_texture",TileTexture(rockTexture,"Hamlet native cliff paint",HamletPalette.Rock));
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
@@ -49,10 +49,26 @@ internal sealed partial class HamletStage
             if (renderer.name.Contains("road_valley_straight_single")) renderer.enabled=false;
     }
 
-    private RenderTexture TileTexture(Texture source,string name)
+    // Only owned material copies reach this method. Red Hook/Lit/Environment uses _COLOR_CONTROLS.
+    private static void Grade(Material material,HamletPalette.Paint paint)
     {
-        var texture=new RenderTexture(512,512,0,RenderTextureFormat.ARGB32) { wrapMode=TextureWrapMode.Repeat,name=name };
-        _details.Add(texture); texture.Create(); Graphics.Blit(source,texture); return texture;
+        if (material==null) return;
+        if (material.HasProperty(Tint)) material.SetColor(Tint,new Color(paint.Tint.X,paint.Tint.Y,paint.Tint.Z));
+        if (material.HasProperty("_UseColorControl"))
+        {
+            material.SetFloat("_UseColorControl",1); material.EnableKeyword("_COLOR_CONTROLS");
+            material.SetFloat("_Brightness",paint.Brightness); material.SetFloat("_Saturation",paint.Saturation);
+        }
+        if (material.HasProperty("_HasVertexPainting")) material.SetFloat("_HasVertexPainting",0);
+        material.DisableKeyword("_HASVERTEXPAINTING_ON");
+    }
+
+    private RenderTexture TileTexture(Texture source,string name,HamletPalette.Paint paint)
+    {
+        var texture=new RenderTexture(512,512,0,RenderTextureFormat.ARGB32) { wrapMode=TextureWrapMode.Mirror,name=name };
+        _details.Add(texture); texture.Create();
+        Graphics.Blit(source,texture,new Vector2(paint.UvScale.X,paint.UvScale.Y),new Vector2(paint.UvOffset.X,paint.UvOffset.Y));
+        return texture;
     }
 
     private static Mesh MeshData(string name,float[] positions,float[] coordinates)

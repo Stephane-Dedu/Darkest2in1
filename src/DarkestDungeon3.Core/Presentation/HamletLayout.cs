@@ -35,8 +35,8 @@ public static class HamletLayout
         public Route(string id, float width, params Point[] points) { Id = id; Width = width; Points = points; }
     }
 
-    public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 40;
-    public static readonly Point CameraTarget = new(14, 10, 15), CameraOffset = new(4, 33, -108);
+    public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 42;
+    public static readonly Point CameraTarget = new(14, 11, 15), CameraOffset = new(3, 36, -106);
     // Footprint ratios come from the authored v02 bounds. Rectangular pads allow a compact town without buried corners.
     public static readonly IReadOnlyList<Site> Sites = new[]
     {

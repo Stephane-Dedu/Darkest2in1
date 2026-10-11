@@ -1,8 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Owner launch pause, 2026-10-11: no game launches for 30 minutes from 16:26:44 UTC. Do not launch DD2 before
-16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction. The owned Hamlet QA process was closed.
+Owner renewed launch pause, 2026-10-11: no game launches for 30 minutes from 17:17:37 UTC. Do not launch any game before
+17:47:37 UTC / 19:47:37 Paris unless the owner changes that instruction. DD2 is stopped.
 Continue offline work during the pause. Do not restore a normal game process until launches are allowed.
+
+Round221 polishes the owner's dark-filler screenshot. HamletPalette shares native material grading and
+atlas crops with the private v04 preview. Painted soil replaces the flat distance texture; rock-only
+cliffs have larger patterns, lighter shadows and mirrored tile edges. Four native rubble clusters dress
+the bases, and Valley trees sit lower. The Mountain is width174 atZ96 with independent height/depth scale;
+the camera is slightly higher at42 degrees. All ten offline bounds fit the town viewport. Release and
+five geometry/layout cases pass; deployed DLL/PDB hashes match, with DD2 stopped. No game or estate access.
+Private evidence: local-art/ui-overhaul/hamlet-landscape-v04. Pre-change plugin backup is universal-modder
+hamlet-landscape-v04-plugin. Native color-control/shading and picking checks remain [?]. Keep the existing
+Hamlet3D flag/painted rollback and independent dirty Expedition Map3D/Shieldbreaker work.
 
 Round220 (2026-10-11) supersedes the round219 terrain: compact DD1 building placement, a high left Survivalist
 cliff, upper Abbey/graveyard and small low square. Core HamletTerrain/HamletGroundwork bake the same soil,

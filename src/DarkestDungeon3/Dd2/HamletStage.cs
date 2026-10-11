@@ -36,9 +36,9 @@ internal sealed partial class HamletStage : MonoBehaviour
     {
         public readonly string Id, Path, Include;
         public readonly Vector3 Position;
-        public readonly float Width, Rotation, HeightScale;
-        public Piece(string id, string path, float x, float y, float z, float width, float rotation = 0, string include = null, float heightScale = 1)
-        { Id = id; Path = path; Position = new(x, y, z); Width = width; Rotation = rotation; Include = include; HeightScale = heightScale; }
+        public readonly float Width, Rotation, HeightScale, DepthScale;
+        public Piece(string id, string path, float x, float y, float z, float width, float rotation = 0, string include = null, float heightScale = 1, float depthScale = 1)
+        { Id = id; Path = path; Position = new(x, y, z); Width = width; Rotation = rotation; Include = include; HeightScale = heightScale; DepthScale = depthScale; }
     }
     // Surrounding native scenery is separate from the ten private building models.
     private static readonly Piece[] Pieces =
@@ -46,19 +46,23 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", -16, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 0, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 16, .04f, 8, 16, 90),
-        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -28, -.4f, 51, 16),
-        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 36, -.4f, 54, 18),
-        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -58, -.4f, 30, 18, 30),
-        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -.4f, 29, 18, -20),
+        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -28, -1.8f, 51, 16),
+        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 36, -1.8f, 54, 18),
+        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -58, -1.8f, 30, 18, 30),
+        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -1.8f, 29, 18, -20),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
-        new(null, Mountains + "mainmenu_mountain_mdl.fbx", 0, -24, 123, 100),
+        new(null, Mountains + "mainmenu_mountain_mdl.fbx", 0, -36, 96, 174, heightScale: .85f, depthScale: .34f),
         new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
         new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
         new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),
         new(null, "Assets/Art/Models/Environments/Camp/camp_firepit.fbx", -51, 0, 17, 2.5f),
         new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", -6, 0, 4, 1.5f),
         new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", 22, 0, 10, 1.5f),
+        new(null, Models + "barricade_military_decor_rocks_01.fbx", -44, -.25f, 5, 7, 25),
+        new(null, Models + "barricade_military_decor_rocks_02.fbx", -25, -.35f, 16, 4, -20),
+        new(null, Models + "barricade_military_decor_rocks_03.fbx", 34, -.3f, 12, 6, 15),
+        new(null, Models + "barricade_military_decor_rocks_02.fbx", 40, -.25f, 25, 8, -40),
     };
 
     private sealed class Building
@@ -161,7 +165,7 @@ internal sealed partial class HamletStage : MonoBehaviour
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
         _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/foundation_ground.mat");
-        _earthAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Tileable/forest_ground_distance.mat");
+        _earthAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/farm_ground_hill_transition.mat");
         _rockAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Nodes/cultist_barricade_rocks.mat");
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
@@ -233,8 +237,12 @@ internal sealed partial class HamletStage : MonoBehaviour
             copy.AddComponent<MeshFilter>().sharedMesh = mesh;
             var renderer = copy.AddComponent<MeshRenderer>();
             renderer.sharedMaterials = source.sharedMaterials.Select(TownMaterial).ToArray();
-            if (piece.Path.EndsWith("camp_sky.fbx") || piece.Path.StartsWith(Mountains))
+            if (piece.Path.EndsWith("camp_sky.fbx"))
                 renderer.sharedMaterials = source.sharedMaterials.Select(BackdropMaterial).ToArray();
+            else if (piece.Path.StartsWith(Mountains))
+                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Mountain);
+            else if (piece.Path.Contains("barricade_military_decor_rocks"))
+                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Rubble);
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
             var block = new MaterialPropertyBlock();
@@ -253,7 +261,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         // Normalise each native assembly to a ground pivot before placing it in the shared scene.
         var shift = new Vector3(bounds.center.x, bounds.min.y, bounds.center.z) - Origin;
         foreach (Transform child in group) child.localPosition -= shift;
-        group.localScale = new Vector3(scale, scale * piece.HeightScale, scale);
+        group.localScale = new Vector3(scale, scale * piece.HeightScale, scale * piece.DepthScale);
         group.localRotation = Quaternion.Euler(0, piece.Rotation, 0);
         group.localPosition = piece.Position + Vector3.up * HamletLayout.Height(piece.Position.x, piece.Position.z);
         if (piece.Id != null)

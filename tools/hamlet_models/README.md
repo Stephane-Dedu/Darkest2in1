@@ -119,13 +119,19 @@ stage; update it when changing the stage's props. Native sky/trees use the exist
 From the repository, using the path variables above:
 
 ```powershell
-$hamletLandscape = 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-landscape-v03'
+$hamletLandscape = 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-landscape-v04'
 & $hamletPython tools/hamlet_models/prepare_landscape.py --game 'C:\Users\Piral\darkestwithdlc\game' --out $hamletLandscape
+& $hamletPython "$hamletKit/tools/export_prefab.py" --game 'C:\Users\Piral\darkestwithdlc\game' "$hamletLandscape/exp" 'biome_common_assets_all.bundle,biome_common_models_platform_high_assets_all.bundle,biome_valley_common_assets_all.bundle' 'barricade_military_decor_rocks_01.fbx' 'barricade_military_decor_rocks_02.fbx' 'barricade_military_decor_rocks_03.fbx'
 dotnet run --project tools/hamlet_models/LayoutExport -c Release -- "$hamletLandscape/layout.json"
 & $hamletBlender --background --factory-startup --threads 8 --python-exit-code 1 --python tools/hamlet_models/town_preview.py -- --models $hamletOutput --kit $hamletKit --layout "$hamletLandscape/layout.json" --out $hamletLandscape --blend
 ```
 
-Outputs: `hamlet-landscape-v03.png`, packed `hamlet-landscape-v03.blend`, `layout.json`, projected service
+Outputs: `hamlet-landscape-v04.png`, packed `hamlet-landscape-v04.blend`, `layout.json`, projected service
 bounds in `composition.json`, and private native surface provenance in `ground-source.json`. Terrain
 geometry, game textures and packed documents all stay outside Git. The guide at `tools/hamlet_3d.md`
 records the runtime deployment and which acceptance checks remain.
+
+Round221 exports `HamletPalette` alongside geometry so surface tints, brightness, saturation and atlas
+windows agree with the runtime settings. Soil samples native painted earth; cliffs use a larger rock-only
+strip. The Mountain has independent height/depth scales and a closer/larger position. `--name` selects
+the output PNG/Blender basename. Native shader math and terrain vertex shading remain approximate in Blender.

@@ -34,13 +34,30 @@ def surface(name, data, materials, groups=None, shade=None):
     return obj
 
 
-def painted_ground(name, texture, tint, vertex_shade=False):
+def painted_ground(name, texture, paint, vertex_shade=False):
     material=bpy.data.materials.new(name); material.use_nodes=True
     nodes=material.node_tree.nodes; links=material.node_tree.links; nodes.clear()
     image=nodes.new('ShaderNodeTexImage'); image.image=texture; image.extension='REPEAT'
+    uv=nodes.new('ShaderNodeTexCoord'); crop=nodes.new('ShaderNodeVectorMath'); crop.operation='MULTIPLY_ADD'
+    crop.inputs[1].default_value=(paint['UvScale']['X'],paint['UvScale']['Y'],1)
+    crop.inputs[2].default_value=(paint['UvOffset']['X'],paint['UvOffset']['Y'],0)
+    if paint['UvScale']['X']!=1 or paint['UvScale']['Y']!=1:
+        separate=nodes.new('ShaderNodeSeparateXYZ'); links.new(uv.outputs['UV'],separate.inputs[0])
+        repeat=nodes.new('ShaderNodeCombineXYZ')
+        for axis in ['X','Y']:
+            mirror=nodes.new('ShaderNodeMath'); mirror.operation='PINGPONG'; mirror.inputs[1].default_value=1
+            links.new(separate.outputs[axis],mirror.inputs[0]); links.new(mirror.outputs[0],repeat.inputs[axis])
+        links.new(repeat.outputs[0],crop.inputs[0])
+    else: links.new(uv.outputs['UV'],crop.inputs[0])
+    links.new(crop.outputs[0],image.inputs['Vector'])
     multiply=nodes.new('ShaderNodeMixRGB'); multiply.blend_type='MULTIPLY'; multiply.inputs[0].default_value=1
-    multiply.inputs[2].default_value=(*tint,1); links.new(image.outputs['Color'],multiply.inputs[1])
-    color=multiply.outputs[0]
+    tint=paint['Tint']
+    multiply.inputs[2].default_value=(tint['X'],tint['Y'],tint['Z'],1); links.new(image.outputs['Color'],multiply.inputs[1])
+    saturation=nodes.new('ShaderNodeHueSaturation'); saturation.inputs['Saturation'].default_value=paint['Saturation']
+    links.new(multiply.outputs[0],saturation.inputs['Color'])
+    lift=nodes.new('ShaderNodeMixRGB'); lift.blend_type='ADD'; lift.inputs[0].default_value=1
+    lift.inputs[2].default_value=(*([paint['Brightness']]*3),1)
+    links.new(saturation.outputs[0],lift.inputs[1]); color=lift.outputs[0]
     if vertex_shade:
         attr=nodes.new('ShaderNodeVertexColor'); attr.layer_name='TerrainShade'
         shade=nodes.new('ShaderNodeMixRGB'); shade.blend_type='MULTIPLY'; shade.inputs[0].default_value=1
@@ -62,12 +79,13 @@ def main(args):
     import bl_lib as L
     L.reset()
     texture=bpy.data.images.load(str(out/'foundation_ground.png'))
-    soil=bpy.data.images.load(str(out/'forest_ground_distance.png'))
+    soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
     cliff=bpy.data.images.load(str(out/'cultist_barricade_rocks.png'))
-    earth=painted_ground('Native painted soil',soil,(2.7,1.3,1.0),True)
-    rock=painted_ground('Native painted rock',cliff,(.90,.92,.94),True)
-    paving=painted_ground('Native foundation paving',texture,(.78,.73,.62))
-    stone=painted_ground('Native foundation retaining courses',texture,(.62,.63,.61))
+    palette=data['Palette']
+    earth=painted_ground('Native painted soil',soil,palette['Soil'],True)
+    rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
+    paving=painted_ground('Native foundation paving',texture,palette['Paving'])
+    stone=painted_ground('Native foundation retaining courses',texture,palette['Masonry'])
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
     surface('Core lanes and stairs',terrain['Paving'],[paving])
@@ -93,12 +111,23 @@ def main(args):
     missing=[]
     for piece in data['Scenery']:
         folder=args.kit/'exp'/piece['Id']
+        if not (folder/'scene.json').exists(): folder=out/'exp'/piece['Id']
         if not (folder/'scene.json').exists(): missing.append(piece['Id']); continue
         lo,hi=L.bbox(folder)
         if not np.isfinite(hi-lo).all(): raise ValueError('Invalid native scenery: '+piece['Id'])
         scale=piece['Width']/max((hi-lo)[[0,2]])
         placement,_=L.place_matrix(folder,(piece['X'],piece['Y'],piece['Z']),rot=piece['Yaw'],scale=scale)
-        L.build(folder,placement)
+        # Scale about the normalized ground pivot in Unity space, before axis conversion.
+        deform=np.diag([1,piece['HeightScale'],piece['DepthScale'],1])
+        pivot=np.eye(4); pivot[:3,3]=[piece['X'],piece['Y'],piece['Z']]
+        placement=pivot@deform@np.linalg.inv(pivot)@placement
+        objects,_,_=L.build(folder,placement)
+        if piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith('barricade_military_decor_rocks'):
+            paint=palette['Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
+            for obj in objects:
+                for slot in obj.material_slots:
+                    texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')
+                    slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint)
     target=data['CameraTarget']; offset=data['CameraOffset']
     aim=Vector((target['X'],target['Z'],target['Y']))
     position=aim+Vector((offset['X'],offset['Z'],offset['Y']))
@@ -116,7 +145,7 @@ def main(args):
     sc.cycles.max_bounces=4; sc.cycles.transparent_max_bounces=32
     sc.view_settings.view_transform='Standard'; sc.view_settings.look='None'
     sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
-    sc.render.filepath=str(out/'hamlet-landscape-v03.png')
+    sc.render.filepath=str(out/(args.name+'.png'))
     bpy.context.view_layer.update()
     screen={}
     for key,objects in buildings.items():
@@ -126,7 +155,7 @@ def main(args):
     (out/'composition.json').write_text(json.dumps({'notice':__doc__,'projected_bounds':screen,'missing_offline_scenery':missing},indent=2))
     bpy.ops.render.render(write_still=True)
     if args.blend:
-        bpy.ops.file.pack_all(); bpy.ops.wm.save_as_mainfile(filepath=str(out/'hamlet-landscape-v03.blend'))
+        bpy.ops.file.pack_all(); bpy.ops.wm.save_as_mainfile(filepath=str(out/(args.name+'.blend')))
     print('TOWN PREVIEW COMPLETE',sc.render.filepath,flush=True)
 
 
@@ -138,5 +167,6 @@ if __name__=='__main__':
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--width',type=int,default=1920)
     parser.add_argument('--samples',type=int,default=16)
+    parser.add_argument('--name',default='hamlet-landscape-v04')
     parser.add_argument('--blend',action='store_true')
     main(parser.parse_args(sys.argv[sys.argv.index('--')+1:]))

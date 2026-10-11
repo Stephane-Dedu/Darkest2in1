@@ -31,7 +31,7 @@ landmark roles. A lower, more frontal perspective retains space for the right ro
 `HamletTerrain` bakes faceted soil and rock faces, closed edge skirts, lanes, stair treads, the irregular
 square and retaining courses on the model-loading worker. All ten foundations use rotated rectangular
 pads sized from v02 model bounds; doors connect to one road network. `HamletGroundwork` combines paving
-and masonry before Unity upload, avoiding per-tread objects/renderers. Native forest soil, cultist rock
+and masonry before Unity upload, avoiding per-tread objects/renderers. Native painted soil, cultist rock
 paint and foundation cobbles distinguish landscape from paths. Their texture copies repeat without
 changing shared native resources, and their handles/textures release with rollback. Valley scenery and
 camp props follow the new ground; the enlarged native sky covers the more frontal camera. The loaded road
@@ -56,7 +56,8 @@ Pre-change plugin/config snapshots are named `hamlet-v02-plugin` and `hamlet-v02
 universal-modder backup store. The first native run passed the complete check. A brighter terrain/front-wagon
 framing pass then passed all ten clicks, controls, rollback, reload and Embark cleanup. The owner stopped
 launches for 30 minutes before its final return-to-town check. The QA process was closed; DD2 was not relaunched.
-Do not launch before 2026-10-11 16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction.
+The owner renewed the pause during round221. Do not launch any game before 2026-10-11 17:47:37 UTC /
+19:47:37 Paris unless the owner changes that instruction.
 
 Round220 was checked entirely offline, including after that pause elapsed. Release and all 1030 Core +
 182 UI tests pass; five layout/geometry cases check grounded rotated footprints/doors, connected paths,
@@ -66,6 +67,24 @@ render with the ten hash-verified GLBs. Private evidence: `local-art/ui-overhaul
 The 1920x1080 preview and packed Blender document establish composition, not native lighting, picking,
 frame time or saved-campaign acceptance. Repeat the unsaved native fixture for the new layout when testing
 resumes. Prior round219 native results apply to its older terrain. Immediate Painted town rollback remains.
+
+Round221 responds to the dark filler and distant Mountain in the owner's offline screenshot. `HamletPalette`
+shares the grading and atlas windows with the preview. Soil now samples the painted top of DD2's
+`farm_ground_hill_transition`, leaving out its grass fringe. Cliffs sample the rock-only upper strip of
+`cultist_barricade_rocks`, leaving out the skulls. Repeatable GPU copies sample these windows without
+editing shared game textures. Larger world periods and a lighter facet shade reduce small black detail.
+Owned native materials enable the verified `_COLOR_CONTROLS` keyword with `_UseColorControl`, `_Brightness`
+and `_Saturation`. Vertex texture painting is disabled on these copies; its native channel defaults can
+otherwise obscure the paint. Four static native military rubble clusters dress the cliff bases.
+
+The Mountain moves from Z123 to96 and width100 to174. Independent height/depth scales keep its base behind
+the Abbey while raising the visible peak. It uses a graded native Environment material instead of the
+previous Sprite material. The camera rises slightly and widens from40 to42 degrees. All ten projected
+building bounds still fit left of the roster and above the footer in the offline render. The v02 building
+package, routes and service foundations are unchanged. Private v04 PNG, packed scene, geometry, surface
+provenance and three extra native prop exports are in `local-art/ui-overhaul/hamlet-landscape-v04/`.
+The preview approximates native color controls and facet shading; native shader/picking acceptance
+remains pending. No game was launched and no estate was accessed during this pass.
 
 NPC idles, upgrade/event exteriors, the coarse Ancestor sculpt, individual trim painting and final lighting
 still need art work. Player.log also repeats URP RTHandle reallocations while the staged and native cameras

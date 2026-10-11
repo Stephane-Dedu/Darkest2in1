@@ -5390,3 +5390,51 @@ for the source seams and offline workflow. Repeat the unsaved Hamlet fixture for
 lighting/picking, rollback/resource release, Embark and return; the old native round219 PASS applies only
 to its older landscape. Native frame time/URP render-target churn, Ancestor/individual trim, upgrades/events
 and saved-campaign transaction acceptance remain. No new launch or normal session was restored this round.
+
+## Round221 (2026-10-11): clearer terrain filler and a closer Mountain
+
+Owner supplied a crop of the round220 offline render: cliff filler too dark, Mountain too far/small,
+camera potentially usable with polish. Renewed the no-game-launch pause for30 minutes at17:17:37 UTC;
+do not launch any game before17:47:37 UTC /19:47:37 Paris. Stored the deadline privately and in the handoff.
+All work in this round remained offline, without reading or writing any estate.
+
+HamletPalette now shares surface grading and native atlas windows between Unity and Blender. Soil uses
+the painted upper30% of farm_ground_hill_transition, instead of the nearly uniform forest distance
+texture. Cliffs sample the rock-only top24% of cultist_barricade_rocks, excluding its skulls and enlarging
+the shapes. Owned GPU copies use mirrored wrapping to soften tile boundaries. World texture periods
+increase from6 to10 for soil and12 for rock; softer facet shading avoids crushed black faces in previews.
+Paving and retaining stone receive their own brighter, less saturated settings. Four native military
+rubble clusters dress cliff bases; Valley trees sit1.4 units lower to reduce floating edges.
+
+Native shader evidence: loaded installed shader/material bundles read-only through UnityPy. Both the
+Valley road template and mainmenu_mountain_mat use Red Hook/Lit/Environment. Its actual color-control
+keyword is _COLOR_CONTROLS; _UseColorControl toggles it, _Brightness defaults0, _Saturation defaults1.
+The Mountain's installed material already enables that keyword. Grade only owned copies; disable
+_HASVERTEXPAINTING_ON because the template's unused channel defaults can hide the paint. Shared materials
+are untouched. Shader export is a property/variant description, not the HLSL implementation; Blender
+color controls and mesh shade therefore remain an approximation requiring native visual acceptance.
+
+Mountain width100->174, centreZ123->96, baseY-24->-36, height multiplier.85, depth multiplier.34. Its
+roughly51-unit depth keeps the near edge behind the terrain'sZ69 bound. Graded native Environment
+paint replaces its Sprite material. The perspective camera changes from40 to42 degrees and rises
+slightly. Buildings, level foundations, routes, compact map extent and v02 model package are unchanged.
+
+Offline pipeline exports Core palette/geometry, verifies all ten GLB hashes, uses three additional
+private native rock-model exports and saves the final1920x1080 PNG/packed scene under
+local-art/ui-overhaul/hamlet-landscape-v04/. Reviewed soil/rock alternatives and the final full composition.
+All10 projected bounds fit x.071.. .722 and y.153.. .800, clear of roster/footer; no missing scenery.
+Verified all five new native material/prop paths in the active Addressables catalogue. Assets, shader
+exports, geometry and renders remain outside Git. The skill's native export pipeline reads bundles only.
+
+Validation: Release passes with three existing unrelated warnings, five Hamlet layout/mesh tests pass,
+and both Python tools compile. Backed up the previous plugin with universal-modder as
+hamlet-landscape-v04-plugin/20261011-193912.zip. Checked DD2 stopped, deployed and verified SHA256 equality
+for both Core/plugin DLLs and PDBs. No game launched. Other agents' Expedition Map3D/Shieldbreaker edits
+remain unstaged by this round. The last complete test suite was round220's1030 Core+182 UI pass.
+
+## Status 2026-10-11: round221 filler installed; launches paused until19:47:37 Paris
+
+DD2 remains stopped. Keep Hamlet3D's defaultfalse/localtrue and Painted town rollback. New native grading,
+camera, scenery placement and picking remain [?] until the unsaved Hamlet fixture can run. Do not launch
+any game before17:47:37 UTC /19:47:37 Paris; no launch is scheduled. Private v04 evidence, sources and
+packed scene are ready for review. Remaining art/RTHandle/saved-campaign acceptance is unchanged.

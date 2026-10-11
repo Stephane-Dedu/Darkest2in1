@@ -33,14 +33,15 @@ public sealed class HamletTerrain
             float nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
             float length=(float)Math.Sqrt(nx*nx+ny*ny+nz*nz); nx/=length; ny/=length; nz/=length;
             bool cliff = skirt || ny < .50f;
-            float light = Math.Max(.38f, Math.Min(1, .70f + .30f*(nx*-.35f+ny*.8f+nz*-.48f)));
+            float light = Math.Max(.65f, Math.Min(1, .84f + .14f*(nx*-.35f+ny*.8f+nz*-.48f)));
             var indices = cliff ? rock : ground;
             foreach (var p in new[] { a,b,c })
             {
                 indices.Add(positions.Count/3);
                 positions.Add(p.X); positions.Add(p.Y); positions.Add(p.Z);
-                uv.Add((cliff && Math.Abs(nx)>Math.Abs(nz) ? p.Z : p.X)/6);
-                uv.Add((cliff ? p.Y : p.Z)/6); shade.Add(light);
+                float period = cliff ? 12 : 10;
+                uv.Add((cliff && Math.Abs(nx)>Math.Abs(nz) ? p.Z : p.X)/period);
+                uv.Add((cliff ? p.Y : p.Z)/period); shade.Add(light);
             }
         }
         void Skirt(HamletLayout.Point a, HamletLayout.Point b)
