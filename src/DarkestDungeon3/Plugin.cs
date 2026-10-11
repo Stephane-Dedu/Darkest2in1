@@ -22,6 +22,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> NativeRoomSceneryPath;
     internal static ConfigEntry<string> ExpeditionArtPath;
     internal static ConfigEntry<string> HamletArtPath;
+    internal static ConfigEntry<bool> Hamlet3D;
     internal static ConfigEntry<bool> DebugKeysEnabled;
     internal static ConfigEntry<string> ExportedBossModel;
     internal static ConfigEntry<Runtime.Art.LargeArt> HeroArt;
@@ -51,6 +52,8 @@ public class Plugin : BaseUnityPlugin
             "Optional private expedition selector artwork. Contains map.png, regional overlays and preview images. Empty or missing map.png retains the DD1 selector.");
         HamletArtPath = Config.Bind("Paths", "HamletArtFolder", Path.Combine(Paths.GameRootPath, "PrivateHamletArt"),
             "Optional private Hamlet scene and visible building masks, prepared with tools/prepare_hamlet_art.py. Empty, missing or invalid packs retain the installed DD1 town.");
+        Hamlet3D = Config.Bind("Look", "Hamlet3D", false,
+            "Experimental live 3D Hamlet using installed DD2 scenery. The town's Painted town button switches back immediately. Off retains the private hillside pack or original town.");
         HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),
             "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
@@ -94,6 +97,7 @@ public class Plugin : BaseUnityPlugin
         host.hideFlags = HideFlags.HideAndDontSave;
         host.AddComponent<Driver>();
         host.AddComponent<Dd2.HeroStage>();
+        host.AddComponent<Dd2.HamletStage>();
         host.AddComponent<UiRoot>();
         if (DebugKeysEnabled.Value)
         {

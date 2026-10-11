@@ -1,5 +1,8 @@
 # Private Hamlet artwork
 
+The optional live perspective renderer is documented in `tools/hamlet_3d.md`. Its feature flag defaults off;
+this painted pack remains the default town and the immediate **Painted town** rollback.
+
 The Hamlet accepts the owner's approved DD1/DD2 hillside v05 art as a private pack. The default folder is
 `<DD2>/PrivateHamletArt`; `Paths.HamletArtFolder` in the BepInEx config can select another folder. An empty
 setting or a missing/rejected pack retains the installed DD1 town. Restart DD2 after replacing a pack.

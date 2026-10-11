@@ -5074,3 +5074,58 @@ Owned check PID62904 was closed after verification; DD2 PID58852 was launched no
 either Hamlet QA flag, and reached MAIN_MENU with the normal Hamlet button. No campaign picker was opened
 by agent tools. Keep protected estates1/3 off limits. The private pack is installed in the active
 `C:\Users\Piral\darkestwithdlc\game\PrivateHamletArt`, not the older retained game directory.
+
+## Round215 (2026-10-11): reversible live 3D Hamlet and DD1 architectural details
+
+Owner authorized a perspective Hamlet using installed DD2 scenery, behind an easy rollback flag, then asked
+for DD1 building textures to establish the correct service identities. `Look.Hamlet3D` defaults false; the
+town's 3D town/Painted town buttons switch immediately and persist only the config choice. The approved
+round214 painted pack remains the default, followed by the original DD1 town if that pack is unavailable.
+
+`HamletStage` loads native Addressables by source path (including GUID-only resource keys), copying only
+MeshFilter/MeshRenderer data into an owned distant stage. Skinned visuals can be baked once; native road
+nodes, inventories, shops, triggers and animators are never instantiated. A dedicated perspective camera
+renders into a 1920x1080 texture. Wheel zoom, middle-drag pan, reset and smooth service focus use the existing
+Hamlet panel dispatch. Navigation/roster/footer and modal pixels retain input ownership. Hidden town screens
+release the stage after three frames; switching to painted art releases it immediately. Load failures and a
+45-second timeout leave the fallback usable, with retry through the mode switch.
+
+Ten services use the native inn, cathedral entrance, Watchtower, Field Hospital/nurse, Hoarder, coach,
+camp shelter, graves and Altar of Hope. A shortened inn component becomes the forge. Seven installed DD1
+idle-atlas crops provide the anvil sign, forge opening, guild banners and abbey windows on fixed world
+surfaces. Atlas rotation/original padding is respected; textures remain in the owned install. Native paving,
+camp props, lampposts, Valley scenery and mountain/sky models connect the composition. Only specifically
+needed ground textures were inspected privately; the other agent's road/arena export pipeline was untouched.
+
+Native rendering findings: the node cathedral prefab is empty; the direct cathedral entrance FBX works.
+Combined road meshes contain several materials, with env_black first; select the actual road material by
+name. Native road materials carry `_FOG`, `_HASLIGHTING_ON`, `_NEARDARK_ON`, distance-darkening and dithering
+keywords. Those produced black/gray patches at the distant stage origin. Owned material copies disable the
+road-specific effects, retaining native textures, cutouts, depth and palette. Shared native materials are
+never changed. Temporary camera globals are restored after the owned camera renders. Wheel renderers are
+named `Mesh and Mesh Collider`; retain those visuals while excluding the actual wagon collider mesh.
+The farm hill texture is a horizon strip, unsuitable for repeating terrain; installed foundation paving
+provides the shared surface. Private exports and all derived game art stay outside Git/releases.
+
+The explicit `-dd3-hamlet3d-preview -dd3-hamlet3d-check` fixture overrides the feature setting only in memory.
+It creates no estate path, guards persistence only for its owned save object and blocks real embark. Native
+1600x900 event checks opened and Escape-closed all ten world services, verified pan/zoom/reset, switched to
+painted art and checked every owned resource category was cleared, reloaded and clicked again, entered the
+approved quest selector, verified stage teardown, then returned to a ready 3D town. The final run logged PASS
+with 72 renderers and no plugin warnings/errors. No OS input/focusing or protected estate access was used.
+Private evidence: `local-art/ui-overhaul/hamlet-3d-v01/town-final.png`, `native-qa-final.log`, selected terrain
+references and `plugin-before/` DLL/config backup. Earlier build experiments exercised the safe fallback;
+the final scene replaces the invalid assets and fixes the reset control and memorial's occluded placement.
+
+All 995 Core + 182 UI tests pass; Release build/deploy passes with 3 existing warnings. Native checks used the
+deployed DLL with SHA256 `481317CF71EE864C9BF648F1066571AA1A607D1B6BB645ADD4916B4193F88C86`.
+No campaign rules changed. This is the first static 3D composition: further building-specific
+texture/geometry fitting, NPC idle animation, upgrade/event exteriors, locked appearance, transactions,
+saved-campaign embark and other resolutions remain separate acceptance/art scope. See tools/hamlet_3d.md.
+Unrelated Shieldbreaker source/tools/tests were preserved outside this round's commit.
+
+Status: normal DD2 relaunched without preview/check flags (PID37708), reached MAIN_MENU and attached the
+native Hamlet entry. `Look.Hamlet3D=false` remains the owner's default. The independent corridor changes
+and Shieldbreaker work remain unstaged. No estate was opened during this round. During the final commit,
+the corridor agent rebuilt/redeployed and started its own `-dd3-corridor-preview -dd3-corridor-check` process
+(PID60456); leave that independently owned session running. The normal launch above predates that test.

@@ -12,7 +12,7 @@ namespace DarkestDungeon3.Ui;
 /// at the level its upgrades have reached), the estate nameplate, the roster down the right, the building
 /// quick-nav down the left, the heirlooms along the bottom. Clicking a building opens its window.
 /// </summary>
-internal sealed class HamletUi
+internal sealed partial class HamletUi
 {
     private enum Panel { Town, StageCoach, Abbey, Tavern, Sanitarium, Wagon, Graveyard, Memorial, Upgrades, Hero, Log, Guild, Blacksmith, Survivalist }
 
@@ -77,6 +77,7 @@ internal sealed class HamletUi
         DrawNav();
         DrawRoster();
         DrawEstateBar();
+        if (!windowOpen && !HeroSheet.RealmOpen && !_exchangeOpen && !_regionsOpen) DrawTownModeSwitch();
 
         if (eventOpen)
         {
@@ -186,6 +187,7 @@ internal sealed class HamletUi
 
     private void DrawTown(bool interactive)
     {
+        if (DrawThreeDimensionalTown(interactive)) return;
         if (HamletArt.Ready) { DrawHybridTown(interactive); return; }
         Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
         // DD1's display state: after a Darkest Dungeon part or during some town events the sky changes.
@@ -309,7 +311,7 @@ internal sealed class HamletUi
 
     private void DrawEstateTitle()
     {
-        if (HamletArt.Ready)
+        if (HamletArt.Ready || Dd2.HamletStage.Enabled)
         {
             ExpeditionSkin.Banner(new Rect(110, 30, 650, 106), ExpeditionSkin.Ivory);
             ExpeditionSkin.OutlinedHeading(new Rect(160, 44, 550, 52), E.Name, 40, ExpeditionSkin.Ivory);
@@ -427,7 +429,7 @@ internal sealed class HamletUi
         if (E.TownEventId != null)
             NavButton(1580, EventArt("town_event.icon.png"), "The week's event", false, () => _eventSeenWeek = -1);
 
-        if (HamletArt.Ready)
+        if (HamletArt.Ready || Dd2.HamletStage.Enabled)
         {
             if (ExpeditionSkin.Button(new Rect(810, 978, 360, 76), "Embark", size: 38)) WantsEmbark = true;
         }

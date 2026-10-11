@@ -12,12 +12,14 @@ namespace DarkestDungeon3.Ui;
 [HarmonyPatch(typeof(UiRoot), "OnGUI")]
 internal static class HamletPreview
 {
-    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-hamlet-preview");
+    private static readonly bool ThreeDimensional = Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview");
+    private static readonly bool Requested = ThreeDimensional || Environment.GetCommandLineArgs().Contains("-dd3-hamlet-preview");
     private static HamletUi _ui;
     private static EmbarkUi _embark;
     private static SaveFile _save;
     private static bool _closed;
     private static readonly bool CheckRequested = Environment.GetCommandLineArgs().Contains("-dd3-hamlet-check");
+    private static readonly bool Check3D = ThreeDimensional && Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-check");
     private static int _checkStep;
     private static float _nextCheck;
     private static bool _checked;
@@ -46,15 +48,17 @@ internal static class HamletPreview
             session.Save = _save;
             estate.Quests = QuestBoard.Generate(estate, session.Campaign, CampaignRegions.Open(estate, session.Campaign));
             _ui = new HamletUi();
+            if (ThreeDimensional) Dd2.HamletStage.PreviewMode(true);
             CampaignAssets.Begin(estate);
             Plugin.Log.LogInfo("[hamlet preview] transient campaign; no estate path selected");
         }
         Gui.Begin(); Drag.Begin(); GUI.depth = -1000; Gui.BlockInput(true);
         var originalEvent = Event.current;
-        var checkInput = CheckInput();
-        if (checkInput != null) Event.current = checkInput;
+        Event checkInput = null;
         try
         {
+            checkInput = CheckInput();
+            if (checkInput != null) Event.current = checkInput;
             if (_embark != null)
             {
                 _embark.Draw();
@@ -69,6 +73,8 @@ internal static class HamletPreview
             if (ExpeditionSkin.Button(new Rect(1230, 1018, 270, 45), "Close preview", size: 20))
             {
                 session.Save = null; _save = null; _ui = null; _embark = null; _closed = true;
+                Dd2.HamletStage.PreviewMode(null);
+                Dd2.HamletStage.Instance?.Clear();
                 Gui.BlockInput(false);
             }
             if (checkInput != null) CheckResult();
@@ -82,6 +88,7 @@ internal static class HamletPreview
     // Native QA dispatches IMGUI events inside this unsaved overlay. It never focuses the desktop or sends OS keys.
     private static Event CheckInput()
     {
+        if (Check3D) return Check3DInput();
         if (!CheckRequested || _checked || Event.current.type != EventType.Repaint || !HamletArt.Ready
             || !CampaignAssets.Status.Ready || Time.unscaledTime < _nextCheck) return null;
         _nextCheck = Time.unscaledTime + 1.2f;
@@ -106,6 +113,7 @@ internal static class HamletPreview
 
     private static void CheckResult()
     {
+        if (Check3D) { Check3DResult(); return; }
         var buildings = HamletArt.Pack.Buildings;
         int serviceStep = buildings.Count * 2;
         if (_checkStep < serviceStep)
@@ -119,6 +127,67 @@ internal static class HamletPreview
             if (_embark == null) throw new InvalidOperationException("Footer Embark did not open the quest selector.");
             _checked = true;
             Plugin.Log.LogInfo("[hamlet check] all 10 service clicks/close controls and footer Embark passed; unsaved quest selector open");
+        }
+        _checkStep++;
+    }
+
+    private static Event Check3DInput()
+    {
+        if (_checked || Event.current.type != EventType.Repaint || !CampaignAssets.Status.Ready || Time.unscaledTime < _nextCheck) return null;
+        var stage = Dd2.HamletStage.Instance;
+        if (_checkStep < 25 || _checkStep is 28 or 29 or 30 or 35)
+        {
+            if (stage?.Failure != null) throw new InvalidOperationException(stage.Failure);
+            if (stage?.Ready != true) return null;
+        }
+        _nextCheck = Time.unscaledTime + 1.2f;
+        if (_checkStep < 20 || _checkStep is 28 or 29)
+        {
+            if (_checkStep % 2 == 1) return new Event { type = EventType.KeyDown, keyCode = KeyCode.Escape };
+            string id = Dd2.HamletStage.Services[_checkStep == 28 ? 0 : _checkStep / 2];
+            var point = stage.VisiblePoint(id);
+            if (!point.HasValue) throw new InvalidOperationException("No visible 3D click point for " + id);
+            return new Event { type = EventType.MouseDown, button = 0, mousePosition = point.Value };
+        }
+        if (_checkStep == 20) return new Event { type = EventType.ScrollWheel, delta = new Vector2(0, -3), mousePosition = new Vector2(800, 750) };
+        if (_checkStep == 21) return new Event { type = EventType.MouseDrag, button = 2, delta = new Vector2(30, 20), mousePosition = new Vector2(800, 750) };
+        if (_checkStep is 33 or 34) return new Event { type = _checkStep == 33 ? EventType.MouseDown : EventType.MouseUp, button = 0, mousePosition = new Vector2(175, 1030) };
+        if (_checkStep == 35) return new Event { type = EventType.Repaint, mousePosition = new Vector2(150, 930) };
+        Vector2 position = _checkStep < 24 ? new Vector2(1410, 132) : _checkStep < 28 ? HamletUi.TownModeButton.center : new Vector2(990, 1016);
+        return new Event { type = _checkStep % 2 == 0 ? EventType.MouseDown : EventType.MouseUp, button = 0, mousePosition = position };
+    }
+
+    private static void Check3DResult()
+    {
+        var stage = Dd2.HamletStage.Instance;
+        void Require(bool ok, string message) { if (!ok) throw new InvalidOperationException("[hamlet 3d check] " + message); }
+        if (_checkStep < 20 || _checkStep is 28 or 29)
+        {
+            string expected = _checkStep % 2 == 0 ? Dd2.HamletStage.Services[_checkStep == 28 ? 0 : _checkStep / 2] : null;
+            Require(_ui.PreviewBuilding == expected, "World click/Escape expected " + expected);
+            if (expected != null) Plugin.Log.LogInfo("[hamlet 3d check] world click opened " + expected);
+        }
+        else if (_checkStep == 20) Require(stage.Zoom < 1, "Wheel zoom did not move the view.");
+        else if (_checkStep == 21) Require(stage.Pan != Vector2.zero, "Middle-drag did not pan the view.");
+        else if (_checkStep == 23) Require(stage.Pan == Vector2.zero && Mathf.Approximately(stage.Zoom, 1), "Reset view did not restore the overview.");
+        else if (_checkStep == 25)
+        {
+            Require(!Dd2.HamletStage.Enabled && !stage.HasResources && HamletArt.Ready, "Painted rollback retained native resources or lost the fallback.");
+            Plugin.Log.LogInfo("[hamlet 3d check] pan, zoom, reset and painted rollback passed; all stage resources released");
+        }
+        else if (_checkStep == 27) Require(Dd2.HamletStage.Enabled, "3D town did not re-enable.");
+        else if (_checkStep == 31) Require(_embark != null, "Footer did not open the quest selector.");
+        else if (_checkStep == 32)
+        {
+            Require(!stage.HasResources && _embark != null, "Leaving town retained its 3D camera/assets.");
+            Plugin.Log.LogInfo("[hamlet 3d check] Embark and stage cleanup passed");
+        }
+        else if (_checkStep == 34) Require(_embark == null, "Back to Hamlet did not return to town.");
+        else if (_checkStep == 35)
+        {
+            Require(stage.Ready && _embark == null, "Returned town did not load.");
+            _checked = true;
+            Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup and return to 3D town; no estate selected or saved");
         }
         _checkStep++;
     }

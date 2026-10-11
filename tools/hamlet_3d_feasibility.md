@@ -1,8 +1,9 @@
 # Native 3D Hamlet feasibility
 
 Investigated 2026-10-11 after the owner proposed using DD2 road encounters as a perspective Hamlet.
-This is a feasible presentation direction, not an approved replacement or a tested runtime implementation.
-Another agent owns the current Hamlet overhaul; no Hamlet code was changed for this investigation.
+This initial investigation established feasibility while another agent owned the painted Hamlet overhaul.
+The owner subsequently authorized a reversible runtime implementation and DD1 building-texture details.
+See `tools/hamlet_3d.md` for the feature flag, implementation, native checks and remaining art scope.
 
 ## Verified locally
 

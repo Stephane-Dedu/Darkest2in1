@@ -15,11 +15,18 @@ tests and Release pass. Real campaign embark, busy pagination, restrictions and 
 native acceptance. See Round213 for evidence and tools/expedition_selector_design.md for owner art direction.
 -dd3-expedition-preview is temporary QA only: no estate path, guarded Persist and blocked embark. Normal DD2
 was relaunched without QA flags (PID59072). Do not automatically open the ordinary estate picker.
-Another agent owns Hamlet scenery; trinket HUD is the following presentation scope. Dirty Shieldbreaker
-changes remain outside this HUD commit.
-Owner's later idea, 2026-10-11: reuse DD2 Hoarder/Hospital/inn geometry for a true perspective 3D Hamlet.
-Read tools/hamlet_3d_feasibility.md for verified assets, native road-script dependencies and a proposed isolated
-two-location proof. This is feasibility research only; no replacement of the Hamlet agent's work was authorized.
+The owner authorized a reversible 3D Hamlet after the painted hillside v05 landed in round214.
+Round215 adds `Look.Hamlet3D` (default off) and town buttons for immediate 3D/painted switching. Read
+tools/hamlet_3d.md before changing the stage: it copies only installed visual components, owns all temporary
+resources, and retains the existing service dispatch. DD1 forge, guild and abbey details are atlas-mapped in
+world space. Native unsaved QA covers ten services, pan/zoom/reset, rollback/reload, Embark, cleanup and return.
+No campaign was selected or saved; do not open the ordinary picker automatically. The painted town remains
+the default. Static composition, additional texture fitting, NPC idles, upgrade/event exteriors and campaign
+transaction acceptance remain. The other agent's road/arena extraction pipeline is independent; do not alter it.
+Normal DD2 was restored without QA flags (PID37708), reached MAIN_MENU and attached the native Hamlet entry;
+`Look.Hamlet3D=false` remains the default. Dirty Shieldbreaker and independent corridor changes remain outside
+the Hamlet commit. The corridor agent subsequently started its own native QA (PID60456, corridor preview/check
+flags); do not stop that session or redeploy over its test. Trinket HUD remains later scope.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without
