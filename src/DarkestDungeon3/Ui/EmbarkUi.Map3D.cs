@@ -99,16 +99,18 @@ internal sealed partial class EmbarkUi
             foreach (string location in Map3DOrder)
             {
                 if (!layout.Spots.TryGetValue(location, out var spot) || (zoomed && location != _zoomLocation)) continue;
-                var pos = zoomed ? new Vector2(spot.ZoomLabelX, spot.ZoomLabelY) : new Vector2(spot.LabelX, spot.LabelY);
+                // The label stands above its region: the anchor is the bottom centre of its quest row.
+                var anchor = zoomed ? new Vector2(spot.ZoomLabelX, spot.ZoomLabelY) : new Vector2(spot.LabelX, spot.LabelY);
+                float marker = zoomed ? 72 : 60;
                 if (location == QuestBoard.DarkestDungeon)
                 {
-                    DrawDungeon(QuestBoard.DarkestDungeon, pos, new[] { QuestBoard.DarkestDungeon });
+                    DrawMap3DLabel(QuestBoard.DarkestDungeon, anchor, new[] { QuestBoard.DarkestDungeon }, marker);
                     continue;
                 }
                 var areas = CampaignRegions.AtLocation(E, location);
                 if (areas.Count == 0) continue;
                 if (!_mapAreas.TryGetValue(location, out var zone) || !areas.Contains(zone)) _mapAreas[location] = zone = areas[0];
-                DrawDungeon(zone, pos, areas);
+                DrawMap3DLabel(zone, anchor, areas, marker);
             }
 
         if (zoomed || (_zoomLocation != null && _zoomIn))
@@ -139,6 +141,110 @@ internal sealed partial class EmbarkUi
                 : _mapAreas.TryGetValue(location, out var shown) ? shown : null;
             if (zone != null && zone != _focusedZone) FocusArea(zone);
         }
+    }
+
+    /// <summary>
+    /// A region's label on the 3D map, centred above the region: a name banner (name, switch arrow, region level)
+    /// over one row of up to four quest markers with DD1's own quest icons. The same rules as the painted map's
+    /// plate: the arrow switches paired areas, the name focuses the area, extra quests scroll in rows of four.
+    /// </summary>
+    private void DrawMap3DLabel(string zone, Vector2 anchor, IReadOnlyList<string> areas, float marker)
+    {
+        const float gap = 8, plateHeight = 46;
+        string name = AreaName(zone);
+        bool mountain = zone == QuestBoard.DarkestDungeon;
+        bool canSwitch = areas.Count > 1;
+        E.ZoneXp.TryGetValue(zone, out int xp);
+        int level = S.Campaign.ZoneLevel(xp);
+        float nameWidth = ExpeditionSkin.Width(name, 28, heading: true);
+        float plateWidth = nameWidth + 48 + (canSwitch ? 30 : 0) + (mountain ? 0 : 34);
+        var plate = new Rect(anchor.x - plateWidth / 2, anchor.y - marker - gap - plateHeight, plateWidth, plateHeight);
+        ExpeditionSkin.Banner(plate, zone == _focusedZone ? ExpeditionSkin.Brass : ExpeditionSkin.Ivory);
+        float x = plate.x + 24;
+        ExpeditionSkin.OutlinedHeading(new Rect(x, plate.y + 4, nameWidth + 6, plateHeight - 8), name, 28, ExpeditionSkin.Ivory);
+        x += nameWidth + 8;
+        if (canSwitch)
+        {
+            int at = areas.ToList().IndexOf(zone);
+            string nextZone = areas[(at + 1) % areas.Count];
+            var next = new Rect(x, plate.y + 8, 24, 30);
+            ExpeditionSkin.Sprite(next, "ui_arrow", next.Contains(Event.current.mousePosition) ? ExpeditionSkin.Brass : ExpeditionSkin.Ivory, fit: true, flip: true);
+            ExpeditionSkin.Tip(next, "Switch to " + AreaName(nextZone));
+            if (Gui.Hotspot(next)) FocusArea(nextZone);
+            x += 30;
+        }
+        if (!mountain)
+        {
+            var levelRect = new Rect(x, plate.y + 5, 30, plateHeight - 10);
+            ExpeditionSkin.Text(levelRect, level.ToString(), 25, ExpeditionSkin.Brass, TextAnchor.MiddleCenter, heading: true);
+            ExpeditionSkin.Tip(levelRect, $"Region level {level}\n{xp} experience");
+        }
+        // Registered after the arrow, so the name cannot take its clicks.
+        if (Gui.Hotspot(plate)) FocusArea(zone);
+
+        if (!mountain && !CampaignRegions.Unlocked(E, S.Campaign, zone))
+        {
+            var locked = new Rect(anchor.x - 150, anchor.y - 44, 300, 40);
+            ExpeditionSkin.Sprite(locked, "ui_labelbg");
+            ExpeditionSkin.Text(new Rect(locked.x + 8, locked.y + 2, locked.width - 16, 36), $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests", 21, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
+            return;
+        }
+        var quests = E.Quests.Where(q => q.Dungeon == zone).ToList();
+        int rows = Mathf.Max(1, (quests.Count + 3) / 4);
+        _questRows.TryGetValue(zone, out int row);
+        row = Mathf.Clamp(row, 0, rows - 1);
+        int first = row * 4, count = Mathf.Min(quests.Count, first + 4) - first;
+        float width = count * marker + Mathf.Max(0, count - 1) * gap, left = anchor.x - width / 2;
+        var rowArea = new Rect(left - 8, anchor.y - marker - 4, width + 16, marker + 8);
+        if (rows > 1 && rowArea.Contains(Event.current.mousePosition) && Event.current.type == EventType.ScrollWheel)
+        {
+            row = Mathf.Clamp(row + (Event.current.delta.y > 0 ? 1 : Event.current.delta.y < 0 ? -1 : 0), 0, rows - 1);
+            Event.current.Use();
+        }
+        for (int i = 0; i < count; i++)
+        {
+            var q = quests[first + i];
+            var r = new Rect(left + i * (marker + gap), anchor.y - marker, marker, marker);
+            DrawMap3DQuestMarker(r, q, r.Contains(Event.current.mousePosition));
+            if (Gui.Hotspot(r)) { SelectQuest(q); ZoomToQuest(q); }
+        }
+        if (rows > 1)
+        {
+            var up = new Rect(left + width + 6, anchor.y - marker, 26, 22);
+            var down = new Rect(left + width + 6, anchor.y - 22, 26, 22);
+            if (row > 0)
+            {
+                ExpeditionSkin.Text(up, "−", 24, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+                if (Gui.Hotspot(up)) row--;
+            }
+            if (row < rows - 1)
+            {
+                ExpeditionSkin.Text(down, "+", 24, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+                if (Gui.Hotspot(down)) row++;
+            }
+            ExpeditionSkin.Tip(new Rect(up.x, up.y, 26, marker), $"Scroll quests: row {row + 1} of {rows}");
+        }
+        _questRows[zone] = row;
+    }
+
+    /// <summary>DD1's quest marker at any size: its length ring, its quest-type badge for the difficulty tier, its selection glow.</summary>
+    private void DrawMap3DQuestMarker(Rect r, QuestOffer q, bool hover)
+    {
+        if (q == _quest && Qs("quest_select_selected.png") is { } selection)
+        {
+            float grow = r.width * 0.22f;
+            GUI.DrawTexture(new Rect(r.x - grow, r.y - grow, r.width + grow * 2, r.height + grow * 2), selection);
+        }
+        var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png")
+            ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
+        if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6) : r, ring);
+        int tier = q.Difficulty >= 6 ? 6 : q.Difficulty >= 5 ? 5 : q.Difficulty >= 3 ? 3 : 1;
+        var badge = Qs($"quest_select_{q.Type}_{tier}.png") ?? Qs($"quest_select_explore_{tier}.png");
+        float size = r.width * 0.56f;
+        var inner = new Rect(r.center.x - size / 2, r.center.y - size / 2, size, size);
+        if (badge != null) GUI.DrawTexture(inner, badge);
+        else ExpeditionSkin.QuestIcon(inner, q.Type, q.Difficulty >= 5 ? ExpeditionSkin.Red : q.Difficulty >= 3 ? ExpeditionSkin.Brass : ExpeditionSkin.Ivory);
+        ExpeditionSkin.Tip(r, $"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}" + (q.IsPlot ? "\nPlot quest" : ""));
     }
 
     /// <summary>Choosing a quest on the 3D map also flies to its region; already there, nothing moves.</summary>

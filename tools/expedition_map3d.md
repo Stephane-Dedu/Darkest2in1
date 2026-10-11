@@ -21,8 +21,10 @@ manner of `Dd2/HamletStage` is the possible next step; see `tools/hamlet_3d.md` 
 Positions are keyed by the legacy map location, as the paired regions are (Sprawl/Ruins at `crypts`, Foetor/Warrens
 at `warrens`, Tangle/Weald at `weald`, Shroud/Cove at `cove`). The scenery is always the DD2 region's; a DD1
 area selected with the switch arrow shows its own name and quests over the same scenery, without an overlay.
-`label` is the top-left the selector passes to its ordinary name plate, so level, XP rule, switch arrow, lock
-text and quest markers are unchanged. `click` rectangles are registered after the plates and markers and must
+`label` and `zoomLabel` are the bottom centre of the region's label, which stands above the region: a name
+banner (name, switch arrow, region level) over one row of up to four quest markers, extra quests scrolling in
+rows of four. Markers use DD1's own length ring, quest-type badge by difficulty tier and selection glow. Keep
+neighbouring labels apart horizontally when two regions sit close. `click` rectangles are registered after the plates and markers and must
 stay inside the map (x 535..1530, y 115..825) so they cannot take clicks from the dossier, roster or party bar.
 Name-plate and click positions can be tuned in the JSON without a rebuild.
 

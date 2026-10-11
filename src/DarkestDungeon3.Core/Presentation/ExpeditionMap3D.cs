@@ -28,7 +28,8 @@ public sealed class ExpeditionMap3D
         public string Location;
         /// <summary>The region's ground point in the overview and in its zoomed frame.</summary>
         public float HubX, HubY, ZoomHubX, ZoomHubY;
-        /// <summary>Top-left of the name plate (quests hang beneath it) in the overview and when zoomed.</summary>
+        /// <summary>Bottom centre of the region's label (name banner over one quest row), which stands above the
+        /// region, in the overview and when zoomed.</summary>
         public float LabelX, LabelY, ZoomLabelX, ZoomLabelY;
         /// <summary>How much larger the region is in its zoomed frame than in the overview.</summary>
         public float ZoomScale;
