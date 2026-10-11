@@ -14,10 +14,11 @@ namespace DarkestDungeon3.Dd2;
 /// <summary>
 /// Trying characters exported from other games in DD2's fights (owner request 2026-10-10, Dark Souls III's Soul of
 /// Cinder). F1 in a dungeon starts a fight against a lone Lost Battalion knight (a large, two-rank DD2 enemy); the
-/// private glTF export (Paths/ExportedBossModel) stands in its place on the knight's own character material. The
-/// export brings no animation: its bones follow the knight's animated DD2 bones (<see cref="RigRetarget"/>), with the
-/// two rest poses aligned, so DD2's idle, attacks, hits and death move it. The knight's model is hidden; DD2 still runs
-/// the fight.
+/// private glTF export (Paths/ExportedBossModel) stands in its place on the knight's own character material. With its
+/// own animations and a <c>&lt;model&gt;.moveset.json</c> beside it (ds3-extract's make_moveset.py), it plays those: the
+/// knight's current animator state picks the export's clip and time (<see cref="ExportedMoveset"/>), so DD2's stance,
+/// attacks, hits and Death's Door show the boss's own moves, timed to DD2's beats. Without them its bones follow the
+/// knight's animated DD2 bones (<see cref="RigRetarget"/>). The knight's model is hidden; DD2 still runs the fight.
 /// </summary>
 [DefaultExecutionOrder(32000)]   // after DD2's animation and its late bone work
 internal sealed class ExportedBoss : MonoBehaviour
@@ -45,6 +46,19 @@ internal sealed class ExportedBoss : MonoBehaviour
     private static readonly List<Renderer> Hidden = new();
     private static readonly List<(Animator Animator, AnimatorCullingMode Mode)> Animators = new();
     private static readonly List<UnityEngine.Object> Made = new();
+
+    // Playing the export's own clips: the knight's animator state picks them (see ExportedMoveset).
+    private const float Blend = 0.15f;                  // seconds to cross-fade from one move into the next
+    private static ExportedMoveset _moves;
+    private static Dictionary<string, GltfModel.Clip> _clips;
+    private static Animator _animator;
+    private static Transform[] _nodes;
+    private static string _state;
+    private static float _stateStart, _blendStart;
+    private static Vector3[] _fromPos;
+    private static Quaternion[] _fromRot;
+    private static readonly float[] Sampled = new float[4];
+    private static readonly List<(Renderer Renderer, string Mesh)> WeaponForms = new();
 
     /// <summary>The next fight's knight takes the export's place (called once the fight has started).</summary>
     public static void Arm()
@@ -77,6 +91,12 @@ internal sealed class ExportedBoss : MonoBehaviour
     /// <summary>Each frame after DD2 has posed the knight: the export takes the same pose.</summary>
     private void LateUpdate()
     {
+        if (_root != null && _moves != null && _animator != null && _nodes != null)
+        {
+            try { PlayClips(); }
+            catch (Exception e) { Plugin.Log.LogError("[exported boss] clips: " + e); _moves = null; }
+            return;
+        }
         if (_root == null || Pairs.Count == 0) return;
         if (_actor == null || _dd2Root == null) { Clear(); return; }
         try
@@ -114,17 +134,22 @@ internal sealed class ExportedBoss : MonoBehaviour
         string path = Plugin.ExportedBossModel?.Value;
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path)) { _armed = false; Plugin.Log.LogWarning($"[exported boss] no export at {path}"); return; }
         if (_model == null || _modelPath != path) { _model = GltfModel.Load(path); _modelPath = path; }
+        string movesPath = Path.ChangeExtension(path, ".moveset.json");
+        _moves = _model.Animations.Count > 0 && File.Exists(movesPath) ? ExportedMoveset.Parse(File.ReadAllText(movesPath)) : null;
 
         // The knight's body: its biggest skinned mesh, with the bones DD2 animates.
         var body = shown.OfType<SkinnedMeshRenderer>().Where(r => r.sharedMesh != null && r.bones != null)
             .OrderByDescending(r => r.bones.Length).ThenByDescending(r => r.sharedMesh.vertexCount).FirstOrDefault();
         int layer = (body != null ? body.gameObject : shown[0].gameObject).layer;
-        Func<GltfModel.Primitive, bool> include = p => !p.Mesh.Contains("#0") || p.Mesh.Contains("#01#");   // one weapon form, as DS3 shows
+        // One weapon form, as DS3 shows; with a moveset, every form its phases switch between.
+        var forms = _moves?.Weapons.ToList() ?? new List<string> { "#01#" };
+        Func<GltfModel.Primitive, bool> include = p => !p.Mesh.Contains("#0") || forms.Any(f => p.Mesh.Contains(f));
         var (root, nodes) = Build(_model, body != null ? body.sharedMaterial : null, layer, include);
         _root = root;
 
         string how = body != null && Retarget(_model, nodes, body, knight.transform) ? $"following the knight's {Pairs.Count} bones"
             : StandStill(_model, nodes, include, bounds, knight.transform);
+        if (_moves != null) how = PlayOwnClips(nodes, body, knight) ?? how;
         foreach (var r in natives) { r.forceRenderingOff = true; Hidden.Add(r); }
         foreach (var animator in knight.GetComponentsInChildren<Animator>(true))
         {
@@ -203,6 +228,70 @@ internal sealed class ExportedBoss : MonoBehaviour
         _pelvis = byName["Pelvis"];
         _pelvisOffset = Vector3.zero;
         return true;
+    }
+
+    /// <summary>
+    /// Switches to the export's own clips: feet on the knight's ground joint (which carries its lunges), every weapon
+    /// form built but only the phase's shown. Returns how it stands, or null when the knight has no animator.
+    /// </summary>
+    private static string PlayOwnClips(Transform[] nodes, SkinnedMeshRenderer body, CombatActorBhv knight)
+    {
+        _animator = (body != null ? body.GetComponentInParent<Animator>() : null)
+            ?? knight.GetComponentsInChildren<Animator>(true).FirstOrDefault(a => a.runtimeAnimatorController != null);
+        if (_animator == null) { _moves = null; return null; }
+        _clips = _model.Animations.GroupBy(a => a.Name).ToDictionary(g => g.Key, g => g.First());
+        _nodes = nodes;
+        _fromPos = new Vector3[nodes.Length];
+        _fromRot = new Quaternion[nodes.Length];
+        _state = null;
+        _moves.Reset();
+
+        var ground = body?.bones?.FirstOrDefault(b => b != null && b.name == "TrajectorySHJnt") ?? knight.transform;
+        var root = _root.transform;
+        root.position = new Vector3(root.position.x, ground.position.y, root.position.z);   // DS3 clips keep feet at y = 0
+        root.SetParent(ground, worldPositionStays: true);
+        foreach (var r in _root.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+            if (r.name.Contains("#0")) WeaponForms.Add((r, r.name));
+        return $"playing its own {_clips.Count} clips on the knight's {_animator.runtimeAnimatorController?.name} states";
+    }
+
+    /// <summary>Each frame: the knight's heaviest clip names the state; the moveset gives the export's clip and time.</summary>
+    private static void PlayClips()
+    {
+        string state = null;
+        float best = -1;
+        foreach (var info in _animator.GetCurrentAnimatorClipInfo(0))
+            if (info.clip != null && info.weight > best) { best = info.weight; state = info.clip.name; }
+        state ??= Donor + "_idle_A";
+        float now = Time.time;
+        if (state != _state)
+        {
+            for (int i = 0; i < _nodes.Length; i++) { _fromPos[i] = _nodes[i].localPosition; _fromRot[i] = _nodes[i].localRotation; }
+            _blendStart = _state == null ? now - Blend : now;
+            _state = state;
+            _stateStart = now;
+        }
+        var (clipName, time, weapon) = _moves.Resolve(state, Donor, now - _stateStart, now);
+        if (state == _state && now == _stateStart) Plugin.Log.LogInfo($"[exported boss] {state} -> {clipName} ({weapon})");
+        if (!_clips.TryGetValue(clipName, out var clip)) return;
+        foreach (var c in clip.Channels)
+        {
+            if (c.Node < 0 || c.Node >= _nodes.Length) continue;
+            GltfModel.Sample(c, time, Sampled);
+            var node = _nodes[c.Node];
+            if (c.Path == 'r') node.localRotation = new Quaternion(Sampled[0], Sampled[1], Sampled[2], Sampled[3]);
+            else if (c.Path == 't') node.localPosition = new Vector3(Sampled[0], Sampled[1], Sampled[2]);
+            else node.localScale = new Vector3(Sampled[0], Sampled[1], Sampled[2]);
+        }
+        float k = Mathf.Clamp01((now - _blendStart) / Blend);
+        if (k < 1)
+            for (int i = 0; i < _nodes.Length; i++)
+            {
+                _nodes[i].localRotation = Quaternion.Slerp(_fromRot[i], _nodes[i].localRotation, k);
+                _nodes[i].localPosition = Vector3.Lerp(_fromPos[i], _nodes[i].localPosition, k);
+            }
+        foreach (var (renderer, mesh) in WeaponForms)
+            if (renderer != null) renderer.enabled = mesh.Contains(weapon);
     }
 
     /// <summary>Without a rig to follow: at the knight's feet, facing the party, arms lowered from the T-pose.</summary>
@@ -465,6 +554,8 @@ internal sealed class ExportedBoss : MonoBehaviour
         Animators.Clear();
         Pairs.Clear();
         _actor = null; _dd2Root = null; _pelvis = null;
+        _moves = null; _clips = null; _animator = null; _nodes = null; _state = null;
+        WeaponForms.Clear();
         if (_root != null) Destroy(_root);
         _root = null;
         foreach (var o in Made) if (o != null) Destroy(o);

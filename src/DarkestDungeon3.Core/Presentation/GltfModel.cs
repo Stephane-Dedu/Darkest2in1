@@ -78,6 +78,24 @@ public sealed class GltfModel
         };
     }
 
+    /// <summary>One animated property of a node: keyframe times and values (3 per key, 4 for rotations).</summary>
+    public sealed class Channel
+    {
+        public int Node;
+        public char Path;                   // 't' translation, 'r' rotation (x, y, z, w), 's' scale
+        public bool Step;
+        public float[] Times, Values;
+        public int Width => Path == 'r' ? 4 : 3;
+    }
+
+    /// <summary>A glTF animation: its channels and length in seconds.</summary>
+    public sealed class Clip
+    {
+        public string Name;
+        public float Duration;
+        public List<Channel> Channels { get; } = new();
+    }
+
     public sealed class MaterialInfo
     {
         public string Name, BaseColor, Emissive, Normal;
@@ -89,6 +107,7 @@ public sealed class GltfModel
     public List<Node> Nodes { get; } = new();
     public List<Primitive> Primitives { get; } = new();
     public List<MaterialInfo> Materials { get; } = new();
+    public List<Clip> Animations { get; } = new();
     /// <summary>The skin's joints (node indices) and their inverse bind matrices (16 floats, column-major).</summary>
     public int[] Joints { get; private set; } = new int[0];
     public float[][] InverseBind { get; private set; } = new float[0][];
@@ -142,6 +161,31 @@ public sealed class GltfModel
                 var m = ibm != null ? ibm.Skip(j * 16).Take(16).ToArray() : Identity();
                 model.InverseBind[j] = Mirror(m);
             }
+        }
+
+        var times = new Dictionary<int, float[]>();   // clips share one time accessor across their channels
+        foreach (var a in ((JArray)gltf["animations"] ?? new JArray()).Cast<JObject>())
+        {
+            var samplers = ((JArray)a["samplers"] ?? new JArray()).Cast<JObject>().ToList();
+            var clip = new Clip { Name = (string)a["name"] ?? "animation" + model.Animations.Count };
+            foreach (var ch in ((JArray)a["channels"] ?? new JArray()).Cast<JObject>())
+            {
+                var target = (JObject)ch["target"];
+                char kind = (string)target?["path"] switch { "translation" => 't', "rotation" => 'r', "scale" => 's', _ => '\0' };
+                if (target?["node"] == null || kind == '\0') continue;
+                var sampler = samplers[(int)ch["sampler"]];
+                string interpolation = (string)sampler["interpolation"] ?? "LINEAR";
+                if (interpolation != "LINEAR" && interpolation != "STEP") throw new FormatException("Only LINEAR and STEP animation samplers are read");
+                int input = (int)sampler["input"];
+                if (!times.TryGetValue(input, out var keys)) times[input] = keys = Floats(input);
+                var values = Floats((int)sampler["output"]);
+                if (kind == 't') MirrorX(values, 3);
+                else if (kind == 'r')
+                    for (int i = 0; i < values.Length; i += 4) { values[i + 1] = -values[i + 1]; values[i + 2] = -values[i + 2]; }
+                clip.Channels.Add(new Channel { Node = (int)target["node"], Path = kind, Step = interpolation == "STEP", Times = keys, Values = values });
+                if (keys.Length > 0) clip.Duration = Math.Max(clip.Duration, keys[keys.Length - 1]);
+            }
+            model.Animations.Add(clip);
         }
 
         var images = ((JArray)gltf["images"] ?? new JArray()).Select(i => (string)i["uri"]).ToList();
@@ -292,6 +336,36 @@ public sealed class GltfModel
             for (int r = 0; r < 4; r++)
                 if ((r == 0) != (c == 0)) m[c * 4 + r] = -m[c * 4 + r];
         return m;
+    }
+
+    /// <summary>
+    /// A channel's value at a time (clamped to its keys) into <paramref name="result"/>: linear between keys, rotations
+    /// along the shorter way and renormalised.
+    /// </summary>
+    public static void Sample(Channel c, float time, float[] result)
+    {
+        int w = c.Width, n = c.Times.Length;
+        if (n == 0) return;
+        int k = Array.BinarySearch(c.Times, time);
+        if (k < 0) k = ~k - 1;                                 // the last key at or before the time
+        if (k < 0 || n == 1) { Array.Copy(c.Values, 0, result, 0, w); return; }
+        if (k >= n - 1) { Array.Copy(c.Values, (n - 1) * w, result, 0, w); return; }
+        float span = c.Times[k + 1] - c.Times[k];
+        float f = c.Step || span <= 0 ? 0 : (time - c.Times[k]) / span;
+        int a = k * w, b = (k + 1) * w;
+        float sign = 1;
+        if (c.Path == 'r')
+        {
+            float dot = 0;
+            for (int i = 0; i < 4; i++) dot += c.Values[a + i] * c.Values[b + i];
+            if (dot < 0) sign = -1;
+        }
+        for (int i = 0; i < w; i++) result[i] = c.Values[a + i] + (sign * c.Values[b + i] - c.Values[a + i]) * f;
+        if (c.Path == 'r')
+        {
+            float len = (float)Math.Sqrt(result[0] * result[0] + result[1] * result[1] + result[2] * result[2] + result[3] * result[3]);
+            if (len > 1e-8f) for (int i = 0; i < 4; i++) result[i] /= len;
+        }
     }
 
     /// <summary>The visible height of the given primitives (model space, rest pose), and their lowest point.</summary>

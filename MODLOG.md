@@ -4875,3 +4875,35 @@ attack shots (seen in Cardonell's Collect Bounty). Death: the first F10 triggers
 shows (true of every enemy with the in-place return). A second F1 fight after the spoils builds the model again
 from cached textures; nothing is left behind. Estate 2 restored (2f230b7f/dd18f310); deployed build matches
 (65452369). The loop ends here: size, animation and look are in place within the stand-in approach.
+
+## Round211: the exported boss plays its own DS3 moves (2026-10-11)
+
+Owner: wants the boss animated with "his (or some) animations" instead of the T-pose; chose the plan "decode his own
+DS3 animations, preview in Blender, play them in DD2 with the knight still running the fight".
+
+Export side (ds3-extract, private): c5280.anibnd holds 117 hkaSplineCompressedAnimation clips (Havok 2014; 112
+non-additive) on a 105-bone Havok skeleton. Its hierarchy differs from the FLVER's (Root between Master and
+Pelvis/Spine, cape chain parented); every skinned bone matches the FLVER bind to 1e-3, so the animated export takes
+Havok's parents/rest pose. Clips play in place (root motion is a separate reference frame). make_moveset.py picks
+clips per knight move and splits each at the sword tip's fastest stretch (strike = peak -0.12/+0.45 s), writing
+`<model>.moveset.json` beside a lean glTF with only the 14 clips used. Also fixed in the exports: triangle winding
+was inverted (the Z mirror already flips it), so earlier copies rendered inside out.
+
+Knight states (UnityPy, read-only: faction_lost_battalion_assets_all.bundle, lost_battalion_knight_animation_controller):
+idle_A/idle_B (9.3 s), attackslash/downswing/attackdown/riposte _antic/_action/_recover (antic up to 5.3 s, held),
+downswing_idle and buff_idle (held between antic and action), buff_antic/action/impact/recover,
+impact_action/impact_recover (hit), deathsdoor_antic/deathsdoor_idle (Armor Break).
+
+Built: Core GltfModel reads animations (LINEAR/STEP channels, mirrored like nodes) and samples them (clamped,
+shortest-way normalised rotations); Core ExportedMoveset maps a donor clip name to (move, part) and resolves
+(export clip, time, weapon form): wind-up plays from 0 and holds, the strike starts at the wind-up's end when DD2's
+action begins, recovery runs to the clip's end, the stance loops, unknown moves fall back to it; deathsdoor plays the
+kneel and switches to phase 2 (a005 moves, #05# greatsword). ExportedBoss: with animations and a moveset, every
+weapon form of the phases is built and only the phase's shown, feet go on the knight's TrajectorySHJnt (carries its
+lunges), and each LateUpdate samples the clip with a 0.15 s cross-fade between states; each state change is logged
+("[exported boss] <knight clip> -> <export clip> (<weapon>)"). Without them the Round209 rig following still runs.
+Tests: 6 new Core cases (state names, timing, stance, Death's Door phase change, sampling, the private export's
+clips/moveset); 973 Core pass; Release builds with -p:Deploy=false. Not deployed or seen in game yet: DD2 was open
+at the campaign menu with the owner at the PC. The game copy (<game>/PrivateBossModels/soul_of_cinder) still holds the
+pre-fix static export; replace it with ds3-extract/soul_of_cinder/dd2/* (gltf, bin, moveset, textures) while DD2 is
+stopped.
