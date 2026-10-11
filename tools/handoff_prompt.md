@@ -1,18 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Owner renewed launch pause, 2026-10-11: no game launches for 30 minutes from 17:17:37 UTC. Do not launch any game before
-17:47:37 UTC / 19:47:37 Paris unless the owner changes that instruction. DD2 is stopped.
-Continue offline work during the pause. Do not restore a normal game process until launches are allowed.
+The owner's timed launch pause expired on2026-10-11 at17:47:37 UTC /19:47:37 Paris. Standing native test
+authorization applies. Round223 uses only the unsaved Hamlet fixture; retain estate protection and verify
+DD2 is stopped before deploying. Close only the exact owned QA PID; never select a campaign in this fixture.
 
-Round221 polishes the owner's dark-filler screenshot. HamletPalette shares native material grading and
-atlas crops with the private v04 preview. Painted soil replaces the flat distance texture; rock-only
-cliffs have larger patterns, lighter shadows and mirrored tile edges. Four native rubble clusters dress
-the bases, and Valley trees sit lower. The Mountain is width174 atZ96 with independent height/depth scale;
-the camera is slightly higher at42 degrees. All ten offline bounds fit the town viewport. Release and
-five geometry/layout cases pass; deployed DLL/PDB hashes match, with DD2 stopped. No game or estate access.
-Private evidence: local-art/ui-overhaul/hamlet-landscape-v04. Pre-change plugin backup is universal-modder
-hamlet-landscape-v04-plugin. Native color-control/shading and picking checks remain [?]. Keep the existing
-Hamlet3D flag/painted rollback and independent dirty Expedition Map3D/Shieldbreaker work.
+Round223 improves native Hamlet readability and coherence: bounded owned paint copies lift black filler,
+crop-corrected UVs and three tint bands clarify cliffs, winding Survivalist stairs/shared civic ascent and
+low walls frame the map, Valley leaf banks/native cliff ledges dress the edges, and four owned chimney
+plumes add movement. Native full service/control/rollback/reload/Embark/return and live resize/restore checks
+pass. Matching window size and DD2's actual HDR texture format removes repeated URP allocations: roughly
+480/sec at baseline to0 in the final probes. Main Menu Camera is untagged; Camera.main alone misses it.
+All1036 Core+182 UI pass, plus31 Hamlet cases after the UV refinement; Release has three unrelated warnings.
+Read tools/hamlet_3d.md before changing renderer ownership, paint or targets. Private v05 evidence lives in
+local-art/ui-overhaul/hamlet-immersion-v05. Keep Hamlet3D defaultfalse/localtrue, immediate Painted town rollback,
+and the other agents' dirty Expedition Map3D/Shieldbreaker changes. NPC/exterior variants, finer sculpture/trim,
+saved transactions and full frame-time/long-session memory acceptance remain separate.
 
 Round220 (2026-10-11) supersedes the round219 terrain: compact DD1 building placement, a high left Survivalist
 cliff, upper Abbey/graveyard and small low square. Core HamletTerrain/HamletGroundwork bake the same soil,
@@ -20,7 +22,7 @@ rock, paths, stairs and masonry for Unity and offline Blender preview; see tools
 the stage. Private preview/packed scene: local-art/ui-overhaul/hamlet-landscape-v03. All1030 Core+182 UI and
 Release pass; five final geometry/layout checks pass. Deployed with DD2 stopped and local Hamlet3D=true
 retained. No game was launched or estate read/saved in this round, including after the timed pause elapsed.
-New native layout/lighting/picking/performance acceptance remains [?]; use the unsaved Hamlet fixture.
+Round223 supersedes the native layout/lighting/picking/buffer checks for this terrain; saved acceptance remains separate.
 Keep the painted rollback and independent Expedition Map3D/Shieldbreaker dirty files. Pre-change plugin
 backup is universal-modder hamlet-landscape-v03-plugin. Source feature default remains false.
 

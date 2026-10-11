@@ -16,30 +16,40 @@ internal sealed partial class HamletStage
         var native=source.sharedMaterials.First(m=>m!=null&&m.name.Contains("valley_road_main"));
         var texture=_terrainAsset.Status==AsyncOperationStatus.Succeeded?BaseTexture(_terrainAsset.Result):BaseTexture(native);
         _groundMaterial=new Material(native) { name="Hamlet earth" };
-        if (texture!=null)
-        {
-            _groundTexture=new RenderTexture(512,512,0,RenderTextureFormat.ARGB32)
-            { wrapMode=TextureWrapMode.Repeat,name="Hamlet repeatable native foundation" };
-            _groundTexture.Create(); Graphics.Blit(texture,_groundTexture);
-            _groundMaterial.SetTexture("_BaseMap_texture",_groundTexture);
-        }
-        var paving=new Material(_groundMaterial) { name="Hamlet worn stone paths" };
-        Grade(paving,HamletPalette.Paving); _details.Add(paving);
-        var rock=new Material(_groundMaterial) { name="Hamlet exposed cliff rock" };
-        Grade(rock,HamletPalette.Rock); _details.Add(rock);
-        var stone=new Material(paving) { name="Hamlet terrace masonry" };
-        Grade(stone,HamletPalette.Masonry); _details.Add(stone);
-        Grade(_groundMaterial,HamletPalette.Soil);
+        var paving=new Material(native) { name="Hamlet worn stone paths" }; _details.Add(paving);
+        var rock=new Material(native) { name="Hamlet exposed cliff rock" }; _details.Add(rock);
+        var stone=new Material(native) { name="Hamlet terrace masonry" }; _details.Add(stone);
+        foreach (var material in new[] { _groundMaterial,paving,rock,stone })
+            if (texture!=null) material.SetTexture("_BaseMap_texture",texture);
+        bool soilLoaded=false,rockLoaded=false;
         if (_earthAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_earthAsset.Result) is { } earthTexture)
-            _groundMaterial.SetTexture("_BaseMap_texture",TileTexture(earthTexture,"Hamlet native soil",HamletPalette.Soil));
+        { _groundMaterial.SetTexture("_BaseMap_texture",earthTexture); soilLoaded=true; }
         if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
-            rock.SetTexture("_BaseMap_texture",TileTexture(rockTexture,"Hamlet native cliff paint",HamletPalette.Rock));
+        { rock.SetTexture("_BaseMap_texture",rockTexture); rockLoaded=true; }
+        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
+        Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
         _groundMesh.colors=data.Shade.Select(s=>new Color(s,s,s,1)).ToArray();
-        _groundMesh.subMeshCount=2; _groundMesh.SetTriangles(data.Ground,0); _groundMesh.SetTriangles(data.Rock,1);
-        Surface(_groundMesh,_groundMaterial,layer).sharedMaterials=new[] { _groundMaterial,rock };
+        // Native paint ignores vertex colours. Three shared tint bands preserve the hillside's faceted light.
+        var rockBands=new[] { new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>() };
+        for (int i=0;i<data.Rock.Length;i+=3)
+        {
+            float light=data.Shade[data.Rock[i]];
+            var band=rockBands[light<.83f?0:light<.90f?1:2];
+            band.Add(data.Rock[i]); band.Add(data.Rock[i+1]); band.Add(data.Rock[i+2]);
+        }
+        var materials=new Material[4]; materials[0]=_groundMaterial;
+        for (int i=0;i<3;i++)
+        {
+            materials[i+1]=new Material(rock) { name="Hamlet cliff facet "+i };
+            float tint=.72f+i*.14f;
+            materials[i+1].SetColor(Tint,new Color(tint,tint,tint,1)); _details.Add(materials[i+1]);
+        }
+        _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);
+        for (int i=0;i<3;i++) _groundMesh.SetTriangles(rockBands[i],i+1);
+        Surface(_groundMesh,_groundMaterial,layer).sharedMaterials=materials;
         foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone) })
         {
             var mesh=MeshData(part.Item2.name,part.Item1.Positions,part.Item1.Uv);
@@ -47,28 +57,6 @@ internal sealed partial class HamletStage
         }
         foreach (var renderer in _root.GetComponentsInChildren<MeshRenderer>())
             if (renderer.name.Contains("road_valley_straight_single")) renderer.enabled=false;
-    }
-
-    // Only owned material copies reach this method. Red Hook/Lit/Environment uses _COLOR_CONTROLS.
-    private static void Grade(Material material,HamletPalette.Paint paint)
-    {
-        if (material==null) return;
-        if (material.HasProperty(Tint)) material.SetColor(Tint,new Color(paint.Tint.X,paint.Tint.Y,paint.Tint.Z));
-        if (material.HasProperty("_UseColorControl"))
-        {
-            material.SetFloat("_UseColorControl",1); material.EnableKeyword("_COLOR_CONTROLS");
-            material.SetFloat("_Brightness",paint.Brightness); material.SetFloat("_Saturation",paint.Saturation);
-        }
-        if (material.HasProperty("_HasVertexPainting")) material.SetFloat("_HasVertexPainting",0);
-        material.DisableKeyword("_HASVERTEXPAINTING_ON");
-    }
-
-    private RenderTexture TileTexture(Texture source,string name,HamletPalette.Paint paint)
-    {
-        var texture=new RenderTexture(512,512,0,RenderTextureFormat.ARGB32) { wrapMode=TextureWrapMode.Mirror,name=name };
-        _details.Add(texture); texture.Create();
-        Graphics.Blit(source,texture,new Vector2(paint.UvScale.X,paint.UvScale.Y),new Vector2(paint.UvOffset.X,paint.UvOffset.Y));
-        return texture;
     }
 
     private static Mesh MeshData(string name,float[] positions,float[] coordinates)

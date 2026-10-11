@@ -56,6 +56,17 @@ public class HamletLayoutTests
     }
 
     [Fact]
+    public void ServiceStairsUseWalkableGradesRatherThanVerticalLadders()
+    {
+        foreach (var route in HamletLayout.Routes) for (int i=1;i<route.Points.Length;i++)
+        {
+            var a=route.Points[i-1]; var b=route.Points[i];
+            float run=MathF.Sqrt((b.X-a.X)*(b.X-a.X)+(b.Z-a.Z)*(b.Z-a.Z));
+            Assert.True(run>0 && MathF.Abs(b.Y-a.Y)/run<=.9f,$"{route.Id} segment {i} is too steep for town stairs.");
+        }
+    }
+
+    [Fact]
     public void TerrainHasClosedCliffsAndValidFacetedGeometry()
     {
         var mesh=HamletTerrain.Build();

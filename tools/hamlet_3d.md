@@ -6,7 +6,8 @@ The choice persists in the mod config, not the estate. With the flag off, the ap
 remains the first choice, followed by the original installed DD1 town. Missing models or a 45-second load
 timeout also retain that fallback. Switching off and back on retries a failed load.
 
-`Dd2/HamletStage` owns a perspective camera and a 1920x1080 render texture. It copies visual components from
+`Dd2/HamletStage` owns a perspective camera and a render texture matching the window and native HDR format.
+Its fixed 16:9 composition follows the virtual UI canvas through window resizing. It copies visual components from
 installed Addressables assets into a distant scene; it never instantiates native road nodes, shops, triggers,
 inventory behaviours or animators. Native meshes and textures stay in the owner's install. Skinned geometry
 is baked once into owned static meshes. DD2's native shader/material copies retain texture mapping, depth and
@@ -86,7 +87,37 @@ provenance and three extra native prop exports are in `local-art/ui-overhaul/ham
 The preview approximates native color controls and facet shading; native shader/picking acceptance
 remains pending. No game was launched and no estate was accessed during this pass.
 
+Round223 establishes native acceptance after the timed launch pause expired. The unsaved fixture passes
+all ten service clicks/Escape, pan/zoom/reset, painted rollback/resource release, reload/re-entry click,
+Embark cleanup, return, and live 1600x900 -> 1440x900 -> 1600x900 resizing. Every service retains a clickable
+point at both sizes. Private captures/logs, the final offline scene and composition are under
+`local-art/ui-overhaul/hamlet-immersion-v05/`. No estate path was selected or saved.
+
+Native `_COLOR_CONTROLS` did not visibly lift the black atlas areas in this environment variant.
+Construction now bakes tint, luminance saturation and linear brightness into bounded owned texture copies:
+512px for terrain/rubble and 1024px for the Mountain. Readback occurs once per distinct paint, never during
+rendering; CPU pixels are discarded after upload. Neutral encoding, lifted blacks/highlights and saturation
+are covered by five Core cases. Cliff crop height grows from24% to46%, retaining only the skull-free top.
+Terrain UVs preserve the rectangular crop's texel proportions. Three native material tint bands restore
+directional facet shading without relying on the shader's unused vertex colours. Paths receive warmer paint.
+
+The Survivalist ascent winds across the cliff instead of climbing in one steep line. The graveyard shares
+the civic ascent, with a separate path down to the Sanitarium. One additional Core case bounds all stair
+grades at0.9 rise/run. Low broken walls frame the forecourt. Four native Valley leaf banks and two native
+Coast cliff ledges soften the outer terrain; no native node behaviours are instantiated. Four small owned
+particle plumes rise from the actual Tavern, Sanitarium and forge chimney caps. Their texture, shared material
+and systems release with the town; no extracted VFX or game scripts are required.
+
+Native allocation diagnosis: the original1920x1080 LDR target shared a URP renderer with DD2's1600x900 HDR
+camera, causing roughly480 RTHandle reallocations/sec. Matching size removed depth churn; copying allowHDR
+alone left roughly240 colour reallocations/sec because the target was still LDR. DD2's main-menu camera
+is untagged, so Camera.main is null. Find the active native view, copy its renderer/HDR setting and select
+the actual format through URP's own format selector. Cache that selection and follow window resizing.
+The final1600x900 B10G11R11_UFloatPack32 target records zero repeated allocations in five-second probes
+after reload/return. `tools/hamlet_models/measure_native.ps1 -HamletProcessId <owned-preview-pid>` reproduces
+the log measurement, rejects a non-preview process and requires the3D town to have rendered first.
+This establishes buffer stability, not a full frame-time or long-session memory benchmark.
+
 NPC idles, upgrade/event exteriors, the coarse Ancestor sculpt, individual trim painting and final lighting
-still need art work. Player.log also repeats URP RTHandle reallocations while the staged and native cameras
-render different targets; performance tuning remains. Saved-campaign transactions/embark need separate
-acceptance. This preview checks presentation, routing and resource lifecycle without selecting an estate.
+still need art work. Saved-campaign transactions/embark need separate acceptance. This preview checks
+presentation, routing and resource lifecycle without selecting an estate. Painted town remains immediate rollback.

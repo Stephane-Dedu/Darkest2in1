@@ -7,6 +7,7 @@ using DarkestDungeon3.Runtime;
 using DarkestDungeon3.Ui;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Experimental.Rendering;
 using UnityEngine.Rendering;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
@@ -63,6 +64,12 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Models + "barricade_military_decor_rocks_02.fbx", -25, -.35f, 16, 4, -20),
         new(null, Models + "barricade_military_decor_rocks_03.fbx", 34, -.3f, 12, 6, 15),
         new(null, Models + "barricade_military_decor_rocks_02.fbx", 40, -.25f, 25, 8, -40),
+        new(null, Valley + "DecorTiles/valley_tile_09.prefab", -46, -.25f, -10, 9, 20),
+        new(null, Valley + "DecorTiles/valley_tile_09.prefab", -16, -.2f, -14, 7, -10),
+        new(null, Valley + "DecorTiles/valley_tile_09.prefab", 43, -.25f, 10, 7, 65),
+        new(null, Valley + "DecorTiles/valley_tile_09.prefab", -1, -.2f, 41, 6, 15),
+        new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", -59, -2, -7, 15, 15),
+        new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", 49, -1, 25, 18, -25),
     };
 
     private sealed class Building
@@ -81,10 +88,13 @@ internal sealed partial class HamletStage : MonoBehaviour
     private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset;
     private Transform _root;
     private Camera _camera;
+    private Camera _nativeView;
+    private RenderPipelineAsset _nativePipeline;
+    private GraphicsFormat _nativeFormat;
+    private bool _nativeHdr;
     private RenderTexture _texture;
     private Mesh _groundMesh;
     private Material _groundMaterial;
-    private RenderTexture _groundTexture;
     private int _lastRequest = -100, _piece;
     private float _started;
     private bool _rendered;
@@ -102,7 +112,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
     internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _details.Count != 0
-        || _texture != null || _groundTexture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
+        || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
 
@@ -132,7 +142,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         _root = new GameObject("DD3 Hamlet 2.0 visuals").transform;
         DontDestroyOnLoad(_root.gameObject);
         _root.position = Origin;
-        _texture = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32) { name = "DD3 perspective Hamlet" };
+        _texture = new RenderTexture(Screen.width, Screen.height, 24)
+        { name = "DD3 perspective Hamlet", graphicsFormat = NativeTargetFormat(NativeViewCamera()) };
         _texture.Create();
         var cameraObject = new GameObject("DD3 Hamlet perspective camera");
         cameraObject.transform.SetParent(_root, false);
@@ -140,10 +151,12 @@ internal sealed partial class HamletStage : MonoBehaviour
         _camera.clearFlags = CameraClearFlags.SolidColor;
         _camera.backgroundColor = new Color(.065f, .075f, .105f);
         _camera.fieldOfView = HamletLayout.FieldOfView;
+        _camera.aspect = 16f / 9;
         _camera.nearClipPlane = .3f;
         _camera.farClipPlane = 400;
         _camera.targetTexture = _texture;
-        _camera.allowHDR = false;
+        var nativeView = NativeViewCamera();
+        _camera.allowHDR = nativeView != null && nativeView.allowHDR;
         _camera.allowMSAA = false;
         _camera.depth = -20;
         _camera.enabled = false;
@@ -153,7 +166,7 @@ internal sealed partial class HamletStage : MonoBehaviour
             var data = cameraObject.AddComponent(urp);
             urp.GetProperty("renderPostProcessing")?.SetValue(data, false);
             urp.GetProperty("renderShadows")?.SetValue(data, false);
-            var mainData = Camera.main != null ? Camera.main.GetComponent(urp) : null;
+            var mainData = nativeView != null ? nativeView.GetComponent(urp) : null;
             var field = urp.GetField("m_RendererIndex", BindingFlags.NonPublic | BindingFlags.Instance);
             if (mainData != null && field != null) urp.GetMethod("SetRenderer")?.Invoke(data, new[] { field.GetValue(mainData) });
         }
@@ -175,6 +188,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (!Enabled || Time.frameCount - _lastRequest > 3) { Clear(); return; }
         try
         {
+            MatchNativeTarget();
             if (_piece < Pieces.Length)
             {
                 if (Time.unscaledTime - _started > 45) throw new InvalidOperationException("Town scenery did not finish loading. Painted town remains available.");
@@ -192,10 +206,43 @@ internal sealed partial class HamletStage : MonoBehaviour
                 BuildGround();
                 _camera.enabled = true;
                 Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; compact DD1 cliff layout, 24.5 metres of service elevation");
+                Plugin.Log.LogInfo($"[hamlet 3d] {_root.GetComponentsInChildren<ParticleSystem>().Length} owned chimney plumes; target {_texture.width}x{_texture.height}/{_texture.graphicsFormat}");
             }
             MoveCamera(1 - Mathf.Exp(-Time.unscaledDeltaTime * 5));
         }
         catch (Exception e) { Fail(e.Message); }
+    }
+    private Camera NativeViewCamera()
+    {
+        if (_nativeView!=null && _nativeView.isActiveAndEnabled && _nativeView.targetTexture==null) return _nativeView;
+        return _nativeView=Camera.main ?? Camera.allCameras.FirstOrDefault(c=>c!=_camera && c.targetTexture==null);
+    }
+
+    private GraphicsFormat NativeTargetFormat(Camera native)
+    {
+        var pipeline=GraphicsSettings.currentRenderPipeline;
+        bool cameraHdr=native!=null && native.allowHDR;
+        if (_nativeFormat!=GraphicsFormat.None && pipeline==_nativePipeline && cameraHdr==_nativeHdr) return _nativeFormat;
+        _nativePipeline=pipeline; _nativeHdr=cameraHdr;
+        var type=pipeline?.GetType();
+        bool hdr=cameraHdr && (bool?)(type?.GetProperty("supportsHDR")?.GetValue(pipeline))==true;
+        var precision=type?.GetProperty("hdrColorBufferPrecision")?.GetValue(pipeline);
+        var urp=Type.GetType("UnityEngine.Rendering.Universal.UniversalRenderPipeline, Unity.RenderPipelines.Universal.Runtime");
+        var choose=urp?.GetMethod("MakeRenderTextureGraphicsFormat",BindingFlags.Static|BindingFlags.NonPublic);
+        return _nativeFormat=choose!=null && precision!=null
+            ? (GraphicsFormat)choose.Invoke(null,new[] { (object)hdr,precision,Graphics.preserveFramebufferAlpha })
+            : SystemInfo.GetGraphicsFormat(hdr?DefaultFormat.HDR:DefaultFormat.LDR);
+    }
+
+    private void MatchNativeTarget()
+    {
+        var native=NativeViewCamera();
+        if (native!=null) _camera.allowHDR=native.allowHDR;
+        var format=NativeTargetFormat(native);
+        if (_texture.width==Screen.width && _texture.height==Screen.height && _texture.graphicsFormat==format) return;
+        _camera.targetTexture=null; _texture.Release();
+        _texture.width=Mathf.Max(1,Screen.width); _texture.height=Mathf.Max(1,Screen.height); _texture.graphicsFormat=format; _texture.Create();
+        _camera.targetTexture=_texture;
     }
     private static Mesh SourceMesh(Renderer renderer) => renderer is SkinnedMeshRenderer skin ? skin.sharedMesh : renderer.GetComponent<MeshFilter>()?.sharedMesh;
     private static bool Visual(Renderer renderer, string include)
@@ -241,7 +288,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 renderer.sharedMaterials = source.sharedMaterials.Select(BackdropMaterial).ToArray();
             else if (piece.Path.StartsWith(Mountains))
                 foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Mountain);
-            else if (piece.Path.Contains("barricade_military_decor_rocks"))
+            else if (piece.Path.Contains("barricade_military_decor_rocks") || piece.Path.Contains("coast_skirt_cliffs"))
                 foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Rubble);
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
@@ -406,9 +453,10 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_texture != null) { _texture.Release(); Destroy(_texture); }
         if (_groundMesh != null) Destroy(_groundMesh);
         if (_groundMaterial != null) Destroy(_groundMaterial);
-        if (_groundTexture != null) { _groundTexture.Release(); Destroy(_groundTexture); }
         foreach (var detail in _details) if (detail != null) { if (detail is RenderTexture rt) rt.Release(); Destroy(detail); }
         _details.Clear();
+        _gradedMaterials.Clear(); _gradedPaint.Clear();
+        _smokeMaterial = null;
         foreach (var handle in _assets.Values) if (handle.IsValid()) Addressables.Release(handle);
         if (_terrainAsset.IsValid()) Addressables.Release(_terrainAsset);
         if (_earthAsset.IsValid()) Addressables.Release(_earthAsset);
@@ -416,7 +464,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         _terrainAsset = default; _earthAsset = default; _rockAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
         ClearModels();
-        _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null; _groundTexture = null;
+        _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;
+        _nativeView = null; _nativePipeline = null; _nativeFormat = GraphicsFormat.None;
         _piece = 0; _rendered = false; _focus = null; _hover = null;
     }
 }

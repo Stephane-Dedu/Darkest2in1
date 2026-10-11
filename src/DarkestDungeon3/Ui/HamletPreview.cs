@@ -23,6 +23,9 @@ internal static class HamletPreview
     private static int _checkStep;
     private static float _nextCheck;
     private static bool _checked;
+    private static Vector2Int _checkResolution;
+    private static int _checkWidth;
+    private static float _resizeDeadline;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save, _save);
 
     private static bool Prefix()
@@ -135,10 +138,19 @@ internal static class HamletPreview
     {
         if (_checked || Event.current.type != EventType.Repaint || !CampaignAssets.Status.Ready || Time.unscaledTime < _nextCheck) return null;
         var stage = Dd2.HamletStage.Instance;
-        if (_checkStep < 25 || _checkStep is 28 or 29 or 30 or 35)
+        if (_checkStep < 25 || _checkStep is 28 or 29 or 30 || _checkStep>=35)
         {
             if (stage?.Failure != null) throw new InvalidOperationException(stage.Failure);
             if (stage?.Ready != true) return null;
+        }
+        if (_checkStep is 36 or 37)
+        {
+            int width=_checkStep==36?_checkWidth:_checkResolution.x;
+            if (Screen.width!=width || stage.Texture.width!=Screen.width || stage.Texture.height!=Screen.height)
+            {
+                if (Time.unscaledTime>_resizeDeadline) throw new InvalidOperationException("Hamlet render target did not follow the window resize.");
+                return null;
+            }
         }
         _nextCheck = Time.unscaledTime + 1.2f;
         if (_checkStep < 20 || _checkStep is 28 or 29)
@@ -152,7 +164,7 @@ internal static class HamletPreview
         if (_checkStep == 20) return new Event { type = EventType.ScrollWheel, delta = new Vector2(0, -3), mousePosition = new Vector2(800, 750) };
         if (_checkStep == 21) return new Event { type = EventType.MouseDrag, button = 2, delta = new Vector2(30, 20), mousePosition = new Vector2(800, 750) };
         if (_checkStep is 33 or 34) return new Event { type = _checkStep == 33 ? EventType.MouseDown : EventType.MouseUp, button = 0, mousePosition = new Vector2(175, 1030) };
-        if (_checkStep == 35) return new Event { type = EventType.Repaint, mousePosition = new Vector2(150, 930) };
+        if (_checkStep >= 35) return new Event { type = EventType.Repaint, mousePosition = new Vector2(150, 930) };
         Vector2 position = _checkStep < 24 ? new Vector2(1410, 132) : _checkStep < 28 ? HamletUi.TownModeButton.center : new Vector2(990, 1016);
         return new Event { type = _checkStep % 2 == 0 ? EventType.MouseDown : EventType.MouseUp, button = 0, mousePosition = position };
     }
@@ -186,8 +198,26 @@ internal static class HamletPreview
         else if (_checkStep == 35)
         {
             Require(stage.Ready && _embark == null, "Returned town did not load.");
-            _checked = true;
-            Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup and return to 3D town; no estate selected or saved");
+            _checkResolution=new Vector2Int(Screen.width,Screen.height);
+            _checkWidth=Screen.width==1440?1600:1440;
+            _resizeDeadline=Time.unscaledTime+10;
+            Screen.SetResolution(_checkWidth,Screen.height,false);
+        }
+        else if (_checkStep is 36 or 37)
+        {
+            Require(stage.Texture.width==Screen.width && stage.Texture.height==Screen.height,"Target does not match the window.");
+            foreach (string id in Dd2.HamletStage.Services) Require(stage.VisiblePoint(id).HasValue,"No clickable point after resize: "+id);
+            if (_checkStep==36)
+            {
+                Plugin.Log.LogInfo($"[hamlet 3d check] resized to {Screen.width}x{Screen.height}; all ten service bounds remain clickable");
+                _resizeDeadline=Time.unscaledTime+10;
+                Screen.SetResolution(_checkResolution.x,_checkResolution.y,false);
+            }
+            else
+            {
+                _checked = true;
+                Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup, return to 3D town and live resize/restore; no estate selected or saved");
+            }
         }
         _checkStep++;
     }

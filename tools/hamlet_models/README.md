@@ -135,3 +135,15 @@ Round221 exports `HamletPalette` alongside geometry so surface tints, brightness
 windows agree with the runtime settings. Soil samples native painted earth; cliffs use a larger rock-only
 strip. The Mountain has independent height/depth scales and a closer/larger position. `--name` selects
 the output PNG/Blender basename. Native shader math and terrain vertex shading remain approximate in Blender.
+
+Round223 adds winding Survivalist stairs, one shared civic ascent, low forecourt walls, four Valley leaf
+banks and two native outer cliff ledges. `LayoutExport` also writes the crop-corrected terrain UVs and updated
+palette. For a new private output directory, run the surface/rock exports above, then export
+`coast_skirt_cliffs_mdl_01.fbx` with `biome_coast_assets_all.bundle,biome_coast_models_platform_high_assets_all.bundle,biome_common_assets_all.bundle`
+to that directory's `exp/`. Use `--name hamlet-immersion-v05` for the current preview basename.
+The runtime bakes lifted paint once and uses three cliff tint bands; the Blender material approximates
+those colours. Four runtime chimney plumes are not part of the offline render or v02 model package.
+The native unsaved fixture now checks live resize/restore as well as all service/control/rollback routes.
+`measure_native.ps1 -HamletProcessId <owned-preview-pid> -Seconds 5` checks repeated URP allocations;
+the measured town must already be rendered. Current native evidence and packed preview are in
+`local-art/ui-overhaul/hamlet-immersion-v05/`. See `tools/hamlet_3d.md` for the HDR target fix and limits.

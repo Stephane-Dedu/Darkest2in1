@@ -41,7 +41,9 @@ public sealed class HamletTerrain
                 positions.Add(p.X); positions.Add(p.Y); positions.Add(p.Z);
                 float period = cliff ? 12 : 10;
                 uv.Add((cliff && Math.Abs(nx)>Math.Abs(nz) ? p.Z : p.X)/period);
-                uv.Add((cliff ? p.Y : p.Z)/period); shade.Add(light);
+                // A cropped atlas is rectangular paint. Preserve its texel aspect on square world coordinates.
+                float cropHeight = cliff ? HamletPalette.Rock.UvScale.Y : HamletPalette.Soil.UvScale.Y;
+                uv.Add((cliff ? p.Y : p.Z)/(period*cropHeight)); shade.Add(light);
             }
         }
         void Skirt(HamletLayout.Point a, HamletLayout.Point b)

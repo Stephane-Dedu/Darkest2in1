@@ -63,6 +63,19 @@ internal static class HamletGroundwork
                 walls.Block(site.X+x*c+front*s,site.Y-.6f,site.Z-x*s+front*c,1.95f,1.4f,.85f,site.Yaw);
             }
         }
+        // Low broken boundary walls frame the forecourt, with a gap at the town entrance.
+        foreach (var line in new[] { new[] { -51f,-17,-38,-20 },new[] { -25f,-24,-7,-26 },new[] { 3f,-26,24,-23 },new[] { 32f,-20,45,-13 } })
+        {
+            float dx=line[2]-line[0],dz=line[3]-line[1],length=Length(dx,dz),yaw=(float)Math.Atan2(dx,dz)*180/(float)Math.PI;
+            int courses=(int)Math.Ceiling(length/1.9f);
+            for (int i=0;i<courses;i++)
+            {
+                if (i%7==4) continue;
+                float t=(i+.5f)/courses,x=line[0]+dx*t,z=line[1]+dz*t;
+                float height=.9f+.35f*(float)Math.Sin(i*1.7f+line[0]);
+                walls.Block(x,HamletLayout.Height(x,z)+height/2,z,.8f,height,length/courses-.08f,yaw);
+            }
+        }
         paving=paths.Finish(); masonry=walls.Finish();
     }
     private static float Length(float x,float z)=>(float)Math.Sqrt(x*x+z*z);

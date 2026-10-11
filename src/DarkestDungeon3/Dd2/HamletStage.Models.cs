@@ -116,6 +116,7 @@ internal sealed partial class HamletStage
         group.SetParent(_root, false);
         var renderers = new List<Renderer>();
         var hitBounds = new List<Bounds>();
+        var chimneys = new List<Bounds>();
         foreach (var batch in model.Primitives.GroupBy(p => p.Material))
         {
             var vertices = new List<Vector3>(); var normals = new List<Vector3>(); var uv = new List<Vector2>(); var triangles = new List<int>();
@@ -136,6 +137,8 @@ internal sealed partial class HamletStage
                     uv.Add(primitive.Uv == null ? Vector2.zero : new Vector2(primitive.Uv[v * 2], primitive.Uv[v * 2 + 1]));
                 }
                 hitBounds.Add(bounds);
+                if (model.Nodes[primitive.Node].Name?.StartsWith("Chimney cap", StringComparison.Ordinal) == true)
+                    chimneys.Add(bounds);
                 bool mirror = matrix.determinant < 0;
                 for (int i = 0; i < primitive.Triangles.Length; i += 3)
                 {
@@ -166,6 +169,8 @@ internal sealed partial class HamletStage
         // Authoring Unity -> Blender -> glTF -> mirrored-X importer reverses X and Z. Restore the authored front.
         group.localRotation = Quaternion.Euler(0, 180 + site.Yaw, 0);
         group.localPosition = new Vector3(site.X, site.Y, site.Z);
+        foreach (var chimney in chimneys)
+            AddChimneySmoke(group,new Vector3(chimney.center.x,chimney.max.y,chimney.center.z)-shift);
         var building = new Building { Id = site.Id, Bounds = renderers[0].bounds };
         building.Renderers.AddRange(renderers);
         foreach (var renderer in renderers.Skip(1)) building.Bounds.Encapsulate(renderer.bounds);

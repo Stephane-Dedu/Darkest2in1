@@ -5438,3 +5438,60 @@ DD2 remains stopped. Keep Hamlet3D's defaultfalse/localtrue and Painted town rol
 camera, scenery placement and picking remain [?] until the unsaved Hamlet fixture can run. Do not launch
 any game before17:47:37 UTC /19:47:37 Paris; no launch is scheduled. Private v04 evidence, sources and
 packed scene are ready for review. Remaining art/RTHandle/saved-campaign acceptance is unchanged.
+
+## Round223 (2026-10-11): native Hamlet paint, coherent routes, atmosphere and stable HDR buffers
+
+Owner asked to keep iterating towards cleaner visuals and an immersive, coherent in-game Hamlet. The timed
+launch pause expired at17:47:37 UTC /19:47:37 Paris before testing. All native runs used the explicit unsaved
+Hamlet fixture with no estate path; no saved campaign was selected, read or modified.
+
+Native baseline established all ten service/Escape routes, controls, rollback/reload, Embark cleanup and
+return on the compact layout. Actual installed Environment paint remained too black despite round221's
+_COLOR_CONTROLS values. Grade now makes bounded owned texture copies during construction:512px terrain/rubble,
+1024px Mountain, cached by source/paint/crop. sRGB decoding, tint, luminance saturation, linear brightness
+and gamma encoding lift shadows while preserving paint. Texture CPU pixels are discarded after upload.
+Five Core cases cover neutral paint, lifted blacks/highlights and saturation/brightness. Shared game assets
+remain untouched; owned copies, materials and handles release on rollback.
+
+Rock crop grows24%->46% of the skull-free upper atlas. UVs now compensate for rectangular crop proportions;
+the previous square-world mapping stretched both earth and rocks. Three cliff material tint bands reproduce
+directional facet shading because native vertex colours are unused. Paving gets warmer/brighter paint.
+Survivalist stairs wind across the cliff; the graveyard shares the civic ascent, branching down to the
+Sanitarium. One added layout case caps stair grade at0.9 rise/run. Low broken forecourt walls bake into the
+existing masonry surface. Four native Valley leaf banks and two Coast cliff ledges soften the edges.
+Reviewed/exported native cliff geometry privately; use it as low ledges rather than stretching it over
+24 metres. Four owned particle systems add restrained smoke at the actual Tavern, Sanitarium and forge
+chimney caps, sharing one tiny texture/material. No native behaviours or gameplay systems are instantiated.
+
+Performance red loop: baseline1920x1080 LDR target against DD2's1600x900 native camera caused roughly480
+RTHandle reallocations/sec. Size-only probe halved that by stopping depth churn. Camera.main was null:
+the active Main Menu Camera is untagged. Finding that view and copying allowHDR alone still left roughly240
+colour reallocations/sec, because the target remained R8G8B8A8_SRGB. Read-only installed URP inspection
+confirmed its target descriptor chooses the render texture's format. Selecting the native HDR format through
+URP's own format selector produces B10G11R11_UFloatPack32 and zero repeated allocations in the final five-second
+probes. Native camera/format lookup is cached and render targets follow live window resizing. Temporary
+camera diagnostics were removed. The reproducible measure_native.ps1 rejects non-preview PIDs and requires
+the3D town to have rendered before counting; an early pre-render zero probe was discarded.
+
+Final native build:128 mesh renderers,4 small chimney systems,10 service models/101646 source triangles.
+The extended unsaved fixture passes ten real world clicks/Escape, pan/zoom/reset, painted rollback/all
+resource release, reload/re-entry click, Embark/stage cleanup, return, then1600x900->1440x900->1600x900.
+All ten service bounds remain clickable at both sizes. Captures reviewed; no logged exceptions/warnings.
+Final accepted probe records0 allocations over5.01 seconds. This is buffer stability, not an FPS or
+long-session memory claim. NPC idles, exterior variants, sculpture/trim and saved transactions remain.
+
+Validation: Release passes with the same three unrelated warnings; all1036 Core+182 UI pass. After the
+final UV change, all31 Hamlet cases pass. Both Python tools compile; final offline1920x1080 preview and
+packed scene render successfully. Private evidence:local-art/ui-overhaul/hamlet-immersion-v05/; accepted-native.png,
+accepted-native.log, accepted-player.log, accepted-allocations.json, composition.json, layout.json and packed
+hamlet-immersion-v05.blend. Pre-final plugin backup:hamlet-immersion-v05-plugin/20261011-222012.zip.
+Both DLLs/PDBs match deployed SHA256 hashes. Owned QA PID64716 closed; DD2 stopped. Hamlet3D stays defaultfalse,
+localtrue with immediate Painted town rollback. Independent Expedition Map3D/Shieldbreaker edits and round222
+notes remain outside this commit. No game assets or decompiled code are committed.
+
+## Status 2026-10-11: round223 Hamlet installed and native presentation checks pass
+
+Continue from tools/hamlet_3d.md and the private v05 evidence. The owner's timed launch pause has expired.
+Native service/camera/resource/resize checks and repeated-buffer stability are established. Preserve protected
+estates, the feature flag/painted fallback and other agents' dirty files. Saved-campaign acceptance and remaining
+art work are listed separately; the QA process is closed.

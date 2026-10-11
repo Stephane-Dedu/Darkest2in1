@@ -25,7 +25,10 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("barricade_military_decor_rocks_01",-44,-.25f,5,7,25),
         Scenery("barricade_military_decor_rocks_02",-25,-.35f,16,4,-20),
         Scenery("barricade_military_decor_rocks_03",34,-.3f,12,6,15),
-        Scenery("barricade_military_decor_rocks_02",40,-.25f,25,8,-40)
+        Scenery("barricade_military_decor_rocks_02",40,-.25f,25,8,-40),
+        Scenery("valley_tile_09",-46,-.25f,-10,9,20),Scenery("valley_tile_09",-16,-.2f,-14,7,-10),
+        Scenery("valley_tile_09",43,-.25f,10,7,65),Scenery("valley_tile_09",-1,-.2f,41,6,15),
+        Scenery("coast_skirt_cliffs_mdl_01",-59,-2,-7,15,15),Scenery("coast_skirt_cliffs_mdl_01",49,-1,25,18,-25)
     }
 },new JsonSerializerOptions { IncludeFields=true }));
 Console.WriteLine($"{path}: {terrain.Positions.Length/3:N0} terrain vertices, {terrain.Rock.Length/3:N0} rock faces");

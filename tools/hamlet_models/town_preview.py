@@ -122,7 +122,7 @@ def main(args):
         pivot=np.eye(4); pivot[:3,3]=[piece['X'],piece['Y'],piece['Z']]
         placement=pivot@deform@np.linalg.inv(pivot)@placement
         objects,_,_=L.build(folder,placement)
-        if piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith('barricade_military_decor_rocks'):
+        if piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith(('barricade_military_decor_rocks','coast_skirt_cliffs')):
             paint=palette['Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
             for obj in objects:
                 for slot in obj.material_slots:
