@@ -91,8 +91,9 @@ internal sealed partial class EmbarkUi
             if (areas.Count > 0 && (!_mapAreas.TryGetValue(location, out var selected) || !areas.Contains(selected)))
                 _mapAreas[location] = areas[0];
         }
-        if (paintedMap != null) DrawPaintedMap(paintedMap);
-        else
+        bool map3d = DrawMap3DBackground();   // the experimental pre-rendered map; false keeps the painted one
+        if (!map3d && paintedMap != null) DrawPaintedMap(paintedMap);
+        else if (!map3d)
         {
             var bg = Qs("quest_select.background.png");
             if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg);
@@ -100,18 +101,24 @@ internal sealed partial class EmbarkUi
         }
         ExpeditionSkin.Text(new Rect(104, 64, 440, 56), "Choose a quest", 44, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
 
+        DrawMapModeSwitch();
+
         // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
         var spots = paintedMap != null ? PaintedMapSpots : MapSpots();
-        foreach (var location in CampaignRegions.Legacy)
+        if (map3d) DrawMap3DRegions();
+        else
         {
-            var areas = CampaignRegions.AtLocation(E, location);
-            if (areas.Count == 0 || !spots.TryGetValue(location, out var pos)) continue;
-            if (!_mapAreas.TryGetValue(location, out var zone) || !areas.Contains(zone))
-                _mapAreas[location] = zone = areas[0];
-            DrawDungeon(zone, pos, areas);
+            foreach (var location in CampaignRegions.Legacy)
+            {
+                var areas = CampaignRegions.AtLocation(E, location);
+                if (areas.Count == 0 || !spots.TryGetValue(location, out var pos)) continue;
+                if (!_mapAreas.TryGetValue(location, out var zone) || !areas.Contains(zone))
+                    _mapAreas[location] = zone = areas[0];
+                DrawDungeon(zone, pos, areas);
+            }
+            if ((_expeditionStyle || E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon)) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
+                DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
         }
-        if ((_expeditionStyle || E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon)) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
-            DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
 
         if (_quest != null) DrawQuestScroll(_quest); else DrawEmptyQuestPanel();
 
