@@ -23,6 +23,7 @@ internal sealed class HamletUi
     private readonly ActivityLogUi _activityLog = new();
 
     public bool WantsEmbark;
+    internal string PreviewBuilding => _panel == Panel.Town ? null : _building;
 
     private static Session S => Session.Current;
     private static Estate E => S.Save.Estate;
@@ -185,6 +186,7 @@ internal sealed class HamletUi
 
     private void DrawTown(bool interactive)
     {
+        if (HamletArt.Ready) { DrawHybridTown(interactive); return; }
         Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
         // DD1's display state: after a Darkest Dungeon part or during some town events the sky changes.
         string sky = S.Campaign.TownRender.Background(E.LastReturnPlotId, E.TownEventId);
@@ -229,6 +231,35 @@ internal sealed class HamletUi
                 Event.current.Use();
                 Open(hovered);
             }
+        }
+    }
+
+    private void DrawHybridTown(bool interactive)
+    {
+        var pack = HamletArt.Pack;
+        GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), Art.Png(pack.Background));
+        var mouse = Event.current.mousePosition;
+        // Quick navigation owns these pixels even where a painted building lies behind it.
+        bool overNav = NavOrder.Select((_, i) => new Rect(NavX - 28, NavY + i * NavSpacing - 5, 56, 61)).Any(r => r.Contains(mouse));
+        bool canHit = interactive && GUI.enabled && !_exchangeOpen && !overNav && mouse.x < RosterX && mouse.y < BarY;
+        var hovered = canHit ? pack.Hit(mouse.x, mouse.y) : null;
+        _hovered = hovered?.Id;
+        foreach (var building in pack.Buildings)
+            if (!IsOpen(building.Id)) HamletArt.Feedback(building, new Color(.02f, .025f, .035f, .65f));
+        if (hovered == null) return;
+        HamletArt.Feedback(hovered, new Color(1f, .88f, .62f, .10f));
+        HamletArt.Feedback(hovered, IsOpen(hovered.Id) ? ExpeditionSkin.Brass : ExpeditionSkin.Muted, outline: true);
+        float x = Mathf.Clamp(hovered.X + hovered.Width / 2f, 280, RosterX - 220);
+        float y = Mathf.Max(150, hovered.Y - 18);
+        ExpeditionSkin.Banner(new Rect(x - 180, y - 36, 360, 64), ExpeditionSkin.Ivory);
+        ExpeditionSkin.OutlinedHeading(new Rect(x - 175, y - 31, 350, 52), Name(hovered.Id), 30,
+            IsOpen(hovered.Id) ? ExpeditionSkin.Ivory : ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
+        if (!IsOpen(hovered.Id))
+            ExpeditionSkin.OutlinedHeading(new Rect(x - 190, y + 27, 380, 32), "Not yet restored", 21, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
+        if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
+        {
+            Event.current.Use();
+            Open(hovered.Id);
         }
     }
 
@@ -278,6 +309,13 @@ internal sealed class HamletUi
 
     private void DrawEstateTitle()
     {
+        if (HamletArt.Ready)
+        {
+            ExpeditionSkin.Banner(new Rect(110, 30, 650, 106), ExpeditionSkin.Ivory);
+            ExpeditionSkin.OutlinedHeading(new Rect(160, 44, 550, 52), E.Name, 40, ExpeditionSkin.Ivory);
+            ExpeditionSkin.Text(new Rect(162, 96, 530, 32), $"Week {E.Week + 1}", 22, ExpeditionSkin.Brass);
+            return;
+        }
         var plate = Art.Dd1("campaign", "town", "estate_title", "estate_nameplate.png");
         if (plate != null) GUI.DrawTexture(new Rect(0, 0, 893, 281), plate);
         Gui.Text(new Rect(286, 70 - 30, 560, 56), E.Name, 44, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
@@ -389,12 +427,19 @@ internal sealed class HamletUi
         if (E.TownEventId != null)
             NavButton(1580, EventArt("town_event.icon.png"), "The week's event", false, () => _eventSeenWeek = -1);
 
-        var embark = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
-        var er = new Rect(754, 871, 412, 113);
-        if (embark != null) GUI.DrawTexture(er, embark);
-        bool hover = er.Contains(Event.current.mousePosition);
-        Gui.Text(er, "Embark", 44, hover ? Color.white : Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        if (Gui.Hotspot(er)) WantsEmbark = true;
+        if (HamletArt.Ready)
+        {
+            if (ExpeditionSkin.Button(new Rect(810, 978, 360, 76), "Embark", size: 38)) WantsEmbark = true;
+        }
+        else
+        {
+            var embark = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
+            var er = new Rect(754, 871, 412, 113);
+            if (embark != null) GUI.DrawTexture(er, embark);
+            bool hover = er.Contains(Event.current.mousePosition);
+            Gui.Text(er, "Embark", 44, hover ? Color.white : Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            if (Gui.Hotspot(er)) WantsEmbark = true;
+        }
 
         // Ours, not DD1's: the DD2 regions option and the way back to DD2's menu, small at the bar's left end.
         var regionsButton = new Rect(14, BarY + 22, 110, 34);

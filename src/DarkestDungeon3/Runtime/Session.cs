@@ -40,13 +40,14 @@ internal sealed class Session
     public Dd1Trinkets MemoryTrinkets;
     public Core.Dd2Data.Dd2Tables Dd2Data;
     public TownLayout TownLayout;
+    public TownArtPack TownArt;
 
     private readonly CampaignSaveSlot _slot = new();
     public SaveFile Save { get => _slot.Save; set => _slot.Save = value; }
     public string SavePath => _slot.Path;
 
     /// <summary>Start loading DD1 content in the background. Safe to call more than once.</summary>
-    public static void BeginLoad(string configuredDd1Path, string pluginDir, string streamingAssetsPath)
+    public static void BeginLoad(string configuredDd1Path, string pluginDir, string streamingAssetsPath, string hamletArtPath = null)
     {
         if (IsLoading || Current != null) return;
         Volatile.Write(ref _loadError, null);
@@ -84,6 +85,8 @@ internal sealed class Session
                 s.Dd2Data = Core.Dd2Data.Dd2Tables.Load(Path.Combine(streamingAssetsPath, "Excel"));
                 Stage(9, "Reading the town layout");
                 s.TownLayout = TownLayout.Load(dd1);
+                try { s.TownArt = TownArtPack.Load(hamletArtPath); }
+                catch (Exception e) { Plugin.Log.LogWarning("[hamlet art] Private pack rejected; using DD1 town: " + e.Message); }
                 Volatile.Write(ref _current, s);
                 Stage(10, "Campaign data ready");
                 Plugin.Log.LogInfo($"[session] DD1 content loaded from {dd1.Root}: {s.Campaign.MapGen.All.Count} map configs, " +

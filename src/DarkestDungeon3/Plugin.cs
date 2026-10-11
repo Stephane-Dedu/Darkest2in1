@@ -21,6 +21,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> Dd1Path;
     internal static ConfigEntry<string> NativeRoomSceneryPath;
     internal static ConfigEntry<string> ExpeditionArtPath;
+    internal static ConfigEntry<string> HamletArtPath;
     internal static ConfigEntry<bool> DebugKeysEnabled;
     internal static ConfigEntry<string> ExportedBossModel;
     internal static ConfigEntry<Runtime.Art.LargeArt> HeroArt;
@@ -48,6 +49,8 @@ public class Plugin : BaseUnityPlugin
             "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery.");
         ExpeditionArtPath = Config.Bind("Paths", "ExpeditionArtFolder", Path.Combine(Paths.GameRootPath, "PrivateExpeditionArt"),
             "Optional private expedition selector artwork. Contains map.png, regional overlays and preview images. Empty or missing map.png retains the DD1 selector.");
+        HamletArtPath = Config.Bind("Paths", "HamletArtFolder", Path.Combine(Paths.GameRootPath, "PrivateHamletArt"),
+            "Optional private Hamlet scene and visible building masks, prepared with tools/prepare_hamlet_art.py. Empty, missing or invalid packs retain the installed DD1 town.");
         HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),
             "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
@@ -98,7 +101,7 @@ public class Plugin : BaseUnityPlugin
             host.AddComponent<Dd2.ExportedBoss>();   // F1: the exported-model test fight
         }
 
-        Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location), Application.streamingAssetsPath);
+        Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location), Application.streamingAssetsPath, HamletArtPath.Value);
         Log.LogInfo($"{Name} {Version} loaded");
     }
 }

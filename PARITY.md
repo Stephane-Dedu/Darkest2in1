@@ -1,5 +1,8 @@
 # Campaign parity and refactor checklist
 
+- [x] Round214 private Hamlet v05 integration: clean DD1/DD2 hillside plate, all ten services mapped through cropped visible-alpha masks, depth-aware picking, locked tint/hover feedback, native DD2 estate/name banners and footer Embark. Native1600x900 unsaved checks clicked/closed every service and pressed the actual footer button into the approved quest selector. All995 Core+182 UI tests pass; Release deployed and normal launch restored. Private artwork stays outside Git; workflow: tools/hamlet_art.md.
+- [?] Round214 art variants/acceptance: v05 has one unlocked exterior per building, with dimmed locked buildings. Distinct upgrade-level exteriors and plot/event sky paintings remain missing. Native locked-state appearance, all service transactions and a real saved-campaign embark were not exercised by the unsaved visual fixture; existing rules/dispatch are retained.
+
 - [user] Owner idea 2026-10-11: a true perspective 3D Hamlet using DD2 road encounters. Local kit verifies Hoarder, Field Hospital and inn model assemblies; existing Hamlet service dispatch can be retained. Another agent owns the current Hamlet overhaul. This feasibility check does not replace its work or establish native runtime acceptance. Proposed two-location proof and constraints: tools/hamlet_3d_feasibility.md.
 
 - [x] Round188 native icon methods/pool: installed inv_trinket+ID.png is bound to a separate default icon prefab clone. Native estate2 confirms both definition/instance overloads agree, loaded=True, appearance0/1 retain the DD1 sprite, recycle/re-spawn works and original default sprites stay unchanged. All917 Core/131 UI tests and normal Release pass; saves/source restored/hash matched and normal DLLs deployed.

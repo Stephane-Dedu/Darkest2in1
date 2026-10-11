@@ -27,6 +27,7 @@ internal static class Art
 
     public static void PrepareTown(Dd1Install dd1)
     {
+        HamletArt.Prepare();
         foreach (string relative in PngPreloader.InitialTownImages)
         {
             string path = dd1.PathOf(relative.Split('/'));
@@ -43,7 +44,7 @@ internal static class Art
     }
     public static int PreparedImages => PreparedPaths.Count(ImageFinished);
     public static int RequestedImages => PreparedPaths.Count;
-    private static bool ImageFinished(string path) => Cache.ContainsKey(path)
+    internal static bool ImageFinished(string path) => Cache.ContainsKey(path)
         || (TownImages.TryGet(path, out _, out bool finished) && finished);
 
     // ---- town ----

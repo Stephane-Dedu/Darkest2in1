@@ -5029,3 +5029,48 @@ perspective stage is feasible in principle; renderer/material/fog dependencies, 
 missing buildings and repeated loading/cleanup still need an isolated runtime proof. This is an owner proposal,
 not authorization to replace the other agent's work. Details, source paths and official Unity references:
 tools/hamlet_3d_feasibility.md. No code, game process, private assets or campaign saves changed.
+
+## Round214 (2026-10-11): implement approved private Hamlet hillside v05
+
+Owner explicitly requested implementation of the completed Hamlet art. Retained the recognizable DD1 hillside,
+the DD2 native model/texture renders and painted abbey/guild/forge/asylum/coach/shop/camp cutouts. Installed only
+the clean scene; the mock UI and labelled art are review images. All derived art remains outside Git/releases.
+`tools/prepare_hamlet_art.py` packages the approved plate and ten cropped visible masks to the active game's
+`PrivateHamletArt`. `Paths.HamletArtFolder` selects the private pack; empty/missing/invalid packs retain DD1.
+Workflow/manifest details and limits are in `tools/hamlet_art.md`.
+
+Session reads the manifest and CPU masks on its data worker. The existing torch PNG queue also warms all21
+private textures (plate plus10 tint/outline pairs), one upload per frame. Native logs:33 PNGs/18 DD1 fallback
+renders/13 heroes ready in4.72s on the visual preview and4.88s on the interaction check. Validation requires all
+ten service IDs, matching mask dimensions and canvas, files within the private pack and valid native texture
+sizes; a partial pack cannot leave mismatched scenery/hotspots. Picking uses top-down visible alpha and reverse
+depth, including transparent holes. Quick-nav, roster/footer, modals, trinket overlay and heirloom exchange own
+their covered pixels. Locked buildings dim and keep the original unlock dispatch; services/rules are unchanged.
+Estate title and hover labels reuse the installed DD2 fonts/banner sprites already used by the expedition HUD.
+Embark moves into the bottom bar so it no longer covers the Nomad Wagon/memorial. Main menu/quest HUD work is
+preserved; the existing Shieldbreaker source/tools/test changes are outside this round's commit.
+
+Added explicit `-dd3-hamlet-preview` fixture: transient campaign, no estate path selected, persistence suppressed
+only for the owned object, real game embark blocked by the existing expedition preview. An additional
+`-dd3-hamlet-check` dispatches IMGUI events inside that overlay, without OS input/focusing the owner's desktop.
+Native1600x900 logs verified visible-mask clicks and Escape closes for camping_trainer, abbey, graveyard,
+sanitarium, guild, tavern, statue, nomad_wagon, stage_coach and blacksmith, then the actual footer mouse-down/up
+opened the approved quest selector. Private evidence: `local-art/ui-overhaul/hamlet-native-v05/town.png`,
+`service-check.png`, `native-check.log`; pre-change DLL/config backup is its `plugin-before/` directory.
+The isolated interaction run logged no Hamlet exceptions. Earlier visual-preview session ended after manual
+menu use and a native IMainInstaller shutdown exception; no conclusion about its cause is established. Agent
+tools did not select/read/write campaign saves; only synthetic in-memory campaigns were used for these checks.
+
+All995 Core+182 UI tests pass. Sixteen added Core cases cover alpha holes/top-down orientation/edge coordinates,
+foreground ordering, missing packs, partial/duplicate/unknown service mappings, invalid dimensions/masks and
+paths outside the pack. Release build/deploy passed with3 existing warnings; source/deployed DLLs match.
+Native locked appearance, service transactions, saved-campaign embark and other window sizes remain [?].
+The current exterior is static v05 for unlocked buildings: upgrade-level exteriors and special plot/event sky
+paintings need an art pass. No town-event, upgrade or save rules were changed.
+
+## Status 2026-10-11: round214 deployed; normal DD2 launch restored
+
+Owned check PID62904 was closed after verification; DD2 PID58852 was launched normally at1600x900, without
+either Hamlet QA flag, and reached MAIN_MENU with the normal Hamlet button. No campaign picker was opened
+by agent tools. Keep protected estates1/3 off limits. The private pack is installed in the active
+`C:\Users\Piral\darkestwithdlc\game\PrivateHamletArt`, not the older retained game directory.
