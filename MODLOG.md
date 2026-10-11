@@ -5341,3 +5341,52 @@ releases the full stage immediately. Ten models and the hillside are installed, 
 PASS and partial second framing run as described above. Coarse Ancestor/trim, upgrades/events/NPC animation,
 saved-campaign transaction acceptance, final bright-terrain overview and native render-target churn remain.
 Independent Expedition Map3D, Shieldbreaker and corridor work was preserved outside the Hamlet commit.
+
+## Round220 (2026-10-11): compact DD1 cliff landscape for the 3D Hamlet
+
+Owner request: modify terrain/landscape to match DD1's verticality and map size. Read the installed
+DD1 reference kit's native layout and assembled level03 Hamlet. Repositioned the ten sites around its
+asymmetric composition: high left Survivalist cliff, Tavern/coach below, Sanitarium behind Tavern,
+graveyard below the upper Abbey, Guild above the right forge, and statue/wagon in the low square.
+Service foundations now span 24.5 world units vertically. The bounded ground shrinks from 300x300 to
+124x105 (about 86% less area), and service centre depth from64 to53. The Abbey and Sanitarium are larger
+landmarks. A lower, more frontal camera leaves room for the roster and footer.
+
+HamletLayout separates explicit service elevations, rotated rectangular model footprints and a connected
+road network. Height keeps foundations/doors grounded, carves approaches through uneven civic shelves,
+and forms the steep left cliff and foreground cut. HamletTerrain bakes faceted soil/rock, directional
+rock UVs and closed skirts. HamletGroundwork bakes ragged lanes, a small irregular square, level stair
+treads and retaining courses into two surfaces. All geometry is computed on the existing model worker;
+Unity uploads three owned meshes/four material draws rather than creating individual stair objects.
+
+Installed DD2 forest_ground_distance soil, cultist_barricade_rocks paint and foundation cobbles distinguish
+earth, exposed cliffs and paths. Exact material paths are present in the active Addressables catalogue.
+Repeatable GPU texture copies preserve shared native resources. All new handles/render textures release
+on rollback. Native trees/bushes and camp props follow the revised ground; two unrelated background inns
+are removed. Enlarged native sky covers the frontal camera. The v02 building package itself is unchanged.
+Look.Hamlet3D and immediate Painted town rollback remain; local Hamlet3D=true is retained, default false.
+
+LayoutExport exports actual Core terrain, paving/masonry and camera to a private JSON. prepare_landscape.py
+extracts three installed material textures with provenance. town_preview.py verifies all ten v02 GLB hashes,
+places them and native scenery, renders1920x1080 and saves a packed Blender scene. Reviewed successive
+renders against DD1: removed the broad continuous stone plateau, separated soil from paving, enlarged the
+two civic landmarks, raised the left cliff above the Abbey shelf and fixed the sky's visible upper edges.
+The final projected bounds for all ten buildings fit the town viewport; all referenced scenery exists.
+This preview establishes geometry/composition, not DD2 shader/lighting or picking acceptance.
+
+Validation: Release and all1030 Core +182 UI tests pass. Five final focused cases pass after the last
+height/camera adjustments: DD1 relative placement/compact size, level rotated footprint corners, all
+doors grounded and connected, and finite/nondegenerate terrain, stair and retaining meshes. Python syntax
+passes. Final terrain has80,868 vertices and3720 exposed-rock triangles including skirts. Backed up the
+installed plugin as universal-modder hamlet-landscape-v03-plugin, checked DD2 stopped, deployed, and
+verified DLL/PDB SHA256 equality. No game was launched or estate read/saved, including after the owner's
+30-minute pause elapsed. Other agents' dirty Expedition Map3D and Shieldbreaker work remains outside this commit.
+
+## Status 2026-10-11: round220 compact landscape deployed; native acceptance pending
+
+DD2 remains stopped. Private preview, actual geometry, surface provenance and packed scene are under
+local-art/ui-overhaul/hamlet-landscape-v03/. Read tools/hamlet_3d.md and tools/hamlet_models/README.md
+for the source seams and offline workflow. Repeat the unsaved Hamlet fixture for the new positions,
+lighting/picking, rollback/resource release, Embark and return; the old native round219 PASS applies only
+to its older landscape. Native frame time/URP render-target churn, Ancestor/individual trim, upgrades/events
+and saved-campaign transaction acceptance remain. No new launch or normal session was restored this round.

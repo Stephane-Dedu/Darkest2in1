@@ -21,11 +21,21 @@ one service per frame. Node transforms and painted base/emission factors survive
 by material and two-sided cloth retains back faces. Every uploaded texture, mesh and material is owned by the
 stage and released on rollback. No native shop behaviours or campaign save paths are instantiated.
 
-`Core/Presentation/HamletLayout` places the coach and market below the workshops, then Guild and Abbey on
-higher terraces. The hillside rises 15 world units with level building foundations. A curved road and separate
-approaches follow that surface, with downhill retaining walls and stone steps. A higher three-quarter camera,
-native Valley trees/rocks, camp props and mountain/sky assets provide depth. The loaded road plates supply a
-material and are hidden once the terrain is ready. No extracted game art is committed.
+Round220 reshapes `Core/Presentation/HamletLayout` around the installed DD1 Hamlet layout and assembled
+level03 art. The Survivalist stands on a high left cliff, the Sanitarium behind the Tavern, the graveyard
+below the Abbey, and the Guild above the right-hand forge. Coach, statue and wagon occupy the lower square.
+Service foundations span 24.5 world units vertically. The bounded landscape is 124x105 rather than 300x300;
+service centres span 53 units in depth rather than 64. Larger Abbey/Sanitarium footprints restore their
+landmark roles. A lower, more frontal perspective retains space for the right roster and footer.
+
+`HamletTerrain` bakes faceted soil and rock faces, closed edge skirts, lanes, stair treads, the irregular
+square and retaining courses on the model-loading worker. All ten foundations use rotated rectangular
+pads sized from v02 model bounds; doors connect to one road network. `HamletGroundwork` combines paving
+and masonry before Unity upload, avoiding per-tread objects/renderers. Native forest soil, cultist rock
+paint and foundation cobbles distinguish landscape from paths. Their texture copies repeat without
+changing shared native resources, and their handles/textures release with rollback. Valley scenery and
+camp props follow the new ground; the enlarged native sky covers the more frontal camera. The loaded road
+plates supply a material and are hidden once the terrain is ready. No extracted game art is committed.
 
 World picking selects the nearest original primitive bounds and calls the existing `HamletUi.Open` dispatch.
 Picking keeps those smaller bounds even when material batching combines a whole building into a few renderers.
@@ -47,6 +57,15 @@ universal-modder backup store. The first native run passed the complete check. A
 framing pass then passed all ten clicks, controls, rollback, reload and Embark cleanup. The owner stopped
 launches for 30 minutes before its final return-to-town check. The QA process was closed; DD2 was not relaunched.
 Do not launch before 2026-10-11 16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction.
+
+Round220 was checked entirely offline, including after that pause elapsed. Release and all 1030 Core +
+182 UI tests pass; five layout/geometry cases check grounded rotated footprints/doors, connected paths,
+compact extent, relative building elevations and finite nondegenerate terrain/stair/wall meshes.
+`tools/hamlet_models/LayoutExport` writes the actual Core geometry and camera for `town_preview.py` to
+render with the ten hash-verified GLBs. Private evidence: `local-art/ui-overhaul/hamlet-landscape-v03/`.
+The 1920x1080 preview and packed Blender document establish composition, not native lighting, picking,
+frame time or saved-campaign acceptance. Repeat the unsaved native fixture for the new layout when testing
+resumes. Prior round219 native results apply to its older terrain. Immediate Painted town rollback remains.
 
 NPC idles, upgrade/event exteriors, the coarse Ancestor sculpt, individual trim painting and final lighting
 still need art work. Player.log also repeats URP RTHandle reallocations while the staged and native cameras

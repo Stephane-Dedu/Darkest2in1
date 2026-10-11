@@ -106,3 +106,26 @@ Shieldbreaker pipelines are untouched.
 
 Additional public visual reference: [Red Hook's DD1 media gallery](https://www.darkestdungeon.com/darkest-dungeon/media/).
 Building-specific shape decisions above come from the installed art, not from third-party reconstructions.
+
+## Preview the compact DD1 landscape without launching a game
+
+Round220's town layout and terrain live in Core. `LayoutExport` exports their actual geometry, including
+the paths, stairs and masonry used by Unity. `prepare_landscape.py` reads three surface textures from the
+owner's installed common/Valley bundles. `town_preview.py` checks all ten v02 GLB hashes and places them
+at those same sites, with the same perspective camera. This is an offline composition check: Blender
+does not reproduce DD2's shaders, lighting, picking or UI. Its surrounding scenery table mirrors the
+stage; update it when changing the stage's props. Native sky/trees use the existing private kit exports.
+
+From the repository, using the path variables above:
+
+```powershell
+$hamletLandscape = 'C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\hamlet-landscape-v03'
+& $hamletPython tools/hamlet_models/prepare_landscape.py --game 'C:\Users\Piral\darkestwithdlc\game' --out $hamletLandscape
+dotnet run --project tools/hamlet_models/LayoutExport -c Release -- "$hamletLandscape/layout.json"
+& $hamletBlender --background --factory-startup --threads 8 --python-exit-code 1 --python tools/hamlet_models/town_preview.py -- --models $hamletOutput --kit $hamletKit --layout "$hamletLandscape/layout.json" --out $hamletLandscape --blend
+```
+
+Outputs: `hamlet-landscape-v03.png`, packed `hamlet-landscape-v03.blend`, `layout.json`, projected service
+bounds in `composition.json`, and private native surface provenance in `ground-source.json`. Terrain
+geometry, game textures and packed documents all stay outside Git. The guide at `tools/hamlet_3d.md`
+records the runtime deployment and which acceptance checks remain.

@@ -4,6 +4,16 @@ Owner launch pause, 2026-10-11: no game launches for 30 minutes from 16:26:44 UT
 16:56:44 UTC / 18:56:44 Paris unless the owner changes that instruction. The owned Hamlet QA process was closed.
 Continue offline work during the pause. Do not restore a normal game process until launches are allowed.
 
+Round220 (2026-10-11) supersedes the round219 terrain: compact DD1 building placement, a high left Survivalist
+cliff, upper Abbey/graveyard and small low square. Core HamletTerrain/HamletGroundwork bake the same soil,
+rock, paths, stairs and masonry for Unity and offline Blender preview; see tools/hamlet_3d.md before changing
+the stage. Private preview/packed scene: local-art/ui-overhaul/hamlet-landscape-v03. All1030 Core+182 UI and
+Release pass; five final geometry/layout checks pass. Deployed with DD2 stopped and local Hamlet3D=true
+retained. No game was launched or estate read/saved in this round, including after the timed pause elapsed.
+New native layout/lighting/picking/performance acceptance remains [?]; use the unsaved Hamlet fixture.
+Keep the painted rollback and independent Expedition Map3D/Shieldbreaker dirty files. Pre-change plugin
+backup is universal-modder hamlet-landscape-v03-plugin. Source feature default remains false.
+
 Current owner direction (2026-10-04): DD2 regions are the primary campaign areas; DD1 regions stay optional through
 region toggles. Keep DD1 systems and native DD2 combat. Choose art/transitions for coherence and responsiveness;
 preserve campaign progress. CLAUDE.md is authoritative for this direction and the latest launch permission.

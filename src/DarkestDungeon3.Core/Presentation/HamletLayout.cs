@@ -1,52 +1,112 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DarkestDungeon3.Core.Presentation;
 
-/// <summary>Service placement and a terraced hillside, shared by terrain, paths and building foundations.</summary>
+/// <summary>Compact DD1 composition: left cliff, low square and an upper Abbey/graveyard shelf.</summary>
 public static class HamletLayout
 {
+    public readonly struct Point
+    {
+        public readonly float X, Y, Z;
+        public Point(float x, float y, float z) { X = x; Y = y; Z = z; }
+    }
     public sealed class Site
     {
         public readonly string Id;
-        public readonly float X, Z, Width, Yaw;
-        public float Y => Hill(X, Z);
-        public Site(string id, float x, float z, float width, float yaw = 0)
-        { Id = id; X = x; Z = z; Width = width; Yaw = yaw; }
+        public readonly float X, Y, Z, Width, Yaw, FootprintWidth, FootprintDepth;
+        public Site(string id, float x, float y, float z, float width, float yaw = 0, float footprintWidth = 1, float footprintDepth = 1)
+        { Id = id; X = x; Y = y; Z = z; Width = width; Yaw = yaw; FootprintWidth = width * footprintWidth; FootprintDepth = width * footprintDepth; }
+        public Point Entrance
+        {
+            get
+            {
+                float angle = Yaw * (float)Math.PI / 180, distance = FootprintDepth / 2 + .8f;
+                return new Point(X - (float)Math.Sin(angle) * distance, Y, Z - (float)Math.Cos(angle) * distance);
+            }
+        }
+    }
+    public sealed class Route
+    {
+        public readonly string Id;
+        public readonly float Width;
+        public readonly Point[] Points;
+        public Route(string id, float width, params Point[] points) { Id = id; Width = width; Points = points; }
     }
 
+    public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 40;
+    public static readonly Point CameraTarget = new(14, 10, 15), CameraOffset = new(4, 33, -108);
+    // Footprint ratios come from the authored v02 bounds. Rectangular pads allow a compact town without buried corners.
     public static readonly IReadOnlyList<Site> Sites = new[]
     {
-        new Site("stage_coach", -24, -1, 12, 12),
-        new Site("nomad_wagon", 14, 1, 12, -12),
-        new Site("statue", -4, 9, 5.5f),
-        new Site("camping_trainer", -41, 11, 12, 15),
-        new Site("blacksmith", -11, 23, 13, 5),
-        new Site("tavern", -31, 32, 17, 12),
-        new Site("sanitarium", 25, 24, 13, -14),
-        new Site("guild", 9, 47, 13, -8),
-        new Site("abbey", -16, 63, 15, 8),
-        new Site("graveyard", 33, 61, 13, -12),
+        new Site("stage_coach", -34, -.5f, -9, 11, 12, 1, .43f),
+        new Site("tavern", -28, 1, 5, 18, 6, 1, .74f),
+        new Site("camping_trainer", -45, 24, 24, 12, 8, 1, .84f),
+        new Site("sanitarium", -13, 8, 26, 18, 2, .95f),
+        new Site("graveyard", 2, 12.5f, 24, 10, 0, .93f),
+        new Site("abbey", 10, 17, 43, 24, 0, .64f),
+        new Site("guild", 27, 6, 22, 14, -4, 1, .83f),
+        new Site("blacksmith", 35, 0, -1, 15, -8, 1, .82f),
+        new Site("statue", 0, 0, -5, 4.5f, 0, 1, .89f),
+        new Site("nomad_wagon", 13, 0, -10, 10, -5, .91f),
+    };
+    private static Point Door(string id) => Sites.First(s => s.Id == id).Entrance;
+    public static readonly IReadOnlyList<Route> Routes = new[]
+    {
+        new Route("main", 3.8f, new(-32,-1,-23), new(-25,0,-12), new(-8,0,0), new(2,0,4),
+            new(9,4,12), new(9,9,18), new(8,12.5f,24), new(20,12.5f,28), new(20,17,34), Door("abbey")),
+        new Route("stage_coach", 3, new(-25,0,-12), Door("stage_coach")),
+        new Route("tavern", 3, new(-8,0,0), new(-20,1,-3), Door("tavern")),
+        new Route("camping_trainer", 2.8f, new(-20,1,-3), new(-37,1,0), new(-39,1,8),
+            new(-38,6,11), new(-37,12,14), new(-40,18,16), Door("camping_trainer")),
+        new Route("sanitarium", 3, Door("graveyard"), new(-3,12.5f,18), new(-5,8,15), Door("sanitarium")),
+        new Route("graveyard", 2.8f, new(2,0,4), new(4,4,10), new(3,10,15), Door("graveyard")),
+        new Route("guild", 3, new(9,4,12), new(16,6,14), Door("guild")),
+        new Route("statue", 3, new(-8,0,0), new(-4,0,-8), Door("statue")),
+        new Route("nomad_wagon", 3.4f, new(-4,0,-8), new(2,0,-16), Door("nomad_wagon")),
+        new Route("blacksmith", 3.4f, new(2,0,-16), new(20,0,-18), new(29,0,-12), Door("blacksmith")),
     };
 
     private static float Smooth(float a, float b, float x)
-    {
-        float t = Math.Max(0, Math.Min(1, (x-a)/(b-a)));
-        return t*t*(3-2*t);
-    }
+    { float t = Math.Max(0, Math.Min(1, (x-a)/(b-a))); return t*t*(3-2*t); }
 
-    public static float RoadX(float z) => (float)Math.Sin((z+12)*.046f)*4;
-    private static float Hill(float x, float z) => 4.5f*Smooth(8, 20, z) + 5.5f*Smooth(33, 44, z)
-        + 5*Smooth(50, 61, z) + 5*Smooth(54, 95, Math.Abs(x)) - 3*Smooth(-30, -65, z);
+    private static float Hill(float x, float z)
+    {
+        float wave=(float)Math.Sin(x*.19f)*1.8f+(float)Math.Sin(x*.53f)*.65f;
+        float civic = 12.5f * Smooth(16+wave, 21+wave, z) * Smooth(-26,-19,x) * (1-Smooth(28,39,x));
+        float upper = 17 * Smooth(29+wave,34+wave,z) * Smooth(-8,-2,x) * (1-Smooth(22,32,x));
+        float cliff = (24+.6f*(float)Math.Sin(z*.47f)) * Smooth(-33,-40,x) * Smooth(7+wave,13+wave,z) * (1-Smooth(37,47,z));
+        float banks=Math.Max(Math.Max(civic,upper),cliff)*(1-Smooth(52,67,z));
+        float rough=.32f*(float)Math.Sin(x*.43f+z*.23f)+.18f*(float)Math.Sin(x*.81f-z*.58f);
+        float rim = 2 * Smooth(43, 58, Math.Abs(x));
+        float edge = 13 * Smooth(55, 66, Math.Abs(x + 4));
+        float ditch = 8*(1-Smooth(-28,-18,z))*(1-Smooth(-35,-18,x)) + 6*(1-Smooth(-33,-25,z));
+        return banks + rough + rim - edge - ditch;
+    }
 
     public static float Height(float x, float z)
     {
-        float y = Hill(x, z), best = 0;
-        Site closest = null;
+        float y = Hill(x, z), best = 0, roadHeight = y;
+        foreach (var route in Routes) for (int i = 1; i < route.Points.Length; i++)
+        {
+            var a = route.Points[i-1]; var b = route.Points[i];
+            float dx = b.X-a.X, dz = b.Z-a.Z, length = dx*dx+dz*dz;
+            float t = length > 0 ? Math.Max(0, Math.Min(1, ((x-a.X)*dx+(z-a.Z)*dz)/length)) : 0;
+            float rx = a.X+dx*t, rz = a.Z+dz*t;
+            float distance = (float)Math.Sqrt((x-rx)*(x-rx)+(z-rz)*(z-rz));
+            float weight = 1-Smooth(route.Width*.55f, route.Width*.55f+1.8f, distance);
+            if (weight > best) { best = weight; roadHeight = a.Y+(b.Y-a.Y)*t; }
+        }
+        y = y*(1-best) + roadHeight*best;
+        best = 0; Site closest = null;
         foreach (var site in Sites)
         {
-            float distance = Math.Max(Math.Abs(x-site.X), Math.Abs(z-site.Z));
-            float weight = 1-Smooth(site.Width*.59f, site.Width*.59f+4, distance);
+            float angle = site.Yaw*(float)Math.PI/180, c = (float)Math.Cos(angle), s = (float)Math.Sin(angle);
+            float dx = x-site.X, dz = z-site.Z;
+            float localX = dx*c-dz*s, localZ = dx*s+dz*c;
+            float distance = Math.Max(Math.Abs(localX)-site.FootprintWidth/2-.35f, Math.Abs(localZ)-site.FootprintDepth/2-.35f);
+            float weight = 1-Smooth(0, 1.8f, distance);
             if (weight > best) { best = weight; closest = site; }
         }
         return closest == null ? y : y*(1-best)+closest.Y*best;

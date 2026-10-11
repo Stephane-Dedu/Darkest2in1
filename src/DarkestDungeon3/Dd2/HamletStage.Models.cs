@@ -18,6 +18,7 @@ internal sealed partial class HamletStage
     {
         public readonly Dictionary<string, GltfModel> Models = new();
         public readonly Dictionary<string, byte[]> Paint = new();
+        public HamletTerrain Terrain;
     }
     private Task<ModelPack> _modelTask;
     private ModelPack _modelPack;
@@ -57,6 +58,7 @@ internal sealed partial class HamletStage
                 foreach (string path in new[] { material.BaseColor, material.Emissive }.Where(p => p != null))
                     if (!pack.Paint.ContainsKey(path)) pack.Paint.Add(path, File.ReadAllBytes(path));
         }
+        pack.Terrain = HamletTerrain.Build();
         return pack;
     }
 

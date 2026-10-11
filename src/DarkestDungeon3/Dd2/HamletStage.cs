@@ -46,21 +46,19 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", -16, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 0, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 16, .04f, 8, 16, 90),
-        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -40, -.4f, 57, 25),
-        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 36, -.4f, 66, 24),
-        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -61, -.4f, 29, 22, 30),
-        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 56, -.4f, 31, 20, -20),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -49, 0, -6, 9, 15),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 40, 0, -7, 8, -25),
-        new(null, Models + "inn_lvl_01_prefab.prefab", -42, 0, 53, 10, 15),
-        new(null, Models + "inn_lvl_01_prefab.prefab", 39, 0, 57, 10, -15),
+        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -28, -.4f, 51, 16),
+        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 36, -.4f, 54, 18),
+        new(null, Valley + "DecorTiles/valley_tile_01.prefab", -58, -.4f, 30, 18, 30),
+        new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -.4f, 29, 18, -20),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
         new(null, Mountains + "mainmenu_mountain_mdl.fbx", 0, -24, 123, 100),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -25, 152, 280),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -31, 0, 7, 2.5f),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -32, 0, 4, 2),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_firepit.fbx", -30, 0, 2, 3),
-        new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", -7, 0, 5, 1.5f),
-        new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", 23, 0, 10, 1.5f),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),
+        new(null, "Assets/Art/Models/Environments/Camp/camp_firepit.fbx", -51, 0, 17, 2.5f),
+        new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", -6, 0, 4, 1.5f),
+        new(null, "Assets/Art/Models/Environments/Common/Models/Props/common_prop_lamppost.fbx", 22, 0, 10, 1.5f),
     };
 
     private sealed class Building
@@ -76,7 +74,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private readonly Dictionary<Renderer, Color> _baseTints = new();
     private readonly List<UnityEngine.Object> _details = new();
     private readonly Dictionary<Material, Material> _materials = new();
-    private AsyncOperationHandle<Material> _terrainAsset;
+    private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset;
     private Transform _root;
     private Camera _camera;
     private RenderTexture _texture;
@@ -99,7 +97,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     public string Failure { get; private set; }
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
-    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _details.Count != 0
+    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _details.Count != 0
         || _texture != null || _groundTexture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
@@ -137,7 +135,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         _camera = cameraObject.AddComponent<Camera>();
         _camera.clearFlags = CameraClearFlags.SolidColor;
         _camera.backgroundColor = new Color(.065f, .075f, .105f);
-        _camera.fieldOfView = 42;
+        _camera.fieldOfView = HamletLayout.FieldOfView;
         _camera.nearClipPlane = .3f;
         _camera.farClipPlane = 400;
         _camera.targetTexture = _texture;
@@ -163,6 +161,8 @@ internal sealed partial class HamletStage : MonoBehaviour
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
         _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/foundation_ground.mat");
+        _earthAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Tileable/forest_ground_distance.mat");
+        _rockAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Nodes/cultist_barricade_rocks.mat");
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
     private void Update()
@@ -177,7 +177,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 var piece = Pieces[_piece];
                 var handle = _assets[piece.Path];
                 if (!handle.IsDone) return;
-                if (_piece == Pieces.Length - 1 && !_terrainAsset.IsDone) return;
+                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone)) return;
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null) Build(piece, handle.Result);
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
@@ -187,7 +187,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
                 BuildGround();
                 _camera.enabled = true;
-                Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; hillside rises 15 metres");
+                Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; compact DD1 cliff layout, 24.5 metres of service elevation");
             }
             MoveCamera(1 - Mathf.Exp(-Time.unscaledDeltaTime * 5));
         }
@@ -266,7 +266,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         }
         Plugin.Log.LogInfo($"[hamlet 3d] {piece.Id ?? "scenery"}: {renderers.Count} visual meshes ({prefab.name})");
     }
-    private static readonly Vector3 Overview = new(9, 7, 27);
+    private static readonly Vector3 Overview = new(HamletLayout.CameraTarget.X, HamletLayout.CameraTarget.Y, HamletLayout.CameraTarget.Z);
 
     private Material BackdropMaterial(Material source)
     {
@@ -309,7 +309,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         var target = focused == null ? Overview : Vector3.Lerp(Overview, focused.Bounds.center - Origin, .4f);
         target += new Vector3(_pan.x, 0, _pan.y);
         _look = Vector3.Lerp(_look, target, blend);
-        var offset = new Vector3(20, 52, -94) * (_zoom * (focused == null ? 1 : .87f));
+        var layoutOffset = HamletLayout.CameraOffset;
+        var offset = new Vector3(layoutOffset.X, layoutOffset.Y, layoutOffset.Z) * (_zoom * (focused == null ? 1 : .87f));
         _camera.transform.localPosition = _look + offset;
         _camera.transform.LookAt(Origin + _look);
     }
@@ -398,11 +399,13 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_groundMesh != null) Destroy(_groundMesh);
         if (_groundMaterial != null) Destroy(_groundMaterial);
         if (_groundTexture != null) { _groundTexture.Release(); Destroy(_groundTexture); }
-        foreach (var detail in _details) if (detail != null) Destroy(detail);
+        foreach (var detail in _details) if (detail != null) { if (detail is RenderTexture rt) rt.Release(); Destroy(detail); }
         _details.Clear();
         foreach (var handle in _assets.Values) if (handle.IsValid()) Addressables.Release(handle);
         if (_terrainAsset.IsValid()) Addressables.Release(_terrainAsset);
-        _terrainAsset = default;
+        if (_earthAsset.IsValid()) Addressables.Release(_earthAsset);
+        if (_rockAsset.IsValid()) Addressables.Release(_rockAsset);
+        _terrainAsset = default; _earthAsset = default; _rockAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
         ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null; _groundTexture = null;
