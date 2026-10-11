@@ -30,3 +30,16 @@ When producing runtime backgrounds, omit all text, portraits, buttons, quest ico
 Load the private art pack from `PrivateExpeditionArt` beside the game, or the configured `Paths.ExpeditionArtFolder`. Missing art retains the existing DD1 selector. Keep the artwork outside the public repository. The preparation tool builds registered soft-edged regional overlays and quest previews from the locally generated paintings.
 
 This approval covers the selector's presentation. The Mountain gameplay overhaul in `overhaul_roadmap.md` is a separate design.
+
+## Owner refinement, 2026-10-11 (round213)
+
+Use more of DD1's artistic direction for placement: its inset quest scroll and red destination strip, regional
+progression plates and quest medallions, right-edge roster and bottom party plate. Keep the original provisioner
+shopkeeper, shelf and pack arrangement. Avoid tall boxed destination cards and heavy panel frames. Preserve
+the approved map hub positions, one arrow immediately after each switchable name and quest icons beneath it.
+
+Use the installed DD2 NDDunkelD-Bold headings and AlegreyaSans body text, native banner buttons, node icons,
+portrait frames and dividers. Keep bone/ivory text, muted brass selection accents and restrained red warnings.
+The owner requested a little shadow or border because light names were hard to read over some regions:
+regional headings now use a thin near-black outline and a small downward shadow, without adding opaque plates.
+Native assets load from the installed game's Addressables; private paintings and inspection evidence stay outside Git.

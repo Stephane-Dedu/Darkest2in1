@@ -12,10 +12,18 @@ internal sealed partial class EmbarkUi
     private readonly Inventory _cart = new();
     private string _error;
     private bool _confirmLow, _provisioning;
+    internal bool Preview { get; set; }
+
+    // The visible lineup runs back-to-front, while the campaign stores front-to-back.
+    private string PartyHeroAtCell(int cell)
+    {
+        int rank = 3 - cell;
+        return cell >= 0 && cell < 4 && rank < _party.Count ? _party[rank] : null;
+    }
 
     private bool DrawProvisioningBack()
     {
-        if (!Gui.DdButton(new Rect(30, 1000, 300, 60), "Back to the quests", size: 24)) return false;
+        if (!ProvisionBackButton()) return false;
         // Purchases are only charged at embark, so cancelling needs no estate refund.
         _cart.Items.Clear();
         _cart.Layout.Clear();

@@ -4971,3 +4971,49 @@ backup. No actual saves were read/modified by agent tools. Pre-change plugin bac
 C:\Users\Piral\.universal-modder\backups\dd3-main-menu-before-20261011\20261011-062238.zip.
 Existing dirty Shieldbreaker model/tools/tests were preserved outside this UI change. Following UI work is the
 trinket HUD and quest-selection cohesion; preserve the owner's approved map/region-switch layout.
+
+## Round213 (2026-10-11): expedition HUD, DD1 composition with native DD2 type and controls
+
+Owner requested the quest/expedition overlays while another agent handles the Hamlet. Used the pasted
+dd2-native-kit against the installed game; no extracted fonts, textures or sprites enter Git. After the owner
+asked for more DD1 placement, restored its inset quest scroll, progression plates, quest medallions, right-edge
+roster, party plate and provisioner/shopkeeper composition. The approved private map, regional overlays and
+paired switches retain their existing positions. Native NDDunkelD-Bold/AlegreyaSans, node icons, banner buttons,
+portrait frames, selection marks and dividers supply the DD2 finish with ivory/brass/red states. Regional names
+have a thin near-black outline and a small drop shadow, as requested for lighter terrain. Button labels stay
+fixed; readiness and supply warnings are separate text. Objectives fit their available space and retain full tips.
+
+Addressables discovery: some installed fonts and node assets expose GUID keys only. The loader first tries
+the path, then indexes resource locations by InternalId once per asset type. Native logs confirm both fonts and
+all five node resources loaded. Missing private map art retains DD1 terrain; missing native art keeps controls
+usable. Party right-click previously indexed front-to-back storage using the back-to-front screen cell; it now
+opens the displayed hero, covered by seven linked-source cases for full, partial and empty parties.
+
+Added opt-in -dd3-expedition-preview, gated by debug-key configuration and native main-menu/idle state. It
+creates a transient campaign with no estate path, refuses to replace an existing save selection, suppresses
+Persist only for that owned object and blocks expedition launch. Back to Hamlet clears it and closes the
+preview. Used only this fixture for native checks; no campaign saves or protected estates were opened.
+
+Native1600x900 checks: approved map/quest dossier and outlined names; Sprawl/Ruins switch with changed local
+artwork and live quest selection; provisioner; Shift-click food12 plus one torch (cost975, gold12000 unchanged);
+food moved to another pack slot; right-click torch return (cost900); Back/reopen cleared all staged supplies and
+cost while retaining the quest/party; party click removal and roster drag restored4/4; right-click Baldwin's
+displayed cell opened Baldwin's sheet. Native screenshots remain private under
+local-art/ui-overhaul/expedition-native-hud (final-selector.png, provisions-v04.png, purchases-v04.png,
+pack-return-v04.png, pack-settled-v04.png, cancel-reopen-v04.png, party-inspect-v04.png and party-drop-v04.png).
+Raw label-region comparisons before/after the drag matched exactly; image-preview artifacts were not treated
+as a runtime font defect. No native asset failure or expedition UI exception appeared in the preview log.
+
+Release build/deploy passes; all979 Core and182 UI tests pass. Core was checked before the final cosmetic
+revision; UI and Release were rerun afterward. Remaining native acceptance: busy quest-row pagination, every
+paired/extra area, unavailable-hero restrictions, all supply drag/return variants and real campaign embark with
+the refreshed controls. This preview deliberately cannot verify actual embark. Existing dirty Shieldbreaker
+work remains outside this commit; the Hamlet agent's scope is unchanged.
+
+## Status 2026-10-11: round213 deployed; ordinary launch restored
+
+The unsaved preview was closed by exact owned PID60712. DD2 PID59072 was launched at1600x900 without QA
+flags for ordinary owner play. Do not open the estate picker automatically: protected saves remain off limits.
+The deployed HUD includes the DD1 placement refinement and outlined regional headings. Next presentation scope
+is the trinket HUD; retain the approved map hubs, inline region arrows and regional quest rows. Plugin backup:
+C:\Users\Piral\DarkestDungeon3\local-art\ui-overhaul\expedition-native-hud\plugin-before\DarkestDungeon3.dll.

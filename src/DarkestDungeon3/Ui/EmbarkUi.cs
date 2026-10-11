@@ -37,7 +37,8 @@ internal sealed partial class EmbarkUi
             if (_provisioning) DrawProvisioner(); else DrawQuestSelect();
         }
         DrawSheet();
-        if (_error != null) Gui.Text(new Rect(560, 1040, 900, 36), _error, 22, Gui.Blood, TextAnchor.MiddleCenter);
+        if (_error != null) ExpeditionSkin.Text(new Rect(560, 1040, 900, 36), _error, 23, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
+        ExpeditionSkin.DrawTip();
     }
 
     // ================================================================ quest select
@@ -82,24 +83,25 @@ internal sealed partial class EmbarkUi
             FocusArea(_quest?.Dungeon ?? E.Quests.FirstOrDefault()?.Dungeon);
 
         var paintedMap = ExpeditionMapArt.Background;
-        _expeditionStyle = paintedMap != null;
+        _expeditionStyle = true;
+        ExpeditionSkin.Prepare();
         foreach (var location in CampaignRegions.Legacy)
         {
             var areas = CampaignRegions.AtLocation(E, location);
             if (areas.Count > 0 && (!_mapAreas.TryGetValue(location, out var selected) || !areas.Contains(selected)))
                 _mapAreas[location] = areas[0];
         }
-        if (_expeditionStyle) DrawPaintedMap(paintedMap);
+        if (paintedMap != null) DrawPaintedMap(paintedMap);
         else
         {
             var bg = Qs("quest_select.background.png");
             if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg);
             else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
         }
-        Gui.Text(new Rect(560, 24, 900, 60), "Choose a quest", 48, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        ExpeditionSkin.Text(new Rect(104, 64, 440, 56), "Choose a quest", 44, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
 
         // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
-        var spots = _expeditionStyle ? PaintedMapSpots : MapSpots();
+        var spots = paintedMap != null ? PaintedMapSpots : MapSpots();
         foreach (var location in CampaignRegions.Legacy)
         {
             var areas = CampaignRegions.AtLocation(E, location);
@@ -111,7 +113,7 @@ internal sealed partial class EmbarkUi
         if ((_expeditionStyle || E.Quests.Any(q => q.Dungeon == QuestBoard.DarkestDungeon)) && spots.TryGetValue(QuestBoard.DarkestDungeon, out var darkestPos))
             DrawDungeon(QuestBoard.DarkestDungeon, darkestPos, new[] { QuestBoard.DarkestDungeon });
 
-        if (_quest != null) DrawQuestScroll(_quest);
+        if (_quest != null) DrawQuestScroll(_quest); else DrawEmptyQuestPanel();
 
         DrawPartySlots(new Vector2(754, 900));
 
@@ -124,7 +126,7 @@ internal sealed partial class EmbarkUi
                 : _quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark) ? "Refuses this quest"
                 : null;
             return new RosterColumn.Look(dim: inParty || note != null, note: inParty ? null : note, highlight: inParty);
-        }, draggable: true, expeditionStyle: _expeditionStyle);
+        }, draggable: true, expeditionStyle: _expeditionStyle, readOnly: Preview);
         if (clicked != null) Toggle(clicked);
         if (RosterColumn.RightClickedHero != null) _sheetHeroId = RosterColumn.RightClickedHero.Id;
         // A hero dragged out of the party back onto the roster leaves it.
@@ -136,7 +138,9 @@ internal sealed partial class EmbarkUi
         var heroes = Heroes();
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
         var provisionRect = new Rect(1190, 905, 330, 90);
-        if (_expeditionStyle ? ExpeditionButton(provisionRect, why ?? "Provision", why == null, why == null ? 40 : 18)
+        ExpeditionSkin.Text(new Rect(1190, 1006, 330, 40), why ?? "The party is ready to provision.", 22,
+            why == null ? ExpeditionSkin.Ivory : ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
+        if (_expeditionStyle ? ExpeditionButton(provisionRect, "Provision", why == null, 38)
             : Gui.DdButton(provisionRect, why ?? "Provision", why == null, why == null ? 40 : 18))
         {
             _provisioning = true;
@@ -200,32 +204,33 @@ internal sealed partial class EmbarkUi
     private void DrawDungeon(string zone, Vector2 pos, IReadOnlyList<string> areas)
     {
         var plate = Qs("dungeon_progressionbar.png");
-        if (_expeditionStyle) ExpeditionFrame(new Rect(pos.x - 5, pos.y - 10, 300, 58), 0.78f);
-        else if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
+        if (plate != null) GUI.DrawTexture(new Rect(pos.x - 5, pos.y - 10, 282, 84), plate);
         else Gui.Fill(new Rect(pos.x - 5, pos.y - 10, 282, 84), new Color(0, 0, 0, 0.8f));
         string name = AreaName(zone);
         bool canSwitch = areas.Count > 1;
-        Gui.Text(new Rect(pos.x + 4, pos.y - 6, canSwitch ? 156 : 190, 30), name, 24, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        ExpeditionSkin.OutlinedHeading(new Rect(pos.x + 10, pos.y - 5, canSwitch ? 186 : 220, 34), name, 29, ExpeditionSkin.Ivory);
 
         E.ZoneXp.TryGetValue(zone, out int xp);
         int level = S.Campaign.ZoneLevel(xp);
         var thresholds = S.Campaign.ZoneLevelThresholds;
         bool mountain = _expeditionStyle && zone == QuestBoard.DarkestDungeon;
-        if (!mountain) Gui.Text(new Rect(pos.x + (_expeditionStyle ? 250 : 199), pos.y + 2, 40, 36), level.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+        if (!mountain) ExpeditionSkin.Text(new Rect(pos.x + 244, pos.y - 4, 40, 34), level.ToString(), 26, ExpeditionSkin.Brass, TextAnchor.MiddleCenter, heading: true);
         if (!mountain && thresholds.Count > level + 1)
         {
             float from = thresholds[level], to = thresholds[level + 1];
-            Gui.Fill(new Rect(pos.x + 14, pos.y + 32, 194 * Mathf.Clamp01((xp - from) / Mathf.Max(1, to - from)), 6), new Color(0.75f, 0.62f, 0.3f));
+            ExpeditionSkin.Rule(new Rect(pos.x + 14, pos.y + 32, 220, 3));
+            ExpeditionSkin.Rule(new Rect(pos.x + 14, pos.y + 32, 220 * Mathf.Clamp01((xp - from) / Mathf.Max(1, to - from)), 3), ExpeditionSkin.Brass);
         }
+        if (!mountain) ExpeditionSkin.Tip(new Rect(pos.x + 244, pos.y - 4, 40, 34), $"Region level {level}\n{xp} experience");
         bool unlocked = zone == QuestBoard.DarkestDungeon || CampaignRegions.Unlocked(E, S.Campaign, zone);
         if (canSwitch)
         {
             int at = areas.ToList().IndexOf(zone);
             string nextZone = areas[(at + 1) % areas.Count];
-            float nameWidth = Dd1Font.Heading?.Measure(name, 24 * Gui.HeadingScale).x ?? 156;
-            var next = new Rect(pos.x + 4 + Mathf.Min(nameWidth + 8, 164), pos.y - 6, 24, 30);
-            Gui.Image(next, Art.Dd1("shared", "character", "next_hero.png"), ScaleMode.ScaleToFit);
-            if (next.Contains(Event.current.mousePosition)) Gui.Tip("Switch to " + AreaName(nextZone));
+            float nameWidth = ExpeditionSkin.Width(name, 29, heading: true);
+            var next = new Rect(pos.x + 10 + Mathf.Min(nameWidth + 10, 195), pos.y - 3, 24, 30);
+            ExpeditionSkin.Sprite(next, "ui_arrow", next.Contains(Event.current.mousePosition) ? ExpeditionSkin.Brass : ExpeditionSkin.Ivory, fit: true, flip: true);
+            ExpeditionSkin.Tip(next, "Switch to " + AreaName(nextZone));
             if (Gui.Hotspot(next)) FocusArea(nextZone);
         }
 
@@ -233,7 +238,8 @@ internal sealed partial class EmbarkUi
         if (Gui.Hotspot(new Rect(pos.x - 5, pos.y - 10, 282, 56))) FocusArea(zone);
         if (!unlocked)
         {
-            Gui.Text(new Rect(pos.x + 8, pos.y + 52, 270, 32), $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests", 16, Gui.Dim);
+            ExpeditionSkin.Sprite(new Rect(pos.x - 5, pos.y + 52, 300, 48), "ui_labelbg");
+            ExpeditionSkin.Text(new Rect(pos.x + 8, pos.y + 55, 270, 38), $"Opens after {CampaignRegions.UnlockAfter(S.Campaign, zone)} quests", 21, ExpeditionSkin.Muted);
             return;
         }
         var quests = E.Quests.Where(q => q.Dungeon == zone).ToList();
@@ -253,6 +259,12 @@ internal sealed partial class EmbarkUi
             var c = new Vector2(pos.x + (_expeditionStyle ? 34 : 160) + (i % 4) * 76, pos.y + (_expeditionStyle ? 100 : 92));
             var r = new Rect(c.x - 36, c.y - 36, 72, 72);
             bool hover = r.Contains(Event.current.mousePosition);
+            if (_expeditionStyle)
+            {
+                DrawQuestMarker(r, q, hover);
+                if (Gui.Hotspot(r)) SelectQuest(q);
+                continue;
+            }
             if (q == _quest)
             {
                 var selected = Qs("quest_select_selected.png");
@@ -274,16 +286,16 @@ internal sealed partial class EmbarkUi
             var down = new Rect(scrollX, pos.y + 108, 26, 20);
             if (row > 0)
             {
-                Gui.Image(up, Art.Dd1("shared", "widgets", "scrollbar_uparrow.png"), ScaleMode.ScaleToFit);
+                ExpeditionSkin.Text(up, "−", 24, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
                 if (Gui.Hotspot(up)) row--;
             }
             if (row < rows - 1)
             {
-                Gui.Image(down, Art.Dd1("shared", "widgets", "scrollbar_downarrow.png"), ScaleMode.ScaleToFit);
+                ExpeditionSkin.Text(down, "+", 24, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
                 if (Gui.Hotspot(down)) row++;
             }
-            Gui.Text(new Rect(scrollX - 18, pos.y + 80, 60, 20), $"{row + 1} / {rows}", 14, Gui.Dd1Text, TextAnchor.MiddleCenter);
-            if (new Rect(scrollX - 18, pos.y + 52, 52, 80).Contains(Event.current.mousePosition)) Gui.Tip($"Scroll quests: row {row + 1} of {rows}");
+            ExpeditionSkin.Text(new Rect(scrollX - 18, pos.y + 80, 60, 20), $"{row + 1}/{rows}", 17, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+            ExpeditionSkin.Tip(new Rect(scrollX - 18, pos.y + 52, 52, 80), $"Scroll quests: row {row + 1} of {rows}");
         }
         _questRows[zone] = row;
     }
@@ -341,18 +353,20 @@ internal sealed partial class EmbarkUi
     private void DrawPartySlots(Vector2 at)
     {
         var plate = Art.Dd1("campaign", "town", "embark_party", "embark_party.background.png");
-        if (_expeditionStyle) ExpeditionFrame(new Rect(at.x, at.y, 412, 113));
-        else if (plate != null) GUI.DrawTexture(new Rect(at.x, at.y, 412, 113), plate);
+        if (plate != null) GUI.DrawTexture(new Rect(at.x, at.y, 412, 113), plate);
         else Gui.Fill(new Rect(at.x, at.y, 412, 113), new Color(0, 0, 0, 0.8f));
-        Gui.Text(new Rect(at.x, at.y - 40, 412, 36), "The party", 28, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        ExpeditionSkin.Text(new Rect(at.x, at.y - 66, 412, 36), $"The party  ·  {_party.Count}/4", 30, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
         var slotBg = Art.Dd1("campaign", "town", "hero_slot", "hero_slot.background.png");
         // DD1 lines the party up facing right: rank 4 on the left, rank 1 on the right.
         for (int s = 0; s < 4; s++)
         {
             int rank = 3 - s;
             var r = new Rect(at.x + 22 + s * 93, at.y + 16, 80, 80);
-            if (s < _party.Count && CrawlUi.RightClicked(r)) _sheetHeroId = _party[s];
-            if (slotBg != null) GUI.DrawTexture(r, slotBg);
+            string heroId = PartyHeroAtCell(s);
+            if (heroId != null && CrawlUi.RightClicked(r)) _sheetHeroId = heroId;
+            if (_expeditionStyle) ExpeditionSkin.Slot(r, heroId != null);
+            else if (slotBg != null) GUI.DrawTexture(r, slotBg);
+            ExpeditionSkin.Text(new Rect(r.x + 24, r.yMax + 4, 32, 25), (rank + 1).ToString(), 20, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
             if (Drag.Hovering<HeroDrag>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
             if (Drag.Drop<HeroDrag>(r, out var dropped)) { DropHero(dropped, rank); break; }
             if (rank >= _party.Count) continue;
@@ -367,7 +381,7 @@ internal sealed partial class EmbarkUi
             var sprite = Art.HeroIcon(h.ClassId);
             if (sprite != null && !carried) Art.DrawSprite(new Rect(r.x + 4, r.y + 4, 72, 72), sprite);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
-                Gui.Text(new Rect(r.x - 70, r.yMax + 2, r.width + 140, 26), $"{h.Name}: drag to move, click to remove", 17, Gui.Dd1Text, TextAnchor.MiddleCenter);
+                ExpeditionSkin.Tip(r, $"{h.Name} · Rank {rank + 1}\nDrag to move · Click to remove\nRight-click to inspect equipment");
             if (Gui.Hotspot(r) && !Drag.JustDropped) { _party.RemoveAt(rank); break; }
         }
     }
@@ -378,22 +392,9 @@ internal sealed partial class EmbarkUi
 
     private void DrawProvisioner()
     {
-        var bg = Prov("provision.background.png");
-        if (bg != null) GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), bg); else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.04f, 0.03f, 0.03f));
-        var window = Prov("provision.character_background.png");
-        if (window != null) GUI.DrawTexture(Window, window);
-        var keeper = Prov("provision.character.png");
-        if (keeper != null)
-        {
-            float k = Mathf.Min(1f, (Window.height - 4) / keeper.height);
-            GUI.DrawTexture(new Rect(Window.x + 2, Window.yMax - keeper.height * k - 2, keeper.width * k, keeper.height * k), keeper);
-        }
-        Gui.Text(new Rect(Window.x + 40, Window.y + 20, 520, 60), "Provisioner", 46, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-
         var q = _quest;
         int length = q?.Length ?? 1;
-        if (q != null)
-            Gui.Text(new Rect(1000, 60, 860, 40), $"{S.Zones.ZoneName(q.Dungeon)}: {q.DifficultyName} {Cap(q.Size)} {HamletUi.Pretty(q.Type)}  ·  recommended food {S.Provisioner.MinimumFood(length)}", 22, Gui.Dd1Class, TextAnchor.MiddleRight);
+        DrawProvisionBackdrop(length);
 
         DrawStore(length);
         DrawPack();
@@ -401,7 +402,7 @@ internal sealed partial class EmbarkUi
         int cost = CartCost(), gold = E.Get(Currency.Gold);
         var goldIcon = Art.Dd1("shared", "estate", "currency.gold.large_icon.png");
         if (goldIcon != null) GUI.DrawTexture(new Rect(820, 920, 72, 72), goldIcon);
-        Gui.Text(new Rect(900, 924, 600, 64), $"{Gui.Num(gold, "#,0")}   -{Gui.Num(cost, "#,0")}", 34, cost > gold ? Gui.Blood : Gui.Gold, TextAnchor.MiddleLeft, heading: true);
+        ExpeditionSkin.Text(new Rect(900, 924, 630, 40), $"{Gui.Num(gold, "#,0")} gold   −{Gui.Num(cost, "#,0")} supplies", 29, cost > gold ? ExpeditionSkin.Red : ExpeditionSkin.Brass, heading: true);
 
         if (DrawProvisioningBack()) return;
 
@@ -416,11 +417,13 @@ internal sealed partial class EmbarkUi
             string warn = lowFood ? (S.Lore?.Text("town_provision_not_enough_food_confirm_format")?.Replace("%d", minFood.ToString()) ?? $"Less than {minFood} food: the party may starve.")
                 : noTorch ? "No torches: the dark will press in."
                 : S.Lore?.Text("town_provision_no_trinkets_equipped") ?? "Your party is not fully outfitted with trinkets. Really embark?";
-            Gui.Text(new Rect(1080, 990, 480, 70), warn + (_confirmLow ? "\nEmbark again to go anyway." : ""), 18, Gui.Blood, TextAnchor.MiddleRight);
+            ExpeditionSkin.Text(new Rect(1080, 978, 480, 90), warn + (_confirmLow ? "\nEmbark again to go anyway." : ""), 22, ExpeditionSkin.Red, TextAnchor.MiddleRight);
         }
-        if (Gui.DdButton(new Rect(1580, 980, 320, 86), why ?? "Embark", why == null && cost <= gold, why == null ? 44 : 18))
+        if (why != null || cost > gold) ExpeditionSkin.Text(new Rect(1080, 978, 480, 90), why ?? "Not enough gold for these supplies.", 22, ExpeditionSkin.Red, TextAnchor.MiddleRight);
+        if (ExpeditionSkin.Button(new Rect(1580, 980, 320, 86), "Embark", why == null && cost <= gold, 40))
         {
             if ((lowFood || noTorch || fewTrinkets) && !_confirmLow) { _confirmLow = true; return; }
+            if (Preview) { _error = "Read-only preview. No expedition started."; return; }
             _confirmLow = false;
             var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);
@@ -429,10 +432,9 @@ internal sealed partial class EmbarkUi
         }
     }
 
-    // DD1's provisioner layout (campaign/town/provision/provision.layout.darkest).
-    private static readonly Vector2 StorePos = new(814, 144), PackPos = new(800, 532);
-    private static Rect StoreCell(int i) => new(StorePos.x + 120 + (i % 7) * 80, StorePos.y + 20 + (i / 7) * 170, 72, 144);
-    private static Rect PackCell(int i) => new(PackPos.x + 60 + (i % 8) * 80, PackPos.y + 28 + (i / 8) * 160, 72, 144);
+    // Preserve DD1's shopkeeper, shelf and pack composition (provision.layout.darkest).
+    private static Rect StoreCell(int i) => new(934 + (i % 7) * 80, 164 + (i / 7) * 170, 72, 144);
+    private static Rect PackCell(int i) => new(860 + (i % 8) * 80, 560 + (i / 8) * 160, 72, 144);
     private static readonly Rect StoreArea = new(814, 144, 680, 360), PackArea = new(800, 532, 720, 360);
 
     private void DrawStore(int length)
@@ -447,8 +449,8 @@ internal sealed partial class EmbarkUi
             string id = Supply.Provisioner[i];
             int max = stock.TryGetValue(id, out var m) ? m : 0, have = _cart.Count(id), left = max - have;
             var r = StoreCell(i);
-            if (left > 0) Drag.Source(r, new ShelfItem(id), rect => ItemArt.Stack(rect, id, 1, 1));
-            ItemArt.Stack(r, id, Mathf.Max(left, 0), Mathf.Max(1, items.StackLimit(id)), dim: left <= 0);
+            if (left > 0) Drag.Source(r, new ShelfItem(id), rect => DrawProvisionStack(rect, id, 1));
+            DrawProvisionStack(r, id, Mathf.Max(left, 0), left <= 0);
             if (r.Contains(Event.current.mousePosition)) hovered = id;
             var e = Event.current;
             if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped)
@@ -470,7 +472,8 @@ internal sealed partial class EmbarkUi
         string tip = hovered != null
             ? $"{HamletUi.Pretty(hovered)}: {S.Hamlet.ProvisionPrice(S.Provisioner, items, hovered)} gold. Click buys, Shift+click buys a stack, right-click returns."
             : "Drag supplies into your pack. Drag a stack back to the shelf to return it.";
-        Gui.Text(new Rect(StorePos.x, StorePos.y + 352, 680, 30), tip, 18, Gui.Dd1Text, TextAnchor.MiddleCenter);
+        ExpeditionSkin.Text(new Rect(814, 496, 680, 30), hovered != null ? $"{HamletUi.Pretty(hovered)} · {S.Hamlet.ProvisionPrice(S.Provisioner, items, hovered)} gold" : "Click to buy · Shift+click a stack · Right-click to return", 21, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+        ExpeditionSkin.Tip(StoreArea, tip);
     }
 
     private void DrawPack()
@@ -482,13 +485,14 @@ internal sealed partial class EmbarkUi
         for (int i = 0; i < Inventory.Slots; i++)
         {
             var r = PackCell(i);
+            ExpeditionSkin.Slot(r);
             var stack = stacks.Find(st => st.Slot == i);
             if (Drag.Hovering<ShelfItem>(r) || Drag.Hovering<PackStack>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
             if (stack != null)
             {
-                Drag.Source(r, new PackStack(_cart, i, stack.Key), rect => ItemArt.Stack(rect, stack.Key, stack.Count, items.StackLimit(stack.Key)));
+                Drag.Source(r, new PackStack(_cart, i, stack.Key), rect => DrawProvisionStack(rect, stack.Key, stack.Count));
                 if (!(Drag.Payload is PackStack carried && carried.Pack == _cart && carried.Slot == i))
-                    ItemArt.Stack(r, stack.Key, stack.Count, items.StackLimit(stack.Key));
+                    DrawProvisionStack(r, stack.Key, stack.Count);
                 var e = Event.current;
                 if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped && (e.button == 0 || e.button == 1))
                 {
@@ -506,9 +510,9 @@ internal sealed partial class EmbarkUi
             }
         }
         if (stacks.Count == 0)
-            Gui.Text(new Rect(PackArea.x, PackArea.y + 150, PackArea.width, 40), "The pack is empty. Drag food and torches into it.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.yMax - 35, PackArea.width, 30), "The pack is empty. Drag food and torches into it.", 23, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
         if (stacks.Count > Inventory.Slots)
-            Gui.Text(new Rect(PackArea.x, PackArea.yMax - 30, PackArea.width, 30), "The pack holds 16 stacks: the rest stays behind.", 18, Gui.Blood, TextAnchor.MiddleCenter);
+            ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.yMax - 30, PackArea.width, 30), "The pack holds 16 stacks: the rest stays behind.", 22, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
     }
 
     private int CartCost() { var hamlet = S.Hamlet; return _cart.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value); }

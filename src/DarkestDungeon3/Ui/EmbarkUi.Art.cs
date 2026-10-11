@@ -8,6 +8,7 @@ namespace DarkestDungeon3.Ui;
 internal sealed partial class EmbarkUi
 {
     private bool _expeditionStyle;
+    private bool ProvisionBackButton() => ExpeditionSkin.Button(new Rect(30, 1000, 300, 60), "Back to quests", size: 26);
 
     private static readonly Dictionary<string, Vector2> PaintedMapSpots = new()
     {
@@ -30,55 +31,69 @@ internal sealed partial class EmbarkUi
                 GUI.DrawTexture(canvas, overlay);
     }
 
-    private static void ExpeditionFrame(Rect r, float opacity = 0.9f, bool highlighted = false)
-    {
-        Gui.Fill(r, new Color(0.025f, 0.028f, 0.03f, opacity));
-        var line = highlighted ? Gui.Gold : new Color(0.39f, 0.34f, 0.23f, 0.8f);
-        Gui.Fill(new Rect(r.x, r.y, r.width, 1), line);
-        Gui.Fill(new Rect(r.x, r.yMax - 1, r.width, 1), line);
-        Gui.Fill(new Rect(r.x, r.y, 1, r.height), line);
-        Gui.Fill(new Rect(r.xMax - 1, r.y, 1, r.height), line);
-    }
-
     private static bool ExpeditionButton(Rect r, string text, bool enabled = true, int size = 28)
     {
-        bool hover = enabled && r.Contains(Event.current.mousePosition);
-        ExpeditionFrame(r, hover ? 0.96f : 0.9f, hover);
-        Gui.Text(r, text, size, enabled ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleCenter, heading: true);
-        return enabled && Gui.Hotspot(r);
+        return ExpeditionSkin.Button(r, text, enabled, size);
     }
 
     private void DrawPaintedQuestScroll(QuestOffer q)
     {
-        var panel = new Rect(30, 112, 400, 752);
-        ExpeditionFrame(panel, 0.95f);
-        var preview = ExpeditionMapArt.Preview(q.Dungeon);
-        if (preview != null) GUI.DrawTexture(new Rect(34, 116, 392, 188), preview, ScaleMode.ScaleAndCrop);
-        Gui.Fill(new Rect(34, 306, 392, 76), new Color(0.22f, 0.035f, 0.027f, 0.9f));
-        Gui.Text(new Rect(44, 310, 372, 38), AreaName(q.Dungeon), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
-        Gui.Text(new Rect(44, 348, 372, 30), $"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}{(q.IsPlot ? " · Plot" : "")}", 18, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        DrawDossierBackdrop(q.Dungeon);
+        ExpeditionSkin.Text(new Rect(145, 270, 360, 46), AreaName(q.Dungeon), 36, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
+        ExpeditionSkin.Text(new Rect(145, 322, 360, 48), $"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}", 23, ExpeditionSkin.Brass, TextAnchor.MiddleCenter);
 
         string restriction = Homecoming.MinResolveFor(q.Difficulty) > 0
             ? $"Only heroes of resolve {Homecoming.MinResolveFor(q.Difficulty)} or higher dare go."
             : $"Heroes of resolve {Homecoming.MaxResolveFor(q.Difficulty)} or lower will join; the experienced scorn easy work.";
-        Gui.Text(new Rect(56, 393, 348, 82), (q.IsPlot ? "A quest of consequence.\n" : "") + restriction, 17, Gui.Dd1Text);
+        ExpeditionSkin.Text(new Rect(159, 388, 332, 94), (q.IsPlot ? "A quest of consequence.\n" : "") + restriction, 22, ExpeditionSkin.Ivory);
 
-        Gui.Fill(new Rect(52, 486, 356, 1), new Color(0.38f, 0.35f, 0.27f, 0.7f));
         string camp = q.Length >= 3 ? "Two camps allowed" : q.Length == 2 ? "One camp allowed" : "No camping";
-        Gui.Text(new Rect(56, 491, 348, 28), camp, 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
-        Gui.Text(new Rect(56, 531, 348, 30), "Goal", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(62, 565, 336, 60), GoalLine(q), 18, Gui.Dd1Text);
-        Gui.Fill(new Rect(52, 632, 356, 1), new Color(0.38f, 0.35f, 0.27f, 0.7f));
-        Gui.Text(new Rect(44, 636, 372, 32), "Rewards", 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        ExpeditionSkin.Text(new Rect(183, 510, 320, 28), camp, 23, ExpeditionSkin.Muted);
+        ExpeditionSkin.Text(new Rect(159, 546, 332, 36), "Objective", 29, ExpeditionSkin.Ivory, heading: true);
+        string goal = GoalLine(q);
+        ExpeditionSkin.TextFit(new Rect(165, 586, 320, 64), goal, 24, ExpeditionSkin.Ivory);
+        ExpeditionSkin.Tip(new Rect(165, 586, 320, 64), goal);
+        ExpeditionSkin.Text(new Rect(145, 676, 360, 36), "Rewards", 29, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
         for (int i = 0; i < q.Rewards.Count && i < 8; i++)
         {
             var rw = q.Rewards[i];
-            var r = new Rect(68 + (i % 4) * 86, 674 + (i / 4) * 92, 72, 88);
+            var r = new Rect(167 + (i % 4) * 80, 720 + (i / 4) * 124, 72, 118);
             var icon = rw.Type == "trinket" ? Art.Dd1("panels", "icons_equip", "trinket", "inv_trinket+_unknown.png")
                 : Art.InventoryIcon(rw.Type, rw.Amount, rw.Type == "gold" ? 1750 : 99);
             if (icon != null) GUI.DrawTexture(r, icon, ScaleMode.ScaleToFit);
-            Gui.Text(new Rect(r.x - 6, r.yMax - 25, r.width + 12, 25), rw.Type == "trinket" ? HamletUi.Pretty(rw.Id ?? "trinket") : rw.Amount.ToString(), rw.Type == "trinket" ? 14 : 21, Color.white, TextAnchor.LowerCenter);
-            if (r.Contains(Event.current.mousePosition)) Gui.Tip(rw.Type == "trinket" ? HamletUi.Pretty(rw.Id ?? "trinket") : $"{rw.Amount} {HamletUi.Pretty(rw.Type)}");
+            ExpeditionSkin.Text(new Rect(r.x - 2, r.yMax - 26, r.width + 4, 25), rw.Type == "trinket" ? "Trinket" : rw.Amount.ToString(), 22, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+            ExpeditionSkin.Tip(r, rw.Type == "trinket" ? HamletUi.Pretty(rw.Id ?? "trinket") : $"{rw.Amount} {HamletUi.Pretty(rw.Type)}");
         }
+    }
+
+    private void DrawEmptyQuestPanel()
+    {
+        DrawDossierBackdrop(_focusedZone ?? "dd2_city");
+        ExpeditionSkin.Text(new Rect(145, 270, 360, 46), "Choose your path", 34, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
+        ExpeditionSkin.Text(new Rect(159, 388, 332, 94), "Select a quest beneath a region to inspect its objective, rewards and resolve requirements.", 24, ExpeditionSkin.Ivory);
+        ExpeditionSkin.Text(new Rect(159, 592, 332, 112), "Click heroes in the roster or drag them into the party. Right-click a hero to inspect their equipment.", 24, ExpeditionSkin.Muted);
+    }
+
+    private static void DrawDossierBackdrop(string zone)
+    {
+        // DD1's inset scroll and red name strip, without the tall boxed-card frame.
+        var r = new Rect(125, 132, 400, 843);
+        var scroll = Qs("quest_select.questverbose_bg.png");
+        if (scroll != null) GUI.DrawTexture(r, scroll); else Gui.Fill(r, ExpeditionSkin.Ink);
+        var preview = ExpeditionMapArt.Preview(zone);
+        if (preview != null) GUI.DrawTexture(new Rect(145, 140, 360, 120), preview, ScaleMode.ScaleAndCrop);
+    }
+
+    private void DrawQuestMarker(Rect r, QuestOffer q, bool hover)
+    {
+        bool selected = q == _quest;
+        if (selected && Qs("quest_select_selected.png") is { } selection)
+            GUI.DrawTexture(new Rect(r.x - 16, r.y - 16, r.width + 32, r.height + 32), selection);
+        var ring = Qs($"quest_select_length_{(q.IsPlot ? "plot" : "generated")}_{Mathf.Clamp(q.Length, 0, 4)}.png")
+            ?? Qs($"quest_select_length_generated_{Mathf.Clamp(q.Length, 0, 5)}.png");
+        if (ring != null) GUI.DrawTexture(hover ? new Rect(r.x - 3, r.y - 3, r.width + 6, r.height + 6) : r, ring);
+        var danger = q.Difficulty >= 5 ? ExpeditionSkin.Red : q.Difficulty >= 3 ? ExpeditionSkin.Brass : ExpeditionSkin.Ivory;
+        ExpeditionSkin.QuestIcon(new Rect(r.x + 17, r.y + 17, 38, 38), q.Type, danger);
+        ExpeditionSkin.Tip(r, $"{q.DifficultyName} · {Cap(q.Size)} · {HamletUi.Pretty(q.Type)}" + (q.IsPlot ? "\nPlot quest" : ""));
     }
 }

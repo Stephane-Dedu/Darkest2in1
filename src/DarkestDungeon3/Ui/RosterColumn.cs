@@ -11,7 +11,7 @@ namespace DarkestDungeon3.Ui;
 /// portrait, name, class, resolve level and stress pips, the building icon of whoever is busy, scrolled with the
 /// mouse wheel. Shared by the Hamlet and the quest select screen.
 /// </summary>
-internal static class RosterColumn
+internal static partial class RosterColumn
 {
     public const float X = 1550, FirstY = 132, Spacing = 97;
     public const int Visible = 8;
@@ -67,8 +67,9 @@ internal static class RosterColumn
     /// <summary>The hero right-clicked during the last Draw (DD1 opens their sheet), or null.</summary>
     public static HeroRecord RightClickedHero { get; private set; }
 
-    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false, bool expeditionStyle = false)
+    public static HeroRecord Draw(Estate estate, int capacity, Func<HeroRecord, Look> look = null, bool draggable = false, bool expeditionStyle = false, bool readOnly = false)
     {
+        if (expeditionStyle) return DrawExpedition(estate, capacity, look, draggable, readOnly);
         var grad = Art.Dd1("campaign", "town", "roster", "roster_bggrad.png");
         if (expeditionStyle) Gui.Fill(new Rect(X - 12, 72, 382, Spacing * Visible + 60), new Color(0.025f, 0.028f, 0.03f, 0.93f));
         else if (grad != null) GUI.DrawTexture(new Rect(X, 0, 373, 1080), grad);

@@ -6,6 +6,17 @@ preserve campaign progress. CLAUDE.md is authoritative for this direction and th
 Active install since round199: C:\Users\Piral\darkestwithdlc\game for DD2 and runtime DD1 data.
 The machine-local build override and playtest helpers target it. Preserve the previous install and both
 reverse-engineering workspaces; their references remain valid. The owner authorized launching again after round205.
+Latest expedition UI round213 (2026-10-11): preserve DD1's inset scroll, regional progression plates and medallions,
+right roster, bottom party and original shopkeeper/shelf/pack placement. Native DD2 fonts/icons/banners/frames
+and ivory/brass/red styling are deployed; region names have thin dark outlines/shadows. Approved map hubs,
+inline next arrows and quests beneath each region are unchanged. Native unsaved preview verifies purchases,
+pack movement/return, cancel/reopen, party removal/roster drag and correct hero inspection. All979 Core+182 UI
+tests and Release pass. Real campaign embark, busy pagination, restrictions and remaining area switches need
+native acceptance. See Round213 for evidence and tools/expedition_selector_design.md for owner art direction.
+-dd3-expedition-preview is temporary QA only: no estate path, guarded Persist and blocked embark. Normal DD2
+was relaunched without QA flags (PID59072). Do not automatically open the ordinary estate picker.
+Another agent owns Hamlet scenery; trinket HUD is the following presentation scope. Dirty Shieldbreaker
+changes remain outside this HUD commit.
 Latest owner UI task, round212 (2026-10-11): native Hamlet main-menu entry, DD2-style estate selection, named
 creation beyond3 slots, delete confirmation and an animated native torch during actual asset preparation are
 built and deployed. All979 Core+175 UI tests pass. Native asset gate and synthetic summaries were checked without
@@ -14,7 +25,7 @@ was relaunched normally without any QA flags. Debug preview now explicitly says 
 Do not leave -dd3-menu-check or -dd3-menu-preview active for the owner to play: both prohibit gameplay handoff.
 The owner's normal session subsequently passed the gate in2.88s and reached the Hamlet, quest map and combat.
 Actual create/delete controls, long lists and saved-expedition resume remain live-acceptance items; see Round212 and
-the latest Status in MODLOG. Next UI scope: trinket HUD and quest-selection cohesion, preserving the approved map.
+the latest Status in MODLOG. Quest-selection cohesion is updated in round213 above; trinket HUD follows.
 Existing Shieldbreaker work was left untouched and outside the UI commit.
 Shieldbreaker task, round206: remodeled from Hellion's actual native body surfaces. Read
 tools/shieldbreaker/README.md before changing its private model pipeline or runtime binding.
