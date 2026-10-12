@@ -22,8 +22,11 @@ Runtime/offline use the same Core placement/crops. Release+1068 Core+182 UI pass
 and packed scene:local-art/ui-overhaul/hamlet-grass-v07. The owner approved closing ordinary PID77236.
 Installed with matching hashes, then owned unsaved QA PID86776 passed alpha/crops, all ten services/Escape,
 controls, rollback/resource release, re-entry, Embark/cleanup/return and resize/restore. Final141 renderers,
-four plumes and0 repeated URP allocations over5.029 seconds. QA closed; DD2 stopped, no ordinary game
-relaunched and no estate accessed. Keep independent Map3D and Shieldbreaker edits/notes outside this pass.
+four plumes and0 repeated URP allocations over5.029 seconds. Owned QA closed, no estate accessed. A later
+ordinary DD2 PID85280 is running; leave it untouched and check live processes before any deployment.
+The independent map build replaced DLLs after grass acceptance; latest installed/build hashes match and
+accepted Hamlet sources are unchanged. post-map-build-hashes.json records that later deployment; original
+native evidence retains its accepted-build hashes. Keep independent Shieldbreaker edits/notes outside this pass.
 
 Round225 continues the Hamlet pass. Building albedo no longer adds the author's preview emission into roof/wall
 tints; real glass/forge light remains. A continuous valley ring and ten native wooded background placements

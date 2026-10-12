@@ -5593,7 +5593,10 @@ crop boundaries, muted paint and cleared paths were reviewed in the full1600x900
 clicks/Escape, pan/zoom/reset, painted rollback/all resources released, reload/re-entry, Embark/cleanup/return
 and1600x900->1440x900->1600x900 pass. No warning/error/exception during the check. Final native HDR target
 retains0 repeated URP allocations over5.029 seconds; this is buffer stability, not an FPS or memory benchmark.
-Owned QA PID86776 is closed; no ordinary session relaunched. The fixture never selected/read/saved an estate.
+Owned QA PID86776 is closed. A later ordinary DD2 PID85280 is left untouched. The fixture never selected/read/saved an estate.
+The independent Expedition Map3D build subsequently replaced the assemblies; current installed/build hashes
+match and every accepted Hamlet source file is unchanged from51822ee. Keep deployed-hashes.json as the native
+acceptance build, and post-map-build-hashes.json as the later deployment record.
 Independent Shieldbreaker and Expedition Map3D changes/notes remain outside this commit.
 Private evidence:local-art/ui-overhaul/hamlet-grass-v07/{grass-sources.json,grass-crops.jpg,ground-source.json,
 layout.json,composition.json,hamlet-grass-v07.png,hamlet-grass-v07.blend,core-tests.log,ui-tests.log,release-build.log}.
@@ -5602,7 +5605,8 @@ layout.json,composition.json,hamlet-grass-v07.png,hamlet-grass-v07.blend,core-te
 
 Round226 grass code is committed/pushed as51822ee; native installation and acceptance now pass. Current
 evidence is local-art/ui-overhaul/hamlet-grass-v07, including accepted-native.png/log, accepted-player.log,
-accepted-allocations.json and deployed-hashes.json. DD2 is stopped. No save access/restore is pending.
+accepted-allocations.json and deployed-hashes.json. A subsequent ordinary DD2 PID85280 is running; leave it
+untouched. post-map-build-hashes.json records the independent map deployment. No save access/restore is pending.
 Read tools/hamlet_3d.md and preserve independent agents' dirty files. Saved transactions, finer art/variants
 and full frame-time/long-session memory acceptance remain separate.
 
