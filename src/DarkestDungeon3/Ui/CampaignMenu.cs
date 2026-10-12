@@ -19,7 +19,7 @@ using UnityEngine.UI;
 namespace DarkestDungeon3.Ui;
 
 /// <summary>Native menu entry, estate management, and an asset gate before DD1's campaign handoff.</summary>
-internal sealed class CampaignMenu : MonoBehaviour
+internal sealed partial class CampaignMenu : MonoBehaviour
 {
     public static CampaignMenu Instance { get; private set; }
     public bool IsOpen => _view != View.Closed;
@@ -49,7 +49,7 @@ internal sealed class CampaignMenu : MonoBehaviour
     private bool _reportedReady, _smokeOpened, _smokeDismissed, _smokeReopened;
     private static readonly Color Ivory = new(.83f, .81f, .75f), Muted = new(.57f, .57f, .54f), Brass = new(.69f, .57f, .36f), Red = new(.66f, .22f, .16f);
     private bool ReadOnlyCheck => Plugin.DebugKeysEnabled.Value && Environment.GetCommandLineArgs()
-        .Any(arg => arg == "-dd3-menu-check" || arg == "-dd3-menu-preview");
+        .Any(arg => arg == "-dd3-menu-check" || arg == "-dd3-menu-preview" || arg == "-dd3-menu-input-check");
     private bool TorchCheck => ReadOnlyCheck && Environment.GetCommandLineArgs().Contains("-dd3-menu-check");
 
     private sealed class Row
@@ -83,6 +83,7 @@ internal sealed class CampaignMenu : MonoBehaviour
             _smokeOpened = true;
             _entry.onClick.Invoke();
         }
+        CheckMenuInput();
         if (!IsOpen) return;
         if (UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true) { Back(); return; }
         if (_view != View.Loading) return;
@@ -168,6 +169,11 @@ internal sealed class CampaignMenu : MonoBehaviour
         foreach (var localization in clone.GetComponentsInChildren<LocalizeTextBhv>(true)) { localization.enabled = false; UnityEngine.Object.Destroy(localization); }
         var button = clone.GetComponent<Button>();
         button.onClick = new Button.ButtonClickedEvent(); button.onClick.AddListener(action);
+        // Some native templates only raycast their decorative children. Cover the full button bounds.
+        var hit = clone.GetComponent<Image>() ?? clone.AddComponent<Image>();
+        if (button.targetGraphic != hit) hit.color = Color.clear;
+        hit.raycastTarget = true;
+        clone.AddComponent<CampaignButtonFeedback>();
         // Button handles submission; the native highlight component paints hover only.
         foreach (var highlight in clone.GetComponentsInChildren<HighlightableButtonBhv>(true))
         {
@@ -200,7 +206,7 @@ internal sealed class CampaignMenu : MonoBehaviour
         colors.pressedColor = Color.white;
         colors.disabledColor = new Color(Muted.r, Muted.g, Muted.b, .45f);
         button.colors = colors;
-        foreach (var label in button.GetComponentsInChildren<TMP_Text>(true)) label.color = Color.white;
+        button.GetComponent<CampaignButtonFeedback>().Initialize(button, colour);
     }
 
     private void BuildScreens()
@@ -357,6 +363,12 @@ internal sealed class CampaignMenu : MonoBehaviour
             var button = row.Button = ink.gameObject.AddComponent<Button>();
             button.targetGraphic = ink;
             button.onClick.AddListener(() => Select(row));
+            button.gameObject.AddComponent<EstateDoubleClick>().Initialize(() =>
+            {
+                if (_view != View.Estates) return;
+                Select(row);
+                EnterSelected();
+            });
             row.Mark = Label(button.transform, new Rect(20, 28, 65, 55), "I", 36, Muted, true);
             row.Name = Label(button.transform, new Rect(90, 14, 630, 58), row.Title, 37, Ivory, true);
             Label(button.transform, new Rect(94, 68, 600, 27), row.Error != null ? "Save unavailable" : $"Week {row.Save?.Estate.Week + 1}", 22, Muted);

@@ -5669,3 +5669,42 @@ shared plugin backup is expedition-motion-v01-plugin/20261012-073815.zip; config
 local-art/expedition-motion-v01/config-before-qa.cfg. No saves were accessed. Once DD2 is safely closed, install
 the manifest/five PNGs, verify deployed hashes and run -dd3-expedition-check plus native visual acceptance.
 Close only the owned QA PID and restore a normal launch. Preserve the independent Hamlet/Shieldbreaker work.
+
+## Round228 (2026-10-12): Hamlet hover, estate double-click and expedition roster swaps
+
+Owner requested three small input fixes. CampaignMenu cloned native buttons now own a transparent full-rect
+raycast surface and explicit ivory/brass TMP feedback for pointer hover and controller selection. Native banner
+art and highlight components remain. Estate rows accept only a left double-click; it selects that row and calls
+the same guarded EnterSelected/BeginLoading path as the Return button. Single click still only selects, right
+double-click does nothing, and unreadable saves cannot enter. Loading assets and gameplay handoff are unchanged.
+
+The formation already swapped party portraits, but roster payloads for heroes already in the party were rejected.
+DropHero now resolves membership by hero ID regardless of pickup source. Core ExpeditionFormation owns the bounded
+four-rank swap/replace/append operation; other ranks retain their positions and existing heroes cannot duplicate.
+Existing availability, missing-week and quest-refusal guards remain. Carried portraits use identity and the tooltip
+now describes swapping. Shared Drag behavior is unchanged.
+
+Verification: all1080 Core and187 UI tests pass, plus Release with three existing unrelated warnings. Nine new Core
+cases cover swaps in both directions, full-party replacement, packed empty ranks, same-rank drops and bad input.
+Native -dd3-menu-input-check passed actual EventSystem handlers for hover/reset/controller focus, single selection,
+right double-click, invalid synthetic summary and selected-row double-click through the torch gate. The first fixture
+attempt tested the deliberately disabled native entry while the picker was open; the fixture now temporarily uses
+its normal enabled state and restores it. Native -dd3-roster-check passed real IMGUI mouse down/drag/up, selected
+roster swaps, replacements, fast releases, outside/Escape cancellation, click removal, empty rank and return to roster.
+Its first attempt put the final release below the roster area; it now uses the actual Area.center. These were fixture
+corrections, with no additional gameplay changes. Final native screenshot inspected; logs contain both PASS markers.
+ExpeditionPreview now injects its synthetic event before Drag.Begin and runs Overlay before restoring the real event.
+
+Both fixtures use synthetic estates/transient roster data, no estate path, and the existing no-Persist guard. Native
+estate-file selection/handoff was deliberately not repeated. Ordinary PID85280 had already exited before deployment.
+Owned QA PIDs90412/89568/88908/83932 are closed; live process inspection finds DD2 stopped. Config SHA256 is unchanged;
+deployed plugin/Core DLL hashes match the final build. No saves were accessed and no restore is pending. No round227
+VFX pack was installed. Independent Shieldbreaker files and notes remain outside this commit. Private evidence:
+local-art/ui-overhaul/menu-roster-input-v01/{menu-accepted.log,roster-accepted.log,roster-accepted.png,deployed-hashes.json}.
+
+## Status 2026-10-12: round228 input fixes installed and native checks pass
+
+The three requested input fixes are installed. All1080 Core+187 UI and native synthetic menu/roster checks pass.
+DD2 is stopped, owner config unchanged, no estate read/written and no save restore pending. Keep normal launches free
+of -dd3-menu-input-check/-dd3-roster-check. Round227 VFX installation/full map acceptance remains separate; preserve
+the independent Shieldbreaker work and pending art/model checks. Next work should follow the owner's next request.

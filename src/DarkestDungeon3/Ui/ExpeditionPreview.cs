@@ -12,7 +12,7 @@ namespace DarkestDungeon3.Ui;
 [HarmonyPatch(typeof(UiRoot), "OnGUI")]
 internal static class ExpeditionPreview
 {
-    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-expedition-preview") || ExpeditionMapCheck.Enabled;
+    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-expedition-preview") || ExpeditionMapCheck.Enabled || ExpeditionPartyCheck.Enabled;
     private static EmbarkUi _ui;
     private static SaveFile _save;
     private static bool _closed;
@@ -44,18 +44,24 @@ internal static class ExpeditionPreview
             _ui = EmbarkUi.ForPreview(estate);
             Plugin.Log.LogInfo($"[expedition preview] transient campaign: {estate.Quests.Count} quests; no estate path selected");
         }
-        Gui.Begin(); Drag.Begin(); GUI.depth = -1000;
+        Gui.Begin(); GUI.depth = -1000;
         Gui.BlockInput(true);
         var originalEvent = Event.current;
         _previousBackground ??= Application.runInBackground;
         Application.runInBackground = true;
         try
         {
-            var checkInput = ExpeditionMapCheck.Input(_ui);
+            var checkInput = ExpeditionPartyCheck.Enabled ? ExpeditionPartyCheck.Input() : ExpeditionMapCheck.Input(_ui);
             ExpeditionMapCheck.BeginDraw();
             if (checkInput != null) Event.current = checkInput;
+            Drag.Begin();
             _ui.Draw();
-            if (checkInput != null) ExpeditionMapCheck.Verify(_ui);
+            Drag.Overlay();
+            if (checkInput != null)
+            {
+                if (ExpeditionPartyCheck.Enabled) ExpeditionPartyCheck.Verify(_ui);
+                else ExpeditionMapCheck.Verify(_ui);
+            }
             ExpeditionSkin.Text(new Rect(40, 950, 380, 32), "UI preview · Unsaved", 21, ExpeditionSkin.Muted);
             if (_ui.WantsBack)
             {
@@ -65,9 +71,9 @@ internal static class ExpeditionPreview
                 ExpeditionMapEffects.Clear();
             }
         }
-        catch (Exception e) { ExpeditionMapCheck.Failed(); Plugin.Log.LogError("[expedition preview] " + e); }
+        catch (Exception e) { ExpeditionMapCheck.Failed(); ExpeditionPartyCheck.Failed(); Plugin.Log.LogError("[expedition preview] " + e); }
         finally { Event.current = originalEvent; }
-        Drag.Overlay(); Gui.DrawTip();
+        Gui.DrawTip();
         return false;
     }
 }

@@ -1,5 +1,17 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round228 quick input fixes are installed and verified with native synthetic fixtures. Hamlet buttons now have
+brass text hover/controller feedback and a full-rect hit surface; estate rows accept left double-click through
+the existing torch gate. Expedition formation swaps also work when a selected hero is dragged from the roster.
+All1080 Core+187 UI tests and Release pass. -dd3-menu-input-check passed hover/reset/focus and single/right/
+invalid/double-click cases; -dd3-roster-check passed real IMGUI swaps, replacement, fast release, cancellation,
+click removal, empty-rank addition and return to roster. Both fixtures select no estate path and never persist.
+Ordinary PID85280 had exited before deployment; owned QA PIDs90412/89568/88908/83932 are closed and DD2 is
+stopped. Config hashes are unchanged; no estate access or restore. Private evidence:
+local-art/ui-overhaul/menu-roster-input-v01. Do not leave debug preview/check flags on a normal game launch.
+The round227 map VFX pack/full native acceptance still belongs to that separate task; this input pass did not
+install the VFX pack. Preserve the independent uncommitted Shieldbreaker work and notes.
+
 Round227 expedition work is built and tested offline; read tools/expedition_map3d.md. One persistent valley
 image now has a continuous retargetable camera, fixed quest controls and optional native fire/smoke/mist/cloud
 atlases. The private pack is local-art/expedition-vfx-v01; copy only its manifest and five top-level PNGs to the

@@ -161,18 +161,16 @@ internal sealed partial class EmbarkUi
     {
         var h = E.Hero(drag.HeroId);
         if (h == null) return;
-        if (drag.FromSlot >= 0)
+        if (_party.Contains(h.Id))
         {
-            int from = _party.IndexOf(h.Id);
-            if (from < 0) return;
-            int to = Mathf.Min(rank, _party.Count - 1);
-            (_party[from], _party[to]) = (_party[to], _party[from]);
+            // The same selected hero can be picked up from either its portrait or the roster.
+            ExpeditionFormation.Drop(_party, h.Id, rank);
+            _error = null;
             return;
         }
-        if (_party.Contains(h.Id) || !h.IsAvailable || h.MissingWeeks > 0) return;
+        if (drag.FromSlot >= 0 || !h.IsAvailable || h.MissingWeeks > 0) return;
         if (_quest != null && !Homecoming.WillEmbark(h, _quest, S.Hamlet.AnyResolveCanEmbark)) { _error = $"{h.Name} refuses this quest."; return; }
-        if (rank < _party.Count) _party[rank] = h.Id;          // replaces whoever stood there
-        else if (_party.Count < 4) _party.Add(h.Id);
+        ExpeditionFormation.Drop(_party, h.Id, rank);
         _error = null;
     }
 
@@ -384,11 +382,11 @@ internal sealed partial class EmbarkUi
                 var icon = Art.HeroIcon(cls);
                 if (icon != null) Art.DrawSprite(new Rect(rect.x + 4, rect.y + 4, 72, 72), icon);
             });
-            bool carried = Drag.Payload is HeroDrag hd && hd.FromSlot == rank;
+            bool carried = Drag.Payload is HeroDrag hd && hd.HeroId == h.Id;
             var sprite = Art.HeroIcon(h.ClassId);
             if (sprite != null && !carried) Art.DrawSprite(new Rect(r.x + 4, r.y + 4, 72, 72), sprite);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
-                ExpeditionSkin.Tip(r, $"{h.Name} · Rank {rank + 1}\nDrag to move · Click to remove\nRight-click to inspect equipment");
+                ExpeditionSkin.Tip(r, $"{h.Name} · Rank {rank + 1}\nDrag onto another hero to swap · Click to remove\nRight-click to inspect equipment");
             if (Gui.Hotspot(r) && !Drag.JustDropped) { _party.RemoveAt(rank); break; }
         }
     }
