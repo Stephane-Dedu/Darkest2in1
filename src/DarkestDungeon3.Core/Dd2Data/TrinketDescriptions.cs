@@ -13,6 +13,7 @@ public sealed class TrinketDescriptions
 {
     private readonly Dictionary<(string, string), List<string[]>> _blocks = new();
     private readonly Dictionary<string, string> _english = new();
+    private bool _heroContent;
     private static readonly HashSet<string> ValueStats = new()
     {
         "speed", "speed_tie_breaker", "speed_number_of_turns", "health_damage", "health_damage_range",
@@ -21,9 +22,9 @@ public sealed class TrinketDescriptions
         "affinity_relationship_tag_extra_duration", "token_limit", "kingdom_actor_travel_distance",
     };
 
-    public static TrinketDescriptions Load(string streamingAssets)
+    public static TrinketDescriptions Load(string streamingAssets, bool includeHeroes = false)
     {
-        var data = new TrinketDescriptions();
+        var data = new TrinketDescriptions { _heroContent = includeHeroes };
         string excel = Path.Combine(streamingAssets, "Excel");
         foreach (string file in new[] { "trinkets", "buff", "condition", "effect", "dots", "trinkets_actor_effect_trigger" })
             foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, file + "_data_export.Group.csv")))
@@ -35,6 +36,9 @@ public sealed class TrinketDescriptions
         // effect tables remain authoritative; no boss buffs or actor libraries are imported here.
         foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(Path.Combine(excel, "boss_blessing_data_export.Group.csv")))
             if (type == "Effect" && !data._blocks.ContainsKey((type, id))) data._blocks[(type, id)] = lines;
+        if (includeHeroes)
+            foreach (string file in HeroPathCatalog.Files(excel))
+                foreach (var (id, type, _, lines) in Dd2Tables.BlockLines(file)) data._blocks[(type, id)] = lines;
         string sources = Path.Combine(streamingAssets, "Localization", "Sources");
         // Sources are DD2's English fallback. Runtime localization takes precedence in Text.
         foreach (string file in Directory.Exists(sources) ? Directory.GetFiles(sources, "*.txt") : Array.Empty<string>())
@@ -91,6 +95,82 @@ public sealed class TrinketDescriptions
         string note = Text("item_description_" + id, localize);
         if (!string.IsNullOrEmpty(note)) lines.Add(Plain(note));
         return lines.Count == 0 ? null : string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    public string PathEffects(string id, out bool complete, Func<string, string> localize = null)
+    {
+        complete = true;
+        string authored = Text("hero_path_" + id + "_tooltip_override", localize);
+        if (!string.IsNullOrWhiteSpace(authored)) return Plain(authored);
+        var lines = new List<string>();
+        string external = Field("ActorDataPath", id, "m_ExternalBuffsId") ?? id;
+        foreach (string buff in Values("DataExternalBuffs", external, "buffs"))
+        {
+            string description = Text("buff_desc_" + buff + "_override", localize);
+            if (description != null) { lines.Add(Plain(description)); continue; }
+            if (!AddStats(buff, lines, localize)) complete = false;
+            AddTriggered(buff, lines, ref complete, localize);
+        }
+        AddTriggered(Field("ActorDataPath", id, "m_ActorDataEffectsId") ?? id, lines, ref complete, localize);
+        return string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
+    }
+
+    /// <summary>Cold-menu skill preview. Uses native stats, targeting and the shared effect formatter.</summary>
+    public string SkillEffects(string id, out bool complete, Func<string, string> localize = null)
+    {
+        complete = _blocks.ContainsKey(("ActorDataSkill", id));
+        if (!complete) return null;
+        var lines = new List<string>();
+        string Ranks(string key) => string.Join(", ", Values("ActorDataSkill", id, key));
+        string launch = Ranks("launch_ranks"), target = Ranks("target_ranks");
+        lines.Add("From ranks " + (launch.Length > 0 ? launch : "any"));
+        bool friendly = Field("ActorDataSkill", id, "m_IsFriendly") == "True";
+        if (target.Length > 0) lines.Add((friendly ? "Ally ranks " : "Enemy ranks ") + target +
+            (Field("ActorDataSkill", id, "m_IsMultiHit") == "True" ? " (all)" : ""));
+        else if (Field("ActorDataSkill", id, "m_IsFriendlySelfTargetValid") == "True") lines.Add("Self");
+        var stats = new Dictionary<string, float>();
+        string statsId = Field("ActorDataSkill", id, "m_ActorDataStatsId") ?? id;
+        if (_blocks.TryGetValue(("ActorDataStats", statsId), out var statRows))
+        {
+            string[] keys = Array.Empty<string>();
+            foreach (var row in statRows)
+                if (row[0] == "key_map") keys = row.Skip(1).ToArray();
+                else if (row[0] == "add_stats")
+                    for (int i = 0; i < keys.Length && i + 1 < row.Length; i++)
+                        if (float.TryParse(row[i + 1], NumberStyles.Float, CultureInfo.InvariantCulture, out var value)) stats[keys[i]] = value;
+        }
+        if (stats.TryGetValue("health_damage", out float damage) && damage > 0)
+        {
+            stats.TryGetValue("health_damage_range", out float range);
+            lines.Add($"Damage {(int)damage}–{(int)(damage + range)}");
+        }
+        if (stats.TryGetValue("crit_chance", out float crit) && crit > 0) lines.Add("Crit " + (crit * 100).ToString("0.#", CultureInfo.InvariantCulture) + "%");
+        string cooldown = Field("ActorDataSkill", id, "m_Cooldown"), limit = Field("ActorDataSkill", id, "m_Limit");
+        if (cooldown != null && cooldown != "0") lines.Add("Cooldown " + cooldown);
+        if (limit != null && limit != "0") lines.Add("Uses " + limit);
+        AddTriggered(Field("ActorDataSkill", id, "m_ActorDataEffectsId") ?? id, lines, ref complete, localize);
+        foreach (string group in new[] { "performer_buffs", "target_buffs" })
+            foreach (string buff in Values("ActorDataSkill", id, group))
+            {
+                var buffLines = new List<string>();
+                string authored = Text("buff_desc_" + buff + "_override", localize);
+                if (authored != null) buffLines.Add(Plain(authored));
+                else
+                {
+                    if (!AddStats(buff, buffLines, localize)) complete = false;
+                    AddTriggered(buff, buffLines, ref complete, localize);
+                    string condition = Field("Buff", buff, "m_ConditionId") ?? buff;
+                    if (_blocks.ContainsKey(("Condition", condition)))
+                    {
+                        string conditional = WithCondition(condition, string.Join("\n", buffLines), localize);
+                        buffLines.Clear();
+                        if (conditional != null) buffLines.Add(conditional); else complete = false;
+                    }
+                }
+                lines.AddRange(buffLines.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => (group == "performer_buffs" ? "Self: " : "Target: ") + s));
+            }
+        if (!complete) lines.Add("Additional conditional effects apply in combat.");
+        return string.Join("\n", lines.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 
     private void AddTriggered(string id, List<string> lines, ref bool complete, Func<string, string> localize, int depth = 0)
@@ -171,6 +251,13 @@ public sealed class TrinketDescriptions
     private void AddEffectGroup(string title, bool friendly, IEnumerable<string> effects, bool limited,
         List<string> lines, ref bool complete, Func<string, string> localize, int depth)
     {
+        // Native skill descriptions deliberately omit invisible bookkeeping effects (consume Combo,
+        // mode cleanup, counters). Their absence is not a missing player-facing condition.
+        if (_heroContent)
+        {
+            effects = effects.Where(id => Field("Effect", id, "m_IsVisible") != "False").ToList();
+            if (!effects.Any()) return;
+        }
         if (limited)
         {
             string separator = Plain(Text("spaced_or_label", localize));

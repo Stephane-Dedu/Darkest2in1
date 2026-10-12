@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round234 adds all 42 native DD2 specialisations alongside Resolve/Guild progression, plus the missing owned
+Abomination and Duelist recruits. All 15 installed native DD2 classes are in the coach pool when owned; Bounty
+Hunter remains permanent with Professional. Existing offers remain until the normal weekly refresh. Guild ->
+hero -> Choose Path, Resolve 2, 1,000 gold before discount. Real native replacements/effects preserve canonical
+learned/mastered/equipped progress; Abomination has independent human/beast kits and HUD, automatic Transform/
+Revert. Monarch Oath survives between-battle reconstruction/checkpoints but resets after homecoming.
+Release + 1,133 Core + 188 UI and final unsaved real Guild confirmation/114 native Path/mastery actor cases pass.
+Native Abomination/Duelist/Crusader/Bounty Hunter expedition party inspected; DLL/PDB/config/native profile checks
+recorded privately, owned QA closed, no estate accessed. Final actor-only rerun avoids OS input while the owner
+is active. Native uninstall/quit exceptions follow PASS; the process closes before the final form HUD capture.
+Shutdown/final HUD visual, cold rare conditional tooltip details, full ordinary combat/balance, controller and
+long-session acceptance remain open. Owner requests no launches before 2026-10-12 19:18 UTC / 21:18 Europe/Paris.
+Read tools/hero_paths.md and
+local-art/hero-paths-v01. Independent Shieldbreaker WIP is deliberately outside this commit; preserve it.
+
 Round233 rebuilds all24 native corridors with ground beneath distant scenery and softened card/horizon joins;
 32 typed room PNGs remain unchanged. Shared native fire/smoke/spark/mist/cloud atlases animate travel and the
 same in-place battle backdrop, with frozen crop and continuous effect time. Native mesh projections anchor16

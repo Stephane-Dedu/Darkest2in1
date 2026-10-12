@@ -24,6 +24,9 @@ internal static class HeroSkills
         public string Id;
         public Sprite Icon;
         public bool Starting;
+        public bool MasteredByDefault;
+        public bool AlwaysEquipped;
+        public string ModeId;
     }
 
     /// <summary>The class's combat skills (starting first), or null while its resource loads.</summary>
@@ -41,8 +44,14 @@ internal static class HeroSkills
             {
                 if (s == null) continue;
                 string id = s.GetSkillId();
+                bool mastered = id?.EndsWith("_u", System.StringComparison.Ordinal) == true;
+                if (mastered) id = id.Substring(0, id.Length - 2);
                 if (string.IsNullOrEmpty(id) || list.Any(x => x.Id == id) || IsMoveOrPass(id)) continue;
-                list.Add(new Skill { Id = id, Icon = s.m_SkillSprite, Starting = starting });
+                Core.Dd2Data.HeroPathCatalog.SkillDefinition metadata = null;
+                HeroPathBridge.Catalog?.Skills.TryGetValue(id, out metadata);
+                list.Add(new Skill { Id = id, Icon = s.m_SkillSprite, Starting = starting,
+                    MasteredByDefault = mastered || HeroPathBridge.Catalog?.CanMaster(id) == false,
+                    AlwaysEquipped = metadata?.AlwaysEquipped == true, ModeId = metadata?.ModeId });
             }
         }
         Add(res.m_StartingCombatSkills, true);
@@ -79,10 +88,28 @@ internal static class HeroSkills
 
     public static bool Knows(HeroRecord hero, Skill skill) => skill.Starting || hero.LearnedSkills.Contains(skill.Id);
 
+    public static List<string> Loadout(HeroRecord hero, IEnumerable<string> requested = null)
+    {
+        var skills = ForClass(hero.ClassId) ?? new();
+        var known = skills.Where(s => Knows(hero, s)).Select(s => s.Id).ToList();
+        var choose = requested ?? (hero.EquippedSkills.Count > 0 ? hero.EquippedSkills : skills.Where(s => s.Starting).Select(s => s.Id));
+        return HeroPathBridge.Catalog?.Loadout(hero.ClassId, choose, known) ?? choose.Where(known.Contains).Distinct().Take(EquipLimit).ToList();
+    }
+
+    public static string ModeName(Skill skill) => skill.ModeId == null ? null : Ui.HamletUi.Pretty(skill.ModeId.Substring(skill.ModeId.LastIndexOf('_') + 1));
+
+    public static IReadOnlyList<string> EquippedForCurrentMode(ActorInstance actor) => actor.GetEquippedCombatSkillIds(null,
+        getBaseSkillIds: false, isModeValid: true, includeMoveSkills: false, includePassSkills: false,
+        includeCombatSkillInventory: false, includeTokenSkills: false);
+
     /// <summary>Put the hero's Guild progress on a fresh actor.</summary>
     public static void Apply(HeroRecord hero, ActorInstance actor)
     {
-        foreach (var id in hero.LearnedSkills)
+        // Work on the ordinary skills first. A Path replaces these IDs, including mastered variants.
+        // Explicitly select the class default so native editor/test overrides cannot choose a Path for us.
+        actor.SetActorPath(actor.ActorDataClass.DefualtActorDataPath, refundUnlockedSkills: false);
+        var classSkills = ForClass(hero.ClassId) ?? new();
+        foreach (var id in hero.LearnedSkills.Concat(classSkills.Where(s => s.Starting).Select(s => s.Id)).Distinct())
         {
             var skill = actor.GetCombatSkillInstance(id);
             if (skill != null && !skill.GetIsUnlocked())
@@ -98,10 +125,14 @@ internal static class HeroSkills
             if (unlock != null && unlock.RequirementIds.Contains(id) && actor.GetCombatSkillInstance(id) != null)
                 actor.UnlockSkill(unlock, SourceType.INN);
         }
-        if (hero.EquippedSkills.Count > 0)
+        HeroPathBridge.Apply(hero, actor);
+        var chosen = Loadout(hero);
+        if (chosen.Count > 0)
         {
             var unlocked = actor.GetUnlockedCharacterSheetCombatSkillIds();
-            var equip = hero.EquippedSkills.Where(id => unlocked.Contains(id) || unlocked.Contains(id + "_u")).Take(EquipLimit).ToList();
+            var baseIds = unlocked.Select(id => actor.GetCombatSkillInstance(id)).Where(s => s != null)
+                .Select(actor.GetCombatBaseSkillId).ToList();
+            var equip = chosen.Where(baseIds.Contains).ToList();
             if (equip.Count > 0)
             {
                 // DD2's call only equips, and a fresh hero already has a full loadout: clear it first.

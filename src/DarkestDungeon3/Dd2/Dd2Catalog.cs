@@ -32,21 +32,24 @@ internal sealed class Dd2Catalog : IHeroCatalog
 
     private readonly Dd1Lore _lore;
     private IReadOnlyList<string> _classes;
-    private bool _classesWithCrusader;
+    private int _classAvailability;
 
     public Dd2Catalog(Dd1Lore lore) => _lore = lore;
 
-    /// <summary>The stagecoach's classes (<see cref="RecruitClasses"/>): the Crusader once DD2's owned resources show
-    /// his DLC.</summary>
+    /// <summary>The stagecoach's classes, including each DLC hero once its owned DD2 resource is available.</summary>
     public IReadOnlyList<string> RecruitableClasses
     {
         get
         {
             bool crusader = ActorResources.Has(RecruitClasses.Crusader) == true;
-            if (_classes == null || crusader != _classesWithCrusader)
+            bool duelist = ActorResources.Has(RecruitClasses.Duelist) == true;
+            bool abomination = ActorResources.Has(RecruitClasses.Abomination) == true;
+            bool shieldbreaker = Dd1HeroClasses.Available(RecruitClasses.Shieldbreaker);
+            int availability = (crusader ? 1 : 0) | (duelist ? 2 : 0) | (abomination ? 4 : 0) | (shieldbreaker ? 8 : 0);
+            if (_classes == null || availability != _classAvailability)
             {
-                _classes = RecruitClasses.For(crusader, Dd1HeroClasses.Available(RecruitClasses.Shieldbreaker));
-                _classesWithCrusader = crusader;
+                _classes = RecruitClasses.For(crusader, shieldbreaker, duelist, abomination);
+                _classAvailability = availability;
                 Plugin.Log.LogInfo("[stagecoach] classes: " + string.Join(", ", _classes));
             }
             return _classes;

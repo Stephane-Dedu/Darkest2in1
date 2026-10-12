@@ -39,6 +39,7 @@ internal sealed class Session
     public Dd1Bestiary Bestiary;
     public Dd1Trinkets MemoryTrinkets;
     public Core.Dd2Data.Dd2Tables Dd2Data;
+    public Core.Dd2Data.HeroPathCatalog HeroPaths;
     public TownLayout TownLayout;
     public TownArtPack TownArt;
 
@@ -83,6 +84,7 @@ internal sealed class Session
                 s.Bestiary = Dd1Bestiary.Load(Path.Combine(pluginDir, "data", "monsters.json"));
                 Stage(8, "Reading DD2 heroes and equipment");
                 s.Dd2Data = Core.Dd2Data.Dd2Tables.Load(Path.Combine(streamingAssetsPath, "Excel"));
+                s.HeroPaths = Core.Dd2Data.HeroPathCatalog.Load(Path.Combine(streamingAssetsPath, "Excel"));
                 Stage(9, "Reading the town layout");
                 s.TownLayout = TownLayout.Load(dd1);
                 try { s.TownArt = TownArtPack.Load(hamletArtPath); }

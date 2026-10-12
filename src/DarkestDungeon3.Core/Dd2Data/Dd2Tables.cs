@@ -63,7 +63,8 @@ public sealed class Dd2Tables
     public static Dd2Tables Load(string excelDir)
     {
         var t = new Dd2Tables();
-        foreach (var file in Directory.Exists(excelDir) ? Directory.GetFiles(excelDir, "hero_*_data_export.Group.csv") : new string[0])
+        var heroFiles = HeroPathCatalog.Files(excelDir).Where(f => Path.GetFileName(f).StartsWith("hero_", StringComparison.Ordinal)).ToList();
+        foreach (var file in heroFiles)
             foreach (var (id, type, _, lines) in BlockLines(file))
             {
                 if (type != "ActorDataStats" || id.EndsWith("_corpse")) continue;
@@ -79,7 +80,7 @@ public sealed class Dd2Tables
                 if (c.Stats.ContainsKey("health_max")) t.Classes[id] = c;
             }
         // Every actor data file: its classes and skills (an enemy's skills live in the same file as the enemy).
-        foreach (var file in Directory.Exists(excelDir) ? Directory.GetFiles(excelDir, "*_data_export.Group.csv") : new string[0])
+        foreach (var file in (Directory.Exists(excelDir) ? Directory.GetFiles(excelDir, "*_data_export.Group.csv") : new string[0]).Concat(heroFiles).Distinct())
         {
             var classes = new List<string>();
             var skills = new List<string>();

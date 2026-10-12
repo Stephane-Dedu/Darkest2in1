@@ -45,7 +45,7 @@ internal static class HeroSheet
 
         // Header: name, class, resolve (campaign status).
         Gui.Text(At(76, 8, 600, 50), h.Name, 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(At(76, 58, 600, 34), HamletUi.Pretty(h.ClassId), 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        Gui.Text(At(76, 58, 600, 34), HamletUi.Pretty(h.ClassId) + " · " + Dd2.HeroPathBridge.Name(h.ClassId, h.PathId), 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
         Gui.Text(At(67, 132, 128, 56), h.ResolveLevel.ToString(), 46, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
         Gui.Text(At(67, 186, 128, 24), "Resolve", 17, Gui.Dd1Class, TextAnchor.MiddleCenter);
         var thresholds = S.Campaign.HeroResolveThresholds;
@@ -200,7 +200,7 @@ internal static class HeroSheet
         var locked = Ch("lockedskill.png");
         if (skills != null)
         {
-            var equipped = h.EquippedSkills.Count > 0 ? h.EquippedSkills : skills.Where(s => s.Starting).Take(Dd2.HeroSkills.EquipLimit).Select(s => s.Id).ToList();
+            var equipped = Dd2.HeroSkills.Loadout(h).Concat(skills.Where(s => s.AlwaysEquipped && Dd2.HeroSkills.Knows(h, s)).Select(s => s.Id)).ToList();
             for (int i = 0; i < skills.Count && i < 14; i++)
             {
                 var s = skills[i];
@@ -208,13 +208,13 @@ internal static class HeroSheet
                 bool known = Dd2.HeroSkills.Knows(h, s);
                 var old = GUI.color;
                 if (!known) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
-                if (s.Icon != null) Art.DrawSprite(r, s.Icon);
+                if (s.Icon != null) Art.DrawSprite(r, Dd2.HeroPathBridge.Icon(h, s));
                 GUI.color = old;
                 if (!known && locked != null) GUI.DrawTexture(new Rect(r.x + 20, r.y + 20, 32, 32), locked);
                 if (known && equipped.Contains(s.Id) && selected != null) GUI.DrawTexture(new Rect(r.x - 10, r.y - 10, r.width + 20, r.height + 20), selected);
-                if (h.MasteredSkills.Contains(s.Id)) Gui.Text(new Rect(r.x + 36, r.y + 48, 36, 24), "+", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
+                if (h.MasteredSkills.Contains(s.Id) || s.MasteredByDefault) Gui.Text(new Rect(r.x + 36, r.y + 48, 36, 24), "+", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
                 if (r.Contains(Event.current.mousePosition))
-                    Tip($"{Dd2.HeroSkills.Name(s.Id)}{(h.MasteredSkills.Contains(s.Id) ? " (mastered)" : "")}\n{(known ? equipped.Contains(s.Id) ? "Brought on expeditions" : "Known" : "Learn it at the Guild")}");
+                    Tip($"{Dd2.HeroSkills.Name(s.Id)}{(h.MasteredSkills.Contains(s.Id) ? " (mastered)" : "")}\n{(known ? equipped.Contains(s.Id) ? "Brought on expeditions" : "Known" : "Learn it at the Guild")}\n" + Dd2.HeroPathBridge.SkillDescription(Dd2.HeroPathBridge.SkillId(h, s.Id)));
             }
         }
         Title(1060, 286, "Camping skills");

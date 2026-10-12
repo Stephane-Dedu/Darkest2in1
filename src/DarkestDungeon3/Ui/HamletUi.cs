@@ -743,11 +743,14 @@ internal sealed partial class HamletUi
     {
         var hero = HeroSlot("str_help_town_guild_1", "[DRAG] a hero from your roster into the Guild to see their combat skills.");
         if (hero == null) return;
-        HeroVerbose(hero, Buildings.Guild);
         if (_guildHero != hero.Id) { _guildHero = hero.Id; _guildScroll = Vector2.zero; }
+        if (_guildPaths) { DrawGuildPaths(hero, hamlet); return; }
+        DrawGuildPathSummary(hero);
         var skills = Dd2.HeroSkills.ForClass(hero.ClassId);
         if (skills == null) return;
-        string loadout = hero.EquippedSkills.Count == 0 ? "Default skills" : $"Brings {hero.EquippedSkills.Count}/{Dd2.HeroSkills.EquipLimit} skills";
+        var chosen = Dd2.HeroSkills.Loadout(hero);
+        bool forms = skills.Any(s => s.ModeId != null);
+        string loadout = hero.EquippedSkills.Count == 0 ? "Default skills" : forms ? $"Brings {chosen.Count} skills across forms" : $"Brings {chosen.Count}/{Dd2.HeroSkills.EquipLimit} skills";
         Gui.Text(W(926, 112, 230, 28), loadout, 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
         if (hero.EquippedSkills.Count > 0 && Gui.DdButton(W(1172, 112, 180, 30), "Default skills", true, 18))
         {
@@ -773,8 +776,8 @@ internal sealed partial class HamletUi
         for (int i = 0; i < skills.Count; i++)
         {
             var skill = skills[i];
-            bool known = Dd2.HeroSkills.Knows(hero, skill), mastered = hero.MasteredSkills.Contains(skill.Id);
-            bool equipped = hero.EquippedSkills.Contains(skill.Id);
+            bool known = Dd2.HeroSkills.Knows(hero, skill), mastered = hero.MasteredSkills.Contains(skill.Id) || skill.MasteredByDefault;
+            bool equipped = skill.AlwaysEquipped || chosen.Contains(skill.Id);
             float x = 44, y = 4 + i * 91;
             string learnWhy = known ? null : hamlet.WhyCantLearnSkill(hero, skill.Id);
             string masterWhy = !known || mastered ? null : hamlet.WhyCantMasterSkill(hero, skill.Id, known);
@@ -793,7 +796,7 @@ internal sealed partial class HamletUi
                 var old = GUI.color;
                 if (!has) GUI.color = canTry ? new Color(0.65f, 0.65f, 0.65f, 1f) : new Color(0.3f, 0.3f, 0.3f, 1f);
                 var marker = has ? purchased : canTry ? available : locked;
-                if (rank == 0 && skill.Icon != null) Art.DrawSprite(inner, skill.Icon);
+                if (rank == 0 && skill.Icon != null) Art.DrawSprite(inner, Dd2.HeroPathBridge.Icon(hero, skill));
                 else if (marker != null) GUI.DrawTexture(inner, marker);
                 else Gui.Fill(inner, new Color(0.15f, 0.12f, 0.09f));
                 GUI.color = old;
@@ -813,19 +816,22 @@ internal sealed partial class HamletUi
                 {
                     if (highlight != null) GUI.DrawTexture(inner, highlight);
                     string status = has ? "Purchased." : next ? why ?? "Click to buy." : "Learn the skill first.";
-                    tip = $"{Dd2.HeroSkills.Name(skill.Id)}\n{(rank == 0 ? "Learn" : "Master")}: {status}";
+                    string activeId = Dd2.HeroPathBridge.Catalog.SkillId(hero.ClassId, hero.PathId, skill.Id, rank == 1);
+                    tip = $"{Dd2.HeroSkills.Name(skill.Id)}\n{(rank == 0 ? "Learn" : "Master")}: {status}\n" + Dd2.HeroPathBridge.SkillDescription(activeId);
                 }
             }
             Gui.Text(new Rect(x + 156, y + 2, 230, 32), Dd2.HeroSkills.Name(skill.Id) + (mastered ? " +" : ""), 20, known ? Gui.Dd1Name : Gui.Dd1Class, TextAnchor.MiddleLeft, heading: true);
             if (known)
             {
-                bool full = !equipped && hero.EquippedSkills.Count >= Dd2.HeroSkills.EquipLimit;
+                bool full = !equipped && !Dd2.HeroSkills.Loadout(hero, chosen.Concat(new[] { skill.Id })).Contains(skill.Id);
                 var toggle = new Rect(x + 156, y + 36, 120, 28);
                 Gui.Fill(new Rect(toggle.x, toggle.y + 6, 16, 16), new Color(0.12f, 0.1f, 0.07f));
                 if (equipped) Gui.Fill(new Rect(toggle.x + 3, toggle.y + 9, 10, 10), Gui.Gold);
-                Gui.Text(new Rect(toggle.x + 22, toggle.y, 140, 28), equipped ? "Brought" : full ? "Left (5 chosen)" : "Left behind", 16, equipped ? Gui.Dd1Text : Gui.Dim, TextAnchor.MiddleLeft);
-                if (!full && Gui.Hotspot(toggle))
+                Gui.Text(new Rect(toggle.x + 22, toggle.y, 140, 28), skill.AlwaysEquipped ? "Always brought" : equipped ? "Brought" : full ? "Kit full" : "Left behind", 16, equipped ? Gui.Dd1Text : Gui.Dim, TextAnchor.MiddleLeft);
+                if (skill.ModeId != null) Gui.Text(new Rect(x + 156, y + 66, 220, 22), Dd2.HeroSkills.ModeName(skill) + " form", 14, Gui.Dim, TextAnchor.MiddleLeft);
+                if (!skill.AlwaysEquipped && !full && Gui.Hotspot(toggle))
                 {
+                    if (hero.EquippedSkills.Count == 0) hero.EquippedSkills.AddRange(chosen);
                     if (equipped) hero.EquippedSkills.Remove(skill.Id); else hero.EquippedSkills.Add(skill.Id);
                     S.Persist();
                 }

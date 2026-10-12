@@ -93,6 +93,7 @@ internal static class Dd2Heroes
 
         ApplyEquipment(hero, actor, fillHealth: condition == null);
         HeroSkills.Apply(hero, actor);
+        HeroPathExpedition.Restore(actor, condition?.MonarchOath);
         if (condition != null) ExpeditionActorRestore.Apply(actor, condition);
         else if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
     }
@@ -172,6 +173,7 @@ internal static class Dd2Heroes
         {
             Hp = dead ? 0 : actor.HpRaw, HpMax = hpMax,
             Stress = actor?.Stress ?? previous?.Stress ?? hero.Stress, WoundPercent = actor?.WoundPercent ?? previous?.WoundPercent ?? 0,
+            MonarchOath = actor != null ? HeroPathExpedition.Capture(actor) : previous?.MonarchOath?.Copy(),
             Outcome = new HeroOutcome
             {
                 HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null,

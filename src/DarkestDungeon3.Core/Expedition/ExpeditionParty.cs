@@ -12,6 +12,14 @@ public sealed class ExpeditionHeroState
 {
     public HeroOutcome Outcome = new();
     public float Hp, HpMax, Stress, WoundPercent;
+    /// <summary>Monarch's native Oath accumulates within this expedition, never across Hamlet weeks.</summary>
+    public MonarchOathState MonarchOath;
+}
+
+public sealed class MonarchOathState
+{
+    public int Stacks, Conditions;
+    public MonarchOathState Copy() => new() { Stacks = Math.Max(0, Math.Min(66, Stacks)), Conditions = Math.Max(0, Math.Min(66, Conditions)) };
 }
 
 public static class ExpeditionParty
@@ -49,7 +57,7 @@ public static class ExpeditionParty
     public static ExpeditionHeroState Copy(ExpeditionHeroState snapshot) => new()
     {
         Hp = snapshot.Hp, HpMax = snapshot.HpMax, Stress = snapshot.Stress, WoundPercent = snapshot.WoundPercent,
-        Outcome = CopyOutcome(snapshot.Outcome, snapshot.Stress)
+        Outcome = CopyOutcome(snapshot.Outcome, snapshot.Stress), MonarchOath = snapshot.MonarchOath?.Copy()
     };
 
     /// <summary>Use recorded condition for recovery/results; older saves retain only their estate evidence.</summary>

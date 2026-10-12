@@ -80,7 +80,9 @@ internal static class CampaignAssets
             if (ActorResources.LocationsReady)
             {
                 if (Heroes.Count == 0)
-                    Heroes.AddRange(RecruitClasses.For(ActorResources.Has(RecruitClasses.Crusader) == true)
+                    Heroes.AddRange(RecruitClasses.For(ActorResources.Has(RecruitClasses.Crusader) == true,
+                        ownsDuelist: ActorResources.Has(RecruitClasses.Duelist) == true,
+                        ownsAbomination: ActorResources.Has(RecruitClasses.Abomination) == true)
                         .Where(id => !RecruitClasses.IsDd1Only(id)));
                 foreach (string id in Heroes) Art.Portrait(id);
             }

@@ -5,13 +5,14 @@ namespace DarkestDungeon3.Core.Campaign.Town;
 
 /// <summary>
 /// The classes the stagecoach recruits from: DD2's base heroes; the Bounty Hunter as a permanent recruit (DD2 only
-/// hires him at the inn, as a mercenary; owner request 2026-10-10); the Crusader from DD2's DLC when the game owns it,
+/// hires him at the inn, as a mercenary; owner request 2026-10-10); Crusader, Duelist and Abomination when owned,
 /// so DD1's Crusader (Reynauld included) plays as himself rather than through the Man-at-Arms; and DD1's Shieldbreaker
 /// when DD1's DLC holds her (a DD2 class built from her DD1 data, drawn with her DD1 art).
 /// </summary>
 public static class RecruitClasses
 {
     public const string BountyHunter = "bounty_hunter", Crusader = "crusader", Shieldbreaker = "shieldbreaker";
+    public const string Duelist = "duelist", Abomination = "abomination";
 
     public static readonly IReadOnlyList<string> Base = new[]
     {
@@ -23,9 +24,11 @@ public static class RecruitClasses
 
     public static bool IsDd1Only(string classId) => classId != null && Dd1Only.Contains(classId);
 
-    public static IReadOnlyList<string> For(bool ownsCrusader, bool hasShieldbreaker = false) =>
+    public static IReadOnlyList<string> For(bool ownsCrusader, bool hasShieldbreaker = false, bool ownsDuelist = false, bool ownsAbomination = false) =>
         Base.Append(BountyHunter)
             .Concat(ownsCrusader ? new[] { Crusader } : new string[0])
+            .Concat(ownsDuelist ? new[] { Duelist } : new string[0])
+            .Concat(ownsAbomination ? new[] { Abomination } : new string[0])
             .Concat(hasShieldbreaker ? new[] { Shieldbreaker } : new string[0])
             .ToList();
 }

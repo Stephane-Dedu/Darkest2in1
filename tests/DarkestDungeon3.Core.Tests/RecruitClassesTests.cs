@@ -28,7 +28,35 @@ public class RecruitClassesTests
     {
         Assert.DoesNotContain(RecruitClasses.Crusader, RecruitClasses.For(ownsCrusader: false));
         Assert.Contains(RecruitClasses.Crusader, RecruitClasses.For(ownsCrusader: true));
-        Assert.DoesNotContain("duelist", RecruitClasses.For(ownsCrusader: true));   // the DLC's other hero was not asked for
+        Assert.DoesNotContain("duelist", RecruitClasses.For(ownsCrusader: true));   // ownership is checked per resource
+    }
+
+    private sealed class SingleClassCatalog : FakeCatalog, IHeroCatalog
+    {
+        private readonly string _classId;
+        public SingleClassCatalog(string classId) => _classId = classId;
+        IReadOnlyList<string> IHeroCatalog.RecruitableClasses => new[] { _classId };
+    }
+
+    [Theory]
+    [InlineData("abomination")]
+    [InlineData("duelist")]
+    [InlineData("crusader")]
+    [InlineData("bounty_hunter")]
+    public void ExtraNativeClassesUseTheOrdinaryWeeklyCoachAndPermanentRoster(string classId)
+    {
+        var install = Dd1Install.Find();
+        var estate = new Estate { Seed = 234 };
+        var hamlet = new Hamlet(estate, Dd1Campaign.Load(install), Buildings.Load(install), new SingleClassCatalog(classId));
+        hamlet.RefreshWeek();
+        Assert.NotEmpty(estate.Recruits);
+        Assert.All(estate.Recruits, hero => Assert.Equal(classId, hero.ClassId));
+        var recruit = estate.Recruits[0];
+        Assert.True(hamlet.Recruit(recruit.Id));
+        Assert.Same(recruit, Assert.Single(estate.Roster));
+        hamlet.RefreshWeek();
+        Assert.Same(recruit, Assert.Single(estate.Roster));
+        Assert.Null(recruit.PathId);
     }
 
     [Fact]

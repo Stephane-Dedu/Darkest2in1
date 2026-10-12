@@ -685,16 +685,19 @@ internal sealed class CrawlUi
     {
         var skills = Dd2.HeroSkills.ForClass(hero.ClassId);
         if (skills == null) return;
-        var equipped = actor.GetEquippedCombatSkillIds();
+        var equipped = Dd2.HeroSkills.EquippedForCurrentMode(actor);
         for (int i = 0; i < 5 && i < equipped.Count; i++)
         {
             string id = equipped[i];
-            string baseId = id.EndsWith("_u") ? id.Substring(0, id.Length - 2) : id;
+            string baseId = actor.GetCombatBaseSkillId(actor.GetCombatSkillInstance(id));
             var skill = skills.Find(sk => sk.Id == baseId);
             var r = new Rect(520 + i * 76, 755, 72, 72);
-            if (skill?.Icon != null) Art.DrawSprite(r, skill.Icon);
+            var icon = skill == null ? null : Dd2.HeroPathBridge.Icon(hero, skill);
+            if (icon != null) Art.DrawSprite(r, icon);
+            else Gui.Text(r, Dd2.HeroSkills.Name(baseId), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
             if (id.EndsWith("_u")) Gui.Text(new Rect(r.x + 40, r.y + 46, 30, 26), "+", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
-            if (r.Contains(Event.current.mousePosition)) _hudTip = Dd2.HeroSkills.Name(baseId) + (id.EndsWith("_u") ? " (mastered)" : "");
+            if (r.Contains(Event.current.mousePosition)) _hudTip = Dd2.HeroSkills.Name(baseId) + (id.EndsWith("_u") ? " (mastered)" : "")
+                + "\n" + Dd2.HeroPathBridge.SkillDescription(id);
         }
     }
 

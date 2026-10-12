@@ -5962,3 +5962,71 @@ depth and longer unique lateral travel remain fidelity work. Existing diffuse te
 native shader/effect/depth reconstruction. Ordinary pointer/controller gameplay, saved reload, normal skill kills
 and long-session/frame-time acceptance remain separate. Normal DD2 PID95604 is running untouched; preserve
 concurrent hero/Hamlet work and check live processes before deployment.
+
+## Round234 (2026-10-12): native DD2 Hero Paths and the complete owned hero roster
+
+Owner chose DD2 Paths alongside DD1 Resolve, equipment and Guild progression, then explicitly requested
+Abomination and any other missing DD2 classes. The installed expedition roster has 15 native classes.
+Abomination and Duelist join the normal weekly coach when their owned ResourceActor is available, alongside
+Crusader and permanent Bounty Hunter hires. Existing offers and heroes remain intact. Campaign asset loading
+prepares all owned DLC portraits. Cold Dd2Tables now includes expedition/DLC hero stats and skills, excluding
+Kingdom overrides. Completeness is checked against the installed selectable hero catalog, not only a count.
+
+HeroPathCatalog reads native defaults, class/tag eligibility, unlock IDs, ordered choices, comparison flags,
+423 ordinary/mastered replacement entries and mode/always-equipped metadata. All 42 specialisations across
+14 classes are available at Resolve 2. Bounty Hunter retains Professional; DD1 Shieldbreaker has no invented
+Path. The Guild previews native Path text and current/proposed skill effects, with one explicit Follow purchase
+for 1,000 gold before Guild discount. Only available roster heroes in an open Guild, outside an expedition,
+can retrain. Learned/mastered/equipped base IDs and all Resolve/equipment progress stay unchanged. Default
+choices serialize as null; older saves retain defaults. Invalid saved choices fall back without rewriting saves.
+
+Native actor creation selects the class default, unlocks starting/learned skills, applies mastery, then sets
+the chosen ActorDataPath and canonical loadout. Path-first mastery misses replaced base skills. DD2 itself
+supplies combat effects, buffs and replacements. Guild/hero sheet icons and tooltips resolve the active variant.
+The exploration HUD now uses native GetCombatBaseSkillId rather than suffix trimming, which previously left
+Path icons blank. Native current-mode filtering keeps each Abomination form's banner independent. Guild kits
+allow four chosen skills per form plus automatic Transform/Revert. Bounty Hunter's nonexistent mastery upgrades
+are not sold. Cold-menu effect text uses real native data/localization; rare unsupported conditions are marked
+as abbreviated. Native libraries supply the full formatter after host initialization.
+
+Audited reachable infinite-duration Path/hero buffs through skills, passives, effects and token edges. Of 41
+unique applied candidates, native combat-end cleanup handles Jester, Hellion, Abomination and Flagellant groups;
+the two Monarch Oath IDs persist. HeroPathExpedition captures/restores only those two, idempotently with native
+definitions and the 66-stack cap. Expedition/fight checkpoints deep-copy the state, interrupted fights roll
+back to pre-fight counts, and homecoming discards accumulation. HeroRecord stores no Oath progress.
+Matching REA managed artifact/member evidence was reused for IronCrown SHA256
+dd97e30f2f37e2a287633ab322b8fd18bcfe9e240903713a5c2ae00c894692e6,
+MVID c8627dd8-3822-4311-9403-8920d40a2892. Native details stay private; no game/decompiled data enters Git.
+
+Verification: Release passes with the three existing warnings; all 1,133 Core and 188 UI tests pass. New cases
+cover real-data roster/Path completeness, native replacements, owned DLC stats, refusal/payment/persistence,
+mode capacities, Oath JSON/copy/checkpoint rollback and normal weekly permanent recruitment of the four extra
+classes. Final unsaved 1600x900 -dd3-paths-check passes real Guild confirmation, all 57 default/specialisation
+choices in ordinary and mastered form (114 native actors), canonical skill/loadout/form HUD mapping and bounded
+idempotent Oath restoration. The earlier real-click check's Abomination/Duelist/Crusader/Bounty Hunter party and
+Guild captures were inspected. Final -dd3-paths-actors-check repeats actor/mode HUD assertions with rule-based
+confirmation, avoiding OS input while the owner is active, and prefers Unchained/Instructrice/Templar/Professional.
+No errors occur through the final PASS. The process exits before its final HUD capture; native IMainInstaller
+uninstall and OnApplicationQuit/audio exceptions follow PASS. Shutdown and final HUD visual acceptance remain
+open; do not claim a clean teardown or blame Paths without a reproduction. Full ordinary all-skill combat/
+balance, controller comfort, arbitrary text/window sizes and long-session performance remain unverified.
+
+Pre-native profile backup: universal-modder/backups/dd3-before-paths-check-native-profile/20261012-201404.zip
+(39 files). Final-plugin backup:dd3-before-paths-final-plugin/20261012-203558.zip (17 files). Deployment only
+with DD2 stopped. QA owns a transient save, refuses existing estates and guards its own persistence. OS input
+was restricted to the fixture's Follow button after more than a minute of idle. No DD3 estate read/selected/
+persisted, no protected estate access. Final installed DLL/PDB/config/profile checks and closed PID are recorded
+in local-art/hero-paths-v01/installation-final.json. Final owned QA PID95796 is no longer running; it was not
+killed by this agent. Owner requested no game launches for 30 minutes at 18:47 UTC; do not launch before
+2026-10-12 19:18 UTC (21:18 Europe/Paris). Native profile hashes match the original backup; no restore
+was needed. Shared Release includes independent Shieldbreaker WIP; those sources/tests/notes remain outside
+this commit. Private evidence:local-art/hero-paths-v01; maintenance and limits:tools/hero_paths.md.
+
+## Status 2026-10-12: round234 Hero Paths and all owned DD2 classes installed and native-verified
+
+Normal launch needs no QA flag. New DLC classes can appear at the next normal coach refresh; existing offers
+are retained. Guild -> hero -> Choose Path, Resolve 2, 1,000 gold before discount. Paths persist with heroes,
+including through expeditions. Abomination retains both forms and native transformations. All owned DD2 class
+defaults and specialisations passed native construction/mapping checks. Cold conditional tooltip completeness,
+ordinary full combat playthroughs, final HUD visual/shutdown and broader input/performance acceptance remain the limits above. Preserve
+independent Shieldbreaker work and recheck live processes before another deployment.

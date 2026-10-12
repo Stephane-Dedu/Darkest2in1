@@ -241,6 +241,14 @@ public sealed class Hamlet
     private float GuildDiscount => Tiers.TotalDiscount(Buildings.Data(Buildings.Guild)["combat_skill_cost_discount_upgrades"], Estate);
     private int Discounted(int gold) => (int)System.Math.Round(gold * System.Math.Max(0f, 1f - GuildDiscount));
 
+    public int PathTrainingCost => Discounted(HeroPaths.TrainingGold);
+
+    public string WhyCantTrainPath(HeroRecord hero, Core.Dd2Data.HeroPathCatalog catalog, string pathId, bool expeditionActive) =>
+        HeroPaths.Refusal(Estate, hero, catalog, pathId, expeditionActive, Buildings.IsOpen(Buildings.Guild, Estate), PathTrainingCost);
+
+    public bool TrainPath(string heroId, Core.Dd2Data.HeroPathCatalog catalog, string pathId, bool expeditionActive) =>
+        HeroPaths.Train(Estate, Estate.Hero(heroId), catalog, pathId, expeditionActive, Buildings.IsOpen(Buildings.Guild, Estate), PathTrainingCost);
+
     public int SkillLearnCost(HeroRecord hero, string skillId)
     {
         var tree = Dd1.HeroUpgrades?.SkillTree(hero.ClassId, skillId);
