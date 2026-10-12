@@ -4,8 +4,10 @@ Round227 expedition work is built and tested offline; read tools/expedition_map3
 image now has a continuous retargetable camera, fixed quest controls and optional native fire/smoke/mist/cloud
 atlases. The private pack is local-art/expedition-vfx-v01; copy only its manifest and five top-level PNGs to the
 active PrivateExpeditionArt/vfx after backup and DD2 shutdown. All1071 Core+187 UI and Release Deploy=false
-pass. -dd3-expedition-check is built but unrun, using only the existing unsaved fixture. Ordinary DD2 PID77236
-was in a battle and left untouched; restart approval is pending. No deployment/save access/restore occurred.
+pass. -dd3-expedition-check is built but unrun, using only the existing unsaved fixture. The Hamlet agent's
+later shared deploy includes this map code; its own native check passed. Normal DD2 PID85280 is now in battle
+and was left untouched. The VFX folder is still absent. Plugin/art/config backups are ready (MODLOG round227).
+No estate access or restore occurred. Installation/native expedition acceptance needs a safe restart window.
 Run native input/lifecycle and visual acceptance before marking verified; retain the owner's config choice,
 painted rollback, independent round226 Hamlet grass and Shieldbreaker changes. Restore normal launch after QA.
 

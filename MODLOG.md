@@ -5656,8 +5656,12 @@ local-art/expedition-vfx-v01/{vfx-manifest.json,native-vfx-evidence.json,seriali
 
 ## Status 2026-10-12: round227 expedition map ready; safe restart/native acceptance pending
 
-Code and the private native VFX pack are ready. DD2 PID77236 remains the owner's running battle. Deploy only
-after it is safely closed: back up active plugin/config/PrivateExpeditionArt, copy the manifest and five PNGs into
-PrivateExpeditionArt/vfx, build/deploy, run the unsaved expedition check and inspect native visuals. Close only
-the owned QA PID and restore a normal launch without check/preview flags. Keep protected estates untouched.
-Round226's Hamlet grass also awaits native acceptance; preserve that independent work and Shieldbreaker edits.
+Code is committed/pushed ase33ac7c; the private native VFX pack is ready. The Hamlet agent subsequently
+deployed a shared build including this map code (source/installed plugin SHA256 match20E4066B...), passed its
+unsaved Hamlet checks in PID86776 and restored normal DD2. Normal PID85280 has already entered battle and
+was left untouched. The VFX folder is still absent; the expedition-specific native check has not run.
+Before installation: PrivateExpeditionArt backup is universal-modder expedition-motion-v01-art/20261012-073814.zip;
+shared plugin backup is expedition-motion-v01-plugin/20261012-073815.zip; config copy is private
+local-art/expedition-motion-v01/config-before-qa.cfg. No saves were accessed. Once DD2 is safely closed, install
+the manifest/five PNGs, verify deployed hashes and run -dd3-expedition-check plus native visual acceptance.
+Close only the owned QA PID and restore a normal launch. Preserve the independent Hamlet/Shieldbreaker work.
