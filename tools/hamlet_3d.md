@@ -121,3 +121,38 @@ This establishes buffer stability, not a full frame-time or long-session memory 
 NPC idles, upgrade/event exteriors, the coarse Ancestor sculpt, individual trim painting and final lighting
 still need art work. Saved-campaign transactions/embark need separate acceptance. This preview checks
 presentation, routing and resource lifecycle without selecting an estate. Painted town remains immediate rollback.
+
+Round225 addresses building glow, the isolated plateau and fading road/wall paint. The GLB author's emission
+was a preview aid for native albedo, often1.2-1.55. `BuildingTint` normalizes that painted-only channel and
+uses ordinary base colour for architecture; genuinely brighter glass/flame keeps its light. Owned1024px
+paint copies modestly desaturate building textures without changing their private models or shared native assets.
+
+`HamletLandscape` extends the town's exact boundary into a continuous lower valley. Ten background placements
+reuse seven Valley tree groups and three low Camp treelines. Camp strips keep their original painted silhouette
+material and alpha through an owned Sprite material; grading the entire strip made pale overlapping rectangles
+in the first native iteration, which was rejected. The camera, service sites, game dispatch and HDR target are retained.
+
+Native rough-road stone now paints paths, tileable `bricks` paints the terrace faces, and
+`foundation_panel_06` paints the retaining courses and stairs. These are installed common-bundle textures,
+with dark ink joints and restrained shadow lift. Surface copies retain1024px paving/cliffs and512px masonry.
+The soil gets a one-time1024px world-space bake of native earth/gravel and broad damp/dry stains.
+All source images/exports, comparison captures and the packed offline scene stay private under
+`local-art/ui-overhaul/hamlet-landscape-v06/`.
+
+The owner's native screenshots revealed a shallow entrance being treated as stairs: four oversized treads
+stretched their height-based UVs across long top faces. Stairs now require a grade above0.18 as well as0.45
+rise. Gentle roads remain ramps. Real treads and landings are a separate surface using one course material;
+the continuous cobbled lane does not run through them. Box UVs use width/depth/height for their actual face,
+and all paving branches share world UVs with the square. A continuous diagonal wall projection avoids
+per-triangle atlas flips at cliff corners. It trades some side-face scale variation for uninterrupted courses.
+Six Core cases check valley continuity, finite unoccupied surroundings, building light treatment, road/stair/wall
+UV contracts, retained stone contrast and ground variation. The existing black-lift test now explicitly tests
+a requested grading operation, independently of the intentionally darker current stone palette.
+
+Final native1600x900 unsaved fixture passes all ten service clicks/Escape, pan/zoom/reset, painted rollback
+with complete resource release, reload/re-entry, Embark/cleanup/return and1440x900 resize/restore.
+The140 mesh renderers and four chimney plumes retain the same HDR target. Final probe records zero repeated
+URP allocations over5.024 seconds. Screenshots confirm the repaired entrance and separate stair flights.
+Release and all1044 Core+182 UI tests pass; both DLL/PDB pairs match installed hashes. Owned QA PID76868 is
+closed. No estate selected/read/saved. The packed offline scene contains all scenery with no missing exports.
+Saved transactions, finer art/variants and long-session/frame-time acceptance remain separate.

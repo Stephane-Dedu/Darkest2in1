@@ -1,4 +1,4 @@
-"""Export three installed DD2 surface textures for a private, reproducible offline town preview."""
+"""Export installed DD2 surface textures for a private, reproducible offline town preview."""
 import argparse
 import json
 from pathlib import Path
@@ -14,7 +14,7 @@ def main(game,out):
     bundles=game/'Darkest Dungeon II_Data/StreamingAssets/aa'
     names=['biome_common_assets_all.bundle','biome_valley_common_assets_all.bundle']
     env=UnityPy.load(*[str(bundles/name) for name in names])
-    wanted={'foundation_ground','farm_ground_hill_transition','cultist_barricade_rocks'}
+    wanted={'road_rough_patch','farm_ground_hill_transition','bricks','foundation_panel_06'}
     found={}
     for obj in env.objects:
         if obj.type.name!='Material': continue
@@ -28,7 +28,7 @@ def main(game,out):
             break
     if set(found)!=wanted: raise ValueError('Missing native surface materials: '+str(wanted-set(found)))
     (out/'ground-source.json').write_text(json.dumps({'bundles':names,'textures':found},indent=2))
-    print('Exported three native painted surfaces to',out)
+    print('Exported four native painted surfaces to',out)
 
 
 if __name__=='__main__':

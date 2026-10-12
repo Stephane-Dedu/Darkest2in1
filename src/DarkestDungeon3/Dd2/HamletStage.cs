@@ -38,11 +38,12 @@ internal sealed partial class HamletStage : MonoBehaviour
         public readonly string Id, Path, Include;
         public readonly Vector3 Position;
         public readonly float Width, Rotation, HeightScale, DepthScale;
-        public Piece(string id, string path, float x, float y, float z, float width, float rotation = 0, string include = null, float heightScale = 1, float depthScale = 1)
-        { Id = id; Path = path; Position = new(x, y, z); Width = width; Rotation = rotation; Include = include; HeightScale = heightScale; DepthScale = depthScale; }
+        public readonly bool Absolute, Background;
+        public Piece(string id, string path, float x, float y, float z, float width, float rotation = 0, string include = null, float heightScale = 1, float depthScale = 1, bool absolute = false, bool background = false)
+        { Id = id; Path = path; Position = new(x, y, z); Width = width; Rotation = rotation; Include = include; HeightScale = heightScale; DepthScale = depthScale; Absolute=absolute; Background=background; }
     }
     // Surrounding native scenery is separate from the ten private building models.
-    private static readonly Piece[] Pieces =
+    private static readonly Piece[] Pieces = new Piece[]
     {
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", -16, .04f, 8, 16, 90),
         new(null, Valley + "RoadTiles/road_valley_straight_single.prefab", 0, .04f, 8, 16, 90),
@@ -70,7 +71,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "DecorTiles/valley_tile_09.prefab", -1, -.2f, 41, 6, 15),
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", -59, -2, -7, 15, 15),
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", 49, -1, 25, 18, -25),
-    };
+    }.Concat(HamletLandscape.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
+        heightScale:p.HeightScale,absolute:true,background:true))).ToArray();
 
     private sealed class Building
     {
@@ -85,7 +87,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private readonly Dictionary<Renderer, Color> _baseTints = new();
     private readonly List<UnityEngine.Object> _details = new();
     private readonly Dictionary<Material, Material> _materials = new();
-    private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset;
+    private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset, _wallAsset;
     private Transform _root;
     private Camera _camera;
     private Camera _nativeView;
@@ -111,7 +113,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     public string Failure { get; private set; }
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
-    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _details.Count != 0
+    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _wallAsset.IsValid() || _details.Count != 0
         || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
@@ -177,9 +179,10 @@ internal sealed partial class HamletStage : MonoBehaviour
         foreach (var piece in Pieces)
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
-        _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/foundation_ground.mat");
+        _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Common/RoadEvents/road_rough_patch.mat");
         _earthAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/farm_ground_hill_transition.mat");
-        _rockAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Nodes/cultist_barricade_rocks.mat");
+        _rockAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/bricks.mat");
+        _wallAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/Panels/foundation_panel_06.mat");
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
     private void Update()
@@ -195,7 +198,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 var piece = Pieces[_piece];
                 var handle = _assets[piece.Path];
                 if (!handle.IsDone) return;
-                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone)) return;
+                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone || !_wallAsset.IsDone)) return;
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null) Build(piece, handle.Result);
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
@@ -284,7 +287,20 @@ internal sealed partial class HamletStage : MonoBehaviour
             copy.AddComponent<MeshFilter>().sharedMesh = mesh;
             var renderer = copy.AddComponent<MeshRenderer>();
             renderer.sharedMaterials = source.sharedMaterials.Select(TownMaterial).ToArray();
-            if (piece.Path.EndsWith("camp_sky.fbx"))
+            if (piece.Path.EndsWith("camp_treeline.fbx"))
+            {
+                renderer.sharedMaterials=source.sharedMaterials.Select(BackdropMaterial).ToArray();
+                foreach (var silhouette in renderer.sharedMaterials) silhouette.color=new Color(.7f,.82f,1,1);
+            }
+            else if (piece.Background)
+            {
+                renderer.sharedMaterials=renderer.sharedMaterials.Select(m=>
+                {
+                    var painted=new Material(m) { name="Hamlet distant woodland "+m.name }; _details.Add(painted);
+                    Grade(painted,HamletPalette.Woodland,false); return painted;
+                }).ToArray();
+            }
+            else if (piece.Path.EndsWith("camp_sky.fbx"))
                 renderer.sharedMaterials = source.sharedMaterials.Select(BackdropMaterial).ToArray();
             else if (piece.Path.StartsWith(Mountains))
                 foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Mountain);
@@ -293,7 +309,8 @@ internal sealed partial class HamletStage : MonoBehaviour
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
             var block = new MaterialPropertyBlock();
-            source.GetPropertyBlock(block); renderer.SetPropertyBlock(block);
+            if (!piece.Background) source.GetPropertyBlock(block);
+            renderer.SetPropertyBlock(block);
             var material = renderer.sharedMaterial;
             _baseTints[renderer] = material != null && material.HasProperty(Tint) ? block.HasColor(Tint) ? block.GetColor(Tint) : material.GetColor(Tint)
                 : material != null && material.HasProperty("_Color") ? material.GetColor("_Color") : Color.white;
@@ -310,7 +327,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         foreach (Transform child in group) child.localPosition -= shift;
         group.localScale = new Vector3(scale, scale * piece.HeightScale, scale * piece.DepthScale);
         group.localRotation = Quaternion.Euler(0, piece.Rotation, 0);
-        group.localPosition = piece.Position + Vector3.up * HamletLayout.Height(piece.Position.x, piece.Position.z);
+        group.localPosition = piece.Position + Vector3.up * (piece.Absolute?0:HamletLayout.Height(piece.Position.x, piece.Position.z));
         if (piece.Id != null)
         {
             var building = new Building { Id = piece.Id, Bounds = renderers[0].bounds };
@@ -461,7 +478,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_terrainAsset.IsValid()) Addressables.Release(_terrainAsset);
         if (_earthAsset.IsValid()) Addressables.Release(_earthAsset);
         if (_rockAsset.IsValid()) Addressables.Release(_rockAsset);
-        _terrainAsset = default; _earthAsset = default; _rockAsset = default;
+        if (_wallAsset.IsValid()) Addressables.Release(_wallAsset);
+        _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
         ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;

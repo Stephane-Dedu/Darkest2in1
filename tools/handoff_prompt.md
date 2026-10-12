@@ -4,17 +4,19 @@ The owner's timed launch pause expired on2026-10-11 at17:47:37 UTC /19:47:37 Par
 authorization applies. Round223 uses only the unsaved Hamlet fixture; retain estate protection and verify
 DD2 is stopped before deploying. Close only the exact owned QA PID; never select a campaign in this fixture.
 
-Round223 improves native Hamlet readability and coherence: bounded owned paint copies lift black filler,
-crop-corrected UVs and three tint bands clarify cliffs, winding Survivalist stairs/shared civic ascent and
-low walls frame the map, Valley leaf banks/native cliff ledges dress the edges, and four owned chimney
-plumes add movement. Native full service/control/rollback/reload/Embark/return and live resize/restore checks
-pass. Matching window size and DD2's actual HDR texture format removes repeated URP allocations: roughly
-480/sec at baseline to0 in the final probes. Main Menu Camera is untagged; Camera.main alone misses it.
-All1036 Core+182 UI pass, plus31 Hamlet cases after the UV refinement; Release has three unrelated warnings.
-Read tools/hamlet_3d.md before changing renderer ownership, paint or targets. Private v05 evidence lives in
-local-art/ui-overhaul/hamlet-immersion-v05. Keep Hamlet3D defaultfalse/localtrue, immediate Painted town rollback,
-and the other agents' dirty Expedition Map3D/Shieldbreaker changes. NPC/exterior variants, finer sculpture/trim,
-saved transactions and full frame-time/long-session memory acceptance remain separate.
+Round225 continues the Hamlet pass. Building albedo no longer adds the author's preview emission into roof/wall
+tints; real glass/forge light remains. A continuous valley ring and ten native wooded background placements
+replace the isolated plateau edge. Higher-contrast rough-road paving, tileable terrace stone and coursed retaining
+stone replace the faded atlas choices. Owned world-space earth/gravel paint adds broad stains. Gentle roads
+remain ramps; real stairs have separate treads/landings, correctly scaled face UVs and no intersecting cobble strip.
+Road branches share UVs, and walls no longer flip projection at individual triangle normals.
+Read tools/hamlet_3d.md before changing renderer ownership, paint or targets. Private current native/offline evidence:
+local-art/ui-overhaul/hamlet-landscape-v06. All1044 Core+182 UI pass; Release has three unrelated warnings.
+Round223's native HDR format/window-size fix remains: untagged Main Menu Camera means Camera.main alone misses
+the native view, and mismatched targets caused roughly480 repeated URP allocations/sec before the fix.
+Keep Hamlet3D defaultfalse/localtrue, immediate Painted town rollback and other agents' Expedition Map3D/Shieldbreaker
+changes. Round224 is the independent Shieldbreaker pass. NPC/exterior variants, finer sculpture/trim, saved
+transactions and full frame-time/long-session memory acceptance remain separate.
 
 Round220 (2026-10-11) supersedes the round219 terrain: compact DD1 building placement, a high left Survivalist
 cliff, upper Abbey/graveyard and small low square. Core HamletTerrain/HamletGroundwork bake the same soil,

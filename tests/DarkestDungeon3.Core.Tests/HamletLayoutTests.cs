@@ -91,7 +91,7 @@ public class HamletLayoutTests
     public void StairsAndRetainingCoursesHaveFiniteNondegenerateGeometry()
     {
         var terrain=HamletTerrain.Build();
-        foreach (var mesh in new[] { terrain.Paving,terrain.Masonry })
+        foreach (var mesh in new[] { terrain.Paving,terrain.Masonry,terrain.Stairs })
         {
             Assert.NotEmpty(mesh.Indices);
             Assert.Equal(mesh.Positions.Length/3,mesh.Uv.Length/2);

@@ -26,8 +26,13 @@ internal sealed partial class HamletStage
         { _groundMaterial.SetTexture("_BaseMap_texture",earthTexture); soilLoaded=true; }
         if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
         { rock.SetTexture("_BaseMap_texture",rockTexture); rockLoaded=true; }
+        if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
+            stone.SetTexture("_BaseMap_texture",wallTexture);
         Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
         Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
+        var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
+        valley.SetColor(Tint,new Color(.52f,.59f,.65f,1));
+        _groundMaterial.SetTexture("_BaseMap_texture",GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving)));
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
@@ -50,7 +55,9 @@ internal sealed partial class HamletStage
         _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);
         for (int i=0;i<3;i++) _groundMesh.SetTriangles(rockBands[i],i+1);
         Surface(_groundMesh,_groundMaterial,layer).sharedMaterials=materials;
-        foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone) })
+        var surroundings=MeshData(valley.name,data.Surroundings.Positions,data.Surroundings.Uv);
+        surroundings.triangles=data.Surroundings.Indices; _details.Add(surroundings); Surface(surroundings,valley,layer);
+        foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone),(data.Stairs,stone) })
         {
             var mesh=MeshData(part.Item2.name,part.Item1.Positions,part.Item1.Uv);
             mesh.triangles=part.Item1.Indices; _details.Add(mesh); Surface(mesh,part.Item2,layer);

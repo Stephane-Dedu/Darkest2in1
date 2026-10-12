@@ -17,10 +17,11 @@ public class HamletPaletteTests
     }
 
     [Fact]
-    public void CliffBlackIsLiftedWithoutClippingItsPaintedHighlights()
+    public void RequestedBlackLiftPreservesPaintedHighlights()
     {
-        int black=HamletPalette.GradeRgb(0,0,0,HamletPalette.Rock);
-        int lit=HamletPalette.GradeRgb(82,84,86,HamletPalette.Rock);
+        var liftedPaint=new HamletPalette.Paint(1.35f,1.48f,1.6f,.028f,.4f);
+        int black=HamletPalette.GradeRgb(0,0,0,liftedPaint);
+        int lit=HamletPalette.GradeRgb(82,84,86,liftedPaint);
         Assert.InRange(black&255,40,55);
         Assert.Equal(black>>16,(black>>8)&255);
         Assert.True((lit&255)>(black&255)+20 && (lit&255)<180);

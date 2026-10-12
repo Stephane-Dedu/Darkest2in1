@@ -34,7 +34,7 @@ def surface(name, data, materials, groups=None, shade=None):
     return obj
 
 
-def painted_ground(name, texture, paint, vertex_shade=False):
+def painted_ground(name, texture, paint, vertex_shade=False, cutout=False):
     material=bpy.data.materials.new(name); material.use_nodes=True
     nodes=material.node_tree.nodes; links=material.node_tree.links; nodes.clear()
     image=nodes.new('ShaderNodeTexImage'); image.image=texture; image.extension='REPEAT'
@@ -63,8 +63,57 @@ def painted_ground(name, texture, paint, vertex_shade=False):
         shade=nodes.new('ShaderNodeMixRGB'); shade.blend_type='MULTIPLY'; shade.inputs[0].default_value=1
         links.new(color,shade.inputs[1]); links.new(attr.outputs['Color'],shade.inputs[2]); color=shade.outputs[0]
     emission=nodes.new('ShaderNodeEmission'); links.new(color,emission.inputs['Color'])
-    output=nodes.new('ShaderNodeOutputMaterial'); links.new(emission.outputs[0],output.inputs[0])
+    output=nodes.new('ShaderNodeOutputMaterial')
+    if cutout:
+        transparent=nodes.new('ShaderNodeBsdfTransparent'); mix=nodes.new('ShaderNodeMixShader')
+        threshold=nodes.new('ShaderNodeMath'); threshold.operation='GREATER_THAN'; threshold.inputs[1].default_value=.4
+        links.new(image.outputs['Alpha'],threshold.inputs[0]); links.new(threshold.outputs[0],mix.inputs[0])
+        links.new(transparent.outputs[0],mix.inputs[1]); links.new(emission.outputs[0],mix.inputs[2]); links.new(mix.outputs[0],output.inputs[0])
+    else: links.new(emission.outputs[0],output.inputs[0])
     return material
+
+
+def world_ground(soil,stone,palette,stains):
+    """Approximate the native one-time world paint bake with the exported Core stain field."""
+    size=1024
+    def tile(image,paint,u,v):
+        pixels=np.array(image.pixels[:],dtype=np.float32).reshape(image.size[1],image.size[0],4)
+        mirror=lambda value:1-np.abs(np.mod(value,2)-1)
+        xx=(mirror(u)*paint['UvScale']['X']+paint['UvOffset']['X'])*(image.size[0]-1)
+        yy=(mirror(v)*paint['UvScale']['Y']+paint['UvOffset']['Y'])*(image.size[1]-1)
+        color=pixels[np.clip(yy.astype(int),0,image.size[1]-1),np.clip(xx.astype(int),0,image.size[0]-1),:3]
+        t=paint['Tint']; color=color*np.array([t['X'],t['Y'],t['Z']])
+        luma=np.sum(color*np.array([.2126,.7152,.0722]),axis=2,keepdims=True)
+        return np.clip(luma+(color-luma)*paint['Saturation']+paint['Brightness'],0,1)
+    x,z=np.meshgrid(np.linspace(-66,58,size),np.linspace(-36,69,size))
+    earth=tile(soil,palette['Soil'],x/10,z/3); gravel=tile(stone,palette['Paving'],x/5.5+.37,z/5.5+.19)
+    field=np.array([[s['Tint']['X'],s['Tint']['Y'],s['Tint']['Z'],s['Gravel']] for s in stains],dtype=np.float32).reshape(128,128,4)
+    # Bilinear interpolation of the Core samples, rather than a second procedural noise recipe.
+    at=np.linspace(0,127,size); lo=at.astype(int); hi=np.minimum(lo+1,127); f=at-lo
+    horizontal=field[:,lo,:]*(1-f)[None,:,None]+field[:,hi,:]*f[None,:,None]
+    field=horizontal[lo,:,:]*(1-f)[:,None,None]+horizontal[hi,:,:]*f[:,None,None]
+    encode=lambda v:np.where(v<=.0031308,v*12.92,1.055*np.maximum(v,0)**(1/2.4)-.055)
+    color=(encode(earth)*(1-field[:,:,3:])+encode(gravel)*field[:,:,3:])*field[:,:,:3]
+    color=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
+    rgba=np.ones((size,size,4),dtype=np.float32); rgba[:,:,:3]=color
+    image=bpy.data.images.new('World earth and gravel',width=size,height=size)
+    image.pixels.foreach_set(rgba.reshape(-1)); image.pack()
+    neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,
+             'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
+    return painted_ground('World earth and gravel',image,neutral,True)
+
+
+def quiet_building_materials(objects):
+    # Composition preview only. DD2 still establishes native lighting/material acceptance.
+    for material in {m for obj in objects for m in obj.data.materials if m}:
+        shader=next((n for n in material.node_tree.nodes if n.type=='BSDF_PRINCIPLED'),None)
+        if shader is None: continue
+        basis=shader.inputs['Base Color']; emission=shader.inputs['Emission Strength']
+        if sum(basis.default_value[:3])<.001 and not basis.is_linked:
+            emission.default_value=.9
+        elif emission.default_value<=1.1:
+            emission.default_value=0
+        shader.inputs['Roughness'].default_value=1; shader.inputs['Specular IOR Level'].default_value=0
 
 
 def main(args):
@@ -78,18 +127,23 @@ def main(args):
     sys.path.insert(0,str(args.kit/'tools'))
     import bl_lib as L
     L.reset()
-    texture=bpy.data.images.load(str(out/'foundation_ground.png'))
+    texture=bpy.data.images.load(str(out/'road_rough_patch.png'))
     soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
-    cliff=bpy.data.images.load(str(out/'cultist_barricade_rocks.png'))
+    cliff=bpy.data.images.load(str(out/'bricks.png'))
+    wall=bpy.data.images.load(str(out/'foundation_panel_06.png'))
     palette=data['Palette']
-    earth=painted_ground('Native painted soil',soil,palette['Soil'],True)
+    earth=world_ground(soil,texture,palette,data['GroundStains'])
     rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
     paving=painted_ground('Native foundation paving',texture,palette['Paving'])
-    stone=painted_ground('Native foundation retaining courses',texture,palette['Masonry'])
+    stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
+    surface('Core stair flights and landings',terrain['Stairs'],[stone])
+    valley_paint={**palette['Soil'],'Tint':{k:v*f for (k,v),f in zip(palette['Soil']['Tint'].items(),[.52,.59,.65])}}
+    valley_paint['UvScale']={'X':1,'Y':.30}
+    surface('Core surrounding valley',terrain['Surroundings'],[painted_ground('Surrounding valley',soil,valley_paint)])
     buildings={}
     for site in data['Sites']:
         key=site['Id']; path=args.models/models[key]['glb']
@@ -107,6 +161,7 @@ def main(args):
         for obj in objects:
             original=obj.matrix_world.copy(); obj.parent=None; obj.matrix_world=placement@original
             obj['Service']=key
+        quiet_building_materials(objects)
         buildings[key]=objects
     missing=[]
     for piece in data['Scenery']:
@@ -122,12 +177,17 @@ def main(args):
         pivot=np.eye(4); pivot[:3,3]=[piece['X'],piece['Y'],piece['Z']]
         placement=pivot@deform@np.linalg.inv(pivot)@placement
         objects,_,_=L.build(folder,placement)
-        if piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith(('barricade_military_decor_rocks','coast_skirt_cliffs')):
-            paint=palette['Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
+        if piece.get('Background') and piece['Id']=='camp_treeline':
+            for obj in objects:
+                for slot in obj.material_slots:
+                    for node in slot.material.node_tree.nodes:
+                        if node.type=='MIX_RGB' and node.blend_type=='MULTIPLY': node.inputs[2].default_value=(.7,.82,1,1)
+        elif piece.get('Background') or piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith(('barricade_military_decor_rocks','coast_skirt_cliffs')):
+            paint=palette['Woodland' if piece.get('Background') else 'Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
             for obj in objects:
                 for slot in obj.material_slots:
                     texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')
-                    slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint)
+                    slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint,cutout=piece.get('Background',False))
     target=data['CameraTarget']; offset=data['CameraOffset']
     aim=Vector((target['X'],target['Z'],target['Y']))
     position=aim+Vector((offset['X'],offset['Z'],offset['Y']))

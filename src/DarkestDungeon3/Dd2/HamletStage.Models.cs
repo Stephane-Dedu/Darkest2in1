@@ -195,7 +195,9 @@ internal sealed partial class HamletStage
         Texture texture = path != null ? _paint[path] : Texture2D.whiteTexture;
         foreach (string property in new[] { "_BaseMap_texture", "_BaseMap", "_MainTex" })
             if (material.HasProperty(property)) { material.SetTexture(property, texture); material.SetTextureScale(property, Vector2.one); material.SetTextureOffset(property, Vector2.zero); }
-        var tint = new Color(b[0] * .65f + e[0], b[1] * .65f + e[1], b[2] * .65f + e[2], b[3]);
+        if (path!=null) Grade(material,HamletPalette.Building,false);
+        var color=HamletPalette.BuildingTint(new(b[0],b[1],b[2]),new(e[0],e[1],e[2]),paintedEmission);
+        var tint = new Color(color.X,color.Y,color.Z,b[3]);
         if (material.HasProperty(Tint)) material.SetColor(Tint, tint);
         if (material.HasProperty("_Color")) material.SetColor("_Color", tint);
         if (material.HasProperty("_IsAlphaCutout")) material.SetFloat("_IsAlphaCutout", info.Mask || info.Blend ? 1 : 0);

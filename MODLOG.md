@@ -5495,3 +5495,66 @@ Continue from tools/hamlet_3d.md and the private v05 evidence. The owner's timed
 Native service/camera/resource/resize checks and repeated-buffer stability are established. Preserve protected
 estates, the feature flag/painted fallback and other agents' dirty files. Saved-campaign acceptance and remaining
 art work are listed separately; the QA process is closed.
+
+## Round225 (2026-10-12): Hamlet paint, wooded surroundings, stronger stone and clean stair junctions
+
+Owner asked to remove the glowy building texture, add backgrounds around the isolated plateau and give terrain
+more texture. Follow-up screenshots requested stronger road/wall contrast, then identified stretched entrance
+paint and competing surfaces around the upper stairs. Kept the service sites, camera, gameplay dispatch,
+feature flag and immediate Painted town fallback. All native testing used the unsaved Hamlet fixture.
+
+Building importer had added the glTF author's preview emission into every surface tint, including native
+paint-only materials with emission strengths1.2-1.55. BuildingTint now normalizes that channel as albedo,
+uses base colour for ordinary architecture and retains brighter glass/forge paint. Owned1024px copies
+slightly desaturate the building paint. The verified private model package is unchanged.
+
+HamletLandscape adds a ring of lower valley terrain whose first vertices match the playable boundary,
+with seven native Valley tree groups and three Camp treeline silhouettes. Shared Core placements feed
+runtime and LayoutExport. First native iteration made treelines too high/pale; rejected it, lowered the
+strips and kept their original silhouette paint/alpha through owned Sprite materials. No native scripts.
+HamletGroundPaint supplies broad damp/dry stains and gravel weights; a one-time1024px owned world texture
+combines native earth/stone. Source textures and GPU readbacks remain bounded, cached and construction-only.
+
+Native common-bundle road_rough_patch replaces the faded large paving atlas. Tileable bricks replaces the
+repeated rock atlas on terrace faces; foundation_panel_06 paints retaining courses and stairs. Crops were
+selected from private contact sheets, avoiding doors/posters and rough-road transparent fringes. Shadow
+lift falls to.002-.003 for the stone paints, retaining dark ink joints and bright stone. Native paths/cliffs
+keep1024px owned paint; masonry/soil use512px. No game assets enter Git.
+
+The entrance corruption was geometric: a gentle1-unit rise over13 units triggered four long stair blocks.
+Their UVs used riser height on the horizontal tread face, creating stretched slivers. Stair construction
+now requires grade>0.18 and rise>=0.45. Gentle roads stay paved ramps. Actual stairs use a separate coursed
+stone mesh with level landings, and no cobbled strip through the blocks. Box UVs use the actual face width,
+height/depth. All paving branches and the square share one world projection. Cliff UVs use a continuous
+diagonal world projection rather than choosing a new axis at each triangle normal. Side-face scale varies
+somewhat, but courses no longer jump at facet boundaries.
+
+Six new Core cases cover boundary continuity, finite/upward unoccupied surroundings, architecture versus
+warm-light tint, road/stair/wall UV contracts, retained stone contrast and ground variation. The old black-lift
+test now tests an explicitly requested lift independently of the darker current palette. Full1044 Core+
+182 UI pass. Release passes with the same three unrelated warnings. Private1600x900 offline PNG/packed scene
+and composition have no missing scenery. Native final140 MeshRenderers/four chimney systems passes ten world
+service clicks/Escape, controls/reset, painted rollback/all resources released, reload/re-entry click,
+Embark/cleanup/return and1600x900->1440x900->1600x900. Screenshots reviewed after the final ramp/stair/UV fixes.
+No logged exceptions/warnings. Final URP probe:0 reallocations over5.024 seconds. Buffer stability only,
+not an FPS or long-session memory claim. Both DLL/PDB pairs match deployed hashes; owned QA PID76868 closed.
+
+Private evidence:local-art/ui-overhaul/hamlet-landscape-v06/accepted-native.png, accepted-native.log,
+accepted-player.log, accepted-allocations.json, deployed-hashes.json, core-tests.log, layout.json,
+composition.json and hamlet-landscape-v06.blend. Previous round223 backup remains in
+hamlet-immersion-v05-plugin/20261011-222012.zip; first-pass backup is hamlet-landscape-v06-plugin/first-pass.zip.
+No estate selected, read or saved. Other agents' Shieldbreaker/Expedition Map3D edits and round222/224 notes
+are preserved outside this commit. Hamlet3D remains defaultfalse/localtrue with immediate painted rollback.
+
+## Status 2026-10-12: round225 Hamlet installed; entrance and upper stair junctions repaired
+
+Continue from tools/hamlet_3d.md and private v06 evidence. Stronger stone contrast is retained; the entrance
+stays a ramp and actual stairs have one material with correct face mapping. Native service/control/resource/
+resize and repeated-buffer checks pass. DD2 is stopped, no save restore pending. Preserve protected estates,
+the painted fallback and independent dirty work. Saved-campaign transactions, exterior/NPC variants and
+finer art remain separate.
+Owner: "she is holding the spear in reverse, hand does a 360 and tip of the spear is behind her towards the ground".
+DD1's reverse grip (blade low behind) reads as backwards in 3D, and clip keys blend spear directions linearly: from
+blade-behind to blade-forward the blend passes through almost no direction, so the wrist flipped. Every spear key now
+points forward or up (z >= 0; checked at export): idle upright and slightly forward at the hip, defend upright, expose
+low but blade forward. Installed after the owner closed DD2: json 2B8245D4 (textures unchanged).

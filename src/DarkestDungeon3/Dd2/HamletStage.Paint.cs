@@ -17,7 +17,8 @@ internal sealed partial class HamletStage
             var key=(source.GetInstanceID(),paint,crop);
             if (!_gradedPaint.TryGetValue(key,out var texture))
             {
-                int size=material.name.Contains("mountain")?1024:512;
+                int size=material.name.Contains("mountain") || material.name.StartsWith("Hamlet paint ")
+                    || material.name=="Hamlet worn stone paths" || material.name=="Hamlet exposed cliff rock"?1024:512;
                 texture=PaintCopy(source,paint,crop,size); _gradedPaint.Add(key,texture);
             }
             material.SetTexture("_BaseMap_texture",texture);

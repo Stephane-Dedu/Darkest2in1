@@ -4,54 +4,56 @@ using System.Linq;
 
 namespace DarkestDungeon3.Core.Presentation;
 
-/// <summary>Continuous lanes, stone stair treads and retaining courses, baked into two owned surfaces.</summary>
+/// <summary>Continuous lanes, stone stair treads and retaining courses, baked into three owned surfaces.</summary>
 internal static class HamletGroundwork
 {
-    internal static void Build(out HamletTerrain.Surface paving,out HamletTerrain.Surface masonry)
+    internal static void Build(out HamletTerrain.Surface paving,out HamletTerrain.Surface masonry,out HamletTerrain.Surface stairs)
     {
-        var paths=new Builder(); var walls=new Builder();
+        var paths=new Builder(); var walls=new Builder(); var stepsMesh=new Builder();
+        var landings=new HashSet<HamletLayout.Point>();
         foreach (var route in HamletLayout.Routes)
         {
-            var points=new List<HamletLayout.Point>();
             for (int i=1;i<route.Points.Length;i++)
             {
                 var a=route.Points[i-1]; var b=route.Points[i];
                 float dx=b.X-a.X,dz=b.Z-a.Z,distance=Length(dx,dz);
-                int samples=Math.Max(1,(int)Math.Ceiling(distance/.65f));
-                for (int sample=0;sample<samples;sample++)
-                { float t=sample/(float)samples; points.Add(new(a.X+dx*t,0,a.Z+dz*t)); }
-                if (i==route.Points.Length-1) points.Add(b);
                 float rise=Math.Abs(b.Y-a.Y);
-                if (rise<.45f) continue;
-                int steps=(int)Math.Ceiling(rise/.32f); float yaw=(float)Math.Atan2(dx,dz)*180/(float)Math.PI;
-                for (int step=0;step<steps;step++)
+                bool stair=rise>=.45f && rise/distance>.18f;
+                float yaw=(float)Math.Atan2(dx,dz)*180/(float)Math.PI;
+                if (stair)
                 {
-                    float t=(step+.5f)/steps,x=a.X+dx*t,z=a.Z+dz*t;
-                    paths.Block(x,HamletLayout.Height(x,z)-.08f,z,route.Width*.94f,.36f,distance/steps+.13f,yaw);
+                    int steps=(int)Math.Ceiling(rise/.32f);
+                    for (int step=0;step<steps;step++)
+                    {
+                        float t=(step+.5f)/steps,x=a.X+dx*t,z=a.Z+dz*t;
+                        stepsMesh.Block(x,a.Y+(b.Y-a.Y)*t-.08f,z,route.Width*.94f,.36f,distance/steps+.08f,yaw);
+                    }
+                    foreach (var point in new[] { a,b }) if (landings.Add(point))
+                        stepsMesh.Block(point.X,point.Y-.10f,point.Z,route.Width,.36f,route.Width,yaw);
+                    continue;
                 }
-            }
-            float length=0; int start=paths.Count;
-            for (int i=0;i<points.Count;i++)
-            {
-                var before=points[Math.Max(0,i-1)]; var after=points[Math.Min(i+1,points.Count-1)];
-                float dx=after.X-before.X,dz=after.Z-before.Z,d=Length(dx,dz);
-                if (i>0) length+=Length(points[i].X-points[i-1].X,points[i].Z-points[i-1].Z);
-                for (int edge=0;edge<2;edge++)
+                int samples=Math.Max(1,(int)Math.Ceiling(distance/.65f)),start=paths.Count;
+                for (int sample=0;sample<=samples;sample++)
                 {
-                    float ragged=1+.045f*(float)Math.Sin(i*1.7f+edge*2.2f),offset=route.Width*ragged*(edge==0?-.5f:.5f);
-                    float x=points[i].X+dz/d*offset,z=points[i].Z-dx/d*offset;
-                    paths.Vertex(x,HamletLayout.Height(x,z)+.035f,z,edge*route.Width/5,length/5);
+                    float t=sample/(float)samples;
+                    for (int edge=0;edge<2;edge++)
+                    {
+                        float offset=route.Width*(edge==0?-.5f:.5f);
+                        float x=a.X+dx*t+dz/distance*offset,z=a.Z+dz*t-dx/distance*offset;
+                        // One world projection across branches and the square; joins cannot reset or shear the paint.
+                        paths.Vertex(x,HamletLayout.Height(x,z)+.055f,z,x/5,z/5);
+                    }
+                    if (sample==samples) continue;
+                    int v=start+sample*2; paths.Triangle(v,v+2,v+1); paths.Triangle(v+1,v+2,v+3);
                 }
-                if (i==points.Count-1) continue;
-                int v=start+i*2; paths.Triangle(v,v+2,v+1); paths.Triangle(v+1,v+2,v+3);
             }
         }
         const int count=32; int square=paths.Count;
-        paths.Vertex(0,HamletLayout.Height(0,-3)+.045f,-3,0,-.5f);
+        paths.Vertex(0,HamletLayout.Height(0,-3)+.055f,-3,0,-3/5f);
         for (int i=0;i<count;i++)
         {
             float angle=i*(float)Math.PI*2/count,r=1+.06f*(float)Math.Sin(i*2.1f),x=(float)Math.Cos(angle)*13*r,z=-3+(float)Math.Sin(angle)*7*r;
-            paths.Vertex(x,HamletLayout.Height(x,z)+.045f,z,x/6,z/6);
+            paths.Vertex(x,HamletLayout.Height(x,z)+.055f,z,x/5,z/5);
             paths.Triangle(square,square+(i+1)%count+1,square+i+1);
         }
         foreach (var site in HamletLayout.Sites.Where(s=>s.Y>3))
@@ -76,7 +78,7 @@ internal static class HamletGroundwork
                 walls.Block(x,HamletLayout.Height(x,z)+height/2,z,.8f,height,length/courses-.08f,yaw);
             }
         }
-        paving=paths.Finish(); masonry=walls.Finish();
+        paving=paths.Finish(); masonry=walls.Finish(); stairs=stepsMesh.Finish();
     }
     private static float Length(float x,float z)=>(float)Math.Sqrt(x*x+z*z);
 
@@ -100,7 +102,8 @@ internal static class HamletGroundwork
                 for (int i=0;i<4;i++)
                 {
                     var p=corners[faces[face*4+i]]; float px=p.Item1*width/2,pz=p.Item3*depth/2;
-                    Vertex(x+px*c+pz*s,y+p.Item2*height/2,z-px*s+pz*c,(i>1?width:0)/3,(i==1||i==2?height:0)/3);
+                    float u=face<2 || face>=4?width:depth,v=face<4?height:depth;
+                    Vertex(x+px*c+pz*s,y+p.Item2*height/2,z-px*s+pz*c,(i>1?u:0)/3,(i==1||i==2?v:0)/3);
                 }
                 Triangle(start,start+1,start+2); Triangle(start,start+2,start+3);
             }

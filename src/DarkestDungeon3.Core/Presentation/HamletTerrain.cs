@@ -13,7 +13,7 @@ public sealed class HamletTerrain
     }
     public float[] Positions, Uv, Shade;
     public int[] Ground, Rock;
-    public Surface Paving, Masonry;
+    public Surface Paving, Masonry, Stairs, Surroundings;
     public static HamletTerrain Build(float spacing = 1)
     {
         if (spacing < .5f || spacing > 4 || float.IsNaN(spacing)) throw new ArgumentOutOfRangeException(nameof(spacing));
@@ -39,11 +39,12 @@ public sealed class HamletTerrain
             {
                 indices.Add(positions.Count/3);
                 positions.Add(p.X); positions.Add(p.Y); positions.Add(p.Z);
-                float period = cliff ? 12 : 10;
-                uv.Add((cliff && Math.Abs(nx)>Math.Abs(nz) ? p.Z : p.X)/period);
+                float period = cliff ? 8 : 10;
+                // A continuous diagonal projection avoids flipping the wall atlas at each changing facet normal.
+                uv.Add(cliff ? (p.X+p.Z*.5f)/period : (p.X-HamletLayout.MinX)/(HamletLayout.MaxX-HamletLayout.MinX));
                 // A cropped atlas is rectangular paint. Preserve its texel aspect on square world coordinates.
                 float cropHeight = cliff ? HamletPalette.Rock.UvScale.Y : HamletPalette.Soil.UvScale.Y;
-                uv.Add((cliff ? p.Y : p.Z)/(period*cropHeight)); shade.Add(light);
+                uv.Add(cliff ? p.Y/(period*cropHeight) : (p.Z-HamletLayout.MinZ)/(HamletLayout.MaxZ-HamletLayout.MinZ)); shade.Add(light);
             }
         }
         void Skirt(HamletLayout.Point a, HamletLayout.Point b)
@@ -55,7 +56,7 @@ public sealed class HamletTerrain
         { var a=At(x,z); var b=At(x,z+1); var c=At(x+1,z); var d=At(x+1,z+1); Triangle(a,b,c); Triangle(c,b,d); }
         for (int x=0; x<columns; x++) { Skirt(At(x+1,0),At(x,0)); Skirt(At(x,rows),At(x+1,rows)); }
         for (int z=0; z<rows; z++) { Skirt(At(0,z),At(0,z+1)); Skirt(At(columns,z+1),At(columns,z)); }
-        HamletGroundwork.Build(out var paving,out var masonry);
-        return new() { Positions=positions.ToArray(), Uv=uv.ToArray(), Shade=shade.ToArray(), Ground=ground.ToArray(), Rock=rock.ToArray(), Paving=paving, Masonry=masonry };
+        HamletGroundwork.Build(out var paving,out var masonry,out var stairs);
+        return new() { Positions=positions.ToArray(), Uv=uv.ToArray(), Shade=shade.ToArray(), Ground=ground.ToArray(), Rock=rock.ToArray(), Paving=paving, Masonry=masonry, Stairs=stairs, Surroundings=HamletLandscape.Build() };
     }
 }

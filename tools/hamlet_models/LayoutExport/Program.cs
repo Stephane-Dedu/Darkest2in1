@@ -13,7 +13,10 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
     Terrain=terrain,
-    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain },
+    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.Building },
+    GroundStains=Enumerable.Range(0,128*128).Select(i=>HamletGroundPaint.At(
+        HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%128+.5f)/128,
+        HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/128+.5f)/128)),
     Scenery=new[]
     {
         Scenery("valley_tile_01",-28,-1.8f,51,16),Scenery("valley_tile_02",36,-1.8f,54,18),
@@ -29,7 +32,8 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("valley_tile_09",-46,-.25f,-10,9,20),Scenery("valley_tile_09",-16,-.2f,-14,7,-10),
         Scenery("valley_tile_09",43,-.25f,10,7,65),Scenery("valley_tile_09",-1,-.2f,41,6,15),
         Scenery("coast_skirt_cliffs_mdl_01",-59,-2,-7,15,15),Scenery("coast_skirt_cliffs_mdl_01",49,-1,25,18,-25)
-    }
+    }.Concat(HamletLandscape.Props.Select(p=>(object)new
+    { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,DepthScale=1,Background=true }))
 },new JsonSerializerOptions { IncludeFields=true }));
 Console.WriteLine($"{path}: {terrain.Positions.Length/3:N0} terrain vertices, {terrain.Rock.Length/3:N0} rock faces");
 

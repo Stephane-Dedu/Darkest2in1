@@ -147,3 +147,23 @@ The native unsaved fixture now checks live resize/restore as well as all service
 `measure_native.ps1 -HamletProcessId <owned-preview-pid> -Seconds 5` checks repeated URP allocations;
 the measured town must already be rendered. Current native evidence and packed preview are in
 `local-art/ui-overhaul/hamlet-immersion-v05/`. See `tools/hamlet_3d.md` for the HDR target fix and limits.
+
+Round225's current preview uses `local-art/ui-overhaul/hamlet-landscape-v06/`. Run `prepare_landscape.py`
+again for four native surfaces: `road_rough_patch`, `farm_ground_hill_transition`, `bricks` and
+`foundation_panel_06`. They replace the earlier paving/cliff atlas choices. `HamletPalette` retains dark
+joints rather than lifting the entire surface to grey. Roads and cliff copies are 1024px; retaining stone
+and soil use512px. A1024px owned world map combines earth, gravel and the Core stain field at construction.
+`LayoutExport` supplies a128x128 sample field for the offline approximation. No texture is generated per frame.
+
+`HamletLandscape` supplies the surrounding valley mesh and ten background placements to both renderers.
+Its first ring matches the playable terrain boundary; seven native Valley tree groups and three low Camp
+treelines dress the outer slopes. The original Camp silhouette paint/alpha avoids pale rectangular backdrops.
+The surrounding scenery and native sky are already in the kit. `--name hamlet-landscape-v06 --blend` writes
+the latest composition and packed document. Offline lighting/material conversion remains approximate.
+
+Building preview emission is no longer added into all native surface tints. Runtime paint is normalized
+and slightly desaturated; actual lantern/glass/forge materials keep their warm light. The original verified
+model package is unchanged. Paths use one world projection across branches and the square. Gentle slopes
+remain paved ramps; real stair flights have separate stone treads and level landings. Their top/side UVs
+use actual face dimensions, and cobbles no longer intersect the stair blocks. Cliff UVs use one diagonal
+world projection rather than switching atlas direction at every changing triangle normal.
