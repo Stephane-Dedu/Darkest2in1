@@ -5749,3 +5749,39 @@ The full104-entry curio design mapping is complete. Review the private searchabl
 before implementing. Start with ordinary container states, books/bones and camps; distinctive bodies need modeling.
 The 12 assemblies show source combinations only. No game launch or save access occurred in this pass. Existing
 round228 input acceptance stands; separate round227 VFX install/native acceptance and Shieldbreaker work remain.
+
+## Round230 (2026-10-12): clickable 3D Hamlet camera/background research and offline comparison
+
+Owner requested best practices and another camera/background iteration without applying code. Authored
+tools/hamlet_hub_research.md separates firsthand source findings, comparable hubs, project inferences and
+unverified interaction claims. Sources include Red Hook's Bourassa interview, original GDC lighting slides,
+Blizzard Hyperion material, 2K/XCOM material, Xbox navigation/contrast/motion guidance and Unity/Epic camera/
+atmosphere documentation. No universal camera angle or lens is claimed. The relevant Red Hook GDC talk was
+identified only by its listing; no detailed claims rely on an unviewed talk.
+
+Six private1600x900 offline renders use the accepted packed grass-v07 scene. A is current18.75-degree pitch,
+42-degree verticalFOV. B25/34 and C32/40 expose more scenery joins/crop the peak; D15/30 compresses terraces.
+E22/36 with3-degree yaw and136-unit distance is a modest overview candidate. F retains E's camera and service
+positions, quiets repeated stone, offsets the full-scale native mountain right/down, grades distance and replaces
+the camp treeline strips with two continuous ridge placeholders. F is a composition blockout, not final DD2 art:
+plain ridges, dark facades and outer-ground transitions need work. Preserve DD1 placement, a stable home shot,
+readable entrances and backed hover names; later service focus must remain optional/reduced-motion compatible.
+
+The private HTML compares the baseline with five alternatives, optional grayscale and measured HUD occupied-area
+guides. These are guide rectangles, not native UI. Six image decode/dimension checks,60 clear and safe door-apron
+proxy ray/projection checks and unchanged source-blend SHA256 pass. Baseline/E/F color/grayscale sheet inspected.
+The actual review script passes choices/image/summary changes and HUD/grayscale toggles with Node DOM stubs.
+Browser layout was not observed; Codex queued the opening request. Full building bounds, real picking, service
+panels, resized views and camera motion are not accepted from these renders. No .NET tests are needed for notes.
+
+Private outputs:local-art/ui-overhaul/hamlet-camera-study-v01/{index.html,review-sheet.jpg,a-current.png,
+b-overlook.png,c-high.png,d-low.png,e-refined.png,f-proposal.png,proposal.blend,camera-study.json,checks.json}.
+Native assets, renders and study scripts remain outside Git. No runtime/config/save change, build, deploy or game
+launch occurred. Concurrent corridor/room and Shieldbreaker work and notes are preserved outside this commit.
+
+## Status 2026-10-12: round230 Hamlet research ready; no camera/background implementation
+
+Review tools/hamlet_hub_research.md and the private comparison before a new native art pass. Begin near22-degree
+pitch/36-degree verticalFOV, compose with actual HUD, connect the valley, then adjust facade/road/wall hierarchy.
+The offline F ridge blockout is not production scenery. Native service/picking/motion/resize checks and game-facing
+implementation remain separate. All previous installed Hamlet acceptance and the painted rollback are unchanged.
