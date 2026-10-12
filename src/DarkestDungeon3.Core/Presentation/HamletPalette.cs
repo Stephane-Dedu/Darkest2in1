@@ -22,6 +22,8 @@ public static class HamletPalette
     public static readonly Paint Mountain = new(1.2f,1.4f,1.65f,.025f,.5f);
     public static readonly Paint Woodland = new(.66f,.78f,.95f,.003f,.45f);
     public static readonly Paint Building = new(.94f,.96f,1,.001f,.76f);
+    public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
+    public static readonly Paint GrassTuft = new(.48f,.62f,.44f,0,1);
 
     public static HamletLayout.Point BuildingTint(HamletLayout.Point basis,HamletLayout.Point emission,bool paintedEmission)
     {

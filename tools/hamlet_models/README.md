@@ -167,3 +167,15 @@ model package is unchanged. Paths use one world projection across branches and t
 remain paved ramps; real stair flights have separate stone treads and level landings. Their top/side UVs
 use actual face dimensions, and cobbles no longer intersect the stair blocks. Cliff UVs use one diagonal
 world projection rather than switching atlas direction at every changing triangle normal.
+
+Round226's grass preview is `local-art/ui-overhaul/hamlet-grass-v07/`. `prepare_landscape.py` now exports six
+surfaces, adding native512px `grass_dry` and4096px `farm_gate_node_assets_grass` from the common/Foetor bundles.
+LayoutExport writes the shared Core grass mask,170 placements and batched silhouette mesh. The2048px world
+paint combines earth/gravel with the turf only outside paths/building aprons. Runtime binds the original
+4096px tuft atlas directly; offline renders use the same reviewed UV crops and olive palette. Source pixels
+and all PNG/Blender output stay outside Git. The native shaders remain the appearance oracle.
+
+For a new output folder, also copy the existing private scenery `exp/` cache from v06, or repeat the native
+rock/Coast exports documented above. Pass absolute paths, or let town_preview resolve its kit/model roots,
+so Blender's glTF importer cannot change the meaning of subsequent texture paths. Use
+`--name hamlet-grass-v07 --blend`. The packed preview contains all scenery and has no missing exports.

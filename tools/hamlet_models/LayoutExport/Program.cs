@@ -12,11 +12,14 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
 {
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
-    Terrain=terrain,
-    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.Building },
+    Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
+    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.Building,HamletPalette.Grass,HamletPalette.GrassTuft },
     GroundStains=Enumerable.Range(0,128*128).Select(i=>HamletGroundPaint.At(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%128+.5f)/128,
         HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/128+.5f)/128)),
+    GrassCover=Enumerable.Range(0,256*256).Select(i=>HamletVegetation.Cover(
+        HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
+        HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
     Scenery=new[]
     {
         Scenery("valley_tile_01",-28,-1.8f,51,16),Scenery("valley_tile_02",36,-1.8f,54,18),

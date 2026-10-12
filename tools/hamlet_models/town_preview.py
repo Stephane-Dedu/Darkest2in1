@@ -73,9 +73,9 @@ def painted_ground(name, texture, paint, vertex_shade=False, cutout=False):
     return material
 
 
-def world_ground(soil,stone,palette,stains):
+def world_ground(soil,stone,grass,palette,stains,cover):
     """Approximate the native one-time world paint bake with the exported Core stain field."""
-    size=1024
+    size=2048
     def tile(image,paint,u,v):
         pixels=np.array(image.pixels[:],dtype=np.float32).reshape(image.size[1],image.size[0],4)
         mirror=lambda value:1-np.abs(np.mod(value,2)-1)
@@ -93,7 +93,13 @@ def world_ground(soil,stone,palette,stains):
     horizontal=field[:,lo,:]*(1-f)[None,:,None]+field[:,hi,:]*f[None,:,None]
     field=horizontal[lo,:,:]*(1-f)[:,None,None]+horizontal[hi,:,:]*f[:,None,None]
     encode=lambda v:np.where(v<=.0031308,v*12.92,1.055*np.maximum(v,0)**(1/2.4)-.055)
-    color=(encode(earth)*(1-field[:,:,3:])+encode(gravel)*field[:,:,3:])*field[:,:,:3]
+    color=encode(earth)*(1-field[:,:,3:])+encode(gravel)*field[:,:,3:]
+    grass_field=np.asarray(cover,dtype=np.float32).reshape(256,256)
+    at=np.linspace(0,255,size); lo=at.astype(int); hi=np.minimum(lo+1,255); f=at-lo
+    horizontal=grass_field[:,lo]*(1-f)[None,:]+grass_field[:,hi]*f[None,:]
+    grass_field=horizontal[lo,:]*(1-f)[:,None]+horizontal[hi,:]*f[:,None]
+    turf=tile(grass,palette['Grass'],x/7.5,z/7.5)
+    color=(color*(1-grass_field[:,:,None])+encode(turf)*grass_field[:,:,None])*field[:,:,:3]
     color=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
     rgba=np.ones((size,size,4),dtype=np.float32); rgba[:,:,:3]=color
     image=bpy.data.images.new('World earth and gravel',width=size,height=size)
@@ -118,6 +124,7 @@ def quiet_building_materials(objects):
 
 def main(args):
     repo=Path(__file__).resolve().parents[2]
+    args.models=args.models.resolve(); args.kit=args.kit.resolve()
     out=args.out.resolve()
     if out==repo or repo in out.parents: raise ValueError('Keep private renders outside Git.')
     out.mkdir(parents=True,exist_ok=True)
@@ -131,8 +138,10 @@ def main(args):
     soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
     cliff=bpy.data.images.load(str(out/'bricks.png'))
     wall=bpy.data.images.load(str(out/'foundation_panel_06.png'))
+    grass=bpy.data.images.load(str(out/'grass_dry.png'))
+    tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
-    earth=world_ground(soil,texture,palette,data['GroundStains'])
+    earth=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'])
     rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
     paving=painted_ground('Native foundation paving',texture,palette['Paving'])
     stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
@@ -141,9 +150,9 @@ def main(args):
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
     surface('Core stair flights and landings',terrain['Stairs'],[stone])
-    valley_paint={**palette['Soil'],'Tint':{k:v*f for (k,v),f in zip(palette['Soil']['Tint'].items(),[.52,.59,.65])}}
-    valley_paint['UvScale']={'X':1,'Y':.30}
-    surface('Core surrounding valley',terrain['Surroundings'],[painted_ground('Surrounding valley',soil,valley_paint)])
+    valley_paint={**palette['Grass'],'Tint':{k:v*f for (k,v),f in zip(palette['Grass']['Tint'].items(),[.52,.59,.65])}}
+    surface('Core surrounding valley',terrain['Surroundings'],[painted_ground('Surrounding valley',grass,valley_paint)])
+    surface('Core native grass tufts',data['Vegetation'],[painted_ground('Native grass silhouettes',tufts,palette['GrassTuft'],cutout=True)])
     buildings={}
     for site in data['Sites']:
         key=site['Id']; path=args.models/models[key]['glb']

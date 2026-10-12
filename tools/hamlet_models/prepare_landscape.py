@@ -12,9 +12,9 @@ def main(game,out):
     if out==repo or repo in out.parents: raise ValueError('Game textures must stay outside Git.')
     out.mkdir(parents=True,exist_ok=True)
     bundles=game/'Darkest Dungeon II_Data/StreamingAssets/aa'
-    names=['biome_common_assets_all.bundle','biome_valley_common_assets_all.bundle']
+    names=['biome_common_assets_all.bundle','biome_valley_common_assets_all.bundle','biome_farm_assets_all.bundle']
     env=UnityPy.load(*[str(bundles/name) for name in names])
-    wanted={'road_rough_patch','farm_ground_hill_transition','bricks','foundation_panel_06'}
+    wanted={'road_rough_patch','farm_ground_hill_transition','bricks','foundation_panel_06','grass_dry','farm_gate_node_assets_grass'}
     found={}
     for obj in env.objects:
         if obj.type.name!='Material': continue
@@ -28,7 +28,7 @@ def main(game,out):
             break
     if set(found)!=wanted: raise ValueError('Missing native surface materials: '+str(wanted-set(found)))
     (out/'ground-source.json').write_text(json.dumps({'bundles':names,'textures':found},indent=2))
-    print('Exported four native painted surfaces to',out)
+    print('Exported six native painted surfaces to',out)
 
 
 if __name__=='__main__':

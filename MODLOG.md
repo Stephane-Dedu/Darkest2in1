@@ -5558,3 +5558,43 @@ DD1's reverse grip (blade low behind) reads as backwards in 3D, and clip keys bl
 blade-behind to blade-forward the blend passes through almost no direction, so the wrist flipped. Every spear key now
 points forward or up (z >= 0; checked at export): idle upright and slightly forward at the hip, defend upright, expose
 low but blade forward. Installed after the owner closed DD2: json 2B8245D4 (textures unchanged).
+
+## Round226 (2026-10-12): native grass on unused Hamlet ground
+
+Owner requested grass where it fits and better source texture quality if available. Reviewed75 native
+ground/grass materials from common, Valley, Foetor and Tangle bundles, plus three Valley grass meshes.
+The usual grass grids and tileable turf are512px. Foetor's farm_gate_node_assets_grass atlas is4096px;
+three grass/reed rectangles have substantially more source pixels per tuft. Private crop review excludes
+the neighbouring bell, gate, timber and masonry. No generated texture or game art enters Git.
+
+HamletVegetation in Core defines ground coverage, route/rotated-footprint clearance and grounded placements.
+The field fades outside route edges and service aprons, leaving the paths, stairs and entrances clear.
+170 tufts sit only on gentle ground with at least1.5 units of clearance. Each has two low angled planes;
+one owned mesh/material binds the original4096px native atlas directly. Native alpha/ink remains; restrained
+olive tint fits the town's dead foliage. Disable native wind because these planes lack its painted weights.
+The grass does not enter service picking or gameplay dispatch.
+
+The world ground bake grows from1024px to2048px. It combines native512px short dry grass with existing
+earth/gravel, broad stains and a256x256 Core clearance field, evaluated once during construction.
+The surrounding valley uses the same turf. Existing stone/path paints and all service/camera positions
+remain. New material handles, owned grass paint and geometry release with the stage. Painted town remains
+immediate rollback. No estate selected/read/saved.
+
+prepare_landscape exports six source paints; LayoutExport exports the same Core coverage and tuft geometry.
+town_preview resolves kit/model roots before Blender imports, avoiding relative texture-path failures after
+glTF changes the process directory. Private1600x900 preview/packed scene contains every scenery export.
+Three Core cases check clear routes/entrances, grounded placements and finite cropped geometry.
+Release passes with the three pre-existing warnings; all1068 Core+182 UI pass, including40 Hamlet cases.
+
+Native deployment/appearance/lifecycle acceptance is pending: ordinary DD2 PID77236 was already running,
+so it was left untouched and builds used Deploy=false. Asked the owner whether to close it or wait.
+The staged/working Shieldbreaker and Expedition Map3D changes are independent and preserved.
+Private evidence:local-art/ui-overhaul/hamlet-grass-v07/{grass-sources.json,grass-crops.jpg,ground-source.json,
+layout.json,composition.json,hamlet-grass-v07.png,hamlet-grass-v07.blend,core-tests.log,ui-tests.log,release-build.log}.
+
+## Status 2026-10-12: round226 grass built and reviewed offline; native installation pending
+
+Round225 is committed/pushed asbd917cc and remains the last accepted native Hamlet. Round226's grass is
+ready for installation once ordinary DD2 is closed. Use the unsaved fixture, verify source alpha/crops,
+all services, rollback/resource release, re-entry and repeated URP allocations before marking it native-verified.
+No save access/restore is pending. Read tools/hamlet_3d.md and preserve independent agents' dirty files.

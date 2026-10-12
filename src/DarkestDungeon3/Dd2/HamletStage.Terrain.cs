@@ -30,9 +30,13 @@ internal sealed partial class HamletStage
             stone.SetTexture("_BaseMap_texture",wallTexture);
         Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
         Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
+        Texture grass=null;
+        if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
+            grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
         var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
+        if (grass!=null) valley.SetTexture("_BaseMap_texture",grass);
         valley.SetColor(Tint,new Color(.52f,.59f,.65f,1));
-        _groundMaterial.SetTexture("_BaseMap_texture",GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving)));
+        _groundMaterial.SetTexture("_BaseMap_texture",GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
@@ -61,6 +65,20 @@ internal sealed partial class HamletStage
         {
             var mesh=MeshData(part.Item2.name,part.Item1.Positions,part.Item1.Uv);
             mesh.triangles=part.Item1.Indices; _details.Add(mesh); Surface(mesh,part.Item2,layer);
+        }
+        if (_grassTuftAsset.Status==AsyncOperationStatus.Succeeded && _grassTuftAsset.Result!=null)
+        {
+            var tufts=TownMaterial(_grassTuftAsset.Result);
+            var paint=HamletPalette.GrassTuft;
+            tufts.SetColor(Tint,new Color(paint.Tint.X,paint.Tint.Y,paint.Tint.Z,1));
+            if (tufts.HasProperty("_Cull")) tufts.SetFloat("_Cull",0);
+            tufts.DisableKeyword("_WIND");
+            foreach (string property in new[] { "_WindFlutter","_WindSwing" })
+                if (tufts.HasProperty(property)) tufts.SetFloat(property,0);
+            var vegetation=HamletVegetation.Build();
+            var mesh=MeshData("Hamlet native grass tufts",vegetation.Positions,vegetation.Uv);
+            mesh.triangles=vegetation.Indices; _details.Add(mesh); Surface(mesh,tufts,layer);
+            Plugin.Log.LogInfo($"[hamlet 3d] {HamletVegetation.Clumps.Count} native grass clumps in one owned mesh; 4096px source atlas");
         }
         foreach (var renderer in _root.GetComponentsInChildren<MeshRenderer>())
             if (renderer.name.Contains("road_valley_straight_single")) renderer.enabled=false;

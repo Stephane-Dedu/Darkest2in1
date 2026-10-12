@@ -87,7 +87,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private readonly Dictionary<Renderer, Color> _baseTints = new();
     private readonly List<UnityEngine.Object> _details = new();
     private readonly Dictionary<Material, Material> _materials = new();
-    private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset, _wallAsset;
+    private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset, _wallAsset, _grassAsset, _grassTuftAsset;
     private Transform _root;
     private Camera _camera;
     private Camera _nativeView;
@@ -113,7 +113,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     public string Failure { get; private set; }
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
-    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _wallAsset.IsValid() || _details.Count != 0
+    internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _wallAsset.IsValid() || _grassAsset.IsValid() || _grassTuftAsset.IsValid() || _details.Count != 0
         || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
@@ -183,6 +183,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         _earthAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/farm_ground_hill_transition.mat");
         _rockAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/bricks.mat");
         _wallAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/Panels/foundation_panel_06.mat");
+        _grassAsset = NativeAssets.Load<Material>(HamletVegetation.GroundPath);
+        _grassTuftAsset = NativeAssets.Load<Material>(HamletVegetation.TuftPath);
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
     private void Update()
@@ -198,7 +200,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 var piece = Pieces[_piece];
                 var handle = _assets[piece.Path];
                 if (!handle.IsDone) return;
-                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone || !_wallAsset.IsDone)) return;
+                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone || !_wallAsset.IsDone || !_grassAsset.IsDone || !_grassTuftAsset.IsDone)) return;
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null) Build(piece, handle.Result);
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
@@ -479,7 +481,9 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_earthAsset.IsValid()) Addressables.Release(_earthAsset);
         if (_rockAsset.IsValid()) Addressables.Release(_rockAsset);
         if (_wallAsset.IsValid()) Addressables.Release(_wallAsset);
-        _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default;
+        if (_grassAsset.IsValid()) Addressables.Release(_grassAsset);
+        if (_grassTuftAsset.IsValid()) Addressables.Release(_grassTuftAsset);
+        _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default; _grassAsset = default; _grassTuftAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
         ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;

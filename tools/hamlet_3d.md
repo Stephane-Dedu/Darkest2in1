@@ -156,3 +156,20 @@ URP allocations over5.024 seconds. Screenshots confirm the repaired entrance and
 Release and all1044 Core+182 UI tests pass; both DLL/PDB pairs match installed hashes. Owned QA PID76868 is
 closed. No estate selected/read/saved. The packed offline scene contains all scenery with no missing exports.
 Saved transactions, finer art/variants and long-session/frame-time acceptance remain separate.
+
+Round226 adds native grass on unused ground. `HamletVegetation.Cover` fades the ground paint away from
+route edges and rotated building footprints, including their entrance aprons. The one-time world bake is
+now2048px, with512px source readbacks and a256x256 clearance field. Native `grass_dry` supplies short turf;
+the surrounding valley shares its restrained olive paint. Stone paths and cliffs retain round225's materials.
+
+The native Valley/Foetor/Tangle grass tiles reviewed are512px. A sharper4096px Foetor gate atlas contains
+three usable reed/grass silhouettes. Reviewed UV rectangles exclude the neighbouring gate, bell and masonry.
+The original atlas is bound directly, retaining its resolution and alpha without an extracted runtime pack.
+170 low tufts on gentle terrain share one owned mesh/material. Two angled planes per tuft give depth;
+native wind is disabled because these owned planes do not carry the source wind weights. Grass never
+participates in picking. Both new Addressables handles, the mesh and owned paint release on rollback/exit.
+
+Three Core cases verify walking/entrance clearance, grounded placement and valid cropped geometry.
+Release and1068 Core+182 UI pass. Private v07 preview/packed scene includes every scenery export;
+native installation/appearance/resource checks remain pending while the owner's ordinary DD2 session runs.
+Evidence: `local-art/ui-overhaul/hamlet-grass-v07/`. No estate is read or modified.
