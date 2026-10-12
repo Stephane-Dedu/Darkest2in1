@@ -17,9 +17,11 @@ Round226 adds grass around the town: native short turf with route/building-apron
 world paint and170 low tufts in one mesh. A reviewed4096px Foetor gate atlas gives sharper grass silhouettes
 than the512px biome grass grids; bind the original native material/texture, never package extracted art.
 Runtime/offline use the same Core placement/crops. Release+1068 Core+182 UI pass; private complete preview
-and packed scene:local-art/ui-overhaul/hamlet-grass-v07. Native installation/acceptance is pending because
-ordinary DD2 PID77236 was already running. Do not close or deploy over it without the owner's reply.
-No estate accessed. Keep the staged/working changes of the independent Map3D and Shieldbreaker agents.
+and packed scene:local-art/ui-overhaul/hamlet-grass-v07. The owner approved closing ordinary PID77236.
+Installed with matching hashes, then owned unsaved QA PID86776 passed alpha/crops, all ten services/Escape,
+controls, rollback/resource release, re-entry, Embark/cleanup/return and resize/restore. Final141 renderers,
+four plumes and0 repeated URP allocations over5.029 seconds. QA closed; DD2 stopped, no ordinary game
+relaunched and no estate accessed. Keep independent Map3D and Shieldbreaker edits/notes outside this pass.
 
 Round225 continues the Hamlet pass. Building albedo no longer adds the author's preview emission into roof/wall
 tints; real glass/forge light remains. A continuous valley ring and ten native wooded background placements

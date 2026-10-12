@@ -170,6 +170,9 @@ native wind is disabled because these owned planes do not carry the source wind 
 participates in picking. Both new Addressables handles, the mesh and owned paint release on rollback/exit.
 
 Three Core cases verify walking/entrance clearance, grounded placement and valid cropped geometry.
-Release and1068 Core+182 UI pass. Private v07 preview/packed scene includes every scenery export;
-native installation/appearance/resource checks remain pending while the owner's ordinary DD2 session runs.
-Evidence: `local-art/ui-overhaul/hamlet-grass-v07/`. No estate is read or modified.
+Release and1068 Core+182 UI pass. Private v07 preview/packed scene includes every scenery export.
+After the owner approved closing the ordinary session, deployed with matching DLL/PDB hashes. Native unsaved
+QA PID86776 passes alpha/crop review, all ten services/Escape, controls, rollback/resource release, re-entry,
+Embark/cleanup/return and1600x900->1440x900->1600x900. Final141 renderers/four chimney systems retain the native
+HDR target;0 repeated URP allocations over5.029 seconds. No warning/error during acceptance. QA closed, no
+ordinary game relaunched and no estate selected/read/saved. Evidence: `local-art/ui-overhaul/hamlet-grass-v07/`.

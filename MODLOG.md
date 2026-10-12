@@ -5586,18 +5586,25 @@ glTF changes the process directory. Private1600x900 preview/packed scene contain
 Three Core cases check clear routes/entrances, grounded placements and finite cropped geometry.
 Release passes with the three pre-existing warnings; all1068 Core+182 UI pass, including40 Hamlet cases.
 
-Native deployment/appearance/lifecycle acceptance is pending: ordinary DD2 PID77236 was already running,
-so it was left untouched and builds used Deploy=false. Asked the owner whether to close it or wait.
-The staged/working Shieldbreaker and Expedition Map3D changes are independent and preserved.
+Owner approved closing ordinary DD2 PID77236 for installation and a brief unsaved check. Closed only that
+verified process, deployed while DD2 was stopped, and matched both DLL/PDB pairs against build hashes.
+Owned QA PID86776 renders170 grass tufts in one mesh,141 total renderers/four chimney systems. Native alpha,
+crop boundaries, muted paint and cleared paths were reviewed in the full1600x900 screenshot. All ten service
+clicks/Escape, pan/zoom/reset, painted rollback/all resources released, reload/re-entry, Embark/cleanup/return
+and1600x900->1440x900->1600x900 pass. No warning/error/exception during the check. Final native HDR target
+retains0 repeated URP allocations over5.029 seconds; this is buffer stability, not an FPS or memory benchmark.
+Owned QA PID86776 is closed; no ordinary session relaunched. The fixture never selected/read/saved an estate.
+Independent Shieldbreaker and Expedition Map3D changes/notes remain outside this commit.
 Private evidence:local-art/ui-overhaul/hamlet-grass-v07/{grass-sources.json,grass-crops.jpg,ground-source.json,
 layout.json,composition.json,hamlet-grass-v07.png,hamlet-grass-v07.blend,core-tests.log,ui-tests.log,release-build.log}.
 
-## Status 2026-10-12: round226 grass built and reviewed offline; native installation pending
+## Status 2026-10-12: round226 grass installed and native presentation checks pass
 
-Round225 is committed/pushed asbd917cc and remains the last accepted native Hamlet. Round226's grass is
-ready for installation once ordinary DD2 is closed. Use the unsaved fixture, verify source alpha/crops,
-all services, rollback/resource release, re-entry and repeated URP allocations before marking it native-verified.
-No save access/restore is pending. Read tools/hamlet_3d.md and preserve independent agents' dirty files.
+Round226 grass code is committed/pushed as51822ee; native installation and acceptance now pass. Current
+evidence is local-art/ui-overhaul/hamlet-grass-v07, including accepted-native.png/log, accepted-player.log,
+accepted-allocations.json and deployed-hashes.json. DD2 is stopped. No save access/restore is pending.
+Read tools/hamlet_3d.md and preserve independent agents' dirty files. Saved transactions, finer art/variants
+and full frame-time/long-session memory acceptance remain separate.
 
 ## Round227 (2026-10-12): continuous expedition camera and native regional atmosphere
 
