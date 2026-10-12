@@ -1,5 +1,14 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round227 expedition work is built and tested offline; read tools/expedition_map3d.md. One persistent valley
+image now has a continuous retargetable camera, fixed quest controls and optional native fire/smoke/mist/cloud
+atlases. The private pack is local-art/expedition-vfx-v01; copy only its manifest and five top-level PNGs to the
+active PrivateExpeditionArt/vfx after backup and DD2 shutdown. All1071 Core+187 UI and Release Deploy=false
+pass. -dd3-expedition-check is built but unrun, using only the existing unsaved fixture. Ordinary DD2 PID77236
+was in a battle and left untouched; restart approval is pending. No deployment/save access/restore occurred.
+Run native input/lifecycle and visual acceptance before marking verified; retain the owner's config choice,
+painted rollback, independent round226 Hamlet grass and Shieldbreaker changes. Restore normal launch after QA.
+
 The owner's timed launch pause expired on2026-10-11 at17:47:37 UTC /19:47:37 Paris. Standing native test
 authorization applies. Round223 uses only the unsaved Hamlet fixture; retain estate protection and verify
 DD2 is stopped before deploying. Close only the exact owned QA PID; never select a campaign in this fixture.

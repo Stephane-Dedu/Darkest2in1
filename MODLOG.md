@@ -5598,3 +5598,59 @@ Round225 is committed/pushed asbd917cc and remains the last accepted native Haml
 ready for installation once ordinary DD2 is closed. Use the unsaved fixture, verify source alpha/crops,
 all services, rollback/resource release, re-entry and repeated URP allocations before marking it native-verified.
 No save access/restore is pending. Read tools/hamlet_3d.md and preserve independent agents' dirty files.
+
+## Round227 (2026-10-12): continuous expedition camera and native regional atmosphere
+
+Owner requested animated Shroud mist, Sprawl smoke/fire/embers and Foetor gas, plus a smooth approach to a
+quest's area without the two-step/reload feeling, keeping quest controls in place. Existing uncommitted Map3D
+selector/config/layout work was adopted and backed up privately before editing. The independent Hamlet and
+Shieldbreaker changes are preserved outside this round.
+
+The old enlarged overview followed by a separate closer-image fade is removed, including the closer-image
+loader API. One persistent map3d.png is transformed by Core ExpeditionMapCamera's critically damped springs
+(log scale and bounded pan). Retargeting/reversing preserves the current frame and velocity, unscaled time
+drives movement and stalled frames are bounded. All region labels, paired arrows and quest rows stay visible,
+clickable and at their overview positions; scenery hit areas follow the camera. Escape/right-click/Back to the
+map returns without clearing the quest. The painted fallback and config defaultfalse remain.
+
+tools/extract_expedition_vfx.py reads the owned DD2 Addressables via universal-modder's UnityPy environment,
+with bundle hashes and bounded source evidence. Five private RGBA PNGs provide six effect IDs: City64-frame
+8x8 fire30FPS/smoke20FPS and four spark shapes; Coast native fractal fog/half-oval mask; Farm/Forest four native
+soft-wash cloud variants. Native Farm steam is brown/pink, not green. The older dd2-native-kit drafts omitted
+particles; this is a separate native atlas layer. No generated art or extracted game assets enter Git.
+REA reused matching IronCrown identity evidence only; particle settings came from shipped serialized
+prefab/material data, not observed shader execution or live native playback.
+
+Runtime ExpeditionMapEffects reads off-thread, uploads at most one unique image per Unity frame and shares
+the cloud sheet. The prepared pack decodes to13.25MiB without mipmaps. Leaving the map releases its owned
+textures after three unused frames; stale workers own no Unity objects and cannot repopulate a later pack.
+ExpeditionMapAtmosphere draws52 deterministic, clipped quads beneath quest controls without consuming
+gameplay RNG or handling input. Effect density/trajectories/fades and some tints adapt native masks to this map.
+
+Verification: all1071 Core and187 UI tests pass; Release Deploy=false passes with the three existing warnings.
+New tests cover mid-flight retarget/reversal, stable frames, frame-rate consistency/coverage, atlas playback and
+malformed metadata, plus the actual loader's shared textures, one upload/frame, main-thread API use, invalid
+dimensions, stale workers, cleanup and reload. The UI shim does not validate GPU decoding. The extractor
+passed compilation, full re-extraction, PNG/frame-cell inspection and a source/converted contact-sheet review.
+
+Native fixture -dd3-expedition-check is built, not yet run: it injects IMGUI input only into the existing unsaved
+preview to check actual quest rectangles, retarget/reversal, paired switches, painted rollback/reload and ordinary
+provisioning cleanup/return. It guards Persist, blocks gameplay handoff and selects no estate path.
+DD2 PID77236 was already in a battle, so it was left running and no plugin/config/art was installed. Asked the
+owner for a safe restart window. Native appearance, timing, click/lifecycle checks and hash-verified deployment
+remain pending. No estate files were read or written and no restore is pending.
+
+Limits: this is a camera over a rendered valley, without live perspective/parallax, depth occlusion or native
+HDR/bloom/distortion. The overview already has baked haze/glow/motes; use restrained overlays. A clean overview
+re-render can separate those layers using the existing kit; no new generated textures are needed. Higher source
+resolution can improve close-view sharpness. Read tools/expedition_map3d.md before changing packs/ownership.
+Private evidence:local-art/expedition-motion-v01/{baseline,before-qa.png,core-tests.log,ui-tests.log,build.log};
+local-art/expedition-vfx-v01/{vfx-manifest.json,native-vfx-evidence.json,serialized-evidence,runtime-effects-preview.jpg}.
+
+## Status 2026-10-12: round227 expedition map ready; safe restart/native acceptance pending
+
+Code and the private native VFX pack are ready. DD2 PID77236 remains the owner's running battle. Deploy only
+after it is safely closed: back up active plugin/config/PrivateExpeditionArt, copy the manifest and five PNGs into
+PrivateExpeditionArt/vfx, build/deploy, run the unsaved expedition check and inspect native visuals. Close only
+the owned QA PID and restore a normal launch without check/preview flags. Keep protected estates untouched.
+Round226's Hamlet grass also awaits native acceptance; preserve that independent work and Shieldbreaker edits.

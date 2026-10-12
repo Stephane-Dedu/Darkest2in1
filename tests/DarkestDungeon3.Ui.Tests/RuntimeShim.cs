@@ -3,6 +3,7 @@ internal static class Plugin
 {
     public static readonly TestLog Log = new();
     public static TestConfig<string> NativeRoomSceneryPath = new();
+    public static TestConfig<string> ExpeditionArtPath = new();
     public sealed class TestConfig<T> { public T Value; }
     public sealed class TestLog
     {

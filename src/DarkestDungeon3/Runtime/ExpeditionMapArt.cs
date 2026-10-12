@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using DarkestDungeon3.Core.Presentation;
 using UnityEngine;
 
 namespace DarkestDungeon3.Runtime;
@@ -23,6 +24,43 @@ internal static class ExpeditionMapArt
     public static Texture2D Preview(string zone) => zone != null && Zones.Contains(zone)
         ? Image("preview-" + zone + ".png") : null;
 
+    private static readonly Dictionary<string, ExpeditionMap3D> Layouts = new();
+
+    /// <summary>The pre-rendered 3D overview (map3d.png); null without it, and then the painted map stays.</summary>
+    public static Texture2D Map3D => Image("map3d.png");
+
+    /// <summary>map3d.json beside the images. Null when missing or unusable; read once per folder.</summary>
+    public static ExpeditionMap3D Map3DLayout
+    {
+        get
+        {
+            string folder = Plugin.ExpeditionArtPath?.Value;
+            if (string.IsNullOrWhiteSpace(folder)) return null;
+            string path;
+            try { path = Path.GetFullPath(Path.Combine(folder, "map3d.json")); }
+            catch { return null; }
+            if (Layouts.TryGetValue(path, out var layout)) return layout;
+            layout = null;
+            try
+            {
+                if (File.Exists(path))
+                {
+                    if (new FileInfo(path).Length > 256 * 1024) throw new InvalidDataException("layout exceeds 256 KB");
+                    layout = ExpeditionMap3D.Parse(File.ReadAllText(path));
+                    if (layout == null) throw new InvalidDataException("no valid map position");
+                    Plugin.Log.LogInfo($"[embark-art] 3D map layout ready ({layout.Spots.Count} positions)");
+                }
+            }
+            catch (Exception e)
+            {
+                layout = null;
+                Plugin.Log.LogWarning($"[embark-art] map3d.json: {e.Message}; retaining the painted map");
+            }
+            Layouts[path] = layout;
+            return layout;
+        }
+    }
+
     private static Texture2D Image(string name)
     {
         string folder = Plugin.ExpeditionArtPath?.Value;
@@ -41,11 +79,12 @@ internal static class ExpeditionMapArt
                 if (image != null && (image.width > 4096 || image.height > 2304
                     || image.width < 64 || image.height < 32))
                     throw new InvalidDataException("invalid selector image dimensions");
-                if (image != null && name == "map.png")
+                if (image != null && (name == "map.png" || name.StartsWith("map3d", StringComparison.Ordinal)))
                 {
                     float ratio = (float)image.width / image.height;
                     if (ratio < 1.7f || ratio > 1.9f) throw new InvalidDataException("selector map must be widescreen");
-                    Plugin.Log.LogInfo($"[embark-art] approved map ready ({image.width}x{image.height})");
+                    if (name == "map.png") Plugin.Log.LogInfo($"[embark-art] approved map ready ({image.width}x{image.height})");
+                    else if (name == "map3d.png") Plugin.Log.LogInfo($"[embark-art] 3D map ready ({image.width}x{image.height})");
                 }
             }
         }

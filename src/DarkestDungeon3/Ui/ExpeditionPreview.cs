@@ -12,10 +12,11 @@ namespace DarkestDungeon3.Ui;
 [HarmonyPatch(typeof(UiRoot), "OnGUI")]
 internal static class ExpeditionPreview
 {
-    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-expedition-preview");
+    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-expedition-preview") || ExpeditionMapCheck.Enabled;
     private static EmbarkUi _ui;
     private static SaveFile _save;
     private static bool _closed;
+    private static bool? _previousBackground;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save, _save);
 
     private static bool Prefix()
@@ -45,17 +46,27 @@ internal static class ExpeditionPreview
         }
         Gui.Begin(); Drag.Begin(); GUI.depth = -1000;
         Gui.BlockInput(true);
+        var originalEvent = Event.current;
+        _previousBackground ??= Application.runInBackground;
+        Application.runInBackground = true;
         try
         {
+            var checkInput = ExpeditionMapCheck.Input(_ui);
+            ExpeditionMapCheck.BeginDraw();
+            if (checkInput != null) Event.current = checkInput;
             _ui.Draw();
+            if (checkInput != null) ExpeditionMapCheck.Verify(_ui);
             ExpeditionSkin.Text(new Rect(40, 950, 380, 32), "UI preview · Unsaved", 21, ExpeditionSkin.Muted);
             if (_ui.WantsBack)
             {
                 session.Save = null; _save = null; _ui = null; _closed = true;
                 Gui.BlockInput(false);
+                Application.runInBackground = _previousBackground ?? false;
+                ExpeditionMapEffects.Clear();
             }
         }
-        catch (Exception e) { Plugin.Log.LogError("[expedition preview] " + e); }
+        catch (Exception e) { ExpeditionMapCheck.Failed(); Plugin.Log.LogError("[expedition preview] " + e); }
+        finally { Event.current = originalEvent; }
         Drag.Overlay(); Gui.DrawTip();
         return false;
     }
