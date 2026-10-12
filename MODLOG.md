@@ -5708,3 +5708,44 @@ The three requested input fixes are installed. All1080 Core+187 UI and native sy
 DD2 is stopped, owner config unchanged, no estate read/written and no save restore pending. Keep normal launches free
 of -dd3-menu-input-check/-dd3-roster-check. Round227 VFX installation/full map acceptance remains separate; preserve
 the independent Shieldbreaker work and pending art/model checks. Next work should follow the owner's next request.
+
+## Round229 (2026-10-12): complete curio design mapping, native source audit and private atlas
+
+Owner requested a DD2-based visual design for every curio, grounded in extracted models/textures. This pass
+authors 104 individual proposals: 60 base-library entries, 10 additional quest props, 27 installed DLC definitions,
+six legacy art-only identities and the Faded Memory exception. Independent inventory checks exact ID coverage;
+quest region mapping comes from quest goal lists, not guesses. Sprite aliases and supply/quest identities stay
+separate. Current CurioLibrary loads the base CSV only; DLC/legacy coverage is not a runtime-support claim.
+
+tools/curios/README.md records regional direction, closed/active/open presentation, model backlog, production order
+and a proposed reversible presentation seam. author_designs.py/designs.json hold author-owned proposals and native
+source selectors. catalog.py audits actual meshes/materials/texture dimensions and writes private HTML/Markdown/
+JSON. Each card names shape, remaining new modeling, supply cues and used state. No gameplay behavior, renderer,
+feature flag or asset pack was implemented. Faded Memory retains the owner's explicit DD1 appearance.
+
+The native audit renders 39 reference groups (42 selected source objects). Direct common/inn model exports supplement
+the kit. Visual inspection rejected a two-triangle pickup-chest icon, the old combined inn table/knife mesh, a
+Guardian building mislabeled altar, a Hero Shrine chapel used as statue and black cage backing. Use a real camp
+coffer, direct table/knife models, compact Chirurgeon slab and textured chain; statue/cage/occult sculpture remains
+new work. Banners, moss, tendrils and nurse are labeled material/shape/pose references rather than finished bodies.
+There are 12 preliminary native prop assemblies; none is claimed as a finished bespoke curio model.
+
+Verification: Python compile, all104 inventory/design IDs,39 nonempty textured source groups,51 nonempty transparent
+renders and252 local image links pass. Native-source and assembly contact sheets were visually inspected after
+replacing misleading sources. Node VM exercised the actual inline filter script with DOM stubs:104 total,60 base,
+10 quest,27 DLC,6 legacy,1 memory,12 studies, case-insensitive exact-ID search, combined no-match, region and reset
+pass. Browser automation timed out; actual browser layout was not observed. The saved HTML was queued in Codex.
+No .NET/runtime code changed, so runtime test/deploy/launch is outside this design round. No saves or config accessed.
+Offline previews use native base-color/tint emission; native shader/VFX/animation/picking acceptance remains pending.
+
+Private output:local-art/ui-overhaul/curio-design-v01/{index.html,curio-mapping.md,inventory.json,audit.json,
+source-sheet.jpg,assembly-studies.jpg,artifact-check.json,filter-check.json,renders,concepts,parts,extra}.
+Only authored tools/design data/docs are versioned; all game assets/fonts/images remain private outside Git.
+Independent Shieldbreaker files and notes are preserved outside this commit.
+
+## Status 2026-10-12: round229 curio proposals ready for review; runtime implementation remains separate
+
+The full104-entry curio design mapping is complete. Review the private searchable atlas and tools/curios/README.md
+before implementing. Start with ordinary container states, books/bones and camps; distinctive bodies need modeling.
+The 12 assemblies show source combinations only. No game launch or save access occurred in this pass. Existing
+round228 input acceptance stands; separate round227 VFX install/native acceptance and Shieldbreaker work remain.

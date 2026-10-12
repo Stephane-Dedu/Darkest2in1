@@ -1,0 +1,1497 @@
+{
+  "version": 1,
+  "status": "Design proposals; no gameplay or runtime art changes.",
+  "parts": {
+    "chest": {
+      "folder": "kit/exp/camp_chest",
+      "objects": [
+        "camp_chest"
+      ],
+      "note": "Real 3D coffer. The similarly named road pickup is a two-triangle icon card and is excluded.",
+      "role": "Prop to adapt"
+    },
+    "camp_chest": {
+      "folder": "kit/exp/camp_chest",
+      "objects": [
+        "camp_chest"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "crate": {
+      "folder": "kit/exp/camp_crate",
+      "objects": [
+        "camp_crate"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "barrel": {
+      "folder": "kit/exp/camp_barrel",
+      "objects": [
+        "camp_barrel"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "sack": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_caves_urgent_repairs",
+      "objects": [
+        "inn_embark_sack(Clone)"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "candles": {
+      "folder": "kit/exp/common_altar_of_hope_prefab",
+      "objects": [
+        "candle_01",
+        "candle_02",
+        "candle_03"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "hope_altar": {
+      "folder": "kit/exp/common_altar_of_hope_prefab",
+      "objects": [
+        "altar 1"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "cultist_altar": {
+      "folder": "extra/chirurgeon_node_altar",
+      "objects": [
+        "table"
+      ],
+      "note": "Compact Chirurgeon slab supplies the base proportions. Cultist reliefs, offering bowl and hostile sigil need new modeling; Guardian architecture is excluded.",
+      "role": "Stone slab reference"
+    },
+    "tentacles": {
+      "folder": "extra/guardian_node_altar",
+      "objects": [
+        "tentacles_01",
+        "tentacles_02"
+      ],
+      "note": "Distributed tendril fragments need reshaping around a compact body; do not import the Guardian node's spacing.",
+      "role": "Organic shape / material reference"
+    },
+    "fountain": {
+      "folder": "extra/oasis_node_02_no_moss",
+      "objects": [
+        "main"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "moss": {
+      "folder": "extra/courtier_node_moss",
+      "objects": [
+        "courtier_node_moss"
+      ],
+      "note": "Draped growth source; make curio-specific hanging or ground patches instead of importing the full node footprint.",
+      "role": "Growth / material reference"
+    },
+    "skulls": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_forest_creature_den",
+      "objects": [
+        "forest_skull_pile_07"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "bones": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_farm_creature_den",
+      "objects": [
+        "bones_01 (1)"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "table": {
+      "folder": "extra/inn_table",
+      "objects": [
+        "inn_table"
+      ],
+      "note": "Direct model export isolates the table from the statically combined inn scene.",
+      "role": "Prop to adapt"
+    },
+    "dagger": {
+      "folder": "extra/inn_table",
+      "objects": [
+        "inn_interior_dagger_geo"
+      ],
+      "note": "Direct model export isolates the knife. Cleavers and hooked blades still need new geometry.",
+      "role": "Prop to adapt"
+    },
+    "books": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_city_dungeon_exterior",
+      "objects": [
+        "city_book_pile_03"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "bookcase": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_city_dungeon_interior",
+      "objects": [
+        "city_dungeon_int_bookcase_02(Clone)"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "cage": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_caves_resist",
+      "objects": [
+        "hanging_cages_chains_02"
+      ],
+      "note": "Textured cage-chain metal reference; the iron maiden shell still needs bespoke modeling.",
+      "role": "Iron / chain reference"
+    },
+    "corpse": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_caves_gaunt_chirurgeon",
+      "objects": [
+        "chirurgeon_node_corpse"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "surgeon_table": {
+      "folder": "extra/chirurgeon_node_altar",
+      "objects": [
+        "table"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "meat_cart": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_farm_faction",
+      "objects": [
+        "farm_cart_meat"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "meat": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_farm_creature_den",
+      "objects": [
+        "meat_piece_small_01"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "fish": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_faction",
+      "objects": [
+        "coast_big_fish"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "fish_small": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_dungeon_exterior",
+      "objects": [
+        "coast_fish_single_02"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "coast_chest": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_faction",
+      "objects": [
+        "coast_chest"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "sea_shrine": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_dungeon_exterior",
+      "objects": [
+        "coast_dungeon_shrine"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "web": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_caves_creature_den",
+      "objects": [
+        "cobwebs"
+      ],
+      "note": "Alpha card; inspect from both sides before runtime use.",
+      "role": "Prop to adapt"
+    },
+    "stump": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_gaunt",
+      "objects": [
+        "coast_tree_stump_02"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "tree": {
+      "folder": "kit/exp/camp_tree_01",
+      "objects": [
+        "camp_tree_01"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "tent": {
+      "folder": "kit/exp/forest_tent_01",
+      "objects": [
+        "forest_tent_01"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "cloth": {
+      "folder": "extra/the_inn_banner_01",
+      "objects": [
+        "the_inn_banner_01"
+      ],
+      "note": "Banner fabric and fraying reference; satchels, bindings and curtains require their own mesh and UVs.",
+      "role": "Cloth / material reference"
+    },
+    "gravestone": {
+      "folder": "kit/exp/gravestone_group_01",
+      "objects": [],
+      "note": "Group source; isolate one marker for a final curio.",
+      "role": "Prop to adapt"
+    },
+    "firepit": {
+      "folder": "kit/exp/camp_firepit",
+      "objects": [
+        "camp_firepit"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "eggs": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_coast_barricade_gang_courtier",
+      "objects": [
+        "courtier_node_eggs_01(Clone)"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "rack": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_city_boss_beastmen",
+      "objects": [
+        "beastmen_node_rack_01"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "pillar": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_city_dungeon_interior",
+      "objects": [
+        "city_dungeon_int_pillar_01(Clone)"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "ruin": {
+      "folder": "kit/exp/city_ruins_02",
+      "objects": [
+        "city_ruins_02"
+      ],
+      "note": "",
+      "role": "Prop to adapt"
+    },
+    "shrine": {
+      "folder": "kit/arenas/scenes_scenes_combat_arena_city_dungeon_interior",
+      "objects": [
+        "city_dungeon_int_pillar_01(Clone)"
+      ],
+      "note": "Stone carving reference only. Hero Shrine is a chapel, so it is excluded as a statue body.",
+      "role": "Carved stone reference"
+    },
+    "nurse": {
+      "folder": "kit/exp/common_field_hospital_prefab",
+      "objects": [
+        "field_hospital_nurse"
+      ],
+      "note": "Cloth/pose reference only for new NPC bodies; do not substitute this nurse unchanged.",
+      "role": "NPC cloth / pose reference"
+    }
+  },
+  "designs": [
+    {
+      "id": "unlocked_strongbox",
+      "title": "Wayfarer's coffer",
+      "parts": [
+        "chest"
+      ],
+      "new_work": "Split lid, empty interior and shallow bottom tray.",
+      "design": "Low crooked oak coffer with iron corners, a loose hasp and one readable lid seam.",
+      "resolved": "Lid tilted back; tray visibly emptied, no persistent reward glow."
+    },
+    {
+      "id": "locked_strongbox",
+      "title": "Ironbound strongbox",
+      "parts": [
+        "chest"
+      ],
+      "new_work": "Oversized padlock, lock socket and separate lid.",
+      "design": "Same traveling coffer family with three iron straps and a large front lock silhouette.",
+      "resolved": "Lock hangs broken or unlocked; lid rests open."
+    },
+    {
+      "id": "goal_strongbox",
+      "title": "Sealed contract coffer",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Wax contract seal and attached quest pennant.",
+      "design": "Ironbound coffer with a pale diagonal cloth seal that identifies an objective at corridor scale.",
+      "resolved": "Seal torn and contents removed; retain empty coffer at its original position."
+    },
+    {
+      "id": "heirloom_chest",
+      "title": "Estate reliquary chest",
+      "parts": [
+        "camp_chest",
+        "candles"
+      ],
+      "new_work": "Carved lid crest, brass fittings and interior.",
+      "design": "Broad bowed chest, worn heraldic panel and dark brass corners; avoid a pile of generic loot around it.",
+      "resolved": "Raised crest lid and empty velvet-lined cavity."
+    },
+    {
+      "id": "eldritch_altar",
+      "title": "Profaned votive altar",
+      "parts": [
+        "cultist_altar",
+        "tentacles",
+        "candles"
+      ],
+      "new_work": "Compact altar cut-down, sacrificial bowl and carved hostile sigil.",
+      "design": "A low black stone shrine with one tentacle wrapping its base and candles grouped on a single side.",
+      "resolved": "Bowl clears or candle pattern changes according to resolution; altar remains."
+    },
+    {
+      "id": "altar_of_light",
+      "title": "Ember votive shrine",
+      "parts": [
+        "hope_altar",
+        "candles"
+      ],
+      "new_work": "Compact pedestal adaptation and glass votive cup.",
+      "design": "Pale chipped devotional stone with warm candles, broad front recess and one bright ivory focal point.",
+      "resolved": "One flame diminishes after use; keep sacred silhouette legible."
+    },
+    {
+      "id": "stack_of_books",
+      "title": "Water-damaged folios",
+      "parts": [
+        "books"
+      ],
+      "new_work": "Separate loose cover and consumable pages.",
+      "design": "Three uneven piles of Sprawl books; one open volume faces the player and the spines keep their inked edges.",
+      "resolved": "Open volume collapses; ash variant is reserved for the existing torch result."
+    },
+    {
+      "id": "iron_maiden",
+      "title": "Penitent's iron cage",
+      "parts": [
+        "cage",
+        "pillar"
+      ],
+      "new_work": "Bespoke human-shaped iron shell, spikes, hinged doors and interior.",
+      "design": "Tall tapering torture cabinet with a narrow face opening and heavy outward doors; cage is only a material reference.",
+      "resolved": "One door opens outward; inner spikes and an empty silhouette remain."
+    },
+    {
+      "id": "pile_of_bones",
+      "title": "Ossuary scatter",
+      "parts": [
+        "bones",
+        "skulls"
+      ],
+      "new_work": "Pickable cluster cleanup and subtle grave dust.",
+      "design": "Low ribcage fan with three skulls arranged toward the camera, resting on dark earth rather than a black base slab.",
+      "resolved": "Bones spread apart with a small searched depression."
+    },
+    {
+      "id": "discarded_pack",
+      "title": "Abandoned travel pack",
+      "parts": [
+        "sack",
+        "cloth"
+      ],
+      "new_work": "Satchel body, leather straps, flap hinge and small buckles.",
+      "design": "A slumped olive canvas pack with a single long shoulder strap and pale folded cloth at its mouth.",
+      "resolved": "Flap falls open and strap goes slack; no new items appear before rewards resolve."
+    },
+    {
+      "id": "sconce",
+      "title": "Roadside flame niche",
+      "parts": [
+        "candles",
+        "pillar"
+      ],
+      "new_work": "Wrought iron wall bracket and portable cropped masonry backing.",
+      "design": "A black iron torch in a broken stone niche, isolated from the building that originally held it.",
+      "resolved": "Torch is removed or extinguished according to the current interaction result."
+    },
+    {
+      "id": "crate",
+      "title": "Splintered supply crate",
+      "parts": [
+        "crate"
+      ],
+      "new_work": "Separate lid slats and interior.",
+      "design": "A squat crate with uneven pale plank ends, dark nail heads and one lifted corner.",
+      "resolved": "Top slats displaced; cavity remains dark and empty."
+    },
+    {
+      "id": "sack",
+      "title": "Tied provision sack",
+      "parts": [
+        "sack"
+      ],
+      "new_work": "Opened neck mesh and a frayed drawstring.",
+      "design": "Coarse ochre sack gathered at the neck; distinguish it from the leather-strapped travel pack.",
+      "resolved": "Neck untied and body deflated."
+    },
+    {
+      "id": "suit_of_armor",
+      "title": "Forgotten sentinel",
+      "parts": [
+        "pillar",
+        "rack"
+      ],
+      "new_work": "Bespoke empty armor suit, helmet, shoulder plates and sword.",
+      "design": "Hollow militia armor on a broken plinth, tilted helmet and one rigid arm resting on a sword.",
+      "resolved": "Helmet turns slightly or plate shifts; armor remains a stable landmark."
+    },
+    {
+      "id": "dinner_cart",
+      "title": "Butcher's serving cart",
+      "parts": [
+        "meat_cart",
+        "meat"
+      ],
+      "new_work": "Wheel/lid separation and small plate details.",
+      "design": "Narrow Foetor cart with a hanging stained cloth and one recognizable covered platter above the meat.",
+      "resolved": "Platter opened and scraps reduced; wheels remain still."
+    },
+    {
+      "id": "decorative_urn",
+      "title": "Ashen memorial urn",
+      "parts": [
+        "pillar",
+        "candles"
+      ],
+      "new_work": "Bespoke lidded urn with handles and painted relief.",
+      "design": "Large ivory urn on a low chipped step; soot fills carved grooves without hiding the pale silhouette.",
+      "resolved": "Lid slides off; broken shard variant follows shovel interaction."
+    },
+    {
+      "id": "locked_display_cabinet",
+      "title": "Burned collector's cabinet",
+      "parts": [
+        "bookcase",
+        "cloth"
+      ],
+      "new_work": "Glass-front doors, brass lock and replacement display shelves.",
+      "design": "Tall narrow display case with cracked dark glass, pale shelf edges and a lock at hand height.",
+      "resolved": "One glass door swings open; shelves empty without changing the cabinet's footprint."
+    },
+    {
+      "id": "confession_booth",
+      "title": "Roadside confessional",
+      "parts": [
+        "ruin",
+        "cloth",
+        "candles"
+      ],
+      "new_work": "Bespoke compact booth, timber lattice and hinged curtain.",
+      "design": "An angular timber booth in salvaged Sprawl stone, deep red curtain and a small cross-shaped aperture.",
+      "resolved": "Curtain drawn aside; candle lowers and interior stays dark."
+    },
+    {
+      "id": "holy_fountain",
+      "title": "Pilgrim's wall fountain",
+      "parts": [
+        "fountain",
+        "candles"
+      ],
+      "new_work": "Separate shallow water basin and water surface.",
+      "design": "Crop the Oasis arch into a compact devotional fountain; pale central relief and clean water identify its purpose.",
+      "resolved": "Water level falls a little; faint ripples settle."
+    },
+    {
+      "id": "bookshelf",
+      "title": "Scorched archive shelf",
+      "parts": [
+        "bookcase",
+        "books"
+      ],
+      "new_work": "Remove library wall connections and split searchable volumes.",
+      "design": "One freestanding leaning bookshelf with sparse intact books among blackened shelves.",
+      "resolved": "A few volumes displaced; shelf silhouette unchanged."
+    },
+    {
+      "id": "alchemy_table",
+      "title": "Abandoned apothecary bench",
+      "parts": [
+        "table",
+        "candles",
+        "books"
+      ],
+      "new_work": "Glass vessels, retort, herb bundles and separable burner.",
+      "design": "Crooked dark wood bench with three oversized vessels and a broad stained preparation surface.",
+      "resolved": "Stopper removed or burner spent; optional existing torch outcome uses brief local flame."
+    },
+    {
+      "id": "knife_rack",
+      "title": "Bloodied butcher's rack",
+      "parts": [
+        "rack",
+        "dagger"
+      ],
+      "new_work": "Compact rack rebuild and four distinct hooked blades.",
+      "design": "Foetor frame hung with asymmetrical cleavers; sharp pale edges contrast with rust-red wood.",
+      "resolved": "One blade shifts and cloth drape drops; searched gaps are visible."
+    },
+    {
+      "id": "sarcophagus",
+      "title": "Cracked saint's tomb",
+      "parts": [
+        "pillar",
+        "ruin"
+      ],
+      "new_work": "Bespoke stone coffin, relief lid and interior.",
+      "design": "Low angular stone tomb with a carved sleeping face and one chipped corner, not a resized supply chest.",
+      "resolved": "Lid pushed to one side to expose the empty stone cavity."
+    },
+    {
+      "id": "mummified_remains",
+      "title": "Bound roadside dead",
+      "parts": [
+        "corpse",
+        "cloth"
+      ],
+      "new_work": "Wrapped body adaptation, exposed hand and bindings.",
+      "design": "Dry desaturated body tightly wrapped against a stump; frayed cloth creates a thin readable outline.",
+      "resolved": "Bindings loosen and body slumps; stay distinct from edible carcasses."
+    },
+    {
+      "id": "sacrificial_stone",
+      "title": "Feasting sacrifice slab",
+      "parts": [
+        "surgeon_table",
+        "meat",
+        "candles"
+      ],
+      "new_work": "Stone top substitution and carved channel.",
+      "design": "Heavy low slab stained dark burgundy with a shallow offering bowl and three uneven steps.",
+      "resolved": "Offering removed; blood channels remain as paint, without a perpetual glow."
+    },
+    {
+      "id": "skull_altar",
+      "title": "Carrion votive cairn",
+      "parts": [
+        "skulls",
+        "bones",
+        "cultist_altar"
+      ],
+      "new_work": "Compact masonry base and skull sockets.",
+      "design": "Short altar crowned by a triangular skull stack and two crooked bone uprights.",
+      "resolved": "Top skull tilts; candle or dust response ends quickly."
+    },
+    {
+      "id": "occult_scrawlings",
+      "title": "Defaced barn scripture",
+      "parts": [
+        "ruin",
+        "cloth"
+      ],
+      "new_work": "Painted occult glyph panel and loose parchment strips.",
+      "design": "A broken plaster panel covered by bold charcoal signs, red hand marks and hanging parchment.",
+      "resolved": "Scratches partially erased or paper torn; keep the same wall fragment."
+    },
+    {
+      "id": "moonshine_barrel",
+      "title": "Fermenting farm cask",
+      "parts": [
+        "barrel",
+        "cloth"
+      ],
+      "new_work": "Tap, stopper and leaking rim detail.",
+      "design": "Swollen oak cask on two crude supports; pale tap and a sour green stain suggest dangerous drink.",
+      "resolved": "Tap hangs open with a short drip; lid or bung remains displaced."
+    },
+    {
+      "id": "locked_sarcophagus",
+      "title": "Chained funerary tomb",
+      "parts": [
+        "pillar",
+        "ruin"
+      ],
+      "new_work": "Stone coffin family plus iron chain, padlock and lid.",
+      "design": "Same tomb proportions as Sarcophagus, with two broad chain runs and a single large lock.",
+      "resolved": "Chain loosens beside the opened lid; no silhouette swap to a chest."
+    },
+    {
+      "id": "makeshift_dining_table",
+      "title": "The abandoned feast",
+      "parts": [
+        "table",
+        "meat",
+        "barrel"
+      ],
+      "new_work": "Bowls, bones, stained cloth and separable dishes.",
+      "design": "Uneven Foetor table with mismatched bowls and food concentrated at its center.",
+      "resolved": "Table remains; picked-over dishes and hanging cloth show it has been searched."
+    },
+    {
+      "id": "pile_of_scrolls",
+      "title": "Sealed heretic scrolls",
+      "parts": [
+        "books",
+        "cloth"
+      ],
+      "new_work": "Bespoke rolled parchment tubes, wax seals and torn sheets.",
+      "design": "Three large rolled scrolls and one partially unrolled strip on a rough plank, readable as scrolls rather than books.",
+      "resolved": "Scrolls unroll or burn according to the existing result; charred ribbons remain."
+    },
+    {
+      "id": "ancient_coffin",
+      "title": "Root-bound wooden coffin",
+      "parts": [
+        "stump",
+        "crate",
+        "moss"
+      ],
+      "new_work": "Bespoke coffin silhouette, separated lid and exposed joints.",
+      "design": "Long narrow timber coffin pinched by roots, with crooked pale planks and a split headboard.",
+      "resolved": "Lid leans against the roots; coffin interior stays grounded."
+    },
+    {
+      "id": "old_tree",
+      "title": "Hollow sentinel stump",
+      "parts": [
+        "stump",
+        "tree",
+        "moss"
+      ],
+      "new_work": "Hollow cavity cut, rot lining and removable bark panel.",
+      "design": "A bent Tangle stump with one broad dark hollow facing the party and a few pale roots at ground level.",
+      "resolved": "Loose bark falls aside, exposing the searched hollow."
+    },
+    {
+      "id": "beast_carcass",
+      "title": "Forest carrion",
+      "parts": [
+        "meat",
+        "bones",
+        "cloth"
+      ],
+      "new_work": "Bespoke quadruped body, exposed ribs and fur patches.",
+      "design": "Low boar-like carcass with a visible rib fan and heavy dark hide; meat props supply the native painted material.",
+      "resolved": "Rib opening widens slightly; scavenged flesh decreases."
+    },
+    {
+      "id": "pristine_fountain",
+      "title": "Hidden woodland spring",
+      "parts": [
+        "fountain",
+        "moss"
+      ],
+      "new_work": "Low round basin and clear water surface.",
+      "design": "Smaller moss-framed fountain with brighter stone and unbroken water, clearly cleaner than a brackish pool.",
+      "resolved": "Water ripples and settles; no contaminated color change unless current rules require it."
+    },
+    {
+      "id": "travellers_tent",
+      "title": "Deserter's canvas shelter",
+      "parts": [
+        "tent",
+        "sack",
+        "firepit"
+      ],
+      "new_work": "Open entrance flap and a small searched interior.",
+      "design": "A compact military tent with frayed ivory canvas, a low pack and an unlit fire ring; reduce large node footprint.",
+      "resolved": "Front flap pulled aside; pack deflates and fire ring remains cold."
+    },
+    {
+      "id": "cosmic_spiderweb",
+      "title": "Silken road snare",
+      "parts": [
+        "web",
+        "stump"
+      ],
+      "new_work": "Bespoke radial web frame, captured bundle and alpha layers.",
+      "design": "One asymmetrical cobweb stretched between two dead branches, with a dark suspended cocoon.",
+      "resolved": "Central strands torn and cocoon lowered; retain outer threads as the used state."
+    },
+    {
+      "id": "lost_luggage",
+      "title": "Mildewed campaign trunk",
+      "parts": [
+        "camp_chest",
+        "cloth",
+        "moss"
+      ],
+      "new_work": "Leather trunk corners, straps and separate flap.",
+      "design": "Flat travel trunk overtaken by damp green growth, with a pale cloth label and one rigid handle.",
+      "resolved": "Straps loosen and lid opens; moisture remains a painted detail."
+    },
+    {
+      "id": "shallow_grave",
+      "title": "Hastily covered burial",
+      "parts": [
+        "gravestone",
+        "bones"
+      ],
+      "new_work": "Small soil mound, shovel notch and opened grave depression.",
+      "design": "A low uneven earth mound marked by a broken stick or short stone, with one exposed bone.",
+      "resolved": "Soil pushed into two side heaps, exposing the shallow pit."
+    },
+    {
+      "id": "troubling_effigy",
+      "title": "The bound watcher",
+      "parts": [
+        "rack",
+        "skulls",
+        "cloth"
+      ],
+      "new_work": "Bespoke branch cross-frame, knots and cloth skull wrap.",
+      "design": "A narrow crooked wooden figure bound in faded red cloth, one skull facing the player.",
+      "resolved": "Bindings unravel slightly and head slumps; avoid turning it into a friendly hero shrine."
+    },
+    {
+      "id": "barnacle_crusted_chest",
+      "title": "Drowned cargo chest",
+      "parts": [
+        "coast_chest",
+        "fish_small"
+      ],
+      "new_work": "Barnacle clusters, seaweed fringe and split lid.",
+      "design": "Salt-white encrusted coffer on a dark wet timber base, with growth concentrated along the lid seam.",
+      "resolved": "Barnacles break away and lid opens; shells remain around the footline."
+    },
+    {
+      "id": "brackish_tidepool",
+      "title": "The poisoned shallows",
+      "parts": [
+        "stump",
+        "moss",
+        "fish_small"
+      ],
+      "new_work": "Shallow rock bowl, water shader surface and foam fringe.",
+      "design": "A broad low pool edged by black Shroud rocks; sour olive water contrasts with clean springs.",
+      "resolved": "Surface disturbed with a small reduced pool; no reward cue before outcome resolution."
+    },
+    {
+      "id": "fish_idol",
+      "title": "Drowned congregation idol",
+      "parts": [
+        "sea_shrine",
+        "fish_small"
+      ],
+      "new_work": "Isolate central shrine figure, compact pedestal and barnacles.",
+      "design": "A squat fish-faced devotional stone with two candle niches and a cool salt-stained rim.",
+      "resolved": "Candles extinguish or offerings vanish; stone silhouette remains."
+    },
+    {
+      "id": "giant_oyster",
+      "title": "The armored pearl shell",
+      "parts": [
+        "sea_shrine",
+        "fish_small"
+      ],
+      "new_work": "Bespoke ribbed two-part oyster shell, nacre interior and pearl.",
+      "design": "A broad scalloped shell with a heavy black underside and one ivory inner lip; shrine textures provide marine stone reference only.",
+      "resolved": "Upper shell hinges back to reveal an empty nacre hollow after collection."
+    },
+    {
+      "id": "giant_fish_carcass",
+      "title": "Leviathan's castoff",
+      "parts": [
+        "fish",
+        "fish_small",
+        "bones"
+      ],
+      "new_work": "Split belly and searchable body cavity.",
+      "design": "Large native Shroud fish laid diagonally on wet planks, jaw and pale ribs facing the party.",
+      "resolved": "Belly opens and loose flesh shifts; head and tail stay in place."
+    },
+    {
+      "id": "ships_figurehead",
+      "title": "Broken prow saint",
+      "parts": [
+        "sea_shrine",
+        "cloth"
+      ],
+      "new_work": "Bespoke carved female figurehead and splintered prow beam.",
+      "design": "Tall weathered wooden figure with flowing carved cloth, wedged into a short broken ship prow.",
+      "resolved": "One hanging ribbon falls; the wreck fragment remains recognizable."
+    },
+    {
+      "id": "eerie_coral",
+      "title": "The whispering reef",
+      "parts": [
+        "sea_shrine",
+        "moss"
+      ],
+      "new_work": "Bespoke branching coral mesh and pale crust texture paint.",
+      "design": "An upward coral fan in muted ivory and cold mauve, with thick irregular branches and deep black gaps.",
+      "resolved": "One small branch snaps or polyps retract; silhouette remains a coral fan."
+    },
+    {
+      "id": "travellers_tent_tutorial",
+      "title": "The first abandoned camp",
+      "parts": [
+        "tent",
+        "sack",
+        "firepit"
+      ],
+      "new_work": "Tent family with a simpler entrance and stronger value contrast.",
+      "design": "Same shelter language as Traveller's Tent, cleared of foreground clutter so the first interaction reads immediately.",
+      "resolved": "Entrance opened and pack searched; tutorial identity remains separate in data."
+    },
+    {
+      "id": "bandits_trapped_chest",
+      "title": "The highwayman's bait",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Visible sprung wire, nail trap and independent lid.",
+      "design": "Small inviting coffer with a deliberately visible thin wire and a torn bandit ribbon; avoid hiding the warning in clutter.",
+      "resolved": "Wire slack and lid open after the existing trap or safe interaction resolves."
+    },
+    {
+      "id": "shamblers_altar",
+      "title": "The starless invitation",
+      "parts": [
+        "cultist_altar",
+        "tentacles",
+        "candles"
+      ],
+      "new_work": "Bespoke compact Shambler altar profile, torch socket and sigil.",
+      "design": "A steep black altar with a large central torch socket and restrained red tendrils; combine Chirurgeon stone with Guardian tendril materials.",
+      "resolved": "Socket scorches and shrine becomes dormant after its existing encounter flow."
+    },
+    {
+      "id": "bas_relief",
+      "title": "Sunken covenant panel",
+      "parts": [
+        "sea_shrine",
+        "ruin"
+      ],
+      "new_work": "Bespoke fish/cult relief panel and chipped stone frame.",
+      "design": "Low wide carved marine relief propped against a broken wall, with shallow cold highlights and thick dark grooves.",
+      "resolved": "A small fragment breaks loose; relief remains at the same anchor."
+    },
+    {
+      "id": "secret_stash",
+      "title": "The concealed coffer",
+      "parts": [
+        "camp_chest",
+        "cloth"
+      ],
+      "new_work": "Nested compartment, jeweled key plate and interior.",
+      "design": "Very small ornate coffer tucked beneath a folded drape, clearly more deliberate than an ordinary supply box.",
+      "resolved": "Inner compartment opened and jewels removed."
+    },
+    {
+      "id": "ancestors_knapsack",
+      "title": "The ancestor's field bag",
+      "parts": [
+        "sack",
+        "cloth",
+        "books"
+      ],
+      "new_work": "Bespoke leather bag, family clasp and map roll.",
+      "design": "A heavy dark leather knapsack with a pale heraldic clasp, tightly rolled map and worn red lining.",
+      "resolved": "Map unrolled and flap opened; clasp persists as the landmark."
+    },
+    {
+      "id": "tutorial_shovel",
+      "title": "First road supplies: shovel",
+      "parts": [
+        "chest"
+      ],
+      "new_work": "Chest family and a clearly visible shovel bundle.",
+      "design": "Keep the ordinary open-coffer silhouette, with a pale shovel handle and blade visible at the top.",
+      "resolved": "Tool bundle removed; use the ordinary emptied chest state."
+    },
+    {
+      "id": "tutorial_key",
+      "title": "First road supplies: key",
+      "parts": [
+        "sack",
+        "cloth"
+      ],
+      "new_work": "Pack family plus a clearly visible key ring.",
+      "design": "Simple canvas travel bag with an oversized key ring on its flap; preserve tutorial pickup identity.",
+      "resolved": "Key ring and contents removed; flap rests open."
+    },
+    {
+      "id": "tutorial_holy",
+      "title": "First road supplies: holy water",
+      "parts": [
+        "sack",
+        "candles"
+      ],
+      "new_work": "Sack family plus three pale glass bottles.",
+      "design": "Tied provision sack with a small bright bottle rack at its mouth; bottles supply the first-reading cue.",
+      "resolved": "Bottle rack emptied and neck untied."
+    },
+    {
+      "id": "tutorial_food",
+      "title": "First road supplies: food",
+      "parts": [
+        "sack",
+        "cloth"
+      ],
+      "new_work": "Pack family plus wrapped bread and dried food.",
+      "design": "Slumped travel pack with one pale food bundle and an open corner, visually distinct from the key pack.",
+      "resolved": "Bundle removed and fabric relaxes."
+    },
+    {
+      "id": "thanks_chest",
+      "title": "The impossible gift",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Ordinary coffer family plus an original restrained cloth gift seal.",
+      "design": "Keep the base unlocked chest silhouette and its separate identity; add a small pale knot as a readable gift cue.",
+      "resolved": "Opened empty coffer; no repeated reward animation on revisit."
+    },
+    {
+      "id": "open_grave",
+      "title": "The violated burial",
+      "parts": [
+        "gravestone",
+        "bones",
+        "corpse"
+      ],
+      "new_work": "Deep open soil cavity and broken coffin lining.",
+      "design": "A wider darker grave than Shallow Grave, with an exposed coffin plank and displaced marker.",
+      "resolved": "Fresh earth pushed aside; searched cavity remains visible."
+    },
+    {
+      "id": "incursion_knapsack",
+      "title": "Raider's abandoned satchel",
+      "parts": [
+        "sack",
+        "cloth"
+      ],
+      "new_work": "Ancestor bag family with torn militia strap and damaged clasp.",
+      "design": "Use the heavy satchel silhouette but strip out heraldic polish; a slashed red strap ties it to the town raid.",
+      "resolved": "Torn flap falls open and loose contents vanish."
+    },
+    {
+      "id": "reliquary",
+      "title": "Pilgrim's relic case",
+      "parts": [
+        "camp_chest",
+        "hope_altar",
+        "candles"
+      ],
+      "new_work": "Small shrine-shaped case, holy seal and removable relic tray.",
+      "design": "Compact peaked reliquary with ivory carved sides, a brass front grille and one clear objective seal.",
+      "resolved": "Grille open and tray empty; quest identity stays distinct from a normal heirloom chest."
+    },
+    {
+      "id": "chirurgeons_satchel",
+      "title": "Field surgeon's medicine case",
+      "parts": [
+        "sack",
+        "cloth",
+        "dagger"
+      ],
+      "new_work": "Medical bag, brass clasps and capped vials.",
+      "design": "Low leather medical satchel with a pale cross-tag and three large bottle silhouettes.",
+      "resolved": "Case opened with empty vial slots; avoid implying a new healing interaction."
+    },
+    {
+      "id": "foodstuff_crate",
+      "title": "Sealed grain delivery",
+      "parts": [
+        "crate",
+        "sack"
+      ],
+      "new_work": "Grain label stencil and separate sack mouths.",
+      "design": "Two low shipment crates under tied grain sacks; one pale wheat mark reads as the objective cue.",
+      "resolved": "Crate opened and grain bundle removed."
+    },
+    {
+      "id": "shipment_crates",
+      "title": "The missing cargo",
+      "parts": [
+        "crate",
+        "barrel",
+        "cloth"
+      ],
+      "new_work": "Three-crate arrangement, rope seals and objective pennant.",
+      "design": "Stack two small crates beside one broad crate, bound with dark rope and a single pale contract ribbon.",
+      "resolved": "Front crate opened and seals broken; group footprint unchanged."
+    },
+    {
+      "id": "corrupted_altar",
+      "title": "Infected votive stone",
+      "parts": [
+        "cultist_altar",
+        "tentacles",
+        "hope_altar"
+      ],
+      "new_work": "Compact altar family with corruption sockets and removable tendrils.",
+      "design": "Familiar devotional altar partly swallowed by dark growth; one clean stone face remains for recognition.",
+      "resolved": "Corruption recedes locally after the existing cleansing action; keep the altar mesh."
+    },
+    {
+      "id": "infected_corpse",
+      "title": "The plague carrier",
+      "parts": [
+        "corpse",
+        "cloth",
+        "meat"
+      ],
+      "new_work": "Disease sacs, sheet flap and treatment-state variant.",
+      "design": "Human body under a stained field sheet, one hand exposed and dark swollen growth kept low on the silhouette.",
+      "resolved": "Sheet pulled aside and infestation depleted after cleansing; no standing NPC replacement."
+    },
+    {
+      "id": "animalistic_shrine",
+      "title": "The hunting covenant",
+      "parts": [
+        "rack",
+        "skulls",
+        "bones"
+      ],
+      "new_work": "Antler crown, compact branch stand and carved offering bowl.",
+      "design": "A Foetor timber shrine crowned by a large antler arc and bound skull, with an obvious low offering bowl.",
+      "resolved": "Bowl cleared and bindings relax after the existing ritual."
+    },
+    {
+      "id": "protective_ward",
+      "title": "The warding obelisk",
+      "parts": [
+        "pillar",
+        "hope_altar",
+        "candles"
+      ],
+      "new_work": "Bespoke short obelisk, carved sockets and activated rune layer.",
+      "design": "A compact chipped ivory obelisk with three large dark runes and one sealed recess for the quest action.",
+      "resolved": "Runes remain faintly lit after activation; persistent objective state controls the art."
+    },
+    {
+      "id": "beacon",
+      "title": "The last signal",
+      "parts": [
+        "pillar",
+        "candles",
+        "cultist_altar"
+      ],
+      "new_work": "Tall beacon cage, brazier and flame socket.",
+      "design": "A narrow tapering stone beacon with a large sheltered brazier at the top; bright point is limited to the flame.",
+      "resolved": "Brazier lit only after the existing objective activates it."
+    },
+    {
+      "id": "teleporter",
+      "title": "The fractured threshold",
+      "parts": [
+        "cultist_altar",
+        "tentacles",
+        "pillar"
+      ],
+      "new_work": "Bespoke incomplete stone ring, ground plate and portal surface.",
+      "design": "Broken standing ring on a low engraved base, with a dark central aperture and pale fractured rim.",
+      "resolved": "Brief distortion during existing travel; stable dormant state afterwards."
+    },
+    {
+      "id": "cc_hive",
+      "title": "The blood-fed hive",
+      "parts": [
+        "eggs",
+        "stump"
+      ],
+      "new_work": "Hanging hive shell, slit entrance and insect silhouettes.",
+      "design": "An elongated papery hive suspended beneath a dead branch, native Courtier eggs clustered at its root.",
+      "resolved": "Shell splits and swarm thins; retain an empty torn casing."
+    },
+    {
+      "id": "cc_damned_fountain",
+      "title": "The crimson spring",
+      "parts": [
+        "fountain",
+        "eggs",
+        "candles"
+      ],
+      "new_work": "Basin adaptation, blood-water surface and gilded crest.",
+      "design": "Courtly fountain with black stone, faded gold rim and dark crimson water; eggs invade only the lower cracks.",
+      "resolved": "Water level drops and egg film breaks after use."
+    },
+    {
+      "id": "cc_bone_pile",
+      "title": "The court's remains",
+      "parts": [
+        "bones",
+        "skulls",
+        "cloth"
+      ],
+      "new_work": "Elongated vampire skull accents and powdered-wig scraps.",
+      "design": "A pale bony scatter with two long jaw shapes and scraps of court finery, distinct from ordinary human bones.",
+      "resolved": "Searched bones spread; finery becomes flatter and dirtier."
+    },
+    {
+      "id": "cc_egg_cluster",
+      "title": "Pulsing blood eggs",
+      "parts": [
+        "eggs"
+      ],
+      "new_work": "Individual shell separation and ruptured variant.",
+      "design": "Use the native DD2 Courtier egg shapes in a low readable cluster, with red veins and a dark moist base.",
+      "resolved": "Several shells split and collapse; remaining eggs stop pulsing."
+    },
+    {
+      "id": "cc_shrew_hooded",
+      "title": "The hooded supplicant",
+      "parts": [
+        "nurse",
+        "cloth"
+      ],
+      "new_work": "Bespoke seated Blood Shrew body, hood, hand and animation rig.",
+      "design": "A small hunched court survivor beneath a ragged deep-red hood, one open hand extended; nurse is cloth reference only.",
+      "resolved": "Hand lowers and figure hunches back after the existing encounter."
+    },
+    {
+      "id": "cc_shrew_elder",
+      "title": "The elder supplicant",
+      "parts": [
+        "nurse",
+        "cloth",
+        "gravestone"
+      ],
+      "new_work": "Bespoke elderly Blood Shrew body, exposed head and cane.",
+      "design": "Unhooded bent elder on a low stool, pale elongated face and rigid cane; keep distinct from the hooded variant.",
+      "resolved": "Cane settles and body becomes still; preserve NPC identity."
+    },
+    {
+      "id": "cc_hammer_game",
+      "title": "The court's cruel amusement",
+      "parts": [
+        "rack",
+        "barrel",
+        "cloth"
+      ],
+      "new_work": "Bespoke striker tower, bell, mallet and score board.",
+      "design": "Tall warped fairground strength tester in faded court colors, large mallet at its foot and a small bell above.",
+      "resolved": "Striker rests high or low according to the existing result; no result telegraph on hover."
+    },
+    {
+      "id": "cc_bloodflower",
+      "title": "The drinking bloom",
+      "parts": [
+        "eggs",
+        "moss",
+        "meat"
+      ],
+      "new_work": "Bespoke bloodflower stem, broad petals and tubular mouth.",
+      "design": "One large dark-red fleshy bloom rising from pale native egg growth, framed by sparse black leaves.",
+      "resolved": "Petals close and stem bows after use."
+    },
+    {
+      "id": "cc_food_cart",
+      "title": "The ruined reception",
+      "parts": [
+        "meat_cart",
+        "table",
+        "cloth"
+      ],
+      "new_work": "Silver platter forms, stained lace and courtly cart rails.",
+      "design": "Narrow banquet cart with tarnished pale platters and a wine-dark lace cloth; keep the food silhouette above the rail.",
+      "resolved": "Platters opened and picked over; cloth hangs lower."
+    },
+    {
+      "id": "cc_wine_crate",
+      "title": "Cellar master's last bottles",
+      "parts": [
+        "crate",
+        "barrel",
+        "cloth"
+      ],
+      "new_work": "Bottle cluster, straw lining and broken-bottle state.",
+      "design": "Open-sided wine crate with three oversized black-green bottles, pale neck labels and a torn crest ribbon.",
+      "resolved": "Bottles removed or broken; loose straw exposed."
+    },
+    {
+      "id": "redkey_heirloom_chest",
+      "title": "Crimson gate-key coffer",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Red key-shaped clasp and a matching large ribbon.",
+      "design": "Small Court coffer marked with a red ribbon and an unmistakable key-shaped front plate.",
+      "resolved": "Key compartment emptied; red ribbon remains for used-state recognition."
+    },
+    {
+      "id": "bluekey_heirloom_chest",
+      "title": "Azure gate-key coffer",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Blue key-shaped clasp and two-notch heraldic plate.",
+      "design": "Same keyed coffer family, with a blue cloth strip and a two-notch metal plate so color is not the only cue.",
+      "resolved": "Compartment emptied; blue strip and two-notch plate remain."
+    },
+    {
+      "id": "greenkey_heirloom_chest",
+      "title": "Verdant gate-key coffer",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Green key-shaped clasp and leaf-cut heraldic plate.",
+      "design": "Same keyed coffer family, with a green ribbon and leaf-cut plate to distinguish its identity.",
+      "resolved": "Compartment emptied; ribbon and leaf plate remain."
+    },
+    {
+      "id": "yellowkey_heirloom_chest",
+      "title": "Saffron gate-key coffer",
+      "parts": [
+        "chest",
+        "cloth"
+      ],
+      "new_work": "Yellow key-shaped clasp and sun-cut heraldic plate.",
+      "design": "Same keyed coffer family, with a yellow ribbon and sun-cut plate that stays readable in low light.",
+      "resolved": "Compartment emptied; sun plate remains without a reward glow."
+    },
+    {
+      "id": "trinket_chest",
+      "title": "The court jeweler's case",
+      "parts": [
+        "camp_chest",
+        "cloth"
+      ],
+      "new_work": "Narrow jewelry drawers, velvet lining and separate lid.",
+      "design": "Ornate low court case with thin pale fittings and burgundy velvet visible through its lid seam.",
+      "resolved": "Open lid reveals empty individual jewelry recesses."
+    },
+    {
+      "id": "cc_treasure_chest",
+      "title": "The blood court treasury",
+      "parts": [
+        "camp_chest",
+        "eggs",
+        "cloth"
+      ],
+      "new_work": "Gilded crest and egg-overgrown lock adaptation.",
+      "design": "Broad estate chest invaded by native Courtier eggs along one hinge, with restrained tarnished gold corners.",
+      "resolved": "Lid opens and eggs split at the hinge; treasury is visibly emptied."
+    },
+    {
+      "id": "cc_infested_egg_cluster",
+      "title": "The spreading clutch",
+      "parts": [
+        "eggs",
+        "stump",
+        "moss"
+      ],
+      "new_work": "Root attachments and a more dispersed ruptured variant.",
+      "design": "A flatter native egg cluster crawling across an ordinary regional stump; preserve infestation identity outside the Court.",
+      "resolved": "Eggs rupture locally and roots darken; no entire biome recolor."
+    },
+    {
+      "id": "com_provisionbox_1",
+      "title": "The Miller's provision armoire",
+      "parts": [
+        "bookcase",
+        "crate"
+      ],
+      "new_work": "Farm armoire doors, shelves and crystalline cracks.",
+      "design": "Tall crooked farmhouse cupboard with pale chipped paint and cyan-violet crystal seams held to one corner.",
+      "resolved": "Doors open and shelves empty; crystal seams stay dormant."
+    },
+    {
+      "id": "com_provisionbox_2",
+      "title": "The harvest provision chest",
+      "parts": [
+        "camp_chest",
+        "crate"
+      ],
+      "new_work": "Farm chest lid and crystalline hinge detail.",
+      "design": "Low farm chest with diagonal timber braces and a small shard trapped beneath the hinge.",
+      "resolved": "Lid open and contents removed; preserve the armoire/chest distinction."
+    },
+    {
+      "id": "com_hero_health_heal",
+      "title": "One life, preserved",
+      "parts": [
+        "hope_altar",
+        "candles"
+      ],
+      "new_work": "Single small life crystal and shallow stone cup.",
+      "design": "One warm pale crystal held in a low stone cup; a solitary vessel distinguishes single-hero health restoration.",
+      "resolved": "Crystal dulls and cup empties after the existing use."
+    },
+    {
+      "id": "com_hero_stress_heal",
+      "title": "One mind, released",
+      "parts": [
+        "books",
+        "candles"
+      ],
+      "new_work": "Small polished memory crystal and open folio.",
+      "design": "One cold blue-violet crystal above a wide open folio, with one candle for a solitary mind.",
+      "resolved": "Crystal dims and pages fold inward after the existing use."
+    },
+    {
+      "id": "com_party_health_heal",
+      "title": "The shared well",
+      "parts": [
+        "fountain",
+        "candles"
+      ],
+      "new_work": "Four-cup basin crown and restrained life-crystal core.",
+      "design": "Broad low basin with four clear drinking cups around a pale central crystal, distinct from the single cup.",
+      "resolved": "Four cups darken and central crystal becomes opaque."
+    },
+    {
+      "id": "com_party_stress_heal",
+      "title": "The quiet constellation",
+      "parts": [
+        "hope_altar",
+        "candles"
+      ],
+      "new_work": "Four crystal tips on an open angular ring.",
+      "design": "A low open ring supporting four pale violet shards, readable as a group restoration landmark.",
+      "resolved": "All four shards dim together; ring remains intact."
+    },
+    {
+      "id": "com_millerwife_curio",
+      "title": "The wife at the threshold",
+      "parts": [
+        "nurse",
+        "cloth",
+        "crate"
+      ],
+      "new_work": "Bespoke Miller's Wife body, face, dress and seated pose.",
+      "design": "A sorrowful seated farm woman beside a small crate, head turned slightly away and hands folded; retain NPC identity.",
+      "resolved": "Hands lower gently; she remains seated after the existing interaction."
+    },
+    {
+      "id": "com_treasure",
+      "title": "The fractured harvest",
+      "parts": [
+        "camp_chest",
+        "crate"
+      ],
+      "new_work": "Crystal cluster, split chest panels and cold inner lining.",
+      "design": "Farm coffer split by a fan of pale turquoise crystals, with treasure space readable beneath the growth.",
+      "resolved": "Crystal fan remains, lid opens and cavity empties."
+    },
+    {
+      "id": "com_fireplace",
+      "title": "The waiting hearth",
+      "parts": [
+        "firepit",
+        "ruin"
+      ],
+      "new_work": "Compact farmhouse fireplace surround and firewood socket.",
+      "design": "A shallow stone hearth with angular soot-black bricks and one broad log slot, separated from the inn room mesh.",
+      "resolved": "Firewood spent and flame extinguished according to the existing sequence."
+    },
+    {
+      "id": "com_standingstone",
+      "title": "The broken hour marker",
+      "parts": [
+        "pillar",
+        "cultist_altar"
+      ],
+      "new_work": "Bespoke leaning crystal monolith and fractured ground socket.",
+      "design": "Tall asymmetrical blue-violet standing stone, one great crack crossing its face and a compact farm-stone base.",
+      "resolved": "Crack briefly brightens during transition, then returns to a stable dormant state."
+    },
+    {
+      "id": "aged_cask",
+      "title": "The forgotten vintage",
+      "parts": [
+        "barrel",
+        "cloth"
+      ],
+      "new_work": "Ancient tap and rotten support beams.",
+      "design": "A darker narrower cask than Moonshine Barrel, framed by dead ivy and a faded cellar label.",
+      "resolved": "Tap slack and bung removed; age remains readable in the wood."
+    },
+    {
+      "id": "arcane_lectern",
+      "title": "The forbidden reading stand",
+      "parts": [
+        "books",
+        "pillar",
+        "candles"
+      ],
+      "new_work": "Bespoke slanted lectern and chained oversized tome.",
+      "design": "A steep black stone reading stand holding one pale open book, with a single heavy chain crossing its spine.",
+      "resolved": "Book shut or chain loosened; lectern remains fixed."
+    },
+    {
+      "id": "chest",
+      "title": "Unassigned salvage coffer",
+      "parts": [
+        "chest"
+      ],
+      "new_work": "Ordinary chest family only; no new gameplay identity assigned.",
+      "design": "Neutral unadorned coffer reserved for legacy art references until a live encounter needs it.",
+      "resolved": "Use the ordinary emptied chest state."
+    },
+    {
+      "id": "musty_tome",
+      "title": "The mildew-bound volume",
+      "parts": [
+        "books",
+        "moss"
+      ],
+      "new_work": "Oversized tome cover, loose pages and fungal spine.",
+      "design": "One broad swollen book on a low fallen plank, pale pages trapped beneath a moss-green cover.",
+      "resolved": "Cover opens and a few pages scatter; no new rules implied."
+    },
+    {
+      "id": "old_one_statue",
+      "title": "The faceless remnant",
+      "parts": [
+        "shrine",
+        "tentacles",
+        "pillar"
+      ],
+      "new_work": "Bespoke faceless statue head, folded hands and compact plinth.",
+      "design": "Tall eroded cult figure with folded hands and a blank face, wrapped by one low root-like tendril.",
+      "resolved": "Dust falls from the face; no permanent glow added."
+    },
+    {
+      "id": "rotting_corpse",
+      "title": "The roadside forgotten",
+      "parts": [
+        "corpse",
+        "cloth",
+        "moss"
+      ],
+      "new_work": "Decayed body adaptation, torn clothing and exposed rib patch.",
+      "design": "A low human corpse in torn road clothes, earth and moss around the feet; keep separate from the infected quest corpse.",
+      "resolved": "Cloth pulled aside and searched body settles into the earth."
+    },
+    {
+      "id": "faded_memory",
+      "title": "A remnant of the old world",
+      "parts": [
+        "ruin",
+        "candles"
+      ],
+      "new_work": "Preserve the owner's DD1-style curio art; optional DD2 stone frame only.",
+      "design": "Keep the existing DD1 spectral silhouette. A restrained DD2 broken-stone frame may ground it in the corridor without replacing its identity.",
+      "resolved": "Fade the spectral remnant only when the existing memory state resolves; never change its encounter or rewards."
+    }
+  ]
+}

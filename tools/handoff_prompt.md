@@ -1,5 +1,15 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round229 is a completed offline curio design pass. Review tools/curios/README.md and the private
+local-art/ui-overhaul/curio-design-v01/index.html. There are104 original proposals,39 native source-reference
+groups and12 preliminary prop assemblies; none is installed curio art. Exact inventory coverage, image files,
+Python compile and JavaScript filter checks pass; both render sheets were inspected. Browser automation timed
+out, so browser layout remains unobserved. No runtime code/deploy/game launch/save access in this pass. Preserve
+Faded Memory's explicit DD1 appearance. Start production with containers, books/bones and camps, then bespoke
+silhouettes; retain ID/supply/outcome/save contracts and a reversible presentation fallback. All extracted
+assets, fonts and previews stay private outside Git. Independent Shieldbreaker work and round227 expedition
+VFX install/native acceptance remain separate.
+
 Round228 quick input fixes are installed and verified with native synthetic fixtures. Hamlet buttons now have
 brass text hover/controller feedback and a full-rect hit surface; estate rows accept left double-click through
 the existing torch gate. Expedition formation swaps also work when a selected hero is dragged from the roster.
