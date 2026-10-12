@@ -163,7 +163,10 @@ internal static class RegionSceneryArt
     }
 
     public static RoomSceneryChoice RoomChoice(RegionalScenery plan, int seed, int roomId) =>
-        plan.RoomBackground(seed, roomId, _region == plan.Region && _privateVariants.Count > 0 ? _privateVariants : plan.RoomBackgrounds);
+        RoomChoice(plan, seed, new Room { Id = roomId });
+    public static RoomSceneryChoice RoomChoice(RegionalScenery plan, int seed, Room room) =>
+        PrivateRoomScenery.Choose(plan, seed, room, _region == plan.Region ? _privateVariants : Array.Empty<string>());
+    public static IReadOnlyList<string> RoomSceneFiles(string region) => _region == region ? _privateVariants : Array.Empty<string>();
     public static bool PrivateRoom(string fileName) => fileName != null && _privateVariants.Contains(fileName);
     public static RoomSceneryChoice CorridorChoice(RegionalScenery plan, int seed, int corridorId) =>
         plan.CorridorBackground(seed, corridorId, _region == plan.Region ? _corridorVariants : Array.Empty<string>());

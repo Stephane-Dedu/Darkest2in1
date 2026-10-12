@@ -1,5 +1,24 @@
 # Native corridor art audit, round216
 
+## Round231 update
+
+Whole-scene reflection/repetition is removed: one bounded panorama now preserves authored perspective and heading
+orientation. The corridor source files need no re-extraction for this defect. The 8% overscan provides a small pan,
+not a full physical hallway's worth of unique scenery. A longer lateral native render or layered live scene would
+allow more travel; do not restore reflected full-scene tiles to manufacture it.
+
+Native room arenas are reframed and supplied with native foreground ground by `tools/render_native_rooms.py`.
+Boss, entrance, encounter, quiet and treasure purposes select separate scenery. Native city/forest exports lacked
+foreground ground; Shroud piers stopped above the crawl footline. The renderer now extends existing native ground
+materials, rather than requiring generated textures. Shroud's empty cultist scenery is replaced with Chirurgeon.
+See `corridor_art.md` and MODLOG/PARITY for installed state and native acceptance.
+
+Remaining visual gaps still concern ground-card boundaries, flat lighting, baked foreground props and static
+atmosphere/water. Recovering native shader/emission/VFX data and depth-separated passes would help. More diffuse
+textures or generated art are not required for the primary four regions at this stage.
+
+## Original round216 findings
+
 The first 24 native corridors are installed in the active DD2 private pack and
 have been rendered by the real loader/panorama renderer in an unsaved native
 window. They replace eight generated corridors. Battle arena art is unchanged.

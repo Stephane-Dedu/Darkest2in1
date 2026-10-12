@@ -24,8 +24,11 @@ public sealed class RegionalScenery
     public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId) => RoomBackground(expeditionSeed, roomId, RoomBackgrounds);
 
     /// <summary>One continuous scene per hallway, independent of rooms, heading, tile and gameplay RNG.</summary>
-    public RoomSceneryChoice CorridorBackground(int expeditionSeed, int corridorId, IReadOnlyList<string> variants) =>
-        RoomBackground(unchecked(expeditionSeed ^ 0x43A91D27), corridorId, variants);
+    public RoomSceneryChoice CorridorBackground(int expeditionSeed, int corridorId, IReadOnlyList<string> variants)
+    {
+        var choice = RoomBackground(unchecked(expeditionSeed ^ 0x43A91D27), corridorId, variants);
+        return choice == null ? null : new RoomSceneryChoice(choice.FileName, false);
+    }
 
     public RoomSceneryChoice RoomBackground(int expeditionSeed, int roomId, IReadOnlyList<string> variants)
     {

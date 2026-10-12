@@ -10,6 +10,43 @@ namespace DarkestDungeon3.Ui.Tests;
 public class RegionSceneryArtTests
 {
     [Fact]
+    public void NativeRolePackIsAdoptedAfterDecodeAndSkippedBossUsesBattleWithoutARevisitSwap()
+    {
+        string pack = Path.Combine(Path.GetTempPath(), "dd3-role-runtime-" + Guid.NewGuid());
+        Directory.CreateDirectory(pack);
+        var oldConfig = Plugin.NativeRoomSceneryPath.Value;
+        var png = File.ReadAllBytes(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../data/scenery/dd2_city-01.png")));
+        try
+        {
+            File.WriteAllBytes(Path.Combine(pack, "dd2_city-arena-boss-01.png"), new byte[] { 1, 2, 3 });
+            foreach (string role in new[] { "battle", "quiet" })
+                File.WriteAllBytes(Path.Combine(pack, $"dd2_city-arena-{role}-01.png"), png);
+            Plugin.NativeRoomSceneryPath.Value = pack;
+            RegionSceneryArt.Clear(); Time.unscaledTime = 10;
+            var plan = RegionalScenery.For("dd2_city");
+            var watch = Stopwatch.StartNew();
+            while (RegionSceneryArt.RoomSceneFiles(plan.Region).Count != 2 && watch.Elapsed.TotalSeconds < 10)
+            { RegionSceneryArt.Prepare(plan.Region); Thread.Sleep(1); }
+            Assert.Equal(2, RegionSceneryArt.RoomSceneFiles(plan.Region).Count);
+            var room = new Room { Id = 3, Content = RoomContent.Boss };
+            var before = RegionSceneryArt.RoomChoice(plan, 7, room);
+            Assert.Equal("dd2_city-arena-battle-01.png", before.FileName); Assert.False(before.Mirror);
+            room.Cleared = true;
+            for (int tick = 0; tick < 10; tick++) RegionSceneryArt.Prepare(plan.Region);
+            Assert.Equal(before.FileName, RegionSceneryArt.RoomChoice(plan, 7, room).FileName);
+            Assert.Empty(RegionSceneryArt.RoomSceneFiles("dd2_farm"));
+            RegionSceneryArt.Clear();
+            Assert.Empty(RegionSceneryArt.RoomSceneFiles(plan.Region));
+            Assert.Null(RegionSceneryArt.RoomTextureFor(before.FileName));
+        }
+        finally
+        {
+            RegionSceneryArt.Clear(); Plugin.NativeRoomSceneryPath.Value = oldConfig;
+            Directory.Delete(pack, recursive: true);
+        }
+    }
+
+    [Fact]
     public void RealLoaderAdoptsACompletedPackSkipsBrokenFilesAndReleasesOnRegionExit()
     {
         string pack = Path.Combine(Path.GetTempPath(), "dd3-scenery-runtime-" + Guid.NewGuid());

@@ -1,12 +1,54 @@
 # Private DD2 corridor scenery
 
-## Current pack: native DD2 roads, round216
+## Current renderer and native rooms, round231
+
+Complete corridor plates are drawn once. The previous renderer tiled whole perspective scenes with alternating
+reflection, producing bilateral roofs, duplicated buildings and mismatched perspective. This was confirmed against
+the unreflected source and reproduced by observing two draws in the actual UI method. The replacement uniformly
+overscans 8%, pans within the image from physical corridor progress, and preserves source orientation on reversal.
+The y=680 source floor anchor stays fixed and UVs stay within the source. Walking props retain their physical travel;
+this small panorama pan is deliberately slower. Native tiled fallback scenery remains unchanged.
+
+Rooms support canonical purpose names, such as `dd2_city-arena-boss-01.png` and `dd2_city-arena-battle-01.png`.
+Allowed purposes are `boss`, `entrance`, `battle`, `quiet` and `treasure`. Private room discovery prioritizes these
+files and keeps the existing 12-image cap. Selection uses expedition seed, room ID and original room content;
+clearing, scouting and taking a curio do not change it. Secret rooms use treasure scenery; guarded curios and
+treasures use encounter scenery. A missing boss scene falls back to a regional encounter. Missing purposes use
+legacy numbered private art or distributed scenery, and invalid files are filtered before selection. Native
+compositions keep their orientation. These choices change artwork only; they do not spawn a DD2 lair boss.
+
+`tools/render_native_rooms.py` renders eight rooms per region from the owner's native kit: lair interior for boss,
+lair exterior for entrance, resistance/faction/military/cultist for battles, gaunt for quiet rooms and pillager for
+treasure rooms. Shroud substitutes Chirurgeon for its empty cultist export. The native combat camera has a 0.31
+vertical lens shift for the crawl footline. A plane extends the region's native cobblestone, farm, forest or pier
+ground material beneath the actors; existing arena geometry remains above it. The result is not the untouched
+combat-camera export. It uses base color, tint and approximate depth haze; lighting and animated VFX remain absent.
+
+Rebuild outside Git, using Blender with NumPy and the extracted kit's `bl_lib.py`, then Python with Pillow/NumPy:
+
+```powershell
+blender -b --threads 8 --python-exit-code 1 --python tools/render_native_rooms.py -- <kit> <private-output>
+python tools/render_native_rooms.py <kit> <private-output> --compose-only
+```
+
+Use a fresh output directory when changing geometry/camera/material settings; completed near passes are cached.
+The manifest records scene/floor/output hashes, camera and ground fitting. With DD2 stopped, back up PrivateScenery,
+archive the old generic arena PNGs outside its top level, then install the 32 purpose-named PNGs and
+`native-rooms-manifest.json`. Preserve all corridor PNGs, HamletModels and prior provenance. All game art stays private.
+Current private output: `C:\Users\Piral\DarkestDungeon3\local-art\scenery-single-scene-v02\rooms`.
+
+`-dd3-scenery-check` runs the existing unsaved native fixture through all corridor and room scenes in all four
+regions. The actual loader and both actual draw methods are used. Corridor pan traverses both ends; full-body DD1
+reference figures and gold y=680 marks show framing. No estate is chosen or persisted. This checks art presentation,
+not native 3D actor contact, room-transition gameplay, torch interactions or battle return. Remove the flag for play.
+
+## Previous native DD2 road pack, round216
 
 The active install now uses 24 panoramas made from the owner's DD2 road, decor,
 skirt and skybox assets: six each for Sprawl (`city`), Foetor (`farm`), Tangle
 (`forest`) and Shroud (`coast`). These replace the eight generated corridors
 described below. No generated artwork was used in this pack. Room panoramas and
-their manifest are unchanged; the new battle-arena exports are not installed.
+their manifest were unchanged in round216; round231 replaces room art as described above.
 
 Sources remain in `local-art/dd2-native-kit/corridor-renders/`. Prepare them with
 a Python environment containing Pillow:
@@ -88,7 +130,7 @@ the existing room pack bounds: RGB/RGBA eight-bit PNG, up to 16 MB, width
 lower walking band before adding a file. Source-derived art stays private;
 never commit these images or reference renders or include them in a release.
 
-## Traversal and loading
+## Historical round171 traversal and loading (superseded by round231 for complete panoramas)
 
 The expedition seed and corridor ID select a scene and mirror without consuming
 gameplay RNG. One hallway keeps the same panorama from end to end. Consecutive

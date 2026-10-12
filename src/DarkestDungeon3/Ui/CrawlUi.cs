@@ -164,6 +164,7 @@ internal sealed class CrawlUi
         float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
         if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
         if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        if (regional != null && exp.InRoom) DrawRoomPanorama(regional, exp.Seed, crawl.CurrentRoom, nativeAlpha);
         if (regional != null && !exp.InRoom)
         {
             var corridor = crawl.CurrentCorridor;
@@ -171,8 +172,7 @@ internal sealed class CrawlUi
             var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
             float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
             CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
-                CorridorSceneryLayout.Camera(corridor.Id, exp.TileIndex, reverse, slide), reverse,
-                choice?.Mirror ?? false, panoramaAlpha);
+                CorridorPanoramaLayout.Progress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha);
             DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
         }
         DrawProps(crawl, exp, slide);
@@ -249,8 +249,6 @@ internal sealed class CrawlUi
             GUI.color = sceneColor;
             // Open outdoor locations share the same walkway; no wall or doorway interrupts the landscape.
             foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
-            // Existing room fade covers the scene switch; a half-visible panorama during walking would look ghosted.
-            if (exp.InRoom) DrawGeneratedRoom(plan, exp.Seed, exp.RoomId);
         }
         finally { GUI.color = old; }
     }
@@ -268,33 +266,14 @@ internal sealed class CrawlUi
                 Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
     }
 
-    private static void DrawGeneratedRoom(RegionalScenery plan, int seed, int roomId)
+    private static void DrawRoomPanorama(RegionalScenery plan, int seed, Room room, float nativeAlpha)
     {
-        var choice = RegionSceneryArt.RoomChoice(plan, seed, roomId);
+        var choice = RegionSceneryArt.RoomChoice(plan, seed, room);
         var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
-        if (texture == null) return;
-        var old = GUI.color;
-        float opacity = old.a * RegionSceneryArt.RoomAlpha(choice.FileName);
-        float floorTop = plan.Layers.First(layer => layer.Ground).Top;
-        try
-        {
-            void Strip(float y, float height, float alpha)
-            {
-                GUI.color = new Color(old.r, old.g, old.b, opacity * alpha);
-                var uv = new Rect(choice.Mirror ? 1 : 0, 1 - (y + height) / 720f, choice.Mirror ? -1 : 1, height / 720f);
-                GUI.DrawTextureWithTexCoords(new Rect(0, y, Gui.W, height), texture, uv);
-            }
-            // Private arena extensions include their own continuous floor, including the Shroud's wharves.
-            if (RegionSceneryArt.PrivateRoom(choice.FileName)) { Strip(0, 720, 1); return; }
-            Strip(0, floorTop, 1);
-            // Blend the painted ground into the same native road instead of pasting a hard edge at the footline.
-            for (float y = floorTop; y < 720; y += 5)
-            {
-                float height = Mathf.Min(5, 720 - y);
-                Strip(y, height, 1 - (y + height / 2 - floorTop) / (720 - floorTop));
-            }
-        }
-        finally { GUI.color = old; }
+        bool fullFloor = RegionSceneryArt.PrivateRoom(choice?.FileName);
+        RoomPanoramaUi.Draw(texture, choice?.Mirror ?? false,
+            RegionSceneryArt.RoomAlpha(choice?.FileName) * (fullFloor ? 1 : nativeAlpha),
+            fullFloor, plan.Layers.First(layer => layer.Ground).Top);
     }
 
     private static void DrawSceneryLayer(SceneryLayer layer, float camera, bool reverse)

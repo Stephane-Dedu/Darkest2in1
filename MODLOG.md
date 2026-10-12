@@ -5785,3 +5785,61 @@ Review tools/hamlet_hub_research.md and the private comparison before a new nati
 pitch/36-degree verticalFOV, compose with actual HUD, connect the valley, then adjust facade/road/wall hierarchy.
 The offline F ridge blockout is not production scenery. Native service/picking/motion/resize checks and game-facing
 implementation remain separate. All previous installed Hamlet acceptance and the painted rollback are unchanged.
+
+## Round231 (2026-10-12): remove mirrored corridor twins and install native encounter/boss room scenery
+
+Owner reported doubled/mirrored corridor architecture and requested actual DD2 encounter/boss backgrounds for rooms.
+Confirmed cause: CorridorPanoramaUi tiled complete perspective scenes with alternating reflection. The raw Sprawl
+source has no bilateral join; the prior native capture does. A failing regression observed two adjacent actual UI
+draw calls for one complete scene. The fix draws one bounded UV crop with uniform8% overscan. Physical corridor
+progress drives a small pan, independent of corridor global tile offsets and heading reflection. Source floor y680
+stays fixed; UVs stay inside the PNG. Props retain physical travel; the full plate now has slower distant parallax.
+Corridor choices retain source orientation. Native tile-layer fallback, map generation and gameplay RNG are unchanged.
+
+Private room discovery supports arena-<purpose>-NN names, prioritizes those over legacy numbered extensions, and
+retains12-image/16MiB/4096x2048/header/aspect allocation bounds. Purpose selection uses stable Room.Content/IsSecret:
+boss, entrance, battle (including guarded curios/treasures), quiet and treasure. Clearing/revisiting/curio use does
+not swap scenery. Missing boss uses an encounter; missing purpose uses legacy/distributed art. Broken files are
+excluded before completed-set adoption. Native focal compositions never mirror. A separate actual room draw seam
+retains fallback floor blending; full private arenas can render even when the native tile Addressables are unavailable.
+
+tools/render_native_rooms.py renders32 scenes, eight per primary region, from the owner's DD2 kit. Native lair
+interior/exterior become boss/entrance; resist/faction/military/cultist supply four encounter variations; gaunt/pillager
+supply quiet/treasure. Shroud cultist export lacks a landmark, so Chirurgeon replaces it. The original combat camera
+put the floor above crawl feet; vertical lens shift0.31 reframes it. Native cobblestone, farm/forest ground and Shroud
+deck materials extend across an authored foreground plane below arena geometry. Native base-color/tint/depth haze
+remain approximate lighting, without animated VFX. This selects scenery only, not DD2 boss/encounter gameplay.
+
+All32 PNG decodes/dimensions/byte bounds/source-output hashes and8-per-region counts pass. All24 installed corridor
+hashes remain unchanged. The24 old generic arena PNGs moved to local-art/scenery-single-scene-v02/previous-room-pack;
+HamletModels and provenance are preserved. Complete PrivateScenery backup:
+C:/Users/Piral/.universal-modder/backups/dd3-scenery-single-scene-v02/20261012-132054.zip (106 files/170MiB).
+Prior plugin/data backup:dd3-before-single-scene-plugin/20261012-132430.zip. All private imagery remains outside Git.
+
+Verification: original draw regression red->green; actual UI coverage/aspect/floor/tint/matrix/failure cases; continuous
+forward/reverse/discrete progress; typed purpose/cleared stability/invalid discovery/fallback; actual loader's skipped
+boss, completed adoption, one upload/update and cleanup. Release +1095 Core +188 UI pass. A final four-case position
+check includes reverse discrete stepping. Installed plugin/Core DLL hashes match19e5119e.../0b3f0899... recorded privately.
+The shared deployed build includes independent in-progress Shieldbreaker sources; those files/notes are not part
+of this commit. Concurrent round230 Hamlet research is preserved. No generated textures are used or needed here.
+
+One native1600x900 unsaved -dd3-scenery-check launch, PID87872, displays all24 corridors and32 room scenes through
+the actual loader/draw methods. All56 frames captured, native PASS logged, and both complete contact sheets visually
+inspected: mirrored joins absent, arena floor reaches full-body DD1 reference feet at y680. No native error/exception
+was logged during the completed check. QA process closed by exact owned PID; DD2 stopped; mod config SHA256 unchanged.
+No estate selected/read/written by the fixture or tools, no campaign save modification/restore, no OS input sent.
+
+Private evidence:local-art/scenery-single-scene-v02/{rooms,native-check,native-room-sheet.jpg,
+native-corridor-sheet.jpg,asset-verification.json,installation.json,deployed-hashes.json,*tests.log}.
+Workflow/limits:tools/corridor_art.md and tools/native_corridor_audit.md. Remaining art work: hard distant ground-card
+edges, flat lighting, baked foreground occlusion and static fog/water. Recover shader/emission/VFX and depth-separated
+passes; more diffuse textures/generated art are not currently necessary. The small bounded pan is not a unique
+full-length corridor; longer lateral native renders or live layers would support more travel. Native3D actor contact,
+saved expedition room transitions/torch/curios and in-place battle capture/return remain separate live-quest acceptance.
+
+## Status 2026-10-12: round231 corridor reflection fix and native rooms installed and preview verified
+
+DD2 is stopped with normal launch behavior. Use the new backgrounds in the active install; no preview flag needed.
+Do not infer saved-quest/3D actor or combat handoff acceptance from the unsaved DD1-reference preview. No rollback is
+pending. Preserve independent Shieldbreaker work and Hamlet research; round227 map VFX installation/acceptance remains
+separate. Next visual priority is ground-card joins/native lighting/depth rather than generating replacement textures.

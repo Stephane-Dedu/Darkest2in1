@@ -19,7 +19,8 @@ public class CorridorSceneryTests
             var files = Enumerable.Range(1, count).Select(i => $"{region}-corridor-{i:00}.png").ToArray();
             var scenes = Enumerable.Range(0, count * 2).Select(id => plan.CorridorBackground(seed, id, files)).ToArray();
             Assert.Equal(count, scenes.Take(count).Select(s => s.FileName).Distinct().Count());
-            Assert.Equal(count * 2, scenes.Select(s => (s.FileName, s.Mirror)).Distinct().Count());
+            Assert.Equal(count, scenes.Select(s => (s.FileName, s.Mirror)).Distinct().Count());
+            Assert.All(scenes, scene => Assert.False(scene.Mirror));
             foreach (int id in Enumerable.Range(0, scenes.Length))
             {
                 var reload = RegionalScenery.For(region).CorridorBackground(seed, id, files.ToArray());

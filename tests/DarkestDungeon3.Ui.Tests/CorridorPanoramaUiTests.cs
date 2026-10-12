@@ -7,14 +7,27 @@ namespace DarkestDungeon3.Ui.Tests;
 
 public class CorridorPanoramaUiTests
 {
+    [Fact]
+    public void CompleteNativeSceneIsDrawnOnceWithoutReflectedTwins()
+    {
+        var texture = new Texture2D(2880, 1080, TextureFormat.RGBA32, false);
+        var draws = new List<(Rect Rect, Rect Uv)>();
+        GUI.ObserveTextureDraw = (rect, tex, uv, matrix, color) => draws.Add((rect, uv));
+        try
+        {
+            CorridorPanoramaUi.Draw(texture, .5f, 1);
+            var draw = Assert.Single(draws);
+            Assert.True(draw.Uv.width > 0, "The scenery must retain its authored orientation.");
+        }
+        finally { GUI.ObserveTextureDraw = null; }
+    }
+
     [Theory]
-    [InlineData(1600, 900, false, false)]
-    [InlineData(1600, 900, false, true)]
-    [InlineData(1587, 924, true, false)]
-    [InlineData(1587, 924, true, true)]
-    [InlineData(2560, 1080, false, true)]
-    [InlineData(2560, 1440, true, false)]
-    public void ActualPanoramaDrawKeepsFloorCoverageAndMatchingEdgesWhileWalking(int width, int height, bool reverse, bool mirror)
+    [InlineData(1600, 900)]
+    [InlineData(1587, 924)]
+    [InlineData(2560, 1080)]
+    [InlineData(2560, 1440)]
+    public void BoundedPanCoversTheViewportAndPreservesAspectFootlineAndGuiState(int width, int height)
     {
         var texture = new Texture2D(2048, 768, TextureFormat.RGBA32, false);
         var draws = new List<(Rect Rect, Rect Uv, Matrix4x4 Matrix, Color Color)>();
@@ -31,35 +44,32 @@ public class CorridorPanoramaUiTests
         };
         try
         {
-            foreach (float camera in new[] { -9723.5f, -1, 0, 720, 7359.25f })
+            float previousX = -1;
+            foreach (float progress in new[] { -1f, 0, .25f, .5f, .75f, 1, 2 })
             {
                 draws.Clear();
-                CorridorPanoramaUi.Draw(texture, camera, reverse, mirror, .5f);
-                var row = draws.OrderBy(d => d.Rect.x).ToArray();
-                Assert.NotEmpty(row);
-                Assert.True(row[0].Rect.x <= 0);
-                Assert.True(row[^1].Rect.xMax >= 1920);
-                for (int i = 0; i < row.Length; i++)
-                {
-                    var d = row[i];
-                    Assert.Equal(0, d.Rect.y); Assert.Equal(720, d.Rect.yMax);
-                    Assert.Equal(0, d.Uv.y); Assert.Equal(1, d.Uv.height);
-                    Assert.Equal(.3f, d.Color.a);
-                    Assert.Equal(tint.r, d.Color.r);
-                    Assert.Equal(screen, d.Matrix);
-                    if (i == 0) continue;
-                    Assert.Equal(row[i-1].Rect.xMax, d.Rect.x, 2);
-                    Assert.Equal(row[i-1].Uv.xMax, d.Uv.x); // Same source edge at each join.
-                }
+                CorridorPanoramaUi.Draw(texture, progress, .5f);
+                var d = Assert.Single(draws);
+                Assert.Equal(0, d.Rect.x); Assert.Equal(1920, d.Rect.xMax);
+                Assert.Equal(0, d.Rect.y); Assert.Equal(720, d.Rect.yMax);
+                Assert.InRange(d.Uv.x, 0, 1); Assert.InRange(d.Uv.xMax, 0, 1.00001f);
+                Assert.InRange(d.Uv.y, 0, 1); Assert.InRange(d.Uv.yMax, 0, 1.00001f);
+                Assert.True(d.Uv.width > 0 && d.Uv.height > 0);
+                Assert.True(d.Uv.x >= previousX); previousX = d.Uv.x;
+                Assert.Equal(1920f / 720, texture.width * d.Uv.width / (texture.height * d.Uv.height), 4);
+                float sourceFoot = 1 - 680f / 720;
+                Assert.Equal(680, 720 * (1 - (sourceFoot - d.Uv.y) / d.Uv.height), 3);
+                Assert.Equal(.3f, d.Color.a); Assert.Equal(tint.r, d.Color.r);
+                Assert.Equal(screen, d.Matrix);
                 Assert.Equal(tint, GUI.color);
                 Assert.Equal(screen, GUI.matrix);
             }
             var oldDraws = draws.Count;
-            CorridorPanoramaUi.Draw(null, 0, false, false, 1);
-            CorridorPanoramaUi.Draw(texture, 0, false, false, 0);
+            CorridorPanoramaUi.Draw(null, 0, 1);
+            CorridorPanoramaUi.Draw(texture, 0, 0);
             Assert.Equal(oldDraws, draws.Count);
             GUI.ThrowOnTextureDraw = true;
-            Assert.Throws<InvalidOperationException>(() => CorridorPanoramaUi.Draw(texture, 0, false, false, 1));
+            Assert.Throws<InvalidOperationException>(() => CorridorPanoramaUi.Draw(texture, 0, 1));
             Assert.Equal(tint, GUI.color);
             Assert.Equal(screen, GUI.matrix);
         }
