@@ -179,3 +179,13 @@ For a new output folder, also copy the existing private scenery `exp/` cache fro
 rock/Coast exports documented above. Pass absolute paths, or let town_preview resolve its kit/model roots,
 so Blender's glTF importer cannot change the meaning of subsequent texture paths. Use
 `--name hamlet-grass-v07 --blend`. The packed preview contains all scenery and has no missing exports.
+
+Round232's current preview is `local-art/ui-overhaul/hamlet-overlook-v08/`. `LayoutExport` exports the22-degree
+pitch/36-degree vertical-FOV camera, absolute Mountain placement, surrounding valley bounds and256x256 samples
+of stain/grass/approach-road/haze. `town_preview.py` bakes those native surface sources into an owned2048px valley
+image. All fourteen woodland placements use existing Valley kit exports; their root banks are grounded across
+their footprints. The main road reaches the boundary and continues across the valley without a separate plate.
+Use the same six surface exports and existing `exp/` cache, then export a new `layout.json` and pass
+`--name hamlet-overlook-v08 --blend`. The final packed scene contains all scenery. Native color conversion still
+differs from Blender; use the native overview/service captures and checks recorded in `tools/hamlet_3d.md` for
+runtime acceptance. Preview scripts do not install files, launch the game or read estates.

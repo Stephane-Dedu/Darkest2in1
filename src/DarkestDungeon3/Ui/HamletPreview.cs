@@ -26,6 +26,7 @@ internal static class HamletPreview
     private static Vector2Int _checkResolution;
     private static int _checkWidth;
     private static float _resizeDeadline;
+    private static Vector3 _stillCamera;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save, _save);
 
     private static bool Prefix()
@@ -153,6 +154,11 @@ internal static class HamletPreview
             }
         }
         _nextCheck = Time.unscaledTime + 1.2f;
+        if (_checkStep is 38 or 43) return new Event { type=EventType.KeyDown,keyCode=KeyCode.Tab };
+        if (_checkStep is 39 or 44) return new Event { type=EventType.KeyDown,keyCode=KeyCode.Return };
+        if (_checkStep is 40 or 45) return new Event { type=EventType.KeyDown,keyCode=KeyCode.Escape };
+        if (_checkStep is 41 or 42 or 46 or 47)
+            return new Event { type=_checkStep is 41 or 46?EventType.MouseDown:EventType.MouseUp,button=0,mousePosition=HamletUi.CameraMotionButton.center };
         if (_checkStep < 20 || _checkStep is 28 or 29)
         {
             if (_checkStep % 2 == 1) return new Event { type = EventType.KeyDown, keyCode = KeyCode.Escape };
@@ -215,9 +221,30 @@ internal static class HamletPreview
             }
             else
             {
-                _checked = true;
-                Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup, return to 3D town and live resize/restore; no estate selected or saved");
+                Plugin.Log.LogInfo("[hamlet 3d check] live resize/restore passed; checking keyboard and still-camera controls");
             }
+        }
+        else if (_checkStep is 39 or 44)
+        {
+            Require(_ui.PreviewBuilding!=null,"Keyboard Enter did not open the focused service.");
+            if (_checkStep==44) Require((stage.CameraPosition-_stillCamera).sqrMagnitude<.0001f,"Still camera moved when a service opened.");
+        }
+        else if (_checkStep is 40 or 45)
+        {
+            Require(_ui.PreviewBuilding==null,"Keyboard service Escape did not return to town.");
+            if (_checkStep==45) Require((stage.CameraPosition-_stillCamera).sqrMagnitude<.0001f,"Still camera drifted during the service view.");
+        }
+        else if (_checkStep==42)
+        {
+            Require(!Dd2.HamletStage.MotionEnabled && !stage.SmokePlaying,"Motion off did not stop camera focus and smoke.");
+            _stillCamera=stage.CameraPosition;
+        }
+        else if (_checkStep==47)
+            Require(Dd2.HamletStage.MotionEnabled && stage.SmokePlaying,"Motion on did not restore ambient smoke.");
+        else if (_checkStep==48)
+        {
+            _checked=true;
+            Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup, return, live resize/restore, keyboard focus/Enter/back and still camera/smoke controls; no estate selected or saved");
         }
         _checkStep++;
     }

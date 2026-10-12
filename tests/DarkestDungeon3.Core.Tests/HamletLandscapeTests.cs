@@ -101,4 +101,43 @@ public class HamletLandscapeTests
         Assert.True(samples.Max(s=>s.Gravel)-samples.Min(s=>s.Gravel)>.15f);
         Assert.True(samples.Max(s=>s.Tint.X)-samples.Min(s=>s.Tint.X)>.15f);
     }
+
+    [Fact]
+    public void ApproachContinuesTheMainRoadWithGroundedWalkableGrades()
+    {
+        var first=HamletLayout.Routes[0].Points[0]; var start=HamletLandscape.Approach[0];
+        Assert.Equal((first.X,first.Y,first.Z),(start.X,start.Y,start.Z));
+        for (int i=1;i<HamletLandscape.Approach.Length;i++)
+        {
+            var a=HamletLandscape.Approach[i-1]; var b=HamletLandscape.Approach[i];
+            float run=MathF.Sqrt((b.X-a.X)*(b.X-a.X)+(b.Z-a.Z)*(b.Z-a.Z));
+            Assert.InRange(MathF.Abs(b.Y-a.Y)/run,0,.35f);
+            for (float t=.25f;t<=1;t+=.25f)
+            {
+                float x=a.X+(b.X-a.X)*t,z=a.Z+(b.Z-a.Z)*t;
+                Assert.InRange(MathF.Abs(HamletLandscape.Height(x,z)-(a.Y+(b.Y-a.Y)*t-.12f)),0,.001f);
+                Assert.InRange(HamletLandscape.RoadCover(x,z),.99f,1);
+            }
+        }
+    }
+
+    [Fact]
+    public void DistancePaintIsContinuousAndBackdropsAreGroundedNativeGeometry()
+    {
+        float previous=0;
+        for (float z=-150;z<190;z+=.5f)
+        {
+            float haze=HamletLandscape.Haze(z);
+            Assert.InRange(haze,previous,.68f); Assert.InRange(haze-previous,0,.01f); previous=haze;
+        }
+        Assert.Equal(0,HamletLandscape.Haze(52));
+        Assert.DoesNotContain(HamletLandscape.Props,p=>p.Id=="camp_treeline");
+        foreach (var p in HamletLandscape.Props)
+            foreach (float dx in new[] { -.35f,0,.35f }) foreach (float dz in new[] { -.35f,0,.35f })
+                Assert.True(p.Y<HamletLandscape.Height(p.X+p.Width*dx,p.Z+p.Width*dz),"Native root bank above its ground footprint.");
+        foreach (float x in new[] { HamletLayout.MinX,HamletLayout.MaxX })
+            Assert.InRange(MathF.Abs(HamletLandscape.GrassCover(x,0)-HamletVegetation.Cover(x,0)),0,.00001f);
+        var surface=HamletLandscape.Build();
+        Assert.All(surface.Uv,u=>Assert.InRange(u,0,1));
+    }
 }

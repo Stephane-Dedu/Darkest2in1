@@ -106,3 +106,12 @@ These acceptance checks are proposed for the later iteration:
 - Reduced-motion presentation works with no camera drift, pan, zoom or animated text backing.
 
 Only a later interaction test can establish whether selecting services is easier. Static renders can establish framing and visual coherence, but cannot prove click accuracy, animation comfort or controller navigation quality.
+
+## Implementation follow-up, round232
+
+The owner authorized implementation. The modest overlook, Mountain offset, quieter stone, connected painted
+valley/outward road, native woodland, backed names, keyboard focus and optional camera/smoke motion are now
+installed. Native unsaved service/control/rollback/resize/keyboard/still-camera checks pass at1600x900 and during
+1440x900 resize. See `tools/hamlet_3d.md` and private `local-art/ui-overhaul/hamlet-overlook-v08/native-overview.png`.
+This verifies the implementation and inspected framing; easier selection, motion comfort, controller navigation,
+other text/window sizes and saved-campaign interactions remain separate claims.

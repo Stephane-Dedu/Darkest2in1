@@ -5843,3 +5843,56 @@ DD2 is stopped with normal launch behavior. Use the new backgrounds in the activ
 Do not infer saved-quest/3D actor or combat handoff acceptance from the unsaved DD1-reference preview. No rollback is
 pending. Preserve independent Shieldbreaker work and Hamlet research; round227 map VFX installation/acceptance remains
 separate. Next visual priority is ground-card joins/native lighting/depth rather than generating replacement textures.
+
+## Round232 (2026-10-12): approved Hamlet overlook and native landscape iteration
+
+Owner authorized implementing round230's camera/background direction. HamletLayout now uses22-degree down
+pitch,3-degree yaw,36-degree verticalFOV and136-unit distance. Ten DD1 service sites remain fixed. The full-size
+native Mountain moves right/down, separating it from the Abbey. Quieter cliff/coursed stone retains ink joints;
+building albedo and genuine window/forge light retain the earlier non-glowing treatment. Hover lift is reduced
+and the native brass name banner has dark backing. Selected-service zoom is smaller and fully eased; hovering
+does not move the camera. Reset restores the home view immediately.
+
+The approach extends to the town boundary and follows a graded painted ribbon into the lower valley. Dense
+outer terrain rings and broad uneven wooded shoulders replace the isolated edge. Fourteen native Valley groups
+replace seven groups/three Camp cards; their root banks sample nine footprint heights and sit below them.
+The owned2048px valley paint shares native soil/gravel/turf and stain patterns with town, blends across its edge
+and adds distance haze. Sources/readbacks and a256x256 grass field are construction-only. Native assets, private
+exports/textures and packed Blender output remain outside Git. No native node gameplay components are copied.
+
+Tab/Shift-Tab and directional arrows focus services in screen order; Enter/Space uses existing service dispatch,
+Escape backs out and pointer events restore mouse hover. Header/roster/footer and active overlays block world
+input. Camera motion On/Off controls automatic service focus and chimney smoke, leaving explicit pan/zoom/reset.
+Look.HamletCameraMotion defaults true; the fixture changes it only in memory. Look.Hamlet3D stays defaultfalse
+with immediate Painted town rollback. No estate/save contract or service rule changes.
+
+Private compile snapshot freezes tested sources, preserving tracked concurrent hero code already in the shared
+deployed build; that hero code is outside this commit. Release has only the three existing warnings. All1097 Core
+and188 UI tests pass; all42 Hamlet tests pass after the final ridge-height adjustment. A road regression caught
+the approach becoming stairs; its grade was corrected rather than weakening the existing UV/stair contract.
+Initial offline rendering exposed floating leaf banks and an abrupt grass edge; footprint grounding and matched
+near-town paint corrected those. Final packed preview and native overview/service panel were inspected.
+
+After plugin/config backups and confirmed DD2 shutdown, installed only the four Release DLL/PDB files. Owned
+unsaved1600x900 QA PID95980 passes all ten world-service clicks/Escape, pan/zoom/reset, painted rollback/full
+resource release, reload/re-entry, Embark/cleanup/return and1440x900 resize/restore. Extended fixture also passes
+keyboard focus/Enter/back, still camera during an open service, smoke stopped/cleared when off and resumed on.
+No OS input sent. Final145 mesh renderers,168 batched grass clumps and four chimney systems retain the native HDR
+target. Allocation probe:0 repeated URP reallocations over5.055 seconds. No native error/exception in completed
+acceptance logs. Source and all four installed file hashes match. Config semantic delta is solely the newly bound
+default motion setting; existing feature preferences are retained. Owned QA closed; DD2 remains stopped.
+
+Private evidence:local-art/ui-overhaul/hamlet-overlook-v08/{native-overview.png,native-first.png,native-BepInEx.log,
+native-Player.log,native-allocations.json,acceptance.json,build-sources.json,*tests.log,release-build.log,
+hamlet-overlook-v08.png,hamlet-overlook-v08.blend,layout.json,composition.json}. Pre-change universal-modder backups:
+hamlet-before-overlook-v08/20261012-134633.zip and hamlet-before-overlook-config-v08/20261012-135139.zip.
+No estate selected/read/saved; no save restore. Concurrent corridor/atmosphere and Shieldbreaker sources/notes
+remain outside this commit. Read tools/hamlet_3d.md for controls, lifecycle and limitations.
+
+## Status 2026-10-12: round232 Hamlet overlook installed and unsaved native acceptance complete
+
+Use the existing3D feature preference; no debug flags needed for play. Painted town and camera-motion controls
+are available immediately. Native checks cover presentation/routing/lifecycle at the tested sizes, not controller
+comfort, arbitrary text/window sizes, saved transactions, final lighting or long-session/frame-time behavior.
+NPC/upgrade exteriors and finer individual trim/model work remain art scope. Retain independent corridor and
+hero work; check live process and installed hashes before another deployment. DD2 is stopped.

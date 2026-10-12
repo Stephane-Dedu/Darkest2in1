@@ -18,7 +18,14 @@ internal sealed partial class HamletStage : MonoBehaviour
 {
     public static HamletStage Instance { get; private set; }
     private static bool? _previewMode;
+    private static bool? _previewMotion;
     public static bool Enabled => _previewMode ?? Plugin.Hamlet3D.Value;
+    public static bool MotionEnabled => _previewMotion ?? Plugin.HamletCameraMotion.Value;
+    public static void SetMotion(bool value)
+    {
+        if (HamletPreview.OwnsSession) _previewMotion=value; else Plugin.HamletCameraMotion.Value=value;
+        Instance?.ApplyMotion();
+    }
     public static readonly string[] Services = { "tavern", "stage_coach", "sanitarium", "graveyard", "abbey", "guild", "nomad_wagon", "blacksmith", "camping_trainer", "statue" };
     public static void SetEnabled(bool value)
     {
@@ -26,7 +33,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (!value) Instance?.Clear();
         else if (Instance != null) Instance.Failure = null;
     }
-    internal static void PreviewMode(bool? value) => _previewMode = value;
+    internal static void PreviewMode(bool? value) { _previewMode=value; if (!value.HasValue) _previewMotion=null; }
 
     private const string Common = "Assets/Data/Biome/Common/Map/NodeTiles/";
     private const string Models = "Assets/Art/Models/Environments/Common/Models/Nodes/";
@@ -54,7 +61,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -1.8f, 29, 18, -20),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
-        new(null, Mountains + "mainmenu_mountain_mdl.fbx", 0, -36, 96, 174, heightScale: .85f, depthScale: .34f),
+        new(null, Mountains + "mainmenu_mountain_mdl.fbx", 28, -41, 96, 174, heightScale: .85f, depthScale: .34f,absolute:true),
         new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
         new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
         new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),
@@ -103,6 +110,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private string _focus, _hover;
     private Vector2 _pan;
     private float _zoom = 1;
+    private float _viewScale = 1;
     private Vector3 _look;
     private float _savedFog;
     private Color _savedAmbient, _savedAmbientNoShadow;
@@ -117,6 +125,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
+    internal Vector3 CameraPosition => _camera!=null?_camera.transform.localPosition:Vector3.zero;
+    internal bool SmokePlaying => _root!=null && _root.GetComponentsInChildren<ParticleSystem>().Any(p=>p.isPlaying);
 
     private void Awake()
     {
@@ -213,7 +223,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; compact DD1 cliff layout, 24.5 metres of service elevation");
                 Plugin.Log.LogInfo($"[hamlet 3d] {_root.GetComponentsInChildren<ParticleSystem>().Length} owned chimney plumes; target {_texture.width}x{_texture.height}/{_texture.graphicsFormat}");
             }
-            MoveCamera(1 - Mathf.Exp(-Time.unscaledDeltaTime * 5));
+            MoveCamera(MotionEnabled ? 1 - Mathf.Exp(-Time.unscaledDeltaTime * 7) : 1);
         }
         catch (Exception e) { Fail(e.Message); }
     }
@@ -379,17 +389,18 @@ internal sealed partial class HamletStage : MonoBehaviour
     private void MoveCamera(float blend)
     {
         if (_camera == null) return;
-        var focused = _buildings.FirstOrDefault(b => b.Id == _focus);
+        var focused = MotionEnabled ? _buildings.FirstOrDefault(b => b.Id == _focus) : null;
         var target = focused == null ? Overview : Vector3.Lerp(Overview, focused.Bounds.center - Origin, .4f);
         target += new Vector3(_pan.x, 0, _pan.y);
         _look = Vector3.Lerp(_look, target, blend);
         var layoutOffset = HamletLayout.CameraOffset;
-        var offset = new Vector3(layoutOffset.X, layoutOffset.Y, layoutOffset.Z) * (_zoom * (focused == null ? 1 : .87f));
+        _viewScale=Mathf.Lerp(_viewScale,_zoom*(focused==null?1:.94f),blend);
+        var offset = new Vector3(layoutOffset.X, layoutOffset.Y, layoutOffset.Z) * _viewScale;
         _camera.transform.localPosition = _look + offset;
         _camera.transform.LookAt(Origin + _look);
     }
     public void SetFocus(string id) => _focus = id;
-    public void ResetView() { _pan = Vector2.zero; _zoom = 1; }
+    public void ResetView() { _pan = Vector2.zero; _zoom = 1; MoveCamera(1); }
     public void HandleViewInput(Event e)
     {
         if (e.type == EventType.ScrollWheel) { _zoom = Mathf.Clamp(_zoom + e.delta.y * .035f, .72f, 1.3f); e.Use(); }
@@ -437,7 +448,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         foreach (var b in _buildings) foreach (var renderer in b.Renderers)
         {
             var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block);
-            float factor = !b.Available ? .38f : b.Id == _hover ? 1.3f : 1;
+            float factor = !b.Available ? .38f : b.Id == _hover ? 1.16f : 1;
             var material = renderer.sharedMaterial;
             if (material != null && material.HasProperty(Tint)) block.SetColor(Tint, _baseTints[renderer] * factor);
             else if (material != null && material.HasProperty("_Color")) block.SetColor("_Color", _baseTints[renderer] * factor);

@@ -122,6 +122,38 @@ def quiet_building_materials(objects):
         shader.inputs['Roughness'].default_value=1; shader.inputs['Specular IOR Level'].default_value=0
 
 
+def world_valley(soil,stone,grass,palette,data):
+    """Native surface palette plus exported road/haze field; approximate construction-only bake."""
+    size=2048
+    x,z=np.meshgrid(np.linspace(data['MinX'],data['MaxX'],size),np.linspace(data['MinZ'],data['MaxZ'],size))
+    def tile(image,paint,u,v):
+        pixels=np.asarray(image.pixels[:],dtype=np.float32).reshape(image.size[1],image.size[0],4)
+        mirror=lambda q:1-np.abs(np.mod(q,2)-1)
+        xx=((mirror(u)*paint['UvScale']['X']+paint['UvOffset']['X'])*(image.size[0]-1)).astype(int)
+        yy=((mirror(v)*paint['UvScale']['Y']+paint['UvOffset']['Y'])*(image.size[1]-1)).astype(int)
+        color=pixels[np.clip(yy,0,image.size[1]-1),np.clip(xx,0,image.size[0]-1),:3]
+        t=paint['Tint']; color=color*np.array([t['X'],t['Y'],t['Z']])
+        luma=np.sum(color*np.array([.2126,.7152,.0722]),axis=2,keepdims=True)
+        color=np.clip(luma+(color-luma)*paint['Saturation']+paint['Brightness'],0,1)
+        return np.where(color<=.0031308,color*12.92,1.055*np.maximum(color,0)**(1/2.4)-.055)
+    field=np.array([[s['Stain']['Tint'][k] for k in ['X','Y','Z']]+[s['Stain']['Gravel'],s['Road'],s['Haze'],s['Grass']] for s in data['Samples']],dtype=np.float32).reshape(256,256,7)
+    at=np.linspace(0,255,size); lo=at.astype(int); hi=np.minimum(lo+1,255); f=at-lo
+    horizontal=field[:,lo,:]*(1-f)[None,:,None]+field[:,hi,:]*f[None,:,None]
+    field=horizontal[lo,:,:]*(1-f)[:,None,None]+horizontal[hi,:,:]*f[:,None,None]
+    turf=tile(grass,palette['Grass'],x/7.5,z/7.5); earth=tile(soil,palette['Soil'],x/10,z/3)
+    wear=field[:,:,3:4]; cover=field[:,:,6:7]
+    color=earth*(1-wear)+tile(stone,palette['Paving'],x/5.5+.37,z/5.5+.19)*wear
+    color=(color*(1-cover)+turf*cover)*field[:,:,:3]
+    road=field[:,:,4:5]*.88; color=color*(1-road)+tile(stone,palette['Paving'],x/5,z/5)*road
+    haze=field[:,:,5:6]; color=color*(1-haze)+np.array([.13,.17,.23])*haze
+    rgba=np.ones((size,size,4),dtype=np.float32)
+    rgba[:,:,:3]=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
+    image=bpy.data.images.new('Valley native earth, grass, outward road and depth',width=size,height=size)
+    image.pixels.foreach_set(rgba.reshape(-1)); image.pack()
+    neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
+    return painted_ground('Surrounding painted valley',image,neutral)
+
+
 def main(args):
     repo=Path(__file__).resolve().parents[2]
     args.models=args.models.resolve(); args.kit=args.kit.resolve()
@@ -150,8 +182,7 @@ def main(args):
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
     surface('Core stair flights and landings',terrain['Stairs'],[stone])
-    valley_paint={**palette['Grass'],'Tint':{k:v*f for (k,v),f in zip(palette['Grass']['Tint'].items(),[.52,.59,.65])}}
-    surface('Core surrounding valley',terrain['Surroundings'],[painted_ground('Surrounding valley',grass,valley_paint)])
+    surface('Core surrounding valley',terrain['Surroundings'],[world_valley(soil,texture,grass,palette,data['Valley'])])
     surface('Core native grass tufts',data['Vegetation'],[painted_ground('Native grass silhouettes',tufts,palette['GrassTuft'],cutout=True)])
     buildings={}
     for site in data['Sites']:

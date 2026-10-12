@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round232 implements the owner's approved3D Hamlet overlook.22-degree pitch/36-degree verticalFOV retains
+ten DD1 service sites; Mountain offset, quieter stone, continuous native-painted valley/outward road and14
+grounded native Valley groups improve framing. Backed names, Tab/arrows/Enter service navigation and Camera
+motion On/Off are installed. Motion off keeps a still overview and stops chimney smoke; explicit pan/zoom/reset
+remain. Painted town is immediate rollback, Look.Hamlet3D defaultfalse and existing local preferences preserved.
+Release+1097 Core+188 UI pass; final42 Hamlet cases pass after the ridge adjustment. Native unsaved1600x900 QA
+passes ten services/Escape, view controls, rollback/full resource release, reload/re-entry, Embark/cleanup/return,
+1440x900 resize/restore and keyboard/still-camera/smoke toggles. Native overview/service panel inspected.0 repeated
+URP allocations/5.055sec; four installed DLL/PDB hashes match. Config only gains default HamletCameraMotion=true.
+Private evidence/packed preview:local-art/ui-overhaul/hamlet-overlook-v08; read tools/hamlet_3d.md. The frozen build
+preserves tracked concurrent hero code already in the shared install; that code is outside the Hamlet commit.
+Owned QA PID95980 is closed and DD2 stopped; no estate selected/read/saved or OS input sent. Finer art/lighting,
+NPC/upgrade variants, controller/other window/text sizes, saved transactions and long-session/frame-time checks
+remain. Preserve concurrent corridor/atmosphere and Shieldbreaker sources/notes; check live processes before deploy.
+
 Round230 is research/offline design only for the clickable3D Hamlet. Read tools/hamlet_hub_research.md and
 private local-art/ui-overhaul/hamlet-camera-study-v01/index.html. Six camera/background studies retain all service
 positions; E22-degree pitch/36-degree verticalFOV is the modest overview candidate. F's native mountain offset,

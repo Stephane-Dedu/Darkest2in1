@@ -15,12 +15,12 @@ public static class HamletPalette
     }
     // Crop the painted soil and rough-road patch; wall stone is a seamless native tile.
     public static readonly Paint Soil = new(.72f,.73f,.66f,.009f,.65f,vScale:.30f,vOffset:.70f);
-    public static readonly Paint Rock = new(1.4f,1.5f,1.6f,.002f,.55f);
+    public static readonly Paint Rock = new(.98f,1.095f,1.216f,.002f,.55f);
     public static readonly Paint Rubble = new(1.25f,1.35f,1.45f,.022f,.45f);
     public static readonly Paint Paving = new(1.05f,1.02f,.94f,.002f,.75f,uScale:.64f,vScale:.64f,uOffset:.18f,vOffset:.18f);
-    public static readonly Paint Masonry = new(1.6f,1.65f,1.55f,.003f,.45f);
-    public static readonly Paint Mountain = new(1.2f,1.4f,1.65f,.025f,.5f);
-    public static readonly Paint Woodland = new(.66f,.78f,.95f,.003f,.45f);
+    public static readonly Paint Masonry = new(1.12f,1.2045f,1.178f,.003f,.45f);
+    public static readonly Paint Mountain = new(.84f,1.10f,1.42f,.012f,.45f);
+    public static readonly Paint Woodland = new(.54f,.70f,.86f,.004f,.38f);
     public static readonly Paint Building = new(.94f,.96f,1,.001f,.76f);
     public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
     public static readonly Paint GrassTuft = new(.48f,.62f,.44f,0,1);

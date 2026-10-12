@@ -23,6 +23,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> ExpeditionArtPath;
     internal static ConfigEntry<string> HamletArtPath;
     internal static ConfigEntry<bool> Hamlet3D;
+    internal static ConfigEntry<bool> HamletCameraMotion;
     internal static ConfigEntry<bool> ExpeditionMap3D;
     internal static ConfigEntry<bool> DebugKeysEnabled;
     internal static ConfigEntry<string> ExportedBossModel;
@@ -55,6 +56,8 @@ public class Plugin : BaseUnityPlugin
             "Optional private Hamlet scene and visible building masks, prepared with tools/prepare_hamlet_art.py. Empty, missing or invalid packs retain the installed DD1 town.");
         Hamlet3D = Config.Bind("Look", "Hamlet3D", false,
             "Experimental live 3D Hamlet using installed DD2 scenery. The town's Painted town button switches back immediately. Off retains the private hillside pack or original town.");
+        HamletCameraMotion = Config.Bind("Look", "HamletCameraMotion", true,
+            "Allow gentle camera focus after selecting a Hamlet service and chimney smoke. Off keeps a still overview; explicit pan/zoom/reset remain available. Change with the town's Camera motion control.");
         ExpeditionMap3D = Config.Bind("Look", "ExpeditionMap3D", false,
             "Pre-rendered DD2 expedition map with continuous region zoom and native atmosphere (map3d.png, map3d.json and optional vfx/ in ExpeditionArtFolder). The selector's Painted map button switches back immediately. Off, or a missing pack, retains the painted map.");
         HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),

@@ -176,3 +176,40 @@ QA PID86776 passes alpha/crop review, all ten services/Escape, controls, rollbac
 Embark/cleanup/return and1600x900->1440x900->1600x900. Final141 renderers/four chimney systems retain the native
 HDR target;0 repeated URP allocations over5.029 seconds. No warning/error during acceptance. QA closed, no
 ordinary game relaunched and no estate selected/read/saved. Evidence: `local-art/ui-overhaul/hamlet-grass-v07/`.
+
+Round232 implements the approved round230 camera/background study. The home view uses a22-degree downward
+pitch,3-degree yaw and36-degree vertical FOV, retaining the ten DD1 service sites. The full-size Mountain is
+offset right/down from the Abbey. Selection uses a smaller6% eased zoom; hovering does not move the camera.
+Reset restores the home view immediately. Quieter cliff/retaining paint leaves the original ink joints and
+building albedo intact. Building hover lift is restrained and the native name banner has a dark backing.
+
+The main road now reaches the town boundary and continues as a graded, painted ribbon into the valley.
+The surrounding mesh has denser rings, broad irregular wooded shoulders and fourteen native Valley groups,
+replacing the three Camp treeline cards. Root banks are buried using nine height samples across each footprint.
+Near-town soil/gravel/grass treatment continues across the boundary; distance haze affects only the outer
+paint. The additional2048px owned valley map uses512px source reads and a256x256 clearance field at construction,
+with no per-frame readback or bake. It and all scenery resources release on painted rollback/exit.
+
+Tab/Shift-Tab cycle services in screen order; arrows choose a service in that screen direction. Enter/Space
+opens the focused service through existing dispatch; Escape closes it. Pointer input returns to mouse hover.
+World navigation is blocked under the header, roster, footer and active overlays. The new Camera motion button
+persists `Look.HamletCameraMotion` (defaulttrue). Off keeps a still overview and stops/clears chimney smoke;
+explicit pan/zoom/reset remain available. The unsaved fixture overrides both feature/motion choices in memory.
+`Look.Hamlet3D` remains defaultfalse; Painted town is still immediate rollback.
+
+Release and1097 Core+188 UI tests pass. After the final ridge-height refinement, all42 Hamlet tests pass.
+The1600x900 native unsaved fixture passes ten service clicks/Escape, pan/zoom/reset, painted rollback/resource
+release, reload/re-entry, Embark/cleanup/return,1440x900 resize/restore, keyboard focus/Enter/back and motion
+off/on. It verifies unchanged camera position while a service is open with motion disabled and stopped/resumed
+smoke. Native overview and a service panel were inspected.145 mesh renderers,168 grass clumps and four plumes
+retain the matched HDR target; zero repeated URP allocations over5.055 seconds. This is buffer stability,
+not a full frame-time or long-session memory benchmark. Controller navigation, arbitrary window/text sizes,
+saved transactions, NPC/exterior variants and final art/lighting remain separate acceptance.
+
+Private native logs/captures, final packed Blender preview, source/install hashes and semantic config comparison:
+`local-art/ui-overhaul/hamlet-overlook-v08/`. Offline shaders remain approximate; native captures establish
+appearance. The isolated compile snapshot preserves concurrent tracked hero code already in the shared build;
+that code is outside the Hamlet commit. Four installed DLL/PDB hashes match the verified Release files.
+Config only gains the default motion setting. Pre-deploy plugin and config backups are universal-modder
+`hamlet-before-overlook-v08/20261012-134633.zip` and `hamlet-before-overlook-config-v08/20261012-135139.zip`.
+Owned QA PID95980 is closed, DD2 remains stopped, and no estate was selected/read/saved.

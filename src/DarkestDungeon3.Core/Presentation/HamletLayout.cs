@@ -35,8 +35,9 @@ public static class HamletLayout
         public Route(string id, float width, params Point[] points) { Id = id; Width = width; Points = points; }
     }
 
-    public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 42;
-    public static readonly Point CameraTarget = new(14, 11, 15), CameraOffset = new(3, 36, -106);
+    public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 36;
+    // 22-degree down pitch, 3-degree yaw. Keep facades and approaches beneath the town HUD.
+    public static readonly Point CameraTarget = new(14, 13, 17), CameraOffset = new(6.60f, 50.95f, -125.92f);
     // Footprint ratios come from the authored v02 bounds. Rectangular pads allow a compact town without buried corners.
     public static readonly IReadOnlyList<Site> Sites = new[]
     {
@@ -54,7 +55,7 @@ public static class HamletLayout
     private static Point Door(string id) => Sites.First(s => s.Id == id).Entrance;
     public static readonly IReadOnlyList<Route> Routes = new[]
     {
-        new Route("main", 3.8f, new(-32,-1,-23), new(-25,0,-12), new(-8,0,0), new(2,0,4),
+        new Route("main", 3.8f, new(-51,-4,-36), new(-40,-2,-30), new(-32,-1,-23), new(-25,0,-12), new(-8,0,0), new(2,0,4),
             new(9,4,12), new(9,9,18), new(8,12.5f,24), new(20,12.5f,28), new(20,17,34), Door("abbey")),
         new Route("stage_coach", 3, new(-25,0,-12), Door("stage_coach")),
         new Route("tavern", 3, new(-8,0,0), new(-20,1,-3), Door("tavern")),

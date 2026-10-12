@@ -56,6 +56,15 @@ internal sealed partial class HamletStage
         var renderer=particles.GetComponent<ParticleSystemRenderer>();
         renderer.sharedMaterial=_smokeMaterial; renderer.renderMode=ParticleSystemRenderMode.Billboard;
         renderer.shadowCastingMode=ShadowCastingMode.Off; renderer.receiveShadows=false;
-        particles.Play();
+        if (MotionEnabled) particles.Play();
+    }
+
+    private void ApplyMotion()
+    {
+        if (_root==null) return;
+        foreach (var particles in _root.GetComponentsInChildren<ParticleSystem>())
+            if (MotionEnabled) particles.Play();
+            else particles.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+        MoveCamera(1);
     }
 }

@@ -34,8 +34,8 @@ internal sealed partial class HamletStage
         if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
             grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
         var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
-        if (grass!=null) valley.SetTexture("_BaseMap_texture",grass);
-        valley.SetColor(Tint,new Color(.52f,.59f,.65f,1));
+        valley.SetTexture("_BaseMap_texture",ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
+        valley.SetColor(Tint,Color.white);
         _groundMaterial.SetTexture("_BaseMap_texture",GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
