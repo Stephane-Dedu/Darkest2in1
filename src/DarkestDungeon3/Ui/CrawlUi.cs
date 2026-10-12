@@ -96,6 +96,7 @@ internal sealed class CrawlUi
             if (top > 0f) Gui.Fill(new Rect(0, 0, Gui.W, top), new Color(0, 0, 0, alpha));
             Gui.Fill(new Rect(0, top + 720, Gui.W, Gui.H - top - 720), new Color(0, 0, 0, alpha));
             GUI.DrawTextureWithTexCoords(new Rect(0, top, Gui.W, 720), snapshot, FightBackdropLayout.SceneStrip(snapshot.width, snapshot.height));
+            DungeonAtmosphereUi.DrawCurrent(alpha: 1);
         }
         else
         {
@@ -131,7 +132,7 @@ internal sealed class CrawlUi
             GUI.matrix = canvas;
             GL.Clear(true, true, Color.black);
             GUI.color = Color.white;
-            DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon));
+            DrawScene(crawl, exp, Core.Dungeon.ZoneBase.Of(exp.Quest.Dungeon), atmosphere: false);
             return rt;
         }
         catch (Exception e)
@@ -153,7 +154,7 @@ internal sealed class CrawlUi
 
     // ---------------- scene ----------------
 
-    private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone)
+    private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone, bool atmosphere = true)
     {
         Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, GUI.color.a));
         float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
@@ -175,6 +176,7 @@ internal sealed class CrawlUi
                 CorridorPanoramaLayout.Progress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha);
             DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
         }
+        if (atmosphere && regional != null) DungeonAtmosphereUi.DrawCurrent();
         DrawProps(crawl, exp, slide);
 
         // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.

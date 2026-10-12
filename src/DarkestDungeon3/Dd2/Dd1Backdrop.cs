@@ -113,6 +113,7 @@ internal static class Dd1Backdrop
         WantsSnapshot = false;
         Release(_snapshot);
         _snapshot = scene;
+        if (scene != null) Ui.DungeonAtmosphereUi.Freeze();
         if (scene == null) { _failed = true; Plugin.Log.LogInfo("[backdrop] no scene snapshot: DD2's arena stays"); }
     }
 
@@ -271,6 +272,7 @@ internal static class Dd1Backdrop
         UndoExposure();
         try
         {
+            RefreshAtmosphere();
             foreach (var cam in Camera.allCameras)
             {
                 if (cam == null || !cam.enabled || cam.targetTexture != null || !IsBaseCamera(cam)) continue;
@@ -303,6 +305,33 @@ internal static class Dd1Backdrop
             }
         }
         catch (Exception e) { Plugin.Log.LogWarning("[backdrop] tick: " + e.Message); }
+    }
+
+    // Redraw into the existing backdrop RT, before the combat cameras render. Native actors remain in front;
+    // a static snapshot contains no particles, so successive frames never leave smoke trails behind.
+    private static void RefreshAtmosphere()
+    {
+        if (_snapshot == null || _texture == null || Core.Expedition.FadedMemory.Active(Driver.Instance?.Expedition)) return;
+        var previous = RenderTexture.active;
+        var colour = GUI.color;
+        bool pushed = false;
+        try
+        {
+            RenderTexture.active = _texture;
+            GL.Clear(true, true, Color.black);
+            GL.PushMatrix(); pushed = true;
+            GL.LoadPixelMatrix(0,1920,1080,0);
+            Graphics.DrawTexture(new Rect(0,0,1920,720),_snapshot,
+                FightBackdropLayout.SceneStrip(_snapshot.width,_snapshot.height),0,0,0,0);
+            GUI.color = Color.white;
+            Ui.DungeonAtmosphereUi.DrawCurrent(graphics: true);
+        }
+        finally
+        {
+            if (pushed) GL.PopMatrix();
+            RenderTexture.active = previous;
+            GUI.color = colour;
+        }
     }
 
     private static float _nextScan;
@@ -541,6 +570,7 @@ internal static class Dd1Backdrop
         _texture = null;
         Release(_snapshot);
         _snapshot = null;
+        Ui.DungeonAtmosphereUi.Unfreeze();
         WantsSnapshot = false;
         Ready = false;
     }

@@ -5896,3 +5896,69 @@ are available immediately. Native checks cover presentation/routing/lifecycle at
 comfort, arbitrary text/window sizes, saved transactions, final lighting or long-session/frame-time behavior.
 NPC/upgrade exteriors and finer individual trim/model work remain art scope. Retain independent corridor and
 hero work; check live process and installed hashes before another deployment. DD2 is stopped.
+
+## Round233 (2026-10-12): continuous native corridor ground and animated expedition atmosphere
+
+Owner authorized the remaining scenery gaps after round231. Rebuilt24 native corridor PNGs (six per primary
+region), preserving32 typed room PNGs and HamletModels. The broad horizontal stripe came from opaque ground
+composited above distant geometry. Native textured ground now sits below those rows; ground/skybox horizons and
+the lowest three world units of geometry skirts fade continuously. Native placement/camera/road fitting remain;
+Sprawl lamps and Shroud mooring posts move behind the walking lane. Shroud distant water colour is approximate
+because its exported ocean material has no diffuse texture. No generated art or additional extraction needed.
+tools/render_native_corridors.py imports the private kit helpers without modifying them. Separate Blender passes
+and Pillow composition retain source/output hashes, camera/placements and material/tool provenance. Final ground
+horizon blend spans160px. Fresh output is needed after geometry/material edits; completed road passes are cached.
+
+Core DungeonAtmosphere produces bounded visual-seed/time motion without gameplay RNG: Sprawl smoke/embers,
+Foetor steam, Tangle haze and Shroud mist. Same panorama crop and positive atlas UV clipping keep effects stable
+on reversal and inside the scene. Torch brightness reduces visibility. Existing shared ExpeditionMapEffects
+provides five native PNGs/six effect descriptors (~13.25MiB decoded), one upload per frame and release after use.
+The round227 private VFX pack is now installed for crawl use; map input/camera/lifecycle acceptance remains separate.
+Coverage-only mist/clouds use white RGB and native red alpha (plus native fog gradient) rather than double-darkening
+the mask through RGB and alpha. Fire/smoke simulation RGB and sparks stay intact; native HDR shaders are approximate.
+
+tools/prepare_scenery_emitters.py projects native active fire-mesh bounds through the installed room camera.
+Optional bounded metadata supplies16 anchors in six Sprawl room scenes, tied to exact flat filenames. Lair scenes
+have no accepted visible fire meshes; no arbitrary flames are added. Invalid/missing packs retain static scenery.
+RegionSceneryArt adopts emitter metadata with its worker result and clears it on teardown. During in-place combat,
+the base snapshot excludes particles, crop/anchors freeze, and LateUpdate redraws base plus current effects into
+the existing RT before native actor cameras render. Time continues through combat/return without particle trails.
+Faded Memory preserves its DD1 appearance. No campaign rule/save schema or ordinary combat action changes.
+
+Verification: Release passes with the three existing warnings. All1112 Core/188 UI tests pass, including motion,
+crop/UV clipping, bounded metadata, native anchor binding and actual loader adoption/cleanup. Python compile and
+diff checks pass. Native1600x900 -dd3-scenery-check passes all24 corridors/32 rooms; all56 final-art captures and
+five contact sheets inspected. The final unsaved -dd3-crawl-scenery-check passes actual DD2 actors, torch use,
+curio resolution, trap/disarm, obstacle/shovel, reversal, room battles and identical-texture return in all four
+regions with the final assets. Victories use debug damage/kills/native turn-pass, not ordinary equipped skills.
+
+The repeat native check exposed a QA shortcut failure: fanatic_mash_211 left a Pit Fighter alive at zero HP,
+while other enemies were corpses and turns advanced. A pinned native repro distinguished this from a stalled
+return hook. The fixture now finishes survivors through the existing native debug-kill helper; its first battle
+pins that configuration so every run covers it. Native red->green is the regression oracle; no unit shim exercises
+DD2 Death's Door/presentation. Temporary state/HP instrumentation and repro-only flag removed. Final check logs
+contain no error/exception. Earlier failed/interrupted runs stay private and are not counted as final acceptance.
+
+Pre-change backups:dd3-before-atmosphere-v03-scenery/20261012-140313.zip (115files/192.4MiB),
+dd3-before-atmosphere-v03-plugin/20261012-140319.zip (17files/16.9MiB), and
+dd3-before-crawl-check-native-profile/20261012-140320.zip (39files/1.8MiB), under the universal-modder backup root.
+All deployment occurred with DD2 stopped. Owned QA closed by exact PID; normal launch behavior retained. Four
+installed DLL/PDB hashes match Release; config unchanged. Native DD2 SaveFiles was restored after earlier checks;
+final read-only comparison matches all39 original file hashes. Owned final QA PID98200 is closed. A normal DD2
+launch PID95604 appeared afterward and is left running untouched; no final restore/deploy was performed over it.
+No DD3 estate selected/read/persisted, no protected estate access, no OS input sent.
+The shared Release includes pre-existing concurrent Shieldbreaker sources; those files/notes are outside this commit.
+
+Private evidence:local-art/scenery-atmosphere-v03/{corridors-final,scenery-emitters.json,installation-final.json,
+native-all,native-final-verified,native-complete,native-final-*.jpg,final-verification.json,*tests-verified.log,
+release-build-final.log,field-note.md}. Local universal-modder field note check passes; no public KB submission.
+Read tools/corridor_art.md and tools/native_corridor_audit.md. Art, exports and decompiled data stay outside Git.
+
+## Status 2026-10-12: round233 scenery/atmosphere installed and native travel/battle-return verified
+
+Use the active install with a normal game launch; no QA flags needed. Continuous ground and moving native effects
+are present in all four default regions. Native deferred exposure/bloom, animated ocean, independent foreground
+depth and longer unique lateral travel remain fidelity work. Existing diffuse textures suffice; these gaps need
+native shader/effect/depth reconstruction. Ordinary pointer/controller gameplay, saved reload, normal skill kills
+and long-session/frame-time acceptance remain separate. Normal DD2 PID95604 is running untouched; preserve
+concurrent hero/Hamlet work and check live processes before deployment.

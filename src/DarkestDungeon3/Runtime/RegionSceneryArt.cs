@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DarkestDungeon3.Core.Dungeon;
+using DarkestDungeon3.Core.Presentation;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -24,10 +25,12 @@ internal static class RegionSceneryArt
     private static IReadOnlyList<string> _privateCandidates = Array.Empty<string>(), _privateVariants = Array.Empty<string>();
     private static IReadOnlyList<string> _corridorCandidates = Array.Empty<string>(), _corridorVariants = Array.Empty<string>();
     private static float _privateReadyAt = -1;
+    private static SceneryEmitters _emitters;
+    public static IReadOnlyList<ExpeditionMap3D.MapRect> FireBounds(string file) => _emitters?.For(file) ?? Array.Empty<ExpeditionMap3D.MapRect>();
 
     private sealed class RoomBytes { public string FileName, Error; public byte[] Data; }
     private sealed class RoomTexture { public Texture2D Texture; public float ReadyAt; }
-    private sealed class RoomLoadSet { public RoomBytes[] Images; public IReadOnlyList<string> PrivateFiles, CorridorFiles; public string Error; }
+    private sealed class RoomLoadSet { public RoomBytes[] Images; public IReadOnlyList<string> PrivateFiles, CorridorFiles; public string Error; public SceneryEmitters Emitters; }
 
     public static void Prepare(string region)
     {
@@ -44,10 +47,16 @@ internal static class RegionSceneryArt
             IReadOnlyList<string> privateFiles = Array.Empty<string>();
             IReadOnlyList<string> corridorFiles = Array.Empty<string>();
             string error = null;
+            SceneryEmitters emitters = null;
             try
             {
                 privateFiles = PrivateRoomScenery.Find(privateFolder, region);
                 corridorFiles = PrivateRoomScenery.FindCorridors(privateFolder, region);
+                if (!string.IsNullOrWhiteSpace(privateFolder))
+                {
+                    string path = Path.Combine(privateFolder,"scenery-emitters.json");
+                    if (File.Exists(path) && new FileInfo(path).Length <= 256*1024) emitters = SceneryEmitters.Parse(File.ReadAllText(path));
+                }
             }
             catch (Exception e) { error = e.Message; }
             RoomBytes Read(string source, string fileName)
@@ -70,7 +79,7 @@ internal static class RegionSceneryArt
                 catch (Exception e) { result.Error = e.Message; }
                 return result;
             }
-            return new RoomLoadSet { PrivateFiles = privateFiles, CorridorFiles = corridorFiles, Error = error,
+            return new RoomLoadSet { PrivateFiles = privateFiles, CorridorFiles = corridorFiles, Error = error, Emitters = emitters,
                 Images = plan.RoomBackgrounds.Select(name => Read(folder, name))
                     .Concat(privateFiles.Concat(corridorFiles).Select(name => Read(privateFolder, name))).ToArray() };
         });
@@ -124,6 +133,7 @@ internal static class RegionSceneryArt
             _roomPending = new Queue<RoomBytes>(loaded.Images);
             _privateCandidates = loaded.PrivateFiles;
             _corridorCandidates = loaded.CorridorFiles;
+            _emitters = loaded.Emitters;
             if (loaded.Error != null) Plugin.Log.LogWarning($"[scenery] private room pack: {loaded.Error}; using distributed room scenes");
             _roomLoading = null;
         }
@@ -183,6 +193,7 @@ internal static class RegionSceneryArt
         Handles.Clear();
         foreach (var image in Rooms.Values) UnityEngine.Object.Destroy(image.Texture);
         Rooms.Clear();
+        _emitters = null;
         _roomLoading = null;
         _roomPending = null;
         _privateCandidates = _privateVariants = Array.Empty<string>();

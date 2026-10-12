@@ -21,6 +21,7 @@ public class RegionSceneryArtTests
             File.WriteAllBytes(Path.Combine(pack, "dd2_city-arena-boss-01.png"), new byte[] { 1, 2, 3 });
             foreach (string role in new[] { "battle", "quiet" })
                 File.WriteAllBytes(Path.Combine(pack, $"dd2_city-arena-{role}-01.png"), png);
+            File.WriteAllText(Path.Combine(pack,"scenery-emitters.json"),"{\"scenes\":{\"dd2_city-arena-battle-01.png\":[[300,420,80,160]]}}");
             Plugin.NativeRoomSceneryPath.Value = pack;
             RegionSceneryArt.Clear(); Time.unscaledTime = 10;
             var plan = RegionalScenery.For("dd2_city");
@@ -28,6 +29,7 @@ public class RegionSceneryArtTests
             while (RegionSceneryArt.RoomSceneFiles(plan.Region).Count != 2 && watch.Elapsed.TotalSeconds < 10)
             { RegionSceneryArt.Prepare(plan.Region); Thread.Sleep(1); }
             Assert.Equal(2, RegionSceneryArt.RoomSceneFiles(plan.Region).Count);
+            Assert.Single(RegionSceneryArt.FireBounds("dd2_city-arena-battle-01.png"));
             var room = new Room { Id = 3, Content = RoomContent.Boss };
             var before = RegionSceneryArt.RoomChoice(plan, 7, room);
             Assert.Equal("dd2_city-arena-battle-01.png", before.FileName); Assert.False(before.Mirror);
@@ -38,6 +40,7 @@ public class RegionSceneryArtTests
             RegionSceneryArt.Clear();
             Assert.Empty(RegionSceneryArt.RoomSceneFiles(plan.Region));
             Assert.Null(RegionSceneryArt.RoomTextureFor(before.FileName));
+            Assert.Empty(RegionSceneryArt.FireBounds("dd2_city-arena-battle-01.png"));
         }
         finally
         {

@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round233 rebuilds all24 native corridors with ground beneath distant scenery and softened card/horizon joins;
+32 typed room PNGs remain unchanged. Shared native fire/smoke/spark/mist/cloud atlases animate travel and the
+same in-place battle backdrop, with frozen crop and continuous effect time. Native mesh projections anchor16
+fires in six Sprawl rooms. Fog/cloud conversion uses white RGB/native mask alpha to avoid double attenuation.
+Release+1112 Core+188 UI pass. Unsaved native Driver checks pass torch/curio/trap/obstacle/reversal, actual DD2
+actors, room battles and same-scene return in all four regions; victories use debug damage/kills, not skill kills.
+The first battle pins the Pit Fighter zero-HP regression; the fixture finishes survivors through native debug kill.
+All56 final panorama views pass and their contact sheets were inspected. Evidence:local-art/scenery-atmosphere-v03;
+read tools/corridor_art.md and tools/native_corridor_audit.md. The round227 VFX pack is now installed and tested
+in the crawl; expedition-map input/camera/lifecycle acceptance remains separate. Native HDR/bloom, water motion,
+foreground depth, controller/pointer gameplay, saved reload and long-session/frame-time checks remain open.
+Final QA PID98200 closed. Normal DD2 launch95604 appeared afterward and is left running untouched. Four deployed
+DLL/PDB hashes, config and39 original native profile files match. No final restore/deploy over the running game.
+Preserve independent Shieldbreaker code/notes and the Hamlet changes. Check current processes before deployment.
+
 Round232 implements the owner's approved3D Hamlet overlook.22-degree pitch/36-degree verticalFOV retains
 ten DD1 service sites; Mountain offset, quieter stone, continuous native-painted valley/outward road and14
 grounded native Valley groups improve framing. Backed names, Tab/arrows/Enter service navigation and Camera

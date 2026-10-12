@@ -83,9 +83,10 @@ def bundle_nodes(path):
 def runtime_pack(document, out):
     """Convert native shader masks into a small, straight-alpha GUI pack.
 
-    Native sheets use opaque Texture2D alpha and _RGBAlpha=1. We keep source
-    RGB and copy its red mask into alpha; DD2's HDR shader, distortion, depth
-    fade and camera fade are intentionally not reconstructed by this pack.
+    Native sheets use opaque Texture2D alpha and _RGBAlpha=1. Simulation sheets
+    retain RGB; coverage-only fog/cloud masks use white RGB and native red alpha
+    so GUI tint controls their colour without attenuating the mask twice.
+    DD2's HDR shader, distortion, depth fade and camera fade are not reconstructed.
     """
     textures = {t["name"]: t for t in document["textures"]}
     materials = {(m["region"], m["name"]): m for m in document["materials"]}
@@ -95,7 +96,7 @@ def runtime_pack(document, out):
 
     files = {}
 
-    def publish(file, source, limit=1024, mask=None, keep_alpha=False):
+    def publish(file, source, limit=1024, mask=None, keep_alpha=False, coverage=False):
         value = image(source)
         value.thumbnail((limit, limit), Image.Resampling.LANCZOS)
         conversion = "preserve native RGBA"
@@ -106,6 +107,9 @@ def runtime_pack(document, out):
                 gradient = image(mask).resize(value.size, Image.Resampling.BILINEAR)
                 alpha = ImageChops.multiply(alpha, gradient.getchannel("R"))
                 conversion += " multiplied by native gradient mask red channel"
+            if coverage:
+                value = Image.new("RGBA", value.size, (255, 255, 255, 255))
+                conversion = conversion.replace("preserve RGB", "white RGB for GUI tint")
             value.putalpha(alpha)
         value.save(out / file)
         files[file] = {
@@ -115,11 +119,11 @@ def runtime_pack(document, out):
             "alpha_range": list(value.getextrema()[3]),
         }
 
-    publish("mist.png", "tiling_fractal_05", mask="VFX_Mask_HalfOval_01")
+    publish("mist.png", "tiling_fractal_05", mask="VFX_Mask_HalfOval_01", coverage=True)
     publish("fire.png", "T_VFX_Sim_Fire_Soft_Loop_03")
     publish("smoke.png", "T_VFX_Sim_Smoke_Torch_slow_loop_03")
     publish("ember.png", "vfx_spark_01", keep_alpha=True)
-    publish("gas.png", "vfx_common_smoke_softwash_01")
+    publish("gas.png", "vfx_common_smoke_softwash_01", coverage=True)
 
     city = document["prefabs"][0]
     fire = next(p for p in city["particles"] if "fire_plasm" in p["name"])

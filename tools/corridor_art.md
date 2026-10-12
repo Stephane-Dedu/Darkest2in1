@@ -1,5 +1,55 @@
 # Private DD2 corridor scenery
 
+## Continuous ground and moving atmosphere, round233
+
+`tools/render_native_corridors.py` rebuilds six variants per primary region from the existing road kit. The former
+opaque soil pass was drawn over distant rows, cutting their foundations into a straight stripe. Ground now sits
+underneath those rows. Native road material fills distant ground; skirt bases and ground/skybox horizons blend
+gradually. Shroud distant ground uses dark water colour because the exported ocean shader has no diffuse map.
+Sprawl road lamps and Shroud road posts move behind the actor lane. These remain backdrop props; they do not
+provide foreground actor occlusion. Camera, road scale and y680 fitting are retained.
+
+```powershell
+blender -b --threads 8 --python-exit-code 1 --python tools/render_native_corridors.py -- <kit> <private-output>
+python tools/render_native_corridors.py <kit> <private-output> --compose-only
+blender -b --python-exit-code 1 --python tools/prepare_scenery_emitters.py -- <kit> <rooms-manifest> <private-output>/scenery-emitters.json
+```
+
+Blender needs NumPy; composition runs separately in Python with Pillow/NumPy. Use fresh render output after
+geometry/material changes. A completed road pass caches that variant. Private manifests record source/output
+hashes, placement lists, camera, material provenance and render/composition tool hashes. With DD2 stopped and
+PrivateScenery backed up, copy only the 24 canonical corridor PNGs, their manifest and `scenery-emitters.json`;
+preserve the 32 room PNGs and HamletModels. Current private output/evidence:
+`C:\Users\Piral\DarkestDungeon3\local-art\scenery-atmosphere-v03`.
+
+DungeonAtmosphere reuses the quest-map pack at `ExpeditionArtFolder/vfx/`: five private PNG atlases, six effect
+descriptors, about 13.25MiB decoded RGBA. Sprawl smoke/embers, Foetor steam, Tangle haze and Shroud mist use
+visual seeds and continuous time without gameplay RNG. Effects follow the same bounded crop, clip at the 720px
+scene edge and draw behind props/actors. Torch level reduces visibility. Native fire-mesh bounds anchor animated
+Sprawl flames and a gentle light wash in six room scenes (16 anchors). The two lair scenes have no accepted
+visible fire meshes; no arbitrary flames are added. Missing/invalid metadata or atlases retain static scenery.
+`extract_expedition_vfx.py` converts coverage-only mist/cloud textures to white RGB with native red-channel alpha
+(and the native half-oval fog mask). GUI tint supplies colour; keeping the mask in RGB as well had darkened it
+twice. Fire/smoke simulation RGB and spark RGBA are retained. This remains an authored straight-alpha adaptation
+of the native textures, rather than a reproduction of DD2's shader.
+
+In-place combat captures a particle-free base and freezes its crop/anchors. Every LateUpdate redraws the base
+plus current effects into the same backdrop RT before native cameras render. Particles stay behind actors and
+continue through cover/return without trails or a new RT each frame. The shared atlas loader uploads at most one
+image per frame and releases after use; region changes discard emitter metadata with scenery.
+
+`-dd3-crawl-scenery-check` creates an unsaved campaign and uses ordinary Driver APIs for native heroes, torch,
+travel, curios, traps, obstacles, reversal, room battles and return in all four regions. No estate is selected or
+persisted. Victories use debug damage/kills and native turn-pass events: this checks scenery and lifecycle,
+not skill kills or encounter balance. The first battle is pinned to `fanatic_mash_211` to cover a Pit Fighter
+surviving debug damage at zero HP; the fixture finishes remaining enemies with the existing native debug-kill
+helper. `-dd3-scenery-check` separately cycles every installed panorama
+with reference figures. QA flags are opt-in and require DebugKeys; remove them for play.
+
+Native deferred lighting/HDR/bloom, water animation and foreground depth remain approximated. Existing diffuse
+textures are sufficient; later water/lighting work needs native shader/effect reconstruction rather than generated
+textures. Pointer/controller interaction and long-session performance need broader acceptance beyond Driver actions.
+
 ## Current renderer and native rooms, round231
 
 Complete corridor plates are drawn once. The previous renderer tiled whole perspective scenes with alternating
@@ -22,7 +72,7 @@ lair exterior for entrance, resistance/faction/military/cultist for battles, gau
 treasure rooms. Shroud substitutes Chirurgeon for its empty cultist export. The native combat camera has a 0.31
 vertical lens shift for the crawl footline. A plane extends the region's native cobblestone, farm, forest or pier
 ground material beneath the actors; existing arena geometry remains above it. The result is not the untouched
-combat-camera export. It uses base color, tint and approximate depth haze; lighting and animated VFX remain absent.
+combat-camera export. Its PNG uses base color, tint and approximate depth haze; round233 supplies runtime VFX.
 
 Rebuild outside Git, using Blender with NumPy and the extracted kit's `bl_lib.py`, then Python with Pillow/NumPy:
 

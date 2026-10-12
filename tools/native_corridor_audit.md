@@ -1,5 +1,24 @@
 # Native corridor art audit, round216
 
+## Round233 update
+
+All 24 road panoramas are rebuilt with continuous ground below distant geometry, faded skirt/skybox/ground bases
+and native lane posts/lamps moved behind the party. This fixes the opaque ground pass that caused the broad
+horizontal stripe. Shroud water colour is an explicit approximation: its native ocean material has no diffuse
+texture in the export. Existing 32 typed room PNGs are preserved.
+
+Native extracted smoke/fire simulation sheets, mist/steam masks and sparks now animate the crawl and its in-place
+battle backdrop. Fire positions in six Sprawl room scenes come from native fire-mesh bounds projected through
+the room camera. Effects use the existing private quest-map pack; five atlases are shared and require no new
+diffuse extraction or generated art. The panorama crop is frozen during combat while effect time continues.
+See `corridor_art.md` for rebuilding, private provenance and opt-in native acceptance fixtures.
+
+Remaining limits: approximate deferred lighting/exposure/bloom and fire light wash, still water, no independent
+foreground depth, and the deliberately small bounded pan. More diffuse textures will not supply those systems.
+Recover the ocean shader/noise/depth controls and native lighting/material passes for a further fidelity pass.
+The unsaved Driver fixture exercises real native actors and gameplay actions, but does not establish pointer/
+controller interaction, normal skill-kill balance, saved-campaign reload or long-session/frame-time performance.
+
 ## Round231 update
 
 Whole-scene reflection/repetition is removed: one bounded panorama now preserves authored perspective and heading
