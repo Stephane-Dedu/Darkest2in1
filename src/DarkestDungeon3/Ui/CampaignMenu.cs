@@ -88,13 +88,18 @@ internal sealed partial class CampaignMenu : MonoBehaviour
         if (UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true) { Back(); return; }
         if (_view != View.Loading) return;
         var status = CampaignAssets.Status;
-        _loadMessage.text = status.Error ?? "";
-        _retry.gameObject.SetActive(status.Error != null);
-        if (!status.Ready || !_torch.Finished || Time.frameCount <= _enterFrame + 1) return;
+        // A new estate starts on the Old Road; a saved expedition resumes its own scenery.
+        var scenery=_newName==null && _selected?.Save?.Expedition==null ? Dd2.HamletStage.Instance : null;
+        scenery?.Request();
+        var error=status.Error ?? scenery?.Failure;
+        _loadMessage.text = error ?? "";
+        _retry.gameObject.SetActive(error != null);
+        if (error!=null || !status.Ready || scenery?.Ready==false || !_torch.Finished || Time.frameCount <= _enterFrame + 1) return;
         if (!_reportedReady)
         {
             _reportedReady = true;
             Plugin.Log.LogInfo("[campaign menu] asset gate ready; torch screen painted before campaign handoff");
+            if (scenery!=null) Plugin.Log.LogInfo("[campaign menu] standard3D Hamlet ready before torch handoff");
         }
         if (ReadOnlyCheck)
         {
@@ -438,6 +443,7 @@ internal sealed partial class CampaignMenu : MonoBehaviour
     private void Retry()
     {
         if (_view != View.Loading) return;
+        Dd2.HamletStage.Instance?.Retry();
         Session.BeginLoad(Plugin.Dd1Path.Value, Path.GetDirectoryName(typeof(Plugin).Assembly.Location), Application.streamingAssetsPath);
         CampaignAssets.Begin(_newName == null ? _selected?.Save?.Estate : null); _retry.gameObject.SetActive(false);
     }

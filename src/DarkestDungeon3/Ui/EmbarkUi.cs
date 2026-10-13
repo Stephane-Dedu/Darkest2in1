@@ -91,7 +91,7 @@ internal sealed partial class EmbarkUi
             if (areas.Count > 0 && (!_mapAreas.TryGetValue(location, out var selected) || !areas.Contains(selected)))
                 _mapAreas[location] = areas[0];
         }
-        bool map3d = DrawMap3DBackground();   // the experimental pre-rendered map; false keeps the painted one
+        bool map3d = DrawMap3DBackground();   // Standard view; missing private art uses the recovery map.
         if (!map3d && paintedMap != null) DrawPaintedMap(paintedMap);
         else if (!map3d)
         {
@@ -100,8 +100,6 @@ internal sealed partial class EmbarkUi
             else Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), new Color(0.05f, 0.04f, 0.05f));
         }
         ExpeditionSkin.Text(new Rect(104, 64, 440, 56), "Choose a quest", 44, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
-
-        DrawMapModeSwitch();
 
         // Each pair shares the original estate-map position, with the displayed area's own quests beneath it.
         var spots = paintedMap != null ? PaintedMapSpots : MapSpots();

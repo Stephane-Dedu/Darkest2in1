@@ -6190,3 +6190,50 @@ and outside this commit. Read tools/hamlet_3d.md and tools/hamlet_models/README.
 Look.Hamlet3D stays defaultfalse, with immediate Painted town rollback and existing local preferences retained.
 The larger Mountain and dark native woodland frame the safe clearing. Bespoke cliff/facade art, NPC/upgrade/
 event exteriors, controller/other text/window sizes, saved transactions/real embark and full performance remain.
+
+## Round238 (2026-10-13): standard3D Hamlet/embark and eastern cliff; native acceptance paused
+
+Owner retired the2D/3D presentation flags for Hamlet/embark, asked for more exposed rock on the right, then
+requested no game launches for1h20. Pause starts18:06:19 UTC and ends19:26:19 UTC /21:26:19 Europe/Paris.
+Owned QA PID29076 closed immediately; do not count its interrupted run as complete native acceptance.
+
+Both3D presentations are now standard. Removed Plugin view entries, runtime mode setters, header switches
+and native-fixture overrides. Startup consumes/removes old Look.Hamlet3D/Look.ExpeditionMap3D keys even when
+false. Actual interrupted boot verifies only those two keys are removed; all other config values retained.
+Camera motion/reset remain in the freed header space; failed scenery exposes Retry scenery. Painted art is
+automatic loading/recovery only. Service, quest, roster, pairing, progression and provision rules are unchanged.
+
+Returning-estate torch loading now requests the real native Hamlet and waits for Ready before handoff. Scene
+failure offers retry/cancel; Retry clears its failure/resources. New estates still start on the Old Road and
+saved expeditions use their own route. The unused-frame lifecycle handles cancellation/exit. This new native
+torch path still needs its read-only fixture after the pause. No estate is required by that check.
+
+Rejected added Coast shelves after offline inspection; they looked like thin fins. Core now cuts a steep,
+irregular eastern face beyond the workshop foundations so slope-classified native rock is visible on the right.
+Existing service pads, roads, camera, Mountain and hostile woodland remain. Added a Core rock-exposure case
+alongside the existing foundation/route/finite-geometry coverage. The full private preview/packed scene is
+local-art/ui-overhaul/hamlet-embark-default-v11/hamlet-cliff-v11.{png,blend}; shaders remain approximate offline.
+
+Hamlet native QA now releases all stage resources directly, checks automatic default3D reload and uses the
+new reset-control position. It no longer forces a mode or clicks removed buttons. Expedition native QA starts
+with the ordinary default map, checks explicit effect release/automatic reload and provisioning cleanup/return.
+Live input is isolated only during synthetic checks. These modified final lifecycle/map checks remain pending.
+
+Frozen Release and all1,138 Core+188 UI pass. Final cliff subset:19 layout/landscape cases pass. All13 owned
+sources and four installed DLL/PDB hashes match. The interrupted native Hamlet run opened ten world services
+with no error and no view override; no full PASS, final native cliff capture or buffer probe. Expedition/torch
+fixtures were not launched. Later source changes are failure/config descriptions and a fixture-only camera-motion baseline.
+
+Private acceptance.json records offline verified/native pending, source/install hashes and the two-key config
+migration. Interrupted logs and a guarded future launch helper are alongside it. Before-default backups:
+hamlet-before-default-v11/20261013-195821.zip and hamlet-before-default-config-v11/20261013-195822.zip.
+Final artifacts deployed while DD2 stopped, with no launch during the pause. No estate selected/read/saved,
+no OS input sent. Preserve independent Shieldbreaker work and its journal/parity changes outside this commit.
+
+## Status 2026-10-13: round238 built/installed; finish native acceptance after the owner launch pause
+
+No game launch before19:26:19 UTC /21:26:19 Paris. Afterward, use the private launch helper's hamlet, expedition
+and torch modes, with no mode override. Complete default Hamlet services/controls/full release/reload/Embark/
+return/resize/keyboard/still-camera checks, native right-cliff visual capture, default map camera/effects/provision
+checks, and read-only torch prewarm/cancel/reopen. Record final buffer stability/source/install/config evidence,
+close only owned QA PIDs and leave ordinary play untouched. Broader saved/controller/performance/art work remains.

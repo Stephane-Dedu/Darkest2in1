@@ -82,6 +82,10 @@ public static class HamletLayout
         float rough=.32f*(float)Math.Sin(x*.43f+z*.23f)+.18f*(float)Math.Sin(x*.81f-z*.58f);
         float rim = 2 * Smooth(43, 58, Math.Abs(x));
         float edge = 13 * Smooth(55, 66, Math.Abs(x + 4));
+        // An exposed eastern face sits beyond the workshop foundations, rather than a wide grassy roll-off.
+        float eastWave=.65f*(float)Math.Sin(z*.27f);
+        float eastCliff=13*Smooth(46+eastWave,50+eastWave,x)*Smooth(-31,-23,z)*(1-Smooth(38,46,z));
+        edge=Math.Max(edge,eastCliff);
         float ditch = 8*(1-Smooth(-28,-18,z))*(1-Smooth(-35,-18,x)) + 6*(1-Smooth(-33,-25,z));
         return banks + rough + rim - edge - ditch;
     }

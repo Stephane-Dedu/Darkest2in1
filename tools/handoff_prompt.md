@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Owner launch pause,2026-10-13: do not launch any game before19:26:19 UTC /21:26:19 Europe/Paris. Requested at18:06:19 UTC for1h20. Owned round238 QA PID29076 was closed immediately; its native run is interrupted, not accepted. Continue offline work only until the pause expires or the owner changes it.
+
+Round238 promotes Hamlet/embark3D to standard views, removes mode switches/config entries/preview overrides,
+and adds a slope-painted eastern cliff beyond the workshop pads. Camera motion/reset/retry and automatic
+loading/recovery remain. Returning-estate torch gate waits for the actual native Hamlet; new estates/expedition
+resumes keep their own route. Release+1,138 Core+188 UI and19 cliff/layout cases pass; installed/source hashes
+match. Native startup removes only the two legacy view keys, retaining other values. Default Hamlet opened ten
+services before the owner paused launches; no full PASS or final native cliff capture. Map/torch checks not run.
+Final artifacts deployed with DD2 stopped. Read tools/hamlet_3d.md, tools/expedition_map3d.md and private
+local-art/ui-overhaul/hamlet-embark-default-v11/acceptance.json. Its guarded launch helper supports hamlet,
+expedition and torch modes. After the pause, finish full native lifecycle/resize/keyboard/motion, default map/
+effects/provisioning, read-only torch prewarm/cancel/reopen and buffer/capture checks. No estate accessed or OS
+input sent. Preserve concurrent Shieldbreaker sources/notes; they remain outside this commit. Full custom art,
+controller, saved transactions/real embark and long-session/frame-time acceptance remain broader work.
+
 Round237 enlarges the Mountain to width500/pivot(-12,-78,112), about2.9x wider/1.75x taller, with its base
 buried beyond the ridge.15 native Tangle clusters and darker outer earth enclose the safe clearing; approach,
 service sites, camera and Painted town rollback remain. Native kit assets stay private. Release+1,137 Core+

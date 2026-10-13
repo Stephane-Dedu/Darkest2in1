@@ -17,9 +17,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed partial class HamletStage : MonoBehaviour
 {
     public static HamletStage Instance { get; private set; }
-    private static bool? _previewMode;
     private static bool? _previewMotion;
-    public static bool Enabled => _previewMode ?? Plugin.Hamlet3D.Value;
     public static bool MotionEnabled => _previewMotion ?? Plugin.HamletCameraMotion.Value;
     public static void SetMotion(bool value)
     {
@@ -27,13 +25,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         Instance?.ApplyMotion();
     }
     public static readonly string[] Services = { "tavern", "stage_coach", "sanitarium", "graveyard", "abbey", "guild", "nomad_wagon", "blacksmith", "camping_trainer", "statue" };
-    public static void SetEnabled(bool value)
-    {
-        if (HamletPreview.OwnsSession) _previewMode = value; else Plugin.Hamlet3D.Value = value;
-        if (!value) Instance?.Clear();
-        else if (Instance != null) Instance.Failure = null;
-    }
-    internal static void PreviewMode(bool? value) { _previewMode=value; if (!value.HasValue) _previewMotion=null; }
+    internal static void EndPreview() => _previewMotion=null;
+    internal void Retry() { Clear(); Failure=null; }
 
     private const string Common = "Assets/Data/Biome/Common/Map/NodeTiles/";
     private const string Models = "Assets/Art/Models/Environments/Common/Models/Nodes/";
@@ -189,7 +182,7 @@ internal sealed partial class HamletStage : MonoBehaviour
             int paintRenderer=-1;
             if (rendererData!=null) for (int i=0;i<rendererData.Length;i++)
                 if (rendererData.GetValue(i) is UnityEngine.Object renderer && renderer.name=="Universal_Featureless_ForwardRenderer") paintRenderer=i;
-            if (paintRenderer<0) throw new InvalidOperationException("Installed paint renderer is unavailable. Painted town remains available.");
+            if (paintRenderer<0) throw new InvalidOperationException("Town renderer is unavailable. Retry to reload scenery.");
             urp.GetMethod("SetRenderer")?.Invoke(data,new object[] { paintRenderer });
             if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
             {
@@ -221,13 +214,13 @@ internal sealed partial class HamletStage : MonoBehaviour
     private void Update()
     {
         if (_root == null) return;
-        if (!Enabled || Time.frameCount - _lastRequest > 3) { Clear(); return; }
+        if (Time.frameCount - _lastRequest > 3) { Clear(); return; }
         try
         {
             MatchNativeTarget();
             if (_piece < Pieces.Length)
             {
-                if (Time.unscaledTime - _started > 45) throw new InvalidOperationException("Town scenery did not finish loading. Painted town remains available.");
+                if (Time.unscaledTime - _started > 45) throw new InvalidOperationException("Town scenery did not finish loading. Retry to reload scenery.");
                 var piece = Pieces[_piece];
                 var handle = _assets[piece.Path];
                 if (!handle.IsDone) return;

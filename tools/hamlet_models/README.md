@@ -165,6 +165,12 @@ The exported `Wildwood` palette and Valley `Wilderness` field match the runtime 
 the preview drops `forest_ground_dark` backing faces as the runtime does. All three exports are already in
 the private kit. Use `--name hamlet-mountain-v10` for the private PNG and packed scene. Six Mountain placement
 studies in that output folder precede the combined Mountain/boundary view.
+
+Round238 cuts a steeper eastern face beyond the workshop foundations in Core's actual terrain. Its native
+rock surface is classified by slope; prefab shelf experiments were rejected. Service pads and walking routes
+retain their existing heights, with a Core case checking the exposed eastern rock. Use `--name hamlet-cliff-v11`
+for the current private preview/packed scene. This round also promotes Hamlet/embark3D to their standard views;
+see `tools/hamlet_3d.md` and `tools/expedition_map3d.md`. The final native checks await the owner's launch pause.
 The native unsaved fixture now checks live resize/restore as well as all service/control/rollback routes.
 `measure_native.ps1 -HamletProcessId <owned-preview-pid> -Seconds 5` checks repeated URP allocations;
 the measured town must already be rendered. Current native evidence and packed preview are in

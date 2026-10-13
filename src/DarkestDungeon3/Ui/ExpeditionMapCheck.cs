@@ -22,6 +22,7 @@ internal static class ExpeditionMapCheck
     private static int _step;
     private static float _next, _deadline;
     private static bool _done;
+    internal static bool Running => Enabled && !_done;
 
     internal static void RecordQuest(QuestOffer quest, Rect rect) { if (Enabled) Quests[quest] = rect; }
     internal static void RecordSwitch(string zone, Rect rect) { if (Enabled) Switches[zone] = rect; }
@@ -31,7 +32,7 @@ internal static class ExpeditionMapCheck
     internal static Event Input(EmbarkUi ui)
     {
         if (!Enabled || _done || !ExpeditionPreview.OwnsSession || Event.current.type != EventType.Repaint) return null;
-        if (_deadline == 0) { _deadline = Time.unscaledTime + 90; ui.CheckEnableMap(); }
+        if (_deadline == 0) _deadline = Time.unscaledTime + 90;
         Require(Time.unscaledTime < _deadline, "Timed out waiting for the private map/effects or a control.");
         if (Time.unscaledTime < _next) return null;
         if (_step is 0 or 22 or 30 && (!ui.CheckMapReady || ExpeditionMapEffects.ReadyCount != 6)) return null;
@@ -64,7 +65,6 @@ internal static class ExpeditionMapCheck
             9 or 10 => Quest("weald", _step == 10),
             11 => new Event { type = EventType.KeyDown, keyCode = KeyCode.Escape },
             13 or 14 or 15 or 16 => Switch(_step % 2 == 0),
-            17 or 18 or 20 or 21 => Mouse(EmbarkUi.MapModeButton, _step is 18 or 21),
             23 or 24 => Quest("crypts", _step == 24, apprentice: true),
             25 or 26 => Mouse(new Rect(1190, 905, 330, 90), _step == 26),
             28 or 29 => Mouse(new Rect(30, 1000, 300, 60), _step == 29),
@@ -119,13 +119,19 @@ internal static class ExpeditionMapCheck
             Require(ui.CheckShown("weald") != _switchedFrom && ui.CheckQuest?.Dungeon == ui.CheckShown("weald"), "Paired-area arrow did not select its own quests.");
             Require(Same(_before, ui.CheckCamera), "Paired-area switch moved the camera.");
         }
+        else if (_step == 17)
+        {
+            _selected=ui.CheckQuest;
+            ExpeditionMapEffects.Clear();
+            Require(ExpeditionMapEffects.TextureCount==0,"Explicit effect release retained owned textures.");
+            Checkpoint("paired areas and full effect release passed; standard3D map reload follows");
+        }
         else if (_step == 18) _next = Time.unscaledTime + 1;
         else if (_step == 19)
         {
-            Require(!ui.CheckMapWanted && ExpeditionMapEffects.TextureCount == 0, "Painted fallback retained native effects.");
-            Checkpoint("paired areas and painted rollback passed; five owned textures released");
+            Require(ui.CheckMapReady && ReferenceEquals(_selected,ui.CheckQuest),"Standard3D reload lost the map or selected quest.");
         }
-        else if (_step == 22) Checkpoint("native effect pack reloaded after painted rollback");
+        else if (_step == 22) Checkpoint("native effect pack automatically reloaded in the standard3D view");
         else if (_step == 24) { Selected("crypts"); ui.CheckRestoreParty(); }
         else if (_step == 26)
         {
@@ -137,7 +143,7 @@ internal static class ExpeditionMapCheck
         else if (_step == 30)
         {
             _done = true;
-            Checkpoint("PASS: fixed quest controls, mid-flight retarget/reverse, paired regions, painted fallback/reload, provisioning cleanup/return; no estate selected or saved");
+            Checkpoint("PASS: default3D view, fixed quest controls, mid-flight retarget/reverse, paired regions, effect release/reload, provisioning cleanup/return; no estate selected or saved");
         }
         _step++;
     }
@@ -150,13 +156,11 @@ internal static class ExpeditionMapCheck
 
 internal sealed partial class EmbarkUi
 {
-    internal void CheckEnableMap() { if (ExpeditionMapCheck.Enabled && ExpeditionPreview.OwnsSession) _map3dPreviewMode = true; }
     internal ExpeditionMap3D.MapRect CheckCamera => _mapCamera.Frame;
     internal string CheckLocation => _mapCamera.Location;
     internal QuestOffer CheckQuest => _quest;
     internal string CheckShown(string location) => _mapAreas.TryGetValue(location, out var area) ? area : null;
     internal bool CheckMapReady => Map3DAvailable;
-    internal bool CheckMapWanted => Map3DWanted;
     internal bool CheckProvisioning => _provisioning;
     internal void CheckRestoreParty()
     {

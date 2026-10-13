@@ -11,43 +11,23 @@ namespace DarkestDungeon3.Ui;
 /// <summary>
 /// A continuous camera over the privately rendered DD2 valley. The same image and regional atmosphere
 /// remain throughout an approach, reversal or retarget. Quest controls retain their overview positions.
-/// Quests, region pairing, party, roster and provisioning are the ordinary selector's. Experimental and
-/// reversible: the Painted map button, a missing pack or an invalid layout all retain the painted map.
+/// Quests, region pairing, party, roster and provisioning are the ordinary selector's. This is the standard
+/// view; unavailable private artwork retains automatic recovery through the painted map.
 /// </summary>
 internal sealed partial class EmbarkUi
 {
-    internal static readonly Rect MapModeButton = new(1190, 42, 320, 58);
     private static readonly Rect MapBackButton = new(548, 122, 280, 54);
     private static readonly string[] Map3DOrder = { "crypts", "warrens", "weald", "cove", QuestBoard.DarkestDungeon };
-    private static bool? _map3dPreviewMode;   // the unsaved preview never writes the owner's config
 
     private readonly ExpeditionMapCamera _mapCamera = new();
     private float _mapClock = -1;
 
-    private static bool Map3DWanted => ExpeditionPreview.OwnsSession && _map3dPreviewMode.HasValue
-        ? _map3dPreviewMode.Value : Plugin.ExpeditionMap3D.Value;
-
     private static bool Map3DAvailable => ExpeditionMapArt.Map3D != null && ExpeditionMapArt.Map3DLayout != null;
-
-    /// <summary>The switch sits where the Hamlet's town switch does; it only appears when the pack is usable.</summary>
-    private void DrawMapModeSwitch()
-    {
-        if (!Map3DAvailable) return;
-        bool on = Map3DWanted;
-        bool hover = GUI.enabled && MapModeButton.Contains(Event.current.mousePosition);
-        ExpeditionSkin.Banner(MapModeButton, hover ? ExpeditionSkin.Red : ExpeditionSkin.Brass);
-        ExpeditionSkin.Text(new Rect(MapModeButton.x + 12, MapModeButton.y + 4, MapModeButton.width - 24, MapModeButton.height - 8),
-            on ? "Painted map" : "3D map", 27, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
-        if (!hover || Event.current.type != EventType.MouseDown || Event.current.button != 0) return;
-        Event.current.Use();
-        if (ExpeditionPreview.OwnsSession) _map3dPreviewMode = !on; else Plugin.ExpeditionMap3D.Value = !on;
-        _mapCamera.Reset(); _mapClock = -1;
-    }
 
     /// <summary>One persistent image: selecting a quest performs no IO, decode or image replacement.</summary>
     private bool DrawMap3DBackground()
     {
-        if (!Map3DWanted || !Map3DAvailable) { _mapCamera.Reset(); _mapClock = -1; return false; }
+        if (!Map3DAvailable) { _mapCamera.Reset(); _mapClock = -1; return false; }
         if (Event.current.type == EventType.Repaint)
         {
             float now = Time.unscaledTime;
@@ -215,7 +195,7 @@ internal sealed partial class EmbarkUi
     /// <summary>Choosing a quest on the 3D map also flies to its region; already there, nothing moves.</summary>
     private void ZoomToQuest(QuestOffer quest)
     {
-        if (quest == null || !Map3DWanted || !Map3DAvailable) return;
+        if (quest == null || !Map3DAvailable) return;
         string location = quest.Dungeon == QuestBoard.DarkestDungeon ? QuestBoard.DarkestDungeon : ZoneBase.Of(quest.Dungeon);
         if (location == null || !ExpeditionMapArt.Map3DLayout.Spots.ContainsKey(location)) return;
         _mapCamera.Focus(ExpeditionMapArt.Map3DLayout.Spots[location]);

@@ -5,6 +5,16 @@ namespace DarkestDungeon3.Core.Tests;
 public class HamletLayoutTests
 {
     [Fact]
+    public void EasternWorkshopRimHasExposedRockBelowItsApproach()
+    {
+        foreach (float z in new[] { -12f,0f,16f,28f })
+            Assert.True(HamletLayout.Height(45,z)-HamletLayout.Height(52,z)>8);
+        var terrain=HamletTerrain.Build();
+        Assert.Contains(terrain.Rock,i=>terrain.Positions[i*3]>45 && terrain.Positions[i*3]<52
+            && terrain.Positions[i*3+2]>-20 && terrain.Positions[i*3+2]<30);
+    }
+
+    [Fact]
     public void CompactTownKeepsDd1sLeftCliffAndUpperCivicBuildings()
     {
         Assert.Equal(10, HamletLayout.Sites.Select(s => s.Id).Distinct().Count());

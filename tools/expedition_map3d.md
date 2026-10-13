@@ -1,9 +1,19 @@
 # Expedition map camera and native atmosphere
 
-`Look.ExpeditionMap3D` enables the privately rendered DD2 valley. It stays off by default; the owner's local
-choice is retained. The **3D map / Painted map** button switches immediately and stores its choice in config,
-never the estate. Missing overview/layout files retain the painted selector. Missing effects retain a usable
-map and camera.
+The privately rendered DD2 valley is the standard embark view from round238. The owner retired the2D/3D
+switch and `Look.ExpeditionMap3D`; startup removes the old config entry. Missing overview/layout files retain
+an automatic painted recovery map. Missing effects retain a usable map and camera. No view preference is
+stored in the estate.
+
+Earlier round acceptance below describes the former selectable mode. Round238 replaces that fixture's mode
+switches with explicit effect release/automatic reload, without forcing a view override. Its final native
+acceptance is pending the owner's October13 launch pause.
+
+Round238 removes the config binding, preview override and mode button. The native map fixture now starts with
+the ordinary default view, explicitly releases effect textures and checks their automatic reload, then checks
+provisioning cleanup/return. Synthetic checks consume live pointer/key events only while running. Release and
+188 UI tests pass, but this updated native fixture has not run. No game launch before 2026-10-13 19:26:19 UTC /
+21:26:19 Europe/Paris. See `local-art/ui-overhaul/hamlet-embark-default-v11` and the latest handoff before testing.
 
 Selecting a quest or clicking scenery now approaches the region through one persistent image. The old
 overview-enlargement followed by a separate closer-frame fade is removed. No image is loaded, decoded or

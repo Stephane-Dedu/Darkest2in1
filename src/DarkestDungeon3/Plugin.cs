@@ -22,9 +22,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> NativeRoomSceneryPath;
     internal static ConfigEntry<string> ExpeditionArtPath;
     internal static ConfigEntry<string> HamletArtPath;
-    internal static ConfigEntry<bool> Hamlet3D;
     internal static ConfigEntry<bool> HamletCameraMotion;
-    internal static ConfigEntry<bool> ExpeditionMap3D;
     internal static ConfigEntry<bool> DebugKeysEnabled;
     internal static ConfigEntry<string> ExportedBossModel;
     internal static ConfigEntry<Runtime.Art.LargeArt> HeroArt;
@@ -51,15 +49,11 @@ public class Plugin : BaseUnityPlugin
         NativeRoomSceneryPath = Config.Bind("Paths", "NativeRoomSceneryFolder", Path.Combine(Paths.GameRootPath, "PrivateScenery"),
             "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery.");
         ExpeditionArtPath = Config.Bind("Paths", "ExpeditionArtFolder", Path.Combine(Paths.GameRootPath, "PrivateExpeditionArt"),
-            "Optional private expedition selector artwork. Contains map.png, regional overlays and preview images. Empty or missing map.png retains the DD1 selector.");
+            "Private expedition selector artwork. The standard3D view uses map3d.png, map3d.json and optional vfx/. Missing or invalid3D inputs use the painted recovery map.");
         HamletArtPath = Config.Bind("Paths", "HamletArtFolder", Path.Combine(Paths.GameRootPath, "PrivateHamletArt"),
-            "Optional private Hamlet scene and visible building masks, prepared with tools/prepare_hamlet_art.py. Empty, missing or invalid packs retain the installed DD1 town.");
-        Hamlet3D = Config.Bind("Look", "Hamlet3D", false,
-            "Experimental live 3D Hamlet using installed DD2 scenery. The town's Painted town button switches back immediately. Off retains the private hillside pack or original town.");
+            "Optional painted recovery scene and building masks, prepared with tools/prepare_hamlet_art.py. The standard Hamlet uses installed DD2 scenery and NativeRoomSceneryFolder/HamletModels.");
         HamletCameraMotion = Config.Bind("Look", "HamletCameraMotion", true,
             "Allow gentle camera focus after selecting a Hamlet service and chimney smoke. Off keeps a still overview; explicit pan/zoom/reset remain available. Change with the town's Camera motion control.");
-        ExpeditionMap3D = Config.Bind("Look", "ExpeditionMap3D", false,
-            "Pre-rendered DD2 expedition map with continuous region zoom and native atmosphere (map3d.png, map3d.json and optional vfx/ in ExpeditionArtFolder). The selector's Painted map button switches back immediately. Off, or a missing pack, retains the painted map.");
         HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),
             "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
@@ -81,6 +75,11 @@ public class Plugin : BaseUnityPlugin
         SkipDd2Results = Config.Bind("Look", "SkipDd2ResultsView", true, "After a fight, go straight back to the dungeon (DD1's spoils scroll) instead of DD2's stagecoach results view.");
         HeroModelScale = Config.Bind("Look", "HeroModelScale", 1f, "Size of the DD2 hero models in the dungeon.");
         HeroArt = Config.Bind("Look", "HeroArtInDungeon", Runtime.Art.LargeArt.Story, "Which DD2 hero picture stands in the DD1 dungeon (Altar, HeroStory, Story).");
+
+        // Consume orphaned entries before removing them so older false values cannot keep either view in2D.
+        foreach (string key in new[] { "Hamlet3D", "ExpeditionMap3D" })
+            Config.Remove(Config.Bind("Look",key,true).Definition);
+        Config.Save();
 
         // Each patch class on its own: one that no longer fits the game is logged and skipped, the others still apply
         // (PatchAll stops at the first failure).

@@ -16,7 +16,7 @@ internal sealed partial class HamletStage
         var native=source.sharedMaterials.First(m=>m!=null&&m.name.Contains("valley_road_main"));
         var texture=_terrainAsset.Status==AsyncOperationStatus.Succeeded?BaseTexture(_terrainAsset.Result):BaseTexture(native);
         var surfaceShader=_surfaceShaderAsset.Status==AsyncOperationStatus.Succeeded?_surfaceShaderAsset.Result:null;
-        if (surfaceShader==null) throw new InvalidOperationException("Installed terrain paint shader is unavailable. Painted town remains available.");
+        if (surfaceShader==null) throw new InvalidOperationException("Town terrain shader is unavailable. Retry to reload scenery.");
         Material PaintSurface(string name) => new(surfaceShader) { name=name };
         _groundMaterial=PaintSurface("Hamlet earth");
         var paving=PaintSurface("Hamlet worn stone paths"); _details.Add(paving);

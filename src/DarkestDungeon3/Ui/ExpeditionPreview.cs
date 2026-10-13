@@ -54,6 +54,8 @@ internal static class ExpeditionPreview
             var checkInput = ExpeditionPartyCheck.Enabled ? ExpeditionPartyCheck.Input() : ExpeditionMapCheck.Input(_ui);
             ExpeditionMapCheck.BeginDraw();
             if (checkInput != null) Event.current = checkInput;
+            else if (ExpeditionMapCheck.Running && (originalEvent.isMouse || originalEvent.isKey || originalEvent.type==EventType.ScrollWheel))
+                originalEvent.Use();
             Drag.Begin();
             _ui.Draw();
             Drag.Overlay();

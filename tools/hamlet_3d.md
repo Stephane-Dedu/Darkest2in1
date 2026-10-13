@@ -1,10 +1,14 @@
 # Perspective Hamlet
 
-`Look.Hamlet3D` is an experimental presentation flag, off by default. The town's **3D town** button enables it;
-**Painted town** immediately releases its camera, meshes, materials, render textures and Addressables handles.
-The choice persists in the mod config, not the estate. With the flag off, the approved private hillside pack
-remains the first choice, followed by the original installed DD1 town. Missing models or a 45-second load
-timeout also retain that fallback. Switching off and back on retries a failed load.
+The3D Hamlet is the standard view from round238. The owner retired the2D/3D switches and their config flags;
+startup removes old `Look.Hamlet3D` and `Look.ExpeditionMap3D` entries regardless of their former values.
+Camera motion and Reset view remain; a failure changes Reset view to Retry scenery. Painted art is an automatic
+loading/recovery background, with no selectable2D mode. The returning-estate torch gate now waits for the native
+town to finish building; a failed load offers retry/cancel instead of waiting indefinitely. New estates start
+on the Old Road and saved expeditions retain their own entry path.
+
+Earlier round entries below are historical. Round238 supersedes their default-off/switch/rollback instructions.
+Final native acceptance of round238 is pending the owner's launch pause, noted at the end.
 
 `Dd2/HamletStage` owns a perspective camera and a render texture matching the window and native HDR format.
 Its fixed 16:9 composition follows the virtual UI canvas through window resizing. It copies visual components from
@@ -50,9 +54,9 @@ Leaving the town releases the stage after three frames without a draw request; r
 For native QA, launch with debug keys enabled and `-dd3-hamlet3d-preview -dd3-hamlet3d-check`.
 The fixture uses an unsaved campaign, selects no estate path, suppresses persistence only for that object
 and blocks real expedition embark. It injects IMGUI events without desktop input: ten service clicks and
-Escape closes; zoom, pan and reset; painted rollback/resource release; reload and another world click;
+Escape closes; zoom, pan and reset; explicit full scene release; automatic reload and another world click;
 footer Embark; stage cleanup; Back to Hamlet and another successful scene load. The preview flag overrides
-the feature setting only in memory. Close the owned test process and relaunch without QA flags for play.
+camera motion only in memory. Close the owned test process and relaunch without QA flags for play.
 
 Private round219 package, captures and logs are under `local-art/ui-overhaul/hamlet-ingame-v02/`, outside Git.
 Pre-change plugin/config snapshots are named `hamlet-v02-plugin` and `hamlet-v02-config` in the local
@@ -297,3 +301,28 @@ over5.036sec. Both DLL/PDB pairs and eight owned source files match; config is u
 `hamlet-before-mountain-v10/20261013-191604.zip` and `hamlet-before-mountain-config-v10/20261013-191605.zip`.
 Owned final QA PID25580 closed, DD2 stopped and no estate accessed. This round retains the presentation flag;
 the owner's subsequent request to promote both3D views and remove mode switches belongs to the next round.
+
+Round238 promotes both3D presentations and adds an eastern cliff. Runtime mode fields, both view switches and
+the preview's mode overrides are removed. Deprecated config entries are consumed and deleted at startup;
+the interrupted native boot verifies that only those two keys disappear, with all other values retained.
+The header keeps camera motion and reset in the vacated space. Retry scenery clears a failed stage before
+re-requesting it. The returning-estate torch gate requests the real stage and waits for Ready; failures show
+retry/cancel, and cancelled loads release the stage through the existing unused-frame lifecycle. New estates
+and expedition resumes keep their own entry routes. Automatic painted loading/recovery is retained internally.
+
+The right terrain now drops steeply beyond the workshop pads through an irregular eastern face. Native rock
+paint follows actual slope classification; the rejected added Coast shelves are absent. All service foundations
+and approaches keep their existing heights. The offline packed preview shows the face without moving the camera.
+
+Release and all 1,138 Core + 188 UI tests pass; 19 layout/landscape cases pass after the cliff cut. All 13 owned
+source files and both installed DLL/PDB pairs match. Before the owner stopped launches, the default-view fixture
+opened all ten services without any feature override or error. Its run was interrupted before final lifecycle,
+resize, keyboard and motion acceptance; no final native cliff screenshot exists. The standard embark map and
+read-only torch-prewarm fixtures have not run. They must pass before claiming full native round238 acceptance.
+
+No game launch before 2026-10-13 19:26:19 UTC /21:26:19 Europe/Paris, per the owner's 1h20 pause requested at
+18:06:19 UTC. Owned QA PID29076 was closed immediately. No estate accessed or OS input sent. Private evidence
+and guarded future launch helper: `local-art/ui-overhaul/hamlet-embark-default-v11/`; `acceptance.json` explicitly
+records partial native status. Pre-change backups: `hamlet-before-default-v11/20261013-195821.zip` and
+`hamlet-before-default-config-v11/20261013-195822.zip`. The final build was deployed with DD2 stopped during
+offline work. Broader controller, saved transactions, bespoke art and long-session/frame-time work remains.
