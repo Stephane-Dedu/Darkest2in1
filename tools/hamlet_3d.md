@@ -263,3 +263,37 @@ to its pre-pass snapshot. Pre-deploy backups: universal-modder `hamlet-before-fi
 and `hamlet-before-fidelity-config-v09/20261013-142650.zip`. Owned QA PID25176 is closed, no ordinary game was
 relaunched, no estate was selected/read/saved and no OS input was sent. Concurrent Shieldbreaker sources remain
 preserved in the shared build and outside the Hamlet commit.
+
+Round237 responds to the Mountain looking small and isolated, with too much scenery visible behind its sides.
+Six offline placements compared width, height and buried-base framing using the same native mesh and material.
+The final placement changes width174 ->500, ground pivot(28,-41,96) ->(-12,-78,112), heightScale.85 ->.52 and
+depthScale.34 ->.15. Because normalization uses width, actual height grows from about86 ->151 world units.
+The broad lower mass sinks beyond the civic ridge; its front bound remains aroundZ80, behind all ten service
+sites and the town's Z69 boundary. The cropped peaks and outer slopes give an enclosing backdrop in the home
+view. The camera, services, feature preference and immediate Painted town rollback remain.
+`LayoutExport` uses the same placement. Private studies, full packed scene and native evidence belong under
+`local-art/ui-overhaul/hamlet-mountain-v10/`. The native screenshot remains the appearance reference.
+
+The owner's follow-up asks for hostile outer vegetation so the Hamlet reads as the sheltered, buildable area.
+Fifteen native Tangle decor assemblies replace seven near-town Valley groups and extend around the flanks,
+rear and low foreground. `forest_tile_01/12` carry gnarled trees, vines, roots and broken palisades;
+`forest_tile_04` supplies two low debris banks. Seven distant Valley groups remain. `Wildwood` desaturates
+the Tangle's cyan toward dark grey/green. Native black forest backing is hidden, retaining the continuous
+owned ground. Root banks use the existing nine-sample burial. The256-square Valley export includes Wilderness,
+a continuous outer-ground darkening field that leaves the town boundary and approach readable. This affects
+construction paint only. Two Core cases check service/road clearance, all-sided containment and paint continuity.
+
+The first Mountain-only native run passed pointer/camera/rollback/resize but failed keyboard Enter while the
+owner was using the live preview. The normal UI deliberately clears keyboard focus on mouse activity; the
+fixture previously admitted live mouse events between its synthetic Tab and Enter. Only the active synthetic
+3D check now consumes live pointer/key events and records their count. After PASS or failure, ordinary preview
+input resumes. No product input rule, desktop focus or OS input is changed. Keep the failed run's log as evidence.
+
+Final round237 Release and all1,137 Core+188 UI pass. The full unsaved native fixture passes services/Escape,
+controls, rollback/full release, reload, Embark/cleanup/return, live resize/restore, keyboard and still-camera/
+smoke checks. It isolates33 live input events; no exception in the completed acceptance log. Native overview
+inspected:153 renderers,168 grass clumps, four chimney systems, native HDR target. Zero repeated URP allocations
+over5.036sec. Both DLL/PDB pairs and eight owned source files match; config is unchanged. Pre-deploy backups:
+`hamlet-before-mountain-v10/20261013-191604.zip` and `hamlet-before-mountain-config-v10/20261013-191605.zip`.
+Owned final QA PID25580 closed, DD2 stopped and no estate accessed. This round retains the presentation flag;
+the owner's subsequent request to promote both3D views and remove mode switches belongs to the next round.

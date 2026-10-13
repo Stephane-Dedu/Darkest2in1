@@ -157,6 +157,14 @@ Native rendering now preserves building atlas proportions up to2048px, correct n
 backing materials. The terrain uses the installed URP Unlit shader, and only the Hamlet camera uses the native
 featureless renderer to avoid the main-menu LUT. Blender does not reproduce that renderer; inspect native
 captures before accepting colour or alpha changes. See `tools/hamlet_3d.md` for lifecycle and acceptance limits.
+
+Round237 enlarges the native Mountain to a wider, buried backdrop. The runtime and LayoutExport share width500,
+pivot(-12,-78,112), heightScale.52 and depthScale.15; building sites and camera are unchanged. Fifteen Tangle
+assemblies from `forest_tile_01/04/12` enclose the town with gnarled trees, roots, debris and broken palisades.
+The exported `Wildwood` palette and Valley `Wilderness` field match the runtime grade/outer-ground darkening;
+the preview drops `forest_ground_dark` backing faces as the runtime does. All three exports are already in
+the private kit. Use `--name hamlet-mountain-v10` for the private PNG and packed scene. Six Mountain placement
+studies in that output folder precede the combined Mountain/boundary view.
 The native unsaved fixture now checks live resize/restore as well as all service/control/rollback routes.
 `measure_native.ps1 -HamletProcessId <owned-preview-pid> -Seconds 5` checks repeated URP allocations;
 the measured town must already be rendered. Current native evidence and packed preview are in

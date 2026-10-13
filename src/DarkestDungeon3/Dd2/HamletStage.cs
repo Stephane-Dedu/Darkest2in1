@@ -61,7 +61,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -1.8f, 29, 18, -20),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
-        new(null, Mountains + "mainmenu_mountain_mdl.fbx", 28, -41, 96, 174, heightScale: .85f, depthScale: .34f,absolute:true),
+        // Bury the broad lower mass beyond the civic ridge so the Mountain encloses the town backdrop.
+        new(null, Mountains + "mainmenu_mountain_mdl.fbx", -12, -78, 112, 500, heightScale: .52f, depthScale: .15f,absolute:true),
         new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
         new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
         new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),
@@ -329,7 +330,8 @@ internal sealed partial class HamletStage : MonoBehaviour
                 renderer.sharedMaterials=renderer.sharedMaterials.Select(m=>
                 {
                     var painted=new Material(m) { name="Hamlet distant woodland "+m.name }; _details.Add(painted);
-                    Grade(painted,piece.Position.z>110?HamletPalette.DistantWoodland:HamletPalette.Woodland,false); return painted;
+                    Grade(painted,piece.Path.Contains("/Forest/")?HamletPalette.Wildwood:
+                        piece.Position.z>110?HamletPalette.DistantWoodland:HamletPalette.Woodland,false); return painted;
                 }).ToArray();
             }
             else if (piece.Path.EndsWith("camp_sky.fbx"))
@@ -393,7 +395,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (source == null) return null;
         if (_materials.TryGetValue(source, out var existing)) return existing;
         Material material;
-        if (source.name == "env_black" || source.name == "farm_ground_dark")
+        if (source.name == "env_black" || source.name == "farm_ground_dark" || source.name.StartsWith("forest_ground_dark"))
             material = new Material(Shader.Find("Sprites/Default")) { color = Color.clear, name = "Hidden native road backing" };
         else
         {

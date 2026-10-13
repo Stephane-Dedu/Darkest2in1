@@ -1,5 +1,16 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round237 enlarges the Mountain to width500/pivot(-12,-78,112), about2.9x wider/1.75x taller, with its base
+buried beyond the ridge.15 native Tangle clusters and darker outer earth enclose the safe clearing; approach,
+service sites, camera and Painted town rollback remain. Native kit assets stay private. Release+1,137 Core+
+188 UI and full unsaved native services/controls/rollback/reload/Embark/return/resize/keyboard/still-camera pass.
+The first Mountain-only run failed keyboard while live input could clear synthetic focus; active QA now isolates
+live pointer/key events, with ordinary input restored after checks. Native overview inspected;0 repeated URP
+allocations/5.036sec, installed/source hashes match, config unchanged. Owned final QA PID25580 closed and DD2
+stopped; no estate accessed or OS input sent. Read tools/hamlet_3d.md and private local-art/ui-overhaul/
+hamlet-mountain-v10. Preserve independent Shieldbreaker code/notes and check live processes before deploy.
+Full custom art/controller/saved transactions/long-session acceptance remain separate.
+
 Round236 improves Hamlet material/terrain fidelity without replacing the ten v02 GLBs or approved camera.
 Building paint retains atlas aspect/detail up to 2048px, native cutout keywords and transparent backing alpha.
 Only Hamlet's owned camera uses the installed featureless renderer; owned terrain uses the native URP Unlit

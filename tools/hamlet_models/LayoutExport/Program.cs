@@ -20,10 +20,10 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         {
             float x=HamletLandscape.MinX+(HamletLandscape.MaxX-HamletLandscape.MinX)*(i%256+.5f)/256;
             float z=HamletLandscape.MinZ+(HamletLandscape.MaxZ-HamletLandscape.MinZ)*(i/256+.5f)/256;
-            return new { Stain=HamletGroundPaint.At(x,z),Road=HamletLandscape.RoadCover(x,z),Haze=HamletLandscape.Haze(z),Grass=HamletLandscape.GrassCover(x,z) };
+            return new { Stain=HamletGroundPaint.At(x,z),Road=HamletLandscape.RoadCover(x,z),Haze=HamletLandscape.Haze(z),Grass=HamletLandscape.GrassCover(x,z),Wilderness=HamletLandscape.Wilderness(x,z) };
         })
     },
-    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.DistantWoodland,HamletPalette.Building,HamletPalette.Grass,HamletPalette.GrassTuft },
+    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.DistantWoodland,HamletPalette.Wildwood,HamletPalette.Building,HamletPalette.Grass,HamletPalette.GrassTuft },
     GroundStains=Enumerable.Range(0,128*128).Select(i=>HamletGroundPaint.At(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%128+.5f)/128,
         HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/128+.5f)/128)),
@@ -43,7 +43,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("camp_bush_01",-50,0,-3,6,15),Scenery("camp_bush_01",44,0,-7,6,-25),
         Scenery("camp_crate",-50,0,23,2),Scenery("camp_barrel",-51,0,21,1.5f),Scenery("camp_firepit",-51,0,17,2.5f),
         Scenery("common_prop_lamppost",-6,0,4,1.5f),Scenery("common_prop_lamppost",22,0,10,1.5f),
-        Scenery("mainmenu_mountain_mdl",28,-41,96,174,heightScale:.85f,depthScale:.34f,absolute:true),Scenery("camp_sky",0,-95,152,460),
+        Scenery("mainmenu_mountain_mdl",-12,-78,112,500,heightScale:.52f,depthScale:.15f,absolute:true),Scenery("camp_sky",0,-95,152,460),
         Scenery("barricade_military_decor_rocks_01",-44,-.25f,5,7,25),
         Scenery("barricade_military_decor_rocks_02",-25,-.35f,16,4,-20),
         Scenery("barricade_military_decor_rocks_03",34,-.3f,12,6,15),

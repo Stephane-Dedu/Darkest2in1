@@ -34,7 +34,7 @@ public class HamletLandscapeTests
         }
         Assert.True(mesh.Positions.Where((_,i)=>i%3==0).Max()>170);
         Assert.True(mesh.Positions.Where((_,i)=>i%3==2).Max()>180);
-        Assert.All(HamletLandscape.Props,p=>Assert.True(p.X<HamletLayout.MinX || p.X>HamletLayout.MaxX || p.Z>HamletLayout.MaxZ));
+        Assert.All(HamletLandscape.Props,p=>Assert.True(p.X<HamletLayout.MinX || p.X>HamletLayout.MaxX || p.Z<HamletLayout.MinZ || p.Z>HamletLayout.MaxZ));
     }
 
     [Fact]
@@ -163,5 +163,48 @@ public class HamletLandscapeTests
             Assert.InRange(MathF.Abs(HamletLandscape.GrassCover(x,0)-HamletVegetation.Cover(x,0)),0,.00001f);
         var surface=HamletLandscape.Build();
         Assert.All(surface.Uv,u=>Assert.InRange(u,0,1));
+    }
+
+    [Fact]
+    public void WildwoodEnclosesTheClearingWithoutOccupyingServicesOrTheApproach()
+    {
+        var wildwood=HamletLandscape.Props.Where(p=>p.Id.StartsWith("forest_tile_")).ToArray();
+        Assert.NotEmpty(wildwood);
+        Assert.Contains(wildwood,p=>p.X<HamletLayout.MinX);
+        Assert.Contains(wildwood,p=>p.X>HamletLayout.MaxX);
+        Assert.Contains(wildwood,p=>p.Z>HamletLayout.MaxZ);
+        Assert.All(wildwood,p=>
+        {
+            Assert.True(p.X<HamletLayout.MinX || p.X>HamletLayout.MaxX || p.Z<HamletLayout.MinZ || p.Z>HamletLayout.MaxZ);
+            Assert.True(HamletVegetation.Clearance(p.X,p.Z)>p.Width/2+3,"Wildwood intrudes into a service or town route.");
+            for (int i=1;i<HamletLandscape.Approach.Length;i++)
+            {
+                var a=HamletLandscape.Approach[i-1]; var b=HamletLandscape.Approach[i];
+                float dx=b.X-a.X,dz=b.Z-a.Z;
+                float t=Math.Clamp(((p.X-a.X)*dx+(p.Z-a.Z)*dz)/(dx*dx+dz*dz),0,1);
+                float x=p.X-a.X-dx*t,z=p.Z-a.Z-dz*t;
+                Assert.True(MathF.Sqrt(x*x+z*z)>p.Width/2+4,"Wildwood blocks the outward approach.");
+            }
+        });
+    }
+
+    [Fact]
+    public void WildernessDarkensOuterBanksAndKeepsTheClearingAndApproachOpen()
+    {
+        foreach (var site in HamletLayout.Sites) Assert.Equal(0,HamletLandscape.Wilderness(site.X,site.Z));
+        for (float z=HamletLayout.MinZ;z<=HamletLayout.MaxZ;z++)
+        {
+            Assert.Equal(0,HamletLandscape.Wilderness(HamletLayout.MinX,z));
+            Assert.Equal(0,HamletLandscape.Wilderness(HamletLayout.MaxX,z));
+        }
+        for (int i=1;i<HamletLandscape.Approach.Length;i++)
+            for (int j=0;j<=20;j++)
+            {
+                var a=HamletLandscape.Approach[i-1];var b=HamletLandscape.Approach[i];
+                float t=j/20f;
+                // The existing road mask fades over its first3m; the new ground fade must keep that join negligible.
+                Assert.InRange(HamletLandscape.Wilderness(a.X+(b.X-a.X)*t,a.Z+(b.Z-a.Z)*t),0,.015f);
+            }
+        Assert.Equal(1,HamletLandscape.Wilderness(HamletLayout.MaxX+20,0));
     }
 }

@@ -72,6 +72,7 @@ internal sealed partial class HamletStage
             color=Color.Lerp(color,grassColor,weight);
             color=new Color(color.r*sample.Tint.X,color.g*sample.Tint.Y,color.b*sample.Tint.Z,1);
             color=Color.Lerp(color,PaintTile(gravel,px/5,pz/5),HamletLandscape.RoadCover(px,pz)*.88f);
+            color*=1-.35f*HamletLandscape.Wilderness(px,pz);
             pixels[y*size+x]=Color.Lerp(color,new Color(.13f,.17f,.23f,1),HamletLandscape.Haze(pz));
         }
         var texture=new Texture2D(size,size,TextureFormat.RGBA32,true,false)

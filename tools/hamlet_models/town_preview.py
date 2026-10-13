@@ -139,7 +139,7 @@ def world_valley(soil,stone,grass,palette,data):
         luma=np.sum(color*np.array([.2126,.7152,.0722]),axis=2,keepdims=True)
         color=np.clip(luma+(color-luma)*paint['Saturation']+paint['Brightness'],0,1)
         return np.where(color<=.0031308,color*12.92,1.055*np.maximum(color,0)**(1/2.4)-.055)
-    field=np.array([[s['Stain']['Tint'][k] for k in ['X','Y','Z']]+[s['Stain']['Gravel'],s['Road'],s['Haze'],s['Grass']] for s in data['Samples']],dtype=np.float32).reshape(256,256,7)
+    field=np.array([[s['Stain']['Tint'][k] for k in ['X','Y','Z']]+[s['Stain']['Gravel'],s['Road'],s['Haze'],s['Grass'],s['Wilderness']] for s in data['Samples']],dtype=np.float32).reshape(256,256,8)
     at=np.linspace(0,255,size); lo=at.astype(int); hi=np.minimum(lo+1,255); f=at-lo
     horizontal=field[:,lo,:]*(1-f)[None,:,None]+field[:,hi,:]*f[None,:,None]
     field=horizontal[lo,:,:]*(1-f)[:,None,None]+horizontal[hi,:,:]*f[:,None,None]
@@ -148,6 +148,7 @@ def world_valley(soil,stone,grass,palette,data):
     color=earth*(1-wear)+tile(stone,palette['Paving'],x/5.5+.37,z/5.5+.19)*wear
     color=(color*(1-cover)+turf*cover)*field[:,:,:3]
     road=field[:,:,4:5]*.88; color=color*(1-road)+tile(stone,palette['Paving'],x/5,z/5)*road
+    color*=1-.35*field[:,:,7:8]
     haze=field[:,:,5:6]; color=color*(1-haze)+np.array([.13,.17,.23])*haze
     rgba=np.ones((size,size,4),dtype=np.float32)
     rgba[:,:,:3]=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
@@ -169,6 +170,7 @@ def main(args):
     sys.path.insert(0,str(args.kit/'tools'))
     import bl_lib as L
     L.reset()
+    L.DROP_MATS.append('forest_ground_dark') # Match the runtime's hidden backing beneath Tangle clumps.
     texture=bpy.data.images.load(str(out/'road_rough_patch.png'))
     soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
     cliff=bpy.data.images.load(str(out/'farm_eroded_hill.png'))
@@ -228,6 +230,7 @@ def main(args):
         elif piece.get('Background') or piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith(('barricade_military_decor_rocks','coast_skirt_cliffs')):
             paint=palette['Woodland' if piece.get('Background') else 'Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
             if piece.get('Background') and piece['Z']>110: paint=palette['DistantWoodland']
+            if piece['Id'].startswith('forest_tile_'): paint=palette['Wildwood']
             for obj in objects:
                 for slot in obj.material_slots:
                     texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')

@@ -28,6 +28,7 @@ internal static class HamletPreview
     private static int _checkWidth;
     private static float _resizeDeadline;
     private static Vector3 _stillCamera;
+    private static int _isolatedLiveInputs;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save, _save);
 
     private static bool Prefix()
@@ -64,6 +65,12 @@ internal static class HamletPreview
         {
             checkInput = CheckInput();
             if (checkInput != null) Event.current = checkInput;
+            else if (Check3D && !_checked && (originalEvent.isMouse || originalEvent.isKey || originalEvent.type==EventType.ScrollWheel))
+            {
+                // Desktop movement between synthetic Tab and Enter must not clear the fixture's keyboard focus.
+                _isolatedLiveInputs++;
+                originalEvent.Use();
+            }
             if (_embark != null)
             {
                 _embark.Draw();
@@ -247,6 +254,7 @@ internal static class HamletPreview
         else if (_checkStep==48)
         {
             _checked=true;
+            Plugin.Log.LogInfo($"[hamlet 3d check] isolated {_isolatedLiveInputs} live input events during the synthetic fixture");
             Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, rollback, reload, re-entry click, Embark, cleanup, return, live resize/restore, keyboard focus/Enter/back and still camera/smoke controls; no estate selected or saved");
         }
         _checkStep++;

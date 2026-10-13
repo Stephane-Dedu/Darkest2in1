@@ -21,6 +21,7 @@ public static class HamletLandscape
         }
     }
     private const string Valley="Assets/Data/Biome/ValleyCommon/Map/DecorTiles/";
+    private const string Forest="Assets/Data/Biome/Forest/Map/DecorTiles/";
     public const float MinX=HamletLayout.MinX-118,MaxX=HamletLayout.MaxX+118;
     public const float MinZ=HamletLayout.MinZ-118,MaxZ=HamletLayout.MaxZ+118;
     public static readonly HamletLayout.Point[] Approach =
@@ -29,13 +30,22 @@ public static class HamletLandscape
     };
     public static readonly Prop[] Props =
     {
-        new("valley_tile_01",Valley+"valley_tile_01.prefab",-75,49,26,18),
-        new("valley_tile_02",Valley+"valley_tile_02.prefab",-49,75,24,-20),
-        new("valley_tile_01",Valley+"valley_tile_01.prefab",-16,94,28,35),
-        new("valley_tile_02",Valley+"valley_tile_02.prefab",38,88,27,12),
-        new("valley_tile_01",Valley+"valley_tile_01.prefab",70,59,25,-25),
-        new("valley_tile_02",Valley+"valley_tile_02.prefab",87,28,24,20),
-        new("valley_tile_01",Valley+"valley_tile_01.prefab",-88,4,24,35),
+        // Gnarled Tangle trees, roots and broken palisades enclose the inhabited clearing.
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",-75,49,30,18,.86f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",-49,75,28,-20,.85f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",-16,94,32,35,.80f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",38,88,30,12,.85f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",70,59,30,-25,.85f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",78,28,28,20,.80f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",-80,4,28,35,.82f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",-70,26,26,-38,.85f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",67,6,25,-15,.70f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",61,-19,22,25,.60f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",-77,-22,23,-15,.70f),
+        new("forest_tile_04",Forest+"forest_tile_04.prefab",-29,-49,18,15,.90f),
+        new("forest_tile_04",Forest+"forest_tile_04.prefab",31,-43,19,-25,.90f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",-15,-45,16,45,.40f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",50,-42,17,-30,.45f),
         new("valley_tile_02",Valley+"valley_tile_02.prefab",-106,98,23,-8,.72f),
         new("valley_tile_01",Valley+"valley_tile_01.prefab",-76,119,24,27,.68f),
         new("valley_tile_02",Valley+"valley_tile_02.prefab",-43,131,22,-11,.65f),
@@ -84,6 +94,14 @@ public static class HamletLandscape
     { ApproachAt(x,z,out _,out float weight); return weight; }
 
     public static float Haze(float z) => .68f*Smooth((z-52)/80);
+
+    // Darker undisturbed earth surrounds the cleared town, with the approach road left readable.
+    public static float Wilderness(float x,float z)
+    {
+        float dx=Math.Max(0,Math.Max(HamletLayout.MinX-x,x-HamletLayout.MaxX));
+        float dz=Math.Max(0,Math.Max(HamletLayout.MinZ-z,z-HamletLayout.MaxZ));
+        return Smooth((float)Math.Sqrt(dx*dx+dz*dz)/16)*(1-RoadCover(x,z));
+    }
 
     public static float GrassCover(float x,float z)
     {

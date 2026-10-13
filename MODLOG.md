@@ -6148,3 +6148,45 @@ Keep Look.Hamlet3D defaultfalse and immediate Painted town rollback. Texture/ren
 but full DD2 production art parity remains open: custom cliff silhouettes, facade/roof trim, NPCs and upgrade/
 event exteriors. Controller comfort, arbitrary window/text sizes, saved transactions/real embark and complete
 frame-time/long-session memory acceptance remain separate. Read tools/hamlet_3d.md and preserve other work.
+
+## Round237 (2026-10-13): enclosing Mountain and hostile Hamlet boundaries
+
+Owner found the Mountain underwhelming because of its size and visible space around/behind it, then asked for
+dark/aggressive outer vegetation so the Hamlet reads as the sheltered, buildable area. Compared six private
+native-mesh placements. Final Mountain width174 ->500, pivot(28,-41,96) ->(-12,-78,112), heightScale.85 ->.52,
+depthScale.34 ->.15. Actual height86 ->151, about2.9x wider/1.75x taller. Lower mass is buried beyond the ridge;
+its front bound remains aroundZ80, behind the Z69 town boundary. Peak/outer-slope cropping is intentional.
+Native mesh/material, camera and all ten service sites remain. Runtime and LayoutExport placements agree.
+
+Fifteen native Tangle decor assemblies replace seven nearby Valley groups and extend around the town's sides,
+rear and low foreground. forest_tile_01/12 supply gnarled trees, vines, roots and broken palisades; two
+forest_tile_04 banks supply low debris. Seven distant Valley groups remain. Existing nine-sample burial grounds
+their banks. Wildwood desaturates cyan toward dark grey/green; hidden forest ground backing keeps the owned
+terrain continuous. Wilderness paint smoothly darkens outer earth by up to35%, preserving the clearing and
+approach. The exported field/grade and preview match runtime. No scripts, triggers, colliders or native game
+behaviours are instantiated, and no extracted assets are committed. New Core checks caught and corrected a
+foreground bank encroaching on route clearance; they also check all sides, service/approach gaps and paint joins.
+
+First Mountain-only native run passed pointer/camera/rollback/resize but failed Enter after synthetic Tab while
+the owner was using the preview. Product mouse activity intentionally clears keyboard focus. The synthetic QA
+overlay now consumes live pointer/key events only while its checks run, then releases them after PASS/failure.
+The full native rerun checks the actual Tab/Enter/Escape path with this input isolation; ordinary play input
+is unchanged. Failed log is preserved privately. No OS input or desktop focus sent.
+
+Final frozen Release and1,137 Core+188 UI pass. Final native unsaved fixture passes ten services/Escape, pan/
+zoom/reset, painted rollback/full resource release, reload/re-entry, Embark/cleanup/return,1600x900 ->1440x900
+->1600x900, keyboard focus/Enter/back and still-camera/smoke toggles. Shader/hidden-alpha assertions pass and
+the final native overview is inspected. Zero repeated URP allocations over5.036sec establishes buffer
+stability, not full frame-time or long-session memory. Source/install hashes match; config is byte-identical.
+Owned final QA PID25580 closed, DD2 stopped, no ordinary launch and no estate selected/read/saved.
+
+Private evidence/studies/final packed scene:local-art/ui-overhaul/hamlet-mountain-v10. Pre-deploy backups:
+hamlet-before-mountain-v10/20261013-191604.zip and hamlet-before-mountain-config-v10/20261013-191605.zip.
+Preserve independent Shieldbreaker code/notes; its existing tracked sources remain in the shared frozen build
+and outside this commit. Read tools/hamlet_3d.md and tools/hamlet_models/README.md for rendering and limits.
+
+## Status 2026-10-13: round237 Mountain and hostile outer boundary installed and native-verified
+
+Look.Hamlet3D stays defaultfalse, with immediate Painted town rollback and existing local preferences retained.
+The larger Mountain and dark native woodland frame the safe clearing. Bespoke cliff/facade art, NPC/upgrade/
+event exteriors, controller/other text/window sizes, saved transactions/real embark and full performance remain.
