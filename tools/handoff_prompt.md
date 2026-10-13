@@ -2,6 +2,18 @@ You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside
 
 Owner launch pause,2026-10-13: do not launch any game before19:26:19 UTC /21:26:19 Europe/Paris. Requested at18:06:19 UTC for1h20. Owned round238 QA PID29076 was closed immediately; its native run is interrupted, not accepted. Continue offline work only until the pause expires or the owner changes it.
 
+Round239 fixes the reported 2D flash/reload on Back to Hamlet. EmbarkUi retains the existing town through
+quest selection/hero sheets/provisioning; its camera/particles park, and returning reuses the same texture
+and model resources. Actual departure still clears after three unused frames. Homecoming prewarms behind
+results. Cold/retry entry blocks on the opaque torch gate until the real town has rendered; painted/hybrid/
+DD1 town drawing removed. Build completion no longer depends on camera.enabled. Hidden resize invalidates
+presentation until a fresh frame. Release + 1,141 Core + 188 UI pass, including three red/green lifecycle tests.
+Updated Hamlet native fixture asserts cache identity, camera/particle parking, resume and cold torch instead
+of selector cleanup. NO native run this round; no game launch or estate access. Private frozen build/source/
+install hashes and backup: local-art/ui-overhaul/hamlet-return-cache-v12. Full native torch composition,
+services/park/resume/resize/retry, real results return and round238 default map/estate torch remain pending.
+Do not automatically launch after the pause. Preserve independent Shieldbreaker WIP.
+
 Round238 promotes Hamlet/embark3D to standard views, removes mode switches/config entries/preview overrides,
 and adds a slope-painted eastern cliff beyond the workshop pads. Camera motion/reset/retry and automatic
 loading/recovery remain. Returning-estate torch gate waits for the actual native Hamlet; new estates/expedition

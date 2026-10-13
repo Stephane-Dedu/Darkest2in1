@@ -8,9 +8,8 @@ using UnityEngine;
 namespace DarkestDungeon3.Ui;
 
 /// <summary>
-/// The Hamlet, DD1 style: the town painted from DD1's own art (sky, the hill, every building at its DD1 spot,
-/// at the level its upgrades have reached), the estate nameplate, the roster down the right, the building
-/// quick-nav down the left, the heirlooms along the bottom. Clicking a building opens its window.
+/// The perspective Hamlet with DD1 service placement, estate roster, quick navigation and heirlooms.
+/// The town remains behind its service windows; cold entry uses the torch gate until scenery is ready.
 /// </summary>
 internal sealed partial class HamletUi
 {
@@ -37,11 +36,19 @@ internal sealed partial class HamletUi
     private static readonly string[] NavOrder =
         { Buildings.StageCoach, Buildings.Blacksmith, Buildings.Guild, Buildings.Survivalist, Buildings.Tavern, Buildings.Abbey, Buildings.Sanitarium, Buildings.NomadWagon, Buildings.Graveyard };
 
-    private TownLayout _layout;
     private string _hovered;
 
     public void Draw()
     {
+        var stage = Dd2.HamletStage.Instance;
+        stage?.Request();
+        if (stage?.Ready != true)
+        {
+            Dd1Audio.StopNarration();
+            DrawTownLoading(stage);
+            return;
+        }
+        HamletLoadingTorch.Hide();
         if (_panel != Panel.Memorial || _memorialEstate != E) Dd1Audio.StopNarration();
         var recruit = _panel == Panel.StageCoach && _recruitSheet ? E.Recruits.FirstOrDefault(r => r.Id == _heroId) : null;
         bool enabled = GUI.enabled;
@@ -67,7 +74,6 @@ internal sealed partial class HamletUi
     private void DrawPage()
     {
         var hamlet = S.Hamlet;
-        _layout ??= S.TownLayout ?? TryLoadLayout();
 
         // DD1's town crier announces the week's event once per visit.
         bool eventOpen = E.TownEventId != null && _eventSeenWeek != E.Week;
@@ -164,116 +170,10 @@ internal sealed partial class HamletUi
             _eventSeenWeek = E.Week;
     }
 
-    private static TownLayout TryLoadLayout()
-    {
-        try { return TownLayout.Load(S.Dd1); }
-        catch (System.Exception e) { Plugin.Log.LogWarning("[hamlet] town layout: " + e.Message); return new TownLayout(); }
-    }
-
-    // ---------------------------------------------------------------- the town
-
-    private static bool IdleSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.IdleSlot(s.Name);
-    private static bool ActiveSlot(Core.Dd1.SpineSkeleton.Slot s) => TownLayout.HoverSlot(s.Name);   // outline + building
-
-    private float Upgraded(string building)
-    {
-        var trees = S.Buildings.Trees.Trees.Where(t => t.Key.StartsWith(building + ".")).ToList();
-        int total = trees.Sum(t => t.Value.Count);
-        return total == 0 ? 0f : trees.Sum(t => t.Value.Count(l => E.Upgrades.Contains(l.Key))) / (float)total;
-    }
-
     private bool IsOpen(string building) =>
         building == Buildings.Memorial || building == Buildings.Graveyard || S.Buildings.IsOpen(building, E);
 
-    private void DrawTown(bool interactive)
-    {
-        if (DrawThreeDimensionalTown(interactive)) return;
-        if (HamletArt.Ready) { DrawHybridTown(interactive); return; }
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
-        // DD1's display state: after a Darkest Dungeon part or during some town events the sky changes.
-        string sky = S.Campaign.TownRender.Background(E.LastReturnPlotId, E.TownEventId);
-        Gui.Image(new Rect(0, 0, Gui.W, Gui.H), Art.Dd1(sky.Split('/')) ?? Art.TownBackdrop);
-        if (_layout == null) return;
-
-        var mouse = Event.current.mousePosition;
-        // Pictures: DD1 shows a highlighted ("active") version of the building under the mouse.
-        var pictures = new List<(TownLayout.Spot spot, SpineArt.Picture idle, string folder)>();
-        foreach (var spot in _layout.Spots)
-        {
-            if (spot.Id == "circus") continue;   // DLC
-            bool ground = spot.Id == "ground";
-            string folder = ground ? S.Dd1.PathOf("fx", "town_ground") : TownLayout.ArtFolder(S.Dd1, spot.Id, IsOpen(spot.Id), Upgraded(spot.Id));
-            var idle = SpineArt.Get(folder, "idle", IdleSlot);
-            pictures.Add((spot, idle, folder));
-        }
-
-        string hovered = null;
-        if (interactive && mouse.x < RosterX && mouse.y < BarY)
-            for (int i = pictures.Count - 1; i >= 0 && hovered == null; i--)
-            {
-                var (spot, idle, _) = pictures[i];
-                if (spot.Id == "ground" || idle == null) continue;
-                if (idle.Hit(new Vector2(spot.X, spot.Y), spot.Scale, mouse)) hovered = spot.Id;
-            }
-        _hovered = hovered;
-
-        foreach (var (spot, idle, folder) in pictures)
-        {
-            var pic = spot.Id == hovered ? SpineArt.Get(folder, "active", ActiveSlot) ?? idle : idle;
-            pic?.Draw(new Vector2(spot.X, spot.Y), spot.Scale);
-        }
-
-        if (hovered != null)
-        {
-            var (spot, idle, _) = pictures.First(p => p.spot.Id == hovered);
-            var r = idle.RectAt(new Vector2(spot.X, spot.Y), spot.Scale);
-            DrawBuildingName(hovered, new Vector2(spot.X + spot.NameOffsetX, r.y + 10));
-            if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
-            {
-                Event.current.Use();
-                Open(hovered);
-            }
-        }
-    }
-
-    private void DrawHybridTown(bool interactive)
-    {
-        var pack = HamletArt.Pack;
-        GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), Art.Png(pack.Background));
-        var mouse = Event.current.mousePosition;
-        // Quick navigation owns these pixels even where a painted building lies behind it.
-        bool overNav = NavOrder.Select((_, i) => new Rect(NavX - 28, NavY + i * NavSpacing - 5, 56, 61)).Any(r => r.Contains(mouse));
-        bool canHit = interactive && GUI.enabled && !_exchangeOpen && !overNav && mouse.x < RosterX && mouse.y < BarY;
-        var hovered = canHit ? pack.Hit(mouse.x, mouse.y) : null;
-        _hovered = hovered?.Id;
-        foreach (var building in pack.Buildings)
-            if (!IsOpen(building.Id)) HamletArt.Feedback(building, new Color(.02f, .025f, .035f, .65f));
-        if (hovered == null) return;
-        HamletArt.Feedback(hovered, new Color(1f, .88f, .62f, .10f));
-        HamletArt.Feedback(hovered, IsOpen(hovered.Id) ? ExpeditionSkin.Brass : ExpeditionSkin.Muted, outline: true);
-        float x = Mathf.Clamp(hovered.X + hovered.Width / 2f, 280, RosterX - 220);
-        float y = Mathf.Max(150, hovered.Y - 18);
-        ExpeditionSkin.Banner(new Rect(x - 180, y - 36, 360, 64), ExpeditionSkin.Ivory);
-        ExpeditionSkin.OutlinedHeading(new Rect(x - 175, y - 31, 350, 52), Name(hovered.Id), 30,
-            IsOpen(hovered.Id) ? ExpeditionSkin.Ivory : ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
-        if (!IsOpen(hovered.Id))
-            ExpeditionSkin.OutlinedHeading(new Rect(x - 190, y + 27, 380, 32), "Not yet restored", 21, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
-        if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
-        {
-            Event.current.Use();
-            Open(hovered.Id);
-        }
-    }
-
-    private void DrawBuildingName(string building, Vector2 at)
-    {
-        var splat = Art.Dd1("campaign", "town", "buildings", "blg_name_background.png");
-        if (splat != null) GUI.DrawTexture(new Rect(at.x - 150, at.y - 70, 300, 120), splat);
-        string name = Name(building);
-        Gui.Text(new Rect(at.x - 200, at.y - 40, 400, 44), name, 30, IsOpen(building) ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleCenter, heading: true);
-        if (!IsOpen(building))
-            Gui.Text(new Rect(at.x - 200, at.y, 400, 30), "Not yet restored", 20, Gui.Dim, TextAnchor.MiddleCenter);
-    }
+    private void DrawTown(bool interactive) => DrawThreeDimensionalTown(interactive);
 
     private static string Name(string building) => building switch
     {

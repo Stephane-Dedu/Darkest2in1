@@ -1,4 +1,5 @@
 using DarkestDungeon3.Dd2;
+using DarkestDungeon3.Runtime;
 using System.Linq;
 using UnityEngine;
 
@@ -9,6 +10,26 @@ internal sealed partial class HamletUi
     internal static readonly Rect ResetViewButton = new(1320, 42, 190, 42);
     internal static readonly Rect CameraMotionButton = new(1010, 42, 295, 42);
     private string _townKeyboardFocus;
+
+    private static void DrawTownLoading(HamletStage stage)
+    {
+        var matrix = GUI.matrix;
+        try
+        {
+            GUI.matrix = Matrix4x4.identity;
+            Gui.Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(.025f, .022f, .020f));
+        }
+        finally { GUI.matrix = matrix; }
+        HamletLoadingTorch.Show();
+        ExpeditionSkin.Text(new Rect(360, 728, 1200, 90), "Returning to the Hamlet", 48,
+            ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
+        string error = stage == null ? "Town scenery is unavailable." : stage.Failure;
+        if (error == null) return;
+        ExpeditionSkin.Text(new Rect(460, 824, 1000, 90), error, 26, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
+        if (stage != null && ExpeditionSkin.Button(new Rect(710, 920, 500, 65), "Retry scenery", size: 26)) stage.Retry();
+        if (!HamletPreview.OwnsSession && ExpeditionSkin.Button(new Rect(80, 996, 360, 60), "Main menu", size: 24))
+            Driver.Instance?.LeaveHamlet();
+    }
 
     private void DrawTownControls()
     {
@@ -31,12 +52,11 @@ internal sealed partial class HamletUi
         return true;
     }
 
-    private bool DrawThreeDimensionalTown(bool interactive)
+    private void DrawThreeDimensionalTown(bool interactive)
     {
-        if (HamletStage.Instance == null) return false;
         var stage = HamletStage.Instance;
-        stage.Request();
-        if (!stage.Ready) return false; // Keep the approved town usable while real models load or if they fail.
+        stage?.Request();
+        if (stage?.Ready != true) { DrawTownLoading(stage); return; }
         GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), stage.Texture);
         if (HamletPreview.OwnsSession && HamletPreview.PaintAuditRequested)
             GUI.DrawTexture(new Rect(125,685,260,220),stage.GroundPaintTexture,ScaleMode.ScaleToFit);
@@ -52,7 +72,7 @@ internal sealed partial class HamletUi
         stage.Hover(hovered);
         _hovered = hovered;
         if (canHit) stage.HandleViewInput(Event.current);
-        if (hovered == null) return true;
+        if (hovered == null) return;
         var anchor = stage.Anchor(hovered);
         float x = Mathf.Clamp(anchor.x, 300, RosterX - 200), y = Mathf.Clamp(anchor.y - 38, 190, 880);
         Gui.Fill(new Rect(x-166,y-25,332,52),new Color(.025f,.023f,.022f,.94f));
@@ -66,7 +86,6 @@ internal sealed partial class HamletUi
             Open(hovered);
             stage.SetFocus(hovered);
         }
-        return true;
     }
 
     private void NavigateTown(HamletStage stage)

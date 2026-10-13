@@ -26,6 +26,7 @@ internal static class HamletPreview
     private static int _checkWidth;
     private static float _resizeDeadline;
     private static Vector3 _stillCamera;
+    private static Texture _cachedTown;
     private static int _isolatedLiveInputs;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save, _save);
 
@@ -163,16 +164,26 @@ internal static class HamletPreview
             Plugin.Log.LogInfo("[hamlet 3d check] pan, zoom, reset and full scene release passed; standard3D reload follows");
         }
         else if (_checkStep == 27) Require(stage.Ready, "Standard3D town did not reload.");
-        else if (_checkStep == 31) Require(_embark != null, "Footer did not open the quest selector.");
+        else if (_checkStep is 25 or 26)
+            Require(stage.Ready || HamletLoadingTorch.Visible,"Cold reload did not hold the torch screen.");
+        else if (_checkStep == 31)
+        {
+            Require(_embark != null, "Footer did not open the quest selector.");
+            _cachedTown=stage.Texture;
+        }
         else if (_checkStep == 32)
         {
-            Require(!stage.HasResources && _embark != null, "Leaving town retained its 3D camera/assets.");
-            Plugin.Log.LogInfo("[hamlet 3d check] Embark and stage cleanup passed");
+            Require(stage.HasResources && stage.Ready && stage.Parked && !stage.Rendering && _embark != null,
+                "Quest selection did not park the cached town.");
+            Require(stage.Texture == _cachedTown && !stage.SmokePlaying,"Hidden town was replaced or kept animating.");
+            Plugin.Log.LogInfo("[hamlet 3d check] Embark parks the same town texture/assets without rendering or smoke");
         }
         else if (_checkStep == 34) Require(_embark == null, "Back to Hamlet did not return to town.");
         else if (_checkStep == 35)
         {
-            Require(stage.Ready && _embark == null, "Returned town did not load.");
+            Require(stage.Ready && !stage.Parked && stage.Rendering && _embark == null, "Returned town did not resume.");
+            Require(stage.Texture == _cachedTown,"Back to Hamlet rebuilt its cached town.");
+            Require(!HamletLoadingTorch.Visible,"Cached return displayed a loading torch.");
             _checkResolution=new Vector2Int(Screen.width,Screen.height);
             _checkWidth=Screen.width==1440?1600:1440;
             _resizeDeadline=Time.unscaledTime+10;
@@ -214,7 +225,7 @@ internal static class HamletPreview
         {
             _checked=true;
             Plugin.Log.LogInfo($"[hamlet 3d check] isolated {_isolatedLiveInputs} live input events during the synthetic fixture");
-            Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, full resource release, reload, re-entry click, Embark, cleanup, return, live resize/restore, keyboard focus/Enter/back and still camera/smoke controls; no estate selected or saved");
+            Plugin.Log.LogInfo("[hamlet 3d check] PASS: 10 world services, Escape, pan/zoom/reset, full resource release, reload, re-entry click, Embark park/cache/resume, live resize/restore, keyboard focus/Enter/back and still camera/smoke controls; no estate selected or saved");
         }
         _checkStep++;
     }

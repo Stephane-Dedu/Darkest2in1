@@ -1,14 +1,19 @@
 # Perspective Hamlet
 
-The3D Hamlet is the standard view from round238. The owner retired the2D/3D switches and their config flags;
-startup removes old `Look.Hamlet3D` and `Look.ExpeditionMap3D` entries regardless of their former values.
-Camera motion and Reset view remain; a failure changes Reset view to Retry scenery. Painted art is an automatic
-loading/recovery background, with no selectable2D mode. The returning-estate torch gate now waits for the native
-town to finish building; a failed load offers retry/cancel instead of waiting indefinitely. New estates start
-on the Old Road and saved expeditions retain their own entry path.
+The 3D Hamlet is the standard view. Round239 removes painted/hybrid/DD1 town drawing completely.
+Cold entry and retry show an opaque torch page until the actual town has rendered; failure offers Retry
+scenery or Main menu. The retired view flags/switches remain removed. Camera motion and Reset view remain.
 
-Earlier round entries below are historical. Round238 supersedes their default-off/switch/rollback instructions.
-Final native acceptance of round238 is pending the owner's launch pause, noted at the end.
+Quest selection, hero sheets and provisioning retain one existing scene and its render texture, with its
+camera and particles parked. Return resumes that scene. An actual departure releases it after three unused
+frames. Expedition results prewarm the town behind the results page. A resize while parked requires a new
+render before presentation. The cache does not read estate files or start loading on a map-only preview.
+
+Round239 Release + 1,141 Core + 188 UI tests pass, including three lifecycle regressions. The updated unsaved
+native fixture checks cache identity, parking/resume and cold torch gating. Native acceptance of these changes
+is pending; no game launched during this round. Private evidence: `local-art/ui-overhaul/hamlet-return-cache-v12`.
+Round238 default map and estate torch checks also remain pending. Historical painted rollback/selector-cleanup
+instructions below are superseded by this section and the latest handoff.
 
 `Dd2/HamletStage` owns a perspective camera and a render texture matching the window and native HDR format.
 Its fixed 16:9 composition follows the virtual UI canvas through window resizing. It copies visual components from
@@ -49,13 +54,14 @@ Picking keeps those smaller bounds even when material batching combines a whole 
 Unlocks, treatments, stock, upgrades, roster and campaign rules remain those of the ordinary Hamlet.
 The wheel zooms, middle-drag pans, Reset view restores the overview, and opening/closing a service smoothly
 moves the camera. Navigation, roster/footer and modal overlays block world input over their pixels.
-Leaving the town releases the stage after three frames without a draw request; returning loads it again.
+Quest selection retains the town without rendering. Leaving the town/selector flow releases the stage after
+three unused frames. Returning from actual expedition results prewarms before the town becomes visible.
 
 For native QA, launch with debug keys enabled and `-dd3-hamlet3d-preview -dd3-hamlet3d-check`.
 The fixture uses an unsaved campaign, selects no estate path, suppresses persistence only for that object
 and blocks real expedition embark. It injects IMGUI events without desktop input: ten service clicks and
 Escape closes; zoom, pan and reset; explicit full scene release; automatic reload and another world click;
-footer Embark; stage cleanup; Back to Hamlet and another successful scene load. The preview flag overrides
+footer Embark; cache identity with parked rendering/particles; Back to Hamlet and immediate scene resume. The preview flag overrides
 camera motion only in memory. Close the owned test process and relaunch without QA flags for play.
 
 Private round219 package, captures and logs are under `local-art/ui-overhaul/hamlet-ingame-v02/`, outside Git.

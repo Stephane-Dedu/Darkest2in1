@@ -13,7 +13,7 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace DarkestDungeon3.Dd2;
 
-/// <summary>Owned, disposable perspective town. Copies render components only, never native road behaviours.</summary>
+/// <summary>Owned perspective town, cached through quest selection. Copies visuals, never native road behaviours.</summary>
 internal sealed partial class HamletStage : MonoBehaviour
 {
     public static HamletStage Instance { get; private set; }
@@ -99,9 +99,10 @@ internal sealed partial class HamletStage : MonoBehaviour
     private RenderTexture _texture;
     private Mesh _groundMesh;
     private Material _groundMaterial;
-    private int _lastRequest = -100, _piece;
+    private readonly HamletSceneLease _lease = new();
+    private int _piece;
     private float _started;
-    private bool _rendered;
+    private bool _rendered, _built, _parked;
     private string _focus, _hover;
     private Vector2 _pan;
     private float _zoom = 1;
@@ -122,6 +123,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         .SelectMany(r=>r.sharedMaterials).Any(m=>m!=null && m.name.Contains("Hidden native road backing") && m.HasProperty("_Color") && m.GetColor("_Color").a>0);
     internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _wallAsset.IsValid() || _grassAsset.IsValid() || _grassTuftAsset.IsValid() || _details.Count != 0
         || _surfaceShaderAsset.IsValid() || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
+    internal bool Parked => _parked;
+    internal bool Rendering => _camera != null && _camera.isActiveAndEnabled;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
     internal Vector3 CameraPosition => _camera!=null?_camera.transform.localPosition:Vector3.zero;
@@ -140,12 +143,35 @@ internal sealed partial class HamletStage : MonoBehaviour
         Clear();
         if (Instance == this) Instance = null;
     }
-    public void Request()
+    public void Request() => Request(visible: true);
+    internal void Prewarm() => Request(visible: false);
+
+    private void Request(bool visible)
     {
-        _lastRequest = Time.frameCount;
-        if (_root != null || Failure != null) return;
-        try { Begin(); }
+        _lease.Request(Time.frameCount, visible);
+        if (Failure != null) return;
+        try
+        {
+            if (_parked && visible) { SetParked(false); MatchNativeTarget(); }
+            if (_root == null) Begin();
+        }
         catch (Exception e) { Fail(e.Message); }
+    }
+    /// <summary>Quest selection/provisioning retain an existing town without starting a new load.</summary>
+    internal void KeepWarm()
+    {
+        if (_root == null) return;
+        _lease.Request(Time.frameCount, visible: false);
+        if (_built && _rendered) SetParked(true);
+    }
+
+    private void SetParked(bool parked)
+    {
+        if (_root == null || _parked == parked) return;
+        _parked = parked;
+        if (_camera != null) _camera.enabled = !parked && _built;
+        foreach (var particles in _root.GetComponentsInChildren<ParticleSystem>())
+            if (parked) particles.Pause(); else if (MotionEnabled) particles.Play();
     }
     private void Begin()
     {
@@ -214,9 +240,13 @@ internal sealed partial class HamletStage : MonoBehaviour
     private void Update()
     {
         if (_root == null) return;
-        if (Time.frameCount - _lastRequest > 3) { Clear(); return; }
+        var activity = _lease.Activity(Time.frameCount);
+        if (activity == HamletSceneActivity.Release) { Clear(); return; }
         try
         {
+            // A prewarmed town still needs its first rendered frame before it can be parked.
+            if (_built && _rendered && activity == HamletSceneActivity.Park) { SetParked(true); return; }
+            if (_parked) SetParked(false);
             MatchNativeTarget();
             if (_piece < Pieces.Length)
             {
@@ -229,10 +259,11 @@ internal sealed partial class HamletStage : MonoBehaviour
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
             }
-            else if (!_camera.enabled && AdvanceModels())
+            else if (!_built && AdvanceModels())
             {
                 if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
                 BuildGround();
+                _built = true;
                 _camera.enabled = true;
                 Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; compact DD1 cliff layout, 24.5 metres of service elevation");
                 Plugin.Log.LogInfo($"[hamlet 3d] {_root.GetComponentsInChildren<ParticleSystem>().Length} owned chimney plumes; target {_texture.width}x{_texture.height}/{_texture.graphicsFormat}");
@@ -272,6 +303,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         _camera.targetTexture=null; _texture.Release();
         _texture.width=Mathf.Max(1,Screen.width); _texture.height=Mathf.Max(1,Screen.height); _texture.graphicsFormat=format; _texture.Create();
         _camera.targetTexture=_texture;
+        _rendered=false; // Never present an empty render target after a hidden-window resize.
     }
     private static Mesh SourceMesh(Renderer renderer) => renderer is SkinnedMeshRenderer skin ? skin.sharedMesh : renderer.GetComponent<MeshFilter>()?.sharedMesh;
     private static bool Visual(Renderer renderer, string include)
@@ -491,7 +523,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     }
     private void Fail(string reason)
     {
-        Plugin.Log.LogWarning("[hamlet 3d] " + reason + "; retaining painted town");
+        Plugin.Log.LogWarning("[hamlet 3d] " + reason + "; holding torch screen for retry");
         Clear(); Failure = reason;
     }
     internal void Clear()
@@ -519,6 +551,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;
         _nativeView = null; _nativePipeline = null; _nativeFormat = GraphicsFormat.None;
-        _piece = 0; _rendered = false; _focus = null; _hover = null;
+        _piece = 0; _rendered = false; _built = false; _parked = false; _focus = null; _hover = null;
+        _lease.Reset();
     }
 }

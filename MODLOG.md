@@ -6237,3 +6237,41 @@ and torch modes, with no mode override. Complete default Hamlet services/control
 return/resize/keyboard/still-camera checks, native right-cliff visual capture, default map camera/effects/provision
 checks, and read-only torch prewarm/cancel/reopen. Record final buffer stability/source/install/config evidence,
 close only owned QA PIDs and leave ordinary play untouched. Broader saved/controller/performance/art work remains.
+
+## Round239 (2026-10-13): retain Hamlet through quest selection; torch-only cold entry
+
+Owner reported the old 2D town and "Preparing town scenery" on return from expedition selection. The stage
+released every owned resource after three undrawn frames; HamletUi then drew its painted/DD1 fallback until
+reconstruction completed. This also defeated the returning-estate gate once the selector had been visited.
+
+HamletSceneLease separates visible, retained and departed use. EmbarkUi retains an existing stage throughout
+quest selection, hero sheets and provisioning. A complete hidden town parks its camera and particles, keeping
+one set of models, handles and its rendered texture. Returning resumes that same scene. Build completion is
+now independent of camera.enabled, so a parked camera cannot cause terrain/model construction to run twice.
+Actual departure still releases after three unused frames; explicit retry/shutdown release all resources.
+A retained-window resize revalidates the native target before presentation and waits for a fresh render.
+
+Homecoming prewarms the town behind expedition results. Cold/retry entry blocks town HUD/service input on an
+opaque full-window torch page until the actual stage is Ready. It reuses the installed CampaignTorch flame/art,
+with the same expand scaling as the menu. Failure gives Retry scenery/Main menu. Removed the painted/hybrid
+and DD1 Spine town draw paths, preventing a 2D fallback flash even when loading is slow or fails. Quest,
+service and campaign rules are unchanged. Existing legacy preloaded art/config remain compatible but are not
+drawn by HamletUi. No game assets committed.
+
+Offline regression: extracted the existing three-frame lifecycle without changing its initial decisions;
+`dotnet test tests/DarkestDungeon3.Core.Tests -c Release --filter FullyQualifiedName~HamletSceneLeaseTests`
+failed all three cases before the fix (retained requests released/rendered instead of parking). It now passes
+retention across 600 selector frames, immediate resume, true departure/grace, same-frame use order and reset.
+Frozen Release passes with three existing warnings, all 1,141 Core + 188 UI tests pass. The native unsaved fixture
+now asserts cache/texture identity, parked camera/particles, resumed rendering and cold torch gating, in place
+of the former expected selector cleanup. Updated fixture and Homecoming/torch visuals have NOT run in game.
+No game launched, estate accessed or OS input sent; owner launch pause respected throughout this round.
+Private build, source/install hashes, backup and acceptance: local-art/ui-overhaul/hamlet-return-cache-v12.
+
+## Status 2026-10-13: round239 loading/cache fix built and installed; native acceptance pending
+
+The town is cached while selecting/provisioning a quest, prewarmed during expedition results and gated by its
+first native frame on cold entry. There is no painted town fallback. Full native services/park/resume/resize/
+retry/cold torch and real expedition-results handoff acceptance remain pending. Round238 map/estate torch
+checks also remain pending. Do not auto-launch after the owner's timed pause. Preserve independent
+Shieldbreaker WIP and protected estates; continue from tools/handoff_prompt.md.

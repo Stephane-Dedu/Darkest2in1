@@ -30,6 +30,7 @@ internal sealed partial class EmbarkUi
 
     public void Draw()
     {
+        Dd2.HamletStage.Instance?.KeepWarm();
         _party.RemoveAll(id => E.Hero(id) == null);
         // While a hero sheet is open, the screen under it is only painted: clicks belong to the sheet.
         if (_sheetHeroId == null || Event.current.type == EventType.Repaint)
