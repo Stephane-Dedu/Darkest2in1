@@ -95,6 +95,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private readonly List<UnityEngine.Object> _details = new();
     private readonly Dictionary<Material, Material> _materials = new();
     private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset, _wallAsset, _grassAsset, _grassTuftAsset;
+    private AsyncOperationHandle<Shader> _surfaceShaderAsset;
     private Transform _root;
     private Camera _camera;
     private Camera _nativeView;
@@ -121,8 +122,12 @@ internal sealed partial class HamletStage : MonoBehaviour
     public string Failure { get; private set; }
     public bool Ready => _rendered && _buildings.Count == Services.Length && Failure == null;
     public Texture Texture => _texture;
+    internal Texture GroundPaintTexture => BaseTexture(_groundMaterial);
+    internal string SurfaceShaderName => _groundMaterial?.shader.name;
+    internal bool OpaqueHiddenBackings => _root!=null && _root.GetComponentsInChildren<MeshRenderer>()
+        .SelectMany(r=>r.sharedMaterials).Any(m=>m!=null && m.name.Contains("Hidden native road backing") && m.HasProperty("_Color") && m.GetColor("_Color").a>0);
     internal bool HasResources => _root != null || _assets.Count != 0 || _terrainAsset.IsValid() || _earthAsset.IsValid() || _rockAsset.IsValid() || _wallAsset.IsValid() || _grassAsset.IsValid() || _grassTuftAsset.IsValid() || _details.Count != 0
-        || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
+        || _surfaceShaderAsset.IsValid() || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
     internal Vector3 CameraPosition => _camera!=null?_camera.transform.localPosition:Vector3.zero;
@@ -178,9 +183,23 @@ internal sealed partial class HamletStage : MonoBehaviour
             var data = cameraObject.AddComponent(urp);
             urp.GetProperty("renderPostProcessing")?.SetValue(data, false);
             urp.GetProperty("renderShadows")?.SetValue(data, false);
-            var mainData = nativeView != null ? nativeView.GetComponent(urp) : null;
-            var field = urp.GetField("m_RendererIndex", BindingFlags.NonPublic | BindingFlags.Instance);
-            if (mainData != null && field != null) urp.GetMethod("SetRenderer")?.Invoke(data, new[] { field.GetValue(mainData) });
+            var pipeline=GraphicsSettings.currentRenderPipeline;
+            var rendererData=pipeline?.GetType().GetField("m_RendererDataList",BindingFlags.Instance|BindingFlags.NonPublic)?.GetValue(pipeline) as Array;
+            int paintRenderer=-1;
+            if (rendererData!=null) for (int i=0;i<rendererData.Length;i++)
+                if (rendererData.GetValue(i) is UnityEngine.Object renderer && renderer.name=="Universal_Featureless_ForwardRenderer") paintRenderer=i;
+            if (paintRenderer<0) throw new InvalidOperationException("Installed paint renderer is unavailable. Painted town remains available.");
+            urp.GetMethod("SetRenderer")?.Invoke(data,new object[] { paintRenderer });
+            if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
+            {
+                if (rendererData!=null) foreach (var renderer in rendererData)
+                {
+                    if (renderer==null) continue;
+                    var features=renderer.GetType().GetProperty("rendererFeatures")?.GetValue(renderer) as System.Collections.IEnumerable;
+                    Plugin.Log.LogInfo($"[hamlet renderer] {((UnityEngine.Object)renderer).name}: {string.Join(",",features?.Cast<UnityEngine.Object>().Select(f=>f.name+":"+f.GetType().Name)??Array.Empty<string>())}");
+                }
+                Plugin.Log.LogInfo($"[hamlet renderer] using installed paint renderer {paintRenderer}; native cameras retain their own renderer");
+            }
         }
         _look = Overview;
         ResetView();
@@ -191,10 +210,11 @@ internal sealed partial class HamletStage : MonoBehaviour
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
         _terrainAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Common/RoadEvents/road_rough_patch.mat");
         _earthAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/farm_ground_hill_transition.mat");
-        _rockAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/bricks.mat");
+        _rockAsset = NativeAssets.Load<Material>("Assets/Art/Materials/Environments/Farm/Props/farm_eroded_hill.mat");
         _wallAsset = NativeAssets.Load<Material>("Assets/Art/Textures/Environments/Tileable/Panels/foundation_panel_06.mat");
         _grassAsset = NativeAssets.Load<Material>(HamletVegetation.GroundPath);
         _grassTuftAsset = NativeAssets.Load<Material>(HamletVegetation.TuftPath);
+        _surfaceShaderAsset=NativeAssets.Load<Shader>("Packages/com.unity.render-pipelines.universal/Shaders/Unlit.shader");
         Plugin.Log.LogInfo("[hamlet 3d] loading installed scenery; visual components only; no road scripts");
     }
     private void Update()
@@ -210,7 +230,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 var piece = Pieces[_piece];
                 var handle = _assets[piece.Path];
                 if (!handle.IsDone) return;
-                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone || !_wallAsset.IsDone || !_grassAsset.IsDone || !_grassTuftAsset.IsDone)) return;
+                if (_piece == Pieces.Length - 1 && (!_terrainAsset.IsDone || !_earthAsset.IsDone || !_rockAsset.IsDone || !_wallAsset.IsDone || !_grassAsset.IsDone || !_grassTuftAsset.IsDone || !_surfaceShaderAsset.IsDone)) return;
                 if (handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null) Build(piece, handle.Result);
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
@@ -309,7 +329,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 renderer.sharedMaterials=renderer.sharedMaterials.Select(m=>
                 {
                     var painted=new Material(m) { name="Hamlet distant woodland "+m.name }; _details.Add(painted);
-                    Grade(painted,HamletPalette.Woodland,false); return painted;
+                    Grade(painted,piece.Position.z>110?HamletPalette.DistantWoodland:HamletPalette.Woodland,false); return painted;
                 }).ToArray();
             }
             else if (piece.Path.EndsWith("camp_sky.fbx"))
@@ -382,6 +402,9 @@ internal sealed partial class HamletStage : MonoBehaviour
                 if (material.HasProperty(property)) material.SetFloat(property, 0);
             foreach (string keyword in new[] { "_FOG", "_HASLIGHTING_ON", "_NEARDARK_ON", "_____DARKEN_OVER_DISTANCE_ON", "_____ISDITHERING_ON", "_____NEARFADE_ON" })
                 material.DisableKeyword(keyword);
+            // World-space town bakes own their wear and depth; native road parallax/grit must not reinterpret them.
+            foreach (string property in new[] { "_GritMix","_Parallax" })
+                if (material.HasProperty(property)) material.SetFloat(property,0);
         }
         _materials[source] = material; _details.Add(material);
         return material;
@@ -448,7 +471,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         foreach (var b in _buildings) foreach (var renderer in b.Renderers)
         {
             var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block);
-            float factor = !b.Available ? .38f : b.Id == _hover ? 1.16f : 1;
+            float factor = !b.Available ? .58f : b.Id == _hover ? 1.16f : 1;
             var material = renderer.sharedMaterial;
             if (material != null && material.HasProperty(Tint)) block.SetColor(Tint, _baseTints[renderer] * factor);
             else if (material != null && material.HasProperty("_Color")) block.SetColor("_Color", _baseTints[renderer] * factor);
@@ -461,8 +484,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         _savedFog = Shader.GetGlobalFloat(Fog); _savedUnityFog = RenderSettings.fog;
         _savedAmbient = Shader.GetGlobalColor(Ambient); _savedAmbientNoShadow = Shader.GetGlobalColor(AmbientNoShadow);
         Shader.SetGlobalFloat(Fog, 0); RenderSettings.fog = false;
-        Shader.SetGlobalColor(Ambient, new Color(1.4f, 1.3f, 1.2f));
-        Shader.SetGlobalColor(AmbientNoShadow, new Color(1.4f, 1.3f, 1.2f));
+        Shader.SetGlobalColor(Ambient, Color.white);
+        Shader.SetGlobalColor(AmbientNoShadow, Color.white);
     }
     private void AfterCamera(ScriptableRenderContext context, Camera camera)
     {
@@ -494,6 +517,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_wallAsset.IsValid()) Addressables.Release(_wallAsset);
         if (_grassAsset.IsValid()) Addressables.Release(_grassAsset);
         if (_grassTuftAsset.IsValid()) Addressables.Release(_grassTuftAsset);
+        if (_surfaceShaderAsset.IsValid()) Addressables.Release(_surfaceShaderAsset);
+        _surfaceShaderAsset=default;
         _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default; _grassAsset = default; _grassTuftAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
         ClearModels();

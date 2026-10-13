@@ -23,11 +23,17 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
             return new { Stain=HamletGroundPaint.At(x,z),Road=HamletLandscape.RoadCover(x,z),Haze=HamletLandscape.Haze(z),Grass=HamletLandscape.GrassCover(x,z) };
         })
     },
-    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.Building,HamletPalette.Grass,HamletPalette.GrassTuft },
+    Palette=new { HamletPalette.Soil,HamletPalette.Rock,HamletPalette.Rubble,HamletPalette.Paving,HamletPalette.Masonry,HamletPalette.Mountain,HamletPalette.Woodland,HamletPalette.DistantWoodland,HamletPalette.Building,HamletPalette.Grass,HamletPalette.GrassTuft },
     GroundStains=Enumerable.Range(0,128*128).Select(i=>HamletGroundPaint.At(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%128+.5f)/128,
         HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/128+.5f)/128)),
     GrassCover=Enumerable.Range(0,256*256).Select(i=>HamletVegetation.Cover(
+        HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
+        HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
+    ContactShade=Enumerable.Range(0,256*256).Select(i=>HamletGroundPaint.ContactShade(
+        HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
+        HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
+    EdgeWear=Enumerable.Range(0,256*256).Select(i=>HamletGroundPaint.EdgeWear(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
         HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
     Scenery=new[]

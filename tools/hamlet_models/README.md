@@ -110,8 +110,8 @@ Building-specific shape decisions above come from the installed art, not from th
 ## Preview the compact DD1 landscape without launching a game
 
 Round220's town layout and terrain live in Core. `LayoutExport` exports their actual geometry, including
-the paths, stairs and masonry used by Unity. `prepare_landscape.py` reads three surface textures from the
-owner's installed common/Valley bundles. `town_preview.py` checks all ten v02 GLB hashes and places them
+the paths, stairs and masonry used by Unity. `prepare_landscape.py` reads six surface textures from the
+owner's installed common/Valley/Foetor bundles. `town_preview.py` checks all ten v02 GLB hashes and places them
 at those same sites, with the same perspective camera. This is an offline composition check: Blender
 does not reproduce DD2's shaders, lighting, picking or UI. Its surrounding scenery table mirrors the
 stage; update it when changing the stage's props. Native sky/trees use the existing private kit exports.
@@ -143,6 +143,20 @@ palette. For a new private output directory, run the surface/rock exports above,
 to that directory's `exp/`. Use `--name hamlet-immersion-v05` for the current preview basename.
 The runtime bakes lifted paint once and uses three cliff tint bands; the Blender material approximates
 those colours. Four runtime chimney plumes are not part of the offline render or v02 model package.
+
+Round236 keeps the original ten v02 models and improves runtime texture fidelity instead of regenerating them.
+The six landscape inputs are `road_rough_patch`, `farm_ground_hill_transition`, `farm_eroded_hill`,
+`foundation_panel_06`, `grass_dry` and `farm_gate_node_assets_grass`. The eroded-rock atlas replaces the former
+brick cliff texture; its rock-only window/aspect and the shared palette are exported with the actual Core UVs.
+`LayoutExport` also writes256-square `ContactShade` and `EdgeWear` fields, alongside grass and stain fields,
+so the offline ground follows the runtime's bank/footprint contact and worn road margins. Distant woodland
+grading and valley haze follow Core. Use `--name hamlet-fidelity-v09` and a private output directory to create
+the current preview and packed Blender document. Source images and `ground-source.json` stay outside Git.
+
+Native rendering now preserves building atlas proportions up to2048px, correct native cutouts and transparent
+backing materials. The terrain uses the installed URP Unlit shader, and only the Hamlet camera uses the native
+featureless renderer to avoid the main-menu LUT. Blender does not reproduce that renderer; inspect native
+captures before accepting colour or alpha changes. See `tools/hamlet_3d.md` for lifecycle and acceptance limits.
 The native unsaved fixture now checks live resize/restore as well as all service/control/rollback routes.
 `measure_native.ps1 -HamletProcessId <owned-preview-pid> -Seconds 5` checks repeated URP allocations;
 the measured town must already be rendered. Current native evidence and packed preview are in

@@ -40,6 +40,8 @@ internal sealed partial class HamletUi
         stage.Request();
         if (!stage.Ready) return false; // Keep the approved town usable while real models load or if they fail.
         GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), stage.Texture);
+        if (HamletPreview.OwnsSession && HamletPreview.PaintAuditRequested)
+            GUI.DrawTexture(new Rect(125,685,260,220),stage.GroundPaintTexture,ScaleMode.ScaleToFit);
         var mouse = Event.current.mousePosition;
         bool overNav = mouse.x < 120 || mouse.y<180 || TownModeButton.Contains(mouse) || ResetViewButton.Contains(mouse) || CameraMotionButton.Contains(mouse);
         bool canHit = interactive && GUI.enabled && !_exchangeOpen && !overNav && mouse.x < RosterX && mouse.y < BarY;

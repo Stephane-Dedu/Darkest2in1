@@ -6093,3 +6093,58 @@ but its final in-game image/stronger assertion must be checked in the next free 
 shutdown errors reproduce with the loader disabled and are separate from Paths. Do not interrupt the other
 Hamlet QA or deploy over a running game. Cold rare conditional descriptions, ordinary combat/transformation
 playthroughs, controller/text sizing and long-session performance remain broader acceptance work.
+
+## Round236 (2026-10-13): Hamlet material fidelity, native colour and grounded terrain
+
+Owner: continue iterating the 3D Hamlet toward DD2 design, texture quality, colour coherence and readability.
+Used the pasted dd2-native-kit, Blender and asset-pipeline/game-automation workflows. All native art stays
+private. The ten v02 GLBs, compact DD1 service placement and approved camera are retained.
+
+Building grading no longer resamples every atlas to a 1024px square. Paint copies retain source/crop aspect
+and native detail up to 2048px on the longest edge, without upscaling small images. Texture uploads use 4x
+anisotropy. Native Environment cutouts now use the verified _____IsAlphaCutout property and keyword. Grading
+preserves material alpha: an intermediate experiment made invisible native backing meshes white; fixed and
+asserted in the final native fixture. Locked-service tint is less dark so its silhouette remains identifiable.
+
+Live native comparison identified the main-menu renderer's LUT as the remaining blue/grey colour cast.
+Camera post-processing off and URP Unlit alone did not remove it. Only the owned Hamlet camera now selects
+the installed Universal_Featureless_ForwardRenderer by name; no native camera, renderer feature or pipeline
+array is edited. Owned terrain/paving/rock/masonry bind the explicitly loaded native URP Unlit shader.
+Buildings, sky, Mountain and foliage retain their Environment materials. The shader handle is owned and
+released on rollback/exit; missing renderer/shader keeps Painted town available. Ambient globals are neutral
+and restored after the owned camera renders. Paint readbacks explicitly set/restore GL.sRGBWrite; official
+Unity contracts and exact runtime details are linked in tools/hamlet_3d.md.
+
+Reviewed 25 unique installed stone/rock surfaces. Rejected a repetitive cultist crop, oversized Coast strokes
+and four bare Camp trees. Final exposed cliffs use Foetor's farm_eroded_hill, a 960x760 rock-only window with
+matching texel-aspect UVs and a 12m period. Dressed masonry remains on stairs/retaining courses. Paving is
+quieter, and the world paint gains bounded contact darkening at foundations/banks and gravel wear around
+roads/aprons. A 256x256 construction field feeds the existing 2048px bake; no per-frame painting/readback.
+Distant native woodland is cooler/quieter; valley haze reaches its existing cap sooner. Six native surface
+exports and shared Core contact/wear fields keep the private Blender preview reproducible.
+
+Verification: frozen Release passes (three existing warnings); all 1,135 Core + 188 UI tests pass. New Core
+cases cover retained atlas/crop resolution and bounded contact/wear, alongside existing terrain/UV/clearance
+contracts. Final unsaved native fixture passes ten world services/Escape, pan/zoom/reset, painted rollback
+with complete resource release, reload/re-entry, Embark/cleanup/return, 1600x900 ->1440x900 ->1600x900 resize,
+keyboard focus/Enter/back and still-camera/smoke toggles. Shader/transparent-backing assertions pass. Native grass, rock and earth bind, the offline export resolves
+all six surface sources, and the final native overview has no white backing artifacts.
+145 mesh renderers, 168 grass clumps and four plumes retain the native HDR target. Zero repeated URP buffer
+reallocations over 5.053 seconds; this does not establish full frame-time/long-session memory performance.
+
+All 15 owned source files match the frozen build and all four installed DLL/PDB hashes match. Config is
+byte-identical to the pre-pass snapshot. Pre-deploy universal-modder backups:
+hamlet-before-fidelity-v09/20261013-142649.zip and hamlet-before-fidelity-config-v09/20261013-142650.zip.
+Native captures/logs, source/install/config hashes, tests, reviewed textures and final packed scene:
+local-art/ui-overhaul/hamlet-fidelity-v09/{acceptance.json,native-final.png,native-BepInEx.log,native-Player.log,
+native-allocations.json,build-sources.json,hamlet-fidelity-v09.png,hamlet-fidelity-v09.blend,layout.json}.
+Owned final QA PID25176 is closed. No ordinary game relaunched, estate selected/read/saved or OS input sent.
+Concurrent Shieldbreaker sources are preserved in the shared build and excluded from this commit; its journal
+and parity changes remain unstaged. Round235's hero work remains in HEAD and in the frozen candidate.
+
+## Status 2026-10-13: round236 Hamlet material/terrain polish installed and native-verified
+
+Keep Look.Hamlet3D defaultfalse and immediate Painted town rollback. Texture/rendering defects are corrected,
+but full DD2 production art parity remains open: custom cliff silhouettes, facade/roof trim, NPCs and upgrade/
+event exteriors. Controller comfort, arbitrary window/text sizes, saved transactions/real embark and complete
+frame-time/long-session memory acceptance remain separate. Read tools/hamlet_3d.md and preserve other work.

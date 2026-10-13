@@ -83,7 +83,7 @@ public static class HamletLandscape
     public static float RoadCover(float x,float z)
     { ApproachAt(x,z,out _,out float weight); return weight; }
 
-    public static float Haze(float z) => .68f*Smooth((z-52)/112);
+    public static float Haze(float z) => .68f*Smooth((z-52)/80);
 
     public static float GrassCover(float x,float z)
     {

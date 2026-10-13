@@ -39,11 +39,11 @@ public sealed class HamletTerrain
             {
                 indices.Add(positions.Count/3);
                 positions.Add(p.X); positions.Add(p.Y); positions.Add(p.Z);
-                float period = cliff ? 8 : 10;
+                float period = cliff ? 12 : 10;
                 // A continuous diagonal projection avoids flipping the wall atlas at each changing facet normal.
                 uv.Add(cliff ? (p.X+p.Z*.5f)/period : (p.X-HamletLayout.MinX)/(HamletLayout.MaxX-HamletLayout.MinX));
                 // A cropped atlas is rectangular paint. Preserve its texel aspect on square world coordinates.
-                float cropHeight = cliff ? HamletPalette.Rock.UvScale.Y : HamletPalette.Soil.UvScale.Y;
+                float cropHeight = cliff ? HamletPalette.RockTexelAspect : HamletPalette.Soil.UvScale.Y;
                 uv.Add(cliff ? p.Y/(period*cropHeight) : (p.Z-HamletLayout.MinZ)/(HamletLayout.MaxZ-HamletLayout.MinZ)); shade.Add(light);
             }
         }

@@ -90,6 +90,30 @@ public class HamletLandscapeTests
     }
 
     [Fact]
+    public void PaintCopiesPreserveAtlasResolutionAndCropProportionsWithoutUpscaling()
+    {
+        Assert.Equal((2048,1024),HamletPalette.PaintExtent(4096,2048,2048,HamletPalette.Building,false));
+        Assert.Equal((125,270),HamletPalette.PaintExtent(125,270,2048,HamletPalette.Building,false));
+        Assert.Equal((960,760),HamletPalette.PaintExtent(1024,1024,1024,HamletPalette.Rock,true));
+        Assert.Equal((512,512),HamletPalette.PaintExtent(512,512,512,HamletPalette.Grass,false));
+    }
+
+    [Fact]
+    public void BuildingAndBankContactHasBoundedShadowAndWearFadesAwayFromRoutes()
+    {
+        foreach (var site in HamletLayout.Sites)
+        {
+            Assert.InRange(HamletGroundPaint.ContactShade(site.X,site.Z),.78f,.841f);
+            Assert.Equal(.42f,HamletGroundPaint.EdgeWear(site.X,site.Z));
+        }
+        var samples=Enumerable.Range(0,500).Select(i=>(X:i%25*4-50f,Z:i/25*4-30f)).ToArray();
+        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.ContactShade(p.X,p.Z),.78f,1));
+        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.EdgeWear(p.X,p.Z),0,.42f));
+        Assert.Contains(samples,p=>HamletVegetation.Clearance(p.X,p.Z)>3 && HamletGroundPaint.EdgeWear(p.X,p.Z)==0);
+        Assert.Contains(samples,p=>HamletGroundPaint.ContactShade(p.X,p.Z)>.98f);
+    }
+
+    [Fact]
     public void GroundPaintVariesAcrossTheSquareWithoutOverwritingNativeTexture()
     {
         var samples=Enumerable.Range(0,120).Select(i=>HamletGroundPaint.At(i%12*10-60,i/12*10-30)).ToArray();

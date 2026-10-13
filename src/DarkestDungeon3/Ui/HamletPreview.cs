@@ -12,6 +12,7 @@ namespace DarkestDungeon3.Ui;
 [HarmonyPatch(typeof(UiRoot), "OnGUI")]
 internal static class HamletPreview
 {
+    internal static readonly bool PaintAuditRequested=Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-paint-audit");
     private static readonly bool ThreeDimensional = Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview");
     private static readonly bool Requested = ThreeDimensional || Environment.GetCommandLineArgs().Contains("-dd3-hamlet-preview");
     private static HamletUi _ui;
@@ -179,6 +180,8 @@ internal static class HamletPreview
     {
         var stage = Dd2.HamletStage.Instance;
         void Require(bool ok, string message) { if (!ok) throw new InvalidOperationException("[hamlet 3d check] " + message); }
+        if (_checkStep==0) Require(stage.SurfaceShaderName=="Universal Render Pipeline/Unlit","Terrain did not bind the installed paint shader.");
+        if (_checkStep==0) Require(!stage.OpaqueHiddenBackings,"Grading made native backing geometry opaque.");
         if (_checkStep < 20 || _checkStep is 28 or 29)
         {
             string expected = _checkStep % 2 == 0 ? Dd2.HamletStage.Services[_checkStep == 28 ? 0 : _checkStep / 2] : null;

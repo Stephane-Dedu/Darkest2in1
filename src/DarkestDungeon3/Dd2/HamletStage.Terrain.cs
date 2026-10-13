@@ -15,28 +15,33 @@ internal sealed partial class HamletStage
         if (source==null) throw new InvalidOperationException("Native road surface is unavailable.");
         var native=source.sharedMaterials.First(m=>m!=null&&m.name.Contains("valley_road_main"));
         var texture=_terrainAsset.Status==AsyncOperationStatus.Succeeded?BaseTexture(_terrainAsset.Result):BaseTexture(native);
-        _groundMaterial=new Material(native) { name="Hamlet earth" };
-        var paving=new Material(native) { name="Hamlet worn stone paths" }; _details.Add(paving);
-        var rock=new Material(native) { name="Hamlet exposed cliff rock" }; _details.Add(rock);
-        var stone=new Material(native) { name="Hamlet terrace masonry" }; _details.Add(stone);
+        var surfaceShader=_surfaceShaderAsset.Status==AsyncOperationStatus.Succeeded?_surfaceShaderAsset.Result:null;
+        if (surfaceShader==null) throw new InvalidOperationException("Installed terrain paint shader is unavailable. Painted town remains available.");
+        Material PaintSurface(string name) => new(surfaceShader) { name=name };
+        _groundMaterial=PaintSurface("Hamlet earth");
+        var paving=PaintSurface("Hamlet worn stone paths"); _details.Add(paving);
+        var rock=PaintSurface("Hamlet exposed cliff rock"); _details.Add(rock);
+        var stone=PaintSurface("Hamlet terrace masonry"); _details.Add(stone);
         foreach (var material in new[] { _groundMaterial,paving,rock,stone })
-            if (texture!=null) material.SetTexture("_BaseMap_texture",texture);
+            if (texture!=null) SetPaintTexture(material,texture);
         bool soilLoaded=false,rockLoaded=false;
         if (_earthAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_earthAsset.Result) is { } earthTexture)
-        { _groundMaterial.SetTexture("_BaseMap_texture",earthTexture); soilLoaded=true; }
+        { SetPaintTexture(_groundMaterial,earthTexture); soilLoaded=true; }
         if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
-        { rock.SetTexture("_BaseMap_texture",rockTexture); rockLoaded=true; }
+        { SetPaintTexture(rock,rockTexture); rockLoaded=true; }
         if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
-            stone.SetTexture("_BaseMap_texture",wallTexture);
+            SetPaintTexture(stone,wallTexture);
         Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
         Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
         Texture grass=null;
         if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
             grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
+        if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
+            Plugin.Log.LogInfo($"[hamlet 3d paint] {_groundMaterial.shader.name}; color space {QualitySettings.activeColorSpace}; grass {_grassAsset.Status}/{_grassAsset.Result?.name}/{(_grassAsset.Result!=null?BaseTexture(_grassAsset.Result)?.name:null)}; rock {_rockAsset.Status}; earth {_earthAsset.Status}");
         var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
-        valley.SetTexture("_BaseMap_texture",ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
-        valley.SetColor(Tint,Color.white);
-        _groundMaterial.SetTexture("_BaseMap_texture",GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
+        SetPaintTexture(valley,ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
+        SetPaintTint(valley,Color.white);
+        SetPaintTexture(_groundMaterial,GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
@@ -54,7 +59,7 @@ internal sealed partial class HamletStage
         {
             materials[i+1]=new Material(rock) { name="Hamlet cliff facet "+i };
             float tint=.72f+i*.14f;
-            materials[i+1].SetColor(Tint,new Color(tint,tint,tint,1)); _details.Add(materials[i+1]);
+            SetPaintTint(materials[i+1],new Color(tint,tint,tint,1)); _details.Add(materials[i+1]);
         }
         _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);
         for (int i=0;i<3;i++) _groundMesh.SetTriangles(rockBands[i],i+1);

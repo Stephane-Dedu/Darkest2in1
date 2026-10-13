@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round236 improves Hamlet material/terrain fidelity without replacing the ten v02 GLBs or approved camera.
+Building paint retains atlas aspect/detail up to 2048px, native cutout keywords and transparent backing alpha.
+Only Hamlet's owned camera uses the installed featureless renderer; owned terrain uses the native URP Unlit
+shader to avoid the main-menu LUT colour cast. Native cameras/renderers remain untouched. Foetor eroded rock,
+restrained paving, foundation/bank contact, apron wear and cooler woodland/haze improve the landscape.
+Release + 1,135 Core + 188 UI pass. Final unsaved native ten-service, controls, rollback/full release, reload,
+Embark/cleanup/return, resize, keyboard/still-camera/smoke and shader/alpha checks pass. Native overview inspected;
+zero repeated URP reallocations over 5.053sec. All four installed artifacts and 15 owned sources match; config
+unchanged. Owned final QA PID25176 closed; DD2 stopped. No estate accessed or OS input sent. Read tools/hamlet_3d.md
+and local-art/ui-overhaul/hamlet-fidelity-v09. Painted town rollback and default-off flag retained. Bespoke cliff/
+facade art, NPC/exterior variants, controller/other sizes, saved transactions and full performance remain open.
+Preserve concurrent Shieldbreaker sources/notes. The shared frozen build includes them and committed round235
+hero work; neither is part of this Hamlet commit. Check live processes before deployment. Round235's final
+Abomination portrait visual acceptance is still separate; its earlier QA PID references below are historical.
+
 Round235 verifies native Abomination human/beast/human models, five-skill form HUD and ordinary homecoming/
 stage release. Captures exposed Color portrait falling back to human. Art now caches mode-specific portraits
 and prefers a distinct native CombatBar portrait; built/included in the shared Hamlet snapshot, but final beast

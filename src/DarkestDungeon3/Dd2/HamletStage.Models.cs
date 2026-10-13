@@ -75,7 +75,7 @@ internal sealed partial class HamletStage
         {
             var entry = _paintQueue[_paintIndex++];
             var texture = new Texture2D(2, 2, TextureFormat.RGBA32, true)
-            { name = "Hamlet " + Path.GetFileName(entry.Key), wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear, anisoLevel = 2 };
+            { name = "Hamlet " + Path.GetFileName(entry.Key), wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
             _details.Add(texture);
             if (!texture.LoadImage(entry.Value, true)) throw new FormatException("Cannot upload Hamlet texture: " + entry.Key);
             _paint.Add(entry.Key, texture);
@@ -200,8 +200,12 @@ internal sealed partial class HamletStage
         var tint = new Color(color.X,color.Y,color.Z,b[3]);
         if (material.HasProperty(Tint)) material.SetColor(Tint, tint);
         if (material.HasProperty("_Color")) material.SetColor("_Color", tint);
-        if (material.HasProperty("_IsAlphaCutout")) material.SetFloat("_IsAlphaCutout", info.Mask || info.Blend ? 1 : 0);
-        if (material.HasProperty("_Cutoff")) material.SetFloat("_Cutoff", info.Mask ? info.Cutoff : info.Blend ? .2f : 0);
+        bool cutout=info.Mask || info.Blend;
+        float cutoff=info.Mask ? info.Cutoff : info.Blend ? .2f : 0;
+        if (material.HasProperty("_____IsAlphaCutout")) material.SetFloat("_____IsAlphaCutout",cutout?1:0);
+        if (cutout) material.EnableKeyword("_____ISALPHACUTOUT_ON"); else material.DisableKeyword("_____ISALPHACUTOUT_ON");
+        foreach (string property in new[] { "_Cutoff","_AlphaClip_Override","_AlphaCutoff" })
+            if (material.HasProperty(property)) material.SetFloat(property,cutoff);
         if (material.HasProperty("_Cull")) material.SetInt("_Cull", info.DoubleSided ? 0 : 2);
         return material;
     }

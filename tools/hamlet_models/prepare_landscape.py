@@ -14,7 +14,7 @@ def main(game,out):
     bundles=game/'Darkest Dungeon II_Data/StreamingAssets/aa'
     names=['biome_common_assets_all.bundle','biome_valley_common_assets_all.bundle','biome_farm_assets_all.bundle']
     env=UnityPy.load(*[str(bundles/name) for name in names])
-    wanted={'road_rough_patch','farm_ground_hill_transition','bricks','foundation_panel_06','grass_dry','farm_gate_node_assets_grass'}
+    wanted={'road_rough_patch','farm_ground_hill_transition','farm_eroded_hill','foundation_panel_06','grass_dry','farm_gate_node_assets_grass'}
     found={}
     for obj in env.objects:
         if obj.type.name!='Material': continue
