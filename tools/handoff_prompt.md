@@ -1,5 +1,15 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round235 verifies native Abomination human/beast/human models, five-skill form HUD and ordinary homecoming/
+stage release. Captures exposed Color portrait falling back to human. Art now caches mode-specific portraits
+and prefers a distinct native CombatBar portrait; built/included in the shared Hamlet snapshot, but final beast
+portrait visual/stronger native assertion remains pending while separate Hamlet QA owns the install. Last observed
+QA PID23348 belongs to that other task; leave it alone and recheck processes before any deployment. Frozen
+Release + 1,134 Core + 188 UI pass. Do not count the interrupted second capture run as complete acceptance.
+Native missing-callback/GameSpeed quit errors reproduce with process-local DOORSTOP_DISABLE=1 and DD3 absent;
+no broad shutdown patch was applied. The October 12 launch restriction has expired. Read tools/hero_paths.md and
+local-art/hero-paths-v02. All independent Hamlet/Shieldbreaker changes remain unstaged by this hero round.
+
 Round234 adds all 42 native DD2 specialisations alongside Resolve/Guild progression, plus the missing owned
 Abomination and Duelist recruits. All 15 installed native DD2 classes are in the coach pool when owned; Bounty
 Hunter remains permanent with Professional. Existing offers remain until the normal weekly refresh. Guild ->

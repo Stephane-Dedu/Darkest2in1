@@ -6030,3 +6030,66 @@ including through expeditions. Abomination retains both forms and native transfo
 defaults and specialisations passed native construction/mapping checks. Cold conditional tooltip completeness,
 ordinary full combat playthroughs, final HUD visual/shutdown and broader input/performance acceptance remain the limits above. Preserve
 independent Shieldbreaker work and recheck live processes before another deployment.
+
+## Round235 (2026-10-13): Abomination form HUD and native shutdown comparison
+
+Continued the hero/Path work after the owner's October 12 launch restriction expired. Added an optional mode
+to Art.Portrait/HeroIcon and the cache key, and passed the live actor mode from the exploration HUD. Native
+ResourceActor.GetPortraitIconByType(Color, mode) falls back to the human colour portrait when the mode has no
+colour override. A distinct native CombatBar portrait is now preferred in that case, preserving native art.
+No new textures, class rules, Path balance or estate schema changes.
+
+Opt-in -dd3-paths-visual-check extends the existing unsaved actor fixture. It checks all 114 ordinary/mastered
+Path actors, then selects the actual Abomination and changes human -> beast -> human through DD2's native
+EventActorChangeMode. A direct SetActorMode only changes data; the event also dirties ActorBhv's model selection.
+Checks cover five equipped skills in each form, visible native model roots, portrait lookup, ordinary Leave/
+homecoming, stage model release and Hamlet return. Each stage holds 15 seconds for GPU capture, then requests
+Application.Quit. This is mode presentation acceptance, not a Transform/Revert combat skill/timeline test.
+
+Native first QA PID20504 passes all 114 actor cases and the full form/homecoming fixture. Human, beast, restored
+human and Hamlet images were later captured; visual review caught the colour-portrait fallback despite the
+initial native equality assertion passing. The final assertion now requires the beast portrait to differ from
+the human portrait. The correction is built; that final combat-portrait screen check is pending while the
+separate Hamlet task owns the shared install (QA PID23348 at last observation). It was left untouched. A second
+capture run closed before its last PASS and is not counted as complete acceptance. Do not claim final portrait
+visual verification from the earlier images. Private before-portrait images retain the diagnostic evidence.
+
+Investigated the earlier shutdown errors using matching REA evidence ev_790fdee0e6fe7a5824d9eb3d20e6c8f1a0733ff9d59b34b8961d6e0c0787440d
+for IronCrown dd97e30f2f37e2a287633ab322b8fd18bcfe9e240903713a5c2ae00c894692e6 / MVID
+c8627dd8-3822-4311-9403-8920d40a2892. Globals.InvokeUninstallCallbacks (0x0600003c) directly indexes its
+dictionary; only Reinstaller.Reinstall registers IMainInstaller's callback. Ordinary quit resets/uninstalls
+the main installer without registration, then GameInstaller.OnUninstallFinished (0x0600008b) invokes it.
+GameSpeedMgr.OnApplicationQuit (0x0600154b) dereferences AudioMgr after native teardown can clear the singleton.
+DrivingPositionalSound.Release (0x06006107) has the same unsafe dependency. Static contracts explain the stacks;
+identical installer errors also occur in unrelated October 11 fixtures, before Paths.
+
+Owned cold-start baseline PID12532 was launched with process-local DOORSTOP_DISABLE=1, supported by the active
+doorstop_config.ini ignore_disable_switch=false. BepInEx/plugin startup is absent from its Player log and the
+BepInEx log remains unchanged. Window-close via that exact PID's CloseMainWindow reproduces IMainInstaller's
+missing-key and GameSpeedMgr's quit null exception without DD3 loaded. Baseline remained on the cold warning
+screen; this does not claim a native road/positional-audio comparator. No quit exceptions were suppressed or
+patched, and the temporary environment override does not alter normal launches.
+
+Release/frozen compile passes with the three existing warnings. Frozen 377-file snapshot includes current
+concurrent Hamlet/Shieldbreaker sources without staging them. All 1,134 Core and 188 UI cases pass after copying
+the native address catalog to the private snapshot's expected relative fixture path. The first Core attempt
+failed only for that missing fixture; no assertion was weakened. No full game/data copy is committed.
+The latest shared Hamlet build includes the four exact hero source files and its installed DLL matches its
+snapshot, but final hero visual acceptance is still pending. Later installs remain under the other task's control.
+
+Backups:dd3-before-paths-visual-native-profile/20261013-141202.zip (39 files) and
+dd3-before-paths-visual-plugin/20261013-141203.zip (17 files). Native tests use their own unsaved estate object;
+no DD3 estate selected/read/persisted, no protected estate access. Initial deployments occurred with DD2 stopped;
+after observing the other Hamlet QA, no further shared deployment or process control was performed. Native
+profile/config are not restored over the other session. The chat-messaging tool's explicit authorization was
+requested for coordinating the final test slot; no cross-chat message was sent without an answer.
+Evidence:local-art/hero-paths-v02; tools/hero_paths.md. Preserve all independent Hamlet/Shieldbreaker changes.
+
+## Status 2026-10-13: round235 form models/kits/homecoming verified; final portrait capture pending
+
+All 15 DD2 classes and 42 specialisations remain implemented from round234. Native form models, five-skill HUD
+switching and return cleanup pass. The native combat-portrait fallback is built and included in the shared build,
+but its final in-game image/stronger assertion must be checked in the next free game window. Existing native
+shutdown errors reproduce with the loader disabled and are separate from Paths. Do not interrupt the other
+Hamlet QA or deploy over a running game. Cold rare conditional descriptions, ordinary combat/transformation
+playthroughs, controller/text sizing and long-session performance remain broader acceptance work.

@@ -133,11 +133,11 @@ internal static class Art
     private static readonly Dictionary<string, Sprite> Portraits = new();
     private static readonly Dictionary<string, float> PortraitRetry = new();
 
-    public static Sprite Portrait(string classId, ResourceActor.PortraitIconType type = ResourceActor.PortraitIconType.Color)
+    public static Sprite Portrait(string classId, ResourceActor.PortraitIconType type = ResourceActor.PortraitIconType.Color, string modeName = null)
     {
         if (classId == null) return null;
         if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId)) return Dd2.Dd1HeroClasses.Portrait(classId);
-        string key = classId + "/" + type;
+        string key = classId + "/" + type + (modeName == null ? "" : "/" + modeName);
         if (Portraits.TryGetValue(key, out var s))
         {
             if (s != null && s.texture != null) return s;
@@ -147,7 +147,7 @@ internal static class Art
         if (PortraitRetry.TryGetValue(key, out float next) && Time.unscaledTime < next) return null;
         try
         {
-            s = Dd2.ActorResources.Get(classId)?.GetPortraitIconByType(type);
+            s = Dd2.ActorResources.Get(classId)?.GetPortraitIconByType(type, modeName);
         }
         catch (System.Exception e) { Plugin.Log.LogWarning($"portrait {key}: {e.Message}"); s = null; }
         if (s != null && s.texture != null) Portraits[key] = s;
@@ -156,7 +156,18 @@ internal static class Art
     }
 
     /// <summary>A small hero picture for lists: the colour portrait, else DD2's painted story bust.</summary>
-    public static Sprite HeroIcon(string classId) => Portrait(classId) ?? LargePortrait(classId, LargeArt.Story);
+    public static Sprite HeroIcon(string classId, string modeName = null)
+    {
+        if (modeName != null)
+        {
+            var resource = Dd2.ActorResources.Get(classId);
+            var combat = resource?.GetPortraitIconByType(ResourceActor.PortraitIconType.CombatBar, modeName);
+            // Some modes only provide a combat portrait; Color otherwise silently returns the human portrait.
+            if (combat != null && combat != resource.GetPortraitIconByType(ResourceActor.PortraitIconType.CombatBar))
+                return Portrait(classId, ResourceActor.PortraitIconType.CombatBar, modeName);
+        }
+        return Portrait(classId, modeName: modeName) ?? LargePortrait(classId, LargeArt.Story);
+    }
 
     // DD2's larger hero art lives behind addressable references; load once, asynchronously, and cache.
     private static readonly Dictionary<string, Sprite> Large = new();

@@ -18,9 +18,10 @@ namespace DarkestDungeon3.Ui;
 
 /// <summary>Opt-in Guild input + all native Path/skill acceptance. Owns a transient save, never an estate slot.</summary>
 [HarmonyPatch(typeof(Driver), "Update")]
-internal static class HeroPathsCheck
+internal static partial class HeroPathsCheck
 {
-    private static readonly bool ActorsOnly = Environment.GetCommandLineArgs().Contains("-dd3-paths-actors-check");
+    private static readonly bool VisualRequested = Environment.GetCommandLineArgs().Contains("-dd3-paths-visual-check");
+    private static readonly bool ActorsOnly = VisualRequested || Environment.GetCommandLineArgs().Contains("-dd3-paths-actors-check");
     internal static readonly bool Requested = ActorsOnly || Environment.GetCommandLineArgs().Contains("-dd3-paths-check");
     private static SaveFile _save;
     private static HamletUi _ui;
@@ -33,7 +34,8 @@ internal static class HeroPathsCheck
 
     private static void Postfix()
     {
-        if (!Requested || !Plugin.DebugKeysEnabled.Value || _done) return;
+        if (!Requested || !Plugin.DebugKeysEnabled.Value) return;
+        if (_done) { if (VisualRequested && OwnsSession) UpdateVisual(); return; }
         var s = Session.Current;
         var d = Driver.Instance;
         if (s == null || d == null) return;
@@ -90,6 +92,7 @@ internal static class HeroPathsCheck
             HeroPathExpedition.CheckNative();
             _done = true;
             Plugin.Log.LogInfo($"[paths check] PASS {_cases.Count} actors; {_save.Estate.Roster.Count} classes; Guild preview/{(ActorsOnly ? "rule confirmation" : "UI confirmation")}; base/mastered replacements; canonical loadouts/form HUD; expedition buff restore; no estate files accessed");
+            if (VisualRequested) BeginVisual();
         }
         catch (Exception e) { _done = true; Plugin.Log.LogError("[paths check] FAIL " + e); }
     }

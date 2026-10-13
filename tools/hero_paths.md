@@ -60,7 +60,9 @@ are abbreviated. Combat always uses the actual native effects rather than this f
 
 The exploration HUD uses native GetCombatBaseSkillId instead of trimming `_u`, so Path replacements retain
 their skill icons. It asks the native equipped-skill query to filter by current mode, keeping beast-only skills
-out of Abomination's human banner and vice versa. Tooltips describe the actual equipped variant.
+out of Abomination's human banner and vice versa. Tooltips describe the actual equipped variant. Portrait cache
+keys include the mode. Where DD2 supplies a distinct combat portrait but no colour override, the HUD uses that
+native combat portrait instead of silently retaining the human image.
 
 Monarch's two Oath buff IDs survive DD2's actor recreation between battles. ExpeditionHeroState captures their
 counts, restores them idempotently from native buff definitions and bounds them to the native 66-stack cap.
@@ -89,10 +91,24 @@ and bounded/idempotent Oath restoration pass. The fixture refuses an existing
 save and never selects an estate slot. At 1600x900 the confirmation button center is client 905,688.
 `-dd3-paths-actors-check` repeats actor/HUD assertions using rule-based confirmation, without OS input. This
 does not count as GUI click acceptance; the full flag's separate real-click run supplies that evidence.
+`-dd3-paths-visual-check` adds human -> beast -> human model/HUD checks through the native mode-change event,
+then ordinary homecoming/model release and application quit. Each stage holds 15 seconds for a GPU capture.
+This exercises mode presentation, not a Transform/Revert skill's combat calculation or animation timeline.
 
 Private evidence is in `local-art/hero-paths-v01`: logs, Guild captures, native party capture, build/test outputs and
 installation verification. Native creation, skill/mastery/Path mapping and Guild confirmation are verified.
 Full combat playthroughs for every skill/Path, balance, controller navigation and arbitrary text/window sizes
-remain separate acceptance work. The final actor-only process closed after PASS and before its final HUD capture.
-Native uninstall/quit exceptions followed PASS, so clean shutdown and final form HUD visual acceptance remain
-unverified. The owner requested no launches before 2026-10-12 19:18 UTC / 21:18 Europe/Paris.
+remain separate acceptance work.
+
+The October 13 follow-up in `local-art/hero-paths-v02` verifies both native form models, five equipped skills per
+form, restoration to human and ordinary homecoming/model release. It exposed the colour-portrait fallback above.
+The combat-portrait correction builds successfully; its final native visual check is pending while the separate
+Hamlet task owns the shared game session. Frozen sources pass 1,134 Core and 188 UI tests, including concurrent
+Hamlet changes that stay outside the hero commit.
+
+The shutdown investigation reproduces IMainInstaller's missing callback and GameSpeedMgr's late audio access
+with Doorstop disabled for one owned cold-start process. BepInEx/plugin startup is absent from that process's
+Player log, and its BepInEx log is unchanged. The process was closed through its ordinary window-close request.
+Identical installer stacks also predate Paths in October 11 fixtures. These are existing native shutdown errors;
+the hero changes do not suppress them. Positional-audio errors after a road session remain a separate runtime
+comparison. The owner's October 12 launch restriction expired before these October 13 checks.

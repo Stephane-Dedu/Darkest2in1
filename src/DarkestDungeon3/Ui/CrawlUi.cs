@@ -619,7 +619,7 @@ internal sealed class CrawlUi
         if (hero == null || actor == null) return;
 
         // Banner (DD1 panel.banner.darkest): portrait, name and class, then the five skill slots above "1-5".
-        var portrait = Art.HeroIcon(hero.ClassId);
+        var portrait = Art.HeroIcon(hero.ClassId, actor.ActorDataMode?.Id);
         if (portrait != null) Art.DrawSprite(new Rect(262, 738, 96, 96), portrait);
         if (RightClicked(new Rect(250, 728, 270, 120))) _sheetHeroId = hero.Id;
         float nameSize = 30;
