@@ -73,7 +73,7 @@ def painted_ground(name, texture, paint, vertex_shade=False, cutout=False):
     return material
 
 
-def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=None):
+def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=None,lanes=None):
     """Approximate the native one-time world paint bake with the exported Core stain field."""
     size=2048
     def tile(image,paint,u,v):
@@ -110,7 +110,14 @@ def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=Non
     image.pixels.foreach_set(rgba.reshape(-1)); image.pack()
     neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,
              'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
-    return painted_ground('World earth and gravel',image,neutral,True)
+    earth_material=painted_ground('World earth and gravel',image,neutral,True)
+    if lanes is None: return earth_material,None
+    lane_field=expand(lanes)[:,:,None]
+    color=encode(color)*(1-lane_field)+encode(tile(stone,palette['Paving'],x/5,z/5))*lane_field
+    rgba[:,:,:3]=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
+    image=bpy.data.images.new('World worn paving',width=size,height=size)
+    image.pixels.foreach_set(rgba.reshape(-1)); image.pack()
+    return earth_material,painted_ground('World worn paving',image,neutral)
 
 
 def quiet_building_materials(objects):
@@ -180,7 +187,7 @@ def depth_mist(bands):
         obj.data.materials.append(material)
 
 
-def world_valley(soil,stone,grass,palette,data):
+def world_valley(soil,stone,grass,rock,palette,data):
     """Native surface palette plus exported road/haze field; approximate construction-only bake."""
     size=2048
     x,z=np.meshgrid(np.linspace(data['MinX'],data['MaxX'],size),np.linspace(data['MinZ'],data['MaxZ'],size))
@@ -194,7 +201,7 @@ def world_valley(soil,stone,grass,palette,data):
         luma=np.sum(color*np.array([.2126,.7152,.0722]),axis=2,keepdims=True)
         color=np.clip(luma+(color-luma)*paint['Saturation']+paint['Brightness'],0,1)
         return np.where(color<=.0031308,color*12.92,1.055*np.maximum(color,0)**(1/2.4)-.055)
-    field=np.array([[s['Stain']['Tint'][k] for k in ['X','Y','Z']]+[s['Stain']['Gravel'],s['Road'],s['Haze'],s['Grass'],s['Wilderness']] for s in data['Samples']],dtype=np.float32).reshape(256,256,8)
+    field=np.array([[s['Stain']['Tint'][k] for k in ['X','Y','Z']]+[s['Stain']['Gravel'],s['Road'],s['Haze'],s['Grass'],s['Wilderness'],s.get('Rock',0)] for s in data['Samples']],dtype=np.float32).reshape(256,256,9)
     at=np.linspace(0,255,size); lo=at.astype(int); hi=np.minimum(lo+1,255); f=at-lo
     horizontal=field[:,lo,:]*(1-f)[None,:,None]+field[:,hi,:]*f[None,:,None]
     field=horizontal[lo,:,:]*(1-f)[:,None,None]+horizontal[hi,:,:]*f[:,None,None]
@@ -203,6 +210,8 @@ def world_valley(soil,stone,grass,palette,data):
     color=earth*(1-wear)+tile(stone,palette['Paving'],x/5.5+.37,z/5.5+.19)*wear
     color=(color*(1-cover)+turf*cover)*field[:,:,:3]
     road=field[:,:,4:5]*.88; color=color*(1-road)+tile(stone,palette['Paving'],x/5,z/5)*road
+    cliff=tile(rock,palette['Rock'],x/28,z/18)*np.array([.56,.64,.76])
+    mask=field[:,:,8:9];color=color*(1-mask)+cliff*mask
     color*=1-.35*field[:,:,7:8]
     haze=field[:,:,5:6]; color=color*(1-haze)+np.array([.13,.17,.23])*haze
     rgba=np.ones((size,size,4),dtype=np.float32)
@@ -233,9 +242,9 @@ def main(args):
     grass=bpy.data.images.load(str(out/'grass_dry.png'))
     tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
-    earth=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'))
+    earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
     rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
-    paving=painted_ground('Native foundation paving',texture,palette['Paving'])
+    paving=paving or painted_ground('Native foundation paving',texture,palette['Paving'])
     stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
@@ -243,7 +252,7 @@ def main(args):
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
     surface('Core stair flights and landings',terrain['Stairs'],[stone])
-    surface('Core surrounding valley',terrain['Surroundings'],[world_valley(soil,texture,grass,palette,data['Valley'])])
+    surface('Core surrounding valley',terrain['Surroundings'],[world_valley(soil,texture,grass,cliff,palette,data['Valley'])])
     surface('Core native grass tufts',data['Vegetation'],[painted_ground('Native grass silhouettes',tufts,palette['GrassTuft'],cutout=True)])
     buildings={}
     for site in data['Sites']:

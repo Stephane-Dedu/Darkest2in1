@@ -39,9 +39,10 @@ internal sealed partial class HamletStage
         if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
             Plugin.Log.LogInfo($"[hamlet 3d paint] {_groundMaterial.shader.name}; color space {QualitySettings.activeColorSpace}; grass {_grassAsset.Status}/{_grassAsset.Result?.name}/{(_grassAsset.Result!=null?BaseTexture(_grassAsset.Result)?.name:null)}; rock {_rockAsset.Status}; earth {_earthAsset.Status}");
         var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
-        SetPaintTexture(valley,ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
+        SetPaintTexture(valley,ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass,BaseTexture(rock)));
         SetPaintTint(valley,Color.white);
-        SetPaintTexture(_groundMaterial,GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass));
+        SetPaintTexture(_groundMaterial,GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass,out var lanes));
+        SetPaintTexture(paving,lanes); SetPaintTint(paving,Color.white);
         int layer=source.gameObject.layer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);

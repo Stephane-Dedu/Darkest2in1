@@ -55,7 +55,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
         // Bury the broad lower mass beyond the civic ridge so the Mountain encloses the town backdrop.
-        new(null, Mountains + "mainmenu_mountain_mdl.fbx", -12, -78, 112, 500, heightScale: .52f, depthScale: .15f,absolute:true),
+        new(null, Mountains + "mainmenu_mountain_mdl.fbx", -12, -78, 112, 500, 180, heightScale: .52f, depthScale: .15f,absolute:true),
         new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
         new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
         new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),

@@ -41,4 +41,24 @@ public static class HamletGroundPaint
         float t=Math.Max(0,Math.Min(1,HamletVegetation.Clearance(x,z)/3));
         return .42f*(1-t*t*(3-2*t));
     }
+
+    /// <summary>Continuous worn road margins shared by branches and the forecourt.</summary>
+    public static float LaneCover(float x,float z)
+    {
+        float edge=100;
+        foreach (var route in HamletLayout.Routes) for (int i=1;i<route.Points.Length;i++)
+        {
+            var a=route.Points[i-1]; var b=route.Points[i];
+            float dx=b.X-a.X,dz=b.Z-a.Z,length=dx*dx+dz*dz;
+            if (Math.Abs(b.Y-a.Y)>=.45f && Math.Abs(b.Y-a.Y)/Math.Sqrt(length)>.18f) continue;
+            float t=Math.Max(0,Math.Min(1,((x-a.X)*dx+(z-a.Z)*dz)/length));
+            float rx=x-a.X-dx*t,rz=z-a.Z-dz*t;
+            edge=Math.Min(edge,(float)Math.Sqrt(rx*rx+rz*rz)-route.Width/2);
+        }
+        float square=(float)Math.Sqrt(x*x/(13*13)+(z+3)*(z+3)/(7*7));
+        edge=Math.Min(edge,(square-1)*7);
+        float chip=.13f*(float)Math.Sin(x*2.7f+z*.83f)+.11f*(float)Math.Sin(z*3.3f-x*.73f);
+        float fade=Math.Max(0,Math.Min(1,(-edge-.03f+chip)/.85f));
+        return fade*fade*(3-2*fade);
+    }
 }

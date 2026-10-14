@@ -41,7 +41,7 @@ internal static class HamletGroundwork
                         float offset=route.Width*(edge==0?-.5f:.5f);
                         float x=a.X+dx*t+dz/distance*offset,z=a.Z+dz*t-dx/distance*offset;
                         // One world projection across branches and the square; joins cannot reset or shear the paint.
-                        paths.Vertex(x,HamletLayout.Height(x,z)+.055f,z,x/5,z/5);
+                        LaneVertex(x,z);
                     }
                     if (sample==samples) continue;
                     int v=start+sample*2; paths.Triangle(v,v+2,v+1); paths.Triangle(v+1,v+2,v+3);
@@ -49,11 +49,11 @@ internal static class HamletGroundwork
             }
         }
         const int count=32; int square=paths.Count;
-        paths.Vertex(0,HamletLayout.Height(0,-3)+.055f,-3,0,-3/5f);
+        LaneVertex(0,-3);
         for (int i=0;i<count;i++)
         {
             float angle=i*(float)Math.PI*2/count,r=1+.06f*(float)Math.Sin(i*2.1f),x=(float)Math.Cos(angle)*13*r,z=-3+(float)Math.Sin(angle)*7*r;
-            paths.Vertex(x,HamletLayout.Height(x,z)+.055f,z,x/5,z/5);
+            LaneVertex(x,z);
             paths.Triangle(square,square+(i+1)%count+1,square+i+1);
         }
         foreach (var site in HamletLayout.Sites.Where(s=>s.Y>3))
@@ -79,6 +79,9 @@ internal static class HamletGroundwork
             }
         }
         paving=paths.Finish(); masonry=walls.Finish(); stairs=stepsMesh.Finish();
+        void LaneVertex(float x,float z)=>paths.Vertex(x,HamletLayout.Height(x,z)+.055f,z,
+            (x-HamletLayout.MinX)/(HamletLayout.MaxX-HamletLayout.MinX),
+            (z-HamletLayout.MinZ)/(HamletLayout.MaxZ-HamletLayout.MinZ));
     }
     private static float Length(float x,float z)=>(float)Math.Sqrt(x*x+z*z);
 

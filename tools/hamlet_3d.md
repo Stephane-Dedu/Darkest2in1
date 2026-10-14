@@ -1,5 +1,17 @@
 # Perspective Hamlet
 
+Round242 is the owner-approved visual revision. Keep the original dark native cliff paint and texture
+scale. The detailed Mountain face, charcoal-blue grading, rocky foothills and raised mist frame the town;
+world-space paving has worn margins. Fitted trim on four service models and selective slate/masonry grades
+retain their original envelopes and painted UVs. Private source/package/capture: `local-art/ui-overhaul/
+hamlet-surface-v15`. See `tools/hamlet_models/README.md` for reproducing the private model finishes.
+
+Release+54 Hamlet cases pass. The final unsaved native overview was approved, with181 renderers and zero
+repeated buffer allocations in5.040sec. v14 full interaction/cache/resize acceptance covers the retained
+paths. After review the exact pre-test plugin, model package and config were restored. Install the approved
+private package with the next current-source deployment while DD2 is stopped. Saves and full performance
+remain separate acceptance.
+
 The 3D Hamlet is the standard view. Round239 removes painted/hybrid/DD1 town drawing completely.
 Cold entry and retry show an opaque torch page until the actual town has rendered; failure offers Retry
 scenery or Main menu. The retired view flags/switches remain removed. Camera motion and Reset view remain.

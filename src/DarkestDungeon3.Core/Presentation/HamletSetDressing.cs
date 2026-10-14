@@ -73,7 +73,7 @@ public static class HamletSetDressing
         new(-42,-31,7,3.6f,5,15),new(-15,-32,8,3.2f,5,-15),new(25,-29,7,3,5,12),
     }.Where(r=>HamletVegetation.Clearance(r.X,r.Z)>Math.Max(r.Width,r.Depth)*.5f+.2f).ToArray();
     public static readonly Light[] Lights = MakeLights();
-    public static readonly Mist[] Mists = { new(-8,13,78,220,22,.11f), new(-12,23,103,270,30,.13f) };
+    public static readonly Mist[] Mists = { new(-8,25,78,260,28,.14f), new(-12,37,103,300,38,.13f) };
 
     private static Light[] MakeLights()
     {

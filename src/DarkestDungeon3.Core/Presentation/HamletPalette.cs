@@ -22,7 +22,7 @@ public static class HamletPalette
     public static readonly Paint Rubble = new(1.25f,1.35f,1.45f,.022f,.45f);
     public static readonly Paint Paving = new(.74f,.76f,.70f,.001f,.68f,uScale:.64f,vScale:.64f,uOffset:.18f,vOffset:.18f);
     public static readonly Paint Masonry = new(1.12f,1.2045f,1.178f,.003f,.45f);
-    public static readonly Paint Mountain = new(.84f,1.10f,1.42f,.017f,.40f);
+    public static readonly Paint Mountain = new(.075f,.105f,.16f,.002f,.46f);
     public static readonly Paint Woodland = new(.54f,.70f,.86f,.004f,.38f);
     public static readonly Paint DistantWoodland = new(.40f,.60f,.82f,.009f,.24f);
     public static readonly Paint Wildwood = new(.62f,.66f,.60f,.003f,.24f);

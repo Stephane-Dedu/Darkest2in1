@@ -6374,3 +6374,30 @@ The approved visual iteration is installed. The retained town/cache and cold tor
 Real saved Homecoming/transactions/embark, full default-map/provisioner/estate-picker torch fixtures, controller
 comfort, custom facade/NPC/upgrade art and full performance/memory work remain open. Preserve concurrent
 Shieldbreaker/scenery files and their notes; continue from tools/handoff_prompt.md.
+
+
+## Round242: approved Hamlet Mountain depth and building finishes, 2026-10-14
+
+Owner approved thev15 native capture and authorized committing. Preserve the original darker native cliff
+paint, grading,16-unit world period and760/960 atlas aspect. The Mountain now presents its detailed painted
+face toward town with restrained charcoal-blue grading, low rocky foothills and two elevated mist layers.
+Worn world-space paving margins blend into the ground across branches and the forecourt. Four service
+exteriors gain fitted trim: Abbey coping/ridge/buttress caps, Sanitarium drip/hip courses, Guild doorway
+trim/rivets and Tavern sign/lantern details. Original building envelopes and painted UVs remain intact;
+six GLBs are unchanged. Selected slate/masonry grades improve separation without adding lighting passes.
+
+The private54-file package is59.7 MB at local-art/ui-overhaul/hamlet-surface-v15/HamletModels. finish.py
+rebuilds the fitted details from the verifiedv02 models; package.py retains its original format. All game
+assets and derived model/paint outputs stay outside Git. No generated cliff texture is selected or packaged.
+
+Frozen committed baseline plus this pass: Release passes with three existing warnings and54 Hamlet cases
+pass. v14 full native services/Escape, controls, release/reload, cache park/resume, resize, keyboard and still
+checks passed with1,143 Core+190 UI tests before the final native-rock revision. v15 unsaved PID24016 loads
+all ten services/181 renderers; approved final overview inspected and0 repeated buffer allocations over
+5.040sec. Buffer stability is not a frame-time or long-session benchmark. Review captures, packed offline
+scene, source hashes and exact rollback backups: local-art/ui-overhaul/hamlet-surface-v15/review.json.
+
+Review previews were closed and the exact pre-test plugin/model package/config restored. The approved
+private package is ready for the next stopped-game deployment with current shared sources. This commit
+does not redeploy while another agent's native test runs. No estate read/save or OS input sent. Saved
+Homecoming/transactions, full performance and controller/text/window comfort remain separate acceptance.

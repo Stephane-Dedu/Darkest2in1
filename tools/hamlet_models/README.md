@@ -1,5 +1,25 @@
 # Hamlet building models
 
+The current approved finish pass preserves the original dark native cliffs and improves the Mountain,
+road margins and four building exteriors. `finish.py` imports the verifiedv02 GLBs and adds fitted Abbey
+coping/ridge/buttress caps, Sanitarium drip/hip courses, Guild doorway trim and Tavern sign/lantern details.
+It checks the architectural envelopes, re-imported topology and embedded paint; six GLBs remain unchanged.
+All models, extracted paint and packed Blender documents stay outside Git.
+
+To reproduce the approved fitted models, use a new private output folder and the existing verifiedv02
+library. Run `finish.py` through Blender, then package its output with the ordinary packager:
+
+```powershell
+& 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe' --background --factory-startup --threads 8 --python-exit-code 1 --python tools/hamlet_models/finish.py -- --source 'C:/Users/Piral/DarkestDungeon3/local-art/ui-overhaul/hamlet-buildings-v02' --out 'C:/Users/Piral/DarkestDungeon3/local-art/ui-overhaul/hamlet-buildings-finished' --kit 'C:/Users/Piral/DarkestDungeon3/local-art/dd2-native-kit'
+& 'C:/Users/Piral/DarkestDungeon3/universal-modder/.venv/Scripts/python.exe' tools/hamlet_models/package.py --source 'C:/Users/Piral/DarkestDungeon3/local-art/ui-overhaul/hamlet-buildings-finished' --out 'C:/Users/Piral/DarkestDungeon3/local-art/ui-overhaul/hamlet-buildings-finished/HamletModels'
+```
+
+The approved package is already prepared at `local-art/ui-overhaul/hamlet-surface-v15/HamletModels`: ten
+models,54 hashed files,59.7 MB. Its final native capture is `native-dark-rocks.png`. Native service camera
+controls/cache/resize acceptance precedes the final rock revision; Release+54 Hamlet cases and the final
+overview pass. The review restored the original installation. Deploy the approved package only with DD2
+stopped and current shared plugin sources. The following sections describe the earlier model studies.
+
 Ten separate 3D building studies, based on DD1's fully repaired `town_<building>_level03` exteriors.
 The graveyard uses `town_graveyard`. These are private asset authoring outputs, not replacements for the
 runtime models in round215. The existing `Look.Hamlet3D` flag and painted fallback are unchanged.

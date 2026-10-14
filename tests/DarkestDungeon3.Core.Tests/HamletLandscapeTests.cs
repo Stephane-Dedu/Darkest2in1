@@ -54,8 +54,8 @@ public class HamletLandscapeTests
         var terrain=HamletTerrain.Build(); var paving=terrain.Paving; var stairs=terrain.Stairs;
         for (int i=0;i<paving.Positions.Length/3;i++)
         {
-            Assert.InRange(MathF.Abs(paving.Uv[i*2]-paving.Positions[i*3]/5),0,.00001f);
-            Assert.InRange(MathF.Abs(paving.Uv[i*2+1]-paving.Positions[i*3+2]/5),0,.00001f);
+            Assert.InRange(MathF.Abs(paving.Uv[i*2]-(paving.Positions[i*3]-HamletLayout.MinX)/(HamletLayout.MaxX-HamletLayout.MinX)),0,.00001f);
+            Assert.InRange(MathF.Abs(paving.Uv[i*2+1]-(paving.Positions[i*3+2]-HamletLayout.MinZ)/(HamletLayout.MaxZ-HamletLayout.MinZ)),0,.00001f);
         }
         // The gently sloping entrance is a road, not four three-metre-deep stair blocks.
         Assert.True(stairs.Positions.Where((_,i)=>i%3==2).Min()>-3);
@@ -75,6 +75,21 @@ public class HamletLandscapeTests
             if (uvByPoint.TryGetValue(p,out var previous)) Assert.Equal(previous,uv);
             else uvByPoint.Add(p,uv);
         }
+    }
+
+    [Fact]
+    public void WornPavingKeepsTheLaneCentreAndReturnsToEarthAtTheMargins()
+    {
+        // Middle of the entrance lane, outside the forecourt and other branches.
+        const float x=-45.5f,z=-33;
+        Assert.Equal(1,HamletGroundPaint.LaneCover(x,z));
+        Assert.Equal(1,HamletGroundPaint.LaneCover(0,-3));
+        Assert.Equal(0,HamletGroundPaint.LaneCover(-60,50));
+        float nx=-6/MathF.Sqrt(157),nz=11/MathF.Sqrt(157);
+        float centre=HamletGroundPaint.LaneCover(x+nx*.6f,z+nz*.6f);
+        float edge=HamletGroundPaint.LaneCover(x+nx*1.8f,z+nz*1.8f);
+        float outside=HamletGroundPaint.LaneCover(x+nx*2.1f,z+nz*2.1f);
+        Assert.True(centre>.95f && edge<.35f && outside==0);
     }
 
     [Fact]

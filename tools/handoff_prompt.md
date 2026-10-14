@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round242 (October14) is owner-approved for commit. Preserve the original darker native cliff paint/UV
+scale with the improved Mountain, foothill mist, worn world-space paving and four fitted building finishes.
+Review holds are resolved. The current native capture and approved private package are under local-art/
+ui-overhaul/hamlet-surface-v15; see tools/hamlet_3d.md and tools/hamlet_models/README.md. Review previews
+restored the exact prior installation. Install that package with current shared sources at the next
+stopped-game deployment; preserve the other agent's native test and source work.
+
 The October13 timed launch pause has expired. Round241 used owned unsaved previews and closed them;
 do not relaunch ordinary play automatically. Preserve protected estates and independent agent work.
 

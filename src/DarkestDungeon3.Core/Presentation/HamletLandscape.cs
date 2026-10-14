@@ -66,7 +66,8 @@ public static class HamletLandscape
         // Broad, uneven wooded shoulders. The lower centre keeps the Abbey and mountain apart.
         float shoulder=9+5*(float)Math.Sin(x*.023f+.7f)+4*(float)Math.Sin(x*.051f);
         float ridge=(10+shoulder)*(float)Math.Exp(-Math.Pow((z-127-9*Math.Sin(x*.018))/37,2));
-        float foothill=8*(float)Math.Exp(-Math.Pow((z-90-5*Math.Sin(x*.032))/17,2));
+        float foothill=(11+3*(float)Math.Sin(x*.029f+.4f))
+            *(float)Math.Exp(-Math.Pow((z-92-7*Math.Sin(x*.032))/16,2));
         float valley=-13+wave+ridge+foothill;
         float weight=Smooth(distance/48);
         float height=edge*(1-weight)+valley*weight;
@@ -95,6 +96,8 @@ public static class HamletLandscape
     { ApproachAt(x,z,out _,out float weight); return weight; }
 
     public static float Haze(float z) => .68f*Smooth((z-52)/80);
+
+    public static float FoothillRock(float z) => .88f*Smooth((z-HamletLayout.MaxZ)/25);
 
     // Darker undisturbed earth surrounds the cleared town, with the approach road left readable.
     public static float Wilderness(float x,float z)
