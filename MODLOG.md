@@ -6322,3 +6322,55 @@ retargeting and rendered in Blender under local-art/vilhelm-v01. No Vilhelm game
 yet. a026_003040 is a candidate sword-buff pose, not yet proven to be the black-flame action; do not label it
 confirmed. Private TAE reference investigation and pose sheets are alongside. DS3 source files remain under
 C:/Users/Piral/ds3-extract, never in Git. Keep independent Hamlet/Shieldbreaker work out of this commit.
+
+## Round241 (2026-10-14): cliff forms, depth, service yards and native loading composition
+
+Owner approved the Hamlet visual review. Preserve the ten v02 exteriors, their UVs, all service positions,
+walking routes and camera. Civic/Abbey/Survivalist/eastern cliff transitions now have broken ledges instead
+of smooth ramps. Nine faceted outcrops add 315 triangles, with bases buried under the lowest surrounding
+ground sample. Foundation/route clearance filters exclude intrusive rocks. Continuous rock projection
+grows from12 to16 world units, with the original rectangular atlas texel proportions retained.
+
+HamletSetDressing adds17 native props in purposeful service groups: coach waiting shelter/trunk/lamp,
+Tavern storage, Sanitarium courtyard supplies, Guild tools/chest, forge workyard, Nomad stock and an Abbey
+approach lamp. Only installed visual components are copied, with no native shop/node scripts. Native model
+geometry/UVs remain unchanged. Roof/wall normals select three restrained albedo tint bands; warm emissive
+windows keep their original paint. Hover and locked feedback preserve those bands. No shared material edited.
+
+Two static soft mist layers behind all services and a low foothill break separate the town from the Mountain.
+The Mountain keeps its enclosing width500 placement with a small charcoal-blue lift. Paving is quieter/warmer,
+gravel patches less busy, and foundations have stronger localized contact shadows. Baked entrance light adds
+small amber pools without global bloom or brightening facades. Grass is shorter, duller and confined to verges:
+50 clumps instead of168. Existing four chimney plumes and camera-motion control remain. Owned native scene
+has173 renderers; no extra render targets or lighting passes are introduced.
+
+Offline review caught missing vertex shade on the first outcrop preview and rocks sitting above steep edges;
+the final mesh includes facet shade and samples surrounding ground for burial. Core checks also caught props
+on the Survivalist path and rocks in foundations; moved/excluded those rather than weakening clearance.
+Release passes with three existing warnings; frozen 1,145 Core+190 UI tests pass, including53 Hamlet cases.
+The private preview re-reads actual Core geometry and verified GLBs, with no missing scenery.
+
+Native unsaved checks pass all ten services/Escape, pan/zoom/reset, explicit full resource release/reload,
+re-entry, Embark park/cache identity/resume,1600->1440->1600 resize, keyboard focus/Enter/back and still-camera/
+smoke controls. The fixture also checks all services use facet materials and both distant mist bands exist.
+Native final overview inspected; repeated URP reallocations remain0 over5.040 seconds on the final run.
+This verifies buffer stability, not a frame-time/long-session benchmark. Existing v02 exteriors are unchanged;
+bespoke facade/sculpt/upgrade/NPC work and saved expedition-results return remain separate acceptance.
+
+Cold capture exposed round239's Canvas/IMGUI layering bug: an IMGUI black fill hid the native flame despite
+the torch component being active. Move the opaque background into the torch Canvas; keep IMGUI labels and
+retry controls above it. The same native capture timing now shows the torch. check_loading_capture.py is the
+native screenshot regression:0 bright torch pixels before,5,508 after,100% opaque corner margin. Native fixed
+screen inspected. measure_native.ps1 now accepts both supported Hamlet preview aliases, retaining its PID/
+rendered-scene guards. No fake progress bar, elapsed delay or painted town fallback is added.
+
+Private renders, captures, source/install hashes, pre-change binary backups and logs are under
+local-art/ui-overhaul/hamlet-set-dressing-v13. Concurrent Shieldbreaker/scenery work stays outside this commit.
+No estate selected/read/saved and no OS input sent. Owned QA processes closed; ordinary play is not reopened.
+
+## Status 2026-10-14: round241 visual pass and cold torch composition accepted in unsaved native preview
+
+The approved visual iteration is installed. The retained town/cache and cold torch now have native acceptance.
+Real saved Homecoming/transactions/embark, full default-map/provisioner/estate-picker torch fixtures, controller
+comfort, custom facade/NPC/upgrade art and full performance/memory work remain open. Preserve concurrent
+Shieldbreaker/scenery files and their notes; continue from tools/handoff_prompt.md.

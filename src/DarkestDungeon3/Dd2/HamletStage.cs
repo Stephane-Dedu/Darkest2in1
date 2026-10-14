@@ -73,7 +73,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", -59, -2, -7, 15, 15),
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", 49, -1, 25, 18, -25),
     }.Concat(HamletLandscape.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
-        heightScale:p.HeightScale,absolute:true,background:true))).ToArray();
+        heightScale:p.HeightScale,absolute:true,background:true)))
+        .Concat(HamletSetDressing.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,absolute:true))).ToArray();
 
     private sealed class Building
     {
@@ -86,6 +87,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     private readonly Dictionary<string, AsyncOperationHandle<GameObject>> _assets = new();
     private readonly List<Building> _buildings = new();
     private readonly Dictionary<Renderer, Color> _baseTints = new();
+    private readonly Dictionary<Renderer,Color[]> _facetTints = new();
     private readonly List<UnityEngine.Object> _details = new();
     private readonly Dictionary<Material, Material> _materials = new();
     private AsyncOperationHandle<Material> _terrainAsset, _earthAsset, _rockAsset, _wallAsset, _grassAsset, _grassTuftAsset;
@@ -125,6 +127,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         || _surfaceShaderAsset.IsValid() || _texture != null || _groundMesh != null || _groundMaterial != null || _modelTask != null;
     internal bool Parked => _parked;
     internal bool Rendering => _camera != null && _camera.isActiveAndEnabled;
+    internal bool FacetedServices => _buildings.Count==Services.Length && _buildings.All(b=>b.Renderers.Any(r=>_facetTints.ContainsKey(r)));
+    internal int MistBands => _root==null?0:_root.GetComponentsInChildren<MeshRenderer>().Count(r=>r.name=="Hamlet distant mist band");
     internal Vector2 Pan => _pan;
     internal float Zoom => _zoom;
     internal Vector3 CameraPosition => _camera!=null?_camera.transform.localPosition:Vector3.zero;
@@ -499,6 +503,16 @@ internal sealed partial class HamletStage : MonoBehaviour
         {
             var block = new MaterialPropertyBlock(); renderer.GetPropertyBlock(block);
             float factor = !b.Available ? .58f : b.Id == _hover ? 1.16f : 1;
+            if (_facetTints.TryGetValue(renderer,out var facets))
+            {
+                for (int i=0;i<facets.Length;i++)
+                {
+                    renderer.GetPropertyBlock(block,i);
+                    block.SetColor(Tint,facets[i]*factor);
+                    renderer.SetPropertyBlock(block,i);
+                }
+                continue;
+            }
             var material = renderer.sharedMaterial;
             if (material != null && material.HasProperty(Tint)) block.SetColor(Tint, _baseTints[renderer] * factor);
             else if (material != null && material.HasProperty("_Color")) block.SetColor("_Color", _baseTints[renderer] * factor);
@@ -547,7 +561,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         if (_surfaceShaderAsset.IsValid()) Addressables.Release(_surfaceShaderAsset);
         _surfaceShaderAsset=default;
         _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default; _grassAsset = default; _grassTuftAsset = default;
-        _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _materials.Clear();
+        _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _facetTints.Clear(); _materials.Clear();
         ClearModels();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;
         _nativeView = null; _nativePipeline = null; _nativeFormat = GraphicsFormat.None;

@@ -13,13 +13,6 @@ internal sealed partial class HamletUi
 
     private static void DrawTownLoading(HamletStage stage)
     {
-        var matrix = GUI.matrix;
-        try
-        {
-            GUI.matrix = Matrix4x4.identity;
-            Gui.Fill(new Rect(0, 0, Screen.width, Screen.height), new Color(.025f, .022f, .020f));
-        }
-        finally { GUI.matrix = matrix; }
         HamletLoadingTorch.Show();
         ExpeditionSkin.Text(new Rect(360, 728, 1200, 90), "Returning to the Hamlet", 48,
             ExpeditionSkin.Ivory, TextAnchor.MiddleCenter, heading: true);
@@ -28,7 +21,7 @@ internal sealed partial class HamletUi
         ExpeditionSkin.Text(new Rect(460, 824, 1000, 90), error, 26, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
         if (stage != null && ExpeditionSkin.Button(new Rect(710, 920, 500, 65), "Retry scenery", size: 26)) stage.Retry();
         if (!HamletPreview.OwnsSession && ExpeditionSkin.Button(new Rect(80, 996, 360, 60), "Main menu", size: 24))
-            Driver.Instance?.LeaveHamlet();
+        { HamletLoadingTorch.Hide(); Driver.Instance?.LeaveHamlet(); }
     }
 
     private void DrawTownControls()

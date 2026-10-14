@@ -75,19 +75,25 @@ public static class HamletLayout
     private static float Hill(float x, float z)
     {
         float wave=(float)Math.Sin(x*.19f)*1.8f+(float)Math.Sin(x*.53f)*.65f;
-        float civic = 12.5f * Smooth(16+wave, 21+wave, z) * Smooth(-26,-19,x) * (1-Smooth(28,39,x));
-        float upper = 17 * Smooth(29+wave,34+wave,z) * Smooth(-8,-2,x) * (1-Smooth(22,32,x));
-        float cliff = (24+.6f*(float)Math.Sin(z*.47f)) * Smooth(-33,-40,x) * Smooth(7+wave,13+wave,z) * (1-Smooth(37,47,z));
+        float civic = 12.5f * Ledge(16+wave, 21+wave, z) * Smooth(-26,-19,x) * (1-Smooth(28,39,x));
+        float upper = 17 * Ledge(29+wave,34+wave,z) * Smooth(-8,-2,x) * (1-Smooth(22,32,x));
+        float cliff = (24+.6f*(float)Math.Sin(z*.47f)) * Ledge(-33,-40,x) * Ledge(7+wave,13+wave,z) * (1-Smooth(37,47,z));
         float banks=Math.Max(Math.Max(civic,upper),cliff)*(1-Smooth(52,67,z));
         float rough=.32f*(float)Math.Sin(x*.43f+z*.23f)+.18f*(float)Math.Sin(x*.81f-z*.58f);
         float rim = 2 * Smooth(43, 58, Math.Abs(x));
         float edge = 13 * Smooth(55, 66, Math.Abs(x + 4));
         // An exposed eastern face sits beyond the workshop foundations, rather than a wide grassy roll-off.
         float eastWave=.65f*(float)Math.Sin(z*.27f);
-        float eastCliff=13*Smooth(46+eastWave,50+eastWave,x)*Smooth(-31,-23,z)*(1-Smooth(38,46,z));
+        float eastCliff=13*Ledge(46+eastWave,50+eastWave,x)*Smooth(-31,-23,z)*(1-Smooth(38,46,z));
         edge=Math.Max(edge,eastCliff);
         float ditch = 8*(1-Smooth(-28,-18,z))*(1-Smooth(-35,-18,x)) + 6*(1-Smooth(-33,-25,z));
         return banks + rough + rim - edge - ditch;
+    }
+
+    private static float Ledge(float a,float b,float value)
+    {
+        float t=(value-a)/(b-a);
+        return .22f*Smooth(0,.28f,t)+.46f*Smooth(.35f,.55f,t)+.32f*Smooth(.78f,1,t);
     }
 
     public static float Height(float x, float z)

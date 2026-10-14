@@ -64,6 +64,17 @@ internal sealed partial class HamletStage
         _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);
         for (int i=0;i<3;i++) _groundMesh.SetTriangles(rockBands[i],i+1);
         Surface(_groundMesh,_groundMaterial,layer).sharedMaterials=materials;
+        var outcrops=HamletSetDressing.BuildRocks();
+        var outcropMesh=MeshData("Hamlet broken cliff ledges",outcrops.Positions,outcrops.Uv);
+        outcropMesh.subMeshCount=3; _details.Add(outcropMesh);
+        var outcropBands=new[] { new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>() };
+        for (int i=0;i<outcrops.Indices.Length;i+=3)
+        {
+            float shade=outcrops.Shade[outcrops.Indices[i]];
+            outcropBands[shade<.83f?0:shade<.90f?1:2].AddRange(outcrops.Indices.Skip(i).Take(3));
+        }
+        for (int i=0;i<3;i++) outcropMesh.SetTriangles(outcropBands[i],i);
+        Surface(outcropMesh,materials[2],layer).sharedMaterials=materials.Skip(1).ToArray();
         var surroundings=MeshData(valley.name,data.Surroundings.Positions,data.Surroundings.Uv);
         surroundings.triangles=data.Surroundings.Indices; _details.Add(surroundings); Surface(surroundings,valley,layer);
         foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone),(data.Stairs,stone) })
@@ -87,6 +98,7 @@ internal sealed partial class HamletStage
         }
         foreach (var renderer in _root.GetComponentsInChildren<MeshRenderer>())
             if (renderer.name.Contains("road_valley_straight_single")) renderer.enabled=false;
+        AddDepthMist(layer);
     }
 
     private static Mesh MeshData(string name,float[] positions,float[] coordinates)

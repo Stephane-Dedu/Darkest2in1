@@ -66,7 +66,8 @@ public static class HamletLandscape
         // Broad, uneven wooded shoulders. The lower centre keeps the Abbey and mountain apart.
         float shoulder=9+5*(float)Math.Sin(x*.023f+.7f)+4*(float)Math.Sin(x*.051f);
         float ridge=(10+shoulder)*(float)Math.Exp(-Math.Pow((z-127-9*Math.Sin(x*.018))/37,2));
-        float valley=-13+wave+ridge;
+        float foothill=8*(float)Math.Exp(-Math.Pow((z-90-5*Math.Sin(x*.032))/17,2));
+        float valley=-13+wave+ridge+foothill;
         float weight=Smooth(distance/48);
         float height=edge*(1-weight)+valley*weight;
         ApproachAt(x,z,out float roadHeight,out float road);

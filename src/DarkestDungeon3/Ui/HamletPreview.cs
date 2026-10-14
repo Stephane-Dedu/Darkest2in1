@@ -148,6 +148,7 @@ internal static class HamletPreview
         void Require(bool ok, string message) { if (!ok) throw new InvalidOperationException("[hamlet 3d check] " + message); }
         if (_checkStep==0) Require(stage.SurfaceShaderName=="Universal Render Pipeline/Unlit","Terrain did not bind the installed paint shader.");
         if (_checkStep==0) Require(!stage.OpaqueHiddenBackings,"Grading made native backing geometry opaque.");
+        if (_checkStep==0) Require(stage.FacetedServices && stage.MistBands==2,"Service facets or distant mist did not build.");
         if (_checkStep < 20 || _checkStep is 28 or 29)
         {
             string expected = _checkStep % 2 == 0 ? Dd2.HamletStage.Services[_checkStep == 28 ? 0 : _checkStep / 2] : null;

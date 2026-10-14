@@ -59,14 +59,14 @@ public static class HamletVegetation
             float x=HamletLayout.MinX+2+col*3.4f+(float)Math.Sin(seed*1.73)*1.1f;
             float z=HamletLayout.MinZ+2+row*3.3f+(float)Math.Cos(seed*2.31)*1.1f;
             if (x<HamletLayout.MinX+2 || z<HamletLayout.MinZ+2 || x>HamletLayout.MaxX-2 || z>HamletLayout.MaxZ-2
-                || Cover(x,z)<.48f || Clearance(x,z)<1.5f) continue;
+                || Cover(x,z)<.58f || Clearance(x,z)<1.5f || Clearance(x,z)>7) continue;
             float y=HamletLayout.Height(x,z);
             // Avoid floating tufts on sharp terrace faces or the edge of a stair cutting.
             float slope=0;
             foreach (var d in new[] { (1f,0f),(-1f,0f),(0f,1f),(0f,-1f) })
                 slope=Math.Max(slope,Math.Abs(HamletLayout.Height(x+d.Item1,z+d.Item2)-y));
             if (slope>.65f) continue;
-            float height=.9f+.65f*(.5f+.5f*(float)Math.Sin(seed*3.17));
+            float height=.62f+.40f*(.5f+.5f*(float)Math.Sin(seed*3.17));
             result.Add(new(x,y-.15f,z,height,(float)Math.Sin(seed*1.19)*32,seed%3));
         }
         return result.ToArray();

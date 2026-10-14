@@ -103,11 +103,11 @@ public class HamletLandscapeTests
     {
         foreach (var site in HamletLayout.Sites)
         {
-            Assert.InRange(HamletGroundPaint.ContactShade(site.X,site.Z),.78f,.841f);
+            Assert.InRange(HamletGroundPaint.ContactShade(site.X,site.Z),.7599f,.761f);
             Assert.Equal(.42f,HamletGroundPaint.EdgeWear(site.X,site.Z));
         }
         var samples=Enumerable.Range(0,500).Select(i=>(X:i%25*4-50f,Z:i/25*4-30f)).ToArray();
-        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.ContactShade(p.X,p.Z),.78f,1));
+        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.ContactShade(p.X,p.Z),.7599f,1));
         Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.EdgeWear(p.X,p.Z),0,.42f));
         Assert.Contains(samples,p=>HamletVegetation.Clearance(p.X,p.Z)>3 && HamletGroundPaint.EdgeWear(p.X,p.Z)==0);
         Assert.Contains(samples,p=>HamletGroundPaint.ContactShade(p.X,p.Z)>.98f);

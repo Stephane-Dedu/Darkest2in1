@@ -1,3 +1,4 @@
+using DarkestDungeon3.Core.Presentation;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -6,6 +7,36 @@ namespace DarkestDungeon3.Dd2;
 internal sealed partial class HamletStage
 {
     private Material _smokeMaterial;
+
+    private void AddDepthMist(int layer)
+    {
+        const int width=192,height=64;
+        var texture=new Texture2D(width,height,TextureFormat.RGBA32,false,false)
+        { name="Hamlet soft distant mist",wrapMode=TextureWrapMode.Clamp,filterMode=FilterMode.Bilinear };
+        var pixels=new Color32[width*height];
+        for (int y=0;y<height;y++) for (int x=0;x<width;x++)
+        {
+            float u=x/(float)(width-1),v=y/(float)(height-1);
+            float ridge=.49f+.065f*Mathf.Sin(u*17)+.035f*Mathf.Cos(u*29);
+            float alpha=Mathf.Exp(-Mathf.Pow((v-ridge)/.22f,2))*Mathf.Pow(Mathf.Sin(u*Mathf.PI),.7f);
+            alpha*=Mathf.Clamp01(v*9)*Mathf.Clamp01((1-v)*9);
+            pixels[y*width+x]=new Color32(47,59,77,(byte)(255*alpha));
+        }
+        texture.SetPixels32(pixels); texture.Apply(false,true); _details.Add(texture);
+        foreach (var band in HamletSetDressing.Mists)
+        {
+            var material=new Material(Shader.Find("Sprites/Default"))
+            { name="Hamlet distant mist band",mainTexture=texture,color=new Color(1,1,1,band.Opacity) };
+            _details.Add(material);
+            var mesh=new Mesh { name=material.name,
+                vertices=new[] { new Vector3(band.X-band.Width/2,band.Y-band.Height/2,band.Z),
+                    new Vector3(band.X-band.Width/2,band.Y+band.Height/2,band.Z),
+                    new Vector3(band.X+band.Width/2,band.Y+band.Height/2,band.Z),
+                    new Vector3(band.X+band.Width/2,band.Y-band.Height/2,band.Z) },
+                uv=new[] { Vector2.zero,Vector2.up,Vector2.one,Vector2.right },triangles=new[] { 0,1,2,0,2,3 } };
+            _details.Add(mesh); Surface(mesh,material,layer);
+        }
+    }
 
     private void AddChimneySmoke(Transform building,Vector3 localTop)
     {

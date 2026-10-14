@@ -13,6 +13,10 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
     Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
+    Outcrops=HamletSetDressing.BuildRocks(),Mists=HamletSetDressing.Mists,
+    EntranceLight=Enumerable.Range(0,256*256).Select(i=>HamletSetDressing.EntranceLight(
+        HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
+        HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
     Valley=new
     {
         HamletLandscape.MinX,HamletLandscape.MaxX,HamletLandscape.MinZ,HamletLandscape.MaxZ,
@@ -53,6 +57,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("coast_skirt_cliffs_mdl_01",-59,-2,-7,15,15),Scenery("coast_skirt_cliffs_mdl_01",49,-1,25,18,-25)
     }.Concat(HamletLandscape.Props.Select(p=>(object)new
     { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,DepthScale=1,Background=true }))
+    .Concat(HamletSetDressing.Props.Select(p=>(object)new { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,p.DepthScale }))
 },new JsonSerializerOptions { IncludeFields=true }));
 Console.WriteLine($"{path}: {terrain.Positions.Length/3:N0} terrain vertices, {terrain.Rock.Length/3:N0} rock faces");
 

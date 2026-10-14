@@ -34,7 +34,9 @@ internal sealed partial class HamletStage
                 color=Color.Lerp(color,PaintTile(turf,px/7.5f,pz/7.5f),weight);
             }
             float light=ReadField(shade,fieldSize,fx,fy);
-            pixels[y*size+x]=new Color(color.r*sample.Tint.X*light,color.g*sample.Tint.Y*light,color.b*sample.Tint.Z*light,1);
+            float glow=HamletSetDressing.EntranceLight(px,pz);
+            pixels[y*size+x]=new Color(color.r*sample.Tint.X*light+glow*.40f,
+                color.g*sample.Tint.Y*light+glow*.24f,color.b*sample.Tint.Z*light+glow*.065f,1);
         }
         var texture=new Texture2D(size,size,TextureFormat.RGBA32,true,false)
         { name="Hamlet world earth, grass and worn gravel",wrapMode=TextureWrapMode.Clamp,filterMode=FilterMode.Trilinear,anisoLevel=4 };

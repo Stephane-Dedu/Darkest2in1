@@ -155,7 +155,32 @@ internal sealed partial class HamletStage
             var obj = new GameObject(mesh.name) { layer = layer };
             obj.transform.SetParent(group, false);
             obj.AddComponent<MeshFilter>().sharedMesh = mesh;
-            var renderer = obj.AddComponent<MeshRenderer>(); renderer.sharedMaterial = PaintMaterial(info, template);
+            var renderer = obj.AddComponent<MeshRenderer>();
+            var paint=PaintMaterial(info, template);
+            var bands=new[] { new List<int>(),new List<int>(),new List<int>() };
+            var rotation=Quaternion.Euler(0,180+site.Yaw,0);
+            bool paintedEmission=info.BaseColorFactor.Take(3).All(v=>v<.001f);
+            bool light=!paintedEmission && info.EmissiveFactor.Max()>info.BaseColorFactor.Take(3).Max()*1.1f;
+            for (int i=0;i<triangles.Count;i+=3)
+            {
+                var n=rotation*(normals[triangles[i]]+normals[triangles[i+1]]+normals[triangles[i+2]]).normalized;
+                float key=Vector3.Dot(n,new Vector3(-.35f,.75f,-.55f));
+                int band=light?1:key<-.15f?0:key>.35f?2:1;
+                bands[band].AddRange(new[] { triangles[i],triangles[i+1],triangles[i+2] });
+            }
+            mesh.subMeshCount=3;
+            var facets=new Material[3]; var baseColors=new Color[3];
+            var baseColor=paint.GetColor(Tint);
+            for (int i=0;i<3;i++)
+            {
+                mesh.SetTriangles(bands[i],i);
+                var tint=HamletSetDressing.FacetTint(i==0?1:0,i==2?1:0,0);
+                baseColors[i]=light?baseColor:baseColor*new Color(tint.X,tint.Y,tint.Z,1);
+                facets[i]=i==1?paint:new Material(paint) { name=paint.name+" facet "+i };
+                if (i!=1) _details.Add(facets[i]);
+                facets[i].SetColor(Tint,baseColors[i]);
+            }
+            renderer.sharedMaterials=facets; _facetTints[renderer]=baseColors;
             renderer.shadowCastingMode = ShadowCastingMode.Off; renderer.receiveShadows = false;
             _baseTints[renderer] = renderer.sharedMaterial.HasProperty(Tint) ? renderer.sharedMaterial.GetColor(Tint) : Color.white;
             renderers.Add(renderer);

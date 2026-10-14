@@ -6,7 +6,7 @@ param(
 $ErrorActionPreference='Stop'
 $script:hamletRendered=$false
 $hamletProcess=Get-CimInstance Win32_Process -Filter "ProcessId = $HamletProcessId"
-if (!$hamletProcess -or $hamletProcess.CommandLine -notmatch '-dd3-hamlet3d-preview') {
+if (!$hamletProcess -or $hamletProcess.CommandLine -notmatch '-dd3-hamlet(?:3d)?-preview') {
     throw 'Measure only the owned unsaved Hamlet preview process.'
 }
 function AllocationCount {

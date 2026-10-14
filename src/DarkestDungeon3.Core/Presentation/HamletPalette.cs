@@ -18,16 +18,17 @@ public static class HamletPalette
     public static readonly Paint Rock = new(1.70f,1.85f,2.05f,.008f,.45f,
         uScale:960f/1024,vScale:760f/1024,uOffset:32f/1024,vOffset:144f/1024);
     public const float RockTexelAspect=760f/960;
+    public const float RockPeriod=16;
     public static readonly Paint Rubble = new(1.25f,1.35f,1.45f,.022f,.45f);
-    public static readonly Paint Paving = new(.86f,.88f,.82f,.001f,.75f,uScale:.64f,vScale:.64f,uOffset:.18f,vOffset:.18f);
+    public static readonly Paint Paving = new(.74f,.76f,.70f,.001f,.68f,uScale:.64f,vScale:.64f,uOffset:.18f,vOffset:.18f);
     public static readonly Paint Masonry = new(1.12f,1.2045f,1.178f,.003f,.45f);
-    public static readonly Paint Mountain = new(.84f,1.10f,1.42f,.012f,.45f);
+    public static readonly Paint Mountain = new(.84f,1.10f,1.42f,.017f,.40f);
     public static readonly Paint Woodland = new(.54f,.70f,.86f,.004f,.38f);
     public static readonly Paint DistantWoodland = new(.40f,.60f,.82f,.009f,.24f);
     public static readonly Paint Wildwood = new(.62f,.66f,.60f,.003f,.24f);
     public static readonly Paint Building = new(.94f,.96f,1,.001f,.76f);
     public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
-    public static readonly Paint GrassTuft = new(.48f,.62f,.44f,0,1);
+    public static readonly Paint GrassTuft = new(.31f,.44f,.30f,0,.7f);
 
     public static (int Width,int Height) PaintExtent(int width,int height,int maximum,Paint paint,bool crop)
     {

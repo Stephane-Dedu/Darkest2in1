@@ -73,7 +73,7 @@ def painted_ground(name, texture, paint, vertex_shade=False, cutout=False):
     return material
 
 
-def world_ground(soil,stone,grass,palette,stains,cover,contact,wear):
+def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=None):
     """Approximate the native one-time world paint bake with the exported Core stain field."""
     size=2048
     def tile(image,paint,u,v):
@@ -103,6 +103,7 @@ def world_ground(soil,stone,grass,palette,stains,cover,contact,wear):
     grass_field=expand(cover)
     turf=tile(grass,palette['Grass'],x/7.5,z/7.5)
     color=(color*(1-grass_field[:,:,None])+encode(turf)*grass_field[:,:,None])*field[:,:,:3]*expand(contact)[:,:,None]
+    if entrance is not None: color+=expand(entrance)[:,:,None]*np.array([.40,.24,.065])
     color=np.where(color<=.04045,color/12.92,((color+.055)/1.055)**2.4)
     rgba=np.ones((size,size,4),dtype=np.float32); rgba[:,:,:3]=color
     image=bpy.data.images.new('World earth and gravel',width=size,height=size)
@@ -123,6 +124,60 @@ def quiet_building_materials(objects):
         elif emission.default_value<=1.1:
             emission.default_value=0
         shader.inputs['Roughness'].default_value=1; shader.inputs['Specular IOR Level'].default_value=0
+
+
+def building_facets(objects):
+    """Match the runtime's three bounded albedo tints, without changing UVs or silhouettes."""
+    tints=[(.76,.79,.84,1),(.93,.94,.96,1),(.98,1.04,1.12,1)]
+    for obj in objects:
+        originals=list(obj.data.materials); original_slots=[p.material_index for p in obj.data.polygons]
+        obj.data.materials.clear()
+        for material in originals:
+            for tint in tints:
+                copy=material.copy(); shader=next((n for n in copy.node_tree.nodes if n.type=='BSDF_PRINCIPLED'),None)
+                if shader:
+                    for name in ['Base Color','Emission Color']:
+                        socket=shader.inputs[name]; links=copy.node_tree.links
+                        multiply=copy.node_tree.nodes.new('ShaderNodeMixRGB'); multiply.blend_type='MULTIPLY'
+                        multiply.inputs[0].default_value=1; multiply.inputs[2].default_value=tint
+                        if socket.is_linked:
+                            source=socket.links[0].from_socket; links.remove(socket.links[0]); links.new(source,multiply.inputs[1])
+                        else: multiply.inputs[1].default_value=socket.default_value
+                        links.new(multiply.outputs[0],socket)
+                obj.data.materials.append(copy)
+        for polygon,original_slot in zip(obj.data.polygons,original_slots):
+            normal=obj.matrix_world.to_3x3()@polygon.normal
+            key=normal.normalized().dot(Vector((-.35,-.55,.75)))
+            original=originals[original_slot]
+            light=any(word in original.name.lower() for word in ['window','lantern','flame','fire','candle','glass'])
+            band=1 if light else 0 if key<-.15 else 2 if key>.35 else 1
+            polygon.material_index=original_slot*3+band
+
+
+def depth_mist(bands):
+    width,height=192,64
+    u,v=np.meshgrid(np.linspace(0,1,width),np.linspace(0,1,height))
+    ridge=.49+.065*np.sin(u*17)+.035*np.cos(u*29)
+    alpha=np.exp(-((v-ridge)/.22)**2)*np.maximum(0,np.sin(u*np.pi))**.7
+    alpha*=np.clip(v*9,0,1)*np.clip((1-v)*9,0,1)
+    pixels=np.ones((height,width,4),dtype=np.float32); pixels[:,:,:3]=np.array([47,59,77])/255
+    pixels[:,:,:3]=np.where(pixels[:,:,:3]<=.04045,pixels[:,:,:3]/12.92,((pixels[:,:,:3]+.055)/1.055)**2.4)
+    pixels[:,:,3]=alpha
+    texture=bpy.data.images.new('Soft distant mist',width=width,height=height); texture.pixels.foreach_set(pixels.reshape(-1)); texture.pack()
+    for band in bands:
+        x,y,z,w,h=band['X'],band['Y'],band['Z'],band['Width'],band['Height']
+        obj=surface('Distant mist',{'Positions':[x-w/2,y-h/2,z,x-w/2,y+h/2,z,x+w/2,y+h/2,z,x+w/2,y-h/2,z],
+            'Uv':[0,0,0,1,1,1,1,0],'Indices':[0,1,2,0,2,3]},[])
+        material=bpy.data.materials.new('Distant cool mist'); material.use_nodes=True
+        nodes=material.node_tree.nodes; nodes.clear(); links=material.node_tree.links
+        image=nodes.new('ShaderNodeTexImage'); image.image=texture
+        emission=nodes.new('ShaderNodeEmission'); links.new(image.outputs['Color'],emission.inputs['Color'])
+        transparent=nodes.new('ShaderNodeBsdfTransparent'); mix=nodes.new('ShaderNodeMixShader')
+        opacity=nodes.new('ShaderNodeMath'); opacity.operation='MULTIPLY'; opacity.inputs[1].default_value=band['Opacity']
+        links.new(image.outputs['Alpha'],opacity.inputs[0]); links.new(opacity.outputs[0],mix.inputs[0])
+        links.new(transparent.outputs[0],mix.inputs[1]); links.new(emission.outputs[0],mix.inputs[2])
+        output=nodes.new('ShaderNodeOutputMaterial'); links.new(mix.outputs[0],output.inputs[0])
+        obj.data.materials.append(material)
 
 
 def world_valley(soil,stone,grass,palette,data):
@@ -178,12 +233,13 @@ def main(args):
     grass=bpy.data.images.load(str(out/'grass_dry.png'))
     tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
-    earth=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'])
+    earth=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'))
     rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
     paving=painted_ground('Native foundation paving',texture,palette['Paving'])
     stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
+    if 'Outcrops' in data: surface('Broken cliff ledges',data['Outcrops'],[rock],shade=data['Outcrops']['Shade'])
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
     surface('Core stair flights and landings',terrain['Stairs'],[stone])
@@ -207,6 +263,7 @@ def main(args):
             original=obj.matrix_world.copy(); obj.parent=None; obj.matrix_world=placement@original
             obj['Service']=key
         quiet_building_materials(objects)
+        if 'Outcrops' in data: building_facets(objects)
         buildings[key]=objects
     missing=[]
     for piece in data['Scenery']:
@@ -235,6 +292,7 @@ def main(args):
                 for slot in obj.material_slots:
                     texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')
                     slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint,cutout=piece.get('Background',False))
+    depth_mist(data.get('Mists',[]))
     target=data['CameraTarget']; offset=data['CameraOffset']
     aim=Vector((target['X'],target['Z'],target['Y']))
     position=aim+Vector((offset['X'],offset['Z'],offset['Y']))

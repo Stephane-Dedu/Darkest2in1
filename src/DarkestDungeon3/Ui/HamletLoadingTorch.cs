@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace DarkestDungeon3.Ui;
 
-/// <summary>The same installed animated flame as the estate gate, above the opaque IMGUI loading page.</summary>
+/// <summary>The installed animated flame and opaque background share one Canvas, below the IMGUI labels.</summary>
 internal sealed class HamletLoadingTorch : MonoBehaviour
 {
     private static HamletLoadingTorch _instance;
@@ -23,6 +23,11 @@ internal sealed class HamletLoadingTorch : MonoBehaviour
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
+            var background=new GameObject("Cinder background",typeof(RectTransform)).AddComponent<Image>();
+            background.transform.SetParent(root.transform,false);
+            background.rectTransform.anchorMin=Vector2.zero; background.rectTransform.anchorMax=Vector2.one;
+            background.rectTransform.offsetMin=background.rectTransform.offsetMax=Vector2.zero;
+            background.color=new Color(.025f,.022f,.020f,1); background.raycastTarget=false;
             var torch = new GameObject("Burning torch", typeof(RectTransform));
             torch.transform.SetParent(root.transform, false);
             var rect = (RectTransform)torch.transform;

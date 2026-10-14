@@ -9,11 +9,25 @@ camera and particles parked. Return resumes that scene. An actual departure rele
 frames. Expedition results prewarm the town behind the results page. A resize while parked requires a new
 render before presentation. The cache does not read estate files or start loading on a map-only preview.
 
-Round239 Release + 1,141 Core + 188 UI tests pass, including three lifecycle regressions. The updated unsaved
-native fixture checks cache identity, parking/resume and cold torch gating. Native acceptance of these changes
-is pending; no game launched during this round. Private evidence: `local-art/ui-overhaul/hamlet-return-cache-v12`.
-Round238 default map and estate torch checks also remain pending. Historical painted rollback/selector-cleanup
-instructions below are superseded by this section and the latest handoff.
+Round241 accepts the visual pass in an unsaved native preview. Broken ledges and grounded outcrops,
+service-yard props, restrained roof/wall tint bands, localized entrance/contact paint, quieter paving,
+50 smaller grass clumps and two distant mist layers improve depth while preserving the existing GLBs,
+service positions, routes and camera. The original painted UVs and warm window paint remain intact.
+
+Release + 1,145 Core + 190 UI tests and 53 Hamlet cases pass. The native fixture passes services, controls,
+full release/reload, cache identity and park/resume, live resize, keyboard and still-camera/smoke checks.
+The final overview was inspected, with zero repeated render-buffer allocations in a five-second probe.
+This is buffer stability, not a frame-time or long-session benchmark. Private evidence and packed offline
+scene: `local-art/ui-overhaul/hamlet-set-dressing-v13`.
+
+Round239's black IMGUI fill covered its Canvas flame. The opaque background now belongs to the torch Canvas,
+below the flame; IMGUI labels/retry controls remain above it. A native cold capture verifies the visible flame
+and opaque margins. `check_loading_capture.py <private-window.png>` reproduces that screenshot assertion.
+The failed and fixed captures are retained privately. Both Hamlet preview aliases work with measure_native.ps1.
+
+Real saved results/transactions, default map/provisioner/estate-picker torch fixtures, custom facade/NPC/upgrade
+art, controller/arbitrary text/window sizes and full performance remain open. Historical painted rollback and
+selector-cleanup instructions below are superseded by this section and the latest handoff.
 
 `Dd2/HamletStage` owns a perspective camera and a render texture matching the window and native HDR format.
 Its fixed 16:9 composition follows the virtual UI canvas through window resizing. It copies visual components from

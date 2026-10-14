@@ -1,6 +1,21 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Owner launch pause,2026-10-13: do not launch any game before19:26:19 UTC /21:26:19 Europe/Paris. Requested at18:06:19 UTC for1h20. Owned round238 QA PID29076 was closed immediately; its native run is interrupted, not accepted. Continue offline work only until the pause expires or the owner changes it.
+The October13 timed launch pause has expired. Round241 used owned unsaved previews and closed them;
+do not relaunch ordinary play automatically. Preserve protected estates and independent agent work.
+
+Round241 (October14) adds the approved Hamlet visual pass: broken cliff ledges, nine grounded outcrops,
+17 native service-yard props, restrained roof/wall material bands preserving warm windows, stronger contact
+and small amber entrance paint, quieter roads,50 smaller grass clumps and two distant mist layers/foothills.
+Original ten GLBs, service sites/routes and camera retained. Frozen Release+1,145 Core+190 UI and53 Hamlet
+cases pass. Unsaved native services/controls/full release/reload/cache identity/park/resume/resize/keyboard/
+still-camera/smoke pass; final overview inspected. Zero repeated URP allocations over5.040sec on final full run.
+Cold screenshot caught round239's black IMGUI page covering the Canvas flame. Its opaque background now
+shares the torch Canvas, while IMGUI labels/retry stay above it. Native screenshot regression goes0->5,508
+bright torch pixels with opaque margins; fixed screen inspected. Both preview aliases supported by probe.
+Private evidence, frozen build/source/install hashes, backups and packed render: local-art/ui-overhaul/
+hamlet-set-dressing-v13. No estate accessed/OS input sent; owned previews closed. Preserve Shieldbreaker and
+scenery WIP/notes outside this commit. Remaining: saved Homecoming/transactions/embark, full default-map/
+provisioner/estate-picker torch fixtures, custom facade/NPC/upgrade/cloth art and full performance/comfort.
 
 Round239 fixes the reported 2D flash/reload on Back to Hamlet. EmbarkUi retains the existing town through
 quest selection/hero sheets/provisioning; its camera/particles park, and returning reuses the same texture
