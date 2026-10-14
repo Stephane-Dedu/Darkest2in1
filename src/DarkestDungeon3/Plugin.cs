@@ -40,6 +40,7 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<float> Dd1MonsterScale;
     internal static ConfigEntry<bool> Shieldbreaker3D;
     internal static ConfigEntry<string> HeroModelPath;
+    internal static ConfigEntry<bool> VilhelmHero;
 
     private void Awake()
     {
@@ -56,6 +57,8 @@ public class Plugin : BaseUnityPlugin
             "Allow gentle camera focus after selecting a Hamlet service and chimney smoke. Off keeps a still overview; explicit pan/zoom/reset remain available. Change with the town's Camera motion control.");
         HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),
             "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
+        VilhelmHero = Config.Bind("Experimental", "VilhelmHero", false,
+            "Allow inviting Sir Vilhelm at the Stagecoach when the owner's private animated model is installed. Local test content; no Souls zone is enabled.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
             "Use the experimental rigged Shieldbreaker model in corridors and fights. Missing or incompatible files retain her DD1 art. Off restores DD1 combat sprites.");
         ExportedBossModel = Config.Bind("Paths", "ExportedBossModel", Path.Combine(Paths.GameRootPath, "PrivateBossModels", "soul_of_cinder", "soul_of_cinder.gltf"),
@@ -102,6 +105,7 @@ public class Plugin : BaseUnityPlugin
         host.hideFlags = HideFlags.HideAndDontSave;
         host.AddComponent<Driver>();
         host.AddComponent<Dd2.HeroStage>();
+        host.AddComponent<Dd2.ExportedHeroes>();
         host.AddComponent<Dd2.HamletStage>();
         host.AddComponent<UiRoot>();
         if (DebugKeysEnabled.Value)

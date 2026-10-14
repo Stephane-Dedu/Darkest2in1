@@ -33,6 +33,7 @@ public sealed class CampingSkills
     public static readonly Dictionary<string, string> Dd1ClassFor = new()
     {
         ["runaway"] = "arbalest",
+        [Campaign.Town.ExperimentalHeroes.Vilhelm] = Campaign.Town.ExperimentalHeroes.VilhelmDonor,
     };
 
     public Dictionary<string, CampSkill> Skills { get; } = new();

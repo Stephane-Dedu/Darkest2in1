@@ -32,6 +32,12 @@ internal static class HeroSkills
     /// <summary>The class's combat skills (starting first), or null while its resource loads.</summary>
     public static List<Skill> ForClass(string classId)
     {
+        if (classId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm)
+        {
+            var donor=ForClass(Core.Campaign.Town.ExperimentalHeroes.VilhelmDonor);
+            return donor == null ? null : Core.Campaign.Town.VilhelmKit.Skills.Select(s => new Skill
+                { Id=s.Id,Starting=true,Icon=donor.FirstOrDefault(d => d.Id==s.Donor)?.Icon }).ToList();
+        }
         // A DD1-only class (the Shieldbreaker): her DD1 skills as their DD2 ids, all known from the start.
         if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId))
             return Dd1HeroClasses.Skills(classId).Select(s => new Skill { Id = s.Id, Icon = Dd1HeroClasses.SkillIcon(classId, s.Dd1Skill), Starting = true }).ToList();
@@ -76,6 +82,8 @@ internal static class HeroSkills
 
     public static string Name(string id)
     {
+        string visitorName=Core.Campaign.Town.VilhelmKit.Find(id)?.Name;
+        if (visitorName!=null) return visitorName;
         try
         {
             string name = Tags.Replace(SkillDescription.GetNameText(id) ?? "", "").Trim();

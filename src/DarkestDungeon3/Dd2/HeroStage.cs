@@ -70,7 +70,9 @@ internal sealed class HeroStage : MonoBehaviour
     private readonly HashSet<ActorBhv> _motionUnavailable = new();
     private readonly Dictionary<Renderer, bool> _fallbackVisibility = new();
     internal bool HasHeroModel(uint guid) => _heroes.Any(h => h.guid == guid && h.actor != null
+        && (!SoulsHeroClasses.IsVilhelm(h.actor) || h.actor.GetComponent<ExportedHeroModel>() is { Ready: true })
         && (!ShieldbreakerModel.IsShieldbreaker(h.actor) || ShieldbreakerModel.IsReady(h.actor)));
+    internal static bool Owns(ActorBhv actor) => Instance != null && Instance._heroes.Any(h => h.actor == actor);
     private float _nextMotionBind;
     public static float FeetY = 680f;
 
@@ -476,7 +478,9 @@ internal sealed class HeroStage : MonoBehaviour
                             .OrderByDescending(r => r.bounds.size.x * r.bounds.size.y).FirstOrDefault();
             if (body == null) continue;
             var shieldbreaker = actor.GetComponent<ShieldbreakerModel>();
-            float height = shieldbreaker is { Ready: true } ? shieldbreaker.BodyHeight : body.bounds.size.y;
+            var exported = actor.GetComponent<ExportedHeroModel>();
+            float height = exported is { Ready: true } ? exported.BodyHeight
+                : shieldbreaker is { Ready: true } ? shieldbreaker.BodyHeight : body.bounds.size.y;
             float unscaled = height / Mathf.Max(0.01f, slot.lossyScale.y);
             float fit = Mathf.Clamp(4.0f / Mathf.Max(0.1f, unscaled), 0.5f, 6f);
             slot.localScale = Vector3.one * HeroScale * fit;

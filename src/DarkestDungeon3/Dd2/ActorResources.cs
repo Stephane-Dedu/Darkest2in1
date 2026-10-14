@@ -25,7 +25,11 @@ internal static class ActorResources
     private static readonly HashSet<string> Loading = new();
     private static readonly HashSet<string> Finished = new();
 
-    public static bool IsFinished(string classId) => Loaded.ContainsKey(classId) || Finished.Contains(classId);
+    public static bool IsFinished(string classId)
+    {
+        if (classId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm) classId=Core.Campaign.Town.ExperimentalHeroes.VilhelmDonor;
+        return Loaded.ContainsKey(classId) || Finished.Contains(classId);
+    }
 
     public static void RetryFailures()
     {
@@ -37,6 +41,7 @@ internal static class ActorResources
     /// <summary>The class's ResourceActor, or null while it loads.</summary>
     public static ResourceActor Get(string classId)
     {
+        if (classId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm) classId = Core.Campaign.Town.ExperimentalHeroes.VilhelmDonor;
         if (string.IsNullOrEmpty(classId)) return null;
         if (Singleton<ResourceDatabaseActors>.HasInstance())
         {
@@ -76,6 +81,11 @@ internal static class ActorResources
     /// <summary>Whether DD2's owned resources include this class (a DLC hero); null until they are known.</summary>
     public static bool? Has(string classId)
     {
+        if (classId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm)
+        {
+            if (!System.IO.File.Exists(SoulsHeroClasses.ModelPath)) return false;
+            classId = Core.Campaign.Town.ExperimentalHeroes.VilhelmDonor;
+        }
         if (_locations == null) { FindLocations(); return null; }
         return classId != null && _locations.ContainsKey(classId);
     }

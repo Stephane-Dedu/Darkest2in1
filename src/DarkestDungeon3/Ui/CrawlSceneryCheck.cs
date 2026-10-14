@@ -17,7 +17,8 @@ namespace DarkestDungeon3.Ui;
 internal static class CrawlSceneryCheck
 {
     private static readonly bool MotionChecking = Environment.GetCommandLineArgs().Contains("-dd3-crawl-motion-check");
-    private static readonly bool Requested = MotionChecking || Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
+    private static readonly bool VilhelmChecking = Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-check");
+    private static readonly bool Requested = MotionChecking || VilhelmChecking || Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
     private static readonly string[] Regions = { "dd2_city", "dd2_farm", "dd2_forest", "dd2_coast" };
     private static SaveFile _save;
     private static int _step, _region;
@@ -48,10 +49,25 @@ internal static class CrawlSceneryCheck
                     OpeningRaidPending = false, RegionLayoutVersion = CampaignRegions.LayoutVersion };
                 estate.Add(Currency.Gold,50000);
                 string[] classes = { "highwayman", "grave_robber", "plague_doctor", "man_at_arms" };
+                if (VilhelmChecking) classes[2] = Core.Campaign.Town.ExperimentalHeroes.Vilhelm;
                 for (int i = 0; i < classes.Length; i++) estate.Roster.Add(new HeroRecord
                     { Id = "scenery-check-"+i, Name = classes[i], ClassId = classes[i], ResolveLevel = 1 });
+                if (VilhelmChecking)
+                {
+                    var visitor = estate.Roster[2]; visitor.Name = Core.Campaign.Town.ExperimentalHeroes.VilhelmName;
+                    visitor.EquippedSkills.AddRange(Core.Campaign.Town.VilhelmKit.Loadout);
+                }
                 _save = new SaveFile { Estate = estate };
                 s.Save = _save;
+                if (VilhelmChecking)
+                {
+                    estate.Roster.RemoveAt(2);
+                    var visitor=Core.Campaign.Town.ExperimentalHeroes.InviteVilhelm(s.Hamlet,new Core.Rng(73232));
+                    Require(visitor!=null && Core.Campaign.Town.ExperimentalHeroes.InviteVilhelm(s.Hamlet,new Core.Rng(73232))==null,"Visitor invitation was missing or duplicated");
+                    Require(s.Hamlet.Recruit(visitor.Id),"Ordinary recruitment rejected the visitor");
+                    estate.Roster.Remove(visitor); estate.Roster.Insert(2,visitor);
+                    Plugin.Log.LogInfo("[vilhelm check] coach invitation and ordinary recruitment PASS; transient campaign only");
+                }
                 Application.runInBackground = true;
                 var quest = new QuestOffer { Id = "scenery-check", Dungeon = Regions[0], Type = "cleanse", Length = 1,
                     Difficulty = 1, MapSeed = 73232, SurpriseEnabled = false, ScoutingEnabled = false };
@@ -66,12 +82,14 @@ internal static class CrawlSceneryCheck
             }
             Require(OwnsSession,"Transient session ownership lost");
             if (d.Phase == Phase.Recovery) throw new InvalidOperationException(d.RecoveryMessage);
-            if (Time.unscaledTime-_wait > (_step == 1 ? 200 : 90)) throw new TimeoutException("step "+_step+" phase "+d.Phase);
+            if (Time.unscaledTime-_wait > (_step == 1 ? 200 : VilhelmChecking && _step==17 ? 300 : 90)) throw new TimeoutException("step "+_step+" phase "+d.Phase);
             var exp = d.Expedition;
             switch (_step)
             {
                 case 1:
                     if (d.Phase != Phase.Crawling || !HeroStage.Lit || RegionSceneryArt.RoomSceneFiles(Regions[_region]).Count < 8) return;
+                    if (VilhelmChecking && !UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Any(m => m.Ready && HeroStage.Owns(m.Actor))) return;
+                    if (VilhelmChecking) VilhelmCombatCheck.CheckRegistration();
                     if (MotionChecking)
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
@@ -80,7 +98,7 @@ internal static class CrawlSceneryCheck
                         Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward; continuous ordinary map route; nativeActors={HeroStage.Lit}");
                         _step = 100; _next = Time.unscaledTime; break;
                     }
-                    Advance("entrance-native-actors",d,2); break;
+                    Advance("entrance-native-actors",d,2,VilhelmChecking ? 15 : 1.5f); break;
                 case 100:
                     if (d.IsWalking) return;
                     // Ordinary hunger checks stop a route even when the party eats automatically.
@@ -152,6 +170,7 @@ internal static class CrawlSceneryCheck
                     Require(_beforeFight != null && DungeonAtmosphereUi.LastDrawCount > 0,"Battle environment/effects missing");
                     Advance("native-battle-atmosphere",d,17,8); break;
                 case 17:
+                    if (VilhelmChecking && _region==0 && !VilhelmCombatCheck.Tick()) return;
                     // This fixture validates rendering/lifecycle, not combat balance or skill kills.
                     AccessTools.Method(typeof(DebugKeys),"WinFight").Invoke(null,new object[] { false });
                     Advance("debug-victory-requested",d,18); break;
@@ -271,4 +290,26 @@ internal static class CrawlSceneryCheckBattle
         if (CrawlSceneryCheck.OwnsSession && Driver.Instance?.Expedition?.Quest.Dungeon == "dd2_city")
             __result = "fanatic_mash_211";
     }
+}
+
+// The fixture renders in a real window, but user key presses and held mouse
+// buttons must not change its scripted route. Ordinary campaigns are unaffected.
+[HarmonyPatch(typeof(Driver),"Walk")]
+internal static class CrawlSceneryCheckKeyboard
+{
+    private static void Prefix(ref UnityEngine.InputSystem.Keyboard kb) { if (CrawlSceneryCheck.OwnsSession) kb=null; }
+}
+[HarmonyPatch(typeof(Driver),"MouseWalk")]
+internal static class CrawlSceneryCheckMouse
+{
+    private static bool Prefix(ref int __result)
+    {
+        if (!CrawlSceneryCheck.OwnsSession) return true;
+        __result=0; return false;
+    }
+}
+[HarmonyPatch(typeof(DebugKeys),"Update")]
+internal static class CrawlSceneryCheckKeys
+{
+    private static bool Prefix() => !CrawlSceneryCheck.OwnsSession;
 }

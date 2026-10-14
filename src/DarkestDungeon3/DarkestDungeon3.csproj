@@ -25,6 +25,7 @@
     <Reference Include="Unity.InputSystem"><HintPath>$(GameRefs)\Unity.InputSystem.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.TextMeshPro"><HintPath>$(GameRefs)\Unity.TextMeshPro.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.Addressables"><HintPath>$(GameRefs)\Unity.Addressables.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Unity.Timeline"><HintPath>$(GameManaged)\Unity.Timeline.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="Unity.ResourceManager"><HintPath>$(GameRefs)\Unity.ResourceManager.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine.UI"><HintPath>$(GameRefs)\UnityEngine.UI.dll</HintPath><Private>false</Private></Reference>
     <Reference Include="UnityEngine"><HintPath>$(GameRefs)\UnityEngine.dll</HintPath><Private>false</Private></Reference>

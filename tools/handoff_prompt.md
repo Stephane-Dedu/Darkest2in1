@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Owner requested no game launches for two hours on October14 at17:38:14 UTC.
+Do not launch any game before2026-10-14 19:38:14 UTC /21:38:14 Europe/Paris.
+Offline work may continue. No ordinary campaign or estate should be opened automatically afterward.
+Vilhelm's latest five native skills, base/mastered loadouts and transient coach recruitment passed before
+this restriction. Original diffuse-map and particle-pass corrections are now offline work and need native
+visual acceptance later. Read tools/vilhelm/README.md and the latest MODLOG/PARITY before resuming.
+
 Round242 (October14) is owner-approved for commit. Preserve the original darker native cliff paint/UV
 scale with the improved Mountain, foothill mist, worn world-space paving and four fitted building finishes.
 Review holds are resolved. The current native capture and approved private package are under local-art/

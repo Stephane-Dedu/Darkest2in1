@@ -56,6 +56,7 @@ public sealed class HeroUpgrades
     /// <summary>The DD1 class whose upgrade costs a DD2 class uses.</summary>
     public string Dd1Class(string dd2Class)
     {
+        if (dd2Class == ExperimentalHeroes.Vilhelm) dd2Class = ExperimentalHeroes.VilhelmDonor;
         if (dd2Class != null && Trees.ContainsKey(dd2Class + ".weapon")) return dd2Class;
         if (dd2Class != null && CampingSkills.Dd1ClassFor.TryGetValue(dd2Class, out var stand) && Trees.ContainsKey(stand + ".weapon")) return stand;
         return "highwayman";
@@ -68,6 +69,7 @@ public sealed class HeroUpgrades
     public IReadOnlyList<HeroUpgradeLevel> SkillTree(string dd2Class, string dd2SkillId)
     {
         if (string.IsNullOrEmpty(dd2SkillId)) return null;
+        dd2SkillId = VilhelmKit.Find(dd2SkillId)?.Donor ?? dd2SkillId;
         string skill = dd2SkillId.Contains("_") ? dd2SkillId.Substring(dd2SkillId.IndexOf('_') + 1) : dd2SkillId;
         if (skill.EndsWith("_u")) skill = skill.Substring(0, skill.Length - 2);
         string want = Squash(skill), prefix = Dd1Class(dd2Class) + ".";

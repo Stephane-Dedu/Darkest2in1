@@ -41,6 +41,11 @@ internal static class Dd2Heroes
             var hero = ExpeditionParty.HeroForRestore(original, condition);
             if (hero == null) continue;
             if (condition?.Outcome?.HeroId != hero.Id || !ExpeditionParty.IsValid(condition)) condition = null;
+            if (hero.ClassId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm && !SoulsHeroClasses.TryRegister())
+            {
+                Plugin.Log.LogError("Could not prepare Sir Vilhelm's private test class");
+                continue;
+            }
             // DD1 classes DD2 has no hero for (the Shieldbreaker) are made into DD2 classes first.
             if (Core.Campaign.Town.RecruitClasses.IsDd1Only(hero.ClassId) && !Dd1HeroClasses.TryRegister(hero.ClassId))
             {

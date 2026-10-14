@@ -70,6 +70,10 @@ public sealed class ExportedMoveset
         if (donor != null && name.StartsWith(donor + "_", StringComparison.Ordinal)) name = name.Substring(donor.Length + 1);
         if (name.StartsWith("idle", StringComparison.Ordinal)) return ("idle", "idle");
         var words = name.Split('_');
+        // Some native hero clips keep "action" in the motion's name and append
+        // "recover" afterwards. That final phase must take precedence.
+        int recovery=Array.LastIndexOf(words,"recover");
+        if (recovery>0) return (string.Join("_",words.Take(recovery)),"recover");
         for (int i = 1; i < words.Length; i++)
             if (Parts.Contains(words[i])) return (string.Join("_", words.Take(i)), words[i]);
         return (name, "");

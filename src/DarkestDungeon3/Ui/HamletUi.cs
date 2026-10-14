@@ -821,6 +821,12 @@ internal sealed partial class HamletUi
             if (Gui.Hotspot(row) && !Drag.JustDropped) { _heroId = h.Id; _recruitSheet = true; Drag.Cancel(); }
         }
         // Hiring: a recruit dropped on the roster.
+        if (Dd2.SoulsHeroClasses.Available && Dd2.ActorResources.Has(Core.Campaign.Town.ExperimentalHeroes.VilhelmDonor) == true
+            && ExpeditionSkin.Button(new Rect(origin.x-100,930,600,44), "Invite Sir Vilhelm",
+                Core.Campaign.Town.ExperimentalHeroes.CanInviteVilhelm(E),size:24))
+        {
+            if (Core.Campaign.Town.ExperimentalHeroes.InviteVilhelm(hamlet,new Core.Rng(E.Seed ^ E.Week))!=null) S.Persist();
+        }
         if (Drag.Hovering<RecruitDrag>(RosterColumn.Area)) Gui.Fill(new Rect(RosterColumn.Area.x, RosterColumn.Area.yMax, RosterColumn.Area.width, 4), Gui.Gold);
     }
 

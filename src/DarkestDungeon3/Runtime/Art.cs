@@ -136,6 +136,7 @@ internal static class Art
     public static Sprite Portrait(string classId, ResourceActor.PortraitIconType type = ResourceActor.PortraitIconType.Color, string modeName = null)
     {
         if (classId == null) return null;
+        if (classId == Core.Campaign.Town.ExperimentalHeroes.Vilhelm) return Dd2.SoulsHeroClasses.Portrait();
         if (Core.Campaign.Town.RecruitClasses.IsDd1Only(classId)) return Dd2.Dd1HeroClasses.Portrait(classId);
         string key = classId + "/" + type + (modeName == null ? "" : "/" + modeName);
         if (Portraits.TryGetValue(key, out var s))

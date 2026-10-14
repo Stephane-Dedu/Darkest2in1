@@ -6401,3 +6401,56 @@ Review previews were closed and the exact pre-test plugin/model package/config r
 private package is ready for the next stopped-game deployment with current shared sources. This commit
 does not redeploy while another agent's native test runs. No estate read/save or OS input sent. Saved
 Homecoming/transactions, full performance and controller/text/window comfort remain separate acceptance.
+
+## Round243 (2026-10-14): optional Sir Vilhelm, native motions and corrected sword mount
+
+Owner requested the original DS3 model as a playable local test character, including black-flame ignition,
+then reported a reversed sword axis. Separate sir_vilhelm class/stats and five independent skill aliases
+borrow owned Crusader combat rules/resources without altering Crusader. Stagecoach invitation creates a
+normal recruit, prevents duplicate living visitors and uses ordinary hiring. Guild mastery, equipment and
+camping map to Crusader costs; the option controls invitations while existing visitors still register.
+The public option defaults off; this installation now has Experimental/VilhelmHero=true. No Souls zone added.
+
+Private conversion retains21 meshes/65,946 triangles/176 bones, original texture coordinates and12 c0000
+Havok clips: stance/walk, three attacks, a245_038700 blackflame, three Great Heal phases, front impact and
+death/corpse. The Onyx Blade mount rotates native negative-Y to positive-Z about R_Weapon, minus90deg localX,
+without rotating hands/bones or changing animation tracks. Blender comparison and native cast/attack/idle
+acceptance confirm the corrected mount. Native actor Timeline/controller clocks map contiguous antic/action/
+recovery segments; recovery names containing action no longer replay the action. The blade inspection pose
+is the native ignition action and returns to idle. Selected skill IDs drive mapping, not generic animation
+names. Only active native material controllers apply to added meshes; inactive-controller NRE was fixed.
+Borrowed performer particle clips are suppressed only for this visitor's own skills.
+
+Native DS3 TAE/SpEffect/FXR evidence proves a245_038700, ignitionFFX440460 at0.566667-1.4s, event331 applying
+130022400, chain130022401/45sec and persistentFFX440461. Original s11629 RGBA8x8 atlas is attached along the
+animated weapon. Native Radiance buff presence/turn expiry currently drives the aura; this and the five
+Crusader ability rule sets are an integration baseline, not final DS3 balance. Particle count/attachment was
+observed, but visible flame quality remains [?]. The final material uses a privately loaded native DD2 flame
+material, independent alpha and preserved native queue/blend states. Offline shader evidence establishes
+UniversalForward/transparent, not EnvironmentTransparent's opaque weighted pass; that hypothesis was rejected.
+
+Native acceptance before the owner's launch pause: all five real selected skills and eligible targets,
+calculation/application, actual healing/buff expiry, original clips/three heal phases/idle returns, flame
+emission through the next attack, transient coach recruitment and base/mastered canonical loadouts pass.
+Survival healing is explicit QA setup. Earlier corrected-mount four-region travel/curio/trap/obstacle/reversal/
+room fight/same-scene return also passed with debug victories. These checks do not prove final balance or
+visible flame quality. No repeated ExportedHeroModel exception in the final action run; the known native
+IMainInstaller quit callback exception remains separate. Latest action recording: native-actions-193423.mkv.
+
+Offline follow-up replaces the extraction kit's specular-to-metallic PBR colors with original diffuse PNGs
+for24/27 material definitions, retaining exactly identical geometry/animation bin hashes. Eight Blender poses
+and a new portrait were inspected. A temporary second UV flip was rejected: GltfModel already flips V. It is
+removed. Final diffuse/shader appearance, continuous Vilhelm walking, death/corpse presentation, actual coach
+button comfort and saved recruitment/return still need native review. Cloth physics, full DS3 FXR simulation,
+voice/audio and balance are not implemented. No generated art was used.
+
+Final isolated Release+1,149 Core/190 UI pass. Combined shared snapshot, preserving Shieldbreaker WIP, builds
+and passes1,152 Core/190 UI. Installed42 private pack files and both DLL/PDB pairs with hashes checked while
+DD2 stopped; private model/config/plugin backups are under local-art/vilhelm-v01. Native SaveFiles39 hashes
+remain unchanged; no DD3 estate was selected/read/persisted. No extracted assets/binaries/decomp committed.
+Private provenance, Blender/native captures, native skill APIs, shader tree and build manifests are under
+local-art/vilhelm-v01 and local-art/vilhelm-native-audit. See tools/vilhelm/README.md.
+
+Owner requested no game launches for two hours at17:38:14 UTC. No game was running when checked; owned QA
+PID32676 had already exited. No launch before2026-10-14 19:38:14 UTC /21:38:14 Europe/Paris. The owned launch
+helper enforces this boundary; offline work only until then. Native final visual acceptance remains pending.

@@ -36,6 +36,14 @@ public class ExportedMovesetTests
     }
 
     [Fact]
+    public void HeroRecoverySuffixTakesPrecedenceOverActionInsideTheMotionName()
+    {
+        var split=ExportedMoveset.Split("crusader_attack_scroll_action_scrolloutfar_recover","crusader");
+        Assert.Equal("recover",split.Part);
+        Assert.Equal("attack_scroll_action_scrolloutfar",split.Move);
+    }
+
+    [Fact]
     public void AttacksPlayAtTheirOwnSpeedAndHoldBetweenParts()
     {
         var set = ExportedMoveset.Parse(Json);
