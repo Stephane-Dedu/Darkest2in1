@@ -6275,3 +6275,50 @@ first native frame on cold entry. There is no painted town fallback. Full native
 retry/cold torch and real expedition-results handoff acceptance remain pending. Round238 map/estate torch
 checks also remain pending. Do not auto-launch after the owner's timed pause. Preserve independent
 Shieldbreaker WIP and protected estates; continue from tools/handoff_prompt.md.
+
+## Round240 (2026-10-14): DD1 stage contact and continuous DD2 scenery
+
+Owner reported that backgrounds and ground alignment broke immersion, then requested a refinement loop before
+Vilhelm integration. A private Blender differential reproduced the room camera mismatch: a four-unit reference
+was 504px high at the actor origin and 229px at depth10, against HeroStage's normalised400px body. Replaced the
+independent room/corridor cameras with scenery_camera.py: six-degree pitch,24-unit distance, reference feet at
+y680, four-unit body400px after runtime overscan. Environment meshes use2x native scale. The asset floor uses a
+shared world-UV convention and level native regional material. Removed uneven driving-road tiles from the actor
+lane, independent farm/forest image zooms and forest_ground_dark foundations. Wall bases fade over.6 world units;
+distant bases retain3. Source kit files were never modified and no generated art was needed.
+
+Rebuilt24 private corridors as4096x768 and32 typed native rooms as2880x1080. Bounded corridor travel grows from
+154 to2,227 virtual pixels without repeating/reflection. Wide PNG opt-in applies only to discovered corridor
+files; decoded corridor allocation stays at4096x768 pixels, while existing room-pack bounds remain compatible.
+Reprojected native fire emitters through the new room camera with the2x environment transform. The existing
+dynamic fog/fire/smoke and frozen battle crop/lifecycle remain intact. Each corridor is still one baked plate;
+its per-square scenery speed depends on corridor length. Physical foreground occlusion, water shaders and
+native deferred lighting remain limits, rather than diffuse-texture shortages.
+
+Verification:2 Python camera contracts and50 actual Blender projections pass; frozen Release builds with only
+the three existing warnings;1,145 Core and190 UI tests pass. The ordinary unsaved four-region fixture passed
+native actor travel, torch, curio/trap/obstacle/reversal, room battle and same-scene return (debug victories).
+The final -dd3-crawl-motion-check passed forward/reverse/stop in all four regions over1,022/1,021/1,021/1,020
+sampled frames, with maximum forward pan speed371.2-371.4px/s and no tile-boundary/reversal jumps. Native hunger
+checks remain active; the fixture resumes an interrupted ordinary route and carries32 food. Its initial
+reverse assertion was corrected after an ordinary automatic hunger meal stopped the route. A38-second native
+recording and inspected contact sheet cover sustained movement. All56 plates were inspected offline; the
+ordinary native test does not exhaustively visit every room variant.
+
+Private output/evidence: local-art/scenery-contact-v04 (camera-repro.json,camera-verification.log,final pools,
+manifests,emitters,native-visible,motion-native.log,continuous-walk.mkv,walk-contact.jpg,build source hashes).
+Original top-level PrivateScenery/plugin/config/native-profile backup: backup-before-20261014-040721.zip;
+additional intermediate backup and plugin-only pre-deploy snapshots are alongside. Final assets/plugin were
+deployed only with DD2 stopped; hashes were checked. The first two native attempts were interrupted; hidden
+window capture/lighting was unusable, so final QA used a visible native window without OS input. Owned final
+QA PIDs22344 and24284 were stopped after their checks. Native SaveFiles39-file hashes remain unchanged; no DD3
+estate was selected, read or persisted. Other Hamlet QA PIDs were left alone; no cross-chat message was sent.
+
+Follow-on owner goal remains active: make extracted Sir Vilhelm playable as test content, preserving model and
+native DS3 animations, including black-flame sword buff. His original assembled export has21 meshes,65,946
+triangles,176 bones and Onyx Blade bound to R_Weapon. Local DS3 archives now privately supply c0000 common,
+a0x/a1x/a2x,lo/md/hi andDLC1 animation binders;20 candidate clips were exported onto his original rig without
+retargeting and rendered in Blender under local-art/vilhelm-v01. No Vilhelm game integration is implemented
+yet. a026_003040 is a candidate sword-buff pose, not yet proven to be the black-flame action; do not label it
+confirmed. Private TAE reference investigation and pose sheets are alongside. DS3 source files remain under
+C:/Users/Piral/ds3-extract, never in Git. Keep independent Hamlet/Shieldbreaker work out of this commit.

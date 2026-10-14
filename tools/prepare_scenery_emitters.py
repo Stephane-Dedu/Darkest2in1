@@ -9,6 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from render_native_rooms import digest
+from scenery_camera import create as stage_camera
 
 
 def main():
@@ -27,11 +28,16 @@ def main():
     from mathutils import Vector
     from bpy_extras.object_utils import world_to_camera_view
     L.reset()
-    cam = L.camera((0,-8.3,.74),(0,10,.74),fov=38,res=(2880,1080))
-    cam.data.shift_y = .31
+    manifest = json.loads(args.rooms_manifest.read_text())
+    scale = manifest.get("environment_scale",1)
+    if manifest.get("version",1) >= 2:
+        cam = stage_camera(L)
+    else:
+        cam = L.camera((0,-8.3,.74),(0,10,.74),fov=38,res=(2880,1080))
+        cam.data.shift_y = .31
     bpy.context.view_layer.update()
     scenes, evidence = {}, []
-    for entry in json.loads(args.rooms_manifest.read_text())["files"]:
+    for entry in manifest["files"]:
         if entry["region"] != "dd2_city":
             continue
         folder = args.kit/"arenas"/entry["native_arena"]
@@ -43,6 +49,7 @@ def main():
                 continue
             mesh = np.load(folder/f"mesh-{obj['mesh']}.npz")
             vertices = np.c_[mesh["v"],np.ones(len(mesh["v"]))] @ (L.CHANGE @ np.array(obj["world"])).T
+            vertices[:,:3] *= scale
             points = [world_to_camera_view(bpy.context.scene,cam,Vector(v[:3])) for v in vertices]
             points = [p for p in points if p.z > .1]
             if not points:

@@ -23,6 +23,21 @@ public class CorridorPanoramaUiTests
     }
 
     [Theory]
+    [InlineData(4096, 768)]
+    [InlineData(2880, 1080)]
+    public void WideScenePansThroughDistinctSceneryWithTheSameGroundContact(int width, int height)
+    {
+        var start = CorridorPanoramaLayout.Crop(width, height, 0);
+        var end = CorridorPanoramaLayout.Crop(width, height, 1);
+        Assert.Equal(start.Y, end.Y);
+        Assert.Equal(start.Width, end.Width);
+        Assert.Equal(680, (1 - (1 - 680f / 720 - start.Y) / start.Height) * 720, 3);
+        Assert.Equal(1920f / 720, start.Width * width / (start.Height * height), 5);
+        Assert.InRange(end.X + end.Width, .99999f, 1.00001f);
+        Assert.True((end.X - start.X) / start.Width * 1920 > (width > 2880 ? 2000 : 150));
+    }
+
+    [Theory]
     [InlineData(1600, 900)]
     [InlineData(1587, 924)]
     [InlineData(2560, 1080)]

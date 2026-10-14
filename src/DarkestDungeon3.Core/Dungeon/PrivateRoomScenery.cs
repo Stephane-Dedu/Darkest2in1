@@ -59,7 +59,7 @@ public static class PrivateRoomScenery
     }
 
     /// <summary>Check allocation bounds before Unity decodes/uploads a PNG.</summary>
-    public static bool ValidPng(byte[] data)
+    public static bool ValidPng(byte[] data, bool corridor = false)
     {
         if (data == null || data.Length < 33 || data.Length > MaxFileBytes) return false;
         byte[] signature = { 137, 80, 78, 71, 13, 10, 26, 10 };
@@ -69,7 +69,8 @@ public static class PrivateRoomScenery
         uint width = (uint)data[16] << 24 | (uint)data[17] << 16 | (uint)data[18] << 8 | data[19];
         uint height = (uint)data[20] << 24 | (uint)data[21] << 16 | (uint)data[22] << 8 | data[23];
         return width >= 1920 && width <= 4096 && height >= 720 && height <= 2048
-            && (double)width / height >= 2.6 && (double)width / height <= 2.7
+            && (!corridor || (ulong)width * height <= 4096UL * 768)
+            && (double)width / height >= 2.6 && (double)width / height <= (corridor ? 5.4 : 2.7)
             && data[24] == 8 && (data[25] == 2 || data[25] == 6);
     }
 }

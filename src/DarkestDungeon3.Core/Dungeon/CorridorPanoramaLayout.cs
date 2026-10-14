@@ -12,8 +12,8 @@ public static class CorridorPanoramaLayout
         return Clamp(position / (tileCount - 1));
     }
 
-    // Uniform 8% overscan allows a small distant-scene pan. Keep the authored y=680 floor contact fixed.
-    // The walking props retain their physical travel; the scenery has deliberately slower parallax.
+    // Uniform 8% overscan protects the frame edges. Wider plates provide more lateral travel.
+    // Keep the authored y=680 contact fixed; walking props retain their physical square coordinates.
     public static PanoramaCrop Crop(int width, int height, float progress)
     {
         float scale = Math.Max(1920f / width, 720f / height) * 1.08f;

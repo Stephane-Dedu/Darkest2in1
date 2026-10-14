@@ -56,6 +56,26 @@ public class PrivateRoomSceneryTests
     }
 
     [Fact]
+    public void WideCorridorHasTheSameAllocationBoundAsARoomButNeedsExplicitOptIn()
+    {
+        var data = File.ReadAllBytes(Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,
+            "../../../../../data/scenery/dd2_city-01.png")));
+        void Dimension(int offset, uint value)
+        {
+            for (int i = 3; i >= 0; i--) { data[offset+i] = (byte)value; value >>= 8; }
+        }
+        Dimension(16, 4096); Dimension(20, 768);
+        Assert.True(PrivateRoomScenery.ValidPng(data, corridor: true));
+        Assert.False(PrivateRoomScenery.ValidPng(data));
+        Dimension(20, 1024); // A valid wide aspect must not allow a larger decoded allocation.
+        Assert.False(PrivateRoomScenery.ValidPng(data, corridor: true));
+        Dimension(20, 1536); // Retain the existing optional room-pack contract.
+        Assert.True(PrivateRoomScenery.ValidPng(data));
+        Dimension(16, 8192); Dimension(20, 1536);
+        Assert.False(PrivateRoomScenery.ValidPng(data, corridor: true));
+    }
+
+    [Fact]
     public void PngBoundsAreCheckedBeforeDecodeIncludingUnsignedDimensions()
     {
         var folder = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../data/scenery"));

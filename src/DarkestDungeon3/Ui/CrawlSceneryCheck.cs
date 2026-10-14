@@ -16,23 +16,30 @@ namespace DarkestDungeon3.Ui;
 [HarmonyPatch(typeof(Driver), "Update")]
 internal static class CrawlSceneryCheck
 {
-    private static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
+    private static readonly bool MotionChecking = Environment.GetCommandLineArgs().Contains("-dd3-crawl-motion-check");
+    private static readonly bool Requested = MotionChecking || Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
     private static readonly string[] Regions = { "dd2_city", "dd2_farm", "dd2_forest", "dd2_coast" };
     private static SaveFile _save;
     private static int _step, _region;
     private static float _next, _wait;
     private static bool _done;
     private static Texture _beforeFight;
+    private static float _motionCamera, _motionTime, _motionMaximum;
+    private static int _motionFrames;
+    private static bool _motionSampled;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save,_save) && Session.Current.SavePath == null;
 
     private static void Postfix()
     {
-        if (!Requested || !Plugin.DebugKeysEnabled.Value || _done || Time.unscaledTime < _next) return;
+        if (!Requested || !Plugin.DebugKeysEnabled.Value || _done) return;
         var d = Driver.Instance;
         var s = Session.Current;
         if (s == null || d == null) return;
         try
         {
+            if (MotionChecking && OwnsSession && d.Phase == Phase.Crawling && !d.Expedition.InRoom)
+                ObserveMotion(d);
+            if (Time.unscaledTime < _next) return;
             if (_save == null)
             {
                 if (d.Phase != Phase.Off || GameModeMgr.CurrentMode != GameModeType.MAIN_MENU || Dd2Api.Modes.IsChangingState()) return;
@@ -65,7 +72,36 @@ internal static class CrawlSceneryCheck
             {
                 case 1:
                     if (d.Phase != Phase.Crawling || !HeroStage.Lit || RegionSceneryArt.RoomSceneFiles(Regions[_region]).Count < 8) return;
+                    if (MotionChecking)
+                    {
+                        foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
+                        d.Travel(1); d.WalkToTile(0,5);
+                        _motionSampled = false; _motionFrames = 0; _motionMaximum = 0;
+                        Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward; continuous ordinary map route; nativeActors={HeroStage.Lit}");
+                        _step = 100; _next = Time.unscaledTime; break;
+                    }
                     Advance("entrance-native-actors",d,2); break;
+                case 100:
+                    if (d.IsWalking) return;
+                    // Ordinary hunger checks stop a route even when the party eats automatically.
+                    // Resume through the public API; do not suppress the gameplay check.
+                    if (exp.TileIndex != 5 && d.Crawl.CanNavigate && !d.Crawl.IsBlocked) { d.WalkToTile(0,5); return; }
+                    Require(exp.TileIndex == 5 && _motionFrames > 40,"Forward continuous route did not finish");
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward-finished; frames={_motionFrames}; maximumPanSpeed={_motionMaximum:0.0}");
+                    _step = 101; _next = Time.unscaledTime+2; break;
+                case 101:
+                    d.WalkToTile(0,0);
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} reverse; continuous ordinary map route; nativeActors={HeroStage.Lit}");
+                    _step = 102; _next = Time.unscaledTime; break;
+                case 102:
+                    if (d.IsWalking) return;
+                    if (exp.TileIndex != 0 && d.Crawl.CanNavigate && !d.Crawl.IsBlocked) { d.WalkToTile(0,0); return; }
+                    Require(exp.TileIndex == 0,"Reverse continuous route did not finish");
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} PASS: forward/reverse/stop; frames={_motionFrames}; maximumPanSpeed={_motionMaximum:0.0}; no camera jumps");
+                    if (++_region < Regions.Length)
+                    { SetMap(d,s); _motionSampled = false; _step = 1; _next = Time.unscaledTime+2; _wait = Time.unscaledTime; }
+                    else { _done = true; Plugin.Log.LogInfo("[crawl motion] PASS: all four regions; no estate selected or persisted"); }
+                    break;
                 case 2:
                     exp.Light = 20; Advance("low-torch",d,3); break;
                 case 3:
@@ -160,6 +196,29 @@ internal static class CrawlSceneryCheck
         catch (Exception e) { _done = true; Plugin.Log.LogError("[crawl scenery check] FAIL: "+e); }
     }
 
+    private static void ObserveMotion(Driver d)
+    {
+        var exp = d.Expedition;
+        var corridor = d.Crawl.CurrentCorridor;
+        var choice = RegionSceneryArt.CorridorChoice(RegionalScenery.For(exp.Quest.Dungeon),exp.Seed,corridor.Id);
+        var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
+        if (texture == null || !HeroStage.Lit) return;
+        float progress = CorridorPanoramaLayout.Progress(exp.TileIndex,corridor.Tiles.Count,
+            exp.HeadingRoomId != corridor.RoomB,-d.WalkProgress*720);
+        var crop = CorridorPanoramaLayout.Crop(texture.width,texture.height,progress);
+        float camera = 1920*crop.X/crop.Width, now = Time.unscaledTime;
+        if (_motionSampled && now > _motionTime)
+        {
+            float dt = now-_motionTime, distance = Mathf.Abs(camera-_motionCamera);
+            // The ordinary forward route moves one square per 1.2s. A bounded panorama
+            // covers its whole lateral range in count-1 squares, including carry at crossings.
+            float maximum = (texture.width*720f/texture.height*1.08f-1920)/(corridor.Tiles.Count-1)/1.2f;
+            Require(distance <= maximum*dt+3,"Panorama jumped at a tile boundary or reversal");
+            _motionMaximum = Mathf.Max(_motionMaximum,distance/dt); _motionFrames++;
+        }
+        _motionCamera = camera; _motionTime = now; _motionSampled = true;
+    }
+
     private static void SetMap(Driver d, Session s)
     {
         var exp = d.Expedition;
@@ -182,7 +241,7 @@ internal static class CrawlSceneryCheck
         exp.HeadingRoomId = -1; exp.PendingEncounter = null; exp.FightCheckpoint = null;
         exp.PendingCurio = null; exp.PendingSpoils = null; exp.QuestComplete = false; exp.Light = 100;
         exp.Pack.Items.Clear();
-        exp.Pack.Add(Supply.Food,8); exp.Pack.Add(Supply.Torch,2); exp.Pack.Add(Supply.Shovel,1);
+        exp.Pack.Add(Supply.Food,MotionChecking ? 32 : 8); exp.Pack.Add(Supply.Torch,2); exp.Pack.Add(Supply.Shovel,1);
     }
 
     private static void Advance(string label, Driver d, int next, float hold = 1.5f)

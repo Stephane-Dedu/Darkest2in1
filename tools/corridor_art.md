@@ -1,5 +1,40 @@
 # Private DD2 corridor scenery
 
+## Stage framing and wider travel, October 14, 2026
+
+The current private pack contains 24 corridors at 4096x768 and 32 rooms at 2880x1080.
+`scenery_camera.py` gives both renderers a shared 6-degree stage camera, calibrated to the
+crawl's four-unit/400px bodies and y680 feet. Corridors compensate for the runtime 8% overscan
+before rendering. Native scenery is doubled from its original character scale. The independent
+Foetor/Tangle image enlargements and uneven driving-road tiles in the actor lane are removed.
+One level native material surface, with the same world UV mapping, runs beneath rooms and corridors.
+Forest dark tile foundations are excluded; wall bases blend over .6 world units and distant skirts over 3.
+
+The wider corridor provides about 2,227 virtual pixels of bounded lateral travel, instead of 154.
+Complete architecture remains unreflected and is drawn once. The loader accepts wider images only
+for discovered corridor filenames, with a 4096x768 decoded-pixel ceiling; existing room formats remain
+valid. A wide corridor occupies approximately the same texture memory as the previous 2880x1080 plate.
+The frame follows corridor progress, so travel per square varies with corridor length. This is still a
+baked perspective plate; independent foreground occlusion, water shading and native deferred lighting
+remain approximations.
+
+Use a fresh private output directory for a camera, geometry or material change. `--bands wall` can
+re-render just the wall pass when the camera/layout and other passes are unchanged. Recompose afterward.
+Rebuild fire metadata after rebuilding rooms: `prepare_scenery_emitters.py` understands both camera versions
+and applies the room manifest's environment scale. Assets and QA evidence stay in
+`C:\Users\Piral\DarkestDungeon3\local-art\scenery-contact-v04`.
+
+```powershell
+python -m unittest discover -s tests -p scenery_camera_test.py
+blender -b --python-exit-code 1 --python tools/verify_scenery_camera.py -- <private-kit>
+```
+
+`-dd3-crawl-motion-check` is a separate unsaved native fixture. It walks ordinary map routes through
+six empty squares, stops and reverses in each region, with real hero models. Every frame checks the
+actual panorama crop for jumps at tile crossings. Hunger still runs; the fixture resumes an interrupted
+route through the public API and carries enough food. It never selects or persists an estate.
+This complements the regular travel/torch/interaction/battle/return fixture, rather than replacing it.
+
 ## Continuous ground and moving atmosphere, round233
 
 `tools/render_native_corridors.py` rebuilds six variants per primary region from the existing road kit. The former

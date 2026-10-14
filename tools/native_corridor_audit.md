@@ -1,5 +1,23 @@
 # Native corridor art audit, round216
 
+## October 14 stage-framing update
+
+The latest pack replaces the distant arena framing and mismatched foreground floor with a close,
+hero-calibrated room/corridor camera and level native ground. All 32 room landmarks are re-rendered at
+the crawl's scale, and 24 corridors now have a 4096x768 lateral view. Native Tangle dark foundations
+and low wall bases no longer produce the former hard ground platforms. See `corridor_art.md` for
+the camera contract, bounded wide-image allocation, emitter rebuild and native motion fixture.
+
+The ordinary four-region native scenario passed actor travel, torch, curios, traps, obstacles, reversal,
+room fights and same-scene return. A second native pass checked continuous forward/reverse/stop routes
+and frame-by-frame crop continuity in all four regions. Private captures and a 38-second movement recording
+are under `local-art/scenery-contact-v04`. Native profile hashes remained unchanged; no estate was selected.
+
+Remaining limits are the baked plate's depth/parallax, flat water and approximate lighting. The walking
+ground is deliberately level while native background terrain may rise behind it. More diffuse textures
+are not needed for these fixes; fully physical foreground occlusion needs a separate rendering layer or
+live native scenery, and water needs its shader/effect data.
+
 ## Round233 update
 
 All 24 road panoramas are rebuilt with continuous ground below distant geometry, faded skirt/skybox/ground bases

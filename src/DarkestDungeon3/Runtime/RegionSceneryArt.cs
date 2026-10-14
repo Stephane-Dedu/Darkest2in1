@@ -71,7 +71,7 @@ internal static class RegionSceneryArt
                         else
                         {
                             result.Data = File.ReadAllBytes(path);
-                            if (!PrivateRoomScenery.ValidPng(result.Data))
+                            if (!PrivateRoomScenery.ValidPng(result.Data, corridorFiles.Contains(fileName)))
                             { result.Data = null; result.Error = "invalid PNG header, dimensions or scene ratio"; }
                         }
                     }

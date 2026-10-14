@@ -10,6 +10,9 @@ import json
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from scenery_camera import ENVIRONMENT_SCALE, create as stage_camera, floor as stage_floor, settings as camera_settings, configure_materials
+
 SCENES = {"boss-01": "dungeon_interior", "entrance-01": "dungeon_exterior",
           "battle-01": "resist", "battle-02": "faction", "battle-03": "military", "battle-04": "cultist",
           "quiet-01": "gaunt", "treasure-01": "pillager"}
@@ -83,6 +86,7 @@ def main():
     import bpy
     import numpy as np
     import bl_lib as L
+    configure_materials(L)
 
     # Validate every selected dependency before publishing any files.
     sources, floors = [], {}
@@ -115,23 +119,16 @@ def main():
         floor_folder, floor_key, floor_data, floor_texture = floors[region]
         if not (temp / f"{region}-{kind}-near.png").is_file():
             L.reset()
-            objects, lo, hi = L.build(folder, respect_active=True, shade=shade)
+            objects, lo, hi = L.build(folder, place=np.diag([ENVIRONMENT_SCALE]*3+[1]), respect_active=True, shade=shade)
             if not objects:
                 raise ValueError(f"Empty native arena: {folder}")
             for obj in objects:
                 distance = float(np.mean([c[1] for c in obj.bound_box]))
-                obj["band"] = "far" if distance > 45 else "mid" if distance > 14 else "near"
+                obj["band"] = "far" if distance > 90 else "mid" if distance > 28 else "near"
             # Combat exports omit the foreground ground or end their pier before the crawl's footline.
             # Extend the same region's installed ground material under the actors, below existing geometry.
-            bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 8, -.04))
-            ground = bpy.context.object
-            ground.name = "crawl_native_foreground_ground"
-            ground.scale = (70, 80, 1)
-            ground["band"] = "near"
-            material = dict(floor_data, scale=[17.5, 20], offset=[0, 0])
-            ground.data.materials.append(L.make_mat(floor_folder, floor_key + "-crawl", material, shade=shade))
-            camera = L.camera((0, -8.3, .74), (0, 10, .74), fov=38, res=(w, h))
-            camera.data.shift_y = .31
+            stage_floor(L, floor_folder, floor_key, floor_data, shade=shade, band="near")
+            stage_camera(L, res=(w,h))
             for band, fog in (("far", .5), ("mid", .22), ("near", 0)):
                 visible = False
                 for obj in bpy.data.objects:
@@ -149,10 +146,11 @@ def main():
                         "floor_material": floor_data["name"], "floor_texture_sha256": digest(floor_texture),
                         "size": [w, h]})
         print(f"READY {target.name}", flush=True)
-    manifest = {"version": 1, "generated_art": False, "source_kit": str(kit),
+    manifest = {"version": 2, "generated_art": False, "source_kit": str(kit),
                 "render_tool_sha256": digest(Path(__file__).resolve()),
-                "foreground_plane": {"center_blender": [0, 8, -.04], "size": [70, 80], "uv_repeat": [17.5, 20]},
-                "camera": {"position": [0, .74, -8.3], "vertical_fov": 38, "lens_shift_y": .31},
+                "camera_tool_sha256": digest(Path(__file__).with_name("scenery_camera.py")),
+                "foreground_plane": {"center_blender": [0, 60, -.04], "size": [500, 300], "world_uv_repeat_units": 8},
+                "camera": camera_settings(), "environment_scale": ENVIRONMENT_SCALE,
                 "virtual_scene": [1920, 720], "hero_foot_y": 680,
                 "limits": ["Native base-colour/tint with approximate depth haze; no native lighting or animated VFX",
                            "Native road/deck material extended on an authored foreground plane",
