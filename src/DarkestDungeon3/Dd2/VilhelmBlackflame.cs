@@ -14,6 +14,8 @@ internal sealed class VilhelmBlackflame : IDisposable
 {
     private GameObject _root;
     private ParticleSystem _particles;
+    private ParticleSystem _coreParticles;
+    private GameObject _coreRoot;
     private Material _material;
     private Texture2D _texture;
     private ParticleSystemRenderer _renderer;
@@ -21,7 +23,7 @@ internal sealed class VilhelmBlackflame : IDisposable
     private static IResourceLocation _templateLocation;
     private float _weight;
     internal bool Visible => _weight>.01f;
-    internal int ParticleCount => _particles!=null ? _particles.particleCount : 0;
+    internal int ParticleCount => (_particles!=null ? _particles.particleCount : 0)+(_coreParticles!=null ? _coreParticles.particleCount : 0);
     internal bool MaterialReady => _material!=null;
     private float _diagnoseAt;
     private int _diagnosed;
@@ -66,8 +68,8 @@ internal sealed class VilhelmBlackflame : IDisposable
         var main=_particles.main; main.playOnAwake=false; main.loop=true; main.maxParticles=80;
         main.simulationSpace=ParticleSystemSimulationSpace.Local;
         main.useUnscaledTime=true;
-        main.startLifetime=new ParticleSystem.MinMaxCurve(.18f,.38f); main.startSpeed=new ParticleSystem.MinMaxCurve(.04f,.12f);
-        main.startSize=new ParticleSystem.MinMaxCurve(.14f,.25f); main.startColor=new Color(1,1,1,.85f);
+        main.startLifetime=new ParticleSystem.MinMaxCurve(.3f,.5f); main.startSpeed=new ParticleSystem.MinMaxCurve(.04f,.12f);
+        main.startSize=new ParticleSystem.MinMaxCurve(.28f,.42f); main.startColor=new Color(.75f,.71f,.82f,.65f);
         var shape=_particles.shape; shape.shapeType=ParticleSystemShapeType.Box; shape.scale=new Vector3(.025f,length*.72f,.025f);
         var emission=_particles.emission; emission.rateOverTime=0;
         var sheet=_particles.textureSheetAnimation; sheet.enabled=true; sheet.numTilesX=8; sheet.numTilesY=8;
@@ -78,6 +80,16 @@ internal sealed class VilhelmBlackflame : IDisposable
             new[] { new GradientAlphaKey(0,0),new GradientAlphaKey(1,.15f),new GradientAlphaKey(.7f,.6f),new GradientAlphaKey(0,1) }); colour.color=gradient;
         _renderer=_particles.GetComponent<ParticleSystemRenderer>();
         _renderer.renderMode=ParticleSystemRenderMode.Billboard; _renderer.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;
+        // Native FFX440461 has a near-black layer and separate pale flame layers.
+        // Share the original atlas, but retain both value ranges instead of white fuzz.
+        _coreRoot=UnityEngine.Object.Instantiate(_root,weapon,false);
+        _coreRoot.name="Onyx Blade dark flame";
+        _coreParticles=_coreRoot.GetComponent<ParticleSystem>();
+        var core=_coreParticles.main; core.maxParticles=40;
+        core.startSize=new ParticleSystem.MinMaxCurve(.32f,.48f);
+        core.startColor=new Color(.008f,.006f,.012f,.95f);
+        _coreParticles.GetComponent<ParticleSystemRenderer>().sortingFudge=.05f;
+        _coreParticles.Play();
         _particles.Play();
         Plugin.Log.LogInfo($"[vilhelm] black-flame atlas ready; original weapon extent {length:0.00}m, axis {axis}");
     }
@@ -97,6 +109,7 @@ internal sealed class VilhelmBlackflame : IDisposable
         _material.DisableKeyword("_RGBALPHA_ON");
         _material.DisableKeyword("_USE_LERPCOLOR_ON"); _material.DisableKeyword("_CAMERAFADE_ON"); _material.DisableKeyword("_DEPTHFADE_ON");
         _renderer.sharedMaterial=_material;
+        _coreParticles.GetComponent<ParticleSystemRenderer>().sharedMaterial=_material;
         Plugin.Log.LogInfo("[vilhelm] native flame material ready: "+_material.shader.name+"; queue "+_material.renderQueue+"; passes "+string.Join(",",tags));
     }
     internal void Update(bool active,bool ignition,float delta)
@@ -104,7 +117,8 @@ internal sealed class VilhelmBlackflame : IDisposable
         if (_particles==null) return;
         PrepareMaterial();
         _weight=Mathf.MoveTowards(_weight,active ? 1 : 0,Mathf.Max(0,delta)*8);
-        var emission=_particles.emission; emission.rateOverTime=_weight*(ignition ? 130 : 85);
+        var emission=_particles.emission; emission.rateOverTime=_weight*(ignition ? 35 : 20);
+        var coreEmission=_coreParticles.emission; coreEmission.rateOverTime=_weight*(ignition ? 85 : 50);
         if (_weight>.5f && _diagnosed<3 && Time.unscaledTime>_diagnoseAt && Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-check"))
         {
             _diagnoseAt=Time.unscaledTime+1; _diagnosed++;
@@ -115,6 +129,7 @@ internal sealed class VilhelmBlackflame : IDisposable
     public void Dispose()
     {
         if (_root!=null) UnityEngine.Object.Destroy(_root);
+        if (_coreRoot!=null) UnityEngine.Object.Destroy(_coreRoot);
         if (_material!=null) UnityEngine.Object.Destroy(_material);
         if (_texture!=null) UnityEngine.Object.Destroy(_texture);
         if (_template.IsValid()) Addressables.Release(_template);

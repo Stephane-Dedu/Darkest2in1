@@ -51,7 +51,7 @@ internal sealed class HeroStage : MonoBehaviour
     public static bool RendersBlack { get; private set; }
     private float _loadedAt = -1f;
     private bool _checked;
-    private const float PixelsPerUnit = 100f;          // 1920x720 virtual pixels = 19.2 x 7.2 world units
+    internal const float PixelsPerUnit = 100f;         // 1920x720 virtual pixels = 19.2 x 7.2 world units
     private static readonly Vector3 Origin = new(20000f, 20000f, 0f);
 
     private Camera _camera;

@@ -91,6 +91,7 @@ internal static class CrawlSceneryCheck
                     if (d.Phase != Phase.Crawling || !HeroStage.Lit || RegionSceneryArt.RoomSceneFiles(Regions[_region]).Count < 8) return;
                     if (VilhelmChecking && !UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Any(m => m.Ready && HeroStage.Owns(m.Actor))) return;
                     if (VilhelmChecking) VilhelmCombatCheck.CheckRegistration();
+                    if (VilhelmChecking && MotionChecking) Require(UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Any(m => m.Ready && HeroStage.Owns(m.Actor) && m.NativeWalkReady),"Original Vilhelm walk calibration missing");
                     if (MotionChecking)
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
@@ -229,6 +230,9 @@ internal static class CrawlSceneryCheck
         var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
         if (texture == null || !HeroStage.Lit) return;
         Require(HeroStage.WalkContactErrorPixels <= 6,"A planted native foot missed the moving ground target");
+        if (VilhelmChecking)
+            foreach (var model in UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Where(m => m.Ready && HeroStage.Owns(m.Actor)))
+                Require(model.NativeWalkReady && Time.frameCount-model.SampledFrame<=1,"Imported Vilhelm pose stopped updating");
         float progress = CorridorPanoramaLayout.ViewProgress(exp.TileIndex,corridor.Tiles.Count,
             exp.HeadingRoomId != corridor.RoomB,d.SceneSlide);
         var crop = CorridorPanoramaLayout.Crop(texture.width,texture.height,progress);

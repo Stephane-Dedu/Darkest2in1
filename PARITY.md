@@ -556,3 +556,18 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  installation/native preview await stopped DD2. Another chat owns the running Vilhelm test; owner
  approval requested before interrupting it.
  No estate accessed. Evidence/installer/rollback: local-art/scenery-woodland-v07.
+
+- [x] Round248 Vilhelm native locomotion: original a002_020000 walk plus 41-sample,
+  2 m source root curve follows signed rendered ground travel at fitted scale.
+  Original meshes/nodes/previous 12 clips unchanged. Native forward/reverse/stop
+  passes four regions over 3,370 frames, with per-frame imported pose checks;
+  recordings/captures inspected. DD2 foot error bounds do not measure imported feet.
+- [x] Round248 visible Blackflame: original RGBA atlas, dark/pale blade layers and
+  actor-local native hard/soft rim overrides. Five after-render frames and native
+  cast/application/idle pass. Five-skill/base/mastery/buff-expiry/recruitment and
+  four-region travel/torch/props/fight/return pass in unsaved fixtures. Release +
+  1,171 Core + 204 UI pass; install/source/model hashes match; 39 native profiles
+  unchanged. No estate accessed. Evidence/backups: local-art/vilhelm-v01.
+- [?] Vilhelm remaining: native death/corpse visuals, saved recruitment/homecoming,
+  full DS3 cloth/FXR/audio and final combat balance. Local invitation enabled;
+  public default off. Round247's pending Tangle art installation is unchanged.

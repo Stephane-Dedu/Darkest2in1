@@ -6,6 +6,18 @@ namespace DarkestDungeon3.Core.Tests;
 public class ExportedHeroMotionTests
 {
     [Fact]
+    public void WalkUsesNativeDistanceCurveInsteadOfAConstantGuessedSpeed()
+    {
+        float[] native={0,.2f,1,2};
+        Assert.Equal(2,ExportedHeroMotion.AdvanceWalkByMotion(0,100,100,3,native),5);
+        Assert.Equal(1,ExportedHeroMotion.AdvanceWalkByMotion(.5f,10,100,3,native),5);
+        Assert.Equal(.5f,ExportedHeroMotion.AdvanceWalkByMotion(.5f,0,100,3,native),5);
+        Assert.Equal(2.9f,ExportedHeroMotion.AdvanceWalkByMotion(.5f,-20,100,3,native),5);
+        Assert.Equal(0,ExportedHeroMotion.AdvanceWalkByMotion(0,200,100,3,native),5);
+        Assert.Throws<System.ArgumentException>(() => ExportedHeroMotion.AdvanceWalkByMotion(0,10,100,3,new[] {0f,0,0}));
+    }
+
+    [Fact]
     public void NativeWalkClockFreezesAndReversesAtItsExistingPoseInsteadOfFlippingTheLoop()
     {
         float first = ExportedHeroMotion.AdvanceWalk(.4f,10,100,1.2f);

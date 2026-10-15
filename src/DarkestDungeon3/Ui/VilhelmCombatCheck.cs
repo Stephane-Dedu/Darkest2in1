@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
+using System.IO;
 using System.Linq;
 using Assets.Code.Actor;
 using Assets.Code.Actor.Events;
@@ -21,7 +23,8 @@ namespace DarkestDungeon3.Ui;
 /// <summary>Only called by the unsaved opt-in Vilhelm fixture. Executes native selected skills and targets.</summary>
 internal static class VilhelmCombatCheck
 {
-    private static readonly string[] Actions={"advance","blackflame","slash","sweep","heal"};
+    private static readonly bool CastOnly=Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-cast-check");
+    private static readonly string[] Actions=CastOnly ? new[] {"blackflame"} : new[] {"advance","blackflame","slash","sweep","heal"};
     private static int _index;
     private static uint _guid,_target;
     private static string _pending,_pendingKey;
@@ -30,6 +33,34 @@ internal static class VilhelmCombatCheck
     private static readonly HashSet<string> SampledClips=new();
     private static bool _flameSampled,_idleReturned;
     private static bool _registrationChecked;
+    private static bool _captured;
+
+    internal static void ObserveModel(ExportedHeroModel model)
+    {
+        if (_captured || !CrawlSceneryCheck.OwnsSession || model.SampledClip!="a245_038700" || model.SampledTime<.65f || model.FlameParticles<1) return;
+        _captured=true;
+        Driver.Instance.StartCoroutine(CaptureFlame(model));
+    }
+
+    private static IEnumerator CaptureFlame(ExportedHeroModel model)
+    {
+        string folder=Path.Combine(SoulsHeroClasses.Folder,"qa",DateTime.UtcNow.ToString("yyyyMMdd-HHmmss"));
+        Directory.CreateDirectory(folder);
+        for (int i=0;i<5;i++)
+        {
+            yield return new WaitForEndOfFrame();
+            var frame=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);
+            try
+            {
+                frame.ReadPixels(new Rect(0,0,Screen.width,Screen.height),0,0,false); frame.Apply(false);
+                File.WriteAllBytes(Path.Combine(folder,"blackflame-"+i+".png"),frame.EncodeToPNG());
+                Plugin.Log.LogInfo($"[vilhelm capture] {folder}; frame {i}; clip {model?.SampledClip} at {model?.SampledTime:0.000}; particles {model?.FlameParticles}; borrowedRim={model?.BorrowedCastRim}");
+                Require(model==null || model.SampledClip!="a245_038700" || !model.BorrowedCastRim,"Borrowed gold rim returned during native rendering");
+            }
+            finally { UnityEngine.Object.Destroy(frame); }
+            yield return new WaitForSecondsRealtime(.15f);
+        }
+    }
 
     internal static void CheckRegistration()
     {
@@ -99,8 +130,9 @@ internal static class VilhelmCombatCheck
             {
                 EventManager.RemoveListener<EventSkillFinalizeResults>(OnResult);
                 EventManager.RemoveListener<EventBattleStateChanged>(OnState);
-                Require(!actor.BuffContainer.GetInstances().Any(b => b.Definition.Id=="cru_radiance_melee_bonus"),"Expired flame buff remained active");
-                Plugin.Log.LogInfo("[vilhelm check] PASS: five native skills, original motion phases and idle returns, emitted flame through attack and native buff expiry; assisted survival setup, no balance claim");
+                if (!CastOnly) Require(!actor.BuffContainer.GetInstances().Any(b => b.Definition.Id=="cru_radiance_melee_bonus"),"Expired flame buff remained active");
+                Plugin.Log.LogInfo(CastOnly ? "[vilhelm check] PASS: native Blackflame motion/application/idle; renderer captures recorded"
+                    : "[vilhelm check] PASS: five native skills, original motion phases and idle returns, emitted flame through attack and native buff expiry; assisted survival setup, no balance claim");
                 return true;
             }
         }

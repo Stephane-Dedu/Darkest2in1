@@ -23,12 +23,12 @@ if out == kit or kit in out.parents:
 sys.path.insert(0, str(kit / 'tools'))
 import assemble_parts as assembler
 from export_gltf import export, bone_local, find_png
-from hkx_skeleton import read_skeletons, quat_to_matrix
+from hkx_skeleton import read_skeletons, quat_to_matrix, Packfile
 from hkx_anim import read_clip
 from souls_containers import bnd4_read, dcx_decompress
 
 wanted = {
-    'a002_000000', 'a002_004000', 'a025_030000', 'a025_030010', 'a025_030100',
+    'a002_000000', 'a002_004000', 'a002_020000', 'a025_030000', 'a025_030010', 'a025_030100',
     'a245_038700', 'a000_042003', 'a000_042103', 'a000_042303',
     'a000_005002', 'a000_017002', 'a000_018002'
 }
@@ -100,6 +100,7 @@ for bone in model['bones']:
     bone['matrix'] = matrix
 
 clips, sources, hashes = {}, {}, {}
+walk_motion=None
 for binder in sorted((kit / 'raw/chr').glob('c0000*.anibnd.dcx')):
     data = binder.read_bytes()
     for _, name, contents in bnd4_read(dcx_decompress(data)):
@@ -111,6 +112,15 @@ for binder in sorted((kit / 'raw/chr').glob('c0000*.anibnd.dcx')):
             clips[clip_name] = clip
             sources[clip_name] = binder.name
             hashes[binder.name] = hashlib.sha256(data).hexdigest()
+            if clip_name=='a002_020000':
+                packfile=Packfile(contents)
+                reference=packfile.of_class('hkaDefaultAnimatedReferenceFrame')
+                if len(reference)!=1: raise ValueError('Missing native locomotion reference frame')
+                offset,count=packfile.arr(reference[0]+0x48)
+                samples=np.array(packfile.u(f'{count*4}f',offset)).reshape(count,4)
+                distances=np.r_[0,np.cumsum(np.linalg.norm(np.diff(samples[:,[0,2]],axis=0),axis=1))]
+                if count!=clip['frames'] or not np.all(np.diff(distances)>0): raise ValueError('Invalid native walking distances')
+                walk_motion={'clip':clip_name,'duration':clip['duration'],'distances':distances.tolist()}
 if set(clips) != wanted:
     raise ValueError('Native animation files missing: ' + ', '.join(sorted(wanted - set(clips))))
 animations, report = [], []
@@ -142,6 +152,8 @@ for index, material in enumerate(model['materials']):
         document['materials'][index]['pbrMetallicRoughness']['baseColorTexture']={'index':tex}
         break
 gltf_path.write_text(json.dumps(document,indent=1))
+if walk_motion is None: raise ValueError('Native walking motion is missing')
+(out/'motion.json').write_text(json.dumps(walk_motion,indent=2))
 hashes['c0000.HKX'] = hashlib.sha256(skeleton_path.read_bytes()).hexdigest()
 (out / 'animation-report.json').write_text(json.dumps({'clips': report, 'source_sha256': hashes,
     'weapon_mount': {'native_axis': '-Y', 'animation_axis': '+Z', 'rotation_x_degrees': -90, 'pivot': 'R_Weapon'}}, indent=2))

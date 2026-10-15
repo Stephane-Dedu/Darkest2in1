@@ -6632,3 +6632,67 @@ Round247's six-variant native tree/root/undergrowth pass is ready in local-art/s
 Keep the current install until DD2 stops or the owner authorizes closing the other chat's test.
 Then run install.py and the unsaved preview; update PARITY after inspection.
 Preserve independent Shieldbreaker/Vilhelm work and check live process state before any deployment.
+
+## Round248 (2026-10-15): native Vilhelm walking and visible blade Blackflame
+
+The native DS3 Move behavior selects a002_020000. The previously imported 004000
+pose has only 2.8 mm forward foot range; the actual 41-frame walk has 0.882 m and
+a 1.333333 s cycle. Extracted hkaDefaultAnimatedReferenceFrame samples establish
+2.0000007 m of root travel. The private pack now contains 13 clips and motion.json.
+Signed rendered ground travel, divided by fitted source scale, advances/inverts
+that original cumulative curve. Stops/reversal preserve phase; no animation or
+hand tracks are rotated. Geometry/nodes and the previous 12 animation accessor
+payloads remain byte-identical. Installer carries the motion calibration, and the
+runtime rejects a new walk clip without valid finite/increasing calibration.
+
+DD2's painted hero shader lacks DS3's separate specular contribution. An owned
+runtime diffuse copy applies a bounded tone curve, retaining original PNGs, UVs,
+detail and alpha. All 24 available native diffuse material maps are hash-verified.
+Blackflame uses the original s11629 RGBA atlas with separate near-black/pale layers
+following the corrected weapon mount. The native DD2 torch particle material is
+loaded from its actual Addressable location and retains independent RGBA alpha.
+Its shader already has a UniversalForward pass/queue 3000; changing an imagined
+OIT queue was not the cause. Full DS3 FXR simulation is still approximated.
+
+The borrowed cast's gold outline persisted because DD2 applies material controllers
+at beginContextRendering, after LateUpdate, and uses BOTH _RIM and _SOFT_RIM.
+Actor-local native material overrides now disable both only during Vilhelm's own
+Blackflame cast, and are removed on idle/release. Direct property-block/keyword
+writes and testing only the hard-rim keyword were insufficient. An opt-in cast
+fixture records five exact rendered ignition frames and checks both keywords after
+rendering. Final frames show dark flame/pale fringe on the blade and no gold rim.
+
+Shared Release passes with three existing warnings; 1,171 Core and 204 UI cases
+pass, including nonuniform native-distance forward/stop/reverse/wrap calibration.
+Native five-skill selection/targeting/application, original motion phases/idle
+returns, flame buff expiry, base/mastered loadouts and transient coach invitation/
+ordinary recruitment pass. Four-region travel/torch/curio/trap/obstacle/reversal/
+room fight/return passes using debug victories, with no balance claim. The final
+rim-only correction additionally passes native cast/application/idle/render checks.
+Sustained imported walking passes forward/reverse/stop in Sprawl/Foetor/Tangle/
+Shroud over 834/843/849/844 observed frames (3,370 total), no camera jumps, maximum
+pan speed 371.3 virtual px/s. The fixture requires the original calibration and an
+updated imported pose each frame. Native movement recordings/captures inspected.
+The six-pixel planted-foot bound measures DD2 rigs, not Vilhelm's imported bones.
+
+Private evidence, frozen shared build/source hashes, model verification, captures,
+native logs/video and rollback backups: local-art/vilhelm-v01. Final acceptance
+manifest: final-acceptance-20261015.json. Installed four plugin artifacts/43 model
+files match the tested build; all 403 frozen shared source files still match.
+39 native profile files are unchanged. Local invitations remain enabled; public
+default remains off. All owned QA PIDs are closed, last 23092; DD2 is stopped.
+No estate was selected/persisted and no OS input was sent. The October14 launch
+pause had expired before these tests. No generated artwork or game assets enter Git.
+
+Remaining: full cloth/FXR/audio and final combat rules; native death/corpse visuals,
+saved recruitment/homecoming transactions and broader motion comfort. The original
+extra armor/cloth bones still follow reference/parent poses. Round247's pending
+Tangle pack was not installed by this round. Independent Shieldbreaker work/notes
+are preserved and remain outside this commit, though present in the shared build.
+
+## Status 2026-10-15: Vilhelm locomotion/Blackflame installed and native verified
+
+Round248 is installed with rollback and locally recruitable at the Stagecoach.
+Five-skill and four-region native checks pass; all owned games are closed.
+Continue from tools/handoff_prompt.md, preserving other agents' work and checking
+live processes before deployment. Round247's Tangle art installation remains pending.

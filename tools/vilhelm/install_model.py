@@ -30,6 +30,7 @@ for name in names:
     if source not in path.parents or not path.is_file():
         raise ValueError('Invalid or missing model dependency: ' + name)
     files[name] = path
+if (source/'motion.json').is_file(): files['motion.json']=source/'motion.json'
 files['portrait.png'] = args.portrait.resolve()
 files['vfx/blackflame.png'] = args.flame.resolve()
 if not all(p.is_file() for p in files.values()):

@@ -5,10 +5,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Assets.Code.Actor;
 using Assets.Code.Combat;
+using Assets.Code.Rendering.MaterialPropertyBlocks;
 using DarkestDungeon3.Core.Campaign.Town;
 using DarkestDungeon3.Core.Presentation;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Newtonsoft.Json;
 
 namespace DarkestDungeon3.Dd2;
 
@@ -19,6 +21,13 @@ internal sealed class ExportedHeroes : MonoBehaviour
     {
         internal GltfModel Model;
         internal Dictionary<string,byte[]> Images;
+        internal WalkMotion Walk;
+    }
+    internal sealed class WalkMotion
+    {
+        public string Clip { get; set; }
+        public float Duration { get; set; }
+        public float[] Distances { get; set; }
     }
     private static Task<Pack> _reading;
     private static Pack _pack;
@@ -43,7 +52,18 @@ internal sealed class ExportedHeroes : MonoBehaviour
                 if (new FileInfo(image).Length > 16*1024*1024) throw new FormatException("Oversized hero texture");
                 images[image] = File.ReadAllBytes(image);
             }
-            return new Pack { Model = model, Images = images };
+            WalkMotion walk=null;
+            string motion=Path.Combine(Path.GetDirectoryName(path),"motion.json");
+            if (File.Exists(motion))
+            {
+                if (new FileInfo(motion).Length>65536) throw new FormatException("Oversized walk calibration");
+                walk=JsonConvert.DeserializeObject<WalkMotion>(File.ReadAllText(motion));
+                if (walk?.Clip!="a002_020000" || walk.Distances==null || walk.Distances.Length>512
+                    || !model.Animations.Any(a => a.Name==walk.Clip && Math.Abs(a.Duration-walk.Duration)<.01f)) throw new FormatException("Invalid native walk clip");
+                ExportedHeroMotion.AdvanceWalkByMotion(0,0,100,walk.Duration,walk.Distances);
+            }
+            if (walk==null && model.Animations.Any(a => a.Name=="a002_020000")) throw new FormatException("Native walk calibration is missing");
+            return new Pack { Model = model, Images = images,Walk=walk };
         });
     }
 
@@ -76,10 +96,14 @@ internal sealed class ExportedHeroModel : MonoBehaviour
     internal bool FlameVisible => _flame?.Visible==true;
     internal int FlameParticles => _flame?.ParticleCount ?? 0;
     internal bool FlameMaterialReady => _flame?.MaterialReady==true;
+    internal bool NativeWalkReady => _walk!=null;
+    internal bool BorrowedCastRim => _renderers.Any(r => r!=null && (r.sharedMaterial.IsKeywordEnabled("_RIM") || r.sharedMaterial.IsKeywordEnabled("_SOFT_RIM")));
+    internal int SampledFrame { get; private set; }
     internal float BodyHeight => _root != null ? _root.transform.TransformVector(Vector3.up*_bodyHeight).magnitude : 0;
     private GameObject _root;
     private Transform[] _nodes;
     private GltfModel _model;
+    private ExportedHeroes.WalkMotion _walk;
     private Dictionary<string,GltfModel.Clip> _clips;
     private readonly List<UnityEngine.Object> _made = new();
     private readonly Dictionary<string,Texture2D> _textures = new();
@@ -89,7 +113,9 @@ internal sealed class ExportedHeroModel : MonoBehaviour
     private string _skill;
     private readonly List<SkinnedMeshRenderer> _renderers = new();
     private readonly ExportedHeroClock _clock = new();
-    private readonly MaterialPropertyBlock _castPalette=new();
+    private readonly HashSet<MaterialPropertyBhv> _castBlocks=new();
+    private readonly MaterialPropertyOverride[] _castPalette={ new("_RIM",false,true),new("_UseRim",0f),new("_RimLight",0f),
+        new("_SOFT_RIM",false,true),new("_Use_Soft_Rim",0f),new("_Soft_Rim_Blend",0f) };
     private VilhelmBlackflame _flame;
     private AnimatorCullingMode _culling;
     private Vector3[] _fromPosition;
@@ -118,6 +144,7 @@ internal sealed class ExportedHeroModel : MonoBehaviour
     private void Build(ExportedHeroes.Pack pack, SkinnedMeshRenderer body)
     {
         _model = pack.Model;
+        _walk = pack.Walk;
         _combat=FindObjectsOfType<CombatActorBhv>().FirstOrDefault(c => c.CachedActorBhv==Actor);
         _clips = _model.Animations.GroupBy(c => c.Name).ToDictionary(g => g.Key,g => g.First());
         _root = new GameObject("DD3 Sir Vilhelm");
@@ -215,14 +242,16 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         string action=VilhelmKit.Find(_combat?.CurrentSkillPresentation?.SkillId)?.Key;
         if (split.Move=="idle") _skill=null;
         else if (action!=null || selected!=null) _skill=action ?? selected;
-        if (!stage && _skill=="blackflame")
-            foreach (var renderer in _renderers)
+        bool castingFlame=!stage && _skill=="blackflame" && !split.Move.Contains("impact") && !split.Move.Contains("death");
+        if (castingFlame)
+            foreach (var block in Actor.MaterialPropertyBlocks.Where(b => b!=null && b.isActiveAndEnabled))
             {
-                renderer.GetPropertyBlock(_castPalette);
-                _castPalette.SetFloat("_UseRim",0);
-                _castPalette.SetFloat("_RimLight",0);
-                renderer.SetPropertyBlock(_castPalette);
+                // Native controllers apply again at beginContextRendering, after
+                // LateUpdate. Register an owned override in that same stack.
+                foreach (var value in _castPalette) block.AddOverride(value,uint.MaxValue,1,this);
+                _castBlocks.Add(block);
             }
+        else ClearCastPalette();
         bool walking=stage && Mathf.Abs(HeroStage.WalkDistancePixels)>.0001f;
         string state = stage ? walking ? HeroStage.WalkDistancePixels<0 ? "walk-back" : "walk-forward" : "idle" : native;
         bool changed=state!=_state;
@@ -233,7 +262,7 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         }
         bool impact=split.Move.Contains("impact"), death=split.Move.Contains("death");
         bool healing=_skill=="heal" && !impact && !death;
-        string clipName = walking ? "a002_004000" : stage || split.Move == "idle" ? "a002_000000"
+        string clipName = walking ? _walk?.Clip ?? "a002_004000" : stage || split.Move == "idle" ? "a002_000000"
             : impact ? "a000_005002" : death ? "a000_017002"
             : _skill=="blackflame" ? "a245_038700" : _skill=="sweep" ? "a025_030010"
             : _skill=="advance" ? "a025_030100"
@@ -246,7 +275,9 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         float strike=death ? duration : clipName=="a245_038700" ? 1.4f : Mathf.Min(1.3f,duration*.65f);
         if (walking)
         {
-            _walkClock = ExportedHeroMotion.AdvanceWalk(_walkClock,HeroStage.WalkDistancePixels,100,duration);
+            _walkClock = _walk==null ? ExportedHeroMotion.AdvanceWalk(_walkClock,HeroStage.WalkDistancePixels,100,duration)
+                : ExportedHeroMotion.AdvanceWalkByMotion(_walkClock,HeroStage.WalkDistancePixels,
+                    _root.transform.TransformVector(Vector3.forward).magnitude*HeroStage.PixelsPerUnit,duration,_walk.Distances);
         }
         float t=walking ? _walkClock%Mathf.Max(.01f,duration)
             : healing && !stage ? nativeFrame.Progress*duration : loop ? Time.unscaledTime%Mathf.Max(.01f,duration)
@@ -277,6 +308,8 @@ internal sealed class ExportedHeroModel : MonoBehaviour
             || b.Definition.Id=="cru_radiance_u_melee_bonus")==true;
         bool ignition=!stage && clipName=="a245_038700" && t>=.5666667f && t<=1.4f;
         _flame?.Update(!stage && buff || ignition,ignition,Time.unscaledDeltaTime);
+        SampledFrame=Time.frameCount;
+        if (Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-check")) Ui.VilhelmCombatCheck.ObserveModel(this);
     }
 
     private void HideDonor()
@@ -299,6 +332,15 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         _made.Add(texture);
         if (!ImageConversion.LoadImage(texture,bytes)) throw new FormatException("Invalid hero texture "+path);
         if (texture.width>4096 || texture.height>4096) throw new FormatException("Oversized decoded hero texture");
+        // DS3's near-black metal diffuse expects a separate specular reflection pass.
+        // DD2's painted shader has no such pass. Lift that owned diffuse copy while
+        // retaining native detail, color and alpha; source PNGs remain untouched.
+        var pixels=texture.GetPixels32();
+        var tone=Enumerable.Range(0,256).Select(i => (byte)(255*.85f*Mathf.Pow(i/255f,.6f))).ToArray();
+        byte Paint(byte value) => tone[value];
+        for (int i=0;i<pixels.Length;i++)
+        { var p=pixels[i]; pixels[i]=new Color32(Paint(p.r),Paint(p.g),Paint(p.b),p.a); }
+        texture.SetPixels32(pixels); texture.Apply(true,false);
         _textures[path] = texture; return texture;
     }
 
@@ -337,6 +379,7 @@ internal sealed class ExportedHeroModel : MonoBehaviour
     private void Release()
     {
         Ready=false;
+        ClearCastPalette();
         foreach (var renderer in _hidden) if (renderer.Key != null) renderer.Key.enabled=renderer.Value;
         if (_animator != null) _animator.cullingMode=_culling;
         _flame?.Dispose(); _flame=null;
@@ -347,4 +390,11 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         _made.Clear(); _hidden.Clear(); _textures.Clear(); _renderers.Clear();
     }
     private void OnDestroy() => Release();
+
+    private void ClearCastPalette()
+    {
+        foreach (var block in _castBlocks)
+            if (block!=null) foreach (var value in _castPalette) block.RemoveOverride(value,this);
+        _castBlocks.Clear();
+    }
 }
