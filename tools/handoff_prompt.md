@@ -1,8 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Owner requested no game launches for two hours on October14 at17:38:14 UTC.
-Do not launch any game before2026-10-14 19:38:14 UTC /21:38:14 Europe/Paris.
-Offline work may continue. No ordinary campaign or estate should be opened automatically afterward.
+The October14 launch pause expired at19:38:14 UTC /21:38:14 Europe/Paris.
+Use owned unsaved fixtures for native checks; do not open an ordinary/protected estate automatically.
+Round245 improves18 Tangle/Foetor/Shroud corridors with closer rear scenery, irregular native low verges,
+restrained ground value variation and restored distant Tangle earth banks. Sprawl is byte-identical.
+Private pack/comparisons/rollback: local-art/scenery-verges-v06. Art-only installation changed49 files and
+preserved143 scenery/plugin files. Eight Python checks and all18 clear-footline measurements pass.
+The unsaved native preview rendered all24 corridor choices and depth sets; regional captures inspected.
+Owned preview21976 and motion10508 are closed. No estate was accessed or persisted.
+Hidden-window motion launches produced zero hero samples. A normal visible launch produced4122 visible
+samples and four real rigs. Its motion assertion fired during the discrete doorway transition before
+steady walking. That harness condition needs separating before full native gait acceptance can be claimed.
+Keep the existing round244 gait checks pending. No camera/gameplay change was made in the art-only pass.
+
 Round244 corridor work uses native-painted DD2 depths, local ground contact, quieter floor paint,
 and curated/grounded Tangle walls. Code, offline renders and before/after/motion evidence are under
 local-art/scenery-depth-v05. Read tools/corridor_art.md and MODLOG/PARITY for installation and checks.

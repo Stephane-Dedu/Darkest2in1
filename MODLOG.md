@@ -6512,3 +6512,42 @@ Limits and next native check:
 Native DD2 corridor depths/ground contact and the owner's walking synchronization fix are installed with
 rollback and tests. Native acceptance is[?] until the explicit launch pause ends and the unsaved checks run.
 Independent Shieldbreaker source/test/art work and its journal entries remain uncommitted and untouched.
+
+
+## Round245 (2026-10-15): enclosed native corridor verges and grounded woodland
+
+Owner requested less flat repeated ground and more enclosing detail. Rebuilt18 corridors, six each for
+Tangle/Foetor/Shroud, with original DD2 meshes, painted textures and native UVs. Rear scenery moves three
+native units closer. An independently seeded low verge row adds irregular ferns/roots, roadside scrub,
+well/fence fragments, rope posts and shore debris while leaving the level actor lane clear. Tangle verge
+meshes retain only foliage faces; Shroud dead-fish parts retain only their native material faces. Large
+black barnacle mounds and low-detail cliff cards were rejected after camera-aligned comparisons.
+
+Restored native dark earth banks behind distant Tangle skirts. Dropping their banks had left raised tree
+bases hanging in rectangular silhouettes. Near driving foundations remain excluded. Broad restrained
+value variation and new geometry contact break up native floor bands without changing hue or UV scale.
+Stage projection, hero scale, gameplay travel, room art, emitters and Sprawl's24 image files are unchanged.
+No generated bitmap art, source-kit mutation or new runtime texture allocation was added.
+
+Six composition and two camera tests pass. All18 verge alpha footprints clear the y680 hero contact;
+their lowest significant source pixel is y692, above the y725 source footline. End/centre/end crops for
+all24 variants and three regional before/after comparisons inspected. The unsaved native preview21976
+rendered all24 corridor choices through the actual loader/depth draw and logged PASS; regional captures
+with DD1 reference figures were inspected. This establishes scenery rendering, not 3D hero locomotion.
+
+Art-only stopped-game installation changed49 hash-checked files and preserved143 other scenery/plugin
+files, including rooms/HamletModels/emitters/Sprawl. Rollback zip, source-pass/output hashes, native logs,
+captures and comparisons: local-art/scenery-verges-v06. Plugin assemblies remain the verified round244
+shared build. No estate was selected/read/persisted and no keyboard/mouse input was sent.
+
+Hidden startup windows prevented native hero samples in preliminary motion checks. A normal visible
+launch10508 produced4122 visible samples and four real rigs, then the motion assertion fired during the
+discrete doorway transition. Steady-route acceptance needs a separate transition phase in the fixture.
+No native gait PASS is claimed. All owned preview/motion games are closed; DD2 is stopped.
+
+## Status 2026-10-15: round245 corridor art installed and native preview verified
+
+The requested enclosed corridor pass is ready with complete rollback. Round244 native walking pace/contact,
+stops/reversal, in-place battle/return and imported Vilhelm stride still need acceptance. Keep independent
+Shieldbreaker changes and notes outside this commit. The October14 launch pause has expired; use owned
+unsaved fixtures and never automatically open an ordinary/protected estate.

@@ -1,5 +1,33 @@
 # Private DD2 corridor scenery
 
+## Enclosed verges, round245, October 15, 2026
+
+The v06 pass improves all six Tangle, Foetor and Shroud corridors. Their rear wall rows
+move three native units closer without changing the stage camera, hero scale, floor UVs
+or travel. An independently seeded low verge row breaks the long flat floor boundary.
+Tangle plants retain only native foliage faces and original UVs from three combined meshes.
+Foetor uses roadside scrub and occasional well/fence details. Shroud uses rope posts and
+small dead-fish debris while retaining its ocean view. Large black barnacle mounds and
+low-detail cliff cards were rejected in the private comparison.
+
+Distant Tangle skirts retain their native dark earth banks. Removing that material from
+raised woodland had left rectangular tree bases hanging above the floor. Near foundations
+remain excluded; the distant banks blend into the foreground floor and existing depth haze.
+Ground contact also receives broad, restrained value variation over the original paint.
+No new bitmap artwork or AI-generated textures are used. Sprawl's 24 image files are
+byte-identical to v05. All 18 verge passes leave the y680 footline clear.
+
+Rebuild with the commands below. For an existing v05 pass directory copied to a fresh
+private folder, rerender `ground wall road` for farm/forest/coast and `far vfar` for forest.
+Ground must be rerendered when geometry changes because its contact shadows use that geometry.
+Recompose the complete pack afterward. Native source assets are never modified.
+
+Private renders, comparisons and exact installation rollback are under
+`local-art/scenery-verges-v06`. The art-only installer changes 49 files and verifies
+143 retained scenery/plugin files, including rooms, HamletModels and Sprawl. Existing
+decoded-image limits and 36 MiB current-hall depth budget are unchanged. Six composition
+and two camera cases pass. Native fixture acceptance is recorded in MODLOG/PARITY.
+
 ## Native depth layers, round244, October 14, 2026
 
 The v05 corridor pass keeps the extracted DD2 meshes, painted textures, native UVs and

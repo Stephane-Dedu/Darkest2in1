@@ -527,3 +527,13 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  No game or estate opened. Native pace/contact/render timing, four-region travel/interaction/battle-return and
  imported Vilhelm's true stride clip remain pending. Pause ends October14 at19:38:14 UTC /21:38:14 Paris.
  Evidence: local-art/scenery-depth-v05; tools/corridor_art.md.
+
+
+- [x] Round245 corridor enclosure:18 Tangle/Foetor/Shroud scenes now have closer rear scenery, uneven native
+ foliage/scrub/rope/debris verges, restrained floor value variation and restored distant woodland banks.
+ Original paint/UVs, y680 actor lane/camera, rooms and byte-identical Sprawl retained. Eight Python cases,
+ 18 clear-footline measurements and all24 unsaved native loader/depth previews pass.49 files installed;
+ 143 scenery/plugin files preserved, rollback retained. Evidence: local-art/scenery-verges-v06.
+- [?] Round245 native movement acceptance: normal visible fixture reached four native rigs but its camera
+ assertion included the initial discrete doorway transition. Separate that phase before evaluating the
+ steady route. No native gait or battle-return PASS claimed; no estate accessed. Owned games closed.

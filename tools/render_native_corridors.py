@@ -20,6 +20,35 @@ ROADS = {"city": "road_city_straight_single", "farm": "road_farm_straight_single
          "forest": "road_forest_straight_single", "coast": "road_coast_straight_single_01"}
 W, H = 4096, 768
 
+# Low native scenery omitted by the tall-wall selection. These retain their own
+# painted UVs and give the lane an uneven edge instead of an endless flat floor.
+VERGES = {
+    "forest": ("forest_tile_11", "forest_tile_05", "forest_tile_brambles_01"),
+    "farm": ("farm_tile_05", "farm_tile_06", "farm_tile_12", "farm_tile_20"),
+    "coast": ("coast_tile_14", "coast_tile_10", "coast_tile_07"),
+}
+
+
+def native_parts(objects, material_fragment):
+    """Retain selected native faces/UVs from combined road meshes."""
+    import bmesh
+    import bpy
+    retained = []
+    for obj in objects:
+        bm = bmesh.new()
+        bm.from_mesh(obj.data)
+        rejected = [face for face in bm.faces if material_fragment not in obj.data.materials[face.material_index].name]
+        bmesh.ops.delete(bm, geom=rejected, context="FACES")
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
+        if bm.faces:
+            bm.to_mesh(obj.data)
+            obj.data.update()
+            retained.append(obj)
+        else:
+            bpy.data.objects.remove(obj, do_unlink=True)
+        bm.free()
+    return retained
+
 
 def wall_asset(name, size):
     # The Tangle's hill tiles contain only the dark driving foundation removed
@@ -51,11 +80,26 @@ def ground_contact(ground):
         strength = nt.nodes.new("ShaderNodeMapRange")
         strength.inputs["To Min"].default_value = .40
         nt.links.new(ao.outputs["AO"], strength.inputs["Value"])
+        # Broad, restrained value variation breaks the uniform tile bands while
+        # retaining the original painted detail, hue and room/corridor UV scale.
+        position = nt.nodes.new("ShaderNodeNewGeometry")
+        variation = nt.nodes.new("ShaderNodeTexNoise")
+        variation.inputs["Scale"].default_value = .12
+        variation.inputs["Detail"].default_value = 2
+        nt.links.new(position.outputs["Position"], variation.inputs["Vector"])
+        stain = nt.nodes.new("ShaderNodeMapRange")
+        stain.inputs["To Min"].default_value = .78
+        stain.inputs["To Max"].default_value = 1.02
+        nt.links.new(variation.outputs["Fac"], stain.inputs["Value"])
+        contact = nt.nodes.new("ShaderNodeMath")
+        contact.operation = "MULTIPLY"
+        nt.links.new(strength.outputs[0], contact.inputs[0])
+        nt.links.new(stain.outputs[0], contact.inputs[1])
         multiply = nt.nodes.new("ShaderNodeMixRGB")
         multiply.blend_type = "MULTIPLY"
         multiply.inputs[0].default_value = 1
         nt.links.new(painted, multiply.inputs[1])
-        nt.links.new(strength.outputs[0], multiply.inputs[2])
+        nt.links.new(contact.outputs[0], multiply.inputs[2])
         nt.links.new(multiply.outputs[0], emission.inputs["Color"])
 
 
@@ -161,18 +205,34 @@ def main():
             placements = []
             if args.bands or not (passes / f"{short}-complete.json").is_file():
                 L.reset()
-                def put(asset, x, z, rotation, band, light):
-                    matrix, _ = L.place_matrix(src / asset, (x, bottoms[asset], z), rotation)
-                    objects, lo, _ = L.build(src / asset, matrix, shade=light)
+                def put(asset, x, z, rotation, band, light, scale=1, ground=False):
+                    matrix, _ = L.place_matrix(src / asset, (x, bottoms[asset], z), rotation, scale=scale)
+                    # The distant Tangle skirts carry raised trees on native
+                    # earth banks. Retain those banks behind the walking floor;
+                    # removing them leaves rectangular roots hanging in midair.
+                    drops = L.DROP_MATS[:]
+                    if region == "forest" and band in ("far", "vfar"):
+                        L.DROP_MATS[:] = [name for name in drops if name != "forest_ground_dark"]
+                    try:
+                        objects, lo, _ = L.build(src / asset, matrix, shade=light)
+                    finally:
+                        L.DROP_MATS[:] = drops
+                    fragment = "foliage" if region == "forest" else "coast_deadfish" if asset == "coast_tile_07" else None
+                    if ground and fragment:
+                        objects = native_parts(objects, fragment)
+                        if objects:
+                            lo = np.min([v.co[:] for obj in objects for v in obj.data.vertices],axis=0)
+                    if ground and (not objects or lo[1] < 1):
+                        raise ValueError(f"Empty verge or scenery entering the actor lane: {asset}")
                     # Some native foliage sits above a discarded driving foundation.
                     # Keep buried roots as authored; lower only raised bases to the lane.
-                    sink = float(lo[2]+.12) if region == "forest" and objects and lo[2] > 0 else 0
+                    sink = float(lo[2]+.12) if objects and (ground or region == "forest" and lo[2] > 0) else 0
                     if sink:
                         for obj in objects:
                             for vertex in obj.data.vertices:
                                 vertex.co.z -= sink
                     placements.append({"asset": asset, "x": x, "z": z, "rotation": rotation, "band": band,
-                                       "grounding_offset": -sink})
+                                       "scale": scale, "grounding_offset": -sink})
                     for obj in objects:
                         obj["band"] = band
                         if band in ("far", "vfar", "wall"):
@@ -214,9 +274,26 @@ def main():
                         size = sizes[name]
                         put(name, float(x+size[0]/2), float(z+size[2]/2), rotation, band, light)
                         x += float(size[0])+rng.uniform(*gap)
-                row(walls, rw[0]/2-1, "wall", shade)
+                row(walls, rw[0]/2-(4 if region in VERGES else 1), "wall", shade)
                 row(distant or walls, rw[0]/2+22, "far", shade*.8, gap=(-6,0))
                 row(distant or walls, rw[0]/2+48, "vfar", shade*.6, -110,110,(-8,0))
+                # Keep this RNG independent: adding a clump must not shuffle the
+                # architecture or distant skyline. A shallow lane-edge row is
+                # behind the actors, with a clear level path at depth zero.
+                if region in VERGES:
+                    verge_rng = random.Random(seed+73019)
+                    x = -80.0
+                    previous = None
+                    while x < 80:
+                        pool = [name for name in VERGES[region] if name != previous]
+                        name = verge_rng.choice(pool)
+                        previous = name
+                        scale = verge_rng.uniform(.45,.70) if region != "farm" else verge_rng.uniform(.65,.90)
+                        rotation = verge_rng.choice((0,180))
+                        depth = verge_rng.uniform(3.0,4.5)
+                        put(name, x, depth+float(sizes[name][2])*scale/2, rotation, "road", shade*.92,
+                            scale=scale, ground=True)
+                        x += float(sizes[name][0])*scale+verge_rng.uniform(1.5,5.0)
                 if skies:
                     matrix, _ = L.place_matrix(src/skies[0], (0,-6,150), keep_vfx_mats=True)
                     objects, _, _ = L.build(src/skies[0], matrix, shade=shade, keep_vfx_mats=True)
@@ -267,7 +344,8 @@ def main():
             entries.append({"file": f"dd2_{region}-corridor-{variant:02d}.png", "short": short,
                             "region": "dd2_"+region, "seed": seed, "size": [W,H],
                             "road_scene_sha256": digest(src/road/"scene.json"),
-                            "floor_material": floor_name, "floor_texture_sha256": digest((folder/floor_data["texture"]).resolve())})
+                            "floor_material": floor_name, "floor_texture_sha256": digest((folder/floor_data["texture"]).resolve()),
+                            "placements_sha256": digest(passes/f"{short}-placements.json")})
             print("READY", short, flush=True)
     manifest = {"version": 4, "generated_art": False, "source_kit": str(kit),
                 "tool_sha256": digest(Path(__file__).resolve()), "files": entries,
@@ -275,7 +353,9 @@ def main():
                 "changes": ["Shared hero-calibrated room/corridor stage camera", "4096x768 lateral view without architecture repetition",
                             "Continuous level native ground with shared world UVs", "Native environment doubled for four-unit heroes",
                             "Native floor paint with three-unit local geometry contact",
-                            "Discard empty Tangle foundations and ground raised foliage bases"],
+                            "Broad subtle floor value variation preserves the native paint and shared UV scale",
+                            "Discard empty Tangle foundations and ground raised foliage bases",
+                            "Closer rear scenery and irregular native foliage/rubble verges behind the actor lane"],
                 "camera": camera_settings(True), "environment_scale":ENVIRONMENT_SCALE,
                 "limits": ["Unlit native albedo with approximate depth haze; native deferred lighting is not reproduced"]}
     manifest_path = output/"render-manifest.json"
