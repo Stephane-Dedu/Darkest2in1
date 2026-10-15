@@ -6454,3 +6454,61 @@ local-art/vilhelm-v01 and local-art/vilhelm-native-audit. See tools/vilhelm/READ
 Owner requested no game launches for two hours at17:38:14 UTC. No game was running when checked; owned QA
 PID32676 had already exited. No launch before2026-10-14 19:38:14 UTC /21:38:14 Europe/Paris. The owned launch
 helper enforces this boundary; offline work only until then. Native final visual acceptance remains pending.
+
+
+## Round244 (2026-10-14): native corridor depth, ground contact and distance-driven walking
+
+Owner asked for more immersive DD2-faithful corridors, then reported characters sliding against the scrolling
+ground. Work stayed offline during the explicit two-hour launch pause, ending at19:38:14 UTC /21:38:14 Paris.
+
+Art and composition:
+- Compared round240 native captures and current24 panoramas with installed DD1 Weald/Cove layers and the
+  allowed Unity port's hall composition. Retained native DD2 meshes, diffuse paint, UVs and stage projection.
+- Composed24 complete4096x768 fallback plates plus72 RGBA companions. Back/middle/front travel at18/48/100%.
+  Only one corridor's depths load:36 MiB steady decoded companions, worker IO, one shared upload per update,
+  complete-set adoption and release on hall/region changes. Missing/corrupt depths keep the complete plate.
+- Local geometry contact renders into native floor paint at12 samples. Near floor paint is20% quieter. A56px
+  horizon fade replaces the160px blue-mist gap beneath near scenery. Excluded empty Tangle hill foundations
+  and lowered raised foliage bases; rerendered all six forest layouts. No generated textures or kit mutation.
+- Partial renderer passes retain other scene records. Private manifests hash every source pass and output.
+  Reviewed all24 end/centre/end crops and four-region before/after/motion comparisons. Whole scenery never
+  repeats or reflects. Translucent covers use one complete image, avoiding separately faded wall overlaps.
+
+Sliding diagnosis and correction:
+- The deterministic crop/planted-foot loop reproduced five failures in7ms. Old gait used normalized held
+  input and a fixed1.28s cadence while panorama distance changed with hall length. Independent0.14s speed
+  smoothing delayed stops/reversal, and the0.1s animation time cap lost travel on frame hitches.
+- CorridorSceneMotion now shares button-step easing, held travel and rendered camera displacement with the
+  scene, particles and gait. Each native rig converts virtual pixels through fitted leg length/facing.
+  Phase consumes actual distance; upper-body pose may blend while planted contacts stay on ground targets.
+  Tile carry, art adoption, room changes and return baselines cannot create a teleport stride.
+- ViewProgress presents forward travel toward screen right from either entrance without reflected UVs.
+  Backward input reverses immediately. Optional imported-hero playback uses signed distance and retains its
+  pose on reversal. Sprite bob also follows travel distance. The native fixture now checks planted-foot
+  target error within6 virtual pixels; actual native acceptance remains pending.
+
+Validation and installation:
+- Frozen HEAD74fcb39 plus only this round: Release,1,167 Core and203 UI pass. Frozen current shared sources,
+  preserving independent Shieldbreaker work: Release,1,170 Core and203 UI pass. Six depth/composition tests
+  and two camera cases pass. Red/green locomotion evidence and all frozen source hashes are retained privately.
+- With DD2 stopped, installed101 hash-verified files:24 canonical corridors,72 companions,manifest and four
+  plugin/debug assemblies. Other93 private scenery files, including rooms/HamletModels/emitters, preserved
+  byte-for-byte. Shared source hashes checked before deployment. No config/save/estate/profile accessed.
+- Rollback: local-art/scenery-depth-v05/install-backup-20261014-190827.zip. Installation/source/provenance
+  records, review-final/comparison.jpg and motion-comparison.mp4 are under local-art/scenery-depth-v05.
+
+Limits and next native check:
+- No game launched. Keep the owner's pause through21:38:14 Paris; afterward use unsaved fixtures, never an
+  ordinary/protected estate. Check native walking pace/contact, stop/reverse, both entrances, torch/props,
+  same-scene battle return, upload timing and the hero camera's brightened-frame timing.
+- Backdrops remain painted2.5D with approximate water/lighting and no foreground actor occlusion. Per-square
+  background travel still varies with corridor length. True floor/prop world projection needs further work.
+- Private imported Vilhelm walk audit found only~2.4mm forward foot excursion over its2.4s source clip, too
+  little for credible stride calibration. Its true locomotion source still needs mapping; no new private
+  hero model/rig assets were installed. Only its distance clock/reversal was corrected in this round.
+
+## Status 2026-10-14: round244 installed and verified offline; native visual acceptance deferred
+
+Native DD2 corridor depths/ground contact and the owner's walking synchronization fix are installed with
+rollback and tests. Native acceptance is[?] until the explicit launch pause ends and the unsaved checks run.
+Independent Shieldbreaker source/test/art work and its journal entries remain uncommitted and untouched.

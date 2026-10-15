@@ -3,6 +3,16 @@ You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside
 Owner requested no game launches for two hours on October14 at17:38:14 UTC.
 Do not launch any game before2026-10-14 19:38:14 UTC /21:38:14 Europe/Paris.
 Offline work may continue. No ordinary campaign or estate should be opened automatically afterward.
+Round244 corridor work uses native-painted DD2 depths, local ground contact, quieter floor paint,
+and curated/grounded Tangle walls. Code, offline renders and before/after/motion evidence are under
+local-art/scenery-depth-v05. Read tools/corridor_art.md and MODLOG/PARITY for installation and checks.
+Its verified pack/shared plugin are installed with a rollback zip; 93 other private scenery files
+were preserved. The owner's sliding report reproduced five offline failures. Gait now follows the
+rendered pan in virtual pixels, including fitted rig scale, stops, reverse, button steps, tile carry
+and frame hitches. Forward view works from both entrances without reflected artwork. The native
+fixture checks planted-foot target error; actual GPU/brightened-frame timing remains to inspect.
+Native four-region walking/reversal/torch/props/same-scene battle return and actual upload timing
+are pending after the launch pause. Never select or persist a protected estate for these checks.
 Vilhelm's latest five native skills, base/mastered loadouts and transient coach recruitment passed before
 this restriction. Original diffuse-map and particle-pass corrections are now offline work and need native
 visual acceptance later. Read tools/vilhelm/README.md and the latest MODLOG/PARITY before resuming.

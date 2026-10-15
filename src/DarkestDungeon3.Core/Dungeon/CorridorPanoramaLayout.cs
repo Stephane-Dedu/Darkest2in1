@@ -12,6 +12,14 @@ public static class CorridorPanoramaLayout
         return Clamp(position / (tileCount - 1));
     }
 
+    // DD1 presents forward travel toward screen right from either entrance.
+    // Retain the original painting's orientation, turning the view's path rather than its UVs.
+    public static float ViewProgress(int tileIndex, int tileCount, bool reverse, float slide)
+    {
+        float physical = Progress(tileIndex,tileCount,reverse,slide);
+        return reverse ? 1 - physical : physical;
+    }
+
     // Uniform 8% overscan protects the frame edges. Wider plates provide more lateral travel.
     // Keep the authored y=680 contact fixed; walking props retain their physical square coordinates.
     public static PanoramaCrop Crop(int width, int height, float progress)
@@ -20,6 +28,14 @@ public static class CorridorPanoramaLayout
         float w = width * scale, h = height * scale;
         float top = 680f / 720 * h - 680;
         return new PanoramaCrop((w - 1920) * Clamp(progress) / w, (h - top - 720) / h, 1920 / w, 720 / h);
+    }
+
+    // Native passes are registered at the centre of the hall. Distant silhouettes
+    // travel less, while ground/walls and their fire emitters retain the original pan.
+    public static float LayerProgress(float progress, int layer)
+    {
+        float travel = layer == 0 ? .18f : layer == 1 ? .48f : 1f;
+        return .5f + (Clamp(progress) - .5f) * travel;
     }
 
     private static float Clamp(float value) => Math.Max(0, Math.Min(1, value));

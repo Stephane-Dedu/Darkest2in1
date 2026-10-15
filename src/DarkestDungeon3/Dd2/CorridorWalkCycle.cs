@@ -9,31 +9,32 @@ internal sealed class CorridorWalkCycle
     internal const float Stride = 0.46f;
     internal double Phase { get; private set; }
     internal float Weight { get; private set; }
-    private float _speed;
 
     internal CorridorWalkCycle(double phase) => Phase = Wrap(phase);
 
-    internal void Advance(float speed, float deltaTime, bool visible)
+    internal void Advance(float cyclesPerSecond, float deltaTime, bool visible)
     {
         if (!visible) return;
-        if (float.IsNaN(speed) || float.IsInfinity(speed)) speed = 0;
+        if (float.IsNaN(cyclesPerSecond) || float.IsInfinity(cyclesPerSecond)) cyclesPerSecond = 0;
         if (float.IsNaN(deltaTime) || float.IsInfinity(deltaTime) || deltaTime <= 0) return;
-        double dt = Math.Min(deltaTime, 0.1f);
-        speed = Math.Max(-1, Math.Min(1, speed));
+        double dt = deltaTime;
         float blend = (float)(1 - Math.Exp(-dt / 0.14));
-        _speed += (speed - _speed) * blend;
-        Weight += ((Math.Abs(speed) > 0.01f ? 1f : 0f) - Weight) * blend;
-        if (Math.Abs(_speed) < 0.0001f) _speed = 0;
+        Weight += ((Math.Abs(cyclesPerSecond) > 0.0001f ? 1f : 0f) - Weight) * blend;
         if (Weight < 0.0001f) Weight = 0;
-        Phase = Wrap(Phase + _speed * dt / 1.28);
+        Phase = Wrap(Phase + cyclesPerSecond * dt);
     }
+
+    internal static float Rate(float distancePixels, float projectedLegPixels, float deltaTime) =>
+        deltaTime > 0 && Math.Abs(projectedLegPixels) >= 1
+            ? distancePixels * (float)Stance / (Stride * projectedLegPixels * deltaTime) : 0;
 
     internal readonly struct Foot
     {
         internal readonly float Forward, Lift, Pitch;
         internal readonly bool Planted;
-        internal Foot(double forward, double lift, double pitch, bool planted)
-        { Forward = (float)forward; Lift = (float)lift; Pitch = (float)pitch; Planted = planted; }
+        internal readonly float SwingProgress;
+        internal Foot(double forward, double lift, double pitch, bool planted, double swingProgress = 0)
+        { Forward = (float)forward; Lift = (float)lift; Pitch = (float)pitch; Planted = planted; SwingProgress = (float)swingProgress; }
     }
 
     internal static Foot Sample(double phase)
@@ -54,7 +55,7 @@ internal sealed class CorridorWalkCycle
                  - (1 - Stance) / Stance * (2 * u3 - 3 * u2 + u);
         double lift = 0.08 * Math.Pow(Math.Sin(Math.PI * u), 2);
         double pitchSwing = -14 + 24 * (3 * u2 - 2 * u3) - 12 * Math.Sin(Math.PI * u);
-        return new Foot(Stride * x, lift, pitchSwing, false);
+        return new Foot(Stride * x, lift, pitchSwing, false, u);
     }
 
     // Combat idle is a crouch. Raise that pose toward a relaxed walking height, retaining soft knees
@@ -69,4 +70,29 @@ internal sealed class CorridorWalkCycle
 
     internal static double Wrap(double phase) => double.IsNaN(phase) || double.IsInfinity(phase)
         ? 0 : phase - Math.Floor(phase);
+}
+
+/// <summary>Keep a planted foot on the moving ground even while the upper body blends out of combat idle.</summary>
+internal sealed class CorridorFootContact
+{
+    private bool _moving, _planted;
+    private float _forward, _offset;
+
+    internal float Forward(CorridorWalkCycle.Foot foot, float observedForward, float distanceInLegLengths)
+    {
+        if (float.IsNaN(distanceInLegLengths) || float.IsInfinity(distanceInLegLengths)
+            || Math.Abs(distanceInLegLengths) < .000001f)
+        { _moving = _planted = false; _offset = 0; return foot.Forward; }
+        if (foot.Planted)
+        {
+            _forward = !_moving ? observedForward - distanceInLegLengths
+                : !_planted ? foot.Forward : _forward - distanceInLegLengths;
+            _offset = _forward - foot.Forward;
+            _moving = _planted = true;
+            return _forward;
+        }
+        _moving = true; _planted = false;
+        float u = foot.SwingProgress;
+        return foot.Forward + _offset * (1 - u*u*(3-2*u));
+    }
 }

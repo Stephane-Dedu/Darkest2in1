@@ -222,8 +222,9 @@ internal static class CrawlSceneryCheck
         var choice = RegionSceneryArt.CorridorChoice(RegionalScenery.For(exp.Quest.Dungeon),exp.Seed,corridor.Id);
         var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
         if (texture == null || !HeroStage.Lit) return;
-        float progress = CorridorPanoramaLayout.Progress(exp.TileIndex,corridor.Tiles.Count,
-            exp.HeadingRoomId != corridor.RoomB,-d.WalkProgress*720);
+        Require(HeroStage.WalkContactErrorPixels <= 6,"A planted native foot missed the moving ground target");
+        float progress = CorridorPanoramaLayout.ViewProgress(exp.TileIndex,corridor.Tiles.Count,
+            exp.HeadingRoomId != corridor.RoomB,d.SceneSlide);
         var crop = CorridorPanoramaLayout.Crop(texture.width,texture.height,progress);
         float camera = 1920*crop.X/crop.Width, now = Time.unscaledTime;
         if (_motionSampled && now > _motionTime)

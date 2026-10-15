@@ -99,6 +99,7 @@ public sealed class Texture2D : Texture
     public static Texture2D whiteTexture => _whiteTexture ??= new(1, 1, TextureFormat.RGBA32, false);
     public static readonly List<int> ApiThreads = new();
     public static int RoomDecodeCount;
+    public static Func<byte[],bool> RoomDecodeResult;
     public byte[] Raw;
     public FilterMode filterMode;
     public TextureWrapMode wrapMode;
@@ -117,7 +118,7 @@ public sealed class Texture2D : Texture
         Track(); RoomDecodeCount++;
         width = (data[16] << 24) | (data[17] << 16) | (data[18] << 8) | data[19];
         height = (data[20] << 24) | (data[21] << 16) | (data[22] << 8) | data[23];
-        return true;
+        return RoomDecodeResult?.Invoke(data) ?? true;
     }
     public Color32[] GetPixels32()
     {
@@ -131,6 +132,8 @@ public sealed class Texture2D : Texture
 }
 public static class Object
 {
-    public static void Destroy(object value) => Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId);
+    public static Action<object> ObserveDestroy;
+    public static void Destroy(object value)
+    { Texture2D.ApiThreads.Add(Environment.CurrentManagedThreadId); ObserveDestroy?.Invoke(value); }
     public static void DontDestroyOnLoad(object value) { }
 }

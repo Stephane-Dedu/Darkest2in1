@@ -157,9 +157,7 @@ internal sealed class CrawlUi
     private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone, bool atmosphere = true)
     {
         Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, GUI.color.a));
-        float t = (Time.unscaledTime - D.LastStepTime) / 0.3f;
-        float slide = t < 1f ? D.LastStepDir * 720f * (1f - Mathf.SmoothStep(0, 1, t)) : 0f;
-        slide -= D.WalkProgress * 720f;   // held-key walking scrolls the hallway continuously
+        float slide = D.SceneSlide;
 
         var regional = RegionalScenery.For(exp.Quest.Dungeon);
         float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
@@ -172,8 +170,9 @@ internal sealed class CrawlUi
             bool reverse = exp.HeadingRoomId != corridor.RoomB;
             var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
             float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
+            var layers = RegionSceneryArt.CorridorLayers(choice?.FileName, out float depthBlend);
             CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
-                CorridorPanoramaLayout.Progress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha);
+                CorridorPanoramaLayout.ViewProgress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha, layers, depthBlend);
             DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
         }
         if (atmosphere && regional != null) DungeonAtmosphereUi.DrawCurrent();
@@ -451,7 +450,8 @@ internal sealed class CrawlUi
             // At camp the two front ranks sit on the far side of the fire, facing back toward it.
             bool facingLeft = camping && rank < 2;
             // DD1's walk: each hero bobs a little, out of step with the others.
-            float bob = D.IsMovingNow && !camping ? Mathf.Abs(Mathf.Sin(Time.unscaledTime * 7f + rank * 1.3f)) * -9f : 0f;
+            float bob = Mathf.Abs(HeroStage.WalkSpeed) > .01f && !camping
+                ? Mathf.Abs(Mathf.Sin((float)D.SceneTravel / 50 + rank * 1.3f)) * -9f : 0;
             if (sprite != null) Art.DrawSprite(large ? new Rect(x - 120, Feet - 420 + bob, 240, 430) : new Rect(x - 80, Feet - 230 + bob, 160, 220), sprite, flipX: facingLeft);
             else if (models == null) Gui.Text(new Rect(x - 80, Feet - 150, 160, 60), hero?.Name, 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             GUI.color = old;

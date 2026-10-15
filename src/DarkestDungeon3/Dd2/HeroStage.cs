@@ -66,6 +66,8 @@ internal sealed class HeroStage : MonoBehaviour
     public static float HeroScale = 1f;
     /// <summary>Signed corridor speed: 1 forward, -0.5 backing up, 0 stopped.</summary>
     public static float WalkSpeed;
+    public static float WalkDistancePixels;
+    public static float WalkContactErrorPixels { get; private set; }
     private readonly Dictionary<ActorBhv, CorridorHeroMotion> _motion = new();
     private readonly HashSet<ActorBhv> _motionUnavailable = new();
     private readonly Dictionary<Renderer, bool> _fallbackVisibility = new();
@@ -259,6 +261,7 @@ internal sealed class HeroStage : MonoBehaviour
         _motion.Clear();
         _motionUnavailable.Clear();
         WalkSpeed = 0;
+        WalkDistancePixels = 0;
         _shown.Clear();
         foreach (var (_, slot, _) in _heroes)
             if (slot != null) Destroy(slot.gameObject);
@@ -415,6 +418,7 @@ internal sealed class HeroStage : MonoBehaviour
 
     private void LateUpdate()
     {
+        WalkContactErrorPixels = 0;
         ShowCombatPose();
         Brighten();
         if (_light != null) _light.intensity = LightIntensity * _exposure;
@@ -454,7 +458,9 @@ internal sealed class HeroStage : MonoBehaviour
                     Plugin.Log.LogWarning($"[stage-walk] {actor.GetActorGuid()}: {e.Message}; retaining native pose");
                 }
             }
-            motion?.Apply(WalkSpeed, Time.unscaledDeltaTime, _camera != null && _camera.enabled);
+            motion?.Apply(WalkDistancePixels, Time.unscaledDeltaTime, _camera != null && _camera.enabled);
+            if (motion != null && actor.GetComponent<ExportedHeroModel>() == null)
+                WalkContactErrorPixels = Mathf.Max(WalkContactErrorPixels,motion.ContactErrorPixels);
         }
         if (bindMotion) _nextMotionBind = Time.unscaledTime + 0.5f;
         // Actor parts load asynchronously and may arrive on other layers: keep everything on ours.

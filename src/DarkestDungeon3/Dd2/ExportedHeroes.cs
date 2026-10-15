@@ -223,8 +223,8 @@ internal sealed class ExportedHeroModel : MonoBehaviour
                 _castPalette.SetFloat("_RimLight",0);
                 renderer.SetPropertyBlock(_castPalette);
             }
-        bool walking=stage && Mathf.Abs(HeroStage.WalkSpeed)>.01f;
-        string state = stage ? walking ? HeroStage.WalkSpeed<0 ? "walk-back" : "walk-forward" : "idle" : native;
+        bool walking=stage && Mathf.Abs(HeroStage.WalkDistancePixels)>.0001f;
+        string state = stage ? walking ? HeroStage.WalkDistancePixels<0 ? "walk-back" : "walk-forward" : "idle" : native;
         bool changed=state!=_state;
         if (changed)
         {
@@ -244,12 +244,14 @@ internal sealed class ExportedHeroModel : MonoBehaviour
         bool loop=clipName=="a002_000000" || walking;
         float windup=impact || death ? 0 : clipName=="a245_038700" ? .5f : Mathf.Min(.7f,duration*.3f);
         float strike=death ? duration : clipName=="a245_038700" ? 1.4f : Mathf.Min(1.3f,duration*.65f);
-        if (walking) _walkClock+=Time.unscaledDeltaTime*Mathf.Abs(HeroStage.WalkSpeed);
+        if (walking)
+        {
+            _walkClock = ExportedHeroMotion.AdvanceWalk(_walkClock,HeroStage.WalkDistancePixels,100,duration);
+        }
         float t=walking ? _walkClock%Mathf.Max(.01f,duration)
             : healing && !stage ? nativeFrame.Progress*duration : loop ? Time.unscaledTime%Mathf.Max(.01f,duration)
             : split.Part=="" ? Mathf.Min(now-_stateAt,duration)
             : ExportedHeroMotion.TimeInClip(split.Part,nativeFrame.Progress,windup,strike,duration);
-        if (walking && HeroStage.WalkSpeed<0) t=duration-t;
         SampledClip=clipName; SampledTime=t;
         if (changed) Plugin.Log.LogInfo($"[vilhelm pose] {Actor.GetActorGuid()} {state}; {_skill ?? "stance"} -> {clipName} at {t:0.000}s; {split.Part} {nativeFrame.Progress:0.00}; timeline={nativeFrame.Timeline}");
         for (int i=0;i<_nodes.Length;i++)

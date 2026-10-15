@@ -1,5 +1,64 @@
 # Private DD2 corridor scenery
 
+## Native depth layers, round244, October 14, 2026
+
+The v05 corridor pass keeps the extracted DD2 meshes, painted textures, native UVs and
+round240 stage camera. DD1's separate backdrop/middle/wall composition is the reference
+for movement and hero readability. The 24 canonical 4096x768 PNGs remain complete fallback
+images. Each has optional RGBA companions named `.depth-back.png`, `.depth-middle.png`
+and `.depth-front.png`. They travel at 18%, 48% and 100% of the original bounded panorama pan,
+respectively, with all three registered at the hall centre. Reversal preserves orientation.
+Ground, walls and their existing fire anchors move together. No whole architecture repeats.
+
+Native floor paint now receives local geometry contact over three world units, rendered
+at 12 samples, with a restrained 20% foreground reduction during composition. The Tangle's
+empty foundation-only hill tiles no longer occupy visible wall spans. Foliage bases above
+discarded driving foundations are lowered to the ground; buried roots retain native placement.
+The ground horizon fades over 56 source pixels. The former 160-pixel fade left blue haze
+under nearby roots and palisades, hiding their contact shadows and making them appear to hover.
+
+`CorridorDepthArt` reads only the requested corridor's companions on a worker and uploads
+at most one image per update, sharing that budget with the existing panorama loader. The
+steady decoded companion budget is 36 MiB, with no second region-wide set or render target.
+All three depths must validate and upload before drawing. A missing/broken set keeps the
+complete plate. On adoption, the depths start aligned to that plate and settle into their
+stable parallax over 0.35 seconds. Translucent GUI/battle covers use the complete image to
+avoid independently faded walls brightening or doubling. Leaving the region releases the set.
+
+Hero locomotion uses the actual frame's rendered camera displacement. `CorridorSceneMotion`
+shares the discrete-step easing and continuous pan with scenery, particles and gait. Each native
+rig converts that virtual-pixel distance through its fitted leg length and facing angle. Phase
+has no separate speed filter or 0.1-second time cap. Planted contacts follow ground displacement
+while the upper body blends from idle. Forward travel pans left from either hall entrance,
+preserving the painted UV orientation. Stops, reverse input, tile carry, room changes and newly
+adopted art are covered by regression tests; transition baselines do not become giant strides.
+The optional imported hero also uses a signed distance clock, avoiding a complemented pose
+on reversal. Its source clip still needs a separate native stride/motion audit.
+
+Rebuild privately:
+
+```powershell
+blender -b --threads 8 --python-exit-code 1 --python tools/render_native_corridors.py -- <kit> <passes>
+python tools/render_native_corridors.py <kit> <passes> --compose-only
+python tools/compose_corridor_depth.py <passes> <depth-pack>
+python tools/review_corridor_depth.py <before-pack> <depth-pack> <private-review> --video
+python -m unittest discover -s tests -p corridor_depth_test.py
+```
+
+Keep all art outside Git. Preserve room PNGs, HamletModels and `scenery-emitters.json` when
+installing the 24 canonical PNGs, 72 companions and their manifest. Layer names cannot enter
+the deterministic corridor variant pool. Stage projection, gameplay walking coordinates,
+room art and emitter positions are retained. Private provenance, before/after views, end/centre crops for every
+variant and a motion comparison are under `local-art/scenery-depth-v05`.
+
+The pack and shared plugin are installed with a verified rollback zip. The other 93 private
+scenery files are unchanged. Release, 1,167 Core and 203 UI tests pass on HEAD plus this round;
+the shared snapshot including independent Shieldbreaker work passes 1,170 Core and 203 UI tests.
+Six composition and two camera cases pass. Native travel/reversal/torch/interaction,
+same-scene battle return and upload timing remain pending. The owner's launch pause ends
+October 14 at 19:38:14 UTC /21:38:14 Paris. These are painted 2.5D depths behind actors;
+foreground actor occlusion, native water shaders and deferred lighting remain separate work.
+
 ## Stage framing and wider travel, October 14, 2026
 
 The current private pack contains 24 corridors at 4096x768 and 32 rooms at 2880x1080.

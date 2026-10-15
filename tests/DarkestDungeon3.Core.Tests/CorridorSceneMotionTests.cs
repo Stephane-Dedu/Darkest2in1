@@ -1,0 +1,63 @@
+using DarkestDungeon3.Core.Dungeon;
+
+namespace DarkestDungeon3.Core.Tests;
+
+public class CorridorSceneMotionTests
+{
+    [Theory]
+    [InlineData(false,0)]
+    [InlineData(true,5)]
+    public void ForwardWalkingMovesTheGroundLeftFromEitherEntrance(bool reverse,int tile)
+    {
+        float a = CorridorSceneMotion.Camera(4096,768,tile,6,reverse,0);
+        float b = CorridorSceneMotion.Camera(4096,768,tile,6,reverse,-72);
+        Assert.True(b > a);
+        float backward = CorridorSceneMotion.Camera(4096,768,tile,6,reverse,72);
+        Assert.True(backward <= a);
+        Assert.Equal(CorridorPanoramaLayout.ViewProgress(0,6,false,-72),
+            CorridorPanoramaLayout.ViewProgress(5,6,true,-72),5);
+    }
+
+    [Theory]
+    [InlineData(false,1,2)]
+    [InlineData(true,4,3)]
+    public void ContinuousTileCarryNeverInventsAnotherFootstep(bool reverse,int before,int after)
+    {
+        float a = CorridorSceneMotion.Camera(4096,768,before,6,reverse,-.5f*720);
+        float b = CorridorSceneMotion.Camera(4096,768,after,6,reverse,.5f*720);
+        Assert.Equal(a,b,3);
+    }
+
+    [Fact]
+    public void ButtonStepUsesTheSameEasedSceneDistanceAsTheFeetAndStopsExactly()
+    {
+        float start = CorridorSceneMotion.Slide(0,1,0);
+        float middle = CorridorSceneMotion.Slide(.15f,1,0);
+        float end = CorridorSceneMotion.Slide(.3f,1,0);
+        Assert.Equal(720,start); Assert.Equal(360,middle); Assert.Equal(0,end);
+        Assert.True(CorridorSceneMotion.Camera(4096,768,2,6,false,start)
+            < CorridorSceneMotion.Camera(4096,768,2,6,false,middle));
+        Assert.Equal(end,CorridorSceneMotion.Slide(1,1,0));
+        Assert.Equal(-180,CorridorSceneMotion.Slide(1,0,.25f));
+    }
+
+    [Fact]
+    public void HallEntryArtAdoptionResizeAndReturnCannotAdvanceTheGaitByATeleport()
+    {
+        var motion = new CorridorSceneMotion();
+        float Sample(int seed,int hall,int heading,string art,int width,int height,float x) =>
+            motion.Sample(seed,hall,heading,art,width,height,x);
+        Assert.Equal(0,Sample(7,1,2,"wall",4096,768,700));
+        Assert.Equal(12,Sample(7,1,2,"wall",4096,768,712));
+        Assert.Equal(0,Sample(7,1,2,"other",4096,768,200));
+        Assert.Equal(0,Sample(7,1,2,"other",2880,1080,50));
+        Assert.Equal(0,Sample(7,2,3,"other",2880,1080,700));
+        Assert.Equal(0,Sample(8,2,3,"other",2880,1080,100));
+        Assert.Equal(0,Sample(8,2,4,"other",2880,1080,50));
+        Assert.Equal(-5,Sample(8,2,4,"other",2880,1080,45));
+        motion.Reset();
+        Assert.Equal(0,Sample(8,2,4,"other",2880,1080,100));
+        Assert.Equal(0,Sample(8,2,4,"other",2880,1080,float.NaN));
+        Assert.Equal(0,Sample(8,2,4,"other",2880,1080,300));
+    }
+}

@@ -36,12 +36,18 @@ internal static class RegionSceneryArt
     {
         var plan = RegionalScenery.For(region);
         if (plan == null) { if (_region != null) Clear(); return; }
-        if (_region == region && (!_failed || Time.unscaledTime < _retryAt)) { UpdateRoomTextures(); return; }
+        if (_region == region && (!_failed || Time.unscaledTime < _retryAt))
+        {
+            bool uploaded = UpdateRoomTextures();
+            if (!uploaded) CorridorDepthArt.Update();
+            return;
+        }
         Clear();
         _region = region;
         int generation = _generation;
         string folder = Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "data", "scenery");
         string privateFolder = Plugin.NativeRoomSceneryPath?.Value;
+        CorridorDepthArt.Configure(privateFolder);
         _roomLoading = Task.Run(() =>
         {
             IReadOnlyList<string> privateFiles = Array.Empty<string>();
@@ -125,7 +131,7 @@ internal static class RegionSceneryArt
         && handle.IsDone && handle.Status == AsyncOperationStatus.Succeeded ? handle.Result : null;
 
     // File IO runs off-thread; decode/upload at most one image per update on Unity's main thread during embark.
-    private static void UpdateRoomTextures()
+    private static bool UpdateRoomTextures()
     {
         if (_roomLoading != null && _roomLoading.IsCompleted)
         {
@@ -137,13 +143,13 @@ internal static class RegionSceneryArt
             if (loaded.Error != null) Plugin.Log.LogWarning($"[scenery] private room pack: {loaded.Error}; using distributed room scenes");
             _roomLoading = null;
         }
-        if (_roomPending == null || _roomPending.Count == 0) return;
+        if (_roomPending == null || _roomPending.Count == 0) return false;
         var image = _roomPending.Dequeue();
         if (image.Error != null) Plugin.Log.LogWarning($"[scenery] {image.FileName}: {image.Error}; retaining native region scene");
         Texture2D texture = null;
         try
         {
-            if (image.Data == null) return;
+            if (image.Data == null) return false;
             texture = new Texture2D(2, 2, TextureFormat.RGBA32, mipChain: false)
                 { filterMode = FilterMode.Bilinear, wrapMode = TextureWrapMode.Clamp };
             if (!texture.LoadImage(image.Data, markNonReadable: true) || texture.width > 4096 || texture.height > 2048)
@@ -170,6 +176,7 @@ internal static class RegionSceneryArt
                     Plugin.Log.LogInfo($"[scenery] {_region}: {_corridorVariants.Count} private corridor scenes ready");
             }
         }
+        return true;
     }
 
     public static RoomSceneryChoice RoomChoice(RegionalScenery plan, int seed, int roomId) =>
@@ -181,12 +188,15 @@ internal static class RegionSceneryArt
     public static RoomSceneryChoice CorridorChoice(RegionalScenery plan, int seed, int corridorId) =>
         plan.CorridorBackground(seed, corridorId, _region == plan.Region ? _corridorVariants : Array.Empty<string>());
     public static Texture2D RoomTextureFor(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image) ? image.Texture : null;
+    public static Texture2D[] CorridorLayers(string fileName, out float blend) =>
+        CorridorDepthArt.Request(fileName != null && _corridorVariants.Contains(fileName) ? fileName : null, out blend);
     public static float RoomAlpha(string fileName) => fileName != null && Rooms.TryGetValue(fileName, out var image)
         ? Mathf.SmoothStep(0, 1, Mathf.Clamp01((Time.unscaledTime - (PrivateRoom(fileName) || _corridorVariants.Contains(fileName)
             ? Mathf.Max(image.ReadyAt, _privateReadyAt) : image.ReadyAt)) / 0.35f)) : 0;
 
     public static void Clear()
     {
+        CorridorDepthArt.Clear();
         _generation++;
         foreach (var handle in Handles.Values)
             if (handle.IsValid()) Addressables.Release(handle);

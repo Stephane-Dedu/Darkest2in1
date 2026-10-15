@@ -516,3 +516,14 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round243 optional Sir Vilhelm gameplay/motion integration: independent class/five native skills, ordinary transient invitation/recruitment, base/mastered loadouts, original DS3 motion phases/idle returns, corrected Onyx Blade mount, native healing/buff expiry and emitted particles through attack pass. Public default off; local invitation option enabled. Final shared Release+1,152 Core/190 UI pass; private pack/plugin hashes checked and native39-file profile unchanged. No estate accessed.
 - [?] Round243 Vilhelm visual completion: final native diffuse-map/independent-alpha rendering, visibly readable black flame, continuous walking/death/corpse, actual coach button comfort and saved recruitment/homecoming await native acceptance. Original meshes/rig retained; cloth physics/audio/full FXR/final DS3 balance remain separate. Owner launch pause ends October14 at19:38:14 UTC /21:38:14 Paris; no game launches until then.
+
+
+- [?] Round244 native corridor depth and walking synchronization:24 native-painted scenes/72 optional depths,
+ 36 MiB current-hall companion set, one upload/update, complete fallback, native floor contact/short horizon,
+ filtered/grounded Tangle walls. Five sliding regressions reproduced before correction; gait now uses rendered
+ pixel displacement with fitted rig scale and planted contacts, both entrances, stops/reverse, button steps,
+ tile carry and frame hitches. Frozen HEAD+own Release/1,167 Core/203 UI; shared Release/1,170 Core/203 UI and
+ eight Python cases pass.101 installed files verified,93 other private files preserved, rollback retained.
+ No game or estate opened. Native pace/contact/render timing, four-region travel/interaction/battle-return and
+ imported Vilhelm's true stride clip remain pending. Pause ends October14 at19:38:14 UTC /21:38:14 Paris.
+ Evidence: local-art/scenery-depth-v05; tools/corridor_art.md.

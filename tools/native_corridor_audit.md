@@ -1,5 +1,32 @@
 # Native corridor art audit, round216
 
+## Round244 depth and ground-contact iteration, native acceptance pending
+
+Existing round240 native captures and installed DD1 Weald/Cove corridor layers supplied the
+comparison. The DD2 paintings already carry the regional identity; flattening every distance
+into one pan and missing geometry contact make them feel less substantial during travel.
+V05 separates distant silhouettes, middle scenery and the near wall/floor without replacing
+diffuse art. Slower rear movement, quieter native floor paint and local ground contact are
+implemented. Reviewing all corridor ends also exposed empty Tangle hill/foundation selections
+and raised foliage bases. Those are filtered/grounded before the final forest render.
+
+The 24 scenes and 72 optional companions are installed and checked offline, with
+one active corridor's 36 MiB companion budget and complete-image fallback. A shorter ground
+horizon restores opaque native paint beneath near scenery rather than a blue mist gap.
+The reported sliding reproduced as five failing crop/foot checks: the old fixed cadence,
+independent speed filter and time cap disagreed with per-length panorama travel. Gait now
+consumes the same rendered displacement as the scene, with fitted rig scale and planted contacts.
+Both entrances use screen-forward travel; the original paintings retain their orientation.
+See `corridor_art.md`
+for rebuilding, loading, composition and evidence. Live model readability, frame timing and
+travel/battle-return acceptance await the owner's no-launch deadline at21:38:14 Paris on
+October 14. No game or estate was opened for this pass. The native fixture now also checks
+planted-foot target error. Verify the hero camera's brightened-frame timing in the live capture.
+The optional Vilhelm clip's sampled forward foot excursion is too small to derive a credible
+stride: its true walking source motion still needs mapping. Its signed distance clock is
+corrected, and its private model/rig pack was retained. Baked water/light and foreground actor
+occlusion remain approximations; the depth layers do not claim to reproduce those systems.
+
 ## October 14 stage-framing update
 
 The latest pack replaces the distant arena framing and mismatched foreground floor with a close,

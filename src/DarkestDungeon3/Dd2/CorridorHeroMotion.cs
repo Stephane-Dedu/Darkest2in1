@@ -22,6 +22,7 @@ internal sealed class CorridorHeroMotion
     private readonly float _legLength;
     private readonly CorridorWalkCycle _cycle;
     private readonly List<SavedBone> _saved = new();
+    internal float ContactErrorPixels { get; private set; }
 
     private readonly struct SavedBone
     {
@@ -39,6 +40,7 @@ internal sealed class CorridorHeroMotion
         internal Transform Hip, Knee, Ankle;
         internal float Side, AnkleY;
         internal Quaternion FlatRotation;
+        internal readonly CorridorFootContact Contact = new();
     }
 
     internal static CorridorHeroMotion TryCreate(ActorBhv actor, Transform slot, int rank)
@@ -142,10 +144,12 @@ internal sealed class CorridorHeroMotion
         _saved.Clear();
     }
 
-    internal void Apply(float speed, float deltaTime, bool visible)
+    internal void Apply(float distancePixels, float deltaTime, bool visible)
     {
+        ContactErrorPixels = 0;
         if (_slot == null || _animator == null || !_animator.gameObject.activeInHierarchy || !visible) return;
-        _cycle.Advance(speed, deltaTime, true);
+        float legPixels = _slot.TransformVector(_forward * _legLength).x * 100;
+        _cycle.Advance(CorridorWalkCycle.Rate(distancePixels,legPixels,deltaTime), deltaTime, true);
         float weight = _cycle.Weight;
         if (weight <= 0) return;
         foreach (var bone in _driven) _saved.Add(new SavedBone(bone));
@@ -178,8 +182,9 @@ internal sealed class CorridorHeroMotion
             _head.rotation = Quaternion.AngleAxis(-2.25f * twist * weight, Vector3.up)
                            * Quaternion.AngleAxis(-1.5f * weight, worldSide) * _head.rotation;
 
-        PoseLeg(_left, leftFoot, weight, worldForward, worldSide);
-        PoseLeg(_right, rightFoot, weight, worldForward, worldSide);
+        float distanceInLegLengths = Mathf.Abs(legPixels) >= 1 ? distancePixels / legPixels : 0;
+        PoseLeg(_left, leftFoot, weight, worldForward, worldSide,distanceInLegLengths);
+        PoseLeg(_right, rightFoot, weight, worldForward, worldSide,distanceInLegLengths);
         if (_sword != null)
         {
             _sword.position = _swordHand.TransformPoint(gripPosition);
@@ -187,12 +192,17 @@ internal sealed class CorridorHeroMotion
         }
     }
 
-    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side)
+    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,float distanceInLegLengths)
     {
         var neutral = new Vector3(_homeCenter.x, leg.AnkleY, _homeCenter.z) + _side * leg.Side;
-        var goal = neutral + _forward * (foot.Forward * _legLength) + Vector3.up * (foot.Lift * _legLength);
-        var target = Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), weight);
+        float observed = Vector3.Dot(_slot.InverseTransformPoint(leg.Ankle.position)-neutral,_forward)/_legLength;
+        float contact = leg.Contact.Forward(foot,observed,distanceInLegLengths);
+        var goal = neutral + _forward * (contact * _legLength) + Vector3.up * (foot.Lift * _legLength);
+        float footWeight = Mathf.Abs(distanceInLegLengths) > .000001f ? 1 : weight;
+        var target = Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
         SolveLeg(leg.Hip, leg.Knee, leg.Ankle, target, forward);
+        if (foot.Planted && Mathf.Abs(distanceInLegLengths) > .000001f)
+            ContactErrorPixels = Mathf.Max(ContactErrorPixels,Mathf.Abs(leg.Ankle.position.x-target.x)*100);
         var flat = _slot.rotation * leg.FlatRotation;
         leg.Ankle.rotation = Quaternion.Slerp(leg.Ankle.rotation, Quaternion.AngleAxis(-foot.Pitch, side) * flat, weight);
     }

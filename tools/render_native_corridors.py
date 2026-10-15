@@ -21,6 +21,44 @@ ROADS = {"city": "road_city_straight_single", "farm": "road_farm_straight_single
 W, H = 4096, 768
 
 
+def wall_asset(name, size):
+    # The Tangle's hill tiles contain only the dark driving foundation removed
+    # by configure_materials. Counting their bounds leaves empty spans in a wall.
+    return (("_tile_" in name or "_decor_" in name) and "node" not in name
+            and not name.startswith(("road", "forest_tile_hill_", "forest_tile_base_"))
+            and size[1] >= 6 and size[0] <= 40)
+
+
+def merge_entries(previous, updated):
+    """A selective re-render replaces its records, retaining other completed scenes."""
+    replacements = {entry["short"]: entry for entry in updated}
+    result = [replacements.pop(entry["short"], entry) for entry in previous]
+    return result + list(replacements.values())
+
+
+def ground_contact(ground):
+    """Native floor paint with local geometry contact, independent of missing DD2 lights."""
+    import bpy
+    for slot in ground.material_slots:
+        mat = slot.material.copy()
+        slot.material = mat
+        nt = mat.node_tree
+        emission = next(n for n in nt.nodes if n.type == "EMISSION")
+        painted = emission.inputs["Color"].links[0].from_socket
+        ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
+        ao.inputs["Distance"].default_value = 3
+        ao.samples = 8
+        strength = nt.nodes.new("ShaderNodeMapRange")
+        strength.inputs["To Min"].default_value = .40
+        nt.links.new(ao.outputs["AO"], strength.inputs["Value"])
+        multiply = nt.nodes.new("ShaderNodeMixRGB")
+        multiply.blend_type = "MULTIPLY"
+        multiply.inputs[0].default_value = 1
+        nt.links.new(painted, multiply.inputs[1])
+        nt.links.new(strength.outputs[0], multiply.inputs[2])
+        nt.links.new(multiply.outputs[0], emission.inputs["Color"])
+
+
 def compose(output):
     import numpy as np
     from PIL import Image
@@ -106,8 +144,7 @@ def main():
             size = hi-lo
             if np.all(np.isfinite(size)) and size.max() < 1e6:
                 sizes[folder.name], bottoms[folder.name] = size, float(lo[1])
-        walls = [n for n,s in sizes.items() if ("_tile_" in n or "_decor_" in n) and "node" not in n
-                 and not n.startswith("road") and s[1] >= 6 and s[0] <= 40]
+        walls = [n for n,s in sizes.items() if wall_asset(n,s)]
         distant = [n for n,s in sizes.items() if "skirt" in n and "skybox" not in n and s[1] >= 6 and s[0] <= 60]
         skies = [n for n in sizes if n.startswith("skybox") and "long" in n] or [n for n in sizes if n.startswith("skybox")]
         floor_folder, floor_name = FLOORS[region]
@@ -126,8 +163,16 @@ def main():
                 L.reset()
                 def put(asset, x, z, rotation, band, light):
                     matrix, _ = L.place_matrix(src / asset, (x, bottoms[asset], z), rotation)
-                    objects, _, _ = L.build(src / asset, matrix, shade=light)
-                    placements.append({"asset": asset, "x": x, "z": z, "rotation": rotation, "band": band})
+                    objects, lo, _ = L.build(src / asset, matrix, shade=light)
+                    # Some native foliage sits above a discarded driving foundation.
+                    # Keep buried roots as authored; lower only raised bases to the lane.
+                    sink = float(lo[2]+.12) if region == "forest" and objects and lo[2] > 0 else 0
+                    if sink:
+                        for obj in objects:
+                            for vertex in obj.data.vertices:
+                                vertex.co.z -= sink
+                    placements.append({"asset": asset, "x": x, "z": z, "rotation": rotation, "band": band,
+                                       "grounding_offset": -sink})
                     for obj in objects:
                         obj["band"] = band
                         if band in ("far", "vfar", "wall"):
@@ -184,6 +229,7 @@ def main():
                         for vertex in obj.data.vertices:
                             vertex.co *= ENVIRONMENT_SCALE
                 ground = stage_floor(L, folder, key, floor_data, shade=shade,depth_end=16 if region == "coast" else 210)
+                ground_contact(ground)
                 if region == "coast":
                     # The Shroud's far ground is open water, not an endless wooden pier.
                     # Its native ocean shader has no diffuse map in this export: use the
@@ -209,10 +255,13 @@ def main():
                     visible = False
                     for obj in bpy.data.objects:
                         if obj.type == "MESH":
-                            obj.hide_render = obj.get("band") != band
-                            visible = visible or not obj.hide_render
+                            # Hide other scenery from the ground camera, but let its
+                            # geometry cast local contact into the original floor paint.
+                            obj.hide_render = band != "ground" and obj.get("band") != band
+                            obj.visible_camera = obj.get("band") == band
+                            visible = visible or obj.visible_camera
                     if visible:
-                        L.render(passes/f"{short}-{band}.png", samples=4, transparent=True)
+                        L.render(passes/f"{short}-{band}.png", samples=12 if band == "ground" else 4, transparent=True)
                 (passes/f"{short}-placements.json").write_text(json.dumps(placements, indent=2), encoding="utf-8")
                 (passes/f"{short}-complete.json").write_text(json.dumps({"camera":camera_settings(True),"environment_scale":ENVIRONMENT_SCALE}))
             entries.append({"file": f"dd2_{region}-corridor-{variant:02d}.png", "short": short,
@@ -224,10 +273,18 @@ def main():
                 "tool_sha256": digest(Path(__file__).resolve()), "files": entries,
                 "camera_tool_sha256": digest(Path(__file__).with_name("scenery_camera.py")),
                 "changes": ["Shared hero-calibrated room/corridor stage camera", "4096x768 lateral view without architecture repetition",
-                            "Continuous level native ground with shared world UVs", "Native environment doubled for four-unit heroes"],
+                            "Continuous level native ground with shared world UVs", "Native environment doubled for four-unit heroes",
+                            "Native floor paint with three-unit local geometry contact",
+                            "Discard empty Tangle foundations and ground raised foliage bases"],
                 "camera": camera_settings(True), "environment_scale":ENVIRONMENT_SCALE,
                 "limits": ["Unlit native albedo with approximate depth haze; native deferred lighting is not reproduced"]}
-    (output/"render-manifest.json").write_text(json.dumps(manifest,indent=2)+"\n", encoding="utf-8")
+    manifest_path = output/"render-manifest.json"
+    if args.only and manifest_path.is_file():
+        previous = json.loads(manifest_path.read_text())
+        if previous.get("camera") != manifest["camera"] or previous.get("source_kit") != str(kit):
+            raise ValueError("Partial re-render must use the same camera and source kit; use a fresh output folder")
+        manifest["files"] = merge_entries(previous["files"],entries)
+    manifest_path.write_text(json.dumps(manifest,indent=2)+"\n", encoding="utf-8")
 
 
 if __name__ == "__main__":

@@ -5,6 +5,17 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class ExportedHeroMotionTests
 {
+    [Fact]
+    public void NativeWalkClockFreezesAndReversesAtItsExistingPoseInsteadOfFlippingTheLoop()
+    {
+        float first = ExportedHeroMotion.AdvanceWalk(.4f,10,100,1.2f);
+        Assert.Equal(.5f,first,5);
+        Assert.Equal(first,ExportedHeroMotion.AdvanceWalk(first,0,100,1.2f));
+        Assert.Equal(.45f,ExportedHeroMotion.AdvanceWalk(first,-5,100,1.2f),5);
+        Assert.Equal(1.1f,ExportedHeroMotion.AdvanceWalk(.1f,-20,100,1.2f),5);
+        Assert.Equal(.2f,ExportedHeroMotion.AdvanceWalk(1.1f,30,100,1.2f),5);
+    }
+
     [Theory]
     [InlineData(.55f, 1.2f, 2.6f)]
     [InlineData(.5f, 1.4f, 3.066667f)]

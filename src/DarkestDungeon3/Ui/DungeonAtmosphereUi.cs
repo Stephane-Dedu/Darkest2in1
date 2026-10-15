@@ -58,11 +58,10 @@ internal static class DungeonAtmosphereUi
             : RegionSceneryArt.CorridorChoice(plan, exp.Seed, d.Crawl.CurrentCorridor.Id);
         var texture = RegionSceneryArt.RoomTextureFor(choice?.FileName);
         if (texture == null) return false;
-        float t = (Time.unscaledTime-d.LastStepTime)/.3f;
-        float slide = (t < 1 ? d.LastStepDir*720*(1-Mathf.SmoothStep(0,1,t)) : 0)-d.WalkProgress*720;
+        float slide = d.SceneSlide;
         var corridor = d.Crawl.CurrentCorridor;
         var crop = exp.InRoom ? new PanoramaCrop(0,0,1,1) : CorridorPanoramaLayout.Crop(texture.width,texture.height,
-            CorridorPanoramaLayout.Progress(exp.TileIndex,corridor.Tiles.Count,exp.HeadingRoomId != corridor.RoomB,slide));
+            CorridorPanoramaLayout.ViewProgress(exp.TileIndex,corridor.Tiles.Count,exp.HeadingRoomId != corridor.RoomB,slide));
         view = new View { Region = plan.Region, File = choice.FileName, Seed = exp.Seed ^ (exp.InRoom ? exp.RoomId : corridor.Id),
             Light = exp.Light, Crop = crop, Alpha = RegionSceneryArt.RoomAlpha(choice.FileName) };
         return true;

@@ -55,7 +55,11 @@ internal static class CorridorPreview
             float elapsed = Time.unscaledTime - Mathf.Max(0, _shownAt);
             float travel = Mathf.PingPong(elapsed / 1.5f, 1);
             if (_rooms) RoomPanoramaUi.Draw(texture, false, RegionSceneryArt.RoomAlpha(choice?.FileName), true, 610);
-            else CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName));
+            else
+            {
+                var layers = RegionSceneryArt.CorridorLayers(choice?.FileName, out float blend);
+                CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName), layers, blend);
+            }
             if (texture != null) DungeonAtmosphereUi.Draw(region, 2719 ^ _variant, Time.unscaledTime, 100,
                 _rooms ? new PanoramaCrop(0,0,1,1) : CorridorPanoramaLayout.Crop(texture.width,texture.height,travel),file: choice.FileName);
             // Full-body DD1 reference silhouettes at the crawl's party anchors and footline.

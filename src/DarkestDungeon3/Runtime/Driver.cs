@@ -77,6 +77,7 @@ internal sealed partial class Driver : MonoBehaviour
 
     private void Update()
     {
+        HeroStage.WalkDistancePixels = HeroStage.WalkSpeed = 0;
         Dd2Run.Update();
         CampaignAssets.Update();
         SpineArt.Update();
@@ -95,7 +96,7 @@ internal sealed partial class Driver : MonoBehaviour
         if (fighting) HeroStage.WalkSpeed = 0f;
         stage?.SetVisible((Phase == Phase.Crawling || fightCover) && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
         stage?.SetBattleBlend(Dd1Backdrop.HeroTargets, fighting ? Dd2Combat.LayoutBlend : 0f, fighting ? Dd2Combat.TurnBlend : 0f);
-        if (Phase != Phase.Crawling || Crawl == null) return;
+        if (Phase != Phase.Crawling || Crawl == null) { _sceneMotion.Reset(); return; }
         LockRoadInput();
         if (stage != null && Plugin.HeroModels.Value)
         {
@@ -109,7 +110,7 @@ internal sealed partial class Driver : MonoBehaviour
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
         Walk(kb);
-        HeroStage.WalkSpeed = Expedition.Camp == null && !Expedition.InRoom ? _walkVelocity * SecondsPerSquare : 0f;
+        UpdateSceneMotion();
         if (kb != null && kb.tKey.wasPressedThisFrame) UseTorch();
     }
 
