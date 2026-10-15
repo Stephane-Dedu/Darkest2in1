@@ -183,8 +183,15 @@ internal sealed class CorridorHeroMotion
                            * Quaternion.AngleAxis(-1.5f * weight, worldSide) * _head.rotation;
 
         float distanceInLegLengths = Mathf.Abs(legPixels) >= 1 ? distancePixels / legPixels : 0;
-        PoseLeg(_left, leftFoot, weight, worldForward, worldSide,distanceInLegLengths);
-        PoseLeg(_right, rightFoot, weight, worldForward, worldSide,distanceInLegLengths);
+        var leftTarget = FootTarget(_left,leftFoot,weight,distanceInLegLengths);
+        var rightTarget = FootTarget(_right,rightFoot,weight,distanceInLegLengths);
+        // A retained combat contact can be wider than the settled walk. Raising
+        // the hips past that leg's reach makes IK clamp and slide the foot.
+        // Fit the common pelvis before solving either leg, retaining both targets.
+        float drop = Mathf.Max(ContactDrop(_left,leftTarget),ContactDrop(_right,rightTarget));
+        _pelvis.position -= Vector3.up*drop;
+        PoseLeg(_left, leftFoot, weight, worldForward, worldSide,leftTarget,distanceInLegLengths);
+        PoseLeg(_right, rightFoot, weight, worldForward, worldSide,rightTarget,distanceInLegLengths);
         if (_sword != null)
         {
             _sword.position = _swordHand.TransformPoint(gripPosition);
@@ -192,14 +199,25 @@ internal sealed class CorridorHeroMotion
         }
     }
 
-    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,float distanceInLegLengths)
+    private Vector3 FootTarget(Leg leg, CorridorWalkCycle.Foot foot, float weight,float distanceInLegLengths)
     {
         var neutral = new Vector3(_homeCenter.x, leg.AnkleY, _homeCenter.z) + _side * leg.Side;
         float observed = Vector3.Dot(_slot.InverseTransformPoint(leg.Ankle.position)-neutral,_forward)/_legLength;
         float contact = leg.Contact.Forward(foot,observed,distanceInLegLengths);
         var goal = neutral + _forward * (contact * _legLength) + Vector3.up * (foot.Lift * _legLength);
         float footWeight = Mathf.Abs(distanceInLegLengths) > .000001f ? 1 : weight;
-        var target = Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
+        return Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
+    }
+
+    private static float ContactDrop(Leg leg, Vector3 target)
+    {
+        float reach = Vector3.Distance(leg.Hip.position,leg.Knee.position)+Vector3.Distance(leg.Knee.position,leg.Ankle.position);
+        var delta = leg.Hip.position-target;
+        return CorridorWalkCycle.PelvisContactDrop(reach,delta.x*delta.x+delta.z*delta.z,delta.y);
+    }
+
+    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,Vector3 target,float distanceInLegLengths)
+    {
         SolveLeg(leg.Hip, leg.Knee, leg.Ankle, target, forward);
         if (foot.Planted && Mathf.Abs(distanceInLegLengths) > .000001f)
             ContactErrorPixels = Mathf.Max(ContactErrorPixels,Mathf.Abs(leg.Ankle.position.x-target.x)*100);

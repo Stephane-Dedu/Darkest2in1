@@ -38,7 +38,8 @@ internal static class CrawlSceneryCheck
         if (s == null || d == null) return;
         try
         {
-            if (MotionChecking && OwnsSession && d.Phase == Phase.Crawling && !d.Expedition.InRoom)
+            if (MotionChecking && _step >= 100 && _step <= 102 && OwnsSession
+                && d.Phase == Phase.Crawling && !d.Expedition.InRoom)
                 ObserveMotion(d);
             if (Time.unscaledTime < _next) return;
             if (_save == null)
@@ -93,12 +94,17 @@ internal static class CrawlSceneryCheck
                     if (MotionChecking)
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
-                        d.Travel(1); d.WalkToTile(0,5);
-                        _motionSampled = false; _motionFrames = 0; _motionMaximum = 0;
-                        Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward; continuous ordinary map route; nativeActors={HeroStage.Lit}");
-                        _step = 100; _next = Time.unscaledTime; break;
+                        d.Travel(1);
+                        // Travel is a discrete doorway transition with its own .3s easing.
+                        // Measure the ordinary held route once that transition has settled.
+                        _step = 99; _next = Time.unscaledTime+.4f; _wait = Time.unscaledTime; break;
                     }
                     Advance("entrance-native-actors",d,2,VilhelmChecking ? 15 : 1.5f); break;
+                case 99:
+                    d.WalkToTile(0,5);
+                    _motionSampled = false; _motionFrames = 0; _motionMaximum = 0;
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward; continuous ordinary map route; nativeActors={HeroStage.Lit}");
+                    _step = 100; _next = Time.unscaledTime; break;
                 case 100:
                     if (d.IsWalking) return;
                     // Ordinary hunger checks stop a route even when the party eats automatically.

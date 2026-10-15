@@ -534,6 +534,16 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  Original paint/UVs, y680 actor lane/camera, rooms and byte-identical Sprawl retained. Eight Python cases,
  18 clear-footline measurements and all24 unsaved native loader/depth previews pass.49 files installed;
  143 scenery/plugin files preserved, rollback retained. Evidence: local-art/scenery-verges-v06.
-- [?] Round245 native movement acceptance: normal visible fixture reached four native rigs but its camera
- assertion included the initial discrete doorway transition. Separate that phase before evaluating the
- steady route. No native gait or battle-return PASS claimed; no estate accessed. Owned games closed.
+- [x] Round245 steady-route fixture condition resolved in round246: doorway easing finishes before measurement.
+ The native follow-up exposed/corrected a leg-reach contact defect; four-region continuous gait now passes.
+ Battle-return and remaining motion/comfort scenarios stay open below. No estate accessed.
+
+
+- [x] Round246 native continuous corridor walking: reachable pelvis height preserves first-stance contacts
+ through body blending. Native PD miss2.408 requested/2.231 reach/8.398px reproduced, then corrected;
+ red/green reach regression, shared Release/1,170 Core/204 UI pass. Final unsaved real-actor forward/reverse/
+ stop/contact within6px and no pan jumps pass in four regions over4,077 frames.190 scenery files preserved.
+ Evidence/rollback/video: local-art/scenery-verges-v06. All owned games closed; no estate accessed.
+- [?] Remaining native motion/scenery acceptance: both-entrance visits, discrete button gait, other heroes/
+ hall lengths/cadence comfort, GPU frame-timing precision, torch/props/battle-return on these depths and
+ imported Vilhelm stride. Continuous-route and background preview results do not establish these.

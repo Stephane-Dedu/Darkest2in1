@@ -26,7 +26,16 @@ Private renders, comparisons and exact installation rollback are under
 `local-art/scenery-verges-v06`. The art-only installer changes 49 files and verifies
 143 retained scenery/plugin files, including rooms, HamletModels and Sprawl. Existing
 decoded-image limits and 36 MiB current-hall depth budget are unchanged. Six composition
-and two camera cases pass. Native fixture acceptance is recorded in MODLOG/PARITY.
+and two camera cases pass. All24 choices/depths rendered in the unsaved native preview.
+
+Round246's native walking check first waits for the doorway transition, then measures the
+steady route. It exposed a retained combat contact beyond the rising pelvis's leg reach.
+Both foot targets now constrain the pelvis before either leg solves, preserving those
+contacts while the upper body blends into the gait. The measured native case has a red/green
+regression; all204 UI cases pass. Final real-actor continuous forward/reverse/stop checks
+pass in four regions over4,077 observed frames, with planted targets within6px and no pan
+jumps. This does not establish every hero/hall length, discrete button gait, GPU frame-timing
+precision, native both-entrance visits or the separate battle-return fixture.
 
 ## Native depth layers, round244, October 14, 2026
 

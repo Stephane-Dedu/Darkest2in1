@@ -6,6 +6,21 @@ namespace DarkestDungeon3.Ui.Tests;
 
 public class CorridorLocomotionTests
 {
+    [Fact]
+    public void StartingCombatContactRemainsReachableWhileThePelvisBlendsUp()
+    {
+        // Native Plague Doctor first contact: requested 2.408, available 2.231.
+        // Its retained combat stance must constrain the rising body, otherwise
+        // the two-bone solver clamps the foot away from the moving ground.
+        const float reach = 2.231f, horizontal = reach*.556f, requested = 2.408f;
+        float vertical = MathF.Sqrt(requested*requested-horizontal*horizontal);
+        float drop = CorridorWalkCycle.PelvisContactDrop(reach,horizontal*horizontal,vertical);
+        float after = MathF.Sqrt(horizontal*horizontal+(vertical-drop)*(vertical-drop));
+        Assert.True(drop > .2f);
+        Assert.InRange(after,0,reach*.981f);
+        Assert.Equal(0,CorridorWalkCycle.PelvisContactDrop(reach,.1f,reach*.8f));
+    }
+
     // Exercise the actual panorama crop and planted-foot sampler in the same
     // virtual-pixel units. Native rig/IK acceptance still requires the game.
     [Theory]

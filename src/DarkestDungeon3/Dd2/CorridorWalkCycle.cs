@@ -64,6 +64,9 @@ internal sealed class CorridorWalkCycle
         Math.Max(0, legLength * 0.93f - nativeHipHeight)
         + legLength * (-0.015f - 0.008f * (float)Math.Cos((phase - Handover) * Math.PI * 4));
 
+    internal static float PelvisContactDrop(float reach, float horizontalSquared, float vertical) =>
+        Math.Max(0,vertical-(float)Math.Sqrt(Math.Max(0,reach*reach*.98f*.98f-horizontalSquared)));
+
     // Centre the transfer in double support; the body then passes over each planted foot.
     private const double Handover = (Stance - 0.5) / 2;
     internal static float SupportShift(double phase) => (float)Math.Sin((phase - Handover) * Math.PI * 2);

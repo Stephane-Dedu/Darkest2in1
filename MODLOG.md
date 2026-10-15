@@ -6551,3 +6551,42 @@ The requested enclosed corridor pass is ready with complete rollback. Round244 n
 stops/reversal, in-place battle/return and imported Vilhelm stride still need acceptance. Keep independent
 Shieldbreaker changes and notes outside this commit. The October14 launch pause has expired; use owned
 unsaved fixtures and never automatically open an ordinary/protected estate.
+
+
+## Round246 (2026-10-15): native walking contact reach and final corridor acceptance
+
+The visible native run reproduced a real planted-foot miss after separating the fixture's doorway
+transition from its steady-route measurement. The first timing assertion had included Travel's discrete
+.3s ease in a constant-speed bound. Motion QA now waits .4s, then samples only forward/stop/reverse phases.
+No gameplay speed, camera projection or door behavior changed for this fixture correction.
+
+Ranked contact hypotheses were retained combat stance beyond leg reach, rig/solver scale mismatch and an
+oversized first camera delta. A targeted native probe confirmed the first: Plague Doctor right contact,
+body blend .657, requested hip-to-foot2.408 units versus available2.231, error8.398px. The frame traveled
+.031 leg lengths. Raising the pelvis while retaining the combat foot spread forced IK to clamp its foot.
+
+Both world-space foot targets are now calculated first. Their current leg lengths/horizontal reach
+constrain one common pelvis height before either leg solves, with2% knee reserve. Normal settled gait
+needs no extra drop. This preserves contact positions through the first stance instead of dragging the
+foot when the body rises. The measured reach case reproduced a failing regression before the correction;
+all204 UI cases now pass. Shared Release passes with three existing warnings; unchanged Core passes1,170.
+Temporary DEBUG-dd3-contact instrumentation was removed before final build/deployment.
+
+Final owned unsaved native23528 passes continuous forward/reverse/stop in Sprawl/Foetor/Tangle/Shroud.
+Per-region observed frames1,017/1,020/1,022/1,018, total4,077; maximum pan speed371.3 virtual px/s. Planted
+native foot targets stay within6 virtual pixels and no camera jump occurs. Native real-actor regional
+captures inspected. The earlier24-choice background/depth preview PASS remains valid; all190 scenery
+files were hash-preserved across plugin deployment. Source/build/install hashes, plugin rollback zips,
+red/green reach evidence, native logs/captures and video remain in local-art/scenery-verges-v06.
+
+All owned games are closed and DD2 is stopped. No estate was accessed or persisted; no keyboard/mouse
+input was sent. Independent Shieldbreaker source/tests/art/notes remain outside this commit. The final
+shared plugin preserves them. Remaining acceptance: native both-entrance visits, discrete button gait,
+other heroes/hall lengths and cadence comfort, GPU frame-timing precision, torch/props/battle-return on
+the new depths and imported Vilhelm's true stride. Painted depth/water/occlusion limits are unchanged.
+
+## Status 2026-10-15: corridor art and four-region native continuous walking verified
+
+Rounds245/246 are installed with rollback:18 improved corridors, all24 native background/depth previews,
+and four-region real-actor forward/reverse/stop/contact checks pass. No game remains running. Preserve
+the independent Shieldbreaker work; continue from tools/handoff_prompt.md for the remaining scenarios.

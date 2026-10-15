@@ -7,11 +7,15 @@ restrained ground value variation and restored distant Tangle earth banks. Spraw
 Private pack/comparisons/rollback: local-art/scenery-verges-v06. Art-only installation changed49 files and
 preserved143 scenery/plugin files. Eight Python checks and all18 clear-footline measurements pass.
 The unsaved native preview rendered all24 corridor choices and depth sets; regional captures inspected.
-Owned preview21976 and motion10508 are closed. No estate was accessed or persisted.
-Hidden-window motion launches produced zero hero samples. A normal visible launch produced4122 visible
-samples and four real rigs. Its motion assertion fired during the discrete doorway transition before
-steady walking. That harness condition needs separating before full native gait acceptance can be claimed.
-Keep the existing round244 gait checks pending. No camera/gameplay change was made in the art-only pass.
+Round246 separates the doorway transition from the motion fixture's steady-route measurement. Its real
+native run then exposed an unreachable Plague Doctor contact: requested2.408 units/reach2.231/error8.398px.
+Both foot targets now constrain pelvis height before either leg solves. A red/green reach test and204 UI
+cases pass; shared Release and unchanged1,170 Core pass. Final native23528 passes four regions' continuous
+forward/reverse/stop, planted targets within6px and no pan jumps over4,077 observed frames. Real-actor
+regional captures inspected. All owned games are closed, no estate accessed/persisted or OS input sent.
+Private source/install hashes, plugin/art rollback, native logs/video: local-art/scenery-verges-v06.
+Both-entrance native visits, discrete button gait, torch/props/battle-return on these depths, cadence
+comfort for other hall lengths/heroes, imported Vilhelm stride and GPU frame-timing precision remain open.
 
 Round244 corridor work uses native-painted DD2 depths, local ground contact, quieter floor paint,
 and curated/grounded Tangle walls. Code, offline renders and before/after/motion evidence are under
