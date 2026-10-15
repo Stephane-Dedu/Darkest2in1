@@ -1,5 +1,16 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round247 prepares a denser Tangle pack for the owner's repeated-floor screenshot: six variants with
+irregular native root paint, nearer individual trunks and small undergrowth. Twelve images change;
+84 other images are byte-identical. Eight Python cases, six clear-footline checks and all six variants'
+start/centre/end crops pass. Camera, gait, rooms, other regions and runtime texture budgets are unchanged.
+Private final pack, comparisons, provenance, stopped-game installer and QA helpers:
+local-art/scenery-woodland-v07. It is NOT installed yet: another chat is running -dd3-vilhelm-check.
+The owner was asked before interrupting that test. Recheck processes; install.py refuses running DD2.
+After installation run the owned unsaved corridor preview, inspect the six Tangle captures, close only
+its exact owned PID and update MODLOG/PARITY. No DLL changes or estate access are needed for this art pass.
+Preserve independent Shieldbreaker/Vilhelm changes and their installed plugin; stage only owned notes.
+
 The October14 launch pause expired at19:38:14 UTC /21:38:14 Europe/Paris.
 Use owned unsaved fixtures for native checks; do not open an ordinary/protected estate automatically.
 Round245 improves18 Tangle/Foetor/Shroud corridors with closer rear scenery, irregular native low verges,

@@ -6590,3 +6590,45 @@ the new depths and imported Vilhelm's true stride. Painted depth/water/occlusion
 Rounds245/246 are installed with rollback:18 improved corridors, all24 native background/depth previews,
 and four-region real-actor forward/reverse/stop/contact checks pass. No game remains running. Preserve
 the independent Shieldbreaker work; continue from tools/handoff_prompt.md for the remaining scenarios.
+
+
+## Round247 (2026-10-15): break up repeated Tangle ground and close the forest
+
+The owner's forest-04 screenshot exposes the driving road's parallel brown strips repeated into
+depth. Low-frequency value variation alone retained that structure. All six Tangle corridors now
+blend original forest_road_roots_01 paint into irregular patches at a different world period:
+18.6 staged units versus the road's eight. Coverage increases behind the walking lane. Native tint,
+ink, local geometry contact and restrained value variation are retained; no new bitmap art is used.
+
+Nearer individual trunks use selected native tree materials from forest_tile_06,
+forest_tile_brambles_02, forest_tile_01 and forest_tile_02, with varied scale, yaw and depth and no
+consecutive reuse. Whole entrance/root clusters were rejected after full-crop review because their
+silhouettes repeated too visibly. Placement grounds the actual retained vertices after rotation,
+instead of the discarded driving foundation. Smaller forest_tile_11 foliage fills the root gaps.
+The native mesh UVs, existing large verges, distant earth banks and skyline remain intact.
+
+Private evidence/pack/installer/QA helpers: local-art/scenery-woodland-v07. Twelve images change
+(six canonical plates and six front companions);84 other images are byte-identical. No runtime
+objects, layers or memory budget are added. Camera, y680 actor lane, gait, rooms and other regions
+are unchanged. Eight Python composition/camera cases pass. All six variants at both ends and centre
+were inspected; the full-width y676-720 near-geometry alpha band is empty. PNG bounds/alpha/source
+hashes and retained-material mesh bounds pass. Source assets and derived artwork remain outside Git.
+
+The private pack and stopped-game rollback installer are ready but NOT installed.
+Another chat is actively testing Vilhelm in DD2; the owner was asked before interrupting it.
+No game was launched or stopped by this round. Recheck processes before deployment. Native acceptance
+is pending: install while DD2 is stopped, run the unsaved corridor preview, inspect the six Tangle
+captures and close only that owned PID. No estate was accessed or persisted.
+
+This art-only round does not repeat or expand round246's native locomotion acceptance. Existing
+both-entrance, discrete-button, other-hero/hall-length, GPU-timing, torch/props/battle-return and
+Vilhelm-stride acceptance remains separate. Native albedo and approximate haze still differ from
+DD2's full deferred lighting. Independent Shieldbreaker/Vilhelm source, tests, art and notes stay
+outside this commit.
+
+## Status 2026-10-15: Tangle ground/enclosure ready; deployment/native preview pending
+
+Round247's six-variant native tree/root/undergrowth pass is ready in local-art/scenery-woodland-v07.
+Keep the current install until DD2 stops or the owner authorizes closing the other chat's test.
+Then run install.py and the unsaved preview; update PARITY after inspection.
+Preserve independent Shieldbreaker/Vilhelm work and check live process state before any deployment.

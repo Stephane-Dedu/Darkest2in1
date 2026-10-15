@@ -1,5 +1,35 @@
 # Private DD2 corridor scenery
 
+## Tangle ground and tree enclosure, round247, October 15, 2026
+
+The v07 pass addresses the parallel brown road strips repeating into the depth of
+open forest corridors. All six Tangle variants blend the original road with native
+`forest_road_roots_01` paint in irregular world-space patches. The root map repeats
+every 18.6 staged units instead of the road's eight. Root coverage increases behind
+the walking lane; the existing ground contact and restrained value variation follow
+the blend. Both source images retain their native colours and painted ink.
+
+An independently seeded nearer row uses individual tree materials from `forest_tile_06`,
+`forest_tile_brambles_02`, `forest_tile_01` and `forest_tile_02`, without consecutive
+reuse. Whole entrance/root clusters were rejected for repeating too visibly.
+Placement anchors the actual retained vertices after
+rotation, rather than the discarded driving foundation. Smaller native foliage
+clumps from `forest_tile_11` break up the ground between trunks. Their minimum depth
+stays behind the actor lane. Existing skyline, distant banks, large verges, camera,
+hero scale, movement and original tree UVs remain intact.
+
+Private sources, full start/centre/end comparisons and verification are under
+`local-art/scenery-woodland-v07`. Copy the v06 passes into a fresh private directory;
+rerender `ground wall road` for `forest-01` through `forest-06`, then compose the
+complete pack with the commands below. Ground must be rerendered for its new local
+contact shadows. The six canonical images and six front companions change. All
+84 other image files are byte-identical, including every Sprawl/Foetor/Shroud image.
+No runtime objects or texture layers are added; the current-hall budget is unchanged.
+
+Eight Python composition/camera cases and the six full-width clear-footline checks
+pass. Native installation/preview status is recorded in MODLOG/PARITY. This is baked
+native albedo with approximate haze; the engine's full DD2 lighting is not reproduced.
+
 ## Enclosed verges, round245, October 15, 2026
 
 The v06 pass improves all six Tangle, Foetor and Shroud corridors. Their rear wall rows

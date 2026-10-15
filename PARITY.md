@@ -547,3 +547,12 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Remaining native motion/scenery acceptance: both-entrance visits, discrete button gait, other heroes/
  hall lengths/cadence comfort, GPU frame-timing precision, torch/props/battle-return on these depths and
  imported Vilhelm stride. Continuous-route and background preview results do not establish these.
+
+
+- [?] Round247 Tangle repeated-floor pass: six corridors use irregular native root paint at a
+ larger world period, nearer individual trunks and small undergrowth. Twelve images change;84 other
+ images are byte-identical. Eight Python cases, six clear-footline checks and all start/centre/end
+ crops pass; camera, gait, rooms and runtime texture budget are unchanged. Private pack is ready;
+ installation/native preview await stopped DD2. Another chat owns the running Vilhelm test; owner
+ approval requested before interrupting it.
+ No estate accessed. Evidence/installer/rollback: local-art/scenery-woodland-v07.
