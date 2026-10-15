@@ -6696,3 +6696,55 @@ Round248 is installed with rollback and locally recruitable at the Stagecoach.
 Five-skill and four-region native checks pass; all owned games are closed.
 Continue from tools/handoff_prompt.md, preserving other agents' work and checking
 live processes before deployment. Round247's Tangle art installation remains pending.
+
+
+## Round249 (2026-10-15): native ground/enclosure treatment across all four regions
+
+The owner approved round247's Tangle and requested the same treatment for all regions.
+All six Sprawl, Foetor and Shroud variants now break driving-road repeats with irregular
+patches of native regional paint. Their patch distribution/UV phase also varies by corridor.
+The eight-unit underlying road UVs remain intact. Detail periods are14.0 units for Sprawl,
+18.2 for Foetor and17.0 for Shroud. Approved Tangle paint/geometry/images are unchanged.
+
+Sprawl uses road_rough_patch_darker from its urgent-repair arena, closer masonry,
+selected broken arches and sparse native camp crates/barrels. Foetor uses farm_footpath,
+nearer native crop banks/wilted sunflowers, occasional dead trees, low walls and scrub.
+Shroud uses coast_road_01_mix_alt, wrecked boats/mooring posts/ropes and small native
+fish remains, retaining open sea views. A flesh-covered Foetor floor and orange camp
+props on the cold coast were rejected in offline comparison. Selected mesh faces keep
+native UVs; true retained bounds after rotation anchor them behind the actor lane.
+Ground contact is rerendered with the added scenery. No source assets are modified.
+
+Private complete pack, native source/placement/output hashes, regional comparisons,
+all24 variants at start/centre/end, installer and exact rollback: local-art/scenery-regions-v08.
+Relative to approved v07,36 canonical/front images change and60 image files are identical.
+All24 approved Tangle image files and every back/middle companion remain byte-identical.
+Camera, y680 lane, rooms, depth travel, gait and runtime texture budgets are retained.
+No runtime scenery objects/layers are added. No generated artwork or game assets enter Git.
+
+Eight Python composition/camera cases and all24 full-width y676-720 clear-footline checks
+pass. PNG dimensions/alpha/16MiB bounds, source hashes and selected-mesh lane bounds pass.
+All24 end/centre crops were inspected. Stopped-game installation changes49 files,
+including the previously pending Tangle pass, and hash-preserves145 scenery/plugin files.
+The four current DLL/PDB artifacts, rooms and Hamlet models remain intact. This round
+does not rebuild or deploy a DLL; round248's shared plugin acceptance is retained.
+
+Owned unsaved native preview14208 passes all24 corridor choices and all24 depth sets.
+Every native capture was inspected with the fixture's DD1 reference bodies. No new
+scenery errors/exceptions appear in its log. The exact owned PID was closed, DD2 is
+stopped, and final installed/preserved hashes match. No estate was accessed/persisted
+and no OS input was sent. Round247's installation/native preview gap is now resolved.
+
+Native locomotion/torch/props/battle-return acceptance remains scoped to the earlier
+fixtures; this background preview does not repeat those gameplay checks. Original
+albedo, approximate haze and coarse native bank/water foundations remain art limits.
+Preserve independent Shieldbreaker source/tests/art/notes outside this commit.
+
+## Status 2026-10-15: all24 corridor variants installed and native preview verified
+
+Round249's four-region pack and approved Tangle are installed with exact rollback.
+All24 actual loader/depth choices,24 clear footlines and eight Python cases pass;
+native regional captures inspected. Owned preview14208 closed; DD2 stopped. No estate
+or OS input accessed. Active pack/evidence: local-art/scenery-regions-v08. Older pack
+installers can restore older regions; use v08 for the current complete pack.
+Preserve independent Shieldbreaker WIP and the installed round248 shared plugin.

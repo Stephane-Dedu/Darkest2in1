@@ -28,6 +28,37 @@ VERGES = {
     "coast": ("coast_tile_14", "coast_tile_10", "coast_tile_07"),
 }
 
+GROUND_DETAILS = {
+    "forest": ("roads/road_forest_brambles_diagonal_quad_01", "forest_road_roots_01", .43, (.45,.95)),
+    "city": ("arenas/scenes_scenes_combat_arena_city_urgent_repairs", "road_rough_patch_darker", .57, (.72,.95)),
+    "farm": ("roads/farm_tile_01", "farm_footpath", .44, (.65,.95)),
+    "coast": ("roads/road_coast_diagonal_corner_01", "coast_road_01_mix_alt", .47, (.50,.90)),
+}
+
+# Region-specific near scenery. Use only selected native materials, without the
+# broad driving foundations or unsupported hanging decorations.
+INFILL = {
+    "city": (("city_decor_05", "city_decor_03", .35,.50),
+             ("city_decor_05", "city_decor_01_transp", .28,.42)),
+    "farm": (("farm_tile_33_crops", "farm_large_crops_sway", .32,.46),
+             ("farm_tile_34_crops", "farm_large_crops_sway", .26,.34),
+             ("farm_tile_35_crops", "farm_sunflowers", .25,.38),
+             ("farm_tile_04", "farm_tree_02_big", .45,.62)),
+    "coast": (("coast_tile_09", "coast_boats", .40,.55),
+              ("coast_tile_12", "coast_boats", .35,.50),
+              ("coast_tile_11", "coast_", .33,.45)),
+}
+LITTER = {
+    "city": (("exp/camp_crate", "camp_props", .75,1.20),
+             ("exp/camp_barrel", "camp_props", .75,1.20)),
+    "farm": (("farm_tile_05", "farm_shrubs_and_tufts", .30,.50),
+             ("farm_tile_12", "farm_shrubs_and_tufts", .30,.50),
+             ("farm_tile_10", "farm_fences_and_walls", .40,.60)),
+    "coast": (("coast_tile_07", "coast_deadfish", .18,.25),
+              ("coast_tile_14", "coast_deadfish", .22,.35),
+              ("coast_tile_10", "coast_posts", .18,.25)),
+}
+
 
 def native_parts(objects, material_fragment):
     """Retain selected native faces/UVs from combined road meshes."""
@@ -65,8 +96,8 @@ def merge_entries(previous, updated):
     return result + list(replacements.values())
 
 
-def forest_floor_paint(nt, painted, folder, data, shade):
-    """Break the driving road's parallel strips with original Tangle root paint."""
+def ground_patch_paint(nt, painted, folder, data, shade, uv_scale=.43, coverage=(.45,.95), phase=0):
+    """Break driving-road repeats with irregular patches of native regional paint."""
     import bpy
     texture = nt.nodes.new("ShaderNodeTexImage")
     texture.image = bpy.data.images.load(str((folder / data["texture"]).resolve()), check_existing=True)
@@ -75,8 +106,8 @@ def forest_floor_paint(nt, painted, folder, data, shade):
     mapping.operation = "MULTIPLY_ADD"
     # A different, larger world period prevents the root and road repeats from
     # lining up. Keep sharp native ink; only the irregular patch boundaries blend.
-    mapping.inputs[1].default_value = (.43, .43, 1)
-    mapping.inputs[2].default_value = (.173, .417, 0)
+    mapping.inputs[1].default_value = (uv_scale, uv_scale, 1)
+    mapping.inputs[2].default_value = (.173+phase*.113, .417+phase*.071, 0)
     nt.links.new(uv.outputs["UV"], mapping.inputs[0])
     nt.links.new(mapping.outputs[0], texture.inputs["Vector"])
     tint = nt.nodes.new("ShaderNodeMixRGB")
@@ -88,7 +119,14 @@ def forest_floor_paint(nt, painted, folder, data, shade):
     noise = nt.nodes.new("ShaderNodeTexNoise")
     noise.inputs["Scale"].default_value = .19
     noise.inputs["Detail"].default_value = 1.3
-    nt.links.new(position.outputs["Position"], noise.inputs["Vector"])
+    coordinates = position.outputs["Position"]
+    if phase:
+        offset = nt.nodes.new("ShaderNodeVectorMath")
+        offset.operation = "ADD"
+        offset.inputs[1].default_value = (phase*13.17,phase*7.31,0)
+        nt.links.new(coordinates, offset.inputs[0])
+        coordinates = offset.outputs[0]
+    nt.links.new(coordinates, noise.inputs["Vector"])
     patches = nt.nodes.new("ShaderNodeMapRange")
     patches.interpolation_type = "SMOOTHSTEP"
     patches.inputs["From Min"].default_value = .34
@@ -96,17 +134,17 @@ def forest_floor_paint(nt, painted, folder, data, shade):
     nt.links.new(noise.outputs["Fac"], patches.inputs["Value"])
     depth = nt.nodes.new("ShaderNodeSeparateXYZ")
     nt.links.new(position.outputs["Position"], depth.inputs[0])
-    coverage = nt.nodes.new("ShaderNodeMapRange")
-    coverage.interpolation_type = "SMOOTHSTEP"
-    coverage.inputs["From Min"].default_value = 1
-    coverage.inputs["From Max"].default_value = 16
-    coverage.inputs["To Min"].default_value = .45
-    coverage.inputs["To Max"].default_value = .95
-    nt.links.new(depth.outputs["Y"], coverage.inputs["Value"])
+    depth_weight = nt.nodes.new("ShaderNodeMapRange")
+    depth_weight.interpolation_type = "SMOOTHSTEP"
+    depth_weight.inputs["From Min"].default_value = 1
+    depth_weight.inputs["From Max"].default_value = 16
+    depth_weight.inputs["To Min"].default_value = coverage[0]
+    depth_weight.inputs["To Max"].default_value = coverage[1]
+    nt.links.new(depth.outputs["Y"], depth_weight.inputs["Value"])
     weight = nt.nodes.new("ShaderNodeMath")
     weight.operation = "MULTIPLY"
     nt.links.new(patches.outputs[0], weight.inputs[0])
-    nt.links.new(coverage.outputs[0], weight.inputs[1])
+    nt.links.new(depth_weight.outputs[0], weight.inputs[1])
     mix = nt.nodes.new("ShaderNodeMixRGB")
     nt.links.new(weight.outputs[0], mix.inputs[0])
     nt.links.new(painted, mix.inputs[1])
@@ -114,7 +152,7 @@ def forest_floor_paint(nt, painted, folder, data, shade):
     return mix.outputs[0]
 
 
-def ground_contact(ground, root_paint=None, shade=1):
+def ground_contact(ground, detail_paint=None, shade=1, paint_settings=None):
     """Native floor paint with local geometry contact, independent of missing DD2 lights."""
     import bpy
     for slot in ground.material_slots:
@@ -123,8 +161,8 @@ def ground_contact(ground, root_paint=None, shade=1):
         nt = mat.node_tree
         emission = next(n for n in nt.nodes if n.type == "EMISSION")
         painted = emission.inputs["Color"].links[0].from_socket
-        if root_paint:
-            painted = forest_floor_paint(nt, painted, *root_paint, shade)
+        if detail_paint:
+            painted = ground_patch_paint(nt, painted, *detail_paint, shade, **(paint_settings or {}))
         ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
         ao.inputs["Distance"].default_value = 3
         ao.samples = 8
@@ -246,12 +284,11 @@ def main():
         folder = kit / floor_folder
         document = json.loads((folder / "scene.json").read_text())
         key, floor_data = next((k,v) for k,v in document["materials"].items() if v["name"] == floor_name)
-        root_paint = None
-        if region == "forest":
-            root_folder = src / "road_forest_brambles_diagonal_quad_01"
-            root_data = next(m for m in json.loads((root_folder / "scene.json").read_text())["materials"].values()
-                             if m["name"] == "forest_road_roots_01")
-            root_paint = (root_folder, root_data)
+        detail_path, detail_name, uv_scale, coverage = GROUND_DETAILS[region]
+        detail_folder = kit / detail_path
+        detail_data = next(m for m in json.loads((detail_folder / "scene.json").read_text())["materials"].values()
+                           if m["name"] == detail_name)
+        detail_paint = (detail_folder, detail_data)
         for variant in range(1,7):
             short = f"{region}-{variant:02d}"
             if args.only and short not in args.only:
@@ -331,14 +368,16 @@ def main():
                         size = sizes[name]
                         put(name, float(x+size[0]/2), float(z+size[2]/2), rotation, band, light)
                         x += float(size[0])+rng.uniform(*gap)
-                row(walls, rw[0]/2-(4 if region in VERGES else 1), "wall", shade)
+                wall_depth = max(2.8,rw[0]/2-4) if region == "city" else rw[0]/2-(4 if region in VERGES else 1)
+                row(walls, wall_depth, "wall", shade)
                 row(distant or walls, rw[0]/2+22, "far", shade*.8, gap=(-6,0))
                 row(distant or walls, rw[0]/2+48, "vfar", shade*.6, -110,110,(-8,0))
                 def planted_parts(asset, fragment, x, near_depth, rotation, scale, band, light):
                     # Whole driving tiles include broad discarded foundations.
                     # Anchor the retained tree/foliage itself, after rotation,
                     # so its roots actually close the visible ground near the lane.
-                    objects, _, _ = L.build(src / asset, shade=light)
+                    part_folder = kit / asset if "/" in asset else src / asset
+                    objects, _, _ = L.build(part_folder, shade=light)
                     objects = native_parts(objects, fragment)
                     vertices = [v for obj in objects for v in obj.data.vertices]
                     if not vertices:
@@ -359,7 +398,23 @@ def main():
                     placements.append({"asset": asset, "parts": fragment, "x": x, "z": near_depth,
                                        "rotation": rotation, "band": band, "scale": scale,
                                        "bounds": [xyz.min(0).tolist(), xyz.max(0).tolist()],
-                                       "scene_sha256": digest(src / asset / "scene.json")})
+                                       "scene_sha256": digest(part_folder / "scene.json")})
+                if region in INFILL:
+                    infill_rng = random.Random(seed+31871)
+                    def infill_row(pool, depth, gap, band, light):
+                        x, previous = -82.0, None
+                        while x < 82:
+                            item = infill_rng.choice([p for p in pool if p != previous])
+                            previous = item
+                            name, fragment, low, high = item
+                            planted_parts(name, fragment, x, infill_rng.uniform(*depth),
+                                          infill_rng.choice((0,180))+infill_rng.uniform(-25,25),
+                                          infill_rng.uniform(low,high), band, light)
+                            x += infill_rng.uniform(*gap)
+                    infill_row(INFILL[region], (4.0,7.0) if region == "farm" else (3.2,5.0),
+                               {"city":(12,20),"farm":(6,10),"coast":(8,13)}[region], "wall", shade*.90)
+                    infill_row(LITTER[region], (1.8,4.0), (3.2,6.0) if region == "farm" else (5.0,9.0),
+                               "road", shade*(.88 if region == "farm" else .65))
                 if region == "forest":
                     woodland_rng = random.Random(seed+91237)
                     trees = (("forest_tile_06", "forest_tree_large_02", .48, .68),
@@ -413,7 +468,8 @@ def main():
                         for vertex in obj.data.vertices:
                             vertex.co *= ENVIRONMENT_SCALE
                 ground = stage_floor(L, folder, key, floor_data, shade=shade,depth_end=16 if region == "coast" else 210)
-                ground_contact(ground, root_paint, shade)
+                paint_settings = {"uv_scale":uv_scale,"coverage":coverage,"phase":0 if region == "forest" else variant}
+                ground_contact(ground, detail_paint, shade, paint_settings)
                 if region == "coast":
                     # The Shroud's far ground is open water, not an endless wooden pier.
                     # Its native ocean shader has no diffuse map in this export: use the
@@ -453,9 +509,10 @@ def main():
                             "road_scene_sha256": digest(src/road/"scene.json"),
                             "floor_material": floor_name, "floor_texture_sha256": digest((folder/floor_data["texture"]).resolve()),
                             "placements_sha256": digest(passes/f"{short}-placements.json")})
-            if root_paint:
-                entries[-1]["ground_detail_material"] = root_data["name"]
-                entries[-1]["ground_detail_texture_sha256"] = digest((root_folder/root_data["texture"]).resolve())
+            entries[-1]["ground_detail_material"] = detail_data["name"]
+            entries[-1]["ground_detail_texture_sha256"] = digest((detail_folder/detail_data["texture"]).resolve())
+            entries[-1]["ground_detail_world_period"] = 8/uv_scale
+            entries[-1]["ground_detail_phase"] = 0 if region == "forest" else variant
             print("READY", short, flush=True)
     manifest = {"version": 4, "generated_art": False, "source_kit": str(kit),
                 "tool_sha256": digest(Path(__file__).resolve()), "files": entries,
@@ -467,7 +524,9 @@ def main():
                             "Discard empty Tangle foundations and ground raised foliage bases",
                             "Closer rear scenery and irregular native foliage/rubble verges behind the actor lane",
                             "Near Tangle trunks rooted from retained mesh bounds and small irregular undergrowth",
-                            "Native Tangle root paint breaks parallel road strips at a different world period"],
+                            "Native Tangle root paint breaks parallel road strips at a different world period",
+                            "Region-specific rubble, earthen footpath and worn-board paint with independent variant patch phases",
+                            "Closer Sprawl masonry, Foetor crop banks and Shroud wreckage with low native roadside details"],
                 "camera": camera_settings(True), "environment_scale":ENVIRONMENT_SCALE,
                 "limits": ["Unlit native albedo with approximate depth haze; native deferred lighting is not reproduced"]}
     manifest_path = output/"render-manifest.json"

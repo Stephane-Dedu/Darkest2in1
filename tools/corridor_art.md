@@ -1,5 +1,39 @@
 # Private DD2 corridor scenery
 
+## All four regions, round249, October 15, 2026
+
+The v08 pack extends the approved Tangle treatment to all six Sprawl, Foetor and
+Shroud corridor variants. Each uses native regional paint in irregular world-space
+patches with a larger repeat period than the underlying eight-unit driving road.
+The three new regions also vary the patch position and distribution by variant.
+Sprawl uses the native urgent-repair rubble map, Foetor uses its earthen footpath,
+and Shroud uses a native mixed-board map. A flesh-covered Foetor floor and orange
+camp props on the cold coast were rejected during comparison.
+
+Near scenery remains specific to each region. Sprawl has closer masonry and broken
+arches with sparse native crates/barrels. Foetor has crop banks, wilted sunflowers,
+occasional dead trees, low stone walls and scrub. Shroud has wrecked boats, mooring
+posts, ropes and small native fish remains, retaining its open sea view. All selected
+parts keep their original UVs and are anchored using their actual retained mesh bounds.
+
+Ground contact is rerendered with that scenery. The camera, walking lane, room art,
+depth travel and runtime image budgets stay unchanged. The approved Tangle images are
+byte-identical to v07; the other regions' back/middle companions are also retained.
+Relative to v07, 36 canonical/front images change and 60 image files are identical.
+This completes a 24-corridor pack using native artwork, with no added runtime objects.
+
+Private output, all variants at both ends/centre, comparisons, provenance and the
+stopped-game installer/QA helpers are under `local-art/scenery-regions-v08`.
+Copy v07 into a fresh directory, rerender `ground wall road` for city/farm/coast,
+then compose the complete pack with the commands below. Installation also includes
+the previously approved Tangle pass. The stopped-game install changed 49 files and
+hash-preserved 145 scenery/plugin files, including the four current DLL/PDB artifacts.
+Eight Python cases, all 24 clear-footline checks and all 24 native loader/depth previews
+pass. Native captures for every variant were inspected with the fixture's DD1 reference
+bodies. Owned QA PID14208 was closed; no estate was accessed/persisted or OS input sent.
+Original albedo and approximate haze remain the lighting limit. This art-only preview
+does not repeat the separate native locomotion, interaction or battle-return fixtures.
+
 ## Tangle ground and tree enclosure, round247, October 15, 2026
 
 The v07 pass addresses the parallel brown road strips repeating into the depth of

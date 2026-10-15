@@ -549,13 +549,13 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  imported Vilhelm stride. Continuous-route and background preview results do not establish these.
 
 
-- [?] Round247 Tangle repeated-floor pass: six corridors use irregular native root paint at a
+- [x] Round247 Tangle repeated-floor pass: six corridors use irregular native root paint at a
  larger world period, nearer individual trunks and small undergrowth. Twelve images change;84 other
  images are byte-identical. Eight Python cases, six clear-footline checks and all start/centre/end
- crops pass; camera, gait, rooms and runtime texture budget are unchanged. Private pack is ready;
- installation/native preview await stopped DD2. Another chat owns the running Vilhelm test; owner
- approval requested before interrupting it.
- No estate accessed. Evidence/installer/rollback: local-art/scenery-woodland-v07.
+ crops pass; camera, gait, rooms and runtime texture budget are unchanged. Approved images are
+ installed unchanged in round249's complete pack; all six native Tangle previews/depth sets pass.
+ No estate accessed. Original evidence: local-art/scenery-woodland-v07;
+ active installation/native evidence/rollback: local-art/scenery-regions-v08.
 
 - [x] Round248 Vilhelm native locomotion: original a002_020000 walk plus 41-sample,
   2 m source root curve follows signed rendered ground travel at fitted scale.
@@ -570,4 +570,14 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   unchanged. No estate accessed. Evidence/backups: local-art/vilhelm-v01.
 - [?] Vilhelm remaining: native death/corpse visuals, saved recruitment/homecoming,
   full DS3 cloth/FXR/audio and final combat balance. Local invitation enabled;
-  public default off. Round247's pending Tangle art installation is unchanged.
+  public default off. Round249 installs and previews the approved Tangle art.
+
+
+- [x] Round249 four-region corridor art: native rubble/near masonry in Sprawl,
+ earthen footpaths/crop banks/walls in Foetor, varied boards/wreckage/posts/fish remains
+ in Shroud. Approved Tangle images retained exactly. All24 variants have clear footlines;
+ eight Python cases, all start/centre/end crops and all24 actual native loader/depth choices
+ pass.49 files installed with exact rollback;145 scenery/plugin files hash-preserved.
+ Camera/gait/rooms/runtime texture budgets retained. Every native capture inspected with
+ DD1 reference bodies; owned preview14208 closed, no estate or OS input accessed.
+ Evidence/installer/rollback: local-art/scenery-regions-v08. Round247 installation resolved.

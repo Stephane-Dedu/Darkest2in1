@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round249 installs the approved Tangle treatment across all four regions,24 corridors total.
+Sprawl has native rubble/near masonry, Foetor has earthen wear/crop banks/low walls,
+and Shroud has varied boards/wreckage/posts/fish remains with the sea view retained.
+Native paint patches vary by corridor. Tangle's approved v07 images are byte-identical.
+Camera, gait, rooms, depth travel and runtime image budgets are unchanged. Eight Python
+cases,24 clear footlines and all24 unsaved native loader/depth previews pass. Every native
+variant capture was inspected with DD1 reference bodies. This does not repeat the separate
+native movement/interaction/battle fixtures.49 files installed;145 scenery/plugin files,
+including the current four DLL/PDB artifacts, hash-preserved. Owned preview14208 closed;
+DD2 is stopped, no estate selected/persisted and no OS input sent.
+Active pack, source hashes, all end/centre crops, native captures/log and exact rollback:
+local-art/scenery-regions-v08. Use its installer for this complete pack. Older installers
+can restore older regions. Preserve independent Shieldbreaker WIP and the current shared plugin.
+
 Round248 verifies Vilhelm's original DS3 locomotion and visible Blackflame in DD2.
 The native Move behavior uses a002_020000, not the almost stationary a002_004000.
 The private 13-clip pack adds its 41-sample, 2 m root curve; signed rendered ground
@@ -19,18 +33,17 @@ Local Stagecoach Invite Sir Vilhelm remains enabled; public default is off.
 Read tools/vilhelm/README.md. Full DS3 FXR/cloth/audio/final balance, native death/
 corpse and saved recruitment/homecoming acceptance remain open. Native DD2 foot
 contact bounds are not numerical acceptance of imported feet. Preserve independent
-Shieldbreaker WIP. Round247's Tangle art below is still pending installation;
-the Vilhelm test that prevented it has now ended. Recheck processes before deploy.
+Shieldbreaker WIP. Round249 subsequently installs the Tangle art and the other regions;
+its art-only installation preserves this shared plugin. Recheck processes before deploy.
 
 Round247 prepares a denser Tangle pack for the owner's repeated-floor screenshot: six variants with
 irregular native root paint, nearer individual trunks and small undergrowth. Twelve images change;
 84 other images are byte-identical. Eight Python cases, six clear-footline checks and all six variants'
 start/centre/end crops pass. Camera, gait, rooms, other regions and runtime texture budgets are unchanged.
-Private final pack, comparisons, provenance, stopped-game installer and QA helpers:
-local-art/scenery-woodland-v07. It is NOT installed yet. Round248 has closed its own Vilhelm test.
-Recheck processes; install.py refuses running DD2.
-After installation run the owned unsaved corridor preview, inspect the six Tangle captures, close only
-its exact owned PID and update MODLOG/PARITY. No DLL changes or estate access are needed for this art pass.
+Original private Tangle pack/comparisons/provenance: local-art/scenery-woodland-v07.
+Round249 installs its approved images unchanged inside local-art/scenery-regions-v08 and verifies
+all six Tangle variants in the unsaved native preview. Use v08 for the active complete pack.
+No DLL changes or estate access were needed for this art pass.
 Preserve independent Shieldbreaker/Vilhelm changes and their installed plugin; stage only owned notes.
 
 The October14 launch pause expired at19:38:14 UTC /21:38:14 Europe/Paris.
