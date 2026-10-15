@@ -581,3 +581,22 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  Camera/gait/rooms/runtime texture budgets retained. Every native capture inspected with
  DD1 reference bodies; owned preview14208 closed, no estate or OS input accessed.
  Evidence/installer/rollback: local-art/scenery-regions-v08. Round247 installation resolved.
+
+- [x] Round250 controlled walkthrough: native recruitment, Guild/smith inspection, quest/party/cart
+  cancellation, ordinary embark, two skill-based victories, trap/torch, private cold pending-loot
+  resume, curio/camp/meal/skill, retreat/results/Hamlet/event and trinket equip. No forced wins or
+  debug heals.93 focused tests and14,400 map/curio configuration checks pass. Private checkpoint
+  only; no normal estate file handoff or successful quest-completion/boss/balance acceptance.
+- [ ] Round250 P1 hidden activation items: native full cart16->20 stacks places wards17-19 outside
+  the16-slot UI. Four emptied visible slots do not recover them. Requires capacity reservation AND
+  existing-overflow layout recovery; explicit item key is required to activate quest curios.
+- [ ] Round250 P2 camp model/target mismatch: corridor model positions versus CampX hit regions;
+  clicking the Plague Doctor selects the Vestal. Bodies remain standing beside the fire.
+- [ ] Round250 P2 quirk generation: Kingdoms-conditioned quirks leak into EXPEDITION recruitment/
+  mapping/curio rewards; mode/effect eligibility and localized presentation need review.
+- [ ] Round250 P2 food cap and curio hover: five immediate foods accepted despite native limit4;
+  armour hover becomes an opaque pale silhouette. Native captures/repro values retained privately.
+- [ ] Preparation compatibility: DD1 supplies lack native combat-item use; curio/trap DoTs collapse
+  to immediate damage. Curio repeats/clusters, DD1/native visual cohesion and cold-load stalls need
+  further work.14,400 stress cases have no missing goal/definition/art folders; this does not prove
+  native rendering states or campaign-weighted variety. Evidence: local-art/walkthrough-audit-20261015.

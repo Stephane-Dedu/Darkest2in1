@@ -6748,3 +6748,87 @@ native regional captures inspected. Owned preview14208 closed; DD2 stopped. No e
 or OS input accessed. Active pack/evidence: local-art/scenery-regions-v08. Older pack
 installers can restore older regions; use v08 for the current complete pack.
 Preserve independent Shieldbreaker WIP and the installed round248 shared plugin.
+
+## Round250 (2026-10-15): end-to-end walkthrough and curio generation audit
+
+Owner requested gameplay/graphics weaknesses, then specifically curio generation and smoothness.
+This round is an audit, with no production code/art changes. Private instrumentation compiled in
+a frozen shared copy, an object-owned persistence guard and a private checkpoint path permit real
+campaign APIs/UI without selecting an estate. Native menu input uses synthetic estate summaries.
+Evidence, temporary source/build, original plugin backup, logs,45 native captures, native state and
+acceptance.json: local-art/walkthrough-audit-20261015. The temporary audit plugin was removed.
+
+Native walkthrough passed recruitment by drag, Guild/Blacksmith inspection, map selection/camera,
+four-hero formation, Shift purchases, cancellation/reopen with empty cart/same quest/party/gold,
+ordinary embark, native hall and room victories through skills, trap/torch, a cold checkpoint resume
+with pending loot, ordinary curio interaction/reward, camp/meal/skill, retreat confirmation/results,
+return to Hamlet/town event and trinket drag/equip. No forced victory or debug health refill.
+Private resume preserves position/light/steps/wins/pack/pending loot/party condition, with no duplicate
+reward. Null object fields differ between SaveFile and observer serialization and were normalized;
+null array slots remain meaningful. First expedition deliberately retreated, second stopped at
+the inventory counterexample. Successful quest completion, bosses/tier/Path balance, normal estate
+picker file handoff and long sessions are NOT established by this audit.
+
+Confirmed defects, in repair order:
+
+1. P1 activation-quest inventory: affordable native16-stack cart (7,450 gold) enters Shroud with20
+stacks. Firewood is at slot16 and three protective wards at17-19; CrawlUi draws only0-15. Discarding
+four visible partial stacks leaves four visible holes but all wards remain hidden. Inventory.Arrange
+keeps existing overflow indices; it does not move them into those holes. InteractQuestCurio requires
+the explicit quest-item key, so the ordinary item-use path cannot complete the objective. Core
+forest probe separately produces16->21 stacks with three hidden antivenom quest items. Fix starting
+item reservation/capacity and layout recovery together. Relevant: Campaign/Embark.cs114-120,
+Expedition/Inventory.cs164-193, Ui/CrawlUi.cs714-744. Native captures43-45 and full-pack checkpoint.
+
+2. P2 camp picking/presentation: Driver keeps native models at corridor RankX while CrawlUi moves
+bars/click targets to CampX. Real click on the standing Plague Doctor selects the Vestal, confirmed
+by HUD/skill header in capture31. Bodies remain standing beside the fire. Backpacks in campfire.png
+are supplies, not duplicated seated heroes. Fix shared native camp formation, hit regions and poses.
+
+3. P2 quirk pool: suit_of_armor grants quirk_kingdoms_heal_wounds_faster_at_camp_pos in an EXPEDITION
+host; native CSV requires generation_all_conditions=is_kingdoms. Reynauld also starts with
+quirk_kingdoms_weak_debuff_vs_siege_neg. Dd2Catalog.MapDd1Quirk/StartingQuirks choose by polarity/tags
+without native mode-generation conditions. UI displays internal-derived Kingdoms names. Filter
+supported campaign effects/mode conditions and localize; do not assume every imported effect works.
+
+4. P2 food cap: five immediate real-pointer food uses heal Reynauld8->18/40 and consume24->19 food.
+Native shared/rules.json max_provisions_before_full=4 is not implemented in Crawl.UseSupply.
+The cap/reset policy needs native reference work before a fix. Native captures22/25 and assertions.
+
+5. P2 curio hover: armour becomes an opaque pale silhouette under the pointer, then its painted
+detail returns when the pointer leaves. Captures26/27. DrawProp replaces the closed picture with
+the active picture; inspect state compositing/alpha rather than generating replacement art first.
+
+6. Gameplay compatibility gaps confirmed in code: purchased bandage/antivenom/laudanum are not
+bridged to native combat items. Crawl.UseSupply treats only food/holy water and says the others
+wait for curios. Curio/trap poison/bleed effects apply full duration as immediate damage through
+CurioResolver.ApplyEffect; there is no travel DoT treatment window. These reduce preparation and
+counterplay. Ordinary native skill healing works; do not confuse that with combat supply support.
+
+Curios are rolled from paired DD1 weighted room/hall/treasure prop tables when the seeded map is
+built. Quest curios are placed afterward in eligible rooms, then hall squares. Outcomes roll on
+interaction and pending reports persist. Stress audit generated14,400 configuration/seed cases
+across four default regions, three lengths/six types/200 seeds: zero disconnected maps, missing
+goal placements, null curios, missing definitions or missing art folders. File availability does
+not establish correct native states.3,844 cases contain adjacent identical ordinary hall curios,
+4,497 pairs, maximum run3, including three stacks of books in city short/explore seed2. These are
+unweighted stress configurations including map fallbacks, NOT a campaign frequency estimate.
+Independent weighted picks have no anti-repeat/spacing rule. Theme/art remains paired DD1 props.
+
+Other visual weaknesses: static DD1 service/hero/inventory/results panels differ sharply from the
+3D Hamlet/map, small low-contrast text, flat camp/prop composition and baked scene lighting versus
+live actors/effects. Cold initialization shows17.75/18.23s Hamlet and19.33s expedition-resume frame
+stalls in the instrumented audit; these need an uninstrumented profile, not a production benchmark
+claim. First native fight setup/reveal takes38/1,167ms with the same backdrop, without a load screen.
+
+93 targeted curio/map/quest/inventory tests pass, though they miss the counterexamples above.
+All owned QA games closed, last27584. Four original DLL/PDB artifacts/config restored byte-exact;
+190 scenery files and39 native profile files hash-preserved. Protected estates1/3 and estate2
+were not accessed; only the private checkpoint was written. OS input went only to the owned game
+after21987s desktop idle was verified. Independent Shieldbreaker code/art/journal WIP is preserved.
+
+## Status 2026-10-15: audit complete; hidden activation items are the first repair
+
+Installed round248 plugin/round249 scenery restored and DD2 stopped. No audited bug is fixed by
+these notes. Start with a failing full-cart Embark.Create/Arrange/UI-visible-inventory regression,
+then camp formation/picking and quirk generation filters. Preserve independent Shieldbreaker WIP.
