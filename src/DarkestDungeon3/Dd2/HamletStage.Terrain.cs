@@ -15,18 +15,8 @@ internal sealed partial class HamletStage
 
     private bool BuildGround()
     {
-        if (_groundMaterial == null)
-        {
-            PrepareGround();
-            return false;
-        }
-        if (_groundPaintTask == null)
-        {
-            if (!PaintReady) return false;
-            BeginGroundPaint(BaseTexture(_groundMaterial),BaseTexture(_groundPaving),_groundGrass,BaseTexture(_groundRock));
-            return false;
-        }
-        if (!UploadGroundPaint()) return false;
+        AdvanceGroundPaint();
+        if (_groundPaintTask == null || !PaintReady || !UploadGroundPaint()) return false;
         var paving=_groundPaving; var rock=_groundRock; var stone=_groundStone; var valley=_groundValley;
         int layer=_groundLayer;
         var data=_modelPack.Terrain;

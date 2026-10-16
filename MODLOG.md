@@ -7059,3 +7059,65 @@ naturally played full successful quest and bosses/balance, ordinary estate-file 
 gait/class/hall-length coverage and long-session performance. Ground bake is responsive but total
 cold preparation remains about20seconds. Native lighting/animated arena water/VFX are approximate.
 Preserve independent Shieldbreaker source/art/journal WIP and both current private scenery packs.
+
+## Round254 (2026-10-16): faster Hamlet paint and preparation before the recap
+
+The owner's return-loading report follows round253. The prior native terrain worker still took
+17,126ms every time the town was rebuilt. Its work was off the main thread, but moving it to a
+worker alone did not remove the wait. Existing prewarm also began only through results OnGUI.
+
+HamletPaintBaker now precomputes the separable world-to-tile coordinates per axis, removing
+repeated divisions/mirrored lookups from millions of pixels. Field and pixel rows run on at
+most four managed workers, bounded by half the available CPUs. Unity/GPU calls stay on the
+main thread, and the existing three texture uploads still span separate frames. Six original
+64px reference buffers and the complete2048px/48MiB output compare byte-for-byte with the old
+baker. No texture detail, terrain resolution, alpha or world projection is reduced.
+
+One process-local HamletPaintCache retains the most recent completed48MiB paint. SHA256 covers
+all four readbacks, absent grass and both paint dimensions. Changed texture bytes invalidate
+it; cancelled requests never replace a completed entry. Overlapping worker requests share one
+bake. Result buffer properties cannot be reassigned by the plugin; uploads no longer null the
+shared buffers. Only one entry is retained, with temporary extra memory on replacement. No
+on-disk cache or extracted art is added. A fresh game process still performs its first bake.
+
+Ground preparation starts alongside model construction. It waits for its four input grades,
+then computes while remaining building grades/uploads finish. Final town reveal still waits
+for complete models, grades and terrain uploads. Driver.Update now requests hidden prewarm
+once the objective completes in exploration/combat, and throughout both recap pages/native
+return transition. Recap drawing no longer owns the preload. Scene release/cancellation and
+parked-camera behavior remain; a full town is not retained for the entire expedition.
+
+Feedback: the new cache seam initially fails3/4 focused cases with the former unconditional
+bake. Five cache tests then pass, covering reuse by content, mutation, grass/dimensions,
+eviction, cancellation and concurrent requests. Frozen Release+1,221 Core+221 UI pass.
+Standalone .NET8 full-resolution comparison: old2,508ms, new first bake541ms, hit2.7ms. These
+are managed benchmark timings, not Unity return times. The native DD2 fixture observes the
+first terrain bake4,372ms/cache miss4,411ms versus the prior17,126ms bake. HamletReady is true
+while the completed private quest is still open in Crawling. No full recap-to-town duration
+or native warm-cache latency is established by this run. Its cold driving/asset-startup frame
+gaps must not be presented as a Hamlet return benchmark.
+
+Owned native QA9208 was no longer running before capture/recap acceptance; the cause was not
+established. The owner confirmed another agent is using DD2 for QA and requested keeping it
+closed. No further launch or OS input followed. Native warm second return, both recap pages,
+instant-return/cancellation stress and fresh native visual acceptance remain open. The old
+IMainInstaller uninstall warning also appears in the native log and predates this update.
+All checkpoints and observer outputs are private; protected estates were not accessed.
+
+The private observer/profile hooks were removed, then the normal Release was rebuilt without
+incremental reuse. Its419 source hashes and four installed DLL/PDB hashes match. Deployment
+required DD2 stopped and the exact backed-up round253 plugin still installed.190 scenery files
+and config are unchanged, retaining current room/corridor packs, cadence and installed hero
+models. Independent fractional-stress and Shieldbreaker source/test/journal work is excluded.
+Private baseline, build, red/green logs, full-resolution comparison, native cold-ready state/log
+and deployment record: local-art/hamlet-return-v11. DD2 is stopped. Capture a fresh baseline
+before the other agent's next QA/deployment; historical room/walkthrough restores would undo
+this loading update.
+
+## Status 2026-10-16: loading update installed, DD2 kept closed
+
+Round254 normal build is installed. Objective completion starts background Hamlet preparation;
+recap continues it, and unchanged terrain paint is reused within this process. Native first
+bake improves from17.1s to4.4s; complete return/warm-cache timing and final visual/recap checks
+are pending the other agent's QA window. Respect the owner's request to keep DD2 closed.
+Next round255. Preserve all independent stress/Shieldbreaker work, current scenery and heroes.

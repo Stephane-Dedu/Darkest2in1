@@ -264,8 +264,10 @@ internal sealed partial class HamletStage : MonoBehaviour
                 else if (piece.Id != null) throw new InvalidOperationException("Missing native model for " + piece.Id);
                 _piece++;
             }
-            else if (!_built && AdvanceModels())
+            else if (!_built)
             {
+                AdvanceGroundPaint();
+                if (!AdvanceModels()) return;
                 if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
                 if (!BuildGround()) return;
                 _built = true;

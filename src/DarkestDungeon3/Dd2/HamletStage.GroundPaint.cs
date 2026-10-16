@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DarkestDungeon3.Core.Presentation;
@@ -7,10 +8,22 @@ namespace DarkestDungeon3.Dd2;
 
 internal sealed partial class HamletStage
 {
+    private static readonly HamletPaintCache GroundPaintCache = new();
     private Task<HamletPaintBaker.Result> _groundPaintTask;
     private CancellationTokenSource _groundPaintCancellation;
     private HamletPaintBaker.Result _groundPaint;
     private int _groundUpload;
+
+    private void AdvanceGroundPaint()
+    {
+        if (_groundMaterial == null) PrepareGround();
+        if (_groundPaintTask != null) return;
+        var inputs = new[] { BaseTexture(_groundMaterial), BaseTexture(_groundPaving), _groundGrass, BaseTexture(_groundRock) };
+        // Building paint can finish alongside terrain. Only the four terrain
+        // input textures must be uploaded before their readbacks are safe.
+        if (_paintJobs.Any(job => inputs.Contains(job.Texture))) return;
+        BeginGroundPaint(inputs[0], inputs[1], inputs[2], inputs[3]);
+    }
 
     private void BeginGroundPaint(Texture soil, Texture stone, Texture grass, Texture rock)
     {
@@ -19,7 +32,7 @@ internal sealed partial class HamletStage
         var turf = grass != null ? ReadPaint(grass) : null; var bedrock = ReadPaint(rock);
         _groundPaintCancellation = new CancellationTokenSource();
         var cancellation = _groundPaintCancellation.Token;
-        _groundPaintTask = Task.Run(() => HamletPaintBaker.Bake(earth, gravel, turf, bedrock, cancellation), cancellation);
+        _groundPaintTask = Task.Run(() => GroundPaintCache.GetOrBake(earth, gravel, turf, bedrock, cancellation), cancellation);
     }
 
     private bool UploadGroundPaint()
@@ -30,17 +43,14 @@ internal sealed partial class HamletStage
         if (_groundUpload == 0)
         {
             SetPaintTexture(_groundValley, UploadPaint(_groundPaint.Valley, "Hamlet painted valley and outward road"));
-            _groundPaint.Valley = null;
         }
         else if (_groundUpload == 1)
         {
             SetPaintTexture(_groundMaterial, UploadPaint(_groundPaint.Ground, "Hamlet world earth, grass and worn gravel"));
-            _groundPaint.Ground = null;
         }
         else if (_groundUpload == 2)
         {
             SetPaintTexture(_groundPaving, UploadPaint(_groundPaint.Lanes, "Hamlet continuous worn paving"));
-            _groundPaint.Lanes = null;
         }
         else return true;
         _groundUpload++;

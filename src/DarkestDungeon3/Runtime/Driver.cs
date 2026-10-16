@@ -79,6 +79,10 @@ internal sealed partial class Driver : MonoBehaviour
         HeroStage.WalkDistancePixels = HeroStage.WalkSpeed = 0;
         Dd2Run.Update();
         CampaignAssets.Update();
+        // Start behind the completed objective and keep preparing through both
+        // results pages, including DD2's own scene transition. Never requires OnGUI.
+        if (Phase == Phase.Homecoming || Phase is Phase.Crawling or Phase.Fighting && Expedition?.QuestComplete == true)
+            HamletStage.Instance?.Prewarm();
         SpineArt.Update();
         Art.Update();
         Ui.CinematicCache.Update();

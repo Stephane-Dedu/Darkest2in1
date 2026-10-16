@@ -1,5 +1,23 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round254 loading update is installed. Hamlet prewarms from objective completion and through
+both recap pages/native return from Driver.Update. Its terrain bake overlaps model preparation.
+Separable native tile lookups and at most4 CPU workers preserve the complete2048px output
+byte-for-byte. One content-keyed process cache reuses unchanged48MiB paint; it does not retain
+the whole town through an expedition. Cancellation/source changes and concurrent requests pass.
+Frozen Release+1,221 Core+221 UI pass. .NET8 old/new/hit2,508/541/2.7ms; native first bake4,372ms
+versus prior17,126ms, HamletReady before leaving a completed private quest. Full native recap,
+warm second-return, instant-skip/cancellation and visual acceptance remain pending.
+
+The owner confirmed another agent is using DD2 QA and requested KEEP DD2 CLOSED. Do not launch
+until that request is lifted. Owned9208 was already gone before recap/capture; no later launch
+or input. Normal419-source build is installed with private hooks removed;190 scenery files and
+config preserved, installed heroes/cadence/current room-corridor packs retained. Independent
+fractional-stress and Shieldbreaker work remains outside this deployment. Private exact source,
+baseline, timing/state logs, comparisons and deployment: local-art/hamlet-return-v11. Make a
+fresh installed baseline; historical walkthrough/room backups would undo the loading change.
+Next round255. Earlier deployment statuses below are historical.
+
 Round253 is installed: all32 native room floors replace the old repeating road/board grid
 with regional DD2 paint, independent mapping periods, irregular joins, contact shading and
 haze. Camera/footline/native arena UVs stay fixed. All32 actual DD2 captures and50 camera

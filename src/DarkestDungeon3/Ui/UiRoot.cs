@@ -110,7 +110,6 @@ internal sealed class UiRoot : MonoBehaviour
                     Gui.DrawAnnouncement();
                     break;
                 case Phase.Homecoming:
-                    Dd2.HamletStage.Instance?.Prewarm();
                     DrawHomecoming(d);
                     break;
             }
