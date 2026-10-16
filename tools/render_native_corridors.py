@@ -192,6 +192,70 @@ def ground_contact(ground, detail_paint=None, shade=1, paint_settings=None):
         nt.links.new(multiply.outputs[0], emission.inputs["Color"])
 
 
+def ocean_material(folder, variant):
+    """Bake restrained native cloud/foam detail instead of a flat black sea.
+
+    This is an offline approximation, not a reconstruction of Unity's animated
+    water shader. The native maps and palette stay private beside their provenance.
+    """
+    import bpy
+    document = json.loads((folder / "materials.json").read_text())
+    data = next(m for m in document["materials"] if m["name"] == "vfx_biome_common_water_ocean")
+    mat = bpy.data.materials.new("crawl_shroud_native_water")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    emission = nt.nodes.new("ShaderNodeEmission")
+    nt.links.new(emission.outputs[0], out.inputs[0])
+    position = nt.nodes.new("ShaderNodeNewGeometry")
+
+    def sample(key, scale, offset):
+        record = data["textures"][key]
+        path = folder / record["file"]
+        if digest(path) != record["sha256"]:
+            raise ValueError(f"Native water texture hash mismatch: {path}")
+        mapping = nt.nodes.new("ShaderNodeVectorMath")
+        mapping.operation = "MULTIPLY_ADD"
+        mapping.inputs[1].default_value = (*scale, 1)
+        mapping.inputs[2].default_value = (*offset, 0)
+        nt.links.new(position.outputs["Position"], mapping.inputs[0])
+        texture = nt.nodes.new("ShaderNodeTexImage")
+        texture.image = bpy.data.images.load(str(path), check_existing=True)
+        texture.image.colorspace_settings.name = "Non-Color"
+        nt.links.new(mapping.outputs[0], texture.inputs["Vector"])
+        return texture.outputs["Color"]
+
+    cloud_a = sample("_CloudMaskTexture", (1/28, 1/19), (variant*.173, variant*.071))
+    cloud_b = sample("_CloudMaskTexture", (1/43, -1/31), (.37+variant*.053, .19))
+    cloud = nt.nodes.new("ShaderNodeMath")
+    cloud.operation = "MULTIPLY"
+    nt.links.new(cloud_a, cloud.inputs[0])
+    nt.links.new(cloud_b, cloud.inputs[1])
+    intensity = nt.nodes.new("ShaderNodeMapRange")
+    intensity.inputs["To Min"].default_value = .018
+    intensity.inputs["To Max"].default_value = .12
+    nt.links.new(cloud.outputs[0], intensity.inputs["Value"])
+    water = nt.nodes.new("ShaderNodeMixRGB")
+    water.blend_type = "MULTIPLY"
+    water.inputs[0].default_value = 1
+    color = data["colors"]["_ColorA"]
+    water.inputs[1].default_value = (color["r"], color["g"], color["b"], 1)
+    nt.links.new(intensity.outputs[0], water.inputs[2])
+    foam = sample("_FoamTexture", (1/38, 1/9), (.19+variant*.127, variant*.091))
+    foam_weight = nt.nodes.new("ShaderNodeMath")
+    foam_weight.operation = "MULTIPLY"
+    nt.links.new(foam, foam_weight.inputs[0])
+    nt.links.new(cloud.outputs[0], foam_weight.inputs[1])
+    foam_mix = nt.nodes.new("ShaderNodeMixRGB")
+    nt.links.new(foam_weight.outputs[0], foam_mix.inputs[0])
+    nt.links.new(water.outputs[0], foam_mix.inputs[1])
+    color = data["colors"]["_FoamColor"]
+    foam_mix.inputs[2].default_value = (color["r"]*.14, color["g"]*.14, color["b"]*.14, 1)
+    nt.links.new(foam_mix.outputs[0], emission.inputs["Color"])
+    return mat
+
+
 def compose(output):
     import numpy as np
     from PIL import Image
@@ -247,6 +311,7 @@ def main():
     parser.add_argument("output", type=Path)
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--compose-only", action="store_true")
+    parser.add_argument("--ocean", type=Path, help="Private ocean maps from export_corridor_water.py")
     parser.add_argument("--bands", nargs="+", choices=("ground","sky","vfar","far","wall","road"),
                         help="Re-render only these passes with the same layout; preserve other completed passes")
     args = parser.parse_args(sys.argv[sys.argv.index("--")+1:] if "--" in sys.argv else sys.argv[1:])
@@ -257,6 +322,8 @@ def main():
     if args.compose_only:
         compose(output)
         return
+    if args.ocean and args.bands and "ground" not in args.bands:
+        raise ValueError("Ocean resources require a ground re-render")
     sys.path.insert(0, str(kit / "tools"))
     import bpy
     import numpy as np
@@ -297,7 +364,7 @@ def main():
             rng = random.Random(seed)
             rw = sizes[road]
             placements = []
-            if args.bands or not (passes / f"{short}-complete.json").is_file():
+            if args.bands or args.ocean and region == "coast" or not (passes / f"{short}-complete.json").is_file():
                 L.reset()
                 def put(asset, x, z, rotation, band, light, scale=1, ground=False):
                     matrix, _ = L.place_matrix(src / asset, (x, bottoms[asset], z), rotation, scale=scale)
@@ -472,16 +539,20 @@ def main():
                 ground_contact(ground, detail_paint, shade, paint_settings)
                 if region == "coast":
                     # The Shroud's far ground is open water, not an endless wooden pier.
-                    # Its native ocean shader has no diffuse map in this export: use the
-                    # region's dark water colour here, with native moving mist at runtime.
-                    sea = bpy.data.materials.new("crawl_shroud_water_colour")
-                    sea.use_nodes = True
-                    nt = sea.node_tree
-                    nt.nodes.clear()
-                    out = nt.nodes.new("ShaderNodeOutputMaterial")
-                    emission = nt.nodes.new("ShaderNodeEmission")
-                    emission.inputs["Color"].default_value = tuple((c/255)**2.2 for c in (9,13,16))+(1,)
-                    nt.links.new(emission.outputs[0], out.inputs[0])
+                    # The base-colour kit omits this shader's cloud/foam maps.
+                    # An optional private export supplies a restrained baked surface;
+                    # old packs can still be reproduced with the flat-colour fallback.
+                    if args.ocean:
+                        sea = ocean_material(args.ocean.resolve(), variant)
+                    else:
+                        sea = bpy.data.materials.new("crawl_shroud_water_colour")
+                        sea.use_nodes = True
+                        nt = sea.node_tree
+                        nt.nodes.clear()
+                        out = nt.nodes.new("ShaderNodeOutputMaterial")
+                        emission = nt.nodes.new("ShaderNodeEmission")
+                        emission.inputs["Color"].default_value = tuple((c/255)**2.2 for c in (9,13,16))+(1,)
+                        nt.links.new(emission.outputs[0], out.inputs[0])
                     # Ocean behind the pier; retain the common planked walking lane.
                     bpy.ops.mesh.primitive_plane_add(size=1, location=(0,166,-.06))
                     water = bpy.context.object
@@ -513,6 +584,12 @@ def main():
             entries[-1]["ground_detail_texture_sha256"] = digest((detail_folder/detail_data["texture"]).resolve())
             entries[-1]["ground_detail_world_period"] = 8/uv_scale
             entries[-1]["ground_detail_phase"] = 0 if region == "forest" else variant
+            if region == "coast" and args.ocean:
+                resources = args.ocean.resolve()
+                entries[-1]["ocean_resources"] = str(resources)
+                entries[-1]["ocean_resources_sha256"] = digest(resources / "materials.json")
+                entries[-1]["ocean_phase"] = variant
+                entries[-1]["ocean_render"] = "Baked native cloud/foam maps; no animated water shader"
             print("READY", short, flush=True)
     manifest = {"version": 4, "generated_art": False, "source_kit": str(kit),
                 "tool_sha256": digest(Path(__file__).resolve()), "files": entries,
@@ -530,6 +607,8 @@ def main():
                 "camera": camera_settings(True), "environment_scale":ENVIRONMENT_SCALE,
                 "limits": ["Unlit native albedo with approximate depth haze; native deferred lighting is not reproduced"]}
     manifest_path = output/"render-manifest.json"
+    if args.ocean:
+        manifest["changes"].append("Native ocean cloud/foam detail replaces the Shroud's flat water colour")
     if args.only and manifest_path.is_file():
         previous = json.loads(manifest_path.read_text())
         if previous.get("camera") != manifest["camera"] or previous.get("source_kit") != str(kit):

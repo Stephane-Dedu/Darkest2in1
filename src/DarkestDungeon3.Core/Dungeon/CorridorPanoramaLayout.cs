@@ -17,7 +17,12 @@ public static class CorridorPanoramaLayout
     public static float ViewProgress(int tileIndex, int tileCount, bool reverse, float slide)
     {
         float physical = Progress(tileIndex,tileCount,reverse,slide);
-        return reverse ? 1 - physical : physical;
+        float heading = reverse ? 1 - physical : physical;
+        // A two-square hall must not sweep the same 2,227px panorama range as
+        // a long hall in one square. Short routes use a centred part of the scene,
+        // retaining the painting's scale and a readable walking speed.
+        float span = Math.Max(0,tileCount-1) / (float)Math.Max(9,tileCount-1);
+        return .5f + (heading-.5f)*span;
     }
 
     // Uniform 8% overscan protects the frame edges. Wider plates provide more lateral travel.

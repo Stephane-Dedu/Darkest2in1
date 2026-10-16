@@ -96,11 +96,18 @@ internal static class CrawlSceneryCheck
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
                         d.Travel(1);
-                        // Travel is a discrete doorway transition with its own .3s easing.
+                        // Travel uses the shared walking-duration easing.
                         // Measure the ordinary held route once that transition has settled.
-                        _step = 99; _next = Time.unscaledTime+.4f; _wait = Time.unscaledTime; break;
+                        _step = 98; _next = Time.unscaledTime+CorridorSceneMotion.StepSeconds+.1f; _wait = Time.unscaledTime; break;
                     }
                     Advance("entrance-native-actors",d,2,VilhelmChecking ? 15 : 1.5f); break;
+                case 98:
+                    d.Step(true);
+                    Require(exp.TileIndex == 1,"First ordinary button step was rejected");
+                    d.Step(true);
+                    Require(exp.TileIndex == 1,"A repeated button step skipped ahead while the ground was moving");
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} button; repeated step rejected during the walking-duration pan");
+                    _step = 99; _next = Time.unscaledTime+CorridorSceneMotion.StepSeconds+.1f; break;
                 case 99:
                     d.WalkToTile(0,5);
                     _motionSampled = false; _motionFrames = 0; _motionMaximum = 0;
@@ -241,8 +248,9 @@ internal static class CrawlSceneryCheck
         {
             float dt = now-_motionTime, distance = Mathf.Abs(camera-_motionCamera);
             // The ordinary forward route moves one square per 1.2s. A bounded panorama
-            // covers its whole lateral range in count-1 squares, including carry at crossings.
-            float maximum = (texture.width*720f/texture.height*1.08f-1920)/(corridor.Tiles.Count-1)/1.2f;
+            // uses a centred span in short halls, including carry at crossings.
+            float maximum = (texture.width*720f/texture.height*1.08f-1920)
+                /Mathf.Max(9,corridor.Tiles.Count-1)/CorridorSceneMotion.StepSeconds;
             Require(distance <= maximum*dt+3,"Panorama jumped at a tile boundary or reversal");
             _motionMaximum = Mathf.Max(_motionMaximum,distance/dt); _motionFrames++;
         }

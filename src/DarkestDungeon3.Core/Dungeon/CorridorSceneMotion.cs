@@ -5,6 +5,7 @@ namespace DarkestDungeon3.Core.Dungeon;
 /// <summary>One scene pan for the ground, atmosphere and hero feet, in virtual pixels.</summary>
 public sealed class CorridorSceneMotion
 {
+    public const float StepSeconds = 1.2f;
     private bool _sampled;
     private int _seed, _corridor, _heading, _width, _height;
     private string _art;
@@ -13,7 +14,7 @@ public sealed class CorridorSceneMotion
 
     public static float Slide(float secondsSinceStep, int stepDirection, float walkProgress)
     {
-        float t = Math.Max(0, Math.Min(1, secondsSinceStep / .3f));
+        float t = Math.Max(0, Math.Min(1, secondsSinceStep / StepSeconds));
         float eased = t * t * (3 - 2 * t);
         return stepDirection * 720 * (1 - eased) - walkProgress * 720;
     }

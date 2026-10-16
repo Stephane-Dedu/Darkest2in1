@@ -6,6 +6,41 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Current cadence, round252, October 16, 2026
+
+The gait follows signed rendered ground distance, including the fitted rig's
+projected leg length. Its contact arc is now 0.90 leg lengths with 62% stance,
+giving about 0.726 projected leg lengths per step. The former 0.46 arc gave only
+0.371, causing the reported rapid shuffle. There is no fixed cycle duration.
+Hidden actors reset contact tracking; restarting aligns phase with the current
+leading foot and blends the lift into the observed pose.
+
+Short halls use a centred portion of the panorama: view span is
+`(tileCount - 1) / max(9, tileCount - 1)`. A two-square route therefore no longer
+sweeps the full painting in one square. Button steps share the ordinary 1.2-second
+walking duration. Repeated button presses wait for that step to finish, and held
+movement resumes afterward. Continuous crossings retain their existing carry.
+
+Foot contacts track unwrapped signed phase. A long frame that skips liftoff and
+landing starts a new contact rather than dragging the previous planted foot past
+the skeleton's reach. Swing offsets respect direction changes and the initially
+observed foot. Both contacts still constrain pelvis height before IK solves.
+
+The exact installed round248 source snapshot plus these changes passes Release,
+1,176 Core and 219 UI tests; the shared tree also passes 1,216 Core and 219 UI.
+Read-only native instrumentation verifies four
+regions' forward/reverse/stop/restart and repeated button cases over 3,804 observed
+motion frames: maximum 2.770 steps/s, 206.3 virtual pixels/s and 0.195-pixel planted
+target error, with no duplicate actor update. Regional captures and sampled frames
+of a 55-second native video were inspected. The final build omits the temporary probe.
+Private evidence, source/install hashes and rollback: `local-art/gait-cadence-v10`.
+No estate was accessed and no OS input was sent. This does not verify every hero,
+hall length, saved campaign, interaction or battle handoff. Vilhelm retains his
+separate imported root-motion animation; this fixture uses native DD2 heroes.
+
+The initial walk-layer account below is historical; the distance clock and
+contact behavior above supersede its fixed-duration and short-stride description.
+
 ## Combat palette
 
 The prefab's Hero shader has a blue `_ShadowColour`; changing scene lights does
@@ -42,7 +77,7 @@ have the required `ROOTSHJnt`, left/right `Leg_HipSHJnt`, `Leg_KneeSHJnt` and
 neutral hip spacing and flat ankle orientation, rather than assuming a Humanoid
 Avatar or a common bone rotation axis. Native artwork remains loaded by DD2.
 
-## Walk layer
+## Initial walk layer, historical
 
 `Driver` passes actual signed hallway velocity, normalized to 1 forward and -0.5
 backwards. A route pending in a room does not animate a walk. The motion layer

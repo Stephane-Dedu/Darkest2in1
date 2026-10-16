@@ -1,5 +1,31 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round252 fixes excessive corridor steps and installs Shroud water detail. Native DD2 gait
+uses a 0.90-leg contact arc, current-foot phase on restart and explicit skipped lift/landing
+tracking after long frames. Short halls use a centred painting span; button steps share
+the 1.2s walking duration and reject repeated steps until the pan finishes. Four regions'
+forward/reverse/stop/restart/button cases pass over 3,804 native motion frames: maximum
+2.770 steps/s, 206.3px/s and 0.195px planted-target error, no duplicate actor updates.
+Frozen Release + 1,176 Core + 219 UI pass; shared Release + 1,216 Core + 219 UI pass.
+The final installed build excludes the private probe.
+Private exact source/install hashes, native log/video/captures and plugin rollback:
+local-art/gait-cadence-v10. Production is the previously installed round248 snapshot
+plus gait changes, preserving its Shieldbreaker/Vilhelm state. Round251's committed
+repairs and unfinished room/UI/combat work require their own final combined deployment
+and native acceptance; do not assume every current main source is installed.
+
+The active complete scenery pack is local-art/scenery-coast-v09, based on v08 with
+restrained native ocean cloud/foam detail in six Shroud ground passes. 12 images and
+the manifest changed; 181 scenery/plugin files preserved. Eight Python cases, 24 clear
+footlines and all 24 native choice/depth previews pass; all captures inspected with
+DD1 reference bodies. Back/middle depths, other regions and walking-surface pixels
+remain identical. This is baked water detail, not an animated ocean shader.
+All owned QA games are closed, DD2 is stopped, no estate was accessed/OS input sent.
+The game window is released to the other chat after coordination. For future tests,
+make a FRESH installed baseline. Do not run walkthrough-fixes-20261015/manage.py restore:
+it would restore old DLLs before failing against newer scenery. Preserve historical
+rollback files, protected estates1/3 and independent Shieldbreaker/room WIP.
+
 Round251 repairs the walkthrough audit: actual16-slot starting pack reservation and legacy overflow
 recovery; shared seated native camp formation/picking; class/mode/inactive-payload quirk filtering;
 4-food cap; persisted travel DoTs/treatment; native shared combat supplies; consistent unfinished-
@@ -12,7 +38,7 @@ and async Hamlet profile remain pending. Old baseline17,899ms frame gap is measu
 performance result. No estate accessed. See latest MODLOG/PARITY and private walkthrough-fixes-
 20261015/combat-supplies-20261015 evidence. Owned23124 closed and original production DLL/config,
 190 scenery/39 native profile files restored before the art/gait chat's QA window. Keep DD2 stopped
-until that chat releases it. Preserve its gait/corridor art and Shieldbreaker WIP. New room-floor
+until the round252 handoff above. Preserve its gait/corridor art and Shieldbreaker WIP. New room-floor
 renderer/preview work is separate; do not overwrite a newer approved corridor pack with old backups.
 
 Round249 installs the approved Tangle treatment across all four regions,24 corridors total.
@@ -25,8 +51,8 @@ variant capture was inspected with DD1 reference bodies. This does not repeat th
 native movement/interaction/battle fixtures.49 files installed;145 scenery/plugin files,
 including the current four DLL/PDB artifacts, hash-preserved. Owned preview14208 closed;
 DD2 is stopped, no estate selected/persisted and no OS input sent.
-Active pack, source hashes, all end/centre crops, native captures/log and exact rollback:
-local-art/scenery-regions-v08. Use its installer for this complete pack. Older installers
+Round249 pack, source hashes, all end/centre crops, native captures/log and exact rollback:
+local-art/scenery-regions-v08. Round252's v09 supersedes it as the active complete pack. Older installers
 can restore older regions. Preserve independent Shieldbreaker WIP and the current shared plugin.
 
 Round248 verifies Vilhelm's original DS3 locomotion and visible Blackflame in DD2.
@@ -57,7 +83,7 @@ irregular native root paint, nearer individual trunks and small undergrowth. Twe
 start/centre/end crops pass. Camera, gait, rooms, other regions and runtime texture budgets are unchanged.
 Original private Tangle pack/comparisons/provenance: local-art/scenery-woodland-v07.
 Round249 installs its approved images unchanged inside local-art/scenery-regions-v08 and verifies
-all six Tangle variants in the unsaved native preview. Use v08 for the active complete pack.
+all six Tangle variants in the unsaved native preview. The active v09 pack retains those images.
 No DLL changes or estate access were needed for this art pass.
 Preserve independent Shieldbreaker/Vilhelm changes and their installed plugin; stage only owned notes.
 

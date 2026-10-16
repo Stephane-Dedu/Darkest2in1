@@ -312,6 +312,9 @@ internal sealed partial class Driver : MonoBehaviour
     public void Step(bool forward)
     {
         if (!Crawl.CanNavigate) return;
+        // A second button step would reset the easing from a new square and
+        // teleport the ground underneath the feet. Held movement owns its carry.
+        if (!_continuousStep && Time.unscaledTime-LastStepTime < SecondsPerSquare) return;
         if (Crawl.IsBlocked && !forward && Crawl.CurrentTile?.Content == Core.Dungeon.HallContent.Battle) return;
         MarkStep(forward ? +1 : -1);
         Handle(Crawl.Step(forward));
@@ -344,7 +347,7 @@ internal sealed partial class Driver : MonoBehaviour
 
     // ---- DD1 walking: hold D/→ to walk the hallway (A/← backs up at half speed); in a room the arrows pick the exit ----
 
-    private const float SecondsPerSquare = 1.2f;
+    private const float SecondsPerSquare = Core.Dungeon.CorridorSceneMotion.StepSeconds;
     private bool _continuousStep;
 
     /// <summary>Where the party stands in its square, from -0.5 (just in from behind) to +0.5 (about to leave
@@ -353,7 +356,7 @@ internal sealed partial class Driver : MonoBehaviour
     public float WalkProgress { get; private set; }
 
     /// <summary>The party is walking right now (held key or auto-walk): heroes bob.</summary>
-    public bool IsMovingNow => Mathf.Abs(_walkVelocity) > 0.01f || IsWalking || Time.unscaledTime - LastStepTime < 0.3f;
+    public bool IsMovingNow => Mathf.Abs(_walkVelocity) > 0.01f || IsWalking || Time.unscaledTime - LastStepTime < SecondsPerSquare;
     private float _walkVelocity;
 
     /// <summary>
@@ -413,6 +416,8 @@ internal sealed partial class Driver : MonoBehaviour
             return;
         }
 
+        // Finish an accepted button step before adding held-key/route movement.
+        if (Time.unscaledTime-LastStepTime < SecondsPerSquare) return;
         int intent = right ^ left ? (right ? 1 : -1) : 0;
         if (intent != 0) StopWalking();
         else if (IsWalking) intent = RouteIntent();

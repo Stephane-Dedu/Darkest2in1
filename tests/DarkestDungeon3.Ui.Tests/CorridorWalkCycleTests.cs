@@ -5,6 +5,34 @@ namespace DarkestDungeon3.Ui.Tests;
 
 public class CorridorWalkCycleTests
 {
+    [Theory]
+    [InlineData(.35f,-.55f,false)]
+    [InlineData(-.55f,.35f,false)]
+    [InlineData(-.10f,.05f,false)]
+    [InlineData(.35f,-.55f,true)]
+    [InlineData(-.55f,.35f,true)]
+    [InlineData(-.10f,.05f,true)]
+    public void RestartMatchesTheCurrentLeadFootAndReleasesTheRearFootBeforeOverextension(float left, float right, bool backwards)
+    {
+        double phase = CorridorWalkCycle.StartPhase(left,right,backwards);
+        var cycle = new CorridorWalkCycle(phase);
+        var contacts = new[] {new CorridorFootContact(),new CorridorFootContact()};
+        float[] observed = {left,right};
+        const float dt = 1f/600;
+        int direction = backwards ? -1 : 1;
+        float distance = direction*CorridorWalkCycle.Stride/(float)CorridorWalkCycle.Stance*dt;
+        for (int i = 0; i < 600; i++)
+        {
+            cycle.Advance(direction,dt,true);
+            for (int foot = 0; foot < 2; foot++)
+            {
+                var sample = CorridorWalkCycle.Sample(cycle.Phase+foot*.5);
+                float target = contacts[foot].Forward(sample,observed[foot],distance);
+                if (sample.Planted) Assert.InRange(target,-.66f,.66f);
+            }
+        }
+    }
+
     [Fact]
     public void BodyRisesOverTheSupportingFootAndSettlesAtTheHandover()
     {
@@ -33,10 +61,14 @@ public class CorridorWalkCycleTests
             float height = nativeHeight + CorridorWalkCycle.PelvisLift(leg, nativeHeight, phase);
             var foot = CorridorWalkCycle.Sample(phase);
             if (!foot.Planted) continue;
-            double reach = Math.Sqrt(height * height + Math.Pow(foot.Forward * leg, 2)) / leg;
-            // Equal-length thigh/shin approximation: 35..52 degrees of flexion, rather than ~80.
+            float horizontalSquared = foot.Forward*foot.Forward*leg*leg;
+            // Use the same contact-constrained pelvis as the native two-leg solver.
+            // Longer steps need the hips to settle before the leg extends fully.
+            height -= CorridorWalkCycle.PelvisContactDrop(leg,horizontalSquared,height);
+            double reach = Math.Sqrt(height * height + horizontalSquared) / leg;
+            // Equal-length thigh/shin approximation: soft knees through the full stride.
             double bend = 2 * Math.Acos(Math.Min(1, reach)) * 180 / Math.PI;
-            Assert.InRange(bend, 30, 55);
+            Assert.InRange(bend, 22, 55);
         }
     }
 

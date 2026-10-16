@@ -5,6 +5,34 @@ namespace DarkestDungeon3.Core.Tests;
 public class CorridorSceneMotionTests
 {
     [Theory]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(6)]
+    [InlineData(12)]
+    public void ShortHallsDoNotFastForwardTheWholePanoramaThroughOneSquare(int count)
+    {
+        const float dt = .001f;
+        float start = CorridorSceneMotion.Camera(4096,768,0,count,false,0);
+        float after = CorridorSceneMotion.Camera(4096,768,0,count,false,-720*dt/1.2f);
+        float speed = (after-start)/dt;
+        Assert.True(speed <= 260,$"A {count}-square hall fast-forwards the walking ground at {speed:0} px/s.");
+    }
+
+    [Fact]
+    public void AButtonStepHasWalkingCadenceInsteadOfAQuarterSecondSprint()
+    {
+        const float dt = .001f;
+        float maximum = 0;
+        for (int i = 0; i < 1200; i++)
+        {
+            float before = CorridorSceneMotion.Camera(4096,768,2,6,false,CorridorSceneMotion.Slide(i*dt,1,0));
+            float after = CorridorSceneMotion.Camera(4096,768,2,6,false,CorridorSceneMotion.Slide((i+1)*dt,1,0));
+            maximum = Math.Max(maximum,(after-before)/dt);
+        }
+        Assert.True(maximum <= 330,$"A button step drives the ground at {maximum:0} px/s.");
+    }
+
+    [Theory]
     [InlineData(false,0)]
     [InlineData(true,5)]
     public void ForwardWalkingMovesTheGroundLeftFromEitherEntrance(bool reverse,int tile)
@@ -32,12 +60,12 @@ public class CorridorSceneMotionTests
     public void ButtonStepUsesTheSameEasedSceneDistanceAsTheFeetAndStopsExactly()
     {
         float start = CorridorSceneMotion.Slide(0,1,0);
-        float middle = CorridorSceneMotion.Slide(.15f,1,0);
-        float end = CorridorSceneMotion.Slide(.3f,1,0);
+        float middle = CorridorSceneMotion.Slide(.6f,1,0);
+        float end = CorridorSceneMotion.Slide(1.2f,1,0);
         Assert.Equal(720,start); Assert.Equal(360,middle); Assert.Equal(0,end);
         Assert.True(CorridorSceneMotion.Camera(4096,768,2,6,false,start)
             < CorridorSceneMotion.Camera(4096,768,2,6,false,middle));
-        Assert.Equal(end,CorridorSceneMotion.Slide(1,1,0));
+        Assert.Equal(end,CorridorSceneMotion.Slide(2,1,0));
         Assert.Equal(-180,CorridorSceneMotion.Slide(1,0,.25f));
     }
 

@@ -7,6 +7,75 @@ namespace DarkestDungeon3.Ui.Tests;
 public class CorridorLocomotionTests
 {
     [Fact]
+    public void StartingWithARearFootInSwingKeepsItsObservedHorizontalPosition()
+    {
+        var contact = new CorridorFootContact();
+        var foot = CorridorWalkCycle.Sample(.67);
+        Assert.False(foot.Planted);
+        Assert.Equal(-.55f,contact.Forward(foot,-.55f,.002f),5);
+    }
+
+    [Fact]
+    public void ReversingAcrossLandingReleasesTheOldSwingOffset()
+    {
+        var contact = new CorridorFootContact();
+        var swing = CorridorWalkCycle.Sample(.64);
+        contact.Forward(swing,-.1f,-.01f);
+        var foot = CorridorWalkCycle.Sample(.61);
+        Assert.True(foot.Planted);
+        float distance = -.03f*CorridorWalkCycle.Stride/(float)CorridorWalkCycle.Stance;
+        float after = contact.Forward(foot,0,distance);
+        Assert.Equal(foot.Forward,after,5);
+    }
+
+    [Theory]
+    [InlineData(1.161883f)]
+    [InlineData(2.4f)]
+    [InlineData(-1.161883f)]
+    [InlineData(-2.4f)]
+    public void ALongFrameThatSkipsLiftoffAndLandingStartsANewGroundContact(float distance)
+    {
+        var contact = new CorridorFootContact();
+        double start = distance > 0 ? .55 : .2;
+        contact.Forward(CorridorWalkCycle.Sample(start),-.3f,.002f*Math.Sign(distance));
+        double next = start+distance*CorridorWalkCycle.Stance/CorridorWalkCycle.Stride;
+        var foot = CorridorWalkCycle.Sample(next);
+        Assert.True(foot.Planted);
+        float target = contact.Forward(foot,0,distance);
+        Assert.Equal(foot.Forward,target,4);
+        Assert.InRange(target,-.46f,.46f);
+    }
+
+    [Theory]
+    [InlineData(2,110f)]
+    [InlineData(6,165f)]
+    [InlineData(12,210f)]
+    public void WalkingTakesReadableStepsRatherThanRapidShortShuffles(int squares, float legPixels)
+    {
+        // Replay one ordinary 1.2-second corridor square through the actual crop,
+        // distance clock and sampler. Target a step covering .65..85 of the fitted
+        // projected leg, rather than spending multiple cycles on a tiny foot arc.
+        const int frames = 72;
+        const float dt = 1.2f / frames;
+        var cycle = new CorridorWalkCycle(.2);
+        double cycles = 0;
+        float previousGround = Camera(squares,0), distance = 0;
+        for (int i = 1; i <= frames; i++)
+        {
+            float ground = Camera(squares,i/(float)frames);
+            float delta = ground-previousGround;
+            double phase = cycle.Phase;
+            cycle.Advance(CorridorWalkCycle.Rate(delta,legPixels,dt),dt,true);
+            cycles += CorridorWalkCycle.Wrap(cycle.Phase-phase);
+            distance += delta;
+            previousGround = ground;
+        }
+        double stepInLegLengths = distance / (2*cycles*legPixels);
+        Assert.True(stepInLegLengths >= .65 && stepInLegLengths <= .85,
+            $"A step covers only {stepInLegLengths:0.000} projected leg lengths, with {2*cycles/1.2:0.00} steps/s in this hall.");
+    }
+
+    [Fact]
     public void StartingCombatContactRemainsReachableWhileThePelvisBlendsUp()
     {
         // Native Plague Doctor first contact: requested 2.408, available 2.231.
@@ -107,8 +176,6 @@ public class CorridorLocomotionTests
 
     private static float Camera(int squares,float fraction)
     {
-        float progress = CorridorPanoramaLayout.Progress(0,squares,false,-fraction*720);
-        var crop = CorridorPanoramaLayout.Crop(4096,768,progress);
-        return 1920*crop.X/crop.Width;
+        return CorridorSceneMotion.Camera(4096,768,0,squares,false,-fraction*720);
     }
 }

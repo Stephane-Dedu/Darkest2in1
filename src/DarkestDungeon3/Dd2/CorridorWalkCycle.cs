@@ -6,11 +6,25 @@ namespace DarkestDungeon3.Dd2;
 internal sealed class CorridorWalkCycle
 {
     internal const double Stance = 0.62;
-    internal const float Stride = 0.46f;
+    // The planted arc must cover a walking step. A .46-leg arc forced two
+    // gait cycles into the distance of one ordinary stride, producing a shuffle.
+    internal const float Stride = 0.90f;
     internal double Phase { get; private set; }
     internal float Weight { get; private set; }
 
     internal CorridorWalkCycle(double phase) => Phase = Wrap(phase);
+
+    internal void Begin(double phase) => Phase = Wrap(phase);
+
+    internal static double StartPhase(float leftForward, float rightForward, bool backwards = false)
+    {
+        if (backwards) return Wrap(Stance-StartPhase(-leftForward,-rightForward));
+        // Start over the forward foot. The rear foot must leave contact soon,
+        // rather than inheriting a long stance from the phase used before stopping.
+        float leading = Math.Max(leftForward,rightForward);
+        double phase = Math.Max(Stance-.5,Stance-Stance*(leading+.65)/Stride);
+        return Wrap(Math.Min(Stance-.000001,phase)+(rightForward>leftForward ? .5 : 0));
+    }
 
     internal void Advance(float cyclesPerSecond, float deltaTime, bool visible)
     {
@@ -79,23 +93,43 @@ internal sealed class CorridorWalkCycle
 internal sealed class CorridorFootContact
 {
     private bool _moving, _planted;
-    private float _forward, _offset;
+    private float _forward, _offset, _swingStart;
+    private double _phase;
+    private int _direction;
+
+    internal void Reset() { _moving = _planted = false; _offset = _swingStart = 0; _phase = 0; _direction = 0; }
 
     internal float Forward(CorridorWalkCycle.Foot foot, float observedForward, float distanceInLegLengths)
     {
         if (float.IsNaN(distanceInLegLengths) || float.IsInfinity(distanceInLegLengths)
             || Math.Abs(distanceInLegLengths) < .000001f)
-        { _moving = _planted = false; _offset = 0; return foot.Forward; }
+        { Reset(); return foot.Forward; }
+        double phase = foot.Planted ? CorridorWalkCycle.Stance*(.5-foot.Forward/CorridorWalkCycle.Stride)
+            : CorridorWalkCycle.Stance+foot.SwingProgress*(1-CorridorWalkCycle.Stance);
+        double advanced = _phase+distanceInLegLengths*CorridorWalkCycle.Stance/CorridorWalkCycle.Stride;
+        int direction = distanceInLegLengths > 0 ? 1 : -1;
         if (foot.Planted)
         {
-            _forward = !_moving ? observedForward - distanceInLegLengths
-                : !_planted ? foot.Forward : _forward - distanceInLegLengths;
+            // A long frame can skip an entire lift/landing while both sampled
+            // poses are planted. That is a new contact, not the old foot dragged
+            // through the missed swing and past the skeleton's reach.
+            bool sameContact = _moving && _planted && advanced >= 0 && advanced < CorridorWalkCycle.Stance;
+            _forward = !_moving ? observedForward-distanceInLegLengths
+                : sameContact ? _forward-distanceInLegLengths : foot.Forward;
             _offset = _forward - foot.Forward;
-            _moving = _planted = true;
-            return _forward;
+            _swingStart = 0;
         }
-        _moving = true; _planted = false;
-        float u = foot.SwingProgress;
-        return foot.Forward + _offset * (1 - u*u*(3-2*u));
+        else
+        {
+            float travel = direction > 0 ? foot.SwingProgress : 1-foot.SwingProgress;
+            if (!_moving) { _offset = observedForward-foot.Forward; _swingStart = travel; }
+            else if (!_planted && direction != _direction) { _offset = _forward-foot.Forward; _swingStart = travel; }
+            else if (direction > 0 ? advanced >= 1 : advanced < CorridorWalkCycle.Stance-1)
+            { _offset = _swingStart = 0; }
+            float u = Math.Min(1,Math.Max(0,(travel-_swingStart)/Math.Max(.000001f,1-_swingStart)));
+            _forward = foot.Forward+_offset*(1-u*u*(3-2*u));
+        }
+        _moving = true; _planted = foot.Planted; _phase = phase; _direction = direction;
+        return _forward;
     }
 }

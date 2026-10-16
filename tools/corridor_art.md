@@ -1,5 +1,47 @@
 # Private DD2 corridor scenery
 
+## Shroud water surface, v09, October 16, 2026
+
+The v09 pack replaces the Shroud's uniform black water band with restrained native
+cloud and foam detail. DD2's ocean material uses `_CloudMaskTexture` and `_FoamTexture`
+instead of a base-colour map, so the original scenery export omitted both. The new
+`export_corridor_water.py` reads that material from the owner's install and writes
+the two 512x512 maps, original colours/properties and source hashes outside Git.
+Its shared textures resolve through `characters_shared_assets_all.bundle`.
+
+`render_native_corridors.py --ocean <private-water-folder>` samples those masks in
+world space with different repeat periods and a corridor-specific phase. Native
+water/foam colours receive a restrained exposure. This is a baked approximation
+of the surface, not Unity's animated water shader. The original flat-colour recipe
+remains reproducible by omitting `--ocean`.
+
+Copy v08's `passes-final` into a fresh private folder. Export the water resources,
+rerender only the six coastal ground passes, then compose the complete pack:
+
+```powershell
+python tools/export_corridor_water.py <game> <private-water-folder>
+blender -b --threads 8 --python-exit-code 1 --python tools/render_native_corridors.py -- <kit> <private-passes> --only coast-01 coast-02 coast-03 coast-04 coast-05 coast-06 --bands ground --ocean <private-water-folder>
+python tools/render_native_corridors.py <kit> <private-passes> --compose-only
+python tools/compose_corridor_depth.py <private-passes> <private-pack>
+```
+
+Private pack, end/centre comparisons, provenance, verification and rollback helpers:
+`local-art/scenery-coast-v09`. Twelve canonical/front images change; 84 image files
+are byte-identical to v08. The Shroud's back/middle depths, all other regions and
+front alpha remain identical. Source pixels at y650 and below are unchanged,
+including the walking surface. Eight Python cases and all24 clear-footline checks
+pass. Installation/native-preview status is recorded in MODLOG/PARITY.
+
+Round252 installed the complete v09 pack while DD2 was stopped: 13 files changed
+(12 images and the manifest), with 181 scenery/plugin files hash-preserved. The
+final production plugin rendered all 24 corridor choices and native depth sets
+in the unsaved preview. All 24 captures were inspected, including all six Shroud
+variants. This loader/art preview uses DD1 reference bodies; native hero cadence
+has separate evidence in `local-art/gait-cadence-v10`. Owned preview23628 is closed.
+Use v09's installer for the current complete pack. Earlier installers/backups can
+restore older art. `installation.json`, `completion.json`, `preview-native.log`
+and the exact rollback zip remain in the private v09 folder.
+
 ## All four regions, round249, October 15, 2026
 
 The v08 pack extends the approved Tangle treatment to all six Sprawl, Foetor and

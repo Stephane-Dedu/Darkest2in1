@@ -6908,3 +6908,78 @@ and the owner's newly reported repeated room ground. Room-only renderer/preview 
 separate from the other chat's corridor gait/Shroud-water work. Do not restore an older scenery
 baseline after another chat installs its approved pack. Preserve protected estates1/3 and all
 independent WIP; use the private activation checkpoint for the final flow.
+
+## Round252 (2026-10-16): readable corridor steps and Shroud water detail
+
+The owner's rapid-step report reproduced in production-source tests. The old
+0.46-leg contact arc advanced only 0.371 projected leg lengths per step. Short
+halls also swept the entire panorama in too few squares: a two-square route could
+pan at 1,856 virtual pixels/s, while the 0.3s button ease peaked at 2,227px/s.
+The contact arc is now 0.90 with the existing 62% stance, about 0.726 projected
+leg lengths per step. Signed rendered travel still drives phase; the solution
+does not cap cadence independently of the moving ground.
+
+Short halls use a centred span, (tileCount-1)/max(9,tileCount-1), at the same art
+scale. Button steps share the ordinary 1.2s walking duration. A second button
+press cannot reset an unfinished ease; held movement waits for that accepted
+step, while continuous square crossings keep their signed carry. Native repeated
+button guards pass in every region.
+
+Initial native runs exposed a second bug during long frames and stop/restart:
+the sampled poses could skip a complete foot lift/landing but retain the old
+planted contact beyond the leg's reach. A measured 1.161883-leg frame reproduced
+the failure. Contacts now track unwrapped signed phase and start a new landing
+after a missed swing. Restart phase follows the currently observed leading foot;
+initial swing offsets, reverse travel and lift blending preserve the observed
+pose. Existing two-contact pelvis fitting and native weapon-grip handling remain.
+Regression cases failed on the previous implementation and pass after the fix.
+
+Exact installed round248 sources plus gait changes pass Release, 1,176 Core and
+219 UI tests. Shared Release, 1,216 Core and 219 UI also pass with deployment
+disabled. Read-only native instrumentation checks four DD2 actors in Sprawl,
+Foetor, Tangle and Shroud over 3,804 observed motion frames. Forward/reverse/stop/
+restart and repeated button cases pass: maximum 2.770 steps/s, 206.3px/s and
+0.195px planted-target error, no duplicate actor update. Regional captures and
+sampled frames of the 55s native video were inspected. The final production build
+has identical runtime sources without the temporary probe, and is installed.
+
+The Shroud's native ocean material has cloud/foam maps rather than a base-colour
+texture. A private export resolves both 512x512 maps through the shared bundle,
+retains original colours/properties and records provenance hashes. The optional
+renderer samples native masks at different world periods and per-corridor phase,
+adding restrained water detail. This is baked surface paint, not Unity's animated
+ocean shader. Omitting --ocean retains the earlier flat-colour recipe.
+
+The complete v09 pack changes only six Shroud canonical/front pairs: 12 PNGs;
+84 PNGs remain byte-identical to v08. Back/middle depths, other regions, front
+alpha and source pixels from y650 downward, including the walking surface, are
+unchanged. Eight Python cases and all 24 clear-footline measurements pass. With
+the final production plugin, all 24 unsaved native choices/depth sets render and
+all 24 captures were inspected with DD1 reference bodies. This loader/art fixture
+does not substitute for the separate native gait acceptance above.
+
+Deployment changed four plugin artifacts first, preserving 191 scenery/config
+files; the art install then changed 13 files and preserved 181 scenery/plugin
+files. All 195 final scenery/config/plugin hashes match. Plugin deployment uses
+the verified previously installed source snapshot, preserving its Shieldbreaker/
+Vilhelm state and excluding the other chat's unfinished room/UI/combat deployment.
+Round251 source repairs still need its final combined native acceptance.
+Private source hashes, red/green cases, final logs/captures/video, completion
+records and exact rollbacks: local-art/gait-cadence-v10 and scenery-coast-v09.
+
+Owned native QA games are closed, last preview23628; DD2 is stopped. No estate
+selected/read/written and no OS input sent. The owner authorized coordination
+with “Review repo for menu rework (2)”. Its old manage.py restore must not run
+after this installation: it restores old DLLs before its old scenery assertion.
+Future experiments must capture a fresh baseline. Independent Shieldbreaker and
+room renderer/preview/journal WIP are preserved outside this commit.
+
+## Status 2026-10-16: gait fix and current corridor pack installed
+
+Round252 is installed and verified; active complete scenery pack is v09. The
+game window is released through the authorized handoff. Next round is253. Other
+chat continues room floors and final acceptance/deployment of round251 sources.
+Remaining gait scope: owner comfort review, other heroes/hall lengths, ordinary
+saved campaign and interaction/battle handoffs with this cadence. Vilhelm retains
+his separately verified imported root animation; this run uses native DD2 actors.
+Preserve protected estates1/3, installed artifacts and all independent WIP.
