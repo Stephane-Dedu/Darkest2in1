@@ -21,7 +21,6 @@ internal sealed class CorridorHeroMotion
     private readonly Vector3 _homeCenter;
     private readonly float _legLength;
     private readonly CorridorWalkCycle _cycle;
-    private bool _walking;
     private readonly List<SavedBone> _saved = new();
     internal float ContactErrorPixels { get; private set; }
 
@@ -158,9 +157,6 @@ internal sealed class CorridorHeroMotion
         ContactErrorPixels = 0;
         if (_slot == null || _animator == null || !_animator.gameObject.activeInHierarchy || !visible) return;
         float legPixels = _slot.TransformVector(_forward * _legLength).x * 100;
-        bool moving = Mathf.Abs(distancePixels) > .000001f;
-        if (moving && !_walking) _cycle.Begin(CorridorWalkCycle.StartPhase(ObservedForward(_left),ObservedForward(_right)));
-        _walking = moving;
         _cycle.Advance(CorridorWalkCycle.Rate(distancePixels,legPixels,deltaTime), deltaTime, true);
         float weight = _cycle.Weight;
         if (weight <= 0) return;
@@ -211,16 +207,12 @@ internal sealed class CorridorHeroMotion
         }
     }
 
-    private Vector3 Neutral(Leg leg) => new Vector3(_homeCenter.x,leg.AnkleY,_homeCenter.z)+_side*leg.Side;
-
-    private float ObservedForward(Leg leg) => Vector3.Dot(_slot.InverseTransformPoint(leg.Ankle.position)-Neutral(leg),_forward)/_legLength;
-
     private Vector3 FootTarget(Leg leg, CorridorWalkCycle.Foot foot, float weight,float distanceInLegLengths)
     {
-        var neutral = Neutral(leg);
-        float observed = ObservedForward(leg);
+        var neutral = new Vector3(_homeCenter.x, leg.AnkleY, _homeCenter.z) + _side * leg.Side;
+        float observed = Vector3.Dot(_slot.InverseTransformPoint(leg.Ankle.position)-neutral,_forward)/_legLength;
         float contact = leg.Contact.Forward(foot,observed,distanceInLegLengths);
-        var goal = neutral + _forward * (contact * _legLength) + Vector3.up * (foot.Lift * _legLength * weight);
+        var goal = neutral + _forward * (contact * _legLength) + Vector3.up * (foot.Lift * _legLength);
         float footWeight = Mathf.Abs(distanceInLegLengths) > .000001f ? 1 : weight;
         return Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
     }
