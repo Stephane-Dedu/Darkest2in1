@@ -140,7 +140,10 @@ internal sealed class UiRoot : MonoBehaviour
         var rules = Session.Current?.Rules;
         string label = why ?? $"Retreat ({Gui.Num(DarkestDungeon3.Dd2.Dd2Combat.RetreatChance(rules) * 100f, "0")}%)";
         if (hover || why == null) Gui.Text(new Rect(r.xMax + 10, r.y + 14, 380, 36), label, 22, why == null ? Gui.Dd1Name : Gui.Dim, TextAnchor.MiddleLeft, heading: true);
-        if (why == null && Gui.Hotspot(r) && !DarkestDungeon3.Dd2.Dd2Combat.TryRetreat(rules)) Gui.Announce("The retreat fails!");
+        bool retreatKey = Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Q
+            || UnityEngine.InputSystem.Keyboard.current?.qKey.wasPressedThisFrame == true;
+        if (why == null && retreatKey && Event.current.type == EventType.KeyDown) Event.current.Use();
+        if (why == null && (Gui.Hotspot(r) || retreatKey) && !DarkestDungeon3.Dd2.Dd2Combat.TryRetreat(rules)) Gui.Announce("The retreat fails!");
     }
 
     private readonly ResultsUi _results = new();

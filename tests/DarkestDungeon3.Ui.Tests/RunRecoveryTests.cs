@@ -114,6 +114,32 @@ public class RunRecoveryTests : IDisposable
     }
 
     [Fact]
+    public void CompletedRoadCallbackWaitsForNativeModeToFinishBeforeStartingPendingGameplay()
+    {
+        int ready = 0;
+        Dd2Run.Start(() => { Assert.False(_modes.Changing); ready++; });
+        _modes.Changing = true;
+        _modes.Complete(GameModeType.DRIVING);
+        Dd2Run.Update();
+        Assert.Equal(0, ready);
+        _modes.Changing = false;
+        Dd2Run.Update();
+        Assert.Equal(1, ready);
+        Dd2Run.Update(); Assert.Equal(1, ready);
+    }
+
+    [Fact]
+    public void EndingHostCancelsAnAlreadyCompletedButStillSettlingRoadCallback()
+    {
+        int ready = 0;
+        Dd2Run.Start(() => ready++);
+        _modes.Changing = true; _modes.Complete(GameModeType.DRIVING);
+        Assert.Equal(0, ready);
+        Dd2Run.End(); _modes.Changing = false; Dd2Run.Update();
+        Assert.Equal(0, ready);
+    }
+
+    [Fact]
     public void IntermediateProgressRestartsTheInactivityClockAndEndCancelsIt()
     {
         int failed = 0;

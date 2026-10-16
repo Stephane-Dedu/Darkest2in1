@@ -6983,3 +6983,79 @@ Remaining gait scope: owner comfort review, other heroes/hall lengths, ordinary
 saved campaign and interaction/battle handoffs with this cadence. Vilhelm retains
 his separately verified imported root animation; this run uses native DD2 actors.
 Preserve protected estates1/3, installed artifacts and all independent WIP.
+
+## Round253 (2026-10-16): native room-floor correction and final walkthrough repair acceptance
+
+The repeated room floor was baked into the PNGs. RoomPanoramaUi already draws one full-frame
+plate, and native room choices retain their orientation. The old renderer extended every arena
+with a complete driving-road/board atlas repeated every8 staged units. Tracks, skulls, planks
+and the distant plane edge became a regular grid. tools/room_floor.py now uses native regional
+rubble, footpath, root and worn-board paint, with three independent periods, broad irregular
+joins and an arena-specific phase. Native arena meshes/UVs, camera, footline and room roles stay
+unchanged. Geometry contact and distance haze join the extension to the arena. No generated art
+or new extraction was needed. Renderer completion records now invalidate stale/interrupted passes
+by source/tool hashes. tools/room_art.md records the recipe and limits.
+
+All32 rebuilt room plates pass native provenance, RGB/8:3/16MiB loader checks. Largest PNG3.89MiB.
+All50 actual Blender camera projections pass. The new opt-in -dd3-room-check fixture runs only
+rooms. All32 actual DD2 frame captures, eight per default region, were inspected with DD1 reference
+bodies at y680. Live DD2 bodies and the activation prop were also inspected in a Shroud room.
+This does not establish every native actor/room combination or original DD2 encounter parity.
+Room-only install replaces32 PNGs and their manifest;162 other scenery/plugin/config files were
+hash-preserved at installation. The active v09 corridor pack and verified round252 gait remain.
+Private candidate, source manifests, comparisons,32 native captures, logs, installer and exact
+room rollback: local-art/scenery-rooms-v10. Extracted artwork stays outside Git.
+
+Round251 final native acceptance now covers the shared-supply query guard, ordinary bandage use,
+targeted quest completion/results/return, campaign panels/equipment drag and asynchronous Hamlet
+paint. Actual native one-charge item equipment rejects skill/target queries once the last shared
+item is spent through a seeded other-hero ledger receipt. This is a native query-seam fixture,
+not an end-to-end second-hero click. A separate real bandage click/target cures bleed, heals the
+Vestal20->25 and charges2->1 bandages; a second item on that actor's turn is refused.
+
+A private late-quest fixture seeded two of three ward activations, then used the normal curio/
+inventory UI for the last one. The wrong torch does nothing and remains8. The lantern consumes
+1->0, objective2->3, and the normal completion/results flow grants4500gold/5crests, reports the
+fallen Plague Doctor, returns to the rendered Hamlet showing Week15 (stored index14). Both results pages,
+Guild window, hero sheet, stash and actual unequip/drag-to-equip cycle pass. A wounded/status-
+seeded native fight retreated with three survivors after23 ordinary skill actions. A later fresh
+fixture wins its hall fight through27 ordinary actions with one casualty. These automated choices
+and seeded conditions do not validate full-quest difficulty, boss balance or a naturally played
+successful quest. Protected estates were not used; all checkpoint data is private.
+
+Native return profiling confirms the terrain bake runs on a worker:17,126ms on thread50, with
+all64 grades on workers. GPU readbacks/uploads stay on the main thread; three terrain uploads
+span three frames. BuildGround's worst main-thread call is19.93ms; the longest observed Homecoming
+frame gap is215.34ms, versus the old measured17,899ms painting stall. The returned town's colour/
+layout is intact. This is one instrumented return/prewarm run, not a general cold-start or long-
+session FPS benchmark. Total cold town preparation still takes roughly20seconds while frames
+and results remain responsive. Private timing evidence: final-profile-state.json, acceptance.json and loading/.
+
+The acceptance loop also reproduced a cold pending-fight resume bug: DD2 invokes its road-entry
+callback before its mode transition flag clears. Immediate party setup requested COMBAT too soon,
+leaving a manual Fight prompt. Dd2Run now defers that callback until the road is idle, with existing
+timeout/retry/cancellation behavior retained. Two regressions fail before the fix; all10 run tests
+pass afterward. A fresh native resume automatically reaches the hero's combat turn without a
+mode-change warning or manual click. Q now uses the mod's retreat action through IMGUI/InputSystem;
+an actual Q press reaches the normal retreat roll and failure feedback. Painted closed armour is
+captured natively. The specific alpha-hit hover highlight still needs a deliberately confirmed
+hover capture; the captured pointer position was not sufficient to prove that state.
+
+Final Release+1,216 Core+221 UI pass. Normal deployment is frozen from the exact verified round252
+production snapshot plus owned round251/253 repairs, preserving its installed Shieldbreaker/
+Vilhelm and excluding later independent Shieldbreaker WIP. All417 normal source hashes and four
+installed DLL/PDB hashes match; private observer/profiler/capture types are removed. Current v09
+corridor files/config and39 native profile files are hash-preserved. All owned games are closed,
+last26200; DD2 is stopped. Final evidence and new post-peer backup: local-art/walkthrough-fixes-
+20261015. Never run its historical manage.py restore against the newer corridor/gait installation.
+
+## Status 2026-10-16: room floors and combined walkthrough repairs installed
+
+Round253 is installed. Room pack is local-art/scenery-rooms-v10; complete corridor pack remains
+local-art/scenery-coast-v09. Normal plugin includes verified gait and the round251 repairs plus
+cold pending-fight handoff/Q input. DD2 is stopped. No estate was selected/read/written; only
+private fixtures. Next acceptance gaps: deliberately confirmed armour alpha-hover state, a
+naturally played full successful quest and bosses/balance, ordinary estate-file handoff, broader
+gait/class/hall-length coverage and long-session performance. Ground bake is responsive but total
+cold preparation remains about20seconds. Native lighting/animated arena water/VFX are approximate.
+Preserve independent Shieldbreaker source/art/journal WIP and both current private scenery packs.

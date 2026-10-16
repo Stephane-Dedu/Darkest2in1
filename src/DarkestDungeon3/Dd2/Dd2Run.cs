@@ -15,11 +15,18 @@ internal static class Dd2Run
     private static int _generation;
     private static float? _waitingSince;
     private static Action _waitFailed;
+    private static Action _roadReady;
     internal const float RoadWaitSeconds = 180f;
 
     /// <summary>Bound an inactive host wait without aborting DD2's own slow scene transition.</summary>
     public static void Update()
     {
+        if (_roadReady != null && Hosting && GameModeMgr.CurrentMode == GameModeType.DRIVING
+            && Dd2Api.Modes?.IsChangingState() == false)
+        {
+            InvokeReady(_roadReady, _waitFailed);
+            return;
+        }
         if (_waitingSince == null || UnityEngine.Time.unscaledTime - _waitingSince.Value < RoadWaitSeconds) return;
         Plugin.Log.LogError("[run] no completed scene entry for three minutes; saved expedition can retry when ready");
         FailWaiting();
@@ -28,7 +35,7 @@ internal static class Dd2Run
     private static void FailWaiting()
     {
         var failed = _waitFailed;
-        _waitingSince = null; _waitFailed = null;
+        _waitingSince = null; _waitFailed = null; _roadReady = null;
         _generation++; // A late entry may finish, but it must not start gameplay behind the recovery screen.
         failed?.Invoke();
     }
@@ -50,11 +57,13 @@ internal static class Dd2Run
         if (modes == null || modes.IsChangingState()) { Plugin.Log.LogWarning("[run] can't start: mode change in progress"); return false; }
         if (Hosting && GameModeMgr.CurrentMode == GameModeType.DRIVING)
         {
+            _waitingSince = null; _waitFailed = null; _roadReady = null;
             try { onReady(); return true; }
             catch (Exception e) { Plugin.Log.LogError("[run] party retry failed: " + e); onFailed?.Invoke(); return false; }
         }
 
         Configure(true);
+        _roadReady = null;
         Hosting = true;
         Singleton<GameTypeMgr>.Instance.SetGameType(GameType.EXPEDITION);
         if (SingletonMonoBehaviour<RunBhv>.HasInstance())
@@ -77,9 +86,11 @@ internal static class Dd2Run
             Plugin.Log.LogInfo($"[run] entered {mode?.GetName()}, party {Dd2Api.Party.Count}");
             if (mode == GameModeType.DRIVING)
             {
-                _waitingSince = null; _waitFailed = null;
-                try { onReady(); }
-                catch (Exception e) { Plugin.Log.LogError("[run] party setup failed: " + e); onFailed?.Invoke(); }
+                // DD2 dispatches this callback before clearing its transition flag.
+                // A saved encounter can immediately request COMBAT, so wait for the idle road.
+                if (Dd2Api.Modes?.IsChangingState() == true)
+                { _waitingSince = UnityEngine.Time.unscaledTime; _roadReady = onReady; _waitFailed = onFailed; }
+                else InvokeReady(onReady, onFailed);
             }
             else if (attempts < 6)
             {
@@ -90,11 +101,18 @@ internal static class Dd2Run
         });
     }
 
+    private static void InvokeReady(Action ready, Action failed)
+    {
+        _waitingSince = null; _waitFailed = null; _roadReady = null;
+        try { ready(); }
+        catch (Exception e) { Plugin.Log.LogError("[run] party setup failed: " + e); failed?.Invoke(); }
+    }
+
     /// <summary>End the host run without DD2's end-of-run screens and return to the main menu.</summary>
     public static void End()
     {
         _generation++;
-        _waitingSince = null; _waitFailed = null;
+        _waitingSince = null; _waitFailed = null; _roadReady = null;
         Plugin.Log.LogInfo("[run] ending host run");
         if (SingletonMonoBehaviour<RunBhv>.HasInstance() && SingletonMonoBehaviour<RunBhv>.Instance.RunScoreManager is { } score
             && score.GetGameOverReason() == null)

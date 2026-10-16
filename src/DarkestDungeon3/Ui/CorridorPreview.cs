@@ -14,13 +14,14 @@ namespace DarkestDungeon3.Ui;
 internal static class CorridorPreview
 {
     private static readonly bool AllChecking = Environment.GetCommandLineArgs().Contains("-dd3-scenery-check");
-    private static readonly bool Requested = AllChecking || Environment.GetCommandLineArgs().Contains("-dd3-corridor-preview");
-    private static readonly bool Checking = AllChecking || Environment.GetCommandLineArgs().Contains("-dd3-corridor-check");
+    private static readonly bool RoomChecking = Environment.GetCommandLineArgs().Contains("-dd3-room-check");
+    private static readonly bool Requested = AllChecking || RoomChecking || Environment.GetCommandLineArgs().Contains("-dd3-corridor-preview");
+    private static readonly bool Checking = AllChecking || RoomChecking || Environment.GetCommandLineArgs().Contains("-dd3-corridor-check");
     private static readonly string[] Regions = { "dd2_city", "dd2_farm", "dd2_forest", "dd2_coast" };
     private static readonly string[] Names = { "The Sprawl", "The Foetor", "The Tangle", "The Shroud" };
     private static readonly string[] Heroes = { "plague_doctor", "grave_robber", "highwayman", "man_at_arms" };
     private static readonly Dd1HeroArt[] FigureArt = new Dd1HeroArt[4];
-    private static bool _closed, _finished, _rooms;
+    private static bool _closed, _finished, _rooms = RoomChecking;
     private static int _region, _variant;
     private static float _shownAt = -1;
     private static string _shown;
@@ -98,7 +99,9 @@ internal static class CorridorPreview
                         else if (_region == Regions.Length - 1)
                         {
                             _variant = count - 1; _finished = true;
-                            Plugin.Log.LogInfo("[scenery check] PASS: all four regional pools rendered, corridors pan without repeats; " + (AllChecking ? "all native rooms drawn; " : "") + "no estate selected");
+                            Plugin.Log.LogInfo(RoomChecking
+                                ? "[room check] PASS: all native rooms drawn across four regional pools; no estate selected"
+                                : "[scenery check] PASS: all four regional pools rendered, corridors pan without repeats; " + (AllChecking ? "all native rooms drawn; " : "") + "no estate selected");
                         }
                         else Switch(_region + 1);
                     }
@@ -112,7 +115,7 @@ internal static class CorridorPreview
 
     private static void Switch(int region)
     {
-        _region = region; _variant = 0; _rooms = false; _shown = null; _shownAt = -1;
+        _region = region; _variant = 0; _rooms = RoomChecking; _shown = null; _shownAt = -1;
         RegionSceneryArt.Clear();
     }
 }

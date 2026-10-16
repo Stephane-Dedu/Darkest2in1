@@ -1,5 +1,33 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round253 is installed: all32 native room floors replace the old repeating road/board grid
+with regional DD2 paint, independent mapping periods, irregular joins, contact shading and
+haze. Camera/footline/native arena UVs stay fixed. All32 actual DD2 captures and50 camera
+projections pass. Recipe: tools/room_art.md. Private room pack, source manifests, captures,
+comparison and rollback: local-art/scenery-rooms-v10. Active complete corridor pack remains
+local-art/scenery-coast-v09; verified round252 gait and installed Shieldbreaker/Vilhelm retained.
+
+Final native acceptance closes the round251 supply query guard, ordinary bandage use, targeted
+final ward activation/results/return, campaign panels/equipment drag and worker terrain paint.
+Cold pending-fight resume now waits for idle road mode and automatically enters native combat;
+actual Q reaches the normal retreat roll. Final combined Release+1,216 Core+221 UI pass.
+Terrain17,126ms and64 grades run on workers; terrain upload spans3 frames, BuildGround main
+max19.93ms. Final measured Homecoming gap max215.34ms versus old cold-Hamlet17,899ms painting
+stall; one instrumented return/prewarm run, not an overall cold-start benchmark. Total cold
+preparation still about20s. UI Week15 is stored week14, not a demonstrated extra week advance.
+
+Normal production has the private observers/profiler/capture hooks removed. Exact417 source
+and four artifact hashes, native evidence, acceptance.json and new post-peer rollback:
+local-art/walkthrough-fixes-20261015. Its historical manage.py restore MUST NOT run: it would
+undo the current plugin before rejecting newer scenery. Make a fresh installed baseline.
+All owned games closed, last26200; DD2 stopped. Private fixtures only; no estate accessed.
+Remaining: deliberate armour alpha-hit hover confirmation, naturally played full quest,
+bosses/balance, ordinary estate-file handoff, broader gait/actor coverage, long-session FPS.
+Native arena lighting/animated water/VFX are approximate. Preserve independent Shieldbreaker
+source/art/journal WIP and protected estates1/3. Next round254.
+
+Earlier handoffs below are historical; this round supersedes their deployment/pending status.
+
 Round252 fixes excessive corridor steps and installs Shroud water detail. Native DD2 gait
 uses a 0.90-leg contact arc, current-foot phase on restart and explicit skipped lift/landing
 tracking after long frames. Short halls use a centred painting span; button steps share

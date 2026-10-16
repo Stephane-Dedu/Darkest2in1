@@ -12,6 +12,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from scenery_camera import ENVIRONMENT_SCALE, create as stage_camera, floor as stage_floor, settings as camera_settings, configure_materials
+from room_floor import source as floor_source, paint as floor_paint
 
 SCENES = {"boss-01": "dungeon_interior", "entrance-01": "dungeon_exterior",
           "battle-01": "resist", "battle-02": "faction", "battle-03": "military", "battle-04": "cultist",
@@ -44,7 +45,7 @@ def compose(output):
         gradient = np.linspace(0, 1, h)[:, None, None] ** .8
         image = Image.fromarray((np.array(top) * (1 - gradient) + np.array(bottom) * gradient)
                                .astype(np.uint8).repeat(w, 1), "RGB").convert("RGBA")
-        for band, fog in (("far", .5), ("mid", .22), ("near", 0)):
+        for band, fog in (("ground", .32), ("far", .5), ("mid", .22), ("near", 0)):
             if band not in entry["passes"]:
                 continue
             path = output / "render-passes" / f"{entry['short']}-{band}.png"
@@ -55,7 +56,13 @@ def compose(output):
                 raise ValueError(f"Invalid render pass: {path}")
             if fog:
                 pixels = np.array(layer).astype(np.float32)
-                pixels[..., :3] = pixels[..., :3] * (1 - fog) + np.array(haze) * fog
+                strength = fog
+                if band == "ground":
+                    # Suppress the far texture frequency and plane's distant edge,
+                    # while leaving the actor footline and foreground native ink sharp.
+                    strength = fog * np.clip((680 - np.arange(h) / 1.5) / 200, 0, 1)[:, None, None]
+                    pixels[..., 3] *= np.clip((np.arange(h) / 1.5 - 450) / 80, 0, 1)[:, None]
+                pixels[..., :3] = pixels[..., :3] * (1 - strength) + np.array(haze) * strength
                 layer = Image.fromarray(pixels.clip(0, 255).astype(np.uint8), "RGBA")
             image.alpha_composite(layer)
         image.convert("RGB").save(target)
@@ -91,14 +98,7 @@ def main():
     # Validate every selected dependency before publishing any files.
     sources, floors = [], {}
     for region in PALETTES:
-        folder, name = FLOORS[region]
-        floor_folder = kit / folder
-        document = json.loads((floor_folder / "scene.json").read_text())
-        key, material = next((k, v) for k, v in document["materials"].items() if v["name"] == name)
-        texture_path = (floor_folder / material["texture"]).resolve()
-        if not texture_path.is_file():
-            raise FileNotFoundError(texture_path)
-        floors[region] = (floor_folder, key, material, texture_path)
+        floors[region] = floor_source(kit, region)
         for role, kind in SCENES.items():
             kind = OVERRIDES.get(region, {}).get(role, kind)
             short = f"{region}_{kind}"
@@ -116,8 +116,16 @@ def main():
     for region, role, kind, folder in sources:
         target = output / f"dd2_{region}-arena-{role}.png"
         shade, top, bottom, haze = PALETTES[region]
-        floor_folder, floor_key, floor_data, floor_texture = floors[region]
-        if not (temp / f"{region}-{kind}-near.png").is_file():
+        floor_folder, floor_key, floor_data, floor_texture, period = floors[region]
+        phase = list(SCENES).index(role) + 1
+        completion = temp / f"{region}-{kind}-complete.json"
+        recipe = {"scene": digest(folder / "scene.json"), "floor": digest(floor_texture),
+                  "renderer": digest(Path(__file__)), "floor_tool": digest(Path(__file__).with_name("room_floor.py")),
+                  "camera": digest(Path(__file__).with_name("scenery_camera.py")), "phase": phase, "floor_period": period}
+        if not completion.is_file() or json.loads(completion.read_text()) != recipe:
+            completion.unlink(missing_ok=True)
+            for band in ("ground", "far", "mid", "near"):
+                (temp / f"{region}-{kind}-{band}.png").unlink(missing_ok=True)
             L.reset()
             objects, lo, hi = L.build(folder, place=np.diag([ENVIRONMENT_SCALE]*3+[1]), respect_active=True, shade=shade)
             if not objects:
@@ -125,35 +133,41 @@ def main():
             for obj in objects:
                 distance = float(np.mean([c[1] for c in obj.bound_box]))
                 obj["band"] = "far" if distance > 90 else "mid" if distance > 28 else "near"
-            # Combat exports omit the foreground ground or end their pier before the crawl's footline.
-            # Extend the same region's installed ground material under the actors, below existing geometry.
-            stage_floor(L, floor_folder, floor_key, floor_data, shade=shade, band="near")
+            # Driving lanes and board atlases are not seamless room floors. Keep
+            # native arena geometry/UVs and extend its foreground with regional paint.
+            ground = stage_floor(L, floor_folder, floor_key, floor_data, shade=shade, band="ground")
+            floor_paint(ground, floor_folder, floor_data, shade, period, phase)
             stage_camera(L, res=(w,h))
-            for band, fog in (("far", .5), ("mid", .22), ("near", 0)):
+            for band in ("ground", "far", "mid", "near"):
                 visible = False
                 for obj in bpy.data.objects:
                     if obj.type == "MESH":
-                        obj.hide_render = obj.get("band") != band
-                        visible = visible or not obj.hide_render
+                        obj.hide_render = band != "ground" and obj.get("band") != band
+                        obj.visible_camera = obj.get("band") == band
+                        visible = visible or obj.visible_camera
                 if not visible:
                     continue
                 path = temp / f"{region}-{kind}-{band}.png"
                 L.render(path, samples=8, transparent=True)
+            completion.write_text(json.dumps(recipe))
         entries.append({"file": target.name, "region": "dd2_" + region, "role": role.split("-")[0],
                         "short": region + "-" + kind,
-                        "passes": [band for band in ("far", "mid", "near") if (temp / f"{region}-{kind}-{band}.png").is_file()],
+                        "passes": [band for band in ("ground", "far", "mid", "near") if (temp / f"{region}-{kind}-{band}.png").is_file()],
                         "native_arena": folder.name, "source_scene_sha256": digest(folder / "scene.json"),
                         "floor_material": floor_data["name"], "floor_texture_sha256": digest(floor_texture),
+                        "floor_periods": [period, period * 1.37, period * .83], "floor_phase": phase,
                         "size": [w, h]})
         print(f"READY {target.name}", flush=True)
-    manifest = {"version": 2, "generated_art": False, "source_kit": str(kit),
+    manifest = {"version": 3, "generated_art": False, "source_kit": str(kit),
                 "render_tool_sha256": digest(Path(__file__).resolve()),
                 "camera_tool_sha256": digest(Path(__file__).with_name("scenery_camera.py")),
-                "foreground_plane": {"center_blender": [0, 60, -.04], "size": [500, 300], "world_uv_repeat_units": 8},
+                "floor_tool_sha256": digest(Path(__file__).with_name("room_floor.py")),
+                "foreground_plane": {"center_blender": [0, 60, -.04], "size": [500, 300],
+                                     "mapping": "three regional paint samples with independent periods and irregular world joins"},
                 "camera": camera_settings(), "environment_scale": ENVIRONMENT_SCALE,
                 "virtual_scene": [1920, 720], "hero_foot_y": 680,
                 "limits": ["Native base-colour/tint with approximate depth haze; no native lighting or animated VFX",
-                           "Native road/deck material extended on an authored foreground plane",
+                           "Native regional paint on an authored foreground plane; approximate contact shading and distance haze",
                            "Room purpose selects an environment, not the actual DD2 encounter or boss"],
                 "files": entries}
     (output / "render-manifest.json").write_text(
