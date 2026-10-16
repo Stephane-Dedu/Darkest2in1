@@ -7,10 +7,10 @@ using DarkestDungeon3.Core.Expedition;
 namespace DarkestDungeon3.Dd2;
 
 /// <summary>
-/// The crawl's view of the party, backed by the real DD2 actors: DD2 owns HP, death's door, meltdowns and quirks,
+/// The crawl's view of the party, backed by real DD2 actors and persistent DD1 resolve conditions,
 /// so out-of-combat effects land with the same rules as in a fight.
 /// </summary>
-internal sealed class Dd2Party : IParty, ITravelResistance
+internal sealed class Dd2Party : IParty, ITravelResistance, IResolveParty
 {
     private readonly Dictionary<string, uint> _guids;     // hero id → actor guid, rank order
     private readonly Dd2Catalog _catalog;
@@ -22,6 +22,9 @@ internal sealed class Dd2Party : IParty, ITravelResistance
     }
 
     public uint Guid(string heroId) => _guids.TryGetValue(heroId, out var g) ? g : 0u;
+    public bool Allows(string heroId,string reaction) => reaction.StartsWith("effect:")
+        ? !Dd1Stress.RefusesEffect(Dd2Api.Actor(Guid(heroId)),reaction.Substring(7))
+        : !Dd1Stress.Refuses(Dd2Api.Actor(Guid(heroId)),reaction);
 
     /// <summary>Every hero's DD2 actor id.</summary>
     public IEnumerable<uint> Guids => _guids.Values;
@@ -49,7 +52,7 @@ internal sealed class Dd2Party : IParty, ITravelResistance
         a.ApplyHealthHeal(maxHpFraction * a.CurrentHpMax, isCrit: false, SourceType.DRIVING, hasDisplayed: false);
     }
 
-    public void AddStress(string heroId, int points, string cause)
+    public void AddStress(string heroId, float points, string cause)
     {
         var a = Dd2Api.Actor(Guid(heroId));
         if (a == null || points == 0) return;

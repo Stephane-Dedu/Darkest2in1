@@ -131,9 +131,10 @@ internal static partial class RosterColumn
             Gui.Text(new Rect(x + 290, y + 6, 70, 32), h.ResolveLevel.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
             for (int p = 0; p < 10; p++)
             {
-                var pip = p < h.Stress ? (h.Stress >= 10 ? over ?? full : full) : empty;
+                var pip = p < h.Stress-10 ? over ?? full : p < h.Stress ? full : empty;
                 if (pip != null) GUI.DrawTexture(new Rect(x + 116 + p * 13, y + 58, 11, 18), pip, ScaleMode.ScaleToFit);
             }
+            if (h.Resolve?.TraitId is { } trait) Gui.Text(new Rect(x+116,y+77,210,18),Dd2.Dd1Stress.Name(trait),15,Gui.Blood,TextAnchor.MiddleLeft);
             if (Gui.Hotspot(r) && !Drag.JustDropped) clicked = h;
         }
 

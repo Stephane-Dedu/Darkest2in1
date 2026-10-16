@@ -104,6 +104,7 @@ internal static class Dd1TrinketStress
         if (damage <= 0 || Runtime.Driver.Instance?.Phase is not (Phase.Crawling or Phase.Fighting)) return;
         float k = Dd1TrinketData.StressMultiplier(__instance);
         if (k == 1) return;
+        if (Dd1Stress.Owns(__instance)) { damage *= k; return; }
         float n = damage * k, whole = (float)Math.Floor(n);
         damage = whole + (Rng.NextDouble() < n - whole ? 1 : 0);
     }

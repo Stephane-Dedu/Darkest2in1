@@ -22,7 +22,7 @@ public class HeroRestoreTests
         var saved = Saved();
         string before = JsonConvert.SerializeObject(hero);
         var restored = ExpeditionParty.HeroForRestore(hero, saved);
-        Assert.Equal(7, restored.Stress);
+        Assert.Equal(6.75f, restored.Stress);
         Assert.Equal(new[] { "changed" }, restored.Quirks);
         Assert.Equal(new string[] { null, "ring" }, restored.Trinkets);
         Assert.Equal("sharpshot", restored.PathId);
@@ -57,7 +57,7 @@ public class HeroRestoreTests
         else { saved.Outcome.Quirks = null; saved.Outcome.Trinkets = null; }
         var restored = ExpeditionParty.HeroForRestore(hero, saved);
         Assert.NotSame(hero, restored);
-        Assert.Equal(kind == "unknown-loadout" ? 7 : 3, restored.Stress);
+        Assert.Equal(kind == "unknown-loadout" ? 6.75f : 3, restored.Stress);
         Assert.Equal(hero.Quirks, restored.Quirks); Assert.Equal(hero.Trinkets, restored.Trinkets);
         restored.Quirks.Clear(); restored.Trinkets.Clear();
         Assert.Single(hero.Quirks); Assert.Single(hero.Trinkets);

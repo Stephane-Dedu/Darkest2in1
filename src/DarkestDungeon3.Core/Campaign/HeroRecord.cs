@@ -40,7 +40,8 @@ public sealed class HeroRecord
     public List<string> MasteredSkills = new();            // DD2 combat skills upgraded at the Guild (base ids)
 
     // Condition carried between expeditions.
-    public int Stress;                                     // DD2 scale (0..stress_max, 10 by default)
+    public float Stress;                                   // compatible native units: 10 = 100 DD1 stress, 20 = heart attack
+    public Expedition.ResolveState Resolve;
     public List<string> Quirks = new();                    // DD2 quirk ids, positive, negative and diseases
     public List<string> LockedQuirks = new();
 

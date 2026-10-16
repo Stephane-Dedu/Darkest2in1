@@ -12,7 +12,8 @@ public sealed class HeroOutcome
     public string HeroId;
     public bool Died;
     public string CauseOfDeath;
-    public int Stress;
+    public float Stress;
+    public ResolveState Resolve;
     public List<string> Quirks;     // null = unchanged
     public List<string> Trinkets;   // null = unchanged
 }
@@ -110,7 +111,7 @@ public static class Homecoming
         if (success && quest.ClearsRosterStress)
         {
             // DD1: a Darkest Dungeon win clears the stress of every hero on the roster (is_roster_stress_cleared_on_completion).
-            foreach (var h in estate.Roster) h.Stress = 0;
+            foreach (var h in estate.Roster) { h.Stress = 0; h.Resolve?.Clear(); }
             log.Add("The victory lifts every heart in the Hamlet: all stress is gone.");
         }
 
@@ -154,13 +155,14 @@ public static class Homecoming
                 continue;
             }
             var quirksBefore = hero.Quirks.ToList();
-            hero.Stress = success && quest.ClearsRosterStress ? 0 : o.Stress;   // the party too, after a Darkest Dungeon win
+            hero.Stress = success && quest.ClearsRosterStress ? 0 : Math.Max(0,Math.Min(ResolveStress.Break,o.Stress));
             if (expedition.Retreated && dd1 != null && dd1.AbandonStressDd1 > 0)
             {
-                // DD1: "The heroes will suffer the stress of defeat" (20 of 100 = 2 of DD2's 10 points).
-                hero.Stress = Math.Min(10, hero.Stress + (int)Math.Round(dd1.AbandonStressDd1 / 10f, MidpointRounding.AwayFromZero));
+                // Town return caps at 100, preserving the affliction without a town heart attack.
+                hero.Stress = Math.Min(ResolveStress.Break, hero.Stress + ResolveStress.Units(dd1.AbandonStressDd1));
                 log.Add($"{hero.Name} suffers the stress of defeat.");
             }
+            hero.Resolve = ResolveStress.Home(o.Resolve ?? hero.Resolve,hero.Stress);
             if (o.Quirks != null) hero.Quirks = o.Quirks;
             if (o.Trinkets != null) hero.Trinkets = Town.TrinketEquipment.RestoreSlots(hero.Trinkets, o.Trinkets);
             result.Stress = hero.Stress;
@@ -228,6 +230,7 @@ public sealed class HeroResult
 {
     public string Id, Name, ClassId, Cause;
     public bool Died;
-    public int ResolveBefore, ResolveAfter, ResolveXp, XpGained, Stress;
+    public int ResolveBefore, ResolveAfter, ResolveXp, XpGained;
+    public float Stress;
     public List<string> NewQuirks = new(), LostQuirks = new();
 }

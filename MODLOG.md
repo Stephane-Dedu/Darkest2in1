@@ -7121,3 +7121,71 @@ recap continues it, and unchanged terrain paint is reused within this process. N
 bake improves from17.1s to4.4s; complete return/warm-cache timing and final visual/recap checks
 are pending the other agent's QA window. Respect the owner's request to keep DD2 closed.
 Next round255. Preserve all independent stress/Shieldbreaker work, current scenery and heroes.
+
+## Round255 â€” DD1 resolve and heart attacks, persistent native Toxic (2026-10-16)
+
+Owner: use DD1's stress system, with100-stress resolve breaks and200-stress heart attacks,
+keeping Flagellant's native Toxic self-effects through the quest. The owner explicitly
+answered "Keep DD2 closed; finish offline." No DD2 launch, OS input or estate access
+followed. Runtime behavior below is built, not natively accepted.
+
+Core now reads the installed DD1 traits/rules: seven generated afflictions, five virtues,
+base75% affliction chance, effective-difficulty adjustments,5%/99% clamps and history
+weights. The first crossing hit caps at100; virtue resets stress to the installed45.
+Affliction persists until0; virtue at200 clears itself/stress without a heart attack.
+Afflicted/Toxic heroes at200 lose remaining HP or die immediately if already at Death's
+Door. The native survivor consumer applies30*(1+modifier) relief; the bridge uses the
+base zero modifier, leaving170. Mapping that native modifier field remains open.
+Native DD1 references/inputs are recorded privately; no decompiled code/assets are committed.
+
+The old save scale remains ten DD1 stress per native unit, so existing7 still means70.
+Persistent stress is now float, preserving small travel/camp/curio amounts. No numeric
+save migration occurs. Resolve state/history and Toxic counts are independently copied
+through actor state, JSON, fight recovery and homecoming. Interrupted fights keep current
+stress/condition and permanent heart-attack deaths instead of rerolling/reviving them;
+legacy null-state checkpoints retain their earlier rewind behavior. Hamlet caps stress
+at100, clears virtue and cures affliction/Toxic only at0.
+
+Scoped DD2 hooks affect expedition-bound heroes only: stress cap20 native units, no
+normal meltdown/resolute queue, trait modifiers and weighted turn acts/comments/refusals.
+DD1 stat effects reuse the existing DD2 adaptations for accuracy/dodge. Pass/random
+commands, self/friendly attacks, buffs/heals/marks/moves, heal/retreat/supply and camping
+refusals are connected. Named block_effect matching prevents virtues from refusing all
+stress healing. Empty random skill-target lists pass instead of locking input. Curio
+compulsion/theft and generic combat buff/item/player-move refusals remain unconnected;
+see tools/stress_system.md for limits and acceptance cases.
+
+Flagellant's first100 break applies native Toxic definitions except its stress-reset
+effect. Blight/HP/cooldowns retain DD2 path conditions. Virulent-blight/manager tokens
+and DBR/Scourge counts survive battle cleanup/reload; restoration never replays the
+onset heal or cooldown reset. Toxic does not retrigger at100 while still afflicted,
+and reaches the same200-stress heart-attack branch. HUD/roster/results/tooltips show
+0â€“200, pips have a second layer above100, and native floating numbers rescale only at
+the presentation queue.
+
+Offline acceptance: frozen Release+1,242 Core+221 UI pass, including installed trait
+loading,100/200 branches, legacy/fractional JSON, Toxic copies, resolve checkpoint
+recovery, permanent heart death, accumulated one-point threshold crossings and camping/
+supply refusals. A formerly ineffective
+Hamlet side-effect test now uses Dismas and checks successful bar admission; Reynauld's
+God Fearing quirk had prevented the activity and idle-heal log lines hid that mistake.
+Metadata checks validate18 native method targets and6 reflected fields, without loading
+the game. This confirms signatures, not Harmony execution or gameplay.
+
+Stopped-game installation overlays only stress changes onto round254's exact419-file
+normal baseline. The resulting425-file snapshot preserves its loading/cache, installed
+hero work, gait and current corridor/room packs. Unrelated shared CrawlUi corridor hunks
+and Shieldbreaker edits stay out. Fresh four-artifact rollback, source/overlay manifests,
+logs, native-input hashes and deployment: local-art/stress-system-v01. Four DLL/PDB hashes
+match; config,13 other plugin files and190 private scenery/model files are unchanged.
+Normal plugin SHA256 05260b7d62f72375929083ef00d48308badfbc6759a2637974c31dea23eef4aa;
+Coreb55e2ee7a541c401eb09e21cf6f394de6fa9daff4aa7d6722ce322885e14bc99.
+
+## Status 2026-10-16: stress rework installed offline; DD2 must remain closed
+
+Round255 is built, offline tested and installed. DD1 resolve/heart attacks and quest-
+persistent Toxic remain `[?]` for native gameplay. No protected estate was accessed.
+Keep DD2 closed until the owner explicitly lifts the hold. Next round256. Use the new
+installed baseline, never historical rollback scripts that would undo round254/255.
+Preserve independent corridor and Shieldbreaker work. Native acceptance scenarios and
+remaining trait adaptations are listed in tools/stress_system.md.

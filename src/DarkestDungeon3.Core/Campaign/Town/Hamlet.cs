@@ -84,7 +84,7 @@ public sealed class Hamlet
             ClassId = cls,
             Name = h.Name,
             ResolveXp = h.ResolveXp,
-            Stress = (int)Math.Round(h.Stress / 10f, MidpointRounding.AwayFromZero),   // DD1 stress (100 = full) -> DD2 pips (10)
+            Stress = ResolveStress.Units(h.Stress),
             WeekRecruited = Estate.Week,
         };
         foreach (var q in h.Quirks.Select(Catalog.MapDd1Quirk).Where(q => q != null).Distinct()) hero.Quirks.Add(q);
@@ -414,11 +414,12 @@ public sealed class Hamlet
             {
                 // DD1: idle heroes shed a little stress each visit; a town event can multiply it.
                 float dd1Relief = Dd1.IdleStressHeal * (1f + EventData("idle_buff").Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f));
-                int idleRelief = ToDd2Points(dd1Relief, rng);
+                float idleRelief = ToDd2Points(dd1Relief, rng);
                 if (idleRelief > 0 && hero.Stress > 0)
                 {
-                    int was = hero.Stress;
+                    float was = hero.Stress;
                     hero.Stress = Math.Max(0, hero.Stress - idleRelief);
+                    if (hero.Stress == 0) hero.Resolve?.Clear();
                     log.Add($"{hero.Name} rested in the Hamlet: stress {was} → {hero.Stress}.");
                 }
                 Capture(hero, first);
@@ -454,9 +455,10 @@ public sealed class Hamlet
         float bonus = EventData("in_activity_buff").Where(d => d.Str.Contains("_in_activity_" + activity.Id + "_"))
                                                  .Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f);
         dd1Heal = (int)Math.Round(dd1Heal * Math.Max(0f, 1f + bonus));
-        int points = ToDd2Points(dd1Heal, rng);
-        int before = hero.Stress;
+        float points = ToDd2Points(dd1Heal, rng);
+        float before = hero.Stress;
         hero.Stress = Math.Max(0, hero.Stress - points);
+        if (hero.Stress == 0) hero.Resolve?.Clear();
         log.Add($"{hero.Name} spent the week at the {activity.Building} ({activity.Id}): stress {before} → {hero.Stress}.");
 
         if (!rng.Chance(activity.SideEffectChance)) return;
@@ -783,13 +785,8 @@ public sealed class Hamlet
 
     // ---------------- helpers ----------------
 
-    /// <summary>DD1 stress (100 = affliction) to whole DD2 points (10 = meltdown), rounding by chance.</summary>
-    public static int ToDd2Points(float dd1Stress, Rng rng)
-    {
-        float points = dd1Stress / CrawlRules.Dd1StressPerDd2Point;
-        int whole = (int)Math.Floor(points);
-        return rng.Chance(points - whole) ? whole + 1 : whole;
-    }
+    /// <summary>Keep the legacy save scale without rounding away DD1 stress.</summary>
+    public static float ToDd2Points(float dd1Stress, Rng rng) => ResolveStress.Units(dd1Stress);
 
     private static JObject PickWeighted(JArray options, Rng rng)
     {

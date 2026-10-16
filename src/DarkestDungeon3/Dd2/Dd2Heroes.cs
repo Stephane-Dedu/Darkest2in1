@@ -73,6 +73,7 @@ internal static class Dd2Heroes
     public static void Apply(HeroRecord hero, ActorInstance actor, ExpeditionHeroState condition = null)
     {
         actor.SetActorName(hero.Name);
+        Dd1Stress.Bind(actor,hero,condition?.Resolve ?? hero.Resolve);
 
         // DD2 rolls starting quirks for a new actor; the Hamlet's record is the truth.
         if (actor.QuirkContainer != null)
@@ -100,7 +101,8 @@ internal static class Dd2Heroes
         HeroSkills.Apply(hero, actor);
         HeroPathExpedition.Restore(actor, condition?.MonarchOath);
         if (condition != null) ExpeditionActorRestore.Apply(actor, condition);
-        else if (hero.Stress > 0) actor.ApplyStressDamage(hero.Stress, canResist: false, SourceType.ROSTER, "dd3", 0u);
+        else Dd1Stress.Raw(actor,hero.Stress);
+        Dd1Stress.CompleteRestore(actor);
     }
 
     // DD1's Blacksmith ranks as DD2's own permanent buffs, distinct ids stacked per rank (the same id doesn't stack).
@@ -154,10 +156,11 @@ internal static class Dd2Heroes
     {
         var actor = Dd2Api.Actor(guid);
         bool dead = actor == null || Dd2Api.IsDead(guid);
-        var outcome = new HeroOutcome { HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null };
+        var outcome = new HeroOutcome { HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? Dd1Stress.DeathCause(guid) ?? "fell in the dungeon" : null };
         if (dead) return outcome;
 
-        outcome.Stress = (int)System.Math.Round(actor.Stress);
+        outcome.Stress = actor.Stress;
+        outcome.Resolve = Dd1Stress.Capture(actor);
         outcome.Quirks = actor.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList();
         outcome.Trinkets = actor.GetTrinketInventory()?.GetItemIds()?.ToList();
         return outcome;
@@ -170,8 +173,9 @@ internal static class Dd2Heroes
         if (guid == 0) return false;
         var actor = Dd2Api.Actor(guid);
         bool rosterDead = Dd2Api.Roster?.GetActorGuids(RosterStatusType.DEAD)?.Contains(guid) == true;
-        if (actor == null && !rosterDead) return false;
-        bool dead = rosterDead || !actor.IsLiving;
+        bool heartAttackDeath = Dd1Stress.DeathCause(guid) == "heart attack";
+        if (actor == null && !rosterDead && !heartAttackDeath) return false;
+        bool dead = rosterDead || heartAttackDeath || actor?.IsLiving == false;
         float hpMax = actor?.CurrentHpMax ?? previous?.HpMax ?? 1;
         if (dead && hpMax <= 0) hpMax = previous?.HpMax > 0 ? previous.HpMax : 1;
         snapshot = new ExpeditionHeroState
@@ -179,9 +183,11 @@ internal static class Dd2Heroes
             Hp = dead ? 0 : actor.HpRaw, HpMax = hpMax,
             Stress = actor?.Stress ?? previous?.Stress ?? hero.Stress, WoundPercent = actor?.WoundPercent ?? previous?.WoundPercent ?? 0,
             MonarchOath = actor != null ? HeroPathExpedition.Capture(actor) : previous?.MonarchOath?.Copy(),
+            Resolve = actor != null ? Dd1Stress.Capture(actor) : previous?.Resolve?.Copy(),
             Outcome = new HeroOutcome
             {
-                HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? "fell in the dungeon" : null,
+                HeroId = hero.Id, Died = dead, CauseOfDeath = dead ? Dd1Stress.DeathCause(guid) ?? "fell in the dungeon" : null,
+                Resolve = actor != null ? Dd1Stress.Capture(actor) : previous?.Resolve?.Copy(),
                 Quirks = actor?.QuirkContainer?.GetInstances().Select(i => i.Definition.Id).ToList() ?? previous?.Outcome.Quirks?.ToList(),
                 Trinkets = actor?.GetTrinketInventory()?.GetItemIds()?.ToList() ?? previous?.Outcome.Trinkets?.ToList()
             }

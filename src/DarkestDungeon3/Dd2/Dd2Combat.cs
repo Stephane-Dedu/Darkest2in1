@@ -53,6 +53,7 @@ internal static class Dd2Combat
     {
         if (WhyNoRetreat() != null) return false;
         _triedRound = _round;
+        if (Dd1Stress.RefusesRetreat()) return false;
         if (RetreatRng.NextDouble() >= RetreatChance(rules))
         {
             _retreatTries++;

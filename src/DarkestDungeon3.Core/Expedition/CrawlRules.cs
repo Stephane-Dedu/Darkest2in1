@@ -17,7 +17,7 @@ public sealed class DarknessBand
 /// <summary>DD1's crawl rules from <c>shared/rules.json</c>, converted to DD2 scales where needed.</summary>
 public sealed class CrawlRules
 {
-    /// <summary>DD1 stress runs to 100 before an affliction, DD2 to 10 before a meltdown.</summary>
+    /// <summary>Compatible storage scale. Resolve is at 10 units/100 stress; heart attack at 20/200.</summary>
     public const float Dd1StressPerDd2Point = 10f;
 
     public float LightLossNewTile = 6f, LightLossVisitedTile = 1f;

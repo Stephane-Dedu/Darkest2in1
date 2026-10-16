@@ -1,5 +1,22 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round255 stress rework is installed and offline checked. DD1 resolve at100, seven afflictions,
+five virtues, cure at0 and200-stress heart attacks replace normal DD2 meltdown for expedition
+heroes. Flagellant retains native Toxic self-effects through the quest/reload, without stress
+reset or replaying the onset heal/cooldowns. Compatible fractional saves, resolve persistence,
+permanent heart deaths and0–200 HUD are built. Frozen Release+1,242 Core+221 UI pass;24 native
+method/field targets match metadata. Native gameplay acceptance remains [?]. Limits and exact
+acceptance cases: tools/stress_system.md. Private425-file source, overlay, original round254
+rollback, final artifact hashes and deployment: local-art/stress-system-v01.
+
+The owner explicitly answered "Keep DD2 closed; finish offline." Do not launch until the owner
+lifts that hold. No launch/input/estate access was performed for round255. Config,190 private
+scenery/model files and installed heroes/cadence/cache are preserved. Shared corridor work,
+including unrelated CrawlUi hunks, and Shieldbreaker WIP are excluded from this build/commit.
+Normal plugin SHA256 05260b7d62f72375929083ef00d48308badfbc6759a2637974c31dea23eef4aa; Coreb55e2ee7a541c401eb09e21cf6f394de6fa9daff4aa7d6722ce322885e14bc99.
+Use a fresh installed baseline; older rollback helpers would undo round254/255. Next round256.
+Earlier deployment statuses below are historical.
+
 Round254 loading update is installed. Hamlet prewarms from objective completion and through
 both recap pages/native return from Driver.Update. Its terrain bake overlaps model preparation.
 Separable native tile lookups and at most4 CPU workers preserve the complete2048px output

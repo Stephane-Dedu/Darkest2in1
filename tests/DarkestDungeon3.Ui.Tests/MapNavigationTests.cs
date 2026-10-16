@@ -18,7 +18,7 @@ public sealed class MapNavigationTests
         public float HpFraction(string id) => 1;
         public void Damage(string id, float hp, string cause) { }
         public void Heal(string id, float hp) { }
-        public void AddStress(string id, int points, string cause) { }
+        public void AddStress(string id, float points, string cause) { }
         public string AddDd1Quirk(string id, string quirk) => quirk;
         public string PurgeNegative(string id) => null;
         public string CureDisease(string id) => null;

@@ -71,8 +71,10 @@ internal static partial class RosterColumn
             ExpeditionSkin.Text(new Rect(x + 314, y + 5, 40, 30), h.ResolveLevel.ToString(), 26, ExpeditionSkin.Brass, TextAnchor.MiddleCenter, heading: true);
             for (int p = 0; p < 10; p++)
                 ExpeditionSkin.Sprite(new Rect(x + 100 + p * 15, y + 70, 8, 8), "ui_routetype_bg",
-                    p < h.Stress ? h.Stress >= 10 ? ExpeditionSkin.Red : ExpeditionSkin.Ivory : new Color(.24f, .23f, .21f));
-            ExpeditionSkin.Tip(r, $"{h.Name} · {HamletUi.Pretty(h.ClassId)}\nResolve {h.ResolveLevel} · Stress {h.Stress}/10\n" + (l.Note ?? "Click to select · Drag into the party") + "\nRight-click to inspect equipment");
+                    p < h.Stress-10 ? ExpeditionSkin.Red : p < h.Stress ? ExpeditionSkin.Ivory : new Color(.24f, .23f, .21f));
+            ExpeditionSkin.Tip(r, $"{h.Name} · {HamletUi.Pretty(h.ClassId)}\nResolve {h.ResolveLevel} · Stress {Core.Expedition.ResolveStress.Dd1(h.Stress):0.#}/200\n" +
+                (h.Resolve?.TraitId is { } trait ? Dd2.Dd1Stress.Name(trait)+"\n" : "")+
+                (l.Note ?? "Click to select · Drag into the party") + "\nRight-click to inspect equipment");
             if (Gui.Hotspot(r) && !Drag.JustDropped) clicked = h;
         }
         ExpeditionSkin.Text(new Rect(X + 6, 928, 350, 35), estate.Roster.Count > Visible

@@ -421,10 +421,11 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Camp/town buffs carried into fights as DD2 buffs.
 
 ## Afflictions, virtues, deaths
-- [ ] Afflictions/virtues, owner decision 2026-10-10: use DD1's afflictions/virtues (resolve test, `affliction_*`, virtue 25%, `affliction_severity_table`) instead of DD2's meltdown. Exception: the Flagellant keeps DD2's Toxic overstress (DD2 hero_flg `overstresses,toxic`). Combat stays DD2's. Not built yet; before coding, audit the existing stress/meltdown bridge and design how DD1's 100-point resolve test maps onto DD2's 10-point stress. Preserve campaigns.
-- [?] Heart attack at 200 stress → DD2 meltdown/death's door stands in.
+- [?] Round255: DD1 resolve at100 replaces DD2 meltdown for expedition heroes. Installed trait/rule data supplies seven afflictions, five virtues, chance/difficulty/history, cure at0 and virtue loss at200. Fractional compatible stress, trait buffs/turn acts, heal/retreat/supply/camp refusals and0–200 HUD are built. Release+1,242 Core+221 UI and24 native metadata targets pass; no game launch by explicit owner request. Native acceptance and remaining trait adaptations: tools/stress_system.md.
+- [?] Flagellant keeps native DD2 Toxic self-effects at100 through fights/reload, without resetting stress. Restores ongoing virulent-blight/DBR/Scourge effects without replaying HP/cooldowns; cured at0 and subject to200-stress heart attacks. Installed offline; native effect/retaliation checks pending.
+- [?] Round255:200-stress heart attack takes an afflicted/Toxic hero to Death's Door, or kills immediately if already there; permanent heart deaths survive interrupted-fight recovery. Virtuous heroes instead lose virtue and reset stress to0. Native base survivor relief30 leaves170 stress; native modifier mapping and gameplay validation remain pending.
 - [?] Death's door and deathblow from DD2; the dead go to the graveyard with cause/week.
-- [?] Death stress on the party: DD1 `death_party_stress_chance` 0.5 × `death_party_stress_damage` 12 (of 100) per ally; DD2's own `on_ally_death` stress trigger (stress_triggers_data_export: +1 of 10 to each observing hero, 100%) applies in its combat — about the same (DD1 averages 0.6 points). Combat stays DD2's. In game: a hero dying in a fight gives each ally 1 stress.
+- [?] Death stress on the party still uses DD2's native combat trigger: +1 native unit (=10 displayed stress) to each observing hero,100%. DD1's0.5 chance ×12 damage averages6; numeric parity is not claimed. The native trigger was observed before round255; its new0–200 presentation remains pending. Combat stays DD2's.
 
 ## Loot & homecoming
 - [?] DD1 results screen (`raid_results`): quest completed/abandoned backgrounds, heroes, items.

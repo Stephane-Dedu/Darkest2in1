@@ -99,6 +99,43 @@ public class FightCheckpointTests
         Assert.Null(state.FightCheckpoint);
     }
 
+    [Theory]
+    [InlineData("toxic", false, 12.3f)]
+    [InlineData("stalwart", true, 4.5f)]
+    [InlineData(null, false, 0)]
+    public void FightRestartRetainsResolveChangesWithoutRerolling(string? trait, bool virtuous, float stress)
+    {
+        var state=State();state.PartyStates["a"].Resolve=new ResolveState {TraitId="fearful"};
+        Assert.True(ExpeditionFight.Record(state,new FightPlan(),"fight",null,false,false));
+        var current=state.PartyStates["a"];
+        current.Resolve=new ResolveState {TraitId=trait,Virtuous=virtuous,ToxicLevel=trait=="toxic" ? 1 : 0,
+            History={{"fearful",1}},ToxicBuffs={{"flg_toxic_dbr_penalty",1}}};
+        current.Stress=stress;current.Hp=1;
+        var loaded=SaveFile.FromJson(Json(state)).Expedition;
+        Assert.True(ExpeditionFight.RestoreParty(loaded));
+        var restored=loaded.PartyStates["a"];
+        Assert.Equal(12,restored.Hp);Assert.Equal(stress,restored.Stress);
+        Assert.Equal(trait,restored.Resolve.TraitId);Assert.Equal(virtuous,restored.Resolve.Virtuous);
+        Assert.Equal(1,restored.Resolve.History["fearful"]);Assert.Equal(27,loaded.RandomCounter);
+        Assert.Equal(stress,restored.Outcome.Stress);Assert.Equal(trait,restored.Outcome.Resolve.TraitId);
+        restored.Resolve.History.Clear();Assert.Single(current.Resolve.History);
+    }
+
+    [Fact]
+    public void HeartAttackDeathCannotBeRewoundIntoALivingHero()
+    {
+        var state=State();state.PartyStates["a"].Resolve=new ResolveState();
+        Assert.True(ExpeditionFight.Record(state,new FightPlan(),"fight",null,false,false));
+        var dead=state.PartyStates["a"];
+        dead.Resolve.TraitId="toxic";dead.Hp=0;dead.Stress=17;
+        dead.Outcome.Died=true;dead.Outcome.CauseOfDeath="heart attack";
+        var loaded=SaveFile.FromJson(Json(state)).Expedition;
+        Assert.True(ExpeditionFight.RestoreParty(loaded));
+        Assert.True(loaded.PartyStates["a"].Outcome.Died);
+        Assert.Equal("heart attack",loaded.PartyStates["a"].Outcome.CauseOfDeath);
+        Assert.Null(ExpeditionParty.HeroForRestore(new HeroRecord {Id="a"},loaded.PartyStates["a"]));
+    }
+
     private static string Json(ExpeditionState state) => new SaveFile { Expedition = state }.ToJson();
     private static ExpeditionState State() => new()
     {

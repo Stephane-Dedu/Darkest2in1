@@ -12,7 +12,7 @@ namespace DarkestDungeon3.Core.Tests;
 public class FakeParty : IParty
 {
     public Dictionary<string, float> Hp = new();
-    public Dictionary<string, int> Stress = new();
+    public Dictionary<string, float> Stress = new();
     public List<string> Log = new();
 
     public FakeParty(params string[] heroes)
@@ -24,7 +24,7 @@ public class FakeParty : IParty
     public float HpFraction(string heroId) => Hp[heroId];
     public void Damage(string heroId, float f, string cause) { Hp[heroId] = System.Math.Max(0.01f, Hp[heroId] - f); Log.Add($"dmg {heroId} {f} {cause}"); }
     public void Heal(string heroId, float f) => Hp[heroId] = System.Math.Min(1f, Hp[heroId] + f);
-    public void AddStress(string heroId, int points, string cause) => Stress[heroId] += points;
+    public void AddStress(string heroId, float points, string cause) => Stress[heroId] += points;
     public List<string> Quirks = new();
     public string AddDd1Quirk(string heroId, string dd1QuirkId) { Quirks.Add(heroId + ":" + dd1QuirkId); return "dd2_" + dd1QuirkId; }
     public string PurgeNegative(string heroId) => "purged";
@@ -371,7 +371,7 @@ public class CrawlTests
     public void HallwayStressAveragesLikeDd1()
     {
         // DD1: 30% per empty forward square of 2 stress on one hero. DD2 mean: 0.06 for the party.
-        int squares = 0, stress = 0;
+        int squares = 0; float stress = 0;
         for (int seed = 0; seed < 1000; seed++)
         {
             var (crawl, party) = NewCrawl("crypts", "medium", "explore", seed, torches: 0);

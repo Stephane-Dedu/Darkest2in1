@@ -96,7 +96,7 @@ internal sealed class ResultsUi
             if (h.XpGained > 0) Gui.Text(new Rect(rx, y + 98, 110, 26), $"+{h.XpGained} xp", 20, Gui.Dd1Class, TextAnchor.MiddleCenter);
             if (h.ResolveAfter > h.ResolveBefore) Gui.Text(new Rect(x + 300, y + 100, 180, 28), "Resolve up!", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
 
-            Gui.Text(new Rect(x + 130, y + 96, 170, 30), $"Stress {h.Stress}/10", 22, h.Stress >= 7 ? Gui.Blood : Gui.Dd1Text, TextAnchor.MiddleLeft);
+            Gui.Text(new Rect(x + 130, y + 96, 200, 30), $"Stress {Core.Expedition.ResolveStress.Dd1(h.Stress):0.#}/200", 22, h.Stress >= 10 ? Gui.Blood : Gui.Dd1Text, TextAnchor.MiddleLeft);
             float qy = y + 18;
             foreach (var quirk in h.NewQuirks.Take(2))
             {

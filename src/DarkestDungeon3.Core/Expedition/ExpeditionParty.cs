@@ -12,6 +12,7 @@ public sealed class ExpeditionHeroState
 {
     public HeroOutcome Outcome = new();
     public float Hp, HpMax, Stress, WoundPercent;
+    public ResolveState Resolve;
     /// <summary>Monarch's native Oath accumulates within this expedition, never across Hamlet weeks.</summary>
     public MonarchOathState MonarchOath;
 }
@@ -48,7 +49,8 @@ public static class ExpeditionParty
         if (snapshot?.Outcome?.Died == true) return null;
         var copy = JsonConvert.DeserializeObject<HeroRecord>(JsonConvert.SerializeObject(hero));
         if (!IsValid(snapshot)) return copy;
-        copy.Stress = (int)Math.Round(snapshot.Stress);
+        copy.Stress = snapshot.Stress;
+        copy.Resolve = snapshot.Resolve?.Copy() ?? copy.Resolve;
         if (snapshot.Outcome.Quirks != null) copy.Quirks = snapshot.Outcome.Quirks.ToList();
         if (snapshot.Outcome.Trinkets != null) copy.Trinkets = TrinketEquipment.RestoreSlots(hero.Trinkets, snapshot.Outcome.Trinkets);
         return copy;
@@ -57,19 +59,19 @@ public static class ExpeditionParty
     public static ExpeditionHeroState Copy(ExpeditionHeroState snapshot) => new()
     {
         Hp = snapshot.Hp, HpMax = snapshot.HpMax, Stress = snapshot.Stress, WoundPercent = snapshot.WoundPercent,
-        Outcome = CopyOutcome(snapshot.Outcome, snapshot.Stress), MonarchOath = snapshot.MonarchOath?.Copy()
+        Outcome = CopyOutcome(snapshot.Outcome, snapshot.Stress, snapshot.Resolve), MonarchOath = snapshot.MonarchOath?.Copy(), Resolve = snapshot.Resolve?.Copy()
     };
 
     /// <summary>Use recorded condition for recovery/results; older saves retain only their estate evidence.</summary>
     public static List<HeroOutcome> Outcomes(ExpeditionState state, Estate estate) => state.Party.Select(id =>
-        state.PartyStates.TryGetValue(id, out var saved) ? CopyOutcome(saved.Outcome, saved.Stress)
+        state.PartyStates.TryGetValue(id, out var saved) ? CopyOutcome(saved.Outcome, saved.Stress, saved.Resolve)
         : new HeroOutcome { HeroId = id, Died = estate.Hero(id)?.IsDead == true, Stress = estate.Hero(id)?.Stress ?? 0,
-            CauseOfDeath = estate.Hero(id)?.CauseOfDeath }).ToList();
+            CauseOfDeath = estate.Hero(id)?.CauseOfDeath, Resolve = estate.Hero(id)?.Resolve?.Copy() }).ToList();
 
-    private static HeroOutcome CopyOutcome(HeroOutcome outcome, float stress) => new()
+    private static HeroOutcome CopyOutcome(HeroOutcome outcome, float stress, ResolveState resolve = null) => new()
     {
         HeroId = outcome.HeroId, Died = outcome.Died, CauseOfDeath = outcome.CauseOfDeath,
-        Stress = (int)Math.Round(stress), Quirks = outcome.Quirks?.ToList(), Trinkets = outcome.Trinkets?.ToList()
+        Stress = stress, Quirks = outcome.Quirks?.ToList(), Trinkets = outcome.Trinkets?.ToList(), Resolve = (resolve ?? outcome.Resolve)?.Copy()
     };
 
     private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);

@@ -127,6 +127,7 @@ public sealed class CurioResolver
         var e = _effects.Get(effectName);
         report?.Effects.Add(effectName);
         if (e == null) return;
+        if ((party as IResolveParty)?.Allows(heroId,"effect:"+effectName)==false) return;
 
         float stress = e.Float("stress");
         if (stress > 0) AddDd1Stress(party, heroId, stress, rng, effectName);
@@ -151,10 +152,7 @@ public sealed class CurioResolver
 
     private static void AddDd1Stress(IParty party, string heroId, float dd1, Rng rng, string cause)
     {
-        float points = Math.Abs(dd1) / Expedition.CrawlRules.Dd1StressPerDd2Point;
-        int whole = (int)Math.Floor(points);
-        if (rng.Chance(points - whole)) whole++;
-        if (whole > 0) party.AddStress(heroId, Math.Sign(dd1) * whole, cause);
+        if (dd1 != 0) party.AddStress(heroId,ResolveStress.Units(dd1),cause);
     }
 
     private static T PickWeighted<T>(IList<T> items, Func<T, float> weight, Rng rng) where T : class

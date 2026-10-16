@@ -461,13 +461,15 @@ public sealed class Crawl
     /// <summary>Supplies used on a living hero. Consume only when a heal or treatment succeeds.</summary>
     public string UseSupply(string heroId, string key)
     {
-        if (State.Ended || heroId == null || !_party.Alive.Contains(heroId)) return null;
+        if (State.Ended || heroId == null || key == null || !_party.Alive.Contains(heroId)) return null;
+        if (State.Pack.Count(key)<=0) return null;
         if (key == Supply.Food)
         {
             // DD1: a provision eaten from the pack heals provision_hp_heal (5%) of max HP.
             if (_party.HpFraction(heroId) >= 1f) return null;
             int eaten = State.ProvisionsConsumed.TryGetValue(heroId, out var count) ? count : 0;
             if (eaten >= _rules.MaxProvisionsBeforeFull) return null;
+            if ((_party as IResolveParty)?.Allows(heroId,"block_item")==false) return null;
             if (!State.Pack.TryUse(Supply.Food)) return null;
             State.ProvisionsConsumed[heroId] = eaten + 1;
             _party.Heal(heroId, _rules.ProvisionHeal);
@@ -476,12 +478,14 @@ public sealed class Crawl
         string cured = key == Supply.Bandage ? "bleed" : key == Supply.Antivenom ? "blight" : null;
         if (cured != null && State.TravelEffects.Any(e => e.HeroId == heroId && e.Kind == cured))
         {
+            if ((_party as IResolveParty)?.Allows(heroId,"block_item")==false) return null;
             if (!State.Pack.TryUse(key)) return null;
             State.TravelEffects.RemoveAll(e => e.HeroId == heroId && e.Kind == cured);
             return cured == "bleed" ? "Bleeding stopped." : "Blight cured.";
         }
         if (key == Supply.HolyWater)
         {
+            if ((_party as IResolveParty)?.Allows(heroId,"block_item")==false) return null;
             if (!State.Pack.TryUse(Supply.HolyWater)) return null;
             // DD1 effect "holy_water": four resistance buffs for 3 battles.
             if (!State.PendingBuffs.TryGetValue(heroId, out var list)) State.PendingBuffs[heroId] = list = new List<string>();
@@ -645,6 +649,7 @@ public sealed class Crawl
         var rng = NextRng();
         foreach (var hero in _party.Alive)
         {
+            if (meal!=Meal.None && (_party as IResolveParty)?.Allows(hero,"block_camping_meal")==false) continue;
             if (heal > 0) _party.Heal(hero, heal);
             else if (heal < 0) _party.Damage(hero, -heal, "hunger");
             if (stress != 0) StressDd1(hero, stress, rng, "meal");
@@ -680,6 +685,9 @@ public sealed class Crawl
         string key = heroId + ":" + skillId;
         camp.Uses[key] = (camp.Uses.TryGetValue(key, out var n) ? n : 0) + 1;
 
+        if ((_party as IResolveParty)?.Allows(heroId,"block_camping_skill_performer")==false) return true;
+        var accepted=new Dictionary<string,bool>();
+
         var rng = NextRng();
         var loot = new List<LootDrop>();
         foreach (var effect in skill.Effects)
@@ -693,7 +701,11 @@ public sealed class Crawl
                 "party_other" => _party.Alive.Where(h => h != heroId).ToArray(),
                 _ => new[] { heroId },
             };
-            foreach (var t in targets) ApplyCampEffect(effect, t, rng, loot);
+            foreach (var t in targets)
+            {
+                if (!accepted.TryGetValue(t,out bool allows)) accepted[t]=allows=(_party as IResolveParty)?.Allows(t,"block_camping_skill_target")!=false;
+                if (allows) ApplyCampEffect(effect,t,rng,loot);
+            }
         }
         if (loot.Count > 0)
         {
@@ -842,17 +854,14 @@ public sealed class Crawl
     }
 
     /// <summary>
-    /// DD1 stress amounts become whole DD2 points by probabilistic rounding: 2 DD1 stress is a 20% chance of
-    /// one DD2 point, 15 is one point plus a 50% chance of a second.
+    /// Preserve small DD1 stress amounts exactly on the compatible fractional native scale.
     /// </summary>
     private void StressDd1(string hero, float dd1Amount, Rng rng, string cause)
     {
-        float points = dd1Amount / CrawlRules.Dd1StressPerDd2Point;
-        int whole = (int)Math.Floor(points);
-        if (rng.Chance(points - whole)) whole++;
-        if (whole == 0) return;
-        _party.AddStress(hero, whole, cause);
-        Emit(CrawlEventType.Stress, heroId: hero, amount: whole, contentId: cause);
+        float points = (float)Math.Round(dd1Amount,MidpointRounding.AwayFromZero) / CrawlRules.Dd1StressPerDd2Point;
+        if (points == 0) return;
+        _party.AddStress(hero, points, cause);
+        Emit(CrawlEventType.Stress, heroId: hero, amount: points, contentId: cause);
     }
 
     private void HungerCheck()

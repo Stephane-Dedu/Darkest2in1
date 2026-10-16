@@ -23,7 +23,7 @@ public class ExpeditionPartyTests
         string before = Json(state);
         var outcomes = ExpeditionParty.Outcomes(state, new Estate());
         var outcome = Assert.Single(outcomes);
-        Assert.Equal(4, outcome.Stress);
+        Assert.Equal(3.5f, outcome.Stress);
         outcome.Quirks.Clear(); outcome.Trinkets.Add("later_ring"); outcome.Died = true;
         Assert.Equal(before, Json(state));
         Assert.Equal(27, state.RandomCounter);

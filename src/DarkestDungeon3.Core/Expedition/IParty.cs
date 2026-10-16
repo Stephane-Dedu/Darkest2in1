@@ -4,7 +4,7 @@ namespace DarkestDungeon3.Core.Expedition;
 
 /// <summary>
 /// The four heroes on the expedition, as the crawl rules see them. In the game this wraps DD2's real actors
-/// (so DD2 owns HP, death's door and meltdowns); in tests it's a plain fake.
+/// (DD2 owns HP/death's door; the expedition owns resolve); in tests it's a plain fake.
 /// </summary>
 public interface IParty
 {
@@ -18,8 +18,8 @@ public interface IParty
 
     void Heal(string heroId, float maxHpFraction);
 
-    /// <summary>Add DD2 stress points (negative relieves).</summary>
-    void AddStress(string heroId, int points, string cause);
+    /// <summary>Add fractional native units, ten DD1 stress per unit. Negative relieves.</summary>
+    void AddStress(string heroId, float points, string cause);
 
     /// <summary>Give a quirk or disease named by its DD1 id; the game maps it to DD2. Returns the DD2 id or null.</summary>
     string AddDd1Quirk(string heroId, string dd1QuirkId);
@@ -35,4 +35,10 @@ public interface IParty
 public interface ITravelResistance
 {
     float Resistance(string heroId, string kind);
+}
+
+/// <summary>Affliction reactions at the campaign interaction boundary.</summary>
+public interface IResolveParty
+{
+    bool Allows(string heroId, string reaction);
 }

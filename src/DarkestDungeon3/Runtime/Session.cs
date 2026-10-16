@@ -34,6 +34,7 @@ internal sealed class Session
     public Buildings Buildings;
     public CrawlContent Content;
     public CrawlRules Rules;
+    public ResolveStress ResolveRules;
     public Dd1Lore Lore;
     public Provisioner Provisioner;
     public ZoneEncounters Zones;
@@ -76,6 +77,7 @@ internal sealed class Session
                 s.MemoryTrinkets = Dd1Trinkets.LoadBase(dd1);
                 Stage(4, "Reading dungeon rules");
                 s.Rules = CrawlRules.FromDd1(s.Campaign.Rules);
+                s.ResolveRules = ResolveStress.Load(dd1,s.Campaign.Rules);
                 Stage(5, "Reading names and campaign lore");
                 s.Lore = Dd1Lore.Load(dd1);
                 Stage(6, "Preparing the provisioner");

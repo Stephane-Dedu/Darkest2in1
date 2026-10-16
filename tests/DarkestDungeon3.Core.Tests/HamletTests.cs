@@ -252,11 +252,11 @@ public class HamletTests
             var h = NewHamlet(seed);
             h.Estate.QuestsCompleted = 5;
             h.Estate.Add(Currency.Gold, 10000);
-            var hero = h.Estate.Roster[0];
-            h.StartActivity(hero.Id, "tavern.bar");
+            var hero = h.Estate.Roster[1]; // Dismas can visit the bar; Reynauld's God Fearing forbids it.
+            Assert.True(h.StartActivity(hero.Id, "tavern.bar"));
             var log = h.EndWeek();
             weeks++;
-            if (log.Count > 1) effects++;
+            if (log.Count(line => !line.Contains("rested in the Hamlet")) > 1) effects++;
         }
         double rate = effects / (double)weeks;
         _out.WriteLine($"bar side-effect rate: {rate:P1}");

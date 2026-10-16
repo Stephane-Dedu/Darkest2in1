@@ -168,7 +168,7 @@ internal static class FightBuffs
 }
 
 /// <summary>DD1's stress resistance buffs (Pep Talk ...) during our fights: scale the stress DD2 deals to that hero.
-/// DD2 stress comes in whole points, so the fraction is rolled (70% of 1 point = 1 point 70% of the time).</summary>
+/// Expedition heroes retain fractional units; unrelated native actors retain the original integer roll.</summary>
 [HarmonyLib.HarmonyPatch(typeof(ActorInstance), nameof(ActorInstance.ApplyStressDamage))]
 internal static class StressTakenInOurFights
 {
@@ -177,6 +177,7 @@ internal static class StressTakenInOurFights
     private static void Prefix(ActorInstance __instance, ref float damage)
     {
         if (damage <= 0f || !Dd2Combat.InFight || !FightBuffs.StressTakenMultiplier.TryGetValue(__instance.ActorGuid, out float k)) return;
+        if (Dd1Stress.Owns(__instance)) { damage *= k; return; }
         float scaled = damage * k;
         float whole = (float)System.Math.Floor(scaled);
         damage = whole + (Rng.NextDouble() < scaled - whole ? 1f : 0f);

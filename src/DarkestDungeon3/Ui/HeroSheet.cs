@@ -143,7 +143,7 @@ internal static class HeroSheet
         {
             ("Max HP", Gui.Num(Mathf.Round(c.Get("health_max") * (1f + armourHp / 100f)), "0")),
             ("Speed", Gui.Num(c.Get("speed") + weaponSpd, "0")),
-            ("Stress", "max " + Gui.Num(c.Get("stress_max"), "0")),
+            ("Stress", "Resolve at 100 · heart attack at 200"),
             ("Death's door", Gui.Num(c.Get("deaths_door_chance") * 100f, "0") + "%"),
         };
         for (int i = 0; i < lines.Count; i++)

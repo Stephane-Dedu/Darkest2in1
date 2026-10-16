@@ -1245,7 +1245,8 @@ internal sealed partial class HamletUi
         Gui.Text(new Rect(Window.x + 40, Window.y + 20, 900, 60), $"{h.Name}", 46, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         Gui.Text(new Rect(Window.x + 40, Window.y + 72, 900, 30), $"{Pretty(h.ClassId)}, resolve level {h.ResolveLevel}", 24, Gui.Dd1Class, TextAnchor.MiddleLeft);
         Gui.Text(new Rect(area.x + 20, area.y + 10, area.width - 40, 300),
-            $"Stress {h.Stress}/10   ({h.ResolveXp} resolve xp)\n\n" +
+            $"Stress {Core.Expedition.ResolveStress.Dd1(h.Stress):0.#}/200   ({h.ResolveXp} resolve xp)\n" +
+            (h.Resolve?.TraitId is { } trait ? Dd2.Dd1Stress.Name(trait)+"\n" : "")+"\n" +
             $"Quirks: {string.Join(", ", h.Quirks.Select(QuirkName))}\n\n" +
             $"Camp skills: {string.Join(", ", h.CampingSkills.Select(Pretty))}\n\n" +
             $"Trinkets: {(!h.WornTrinkets.Any() ? "none" : string.Join(", ", h.WornTrinkets.Select(Pretty)))}" +

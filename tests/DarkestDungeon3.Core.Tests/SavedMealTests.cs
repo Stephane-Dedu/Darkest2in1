@@ -40,7 +40,7 @@ public class SavedMealTests
         foreach (var id in loaded.Party)
         {
             restored.Hp[id] = loaded.PartyStates[id].Hp / 30;
-            restored.Stress[id] = (int)loaded.PartyStates[id].Stress;
+            restored.Stress[id] = loaded.PartyStates[id].Stress;
         }
         var resumed = new Crawl(loaded, rules, restored);
         Assert.Single(resumed.Resume());

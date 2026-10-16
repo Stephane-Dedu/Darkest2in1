@@ -5,7 +5,8 @@ using System.Linq;
 namespace DarkestDungeon3.Core.Expedition;
 
 /// <summary>A fresh native fight restarts both teams, supplies and statuses from its beginning. The mod does
-/// not restore DD2's complete combat state, so it cannot retain mid-fight item spending or treatment either.</summary>
+/// not restore DD2's complete combat state, so it cannot retain mid-fight item spending or treatment either.
+/// Quest resolve conditions, their stress and permanent heart-attack deaths are retained.</summary>
 public sealed class FightCheckpoint
 {
     public int RoomId, CorridorId, TileIndex;
@@ -64,7 +65,19 @@ public static class ExpeditionFight
     {
         var saved = Current(state);
         if (saved == null) return false;
-        state.PartyStates = state.Party.ToDictionary(id => id, id => ExpeditionParty.Copy(saved.PartyStates[id]));
+        state.PartyStates = state.Party.ToDictionary(id => id, id =>
+        {
+            var restart=ExpeditionParty.Copy(saved.PartyStates[id]);
+            // Combat restarts mechanically; quest resolve history/condition and stress do not reroll.
+            // Legacy snapshots with no resolve state retain their old restart behavior.
+            if(state.PartyStates.TryGetValue(id,out var current) && current.Resolve!=null && ExpeditionParty.IsValid(current))
+            {
+                restart.Resolve=current.Resolve.Copy();restart.Stress=current.Stress;
+                restart.Outcome.Resolve=current.Resolve.Copy();restart.Outcome.Stress=current.Stress;
+                if(current.Outcome.Died && current.Outcome.CauseOfDeath=="heart attack") return ExpeditionParty.Copy(current);
+            }
+            return restart;
+        });
         state.Light = saved.Light;
         if (saved.Pack != null) state.Pack = Copy(saved.Pack);
         if (saved.TravelEffects != null) state.TravelEffects = Copy(saved.TravelEffects);

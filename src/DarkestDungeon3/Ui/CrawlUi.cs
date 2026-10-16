@@ -463,6 +463,7 @@ internal sealed class CrawlUi
                 // DD1: a red health bar and ten stress pips at the hero's feet.
                 Gui.Bar(new Rect(x - 55, Feet + 10, 110, 9), Dd2Api.HpFraction(actor), Gui.Dd1Health);
                 DrawStressPips(x - 50, Feet + 24, actor.Stress, actor.StressMax);
+                Gui.Tip(new Rect(x-55,Feet+22,110,18).Contains(Event.current.mousePosition) ? Dd1Stress.Description(actor) : null);
                 var conditions = exp.TravelEffects.Where(e => e.HeroId == id).ToList();
                 if (conditions.Count > 0)
                 {
@@ -514,10 +515,10 @@ internal sealed class CrawlUi
         var full = Art.Overlay("stress_pip_full.png");
         var over = Art.Overlay("stress_pip_full_overstressed.png");
         var empty = Art.Overlay("stress_pip_empty.png");
-        int pips = Mathf.Max(1, Mathf.RoundToInt(max));
+        const int pips = 10;
         for (int i = 0; i < pips; i++)
         {
-            var tex = i < stress ? (stress >= max ? over : full) : empty;
+            var tex = i < stress-10 ? over ?? full : i < stress ? full : empty;
             if (tex != null) GUI.DrawTexture(new Rect(x + i * 10, y, 9, 11), tex);
         }
     }
@@ -642,7 +643,8 @@ internal sealed class CrawlUi
         // Hero panel (DD1 panel.hero.darkest at 240,856): health at (130,11) in red, stress at (130,40) in grey,
         // then DD1's one column of stats at (60,72) in its "stat" font (ubuntu_small): grey label, white value.
         Gui.Text(new Rect(370, 862, 200, 28), $"{actor.HpRounded:0}/{actor.CurrentHpMax:0}", 22, new Color(0.75f, 0f, 0f), TextAnchor.MiddleLeft);
-        Gui.Text(new Rect(370, 891, 200, 28), $"{actor.Stress:0}/{actor.StressMax:0}", 22, new Color(0.59f, 0.59f, 0.59f), TextAnchor.MiddleLeft);
+        Gui.Text(new Rect(370, 891, 280, 28), $"{Core.Expedition.ResolveStress.Dd1(actor.Stress):0.#}/200" +
+            (Dd1Stress.Trait(actor) is { } trait ? " · " + Dd1Stress.Name(trait) : ""), 20, new Color(0.75f, 0.73f, 0.67f), TextAnchor.MiddleLeft);
         float dmg = actor.GetClampedStatValue(ActorStatType.HEALTH_DAMAGE), range = actor.GetClampedStatValue(ActorStatType.HEALTH_DAMAGE_RANGE);
         int dodge = actor.TokenContainer.GetNumberOfTokensWithId("dodge", false) + actor.TokenContainer.GetNumberOfTokensWithId("dodge_plus", false);
         int block = actor.TokenContainer.GetNumberOfTokensWithId("block", false) + actor.TokenContainer.GetNumberOfTokensWithId("block_plus", false);
