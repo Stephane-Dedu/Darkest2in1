@@ -97,7 +97,7 @@ public sealed class CurioResolver
                 break;
             case "Effect":
                 var effect = PickWeighted(outcome.Results, r => r.Weight, rng);
-                if (effect != null) ApplyEffect(effect.Name, heroId, party, rng, report);
+                if (effect != null) ApplyEffect(effect.Name, heroId, party, rng, report, state);
                 break;
             case "Quirk":
             case "Disease":
@@ -122,7 +122,7 @@ public sealed class CurioResolver
     }
 
     /// <summary>Apply a DD1 effect out of combat: stress, stress relief, healing, and damage over time.</summary>
-    public void ApplyEffect(string effectName, string heroId, IParty party, Rng rng, CurioReport report = null)
+    public void ApplyEffect(string effectName, string heroId, IParty party, Rng rng, CurioReport report = null, ExpeditionState state = null)
     {
         var e = _effects.Get(effectName);
         report?.Effects.Add(effectName);
@@ -136,9 +136,17 @@ public sealed class CurioResolver
         float heal = e.Float("heal");
         if (heal > 0) party.Heal(heroId, heal / TypicalDd1Hp);
 
-        // Out of combat a DoT simply lands: damage per turn times its duration.
-        float dot = e.Float("dotPoison") + e.Float("dotBleed");
-        if (dot > 0) party.Damage(heroId, dot * Math.Max(1, e.Int("duration", fallback: 1)) / TypicalDd1Hp, effectName);
+        // Keep the treatment window. Effects tick on later movement, never on resolution or resume.
+        foreach (var (field, kind) in new[] { ("dotPoison", "blight"), ("dotBleed", "bleed") })
+        {
+            float dot = e.Float(field);
+            if (dot <= 0 || state == null) continue;
+            float resistance = (party as ITravelResistance)?.Resistance(heroId, kind) ?? 0f;
+            if (!rng.Chance(Math.Max(0f, e.Float("chance", fallback: 1f) - resistance))) continue;
+            state.TravelEffects.Add(new TravelEffect { HeroId = heroId, Kind = kind,
+                DamageFraction = dot / TypicalDd1Hp, TurnsLeft = Math.Max(1, e.Int("duration", fallback: 1)) });
+            report?.Effects.Add(kind == "bleed" ? "Bleeding. Use a bandage before travelling." : "Blighted. Use antivenom before travelling.");
+        }
     }
 
     private static void AddDd1Stress(IParty party, string heroId, float dd1, Rng rng, string cause)

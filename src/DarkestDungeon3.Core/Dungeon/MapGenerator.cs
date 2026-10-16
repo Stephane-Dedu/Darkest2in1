@@ -90,6 +90,7 @@ public static class MapGenerator
         FillRooms(map, p, rng, props);
         FillHalls(map, p, rng, props);
         PlaceQuestCurios(map, goal, rng);
+        SpaceHallCurios(map, props, rng);
         return map;
     }
 
@@ -198,6 +199,35 @@ public static class MapGenerator
         {
             r.Content = RoomContent.Curio;
             r.CurioId = props.Pick(ZoneProps.RoomCurios, rng);
+        }
+    }
+
+    private static void SpaceHallCurios(DungeonMap map, ZoneProps props, Rng rng)
+    {
+        // Preserve encounter counts and quest objectives. Within each hall prefer a walking square
+        // between ordinary curios; crowded halls still use their native weighted prop table.
+        foreach (var hall in map.Corridors)
+        {
+            bool Curio(int i) => i >= 0 && i < hall.Tiles.Count && hall.Tiles[i].Content == HallContent.Curio;
+            for (int i = 1; i < hall.Tiles.Count; i++)
+            {
+                var tile = hall.Tiles[i];
+                if (!Curio(i) || !Curio(i - 1) || tile.IsQuestGoal) continue;
+                var holes = Enumerable.Range(0, hall.Tiles.Count)
+                    .Where(j => hall.Tiles[j].Content == HallContent.Empty && !hall.Tiles[j].IsQuestGoal && !Curio(j - 1) && !Curio(j + 1)).ToList();
+                if (holes.Count > 0)
+                {
+                    var target = hall.Tiles[rng.Pick(holes)];
+                    target.Content = tile.Content; target.ContentId = tile.ContentId;
+                    tile.Content = HallContent.Empty; tile.ContentId = null;
+                }
+                else
+                {
+                    var neighbours = new HashSet<string> { hall.Tiles[i - 1].ContentId };
+                    if (Curio(i + 1)) neighbours.Add(hall.Tiles[i + 1].ContentId);
+                    if (neighbours.Contains(tile.ContentId)) tile.ContentId = props.Pick(ZoneProps.HallCurios, rng, tile.ContentId, neighbours);
+                }
+            }
         }
     }
 

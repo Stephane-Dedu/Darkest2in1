@@ -1,3 +1,6 @@
+using System;
+using System.Threading;
+
 namespace DarkestDungeon3.Core.Presentation;
 
 /// <summary>Material grading shared by the native town and its private composition preview.</summary>
@@ -60,6 +63,20 @@ public static class HamletPalette
         return Encode(luminance+(r-luminance)*paint.Saturation+paint.Brightness)<<16
             | Encode(luminance+(g-luminance)*paint.Saturation+paint.Brightness)<<8
             | Encode(luminance+(b-luminance)*paint.Saturation+paint.Brightness);
+    }
+
+    /// <summary>Grade an exclusively owned RGBA readback on a worker, preserving every alpha byte.</summary>
+    public static void GradeRgba(byte[] pixels, Paint paint, CancellationToken cancellation = default)
+    {
+        if (pixels == null || pixels.Length % 4 != 0)
+            throw new ArgumentException("Paint grading requires complete RGBA pixels.", nameof(pixels));
+        cancellation.ThrowIfCancellationRequested();
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            if ((i & 16383) == 0) cancellation.ThrowIfCancellationRequested();
+            int rgb = GradeRgb(pixels[i], pixels[i + 1], pixels[i + 2], paint);
+            pixels[i] = (byte)(rgb >> 16); pixels[i + 1] = (byte)(rgb >> 8); pixels[i + 2] = (byte)rgb;
+        }
     }
 
     private static float[] BuildLinear()

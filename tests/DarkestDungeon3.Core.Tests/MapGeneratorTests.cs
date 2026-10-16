@@ -14,6 +14,18 @@ public class MapGeneratorTests
     private static readonly Dd1Install Dd1 = Dd1Install.Find();
 
     [Fact]
+    public void City_corridors_do_not_repeat_the_same_curio_in_adjacent_squares()
+    {
+        var campaign = Core.Campaign.Dd1Campaign.Load(Dd1);
+        var p = campaign.MapGen.Find("dd2_city", "short", "explore");
+        var map = MapGenerator.Generate(p, 2, campaign.Props("dd2_city"));
+        foreach (var hall in map.Corridors)
+            for (int i = 1; i < hall.Tiles.Count; i++)
+                Assert.False(hall.Tiles[i].Content == HallContent.Curio && hall.Tiles[i - 1].Content == HallContent.Curio
+                    && hall.Tiles[i].ContentId == hall.Tiles[i - 1].ContentId);
+    }
+
+    [Fact]
     public void Dd1IsInstalled() => Assert.NotNull(Dd1);
 
     [Fact]

@@ -355,6 +355,7 @@ public sealed class Crawl
     {
         _events.Clear();
         if (State.Ended) return Blocked();
+        State.ProvisionsConsumed.Clear();
         if (State.InRoom)
         {
             var corridor = State.CameFromCorridorId >= 0 ? Map.Corridor(State.CameFromCorridorId) : null;
@@ -405,6 +406,7 @@ public sealed class Crawl
         State.PendingEncounter = null;
         State.FightCheckpoint = null;
         State.BattlesWon++;
+        State.ProvisionsConsumed.Clear();
         LastSpoils = TakeSpoils(State.InRoom ? (CurrentRoom.Content == RoomContent.Boss ? "boss" : "room") : "hall");
         CountDownBuffs();
         if (State.InRoom)
@@ -456,8 +458,7 @@ public sealed class Crawl
         }
     }
 
-    /// <summary>DD1 supplies used on a hero outside combat. Returns what happened, or null if it does nothing here
-    /// (bleed, blight and horror don't outlast a DD2 fight, so bandages, antivenom and laudanum wait for curios).</summary>
+    /// <summary>Supplies used on a living hero. Consume only when a heal or treatment succeeds.</summary>
     public string UseSupply(string heroId, string key)
     {
         if (State.Ended || heroId == null || !_party.Alive.Contains(heroId)) return null;
@@ -465,9 +466,19 @@ public sealed class Crawl
         {
             // DD1: a provision eaten from the pack heals provision_hp_heal (5%) of max HP.
             if (_party.HpFraction(heroId) >= 1f) return null;
+            int eaten = State.ProvisionsConsumed.TryGetValue(heroId, out var count) ? count : 0;
+            if (eaten >= _rules.MaxProvisionsBeforeFull) return null;
             if (!State.Pack.TryUse(Supply.Food)) return null;
+            State.ProvisionsConsumed[heroId] = eaten + 1;
             _party.Heal(heroId, _rules.ProvisionHeal);
             return $"Ate a provision: +{Math.Round(_rules.ProvisionHeal * 100)}% health.";
+        }
+        string cured = key == Supply.Bandage ? "bleed" : key == Supply.Antivenom ? "blight" : null;
+        if (cured != null && State.TravelEffects.Any(e => e.HeroId == heroId && e.Kind == cured))
+        {
+            if (!State.Pack.TryUse(key)) return null;
+            State.TravelEffects.RemoveAll(e => e.HeroId == heroId && e.Kind == cured);
+            return cured == "bleed" ? "Bleeding stopped." : "Blight cured.";
         }
         if (key == Supply.HolyWater)
         {
@@ -483,6 +494,9 @@ public sealed class Crawl
         }
         return null;
     }
+
+    public bool IsFull(string heroId) => heroId != null && State.ProvisionsConsumed.TryGetValue(heroId, out int n)
+        && n >= _rules.MaxProvisionsBeforeFull;
 
     /// <summary>Where the party stands, as a key for the fight waiting there.</summary>
     private string FightSpot => State.InRoom ? "room:" + State.RoomId : $"hall:{State.CorridorId}:{State.TileIndex}";
@@ -543,7 +557,7 @@ public sealed class Crawl
                 float health = obstacle?.HealthFraction ?? -0.05f;
                 if (health < 0) _party.Damage(hero, -health, "obstacle");
                 if (obstacle != null)
-                    foreach (var effect in obstacle.FailEffects) _content.Curios.ApplyEffect(effect, hero, _party, rng);
+                    foreach (var effect in obstacle.FailEffects) _content.Curios.ApplyEffect(effect, hero, _party, rng, state: State);
                 else StressDd1(hero, 15, rng, "obstacle");
             }
         }
@@ -700,6 +714,8 @@ public sealed class Crawl
             case "health_heal_max_health_percent": _party.Heal(hero, effect.Amount); break;
             case "health_damage_max_health_percent": _party.Damage(hero, effect.Amount, "camp"); break;
             case "remove_disease": _party.CureDisease(hero); break;
+            case "remove_bleeding": State.TravelEffects.RemoveAll(e => e.HeroId == hero && e.Kind == "bleed"); break;
+            case "remove_poison": State.TravelEffects.RemoveAll(e => e.HeroId == hero && e.Kind == "blight"); break;
             case "reduce_ambush_chance": State.Camp.AmbushReduction += effect.Amount; break;
             case "reduce_torch": ChangeLight(-effect.Amount); break;
             case "buff":
@@ -718,8 +734,7 @@ public sealed class Crawl
                         loot.Add(drop);
                     }
                 break;
-            // remove_bleeding / remove_poison / remove_deaths_door_recovery_buffs: DoTs already landed out of
-            // combat, and DD2 owns death's door recovery, so there's nothing left to undo.
+            // DD2 owns death's door recovery.
         }
     }
 
@@ -756,6 +771,7 @@ public sealed class Crawl
         var tile = CurrentTile;
         var rng = NextRng();
         State.StepsTaken++;
+        TickTravelEffects();
 
         HallwayStress(forward, rng);
         ChangeLight(-(tile.Visited ? _rules.LightLossVisitedTile : _rules.LightLossNewTile));
@@ -858,6 +874,22 @@ public sealed class Crawl
         Emit(CrawlEventType.Starving, amount: alive.Count);
     }
 
+    private void TickTravelEffects()
+    {
+        foreach (var effect in State.TravelEffects.ToArray())
+        {
+            if (!_party.Alive.Contains(effect.HeroId)) { State.TravelEffects.Remove(effect); continue; }
+            effect.StepProgress += Math.Max(0f, _rules.DotHallwayStepRatio);
+            while (effect.StepProgress >= 1f && effect.TurnsLeft > 0)
+            {
+                effect.StepProgress -= 1f;
+                _party.Damage(effect.HeroId, effect.DamageFraction, effect.Kind);
+                effect.TurnsLeft--;
+            }
+            if (effect.TurnsLeft <= 0) State.TravelEffects.Remove(effect);
+        }
+    }
+
     private void TriggerTrap(HallTile tile, bool scouted, string heroId = null)
     {
         var rng = NextRng();
@@ -868,7 +900,7 @@ public sealed class Crawl
         if (scouted && rng.Chance(TrapDisarmChance(hero, scouted)))
         {
             if (hero != null && trap != null)
-                foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
+                foreach (var e in trap.SuccessEffects) _content.Curios.ApplyEffect(e, hero, _party, rng, state: State);
             Emit(CrawlEventType.TrapDisarmed, tile: tile, contentId: tile.ContentId, heroId: hero);
             return;
         }
@@ -877,7 +909,7 @@ public sealed class Crawl
             if (trap != null)
             {
                 if (trap.HealthFraction < 0) _party.Damage(hero, -trap.HealthFraction, "trap");
-                foreach (var e in trap.FailEffects) _content.Curios.ApplyEffect(e, hero, _party, rng);
+                foreach (var e in trap.FailEffects) _content.Curios.ApplyEffect(e, hero, _party, rng, state: State);
             }
             else
             {
@@ -974,7 +1006,7 @@ public sealed class Crawl
     /// <summary>Mark the quest done once its goal is met (called as the party moves and fights).</summary>
     public void CheckQuest()
     {
-        if (State.Ended || State.QuestComplete || State.Quest == null) return;
+        if (State.Ended || State.QuestComplete || State.Quest == null || _party.Alive.Count == 0) return;
         var goal = State.Goal;
         bool done = goal?.Type == "tutorial_room"
             // DD1's opening raid: reach the last room and win its fight.
@@ -1034,8 +1066,18 @@ public sealed class Crawl
 
     private List<CrawlEvent> Flush()
     {
+        CheckPartyDefeat();
         var copy = new List<CrawlEvent>(_events);
         _events.Clear();
         return copy;
+    }
+
+    public bool CheckPartyDefeat()
+    {
+        if (State.Party.Count == 0 || _party.Alive.Count > 0) return false;
+        State.Ended = true;
+        State.PendingEncounter = null;
+        _events.RemoveAll(e => e.Type is CrawlEventType.Battle or CrawlEventType.Ambush);
+        return true;
     }
 }

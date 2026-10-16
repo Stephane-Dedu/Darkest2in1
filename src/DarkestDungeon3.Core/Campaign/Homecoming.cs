@@ -69,14 +69,14 @@ public static class Homecoming
         var quest = expedition.Quest;
         estate.LastReturnPlotId = quest?.PlotId;   // DD1's town background after a Darkest Dungeon part
         var outcomeList = RetreatSacrifices(quest, expedition.Retreated, outcomes, estate.NextRng());
-        bool success = expedition.QuestComplete && !expedition.Retreated;
         bool wiped = outcomeList.Count > 0 && outcomeList.All(o => o.Died);
+        bool success = expedition.QuestComplete && !expedition.Retreated && !wiped;
         report.Result = success ? "complete" : wiped ? "defeat" : "retreat";
         report.JournalPages = JournalPages.Collect(estate, expedition.Pack, survived: outcomeList.Any(o => !o.Died));
         foreach (int page in report.JournalPages) log.Add($"Brought home journal page {page}.");
 
-        // Loot carried out of the dungeon always counts, success or not.
-        foreach (var kv in expedition.Pack.Items.ToList())
+        // Survivors carry loot home even after a retreat. A wiped party recovers no pack goods.
+        foreach (var kv in expedition.Pack.Items.Where(_ => !wiped).ToList())
         {
             if (kv.Value <= 0) continue;
             if (kv.Key == Currency.Gold || Currency.Heirlooms.Contains(kv.Key))

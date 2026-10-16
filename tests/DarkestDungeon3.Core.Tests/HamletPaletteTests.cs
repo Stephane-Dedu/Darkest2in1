@@ -1,4 +1,5 @@
 using DarkestDungeon3.Core.Presentation;
+using System.Security.Cryptography;
 
 namespace DarkestDungeon3.Core.Tests;
 
@@ -35,5 +36,38 @@ public class HamletPaletteTests
         Assert.Equal(dull&255,(dull>>8)&255);
         int lifted=HamletPalette.GradeRgb(220,60,20,new(1,1,1,.03f,0));
         Assert.True((lifted&255)>(dull&255));
+    }
+
+    [Theory]
+    [InlineData("building","C1DB926A8A835CEACC6746C7C68F313F8EEE5409A1A9943615551366E102E7D7")]
+    [InlineData("soil","334324E63FCCC139C894F3437C98761B691FC61CA83E7830F8F07729922CD7B7")]
+    [InlineData("rock","F3EE2246608749DADD5B82BF7FFB2870A1563A7526366611AAFBBD6EEEB1DB3F")]
+    [InlineData("grass","2851982A21E20EF94B4DFA82EEAF842F1050FFB39B2332C71A04F81D3C683379")]
+    [InlineData("paving","0E4588B396C3653144CA5870DF15368DF9D52DD08EEB0FCCAB292D736D6EA854")]
+    [InlineData("mountain","A092EF31E3DBC55D996DCDB00C7183AE5C9B311F6E635579412D23322339E151")]
+    [InlineData("wildwood","CE958C641007A440FB5E79F48B644543036A3A646FBEC33601106F4BC19C8C8E")]
+    public async Task WorkerGradingMatchesTheExistingMaterialLoopAndKeepsAlpha(string name,string expected)
+    {
+        var pixels=Enumerable.Range(0,16384).Select(i=>(byte)((i*73+i/2048*19+11)%256)).ToArray();
+        var alpha=pixels.Where((_,i)=>i%4==3).ToArray();
+        var paint=name switch
+        {
+            "building"=>HamletPalette.Building,"soil"=>HamletPalette.Soil,"rock"=>HamletPalette.Rock,
+            "grass"=>HamletPalette.Grass,"paving"=>HamletPalette.Paving,"mountain"=>HamletPalette.Mountain,
+            _=>HamletPalette.Wildwood
+        };
+        await Task.Run(()=>HamletPalette.GradeRgba(pixels,paint));
+        Assert.Equal(expected,Convert.ToHexString(SHA256.HashData(pixels)));
+        Assert.Equal(alpha,pixels.Where((_,i)=>i%4==3));
+    }
+
+    [Fact]
+    public void CancelledGradingLeavesOwnedBytesUntouchedAndRejectsPartialPixels()
+    {
+        using var cancelled=new CancellationTokenSource(); cancelled.Cancel();
+        var pixels=new byte[] {4,27,91,0,255,82,16,255}; var before=(byte[])pixels.Clone();
+        Assert.Throws<OperationCanceledException>(()=>HamletPalette.GradeRgba(pixels,HamletPalette.Building,cancelled.Token));
+        Assert.Equal(before,pixels);
+        Assert.Throws<ArgumentException>(()=>HamletPalette.GradeRgba(new byte[7],HamletPalette.Building));
     }
 }

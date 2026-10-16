@@ -143,6 +143,8 @@ internal sealed partial class EmbarkUi
             : Gui.DdButton(backRect, "Back to the Hamlet", size: 24)) WantsBack = true;
         var heroes = Heroes();
         string why = Embark.WhyCantEmbark(E, _quest, heroes, S.Hamlet.AnyResolveCanEmbark);
+        if (why == null && !Embark.PackFits(S.Campaign, _quest, heroes, _cart, S.Provisioner, S.Content.Items))
+            why = "Make room for the quest items and starting supplies.";
         var provisionRect = new Rect(1190, 905, 330, 90);
         ExpeditionSkin.Text(new Rect(1190, 1006, 330, 40), why ?? "The party is ready to provision.", 22,
             why == null ? ExpeditionSkin.Ivory : ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
@@ -441,6 +443,11 @@ internal sealed partial class EmbarkUi
     private static Rect PackCell(int i) => new(860 + (i % 8) * 80, 560 + (i / 8) * 160, 72, 144);
     private static readonly Rect StoreArea = new(814, 144, 680, 360), PackArea = new(800, 532, 720, 360);
 
+    private Inventory PreviewPack() => Embark.StartingPack(S.Campaign, _quest, Heroes(), _cart, S.Provisioner);
+
+    private int BuyAmount(string id, int wanted)
+        => Embark.PurchaseAmount(S.Campaign, _quest, Heroes(), _cart, S.Provisioner, S.Content.Items, id, wanted);
+
     private void DrawStore(int length)
     {
         var grid = Prov("inventory_grid_background_store.png");
@@ -460,7 +467,7 @@ internal sealed partial class EmbarkUi
             if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped)
             {
                 // Shift buys up to a full stack, and puts the last stack back.
-                if (e.button == 0 && left > 0) _cart.Add(id, e.shift ? _cart.ToFullStack(id, left, items) : 1);
+                if (e.button == 0 && left > 0) _cart.Add(id, BuyAmount(id, e.shift ? _cart.ToFullStack(id, left, items) : 1));
                 else if (e.button == 1 && have > 0) _cart.Add(id, -(e.shift ? _cart.LastStack(id, items) : 1));
                 e.Use();
             }
@@ -468,9 +475,7 @@ internal sealed partial class EmbarkUi
         // A stack dragged back from the pack goes back on the shelf.
         if (Drag.Drop<PackStack>(StoreArea, out var back))
         {
-            var stacks = back.Pack.Arrange(items);
-            var stack = stacks.Find(st => st.Slot == back.Slot);
-            if (stack != null) _cart.Add(stack.Key, -stack.Count);
+            _cart.Add(back.Key, -_cart.LastStack(back.Key, items));
         }
         if (Drag.Hovering<PackStack>(StoreArea)) Gui.Fill(new Rect(StoreArea.x, StoreArea.yMax - 6, StoreArea.width, 4), Gui.Gold);
         string tip = hovered != null
@@ -485,7 +490,9 @@ internal sealed partial class EmbarkUi
         var grid = Prov("inventory_grid_background_party.png");
         if (grid != null) GUI.DrawTexture(PackArea, grid);
         var items = S.Content.Items;
-        var stacks = _cart.Arrange(items);
+        var preview = PreviewPack();
+        var stacks = preview.Arrange(items);
+        _cart.Layout = new List<string>(preview.Layout);
         for (int i = 0; i < Inventory.Slots; i++)
         {
             var r = PackCell(i);
@@ -494,18 +501,20 @@ internal sealed partial class EmbarkUi
             if (Drag.Hovering<ShelfItem>(r) || Drag.Hovering<PackStack>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
             if (stack != null)
             {
-                Drag.Source(r, new PackStack(_cart, i, stack.Key), rect => DrawProvisionStack(rect, stack.Key, stack.Count));
+                bool paid = _cart.Count(stack.Key) > 0;
+                if (paid) Drag.Source(r, new PackStack(_cart, i, stack.Key), rect => DrawProvisionStack(rect, stack.Key, stack.Count));
                 if (!(Drag.Payload is PackStack carried && carried.Pack == _cart && carried.Slot == i))
                     DrawProvisionStack(r, stack.Key, stack.Count);
                 var e = Event.current;
                 if (r.Contains(e.mousePosition) && e.type == EventType.MouseUp && !Drag.Active && !Drag.JustDropped && (e.button == 0 || e.button == 1))
                 {
-                    _cart.Add(stack.Key, -1);
+                    if (paid) _cart.Add(stack.Key, -1);
                     e.Use();
                 }
+                if (!paid) ExpeditionSkin.Tip(r, "Starting supplies\nReserved for this expedition. Included at no cost.");
             }
             if (Drag.Drop<PackStack>(r, out var moved) && moved.Pack == _cart) _cart.Move(moved.Slot, i);
-            if (Drag.Drop<ShelfItem>(r, out var bought) && _cart.HasRoomFor(bought.Id, 1, items))
+            if (Drag.Drop<ShelfItem>(r, out var bought) && BuyAmount(bought.Id, 1) > 0)
             {
                 _cart.Add(bought.Id, 1);
                 // Put a brand new stack where it was dropped.
@@ -516,7 +525,8 @@ internal sealed partial class EmbarkUi
         if (stacks.Count == 0)
             ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.yMax - 35, PackArea.width, 30), "The pack is empty. Drag food and torches into it.", 23, ExpeditionSkin.Muted, TextAnchor.MiddleCenter);
         if (stacks.Count > Inventory.Slots)
-            ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.yMax - 30, PackArea.width, 30), "The pack holds 16 stacks: the rest stays behind.", 22, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
+            ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.yMax - 30, PackArea.width, 30), "Return supplies to make room for the quest items.", 22, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
+        ExpeditionSkin.Text(new Rect(PackArea.x, PackArea.y - 28, PackArea.width, 26), $"{stacks.Count}/16 stacks · Starting and quest supplies included", 21, ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
     }
 
     private int CartCost() { var hamlet = S.Hamlet; return _cart.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value); }

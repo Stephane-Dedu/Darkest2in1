@@ -46,6 +46,7 @@ internal static class CampaignAssets
             var session = Session.Current;
             if (!_queued)
             {
+                Ui.CampaignPanelSkin.Prepare();
                 Art.PrepareTown(session.Dd1);
                 foreach (var spot in session.TownLayout.Spots.Where(s => s.Id != "circus"))
                 {

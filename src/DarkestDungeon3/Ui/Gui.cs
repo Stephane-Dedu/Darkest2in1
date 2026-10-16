@@ -101,6 +101,7 @@ internal static class Gui
 
     public static float TextHeight(string text, float size, float width, bool heading = false)
     {
+        if (CampaignPanelSkin.Active) return CampaignPanelSkin.TextHeight(text, size, width, heading);
         size *= heading ? HeadingScale : BodyScale;
         var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
         if (font != null) return font.Measure(text, size, width).y;
@@ -110,6 +111,7 @@ internal static class Gui
 
     public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
     {
+        if (CampaignPanelSkin.Active) { CampaignPanelSkin.Text(r, text, size, colour, align, heading); return; }
         size *= heading ? HeadingScale : BodyScale;
         // The large DwarvenAxe page (63 px lines) stays sharp for titles.
         var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
@@ -132,6 +134,7 @@ internal static class Gui
     /// <summary>A DD1-style text button: dark plate, thin gold frame, DwarvenAxe label, brighter on hover.</summary>
     public static bool DdButton(Rect r, string label, bool enabled = true, float size = 26)
     {
+        if (CampaignPanelSkin.Active) return CampaignPanelSkin.Button(r, label, enabled, size);
         bool hover = enabled && r.Contains(Event.current.mousePosition);
         Fill(r, new Color(0.06f, 0.05f, 0.04f, 0.92f));
         var frame = enabled ? (hover ? Gold : new Color(0.45f, 0.38f, 0.24f)) : new Color(0.25f, 0.23f, 0.2f);
@@ -157,6 +160,7 @@ internal static class Gui
         public float Size;
         public bool Heading;
         public float Height;
+        public bool Campaign;
     }
     private static System.Collections.Generic.List<TipLine> _tip;
 
@@ -165,7 +169,7 @@ internal static class Gui
     {
         if (Event.current.type != EventType.Repaint || string.IsNullOrEmpty(text)) return;
         _tip = text.Split('\n').Select((line, i) => new TipLine
-            { Text = line, Size = i == 0 ? 20 : 17, Colour = i == 0 ? title ?? Dd1Name : Dd1Text, Heading = i == 0 }).ToList();
+            { Text = line, Size = i == 0 ? 20 : 17, Colour = i == 0 ? title ?? Dd1Name : Dd1Text, Heading = i == 0, Campaign = CampaignPanelSkin.Active }).ToList();
     }
 
     public static void EquipmentTip(string name, string rarity, Color rarityColour, string requirement, string effects, string hint = null)
@@ -174,20 +178,26 @@ internal static class Gui
         var neutral = Runtime.Dd1Palette.Get("equipment_tooltip_body", Dd1Class);
         _tip = new System.Collections.Generic.List<TipLine>
         {
-            new() { Text = name, Size = 20, Colour = Runtime.Dd1Palette.Get("equipment_tooltip_title", Gold) },
-            new() { Text = rarity, Size = 17, Colour = rarityColour },
+            new() { Text = name, Size = 20, Colour = Runtime.Dd1Palette.Get("equipment_tooltip_title", Gold), Campaign = CampaignPanelSkin.Active },
+            new() { Text = rarity, Size = 17, Colour = rarityColour, Campaign = CampaignPanelSkin.Active },
         };
         foreach (string part in new[] { requirement, effects, hint }.Where(p => !string.IsNullOrEmpty(p)))
-            _tip.AddRange(part.Split('\n').Select(line => new TipLine { Text = line, Size = 17, Colour = neutral }));
+            _tip.AddRange(part.Split('\n').Select(line => new TipLine { Text = line, Size = 17, Colour = neutral, Campaign = CampaignPanelSkin.Active }));
     }
 
     public static void DrawTip()
     {
         if (_tip == null || Event.current.type != EventType.Repaint) return;
         EnsureStyles();
+        using var skin = CampaignPanelSkin.Scope(_tip.Any(line => line.Campaign));
         const float width = 420f;
         foreach (var line in _tip)
         {
+            if (CampaignPanelSkin.Active)
+            {
+                line.Height = TextHeight(line.Text, line.Size, width - 28, line.Heading) + 5;
+                continue;
+            }
             float size = line.Size * (line.Heading ? HeadingScale : BodyScale);
             var font = line.Heading ? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Body;
             var fallback = font == null ? new GUIStyle(_label) { fontSize = (int)(size * 0.8f) } : null;

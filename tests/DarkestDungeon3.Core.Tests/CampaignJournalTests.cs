@@ -78,7 +78,7 @@ public class CampaignJournalTests
     [InlineData("complete")]
     [InlineData("retreat")]
     [InlineData("defeat")]
-    public void HomecomingPersistsOutcomeSnapshotsWithExistingRewards(string result)
+    public void HomecomingPersistsOutcomeSnapshotsWithSurvivingLootAndRewards(string result)
     {
         var estate = new Estate { Week = 3, Seed = 11 };
         var hero = new HeroRecord { Id = "hero", Name = "Dismas", ClassId = "highwayman" };
@@ -109,7 +109,7 @@ public class CampaignJournalTests
         Assert.Equal(expectedMessages, raids[1].Messages);
         Assert.Equal("Dismas", Assert.Single(raids[1].Heroes).Name);
         Assert.Equal(result == "defeat", raids[1].Heroes[0].Died);
-        Assert.Equal(result == "complete" ? 125 : 25, loaded.Get(Currency.Gold));
+        Assert.Equal(result == "complete" ? 125 : result == "retreat" ? 25 : 0, loaded.Get(Currency.Gold));
         Assert.Equal(result == "defeat" ? 1 : 0, loaded.Graveyard.Count);
         Assert.Equal(3, loaded.Week);
     }

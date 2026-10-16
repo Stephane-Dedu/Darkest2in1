@@ -30,3 +30,9 @@ public interface IParty
     /// <summary>Cure one disease (camp medicine). Returns what was cured, or null.</summary>
     string CureDisease(string heroId);
 }
+
+/// <summary>Optional native resistances for exploration effects, expressed as fractions.</summary>
+public interface ITravelResistance
+{
+    float Resistance(string heroId, string kind);
+}

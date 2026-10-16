@@ -6832,3 +6832,79 @@ after21987s desktop idle was verified. Independent Shieldbreaker code/art/journa
 Installed round248 plugin/round249 scenery restored and DD2 stopped. No audited bug is fixed by
 these notes. Start with a failing full-cart Embark.Create/Arrange/UI-visible-inventory regression,
 then camp formation/picking and quirk generation filters. Preserve independent Shieldbreaker WIP.
+
+## Round251 (2026-10-16): walkthrough repairs and repeat checks
+
+Fixes the round250 inventory, camp picking, quirk generation, food and curio-hover findings.
+Embark now reserves the actual free supplies and activation items before charging for a cart.
+The provisioner previews that combined pack, limits purchases to16 slots and leaves the paid
+cart unchanged on a failed departure. Existing overflow fills visible holes; larger legacy
+overflow is paged without discarding goods. Native legacy-pack recovery exposes firewood and
+all3 wards after4 visible holes are emptied.
+
+Camp models and mouse regions share HeroFormation. Native inn poses face the fire; entering
+and leaving camp retains each native actor instance. All4 actual body clicks select the right
+hero. Food heals5% with the native4-provision cap. Five real clicks on a wounded40HP Crusader
+consume4 food and heal20->28; the fifth is refused. Battle completion/flee resets the cap.
+DD1's16 bounded provisions_consumed offset references confirm normal battle cleanup and a
+wave reset; they do not justify a camp/timer reset. No guessed reset was added.
+
+Future quirk rolls filter native class/mode conditions and fully resolved inactive payloads.
+47 pure coach/inn/route/affinity payloads are excluded. Mixed/unknown payloads remain eligible,
+and Resolution retains its real DD1 tavern restriction. Native localized titles replace
+internal-derived labels. Existing saved quirks are retained. Curio hover uses painted closed/
+open art and a restrained tint, rather than the opaque active-mask silhouette. Native armour
+hover still needs a dedicated capture after the source fix.
+
+Curio/trap bleed and blight become persisted travel stacks with native resistance and the
+DD1 .5-turn-per-hall-square progress. Bandage/antivenom and camp cures remove matching stacks
+before further travel damage. Native combat imports each stack once and exports remaining
+duration before teardown; burn/horror stay native combat-only. Actual native bandage and
+antivenom targeting, cure/heal, invalid healthy target, exact shared-pack charge and one-item-
+per-hero-turn refusal pass. Travel treatment removes2 remaining bleeds with1 bandage. Private
+status/wound seeding is labelled as fixture setup, not naturally generated campaign coverage.
+
+An unfinished fight restarts both teams and now rewinds pack quantities/layout and travel
+stacks with HP/light. Legacy checkpoints lacking those snapshots keep their current records.
+A retained native item slot cannot apply a free cure after another hero spends the last shared
+item; query/target guards complement the ledger. Restart JSON/copy regressions and stale-slot
+Core regression pass. The new native stale-slot query guard still needs final-build acceptance.
+
+Exploration DoT wipes now finish as defeat, suppress queued fights and recover no pack goods,
+including after an objective was already complete. Mortal-party travel and completed-goal
+wipe regressions pass. Hall curio spacing preserves counts and quest locations, moves ordinary
+adjacent stops into isolated holes where possible, and re-rolls repeated neighbours from the
+weighted native table. The repeated-city-seed regression and14,400 stress cases pass with0
+ordinary adjacent identical pairs, missing objectives, disconnected maps, missing definitions
+or missing art folders. This is not a campaign-weighted probability estimate; paired DD1 prop
+themes and total curio density remain unchanged.
+
+Service, hero, stash and results panels use scoped native DD2 fonts/painted chrome, brighter
+text and the same measured style for wrapping/tooltips. Native transaction, equipment drag
+and results-layout acceptance remain pending on the final build. Hamlet terrain and material
+grading move plain RGBA loops to cancellable workers, with bounded main-thread readback/upload
+and reveal after completion. Old scoped native baseline: BuildGround17,814ms and independent
+frame gap17,899ms. Byte-identical portable terrain/grade references and actual Paint.cs scheduler
+checks pass. This does not establish native post-fix performance; cold/return profiling remains.
+
+Frozen shared Release,1,216 Core and207 UI tests pass. Private evidence, source snapshot and
+native captures01/04-13: local-art/walkthrough-fixes-20261015; combat/native DD1 references:
+local-art/combat-supplies-20261015. A native hall fight completed through ordinary skills, with the
+medical/camp cases above. End-to-end successful quest completion, bosses, final balance and
+normal estate-file handoff are not established by this pass.
+
+Owned native23124 was checkpointed and closed for the art/gait chat's QA window. Original4
+production DLL/PDB artifacts/config restored byte-exact;190 scenery files and39 native profile
+files hash-preserved. No estate selected/read/written; only private checkpoint data. The owner
+explicitly authorized active-desktop QA input, sent only to the owned game. Independent
+Shieldbreaker and corridor art/gait changes are excluded from this commit and preserved.
+
+## Status 2026-10-16: repair sources verified; final native acceptance and room floors underway
+
+Round251 repairs are committed. The production build was restored before the other chat took
+the QA/deployment window. Keep DD2 closed until that chat releases it. Next: final-build
+native stale-item guard, successful ward/results/return/panel flow, cold async Hamlet profile,
+and the owner's newly reported repeated room ground. Room-only renderer/preview work is
+separate from the other chat's corridor gait/Shroud-water work. Do not restore an older scenery
+baseline after another chat installs its approved pack. Preserve protected estates1/3 and all
+independent WIP; use the private activation checkpoint for the final flow.

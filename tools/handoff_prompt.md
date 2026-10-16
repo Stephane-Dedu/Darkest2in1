@@ -1,18 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Round250 audits the real flow and curio generation without production changes. Installed round248
-plugin/round249 scenery/config are restored exactly; DD2 is stopped. Private evidence/captures/build
-and acceptance.json: local-art/walkthrough-audit-20261015. No estate was accessed; private checkpoint
-only. Native menu/recruit/cart cancellation/two ordinary skill wins/trap/torch/cold pending-loot
-resume/curio/camp/retreat/results/town/event/trinket equip pass. Successful quest completion, bosses,
-balance and normal estate-file handoff remain untested.93 focused tests and14,400 map stress cases
-pass, with no missing goal/definition/art folder. Adjacent repeats occur; cases are unweighted.
-First repair is P1: a full cart adds invisible quest items beyond slot15. Emptying four visible slots
-does not recover wards at17-19. Fix Embark starting-item capacity and Inventory.Arrange recovery
-together, with a red regression at the real seam. Then camp native-model/hit-region mismatch,
-Kingdoms-only quirk generation leaking into EXPEDITION, food cap and opaque curio hover. Read the
-latest MODLOG for exact reproductions and compatibility/performance limits. These are findings,
-not fixed production behavior. Preserve independent Shieldbreaker source/art/notes.
+Round251 repairs the walkthrough audit: actual16-slot starting pack reservation and legacy overflow
+recovery; shared seated native camp formation/picking; class/mode/inactive-payload quirk filtering;
+4-food cap; persisted travel DoTs/treatment; native shared combat supplies; consistent unfinished-
+fight pack/status rewind; exploration-wipe results and hall curio spacing. Scoped DD2 campaign panel
+skin and cancellable worker terrain/material grading are built. Frozen shared Release+1,216 Core+
+207 UI pass,14,400 map stress cases have0 adjacent ordinary duplicate curios/missing objectives.
+Native camp body clicks, food cap, ordinary bandage/antivenom cures/pack charge and travel treatment
+pass. Dedicated final-build stale-slot, armour hover, successful activation/results/return/panels
+and async Hamlet profile remain pending. Old baseline17,899ms frame gap is measured, not a new
+performance result. No estate accessed. See latest MODLOG/PARITY and private walkthrough-fixes-
+20261015/combat-supplies-20261015 evidence. Owned23124 closed and original production DLL/config,
+190 scenery/39 native profile files restored before the art/gait chat's QA window. Keep DD2 stopped
+until that chat releases it. Preserve its gait/corridor art and Shieldbreaker WIP. New room-floor
+renderer/preview work is separate; do not overwrite a newer approved corridor pack with old backups.
 
 Round249 installs the approved Tangle treatment across all four regions,24 corridors total.
 Sprawl has native rubble/near masonry, Foetor has earthen wear/crop banks/low walls,

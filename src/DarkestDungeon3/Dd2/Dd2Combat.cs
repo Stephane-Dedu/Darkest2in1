@@ -252,6 +252,8 @@ internal static class Dd2Combat
         Dd2Api.Torch = torch;
         LastBattleId = battle;
         InFight = true;
+        CombatSupplies.Begin();
+        ExplorationDots.Begin();
         Retreated = false;
         _retreatTries = 0;
         _round = 0;
@@ -304,6 +306,8 @@ internal static class Dd2Combat
     {
         if (!InFight) return;
         InFight = false;
+        CombatSupplies.End();
+        ExplorationDots.End();
         Assets.Code.Events.EventManager.RemoveListener<Assets.Code.Combat.Events.EventBattleStartRound>(OnRound);
         FightBuffs.Remove(_buffed);
         Dd1MonsterView.Clear();

@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using DarkestDungeon3.Core.Campaign;
@@ -84,6 +85,7 @@ internal sealed class Session
                 s.Bestiary = Dd1Bestiary.Load(Path.Combine(pluginDir, "data", "monsters.json"));
                 Stage(8, "Reading DD2 heroes and equipment");
                 s.Dd2Data = Core.Dd2Data.Dd2Tables.Load(Path.Combine(streamingAssetsPath, "Excel"));
+                Core.Dd2Data.QuirkCompatibility.AllowCampaignEffects(s.Dd2Data, s.Buildings.Activities.SelectMany(a => a.ForbiddenQuirks));
                 s.HeroPaths = Core.Dd2Data.HeroPathCatalog.Load(Path.Combine(streamingAssetsPath, "Excel"));
                 Stage(9, "Reading the town layout");
                 s.TownLayout = TownLayout.Load(dd1);

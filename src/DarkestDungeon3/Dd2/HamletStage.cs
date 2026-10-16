@@ -252,6 +252,7 @@ internal sealed partial class HamletStage : MonoBehaviour
             if (_built && _rendered && activity == HamletSceneActivity.Park) { SetParked(true); return; }
             if (_parked) SetParked(false);
             MatchNativeTarget();
+            AdvancePaint();
             if (_piece < Pieces.Length)
             {
                 if (Time.unscaledTime - _started > 45) throw new InvalidOperationException("Town scenery did not finish loading. Retry to reload scenery.");
@@ -266,7 +267,7 @@ internal sealed partial class HamletStage : MonoBehaviour
             else if (!_built && AdvanceModels())
             {
                 if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
-                BuildGround();
+                if (!BuildGround()) return;
                 _built = true;
                 _camera.enabled = true;
                 Plugin.Log.LogInfo($"[hamlet 3d] built v02: {_buildings.Count} services, {_root.GetComponentsInChildren<MeshRenderer>().Length} renderers; compact DD1 cliff layout, 24.5 metres of service elevation");
@@ -543,6 +544,7 @@ internal sealed partial class HamletStage : MonoBehaviour
     internal void Clear()
     {
         if (_camera != null) _camera.enabled = false;
+        ClearPaintJobs();
         if (_root != null) { _root.gameObject.SetActive(false); Destroy(_root.gameObject); }
         if (_texture != null) { _texture.Release(); Destroy(_texture); }
         if (_groundMesh != null) Destroy(_groundMesh);
@@ -563,6 +565,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         _terrainAsset = default; _earthAsset = default; _rockAsset = default; _wallAsset = default; _grassAsset = default; _grassTuftAsset = default;
         _assets.Clear(); _buildings.Clear(); _baseTints.Clear(); _facetTints.Clear(); _materials.Clear();
         ClearModels();
+        ClearGroundPaint();
         _root = null; _camera = null; _texture = null; _groundMesh = null; _groundMaterial = null;
         _nativeView = null; _nativePipeline = null; _nativeFormat = GraphicsFormat.None;
         _piece = 0; _rendered = false; _built = false; _parked = false; _focus = null; _hover = null;

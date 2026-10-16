@@ -30,14 +30,29 @@ internal static class HeroSheet
     /// </summary>
     public static void Draw(HeroRecord h, Action<string> show, Action close, bool readOnly = false, IReadOnlyList<string> cycle = null)
     {
+        using var skin = CampaignPanelSkin.Scope();
         _readOnly = readOnly;
         // Right-click outside closes it, as in DD1.
         if (Event.current.type == EventType.MouseDown && Event.current.button == 1) { Event.current.Use(); close(); return; }
         var win = At(0, 0, 1395, 776);
         var bg = Ch("characterpanel_bg.png");
-        if (bg != null) GUI.DrawTexture(win, bg); else Gui.Fill(win, new Color(0.04f, 0.035f, 0.03f, 0.97f));
+        CampaignPanelSkin.Frame(win, bg, .30f);
         var frames = Ch("characterpanel_frames.png");
-        if (frames != null) GUI.DrawTexture(At(10, 10, 1395, 776), frames);
+        if (frames != null)
+        {
+            var tint = GUI.color;
+            GUI.color = new Color(.72f, .73f, .67f, .38f);
+            GUI.DrawTexture(At(10, 10, 1395, 776), frames);
+            GUI.color = tint;
+        }
+        ExpeditionSkin.Banner(At(38, 0, 700, 104), new Color(.49f, .43f, .31f));
+        CampaignPanelSkin.Section(At(230, 118, 520, 216));
+        CampaignPanelSkin.Section(At(230, 348, 520, 116));
+        CampaignPanelSkin.Section(At(230, 492, 520, 270));
+        CampaignPanelSkin.Section(At(770, 118, 590, 216));
+        CampaignPanelSkin.Section(At(770, 342, 590, 118));
+        CampaignPanelSkin.Section(At(770, 470, 590, 154));
+        CampaignPanelSkin.Section(At(770, 634, 590, 128));
         // The DD1 frame contains an opaque stained-glass background in the hero's entire area.
         // Its character picture belongs above that art, otherwise the frame erases the picture.
         var figure = Art.HeroFigure(h.ClassId);
@@ -129,12 +144,12 @@ internal static class HeroSheet
             ("Max HP", Gui.Num(Mathf.Round(c.Get("health_max") * (1f + armourHp / 100f)), "0")),
             ("Speed", Gui.Num(c.Get("speed") + weaponSpd, "0")),
             ("Stress", "max " + Gui.Num(c.Get("stress_max"), "0")),
-            ("Death's door", Gui.Num(c.Get("deaths_door_chance") * 100f, "0") + "% to survive"),
+            ("Death's door", Gui.Num(c.Get("deaths_door_chance") * 100f, "0") + "%"),
         };
         for (int i = 0; i < lines.Count; i++)
         {
             var (k, v) = lines[i];
-            float x = 160 + (i % 2) * 230, y = 392 + (i / 2) * 30;
+            float x = 250 + (i % 2) * 235, y = 392 + (i / 2) * 30;
             Gui.Text(At(x, y, 120, 28), k, 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
             Gui.Text(At(x + 110, y, 110, 28), v, 18, Gui.Dd1Text, TextAnchor.MiddleRight);
         }
@@ -148,6 +163,8 @@ internal static class HeroSheet
     private static void DrawEquipment(HeroRecord h)
     {
         Title(464, 504, "Equipment");
+        Gui.Text(At(254, 552, 216, 28), "Weapon · Armour", 19, Gui.Dd1Class, TextAnchor.MiddleCenter);
+        Gui.Text(At(488, 552, 194, 28), _readOnly ? "Equipped trinkets" : "Drag to equip", 19, Gui.Dd1Class, TextAnchor.MiddleCenter);
         string dd1Class = S.Campaign.HeroUpgrades.Dd1Class(h.ClassId);
         if (Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_weapon_{Mathf.Clamp(h.WeaponRank, 0, 4)}.png") is { } w) GUI.DrawTexture(WeaponCell, w);
         if (Art.Dd1("heroes", dd1Class, "icons_equip", $"eqp_armour_{Mathf.Clamp(h.ArmorRank, 0, 4)}.png") is { } a) GUI.DrawTexture(ArmourCell, a);
@@ -157,6 +174,7 @@ internal static class HeroSheet
         for (int i = 0; i < 2; i++)
         {
             var r = TrinketCell(i);
+            ExpeditionSkin.Slot(r, selected: Drag.Hovering<TrinketDrag>(r));
             string id = h.TrinketAt(i);
             bool hover = Drag.Hovering<TrinketDrag>(r);
             if (hover && Drag.Payload is TrinketDrag over)
@@ -194,7 +212,7 @@ internal static class HeroSheet
 
     private static void DrawSkills(HeroRecord h)
     {
-        Title(1060, 52, "Combat skills");
+        Title(1060, 124, "Combat skills");
         var skills = Dd2.HeroSkills.ForClass(h.ClassId);
         var selected = Ch("selected_ability.png");
         var locked = Ch("lockedskill.png");
@@ -204,23 +222,27 @@ internal static class HeroSheet
             for (int i = 0; i < skills.Count && i < 14; i++)
             {
                 var s = skills[i];
-                var r = At(790 + (i % 7) * 80, 180 + (i / 7) * 80, 72, 72);
+                var r = At(790 + (i % 7) * 80, 170 + (i / 7) * 80, 72, 72);
                 bool known = Dd2.HeroSkills.Knows(h, s);
+                ExpeditionSkin.Slot(r, selected: known && equipped.Contains(s.Id));
                 var old = GUI.color;
                 if (!known) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
                 if (s.Icon != null) Art.DrawSprite(r, Dd2.HeroPathBridge.Icon(h, s));
                 GUI.color = old;
                 if (!known && locked != null) GUI.DrawTexture(new Rect(r.x + 20, r.y + 20, 32, 32), locked);
-                if (known && equipped.Contains(s.Id) && selected != null) GUI.DrawTexture(new Rect(r.x - 10, r.y - 10, r.width + 20, r.height + 20), selected);
+                if (known && equipped.Contains(s.Id)
+                    && !ExpeditionSkin.Sprite(new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8), "ui_frame_ability_selected", CampaignPanelSkin.Brass)
+                    && selected != null) GUI.DrawTexture(new Rect(r.x - 10, r.y - 10, r.width + 20, r.height + 20), selected);
                 if (h.MasteredSkills.Contains(s.Id) || s.MasteredByDefault) Gui.Text(new Rect(r.x + 36, r.y + 48, 36, 24), "+", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
                 if (r.Contains(Event.current.mousePosition))
                     Tip($"{Dd2.HeroSkills.Name(s.Id)}{(h.MasteredSkills.Contains(s.Id) ? " (mastered)" : "")}\n{(known ? equipped.Contains(s.Id) ? "Brought on expeditions" : "Known" : "Learn it at the Guild")}\n" + Dd2.HeroPathBridge.SkillDescription(Dd2.HeroPathBridge.SkillId(h, s.Id)));
             }
         }
-        Title(1060, 286, "Camping skills");
+        Title(1060, 346, "Camping skills");
         for (int i = 0; i < h.CampingSkills.Count && i < 7; i++)
         {
-            var r = At(790 + i * 80, 340, 72, 72);
+            var r = At(790 + i * 80, 384, 72, 72);
+            ExpeditionSkin.Slot(r);
             if (Art.Dd1("raid", "camping", "skill_icons", $"camp_skill_{h.CampingSkills[i]}.png") is { } icon) GUI.DrawTexture(r, icon);
             if (r.Contains(Event.current.mousePosition))
             {
@@ -235,11 +257,11 @@ internal static class HeroSheet
 
     private static void DrawResistances(HeroRecord h)
     {
-        Title(1060, 450, "Resistances");
+        Title(1060, 472, "Resistances");
         if (!Dd2.Dd2Catalog.Tables.Classes.TryGetValue(h.ClassId, out var c)) return;
         for (int i = 0; i < Resist.Length; i++)
         {
-            float x = 800 + (i % 2) * 260, y = 494 + (i / 2) * 28;
+            float x = 800 + (i % 2) * 260, y = 512 + (i / 2) * 28;
             Gui.Text(At(x, y, 140, 26), Resist[i].Name, 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
             float v = c.Resistances.TryGetValue(Resist[i].Key, out var r) ? r : 0f;
             Gui.Text(At(x + 140, y, 90, 26), Gui.Num(v * 100f, "0") + "%", 18, Gui.Dd1Text, TextAnchor.MiddleRight);
@@ -248,11 +270,11 @@ internal static class HeroSheet
 
     private static void DrawDiseases(HeroRecord h)
     {
-        Title(1060, 614, "Diseases");
+        Title(1060, 636, "Diseases");
         var diseases = h.Quirks.Where(S.Catalog.IsDisease).ToList();
-        if (diseases.Count == 0) Gui.Text(At(830, 660, 460, 28), "None", 18, Gui.Dim, TextAnchor.MiddleCenter);
+        if (diseases.Count == 0) Gui.Text(At(800, 674, 330, 28), "None", 18, Gui.Dim, TextAnchor.MiddleCenter);
         for (int i = 0; i < diseases.Count && i < 3; i++)
-            Gui.Text(At(830, 660 + i * 28, 460, 26), HamletUi.QuirkName(diseases[i]), 18, Gui.Dd1Health, TextAnchor.MiddleCenter);
+            Gui.Text(At(800, 674 + i * 28, 330, 26), HamletUi.QuirkName(diseases[i]), 18, Gui.Dd1Health, TextAnchor.MiddleLeft);
     }
 
     // ---- trinket art and words ----

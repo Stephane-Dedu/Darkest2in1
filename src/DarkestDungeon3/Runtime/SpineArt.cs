@@ -79,6 +79,12 @@ internal static class SpineArt
     private static Task<Baked> _worker;
     private const double UploadBudgetMs = 4;
 
+    /// <summary>Curio active slots are masks/glows, not replacement paintings. Keep the painted state
+    /// intact under hover; the UI supplies a restrained tint instead of an opaque active silhouette.</summary>
+    public static Picture Curio(string folder, bool used) => used
+        ? Get(folder, "open", s => s.Name != "active" && s.Name != "closed")
+        : Get(folder, "closed", s => s.Name != "active" && s.Name != "open");
+
     public static bool IsFinished(string folder, string variant = "idle", float pixelsPerUnit = 1f) =>
         folder == null || Cache.ContainsKey($"{folder}|{variant}|{pixelsPerUnit:0.00}");
 

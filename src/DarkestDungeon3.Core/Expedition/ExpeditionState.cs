@@ -14,6 +14,8 @@ public sealed class ExpeditionState
     public List<string> Party = new();           // hero ids, rank order
     public Dictionary<string, ExpeditionHeroState> PartyStates = new();
     public Inventory Pack = new();
+    public Dictionary<string, int> ProvisionsConsumed = new();
+    public List<TravelEffect> TravelEffects = new();
     /// <summary>Resolved battle/camping loot awaiting dismissal, saved with its exact taken/remainder amounts.</summary>
     public BattleSpoils PendingSpoils;
     /// <summary>A resolved curio/quest result awaiting dismissal; its effects have already been applied.</summary>
@@ -65,6 +67,15 @@ public sealed class ExpeditionState
     public bool Retreated;
 
     public bool InRoom => RoomId >= 0;
+}
+
+/// <summary>A remaining bleed/blight stack between fights. Travel progress is persisted too.</summary>
+public sealed class TravelEffect
+{
+    public string HeroId, Kind;
+    public float DamageFraction;
+    public int TurnsLeft;
+    public float StepProgress;
 }
 
 public enum CrawlEventType

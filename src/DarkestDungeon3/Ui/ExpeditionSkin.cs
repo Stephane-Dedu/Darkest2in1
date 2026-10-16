@@ -18,6 +18,7 @@ internal static class ExpeditionSkin
     private static readonly Dictionary<string, AsyncOperationHandle<Sprite>> Sprites = new();
     private static readonly Dictionary<string, AsyncOperationHandle<ResourceNodeType>> Nodes = new();
     private static readonly Dictionary<(int, TextAnchor, bool), GUIStyle> Styles = new();
+    private static readonly Dictionary<(int, TextAnchor, bool), GUIStyle> PanelStyles = new();
     private static readonly Dictionary<Type, Dictionary<string, IResourceLocation>> Locations = new();
     private static readonly Vector2[] OutlineOffsets = { new(-1.4f, 0), new(1.4f, 0), new(0, -1.4f), new(0, 1.4f),
         new(-1, -1), new(1, -1), new(-1, 1), new(1, 1) };
@@ -84,6 +85,16 @@ internal static class ExpeditionSkin
                 fontSize = key.Item1, alignment = align, wordWrap = true, richText = false,
                 padding = new RectOffset(), margin = new RectOffset()
             };
+        style.font = Font(heading);
+        return style;
+    }
+
+    /// <summary>Campaign panels share the installed typefaces, with their existing inline colour markup.</summary>
+    internal static GUIStyle PanelTextStyle(float size, TextAnchor align, bool heading)
+    {
+        var key = (Mathf.RoundToInt(size), align, heading);
+        if (!PanelStyles.TryGetValue(key, out var style))
+            PanelStyles[key] = style = new GUIStyle(Style(size, align, heading)) { richText = true };
         style.font = Font(heading);
         return style;
     }

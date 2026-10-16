@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Assets.Code.Actor;
 using Assets.Code.Utils;
+using DarkestDungeon3.Core.Presentation;
 using UnityEngine;
 
 namespace DarkestDungeon3.Dd2;
@@ -59,6 +60,8 @@ internal sealed class HeroStage : MonoBehaviour
     private Transform _root;
     private readonly List<(uint guid, Transform slot, ActorBhv actor)> _heroes = new();
     private string _partyKey;
+    private bool _camping;
+    private readonly Dictionary<ActorBhv, bool> _campPoses = new();
     private HeroCombatPalette _palette;
     private Vector3 _roadEnvironment, _roadShadow;
     private bool _haveRoadLighting;
@@ -205,13 +208,27 @@ internal sealed class HeroStage : MonoBehaviour
     }
 
     /// <summary>Show these actors, rank 1 first, at DD1's rank positions. Re-spawns only if the party changed.</summary>
-    public void SetParty(IReadOnlyList<uint> guids, IReadOnlyList<float> rankX)
+    public void SetParty(IReadOnlyList<uint> guids, IReadOnlyList<float> rankX, bool camping = false)
     {
         string key = string.Join(",", guids);
-        if (key == _partyKey) return;
+        if (key == _partyKey)
+        {
+            _camping = camping;
+            // Camp entry, leaving camp and changing a living hero's rank must move the existing actor.
+            // Actor loading is independent of formation; rebuilding here loses pose and flashes the fallback art.
+            if (!_blending)
+                for (int i = 0; i < _heroes.Count && i < rankX.Count; i++)
+                {
+                    var slot = _heroes[i].slot;
+                    if (slot != null)
+                        slot.localPosition = new Vector3(rankX[i] / PixelsPerUnit, (720f - FeetY) / PixelsPerUnit, 0f);
+                }
+            return;
+        }
         Clear();
         Ensure();
         _partyKey = key;
+        _camping = camping;
         var creator = SingletonMonoBehaviour<ActorCreateGameObjectBhv>.Instance;
         if (creator == null) { Plugin.Log.LogWarning("[stage] no ActorCreateGameObjectBhv"); return; }
 
@@ -260,6 +277,8 @@ internal sealed class HeroStage : MonoBehaviour
         foreach (var motion in _motion.Values) motion.Restore();
         _motion.Clear();
         _motionUnavailable.Clear();
+        _campPoses.Clear();
+        _camping = false;
         WalkSpeed = 0;
         WalkDistancePixels = 0;
         _shown.Clear();
@@ -445,7 +464,7 @@ internal sealed class HeroStage : MonoBehaviour
             }
             _palette.Apply(actor);
             if (!_motion.TryGetValue(actor, out var motion) && !_motionUnavailable.Contains(actor)
-                && _checked && !RendersBlack && bindMotion)
+                && _checked && !RendersBlack && (bindMotion || _camping && !_campPoses.ContainsKey(actor)))
             {
                 try
                 {
@@ -458,7 +477,8 @@ internal sealed class HeroStage : MonoBehaviour
                     Plugin.Log.LogWarning($"[stage-walk] {actor.GetActorGuid()}: {e.Message}; retaining native pose");
                 }
             }
-            motion?.Apply(WalkDistancePixels, Time.unscaledDeltaTime, _camera != null && _camera.enabled);
+            UpdateCampPose(actor, slot, motion);
+            if (!_camping) motion?.Apply(WalkDistancePixels, Time.unscaledDeltaTime, _camera != null && _camera.enabled);
             if (motion != null && actor.GetComponent<ExportedHeroModel>() == null)
                 WalkContactErrorPixels = Mathf.Max(WalkContactErrorPixels,motion.ContactErrorPixels);
         }
@@ -470,6 +490,30 @@ internal sealed class HeroStage : MonoBehaviour
             if (slot != null)
                 foreach (var t in slot.GetComponentsInChildren<Transform>(includeInactive: true))
                     if (t.gameObject.layer != Layer) t.gameObject.layer = Layer;
+    }
+
+    private void UpdateCampPose(ActorBhv actor, Transform slot, CorridorHeroMotion motion)
+    {
+        // Fit and bind from the normal standing pose first, including a cold resume at camp.
+        // Measuring a seated hero as if it were standing would enlarge it on the first frame.
+        if (!_checked || RendersBlack) return;
+        if (!_campPoses.TryGetValue(actor, out bool wasCamping) || wasCamping != _camping)
+        {
+            if (_camping)
+            {
+                // DD2's inn uses this state too. Imported heroes retain their own authored idle;
+                // sampling a donor's sitting motion would otherwise move Vilhelm's attachment root.
+                if (!SoulsHeroClasses.IsVilhelm(actor))
+                {
+                    if (actor.HasAnimatorState("inn_idle")) actor.SetAnimatorState("inn_idle");
+                    else if (actor.HasAnimatorState("idle_neutral")) actor.SetAnimatorState("idle_neutral");
+                }
+            }
+            else if (wasCamping) actor.SetIdleAnimatorState(.18f);
+            _campPoses[actor] = _camping;
+        }
+        if (_camping) motion?.SetCampFacing(slot.localPosition.x * PixelsPerUnit > HeroFormation.FireX);
+        else if (wasCamping && !_blending) motion?.Turn(0f);
     }
 
     private (int Renderer, int Layer, bool Post)? _best;

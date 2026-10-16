@@ -10,6 +10,19 @@ public sealed class Dd2Quirk
 {
     public string Id;
     public List<string> Tags = new();
+    public List<string> GenerationAll = new(), GenerationAny = new();
+    /// <summary>False only when linked native payloads are fully resolved and limited to absent coach/inn systems.</summary>
+    public bool HasExpeditionEffect = true;
+    /// <summary>Generation in our expedition host. Unknown mode/actor conditions fail closed.</summary>
+    public bool CanGenerate(string classId = null)
+    {
+        bool Satisfied(string condition) => condition == "is_confessions" || condition == "run_boss_is_not_brain"
+            || condition.StartsWith("performer_is_not_", StringComparison.Ordinal) && classId != null && classId != condition.Substring(17)
+            || condition.StartsWith("performer_is_", StringComparison.Ordinal) && !condition.StartsWith("performer_is_not_", StringComparison.Ordinal)
+                && classId != null && classId == condition.Substring(13);
+        return HasExpeditionEffect && !Id.StartsWith("quirk_kingdoms_", StringComparison.Ordinal)
+            && GenerationAll.All(Satisfied) && (GenerationAny.Count == 0 || GenerationAny.Any(Satisfied));
+    }
     public bool IsPositive => Tags.Contains("positive");
     public bool IsNegative => Tags.Contains("negative");
     public bool IsDisease => Tags.Contains("disease");
@@ -110,7 +123,9 @@ public sealed class Dd2Tables
                 if (c == own || !t.ActorSkills.ContainsKey(c)) t.ActorSkills[c] = skills;
         }
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "quirk_data_export.Group.csv")))
-            if (type == "Quirk") t.Quirks[id] = new Dd2Quirk { Id = id, Tags = Values(fields, "m_Tags") };
+            if (type == "Quirk") t.Quirks[id] = new Dd2Quirk { Id = id, Tags = Values(fields, "m_Tags"),
+                GenerationAll = Values(fields, "generation_all_conditions"), GenerationAny = Values(fields, "generation_any_conditions") };
+        QuirkCompatibility.Apply(t, excelDir);
         foreach (var (id, type, fields) in Blocks(Path.Combine(excelDir, "trinkets_data_export.Group.csv")))
         {
             if (type != "Item" || Values(fields, "m_type").FirstOrDefault() != "trinket") continue;

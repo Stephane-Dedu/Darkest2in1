@@ -9,41 +9,26 @@ namespace DarkestDungeon3.Dd2;
 
 internal sealed partial class HamletStage
 {
-    private void BuildGround()
+    private Material _groundPaving, _groundRock, _groundStone, _groundValley;
+    private Texture _groundGrass;
+    private int _groundLayer;
+
+    private bool BuildGround()
     {
-        var source=_root.GetComponentsInChildren<MeshRenderer>().FirstOrDefault(r=>r.sharedMaterials.Any(m=>m!=null&&m.name.Contains("valley_road_main")));
-        if (source==null) throw new InvalidOperationException("Native road surface is unavailable.");
-        var native=source.sharedMaterials.First(m=>m!=null&&m.name.Contains("valley_road_main"));
-        var texture=_terrainAsset.Status==AsyncOperationStatus.Succeeded?BaseTexture(_terrainAsset.Result):BaseTexture(native);
-        var surfaceShader=_surfaceShaderAsset.Status==AsyncOperationStatus.Succeeded?_surfaceShaderAsset.Result:null;
-        if (surfaceShader==null) throw new InvalidOperationException("Town terrain shader is unavailable. Retry to reload scenery.");
-        Material PaintSurface(string name) => new(surfaceShader) { name=name };
-        _groundMaterial=PaintSurface("Hamlet earth");
-        var paving=PaintSurface("Hamlet worn stone paths"); _details.Add(paving);
-        var rock=PaintSurface("Hamlet exposed cliff rock"); _details.Add(rock);
-        var stone=PaintSurface("Hamlet terrace masonry"); _details.Add(stone);
-        foreach (var material in new[] { _groundMaterial,paving,rock,stone })
-            if (texture!=null) SetPaintTexture(material,texture);
-        bool soilLoaded=false,rockLoaded=false;
-        if (_earthAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_earthAsset.Result) is { } earthTexture)
-        { SetPaintTexture(_groundMaterial,earthTexture); soilLoaded=true; }
-        if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
-        { SetPaintTexture(rock,rockTexture); rockLoaded=true; }
-        if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
-            SetPaintTexture(stone,wallTexture);
-        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
-        Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
-        Texture grass=null;
-        if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
-            grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
-        if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
-            Plugin.Log.LogInfo($"[hamlet 3d paint] {_groundMaterial.shader.name}; color space {QualitySettings.activeColorSpace}; grass {_grassAsset.Status}/{_grassAsset.Result?.name}/{(_grassAsset.Result!=null?BaseTexture(_grassAsset.Result)?.name:null)}; rock {_rockAsset.Status}; earth {_earthAsset.Status}");
-        var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
-        SetPaintTexture(valley,ValleyPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass,BaseTexture(rock)));
-        SetPaintTint(valley,Color.white);
-        SetPaintTexture(_groundMaterial,GroundPaint(BaseTexture(_groundMaterial),BaseTexture(paving),grass,out var lanes));
-        SetPaintTexture(paving,lanes); SetPaintTint(paving,Color.white);
-        int layer=source.gameObject.layer;
+        if (_groundMaterial == null)
+        {
+            PrepareGround();
+            return false;
+        }
+        if (_groundPaintTask == null)
+        {
+            if (!PaintReady) return false;
+            BeginGroundPaint(BaseTexture(_groundMaterial),BaseTexture(_groundPaving),_groundGrass,BaseTexture(_groundRock));
+            return false;
+        }
+        if (!UploadGroundPaint()) return false;
+        var paving=_groundPaving; var rock=_groundRock; var stone=_groundStone; var valley=_groundValley;
+        int layer=_groundLayer;
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
         _groundMesh.colors=data.Shade.Select(s=>new Color(s,s,s,1)).ToArray();
@@ -100,6 +85,44 @@ internal sealed partial class HamletStage
         foreach (var renderer in _root.GetComponentsInChildren<MeshRenderer>())
             if (renderer.name.Contains("road_valley_straight_single")) renderer.enabled=false;
         AddDepthMist(layer);
+        return true;
+    }
+
+    private void PrepareGround()
+    {
+        var source=_root.GetComponentsInChildren<MeshRenderer>().FirstOrDefault(r=>r.sharedMaterials.Any(m=>m!=null&&m.name.Contains("valley_road_main")));
+        if (source==null) throw new InvalidOperationException("Native road surface is unavailable.");
+        var native=source.sharedMaterials.First(m=>m!=null&&m.name.Contains("valley_road_main"));
+        var texture=_terrainAsset.Status==AsyncOperationStatus.Succeeded?BaseTexture(_terrainAsset.Result):BaseTexture(native);
+        var surfaceShader=_surfaceShaderAsset.Status==AsyncOperationStatus.Succeeded?_surfaceShaderAsset.Result:null;
+        if (surfaceShader==null) throw new InvalidOperationException("Town terrain shader is unavailable. Retry to reload scenery.");
+        Material PaintSurface(string name) => new(surfaceShader) { name=name };
+        _groundMaterial=PaintSurface("Hamlet earth");
+        var paving=PaintSurface("Hamlet worn stone paths"); _details.Add(paving);
+        var rock=PaintSurface("Hamlet exposed cliff rock"); _details.Add(rock);
+        var stone=PaintSurface("Hamlet terrace masonry"); _details.Add(stone);
+        foreach (var material in new[] { _groundMaterial,paving,rock,stone })
+            if (texture!=null) SetPaintTexture(material,texture);
+        bool soilLoaded=false,rockLoaded=false;
+        if (_earthAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_earthAsset.Result) is { } earthTexture)
+        { SetPaintTexture(_groundMaterial,earthTexture); soilLoaded=true; }
+        if (_rockAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_rockAsset.Result) is { } rockTexture)
+        { SetPaintTexture(rock,rockTexture); rockLoaded=true; }
+        if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
+            SetPaintTexture(stone,wallTexture);
+        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
+        Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
+        Texture grass=null;
+        if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
+            grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
+        if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
+            Plugin.Log.LogInfo($"[hamlet 3d paint] {_groundMaterial.shader.name}; color space {QualitySettings.activeColorSpace}; grass {_grassAsset.Status}/{_grassAsset.Result?.name}/{(_grassAsset.Result!=null?BaseTexture(_grassAsset.Result)?.name:null)}; rock {_rockAsset.Status}; earth {_earthAsset.Status}");
+        var valley=new Material(_groundMaterial) { name="Hamlet surrounding valley" }; _details.Add(valley);
+        SetPaintTint(valley,Color.white);
+        SetPaintTint(paving,Color.white);
+        _groundPaving=paving; _groundRock=rock; _groundStone=stone; _groundValley=valley;
+        _groundLayer=source.gameObject.layer;
+        _groundGrass=grass;
     }
 
     private static Mesh MeshData(string name,float[] positions,float[] coordinates)

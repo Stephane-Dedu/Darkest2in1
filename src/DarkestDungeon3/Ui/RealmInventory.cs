@@ -38,11 +38,16 @@ internal static class RealmInventory
     /// them are dimmed), or null. <paramref name="close"/> closes it.</summary>
     public static void Draw(HeroRecord hero, Action close)
     {
+        using var skin = CampaignPanelSkin.Scope();
         var panel = Panel;
         // Its clicks are its own: nothing underneath reacts (as with DD1's windows).
-        if (Ri("realminv_bg.png") is { } bg) GUI.DrawTexture(panel, bg); else Gui.Fill(panel, new Color(0.03f, 0.025f, 0.02f, 0.97f));
+        CampaignPanelSkin.Frame(panel, Ri("realminv_bg.png"), .24f);
+        ExpeditionSkin.Banner(At(136, 22, 300, 64), new Color(.50f, .43f, .30f));
         if (Ri("realm_inventory.icon.png") is { } icon) GUI.DrawTexture(At(23, 22, 113, 113), icon);
-        Gui.Text(At(150, 24, 300, 66), Str("town_name_realm_inventory", "Trinket Inventory"), 40, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(At(150, 24, 276, 62), Str("town_name_realm_inventory", "Trinket Inventory"), 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        ExpeditionSkin.Rule(At(26, 142, 600, 6), CampaignPanelSkin.Brass);
+        Gui.Text(At(30, 155, 560, 30), hero == null ? $"{E.Trinkets.Count} stored trinkets" : $"{E.Trinkets.Count} stored · drag to {hero.Name}'s trinket slots", 20, Gui.Dd1Text, TextAnchor.MiddleLeft);
+        Gui.Fill(At(Grid.x - 6, Grid.y - 4, Columns * Cell.x + 12, 533), new Color(.018f, .023f, .022f, .96f));
 
         bool shift = Event.current.shift;
         string hovered = null;
@@ -101,6 +106,7 @@ internal static class RealmInventory
             string id = trinkets[index];
             var r = new Rect((index % Columns) * Cell.x, (index / Columns) * Cell.y, 72, 144);
             bool fits = hero == null || Enumerable.Range(0, 2).Any(slot => Core.Campaign.Town.TrinketEquipment.Refusal(E, S.Catalog, id, null, index, hero, slot) == null);
+            ExpeditionSkin.Slot(r, selected: insideGrid && r.Contains(Event.current.mousePosition));
             if (!shift && insideGrid) Drag.Source(r, new TrinketDrag(id, null, index), rect => HeroSheet.TrinketIcon(rect, id));
             var old = GUI.color;
             if (!fits) GUI.color = new Color(0.45f, 0.45f, 0.45f, 1f);
@@ -134,7 +140,7 @@ internal static class RealmInventory
             if (Art.Dd1("shared", "estate", "currency.gold.icon.png") is { } gold) GUI.DrawTexture(At(372, 96, 24, 24), gold);
             Gui.Text(At(400, 92, 120, 30), Gui.Num(S.Hamlet.TrinketSellValue(hovered), "#,0"), 19, Gui.Gold, TextAnchor.MiddleLeft);
         }
-        else Gui.Text(At(150, 92, 300, 30), Str("realm_inventory_trinket_sell_instruction", "Hold [SHIFT] to Sell Trinkets"), 17, Gui.Dd1Class, TextAnchor.MiddleLeft);
+        else Gui.Text(At(150, 92, 430, 32), Str("realm_inventory_trinket_sell_instruction", "Hold [SHIFT] to Sell Trinkets"), 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
         if (hovered != null && _sellAsk == null) HeroSheet.TrinketTip(hovered);
         if (_sellAsk != null) AskToSell();
@@ -154,9 +160,7 @@ internal static class RealmInventory
     {
         string id = _sellAsk;
         var box = At(84, 300, 500, 200);
-        Gui.Fill(box, new Color(0.02f, 0.016f, 0.012f, 0.97f));
-        Gui.Fill(new Rect(box.x, box.y, box.width, 2), new Color(0.42f, 0.36f, 0.25f));
-        Gui.Fill(new Rect(box.x, box.yMax - 2, box.width, 2), new Color(0.42f, 0.36f, 0.25f));
+        CampaignPanelSkin.Frame(box);
         string format = Str("realm_inventory_sell_trinket_confirm_question_format", "Really sell {?item_name}%s for {?amount}%d gold?");
         string question = format.Replace("{?item_name}%s", HeroSheet.TrinketName(id)).Replace("{?amount}%d", Gui.Num(S.Hamlet.TrinketSellValue(id), "#,0"))
                                 .Replace("%s", HeroSheet.TrinketName(id)).Replace("%d", Gui.Num(S.Hamlet.TrinketSellValue(id), "#,0"));
@@ -170,13 +174,14 @@ internal static class RealmInventory
 
     private static bool IconButton(Rect r, Texture2D icon, string tip)
     {
-        bool hover = r.Contains(Event.current.mousePosition);
+        var hit = new Rect(r.x - 4, r.y - 4, r.width + 8, r.height + 8);
+        bool hover = hit.Contains(Event.current.mousePosition);
         var old = GUI.color;
         if (!hover) GUI.color = new Color(0.85f, 0.85f, 0.85f, 1f);
-        if (icon != null) GUI.DrawTexture(r, icon); else Gui.Fill(r, new Color(0.2f, 0.17f, 0.12f));
+        if (icon != null) GUI.DrawTexture(new Rect(r.x - 2, r.y - 2, r.width + 4, r.height + 4), icon); else Gui.Fill(r, new Color(0.2f, 0.17f, 0.12f));
         GUI.color = old;
         if (hover) Gui.Tip(tip);
-        return Gui.Hotspot(r);
+        return Gui.Hotspot(hit);
     }
 
     /// <summary>A sort button: sorts the stash; again, the other way. DD1's marker shows the current sort and its

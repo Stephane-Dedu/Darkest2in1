@@ -70,8 +70,11 @@ public class ContentTests
         var rng = new Rng(3);
         for (int i = 0; i < 20; i++) Content.Curios.ApplyEffect("Stress 2", "a", party, rng); // 15 DD1 = 1.5 points each
         Assert.InRange(party.Stress["a"], 22, 38);
-        Content.Curios.ApplyEffect("Blight 1", "a", party, rng);                             // 2 x 3 turns = 6 of ~30 HP
-        Assert.Equal(0.8f, party.Hp["a"], 2);
+        var state = new ExpeditionState();
+        Content.Curios.ApplyEffect("Blight 1", "a", party, rng, state: state);
+        Assert.Equal(1f, party.Hp["a"]);
+        var dot = Assert.Single(state.TravelEffects);
+        Assert.Equal(0.2f, dot.DamageFraction * dot.TurnsLeft, 2);
     }
 
     [Fact]

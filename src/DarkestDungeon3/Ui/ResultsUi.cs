@@ -13,6 +13,7 @@ internal sealed class ResultsUi
 {
     private int _page;
     private HomecomingReport _shown;
+    private Vector2 _trinketScroll;
 
     private static Texture2D Rr(string file) => Art.Dd1("raid_results", file);
     private static Session S => Session.Current;
@@ -20,9 +21,10 @@ internal sealed class ResultsUi
 
     public void Draw(Driver d, bool canLeave)
     {
+        using var skin = CampaignPanelSkin.Scope();
         var report = d.LastReport;
-        if (report != _shown) { _shown = report; _page = 0; }
-        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), Color.black);
+        if (report != _shown) { _shown = report; _page = 0; _trinketScroll = Vector2.zero; }
+        Gui.Fill(new Rect(0, 0, Gui.W, Gui.H), CampaignPanelSkin.Coal);
         if (report == null)
         {
             Gui.Text(new Rect(560, 480, 800, 60), "The party returns to the Hamlet", 40, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
@@ -36,15 +38,23 @@ internal sealed class ResultsUi
             "defeat" => "raid_results.quest_not_completed_defeat_background.png",
             _ => "raid_results.quest_not_completed_escape_background.png",
         });
-        if (bg != null) GUI.DrawTexture(new Rect(Left, 0, Width, 1080), bg);
+        if (bg != null)
+        {
+            var tint = GUI.color; GUI.color = new Color(.76f, .73f, .66f, .34f);
+            GUI.DrawTexture(new Rect(Left, 0, Width, 1080), bg);
+            GUI.color = tint;
+        }
+        CampaignPanelSkin.Frame(new Rect(330, 86, 1260, 856));
+        ExpeditionSkin.Banner(new Rect(440, 108, 1040, 100), new Color(.60f, .49f, .31f));
         string result = report.Result switch { "complete" => "Quest Complete", "defeat" => "Defeat", _ => "Retreat" };
         // On DD1's banner (quest_result_pos 960,150).
         Gui.Text(new Rect(Left, 128, Width, 50), result, 40, report.Result == "complete" ? Gui.Gold : new Color(0.95f, 0.75f, 0.55f), TextAnchor.MiddleCenter, heading: true);
         var q = report.Quest;
         if (q != null)
-            Gui.Text(new Rect(Left, 190, Width, 40), $"{S.Zones.ZoneName(q.Dungeon)}  ·  {q.DifficultyName} {q.Size} {HamletUi.Pretty(q.Type)}", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            Gui.Text(new Rect(410, 206, 1100, 38), $"{S.Zones.ZoneName(q.Dungeon)}  ·  {q.DifficultyName} {q.Size} {HamletUi.Pretty(q.Type)}", 24, Gui.Dd1Class, TextAnchor.MiddleCenter);
 
         if (_page == 0) DrawHeroes(report); else DrawLoot(report);
+        Gui.Text(new Rect(680, 962, 560, 44), _page == 0 ? "1 / 2 · The returning party" : "2 / 2 · Recovered spoils", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
 
         if (_page == 1 && Gui.DdButton(new Rect(50, 980, 240, 66), "Back", true, 26)) _page = 0;
         if (_page == 0)
@@ -56,90 +66,112 @@ internal sealed class ResultsUi
 
     private static void DrawHeroes(HomecomingReport report)
     {
-        var frames = Rr("raid_results.heroes_frames.png");
-        float fx = Left + 450 - 340, fy = 236;
-        if (frames != null) GUI.DrawTexture(new Rect(fx, fy, 680, 675), frames);
+        const float fx = 390, fy = 270;
         var dead = Rr("deadhero_portrait.png");
         for (int i = 0; i < report.Heroes.Count && i < 4; i++)
         {
             var h = report.Heroes[i];
-            float x = fx + 20, y = fy + i * 168;
-            var portrait = new Rect(x + 5, y + 64, 85, 85);
+            float x = fx, y = fy + i * 160;
+            CampaignPanelSkin.Section(new Rect(x, y, 1140, 148));
+            var portrait = new Rect(x + 14, y + 25, 94, 94);
             var sprite = Art.HeroIcon(h.ClassId);
             var old = GUI.color;
             if (h.Died) GUI.color = new Color(0.4f, 0.4f, 0.4f, 1f);
             if (sprite != null) Art.DrawSprite(portrait, sprite);
             GUI.color = old;
             if (h.Died && dead != null) GUI.DrawTexture(portrait, dead);
-            Gui.Text(new Rect(x + 6, y + 10, 400, 40), h.Name, 28, h.Died ? Gui.Dim : Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(x + 130, y + 12, 350, 42), h.Name, 30, h.Died ? Gui.Dim : Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+            Gui.Text(new Rect(x + 130, y + 56, 350, 30), HamletUi.Pretty(h.ClassId), 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
             if (h.Died)
             {
-                Gui.Text(new Rect(x + 110, y + 70, 520, 70), $"Did not return: {h.Cause}.", 21, Gui.Blood, TextAnchor.UpperLeft);
+                Gui.Text(new Rect(x + 510, y + 32, 580, 92), $"Did not return: {h.Cause}.", 24, Gui.Blood, TextAnchor.MiddleLeft);
                 continue;
             }
             // Resolve on the right, as DD1 shows it.
             // DD1's resolve box sits in the frame's right column (campaign_status_offset 556,3).
-            float rx = fx + 556;
-            Gui.Text(new Rect(rx - 30, y + 64, 124, 40), h.ResolveAfter.ToString(), 40, h.ResolveAfter > h.ResolveBefore ? Gui.Gold : Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
-            Gui.Text(new Rect(rx - 30, y + 104, 124, 22), "resolve", 16, Gui.Dd1Class, TextAnchor.MiddleCenter);
-            if (h.XpGained > 0) Gui.Text(new Rect(rx - 30, y + 126, 124, 22), $"+{h.XpGained} xp", 16, Gui.Dd1Class, TextAnchor.MiddleCenter);
-            if (h.ResolveAfter > h.ResolveBefore) Gui.Text(new Rect(x + 300, y + 14, 200, 30), "Resolve up!", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
+            float rx = fx + 1010;
+            Gui.Text(new Rect(rx, y + 14, 110, 48), h.ResolveAfter.ToString(), 42, h.ResolveAfter > h.ResolveBefore ? Gui.Gold : Gui.Dd1Text, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(new Rect(rx, y + 66, 110, 26), "resolve", 20, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            if (h.XpGained > 0) Gui.Text(new Rect(rx, y + 98, 110, 26), $"+{h.XpGained} xp", 20, Gui.Dd1Class, TextAnchor.MiddleCenter);
+            if (h.ResolveAfter > h.ResolveBefore) Gui.Text(new Rect(x + 300, y + 100, 180, 28), "Resolve up!", 22, Gui.Gold, TextAnchor.MiddleRight, heading: true);
 
-            float qy = y + 70;
-            Gui.Text(new Rect(x + 110, qy, 330, 24), $"Stress {h.Stress}/10", 18, h.Stress >= 7 ? Gui.Blood : Gui.Dd1Text, TextAnchor.MiddleLeft);
-            qy += 24;
+            Gui.Text(new Rect(x + 130, y + 96, 170, 30), $"Stress {h.Stress}/10", 22, h.Stress >= 7 ? Gui.Blood : Gui.Dd1Text, TextAnchor.MiddleLeft);
+            float qy = y + 18;
             foreach (var quirk in h.NewQuirks.Take(2))
             {
                 bool good = S.Catalog.IsPositive(quirk);
-                Gui.Text(new Rect(x + 110, qy, 330, 24), (good ? "New quirk: " : "New affliction of the mind: ") + HamletUi.QuirkName(quirk), 18, good ? Gui.Gold : Gui.Blood, TextAnchor.MiddleLeft);
-                qy += 24;
+                Gui.Text(new Rect(x + 510, qy, 470, 36), (good ? "New quirk: " : "New negative quirk: ") + HamletUi.QuirkName(quirk), 22, good ? Gui.Gold : Gui.Blood, TextAnchor.MiddleLeft);
+                qy += 38;
             }
             foreach (var quirk in h.LostQuirks.Take(1))
             {
-                Gui.Text(new Rect(x + 110, qy, 330, 24), "Lost: " + HamletUi.QuirkName(quirk), 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
-                qy += 24;
+                Gui.Text(new Rect(x + 510, qy, 470, 36), "Lost: " + HamletUi.QuirkName(quirk), 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
+                qy += 38;
             }
         }
     }
 
-    private static void DrawLoot(HomecomingReport report)
+    private void DrawLoot(HomecomingReport report)
     {
-        var frames = Rr("raid_results.items_frames.png");
-        float fx = Left + 450 - 266, fy = 230;
-        if (frames != null) GUI.DrawTexture(new Rect(fx, fy, 533, 723), frames);
-        var items = S.Content.Items;
+        const float fx = 400, fy = 270;
+        CampaignPanelSkin.Section(new Rect(fx, fy, 1120, 232));
+        CampaignPanelSkin.Section(new Rect(fx, fy + 250, 520, 374));
+        CampaignPanelSkin.Section(new Rect(fx + 540, fy + 250, 580, 374));
 
         // Quest rewards (only when it was completed).
-        Gui.Text(new Rect(fx, fy + 6, 533, 34), report.Rewards.Count > 0 ? "Quest rewards" : "No quest rewards", 26, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(fx + 24, fy + 12, 1072, 38), report.Rewards.Count > 0 ? "Quest rewards" : "No quest rewards", 28, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         for (int i = 0; i < report.Rewards.Count && i < 6; i++)
         {
             var r = report.Rewards[i];
-            var cell = new Rect(fx + 266 - System.Math.Min(6, report.Rewards.Count) * 40 + i * 80 + 4, fy + 54, 72, 144);
+            var cell = new Rect(fx + 560 - System.Math.Min(6, report.Rewards.Count) * 56 + i * 112 + 4, fy + 64, 80, 144);
+            ExpeditionSkin.Slot(cell);
             var icon = r.Type == "trinket" ? null : Art.InventoryIcon(r.Type, r.Amount, r.Type == "gold" ? 1750 : 99);
-            if (icon != null) GUI.DrawTexture(cell, icon); else Gui.Text(cell, HamletUi.Pretty(r.Id ?? r.Type), 15, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (r.Type == "trinket" && r.Id != null)
+            {
+                HeroSheet.TrinketIcon(cell, r.Id);
+                if (cell.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(r.Id);
+            }
+            else if (icon != null) GUI.DrawTexture(cell, icon);
+            else Gui.Text(cell, HamletUi.Pretty(r.Id ?? r.Type), 19, Gui.Dd1Text, TextAnchor.MiddleCenter);
             Gui.Text(new Rect(cell.x, cell.yMax - 28, cell.width - 4, 26), r.Type == "trinket" ? "" : r.Amount.ToString(), 22, Color.white, TextAnchor.LowerRight);
         }
 
         // What the party carried out: gold (and gems sold for gold), heirlooms, trinkets.
         int gold = (report.Loot.TryGetValue(Currency.Gold, out var g) ? g : 0) + report.GemGold;
-        Gui.Text(new Rect(fx + 30, fy + 250, 300, 34), "Gold", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
-        Gui.Text(new Rect(fx + 300, fy + 250, 200, 34), Gui.Num(gold, "#,0"), 28, Gui.Gold, TextAnchor.MiddleRight, heading: true);
+        Gui.Text(new Rect(fx + 24, fy + 270, 250, 38), "Gold recovered", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(fx + 274, fy + 270, 220, 38), Gui.Num(gold, "#,0"), 30, Gui.Gold, TextAnchor.MiddleRight, heading: true);
         if (report.GemGold > 0)
-            Gui.Text(new Rect(fx + 30, fy + 286, 470, 26), $"including {Gui.Num(report.GemGold, "#,0")} for {report.Gems.Values.Sum()} gems", 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
+            Gui.Text(new Rect(fx + 24, fy + 318, 470, 60), $"Includes {Gui.Num(report.GemGold, "#,0")} gold from {report.Gems.Values.Sum()} gems", 22, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
-        Gui.Text(new Rect(fx + 30, fy + 470, 300, 34), "Heirlooms", 26, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(new Rect(fx + 24, fy + 410, 470, 38), "Heirlooms", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         var heirlooms = report.Loot.Where(kv => Currency.Heirlooms.Contains(kv.Key)).ToList();
         for (int i = 0; i < heirlooms.Count; i++)
         {
             var (key, amount) = (heirlooms[i].Key, heirlooms[i].Value);
             var tex = Art.Dd1("shared", "estate", $"currency.{key}.icon.png");
-            var cell = new Rect(fx + 40 + i * 120, fy + 520, 40, 40);
+            var cell = new Rect(fx + 28 + i * 120, fy + 470, 40, 40);
             if (tex != null) GUI.DrawTexture(cell, tex);
             Gui.Text(new Rect(cell.xMax + 6, cell.y, 70, 40), amount.ToString(), 26, Gui.Dd1Text, TextAnchor.MiddleLeft, heading: true);
         }
-        if (heirlooms.Count == 0) Gui.Text(new Rect(fx + 40, fy + 520, 400, 40), "None", 22, Gui.Dim, TextAnchor.MiddleLeft);
-        if (report.Trinkets.Count > 0)
-            Gui.Text(new Rect(fx + 30, fy + 600, 470, 100), "Trinkets: " + string.Join(", ", report.Trinkets.Select(HamletUi.Pretty)), 19, Gui.Dd1Text);
+        if (heirlooms.Count == 0) Gui.Text(new Rect(fx + 28, fy + 470, 450, 40), "None", 22, Gui.Dim, TextAnchor.MiddleLeft);
+        Gui.Text(new Rect(fx + 564, fy + 270, 530, 38), $"Trinkets recovered · {report.Trinkets.Count}", 28, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        if (report.Trinkets.Count == 0)
+            Gui.Text(new Rect(fx + 564, fy + 334, 530, 80), "No trinkets recovered", 24, Gui.Dim, TextAnchor.MiddleCenter);
+        else
+        {
+            const int columns = 5;
+            int rows = (report.Trinkets.Count + columns - 1) / columns;
+            var view = new Rect(fx + 560, fy + 320, 540, 280);
+            _trinketScroll = GUI.BeginScrollView(view, _trinketScroll, new Rect(0, 0, 520, Mathf.Max(280, rows * 160)));
+            for (int i = 0; i < report.Trinkets.Count; i++)
+            {
+                var cell = new Rect(i % columns * 104 + 12, i / columns * 160 + 4, 80, 144);
+                ExpeditionSkin.Slot(cell);
+                HeroSheet.TrinketIcon(cell, report.Trinkets[i]);
+                if (cell.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(report.Trinkets[i]);
+            }
+            GUI.EndScrollView();
+        }
     }
 }

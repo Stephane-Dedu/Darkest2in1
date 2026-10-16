@@ -61,6 +61,29 @@ public sealed class Provisioner
 /// <summary>Turning a quest, four heroes and a pack into an expedition.</summary>
 public static class Embark
 {
+    /// <summary>The actual pack, including the quest's required items and free class/length supplies.
+    /// The paid cart is never mutated, so previews and failed departures are safe.</summary>
+    public static Inventory StartingPack(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party,
+                                         Inventory bought, Provisioner provisioner = null)
+    {
+        var pack = new Inventory { Layout = new List<string>(bought?.Layout ?? new List<string>()) };
+        if (bought != null) foreach (var kv in bought.Items) pack.Add(kv.Key, kv.Value);
+        if (provisioner != null)
+            foreach (var kv in provisioner.FreeItems(quest.Length, party.Select(h => h.ClassId)).Items) pack.Add(kv.Key, kv.Value);
+        if (dd1.Goals?.For(quest) is { } goal)
+            foreach (var (id, n) in goal.StartingItems) pack.Add(ItemCatalog.QuestKey(id), n);
+        return pack;
+    }
+
+    public static bool PackFits(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party,
+                                Inventory bought, Provisioner provisioner = null, ItemCatalog items = null) =>
+        StartingPack(dd1, quest, party, bought, provisioner).SlotsUsed(items ?? ItemCatalog.Load(dd1.Install)) <= Inventory.Slots;
+
+    public static int PurchaseAmount(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party,
+                                     Inventory cart, Provisioner provisioner, ItemCatalog items, string key, int wanted) =>
+        StartingPack(dd1, quest, party, cart, provisioner).TakePartial(new LootDrop {
+            Type = key == Supply.Food ? "provision" : "supply", Id = key, Amount = wanted }, items);
+
     /// <summary>
     /// DD1's warning before a harder quest (difficulty ≥ trinkets_equipped_warning_dungeon_min_difficulty, 3) when
     /// fewer than trinkets_equipped_warning_min_percent (50%) of the party's trinket slots (two each) are filled.
@@ -93,6 +116,9 @@ public static class Embark
     public static ExpeditionState Create(Dd1Campaign dd1, QuestOffer quest, IReadOnlyList<HeroRecord> party, Inventory bought,
                                          Provisioner provisioner = null)
     {
+        var pack = StartingPack(dd1, quest, party, bought, provisioner);
+        if (pack.SlotsUsed(ItemCatalog.Load(dd1.Install)) > Inventory.Slots)
+            throw new InvalidOperationException("Make room for the quest items and starting supplies before embarking.");
         var goal = dd1.Goals?.For(quest);
         DungeonMap map;
         if (dd1.Install != null && PlotMap.Exists(dd1.Install, quest.MapName))
@@ -111,13 +137,8 @@ public static class Embark
             Map = map,
             Seed = quest.MapSeed,
             Party = party.Select(h => h.Id).ToList(),
-            Pack = bought ?? new Inventory(),
+            Pack = pack,
         };
-        if (provisioner != null)
-            foreach (var kv in provisioner.FreeItems(quest.Length, party.Select(h => h.ClassId)).Items)
-                state.Pack.Add(kv.Key, kv.Value);
-        if (goal != null)
-            foreach (var (id, n) in goal.StartingItems) state.Pack.Add(ItemCatalog.QuestKey(id), n);
 
         foreach (var h in party)
         {

@@ -9,6 +9,26 @@ namespace DarkestDungeon3.Core.Tests;
 public class FallenConditionTests
 {
     [Fact]
+    public void A_wipe_after_completing_the_objective_never_grants_quest_rewards()
+    {
+        var estate = new Estate { QuestsCompleted = 0, Roster = { new HeroRecord { Id = "a", ClassId = "highwayman" } } };
+        var quest = new QuestOffer { Dungeon = "dd2_city", Type = "explore", Difficulty = 1, Length = 1,
+            Rewards = { new Reward { Type = "gold", Amount = 1000 } } };
+        var exp = new ExpeditionState { Party = { "a" }, Ended = true, Quest = quest, QuestComplete = true };
+        exp.Pack.Add(Currency.Gold, 500);
+        exp.Pack.Add(Currency.Crest, 4);
+        exp.Pack.Add("trinket:unclaimed_test_ring", 1);
+        var report = Homecoming.Report(estate, Dd1Campaign.Load(Dd1Install.Find()), exp,
+            new[] { new HeroOutcome { HeroId = "a", Died = true } });
+        Assert.Equal("defeat", report.Result);
+        Assert.Equal(0, estate.QuestsCompleted);
+        Assert.Equal(0, estate.Get(Currency.Gold));
+        Assert.Equal(0, estate.Get(Currency.Crest));
+        Assert.Empty(estate.Trinkets);
+        Assert.Empty(report.Rewards);
+    }
+
+    [Fact]
     public void RecordedQuirksReachTheGraveAndExistingFromBeyondWithoutChangingLoadoutPolicy()
     {
         var install = Dd1Install.Find(); var dd1 = Dd1Campaign.Load(install); var buildings = Buildings.Load(install);

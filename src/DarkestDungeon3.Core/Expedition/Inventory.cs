@@ -178,6 +178,17 @@ public sealed class Inventory
                 int empty = Layout.IndexOf(null);
                 if (empty < 0) Layout.Add(kv.Key); else Layout[empty] = kv.Key;
             }
+        // Old saves can contain starting items beyond the pack's visible page. Recover those stacks
+        // into holes without rearranging the player's valid slots or deleting any item.
+        for (int i = slots; i < Layout.Count; i++)
+        {
+            if (Layout[i] == null) continue;
+            int empty = Layout.FindIndex(0, slots, k => k == null);
+            if (empty < 0) break;
+            Layout[empty] = Layout[i];
+            Layout[i] = null;
+        }
+        while (Layout.Count > slots && Layout[Layout.Count - 1] == null) Layout.RemoveAt(Layout.Count - 1);
         var left = new Dictionary<string, int>(Items);
         var stacks = new List<Stack>();
         for (int i = 0; i < Layout.Count; i++)

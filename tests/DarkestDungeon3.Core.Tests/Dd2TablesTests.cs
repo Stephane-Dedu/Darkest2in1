@@ -13,6 +13,18 @@ public class Dd2TablesTests
         : @"C:\Users\Piral\dd2-decomp\data\Excel";
 
     [Fact]
+    public void Expedition_pool_rejects_Kingdoms_and_respects_class_requirements()
+    {
+        var t = Dd2Tables.Load(Excel);
+        Assert.False(t.Quirks["quirk_kingdoms_heal_wounds_faster_at_camp_pos"].CanGenerate("crusader"));
+        Assert.False(t.Quirks["quirk_kingdoms_weak_debuff_vs_siege_neg"].CanGenerate("crusader"));
+        Assert.True(t.Quirks["quirk_warrior_of_light_pos"].CanGenerate("crusader"));
+        var excluded = t.Quirks.Values.Single(q => q.GenerationAll.Contains("performer_is_not_flagellant"));
+        Assert.False(excluded.CanGenerate("flagellant"));
+        Assert.True(excluded.CanGenerate("crusader"));
+    }
+
+    [Fact]
     public void Quirks_and_trinkets_read_with_their_kinds()
     {
         var t = Dd2Tables.Load(Excel);

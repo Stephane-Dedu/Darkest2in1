@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Dd2;
 /// The crawl's view of the party, backed by the real DD2 actors: DD2 owns HP, death's door, meltdowns and quirks,
 /// so out-of-combat effects land with the same rules as in a fight.
 /// </summary>
-internal sealed class Dd2Party : IParty
+internal sealed class Dd2Party : IParty, ITravelResistance
 {
     private readonly Dictionary<string, uint> _guids;     // hero id → actor guid, rank order
     private readonly Dd2Catalog _catalog;
@@ -30,6 +30,9 @@ internal sealed class Dd2Party : IParty
         _guids.Where(kv => !Dd2Api.IsDead(kv.Value)).Select(kv => kv.Key).ToList();
 
     public float HpFraction(string heroId) => Dd2Api.HpFraction(Dd2Api.Actor(Guid(heroId)));
+
+    public float Resistance(string heroId, string kind) => Dd2Api.Actor(Guid(heroId))?.ActorData
+        .GetDataContainerSum<ActorDataStats>().StatContainer.GetStatTotal(ActorStatType.RESISTANCE, kind) ?? 0f;
 
     public void Damage(string heroId, float maxHpFraction, string cause)
     {
@@ -57,7 +60,7 @@ internal sealed class Dd2Party : IParty
     public string AddDd1Quirk(string heroId, string dd1QuirkId)
     {
         var a = Dd2Api.Actor(Guid(heroId));
-        var quirk = _catalog.QuirkFor(dd1QuirkId);
+        var quirk = _catalog.QuirkFor(dd1QuirkId, Runtime.Session.Current?.Save.Estate.Hero(heroId)?.ClassId);
         if (a?.QuirkContainer == null || quirk == null) return null;
         // DD1's limits (5 positive, 5 negative, 3 diseases): over the cap the new quirk replaces an unlocked one of
         // its kind, or isn't gained if they're all locked.

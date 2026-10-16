@@ -67,7 +67,6 @@ internal sealed partial class Driver : MonoBehaviour
         Plugin.Log.LogInfo("[dd3] " + line);
     }
 
-    private static readonly float[] RankX = { 788, 620, 452, 284 };
 
     /// <summary>After DD2 has moved its actors and camera: pose DD1's monsters for this frame.</summary>
     private void LateUpdate()
@@ -97,6 +96,7 @@ internal sealed partial class Driver : MonoBehaviour
         stage?.SetVisible((Phase == Phase.Crawling || fightCover) && Plugin.HeroModels.Value && !HeroStage.RendersBlack);
         stage?.SetBattleBlend(Dd1Backdrop.HeroTargets, fighting ? Dd2Combat.LayoutBlend : 0f, fighting ? Dd2Combat.TurnBlend : 0f);
         if (Phase != Phase.Crawling || Crawl == null) { _sceneMotion.Reset(); return; }
+        if (FinishExplorationDefeat()) return;
         LockRoadInput();
         if (stage != null && Plugin.HeroModels.Value)
         {
@@ -104,8 +104,9 @@ internal sealed partial class Driver : MonoBehaviour
             // Living heroes keep their DD1 rank slots; the dead leave a gap.
             var guids = Expedition.Party.Select(Party.Guid).ToList();
             var alive = guids.Where(g => g != 0 && !Dd2Api.IsDead(g)).ToList();
-            var xs = guids.Select((g, i) => (g, x: RankX[System.Math.Min(i, 3)])).Where(t => alive.Contains(t.g)).Select(t => t.x).ToList();
-            stage.SetParty(alive, xs);
+            bool camping = Expedition.Camp != null;
+            var xs = guids.Select((g, i) => (g, x: Core.Presentation.HeroFormation.X(i, camping))).Where(t => alive.Contains(t.g)).Select(t => t.x).ToList();
+            stage.SetParty(alive, xs, camping);
         }
 
         var kb = UnityEngine.InputSystem.Keyboard.current;
@@ -211,6 +212,8 @@ internal sealed partial class Driver : MonoBehaviour
         var hamlet = S.Hamlet;
         var why = Core.Campaign.Embark.WhyCantEmbark(S.Save.Estate, quest, party, hamlet.AnyResolveCanEmbark);
         if (why != null) return why;
+        if (!Core.Campaign.Embark.PackFits(S.Campaign, quest, party, bought, opening ? null : S.Provisioner, S.Content.Items))
+            return "Make room for the quest items and starting supplies before embarking.";
         int cost = opening ? 0 : bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);   // the opening's pack is DD1's, free
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
@@ -796,6 +799,7 @@ internal sealed partial class Driver : MonoBehaviour
                 case CrawlEventType.Stress: break;
             }
         }
+        if (FinishExplorationDefeat()) return;
         S.Persist();
         if (fight != null) StartFight(fight.Value, surprised, monstersSurprised);
     }
@@ -814,6 +818,15 @@ internal sealed partial class Driver : MonoBehaviour
     {
         CapturePartyState();
         CompleteHomecoming(ExpeditionParty.Outcomes(Expedition, S.Save.Estate));
+    }
+
+    private bool FinishExplorationDefeat()
+    {
+        if (Crawl?.CheckPartyDefeat() != true) return false;
+        StopWalking();
+        Say("The party has fallen.");
+        FinishExpedition();
+        return true;
     }
 
     private void CompleteHomecoming(List<HeroOutcome> outcomes)

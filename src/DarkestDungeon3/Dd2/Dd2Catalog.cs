@@ -78,8 +78,8 @@ internal sealed class Dd2Catalog : IHeroCatalog
     public IReadOnlyList<string> StartingQuirks(string classId, Rng rng, int positives, int negatives)
     {
         // DD2's own starting pools (pos_start / neg_start), sorted so a seed always gives the same quirks.
-        var pos = AllQuirks.Where(q => q.IsPositive && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
-        var neg = AllQuirks.Where(q => q.IsNegative && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
+        var pos = AllQuirks.Where(q => q.CanGenerate(classId) && q.IsPositive && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
+        var neg = AllQuirks.Where(q => q.CanGenerate(classId) && q.IsNegative && !q.IsDisease && q.IsStarting).OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
         var result = new List<string>();
         for (int i = 0; i < positives && pos.Count > 0; i++) result.Add(rng.Pick(pos).Id);
         for (int i = 0; i < negatives && neg.Count > 0; i++) result.Add(rng.Pick(neg).Id);
@@ -87,14 +87,16 @@ internal sealed class Dd2Catalog : IHeroCatalog
     }
 
     /// <summary>The DD2 quirk standing in for a DD1 quirk: same id if DD2 has it, else one of the same kind.</summary>
-    public string MapDd1Quirk(string dd1QuirkId)
+    public string MapDd1Quirk(string dd1QuirkId) => MapDd1Quirk(dd1QuirkId, null);
+
+    public string MapDd1Quirk(string dd1QuirkId, string classId)
     {
         if (dd1QuirkId == null) return null;
-        if (Tables.Quirks.ContainsKey(dd1QuirkId)) return dd1QuirkId;
+        if (Tables.Quirks.TryGetValue(dd1QuirkId, out var direct) && direct.CanGenerate(classId)) return dd1QuirkId;
         foreach (var guess in new[] { "quirk_" + dd1QuirkId, "quirk_" + dd1QuirkId + "_pos", "quirk_" + dd1QuirkId + "_neg" })
-            if (Tables.Quirks.ContainsKey(guess)) return guess;
+            if (Tables.Quirks.TryGetValue(guess, out var exact) && exact.CanGenerate(classId)) return guess;
         var (positive, disease) = _lore.Quirks.TryGetValue(dd1QuirkId, out var kind) ? kind : (false, false);
-        var pool = AllQuirks.Where(q => disease ? q.IsDisease : positive ? q.IsPositive && !q.IsDisease : q.IsNegative && !q.IsDisease)
+        var pool = AllQuirks.Where(q => q.CanGenerate(classId) && (disease ? q.IsDisease : positive ? q.IsPositive && !q.IsDisease : q.IsNegative && !q.IsDisease))
                             .OrderBy(q => q.Id, StringComparer.Ordinal).ToList();
         if (pool.Count == 0) return null;
         int h = 17;
@@ -102,7 +104,7 @@ internal sealed class Dd2Catalog : IHeroCatalog
         return pool[(int)((uint)h % (uint)pool.Count)].Id;
     }
 
-    public QuirkDefinition QuirkFor(string dd1QuirkId) => Definition(MapDd1Quirk(dd1QuirkId));
+    public QuirkDefinition QuirkFor(string dd1QuirkId, string classId = null) => Definition(MapDd1Quirk(dd1QuirkId, classId));
 
     public bool IsDisease(string quirkId) => quirkId != null && Tables.Quirks.TryGetValue(quirkId, out var q) && q.IsDisease;
     public bool IsPositive(string quirkId) => quirkId != null && Tables.Quirks.TryGetValue(quirkId, out var q) && q.IsPositive;

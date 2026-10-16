@@ -17,7 +17,6 @@ namespace DarkestDungeon3.Ui;
 internal sealed class CrawlUi
 {
     private static readonly float[] HeroX = { 788, 620, 452, 284 };   // rank 1..4 (DD1 overlays.hero_start_pos/spacing)
-    private static readonly float[] CampX = { 1250, 1450, 670, 470 }; // at camp: two each side of the fire
     private const float Feet = 680;
 
     private bool _inventoryTab;
@@ -365,9 +364,10 @@ internal sealed class CrawlUi
         string spriteId = kind == "curios" ? S.Content.Curios.SpriteOf(id) : id;
         string folder = S.Dd1.PathOf("props", "shared", kind, spriteId ?? "");
         SpineArt.Picture pic;
+        bool highlight = false;
         if (kind == "curios")
         {
-            var closed = SpineArt.Get(folder, "closed", sl => sl.Name != "active" && sl.Name != "open");
+            var closed = SpineArt.Curio(folder, false);
             bool hover = hoverable && !used && closed != null && closed.Hit(feet, 1f, Event.current.mousePosition);
             if (hoverable && !used && closed != null)
             {
@@ -375,9 +375,8 @@ internal sealed class CrawlUi
                 if (hover && Gui.Hotspot(area)) CurioClicked = true;
                 if (Drag.Drop<PackStack>(area, out var dropped)) CurioDrop = dropped.Key;
             }
-            pic = used ? SpineArt.Get(folder, "open", sl => sl.Name != "active" && sl.Name != "closed")
-                : hover ? SpineArt.Get(folder, "active", sl => sl.Name != "closed" && sl.Name != "open") ?? closed
-                : closed;
+            pic = used ? SpineArt.Curio(folder, true) : closed;
+            highlight = hover;
         }
         else
         {
@@ -397,7 +396,10 @@ internal sealed class CrawlUi
         {
             var r = pic.RectAt(feet);
             if (shadow != null) GUI.DrawTexture(new Rect(feet.x - r.width * 0.45f, feet.y - 30, r.width * 0.9f, 50), shadow);
+            var colour = GUI.color;
+            if (highlight) GUI.color = colour * new Color(1.15f, 1.11f, 1.03f, 1f);
             pic.Draw(feet);
+            GUI.color = colour;
             return;
         }
         if (used) return;
@@ -437,7 +439,7 @@ internal sealed class CrawlUi
             var actor = Dd2Api.Actor(guid);
             bool dead = actor == null || Dd2Api.IsDead(guid);
             bool camping = exp.Camp != null;
-            float x = camping ? CampX[rank] : HeroX[rank];
+            float x = Core.Presentation.HeroFormation.X(rank, camping);
 
             if (shadow != null) GUI.DrawTexture(new Rect(x - 85, Feet - 30, 170, 50), shadow);
             if (!dead && id == D.SelectedHeroId && selected != null) GUI.DrawTexture(new Rect(x - 87, Feet - 196, 175, 206), selected);
@@ -448,7 +450,7 @@ internal sealed class CrawlUi
             var sprite = shownModel ? null : Art.HeroFigure(hero?.ClassId);
             bool large = sprite != null && sprite != Art.Portrait(hero?.ClassId);
             // At camp the two front ranks sit on the far side of the fire, facing back toward it.
-            bool facingLeft = camping && rank < 2;
+            bool facingLeft = Core.Presentation.HeroFormation.FacesLeft(rank, camping);
             // DD1's walk: each hero bobs a little, out of step with the others.
             float bob = Mathf.Abs(HeroStage.WalkSpeed) > .01f && !camping
                 ? Mathf.Abs(Mathf.Sin((float)D.SceneTravel / 50 + rank * 1.3f)) * -9f : 0;
@@ -461,6 +463,13 @@ internal sealed class CrawlUi
                 // DD1: a red health bar and ten stress pips at the hero's feet.
                 Gui.Bar(new Rect(x - 55, Feet + 10, 110, 9), Dd2Api.HpFraction(actor), Gui.Dd1Health);
                 DrawStressPips(x - 50, Feet + 24, actor.Stress, actor.StressMax);
+                var conditions = exp.TravelEffects.Where(e => e.HeroId == id).ToList();
+                if (conditions.Count > 0)
+                {
+                    Gui.Text(new Rect(x - 72, Feet - 20, 144, 24), string.Join(" · ", conditions.Select(e => e.Kind).Distinct()), 17, new Color(.82f, .72f, .51f), TextAnchor.MiddleCenter);
+                    Gui.Tip(new Rect(x - 72, Feet - 20, 144, 24).Contains(Event.current.mousePosition)
+                        ? string.Join("\n", conditions.Select(e => $"{HamletUi.Pretty(e.Kind)}: {e.TurnsLeft} turns remaining. Treat before travelling.")) : null);
+                }
             }
             else Gui.Text(new Rect(x - 80, Feet + 6, 160, 30), "Dead", 22, Gui.Blood, TextAnchor.UpperCenter, heading: true);
 
@@ -710,22 +719,32 @@ internal sealed class CrawlUi
     // ---------------- inventory ----------------
 
     private static Rect PackCell(int i) => new(960 + 20 + (i % 8) * 80, 720 + 28 + (i / 8) * 160, 72, 144);
+    private int _inventoryPage;
 
     private void DrawInventory(Crawl crawl, ExpeditionState exp)
     {
         var items = S.Content.Items;
         var stacks = exp.Pack.Arrange(items);
+        int pages = Mathf.Max(1, (exp.Pack.Layout.Count + Inventory.Slots - 1) / Inventory.Slots);
+        _inventoryPage = Mathf.Clamp(_inventoryPage, 0, pages - 1);
+        if (pages > 1)
+        {
+            if (Gui.DdButton(new Rect(1660, 718, 90, 28), "‹", _inventoryPage > 0, 20)) _inventoryPage--;
+            Gui.Text(new Rect(1750, 718, 65, 28), $"{_inventoryPage + 1}/{pages}", 19, Gui.Dd1Text, TextAnchor.MiddleCenter);
+            if (Gui.DdButton(new Rect(1815, 718, 90, 28), "›", _inventoryPage + 1 < pages, 20)) _inventoryPage++;
+        }
         for (int i = 0; i < Inventory.Slots; i++)
         {
             var r = PackCell(i);
-            var stack = stacks.Find(st => st.Slot == i);
+            int slot = i + _inventoryPage * Inventory.Slots;
+            var stack = stacks.Find(st => st.Slot == slot);
             if (Drag.Hovering<PackStack>(r)) Gui.Fill(new Rect(r.x, r.yMax + 2, r.width, 4), Gui.Gold);
-            if (Drag.Drop<PackStack>(r, out var moved) && moved.Pack == exp.Pack) { exp.Pack.Move(moved.Slot, i); continue; }
+            if (Drag.Drop<PackStack>(r, out var moved) && moved.Pack == exp.Pack) { exp.Pack.Move(moved.Slot, slot); continue; }
             if (stack == null) continue;
             string key = stack.Key;
             int count = stack.Count, limit = items.StackLimit(key);
-            Drag.Source(r, new PackStack(exp.Pack, i, key), rect => ItemArt.Stack(rect, key, count, limit));
-            bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == i;
+            Drag.Source(r, new PackStack(exp.Pack, slot, key), rect => ItemArt.Stack(rect, key, count, limit));
+            bool carried = Drag.Payload is PackStack c && c.Pack == exp.Pack && c.Slot == slot;
             if (!carried) ItemArt.Stack(r, key, count, limit);
             if (r.Contains(Event.current.mousePosition) && !Drag.Active)
                 Gui.Text(new Rect(960, 1050, 960, 26), Core.Campaign.JournalPages.TryPage(key, out _)
@@ -756,6 +775,7 @@ internal sealed class CrawlUi
     {
         string done = crawl.UseSupply(D.SelectedHeroId, key);
         if (done != null) { Gui.Announce(done); S.Persist(); return; }
+        if (key == Supply.Food && crawl.IsFull(D.SelectedHeroId)) { Gui.Announce("This hero is full."); return; }
         if (key == Supply.Torch) D.UseTorch();
         else if (key == Supply.Firewood && crawl.CanCamp) D.MakeCamp();
         else if (key is Supply.Bandage or Supply.Antivenom or Supply.Laudanum or Supply.Herbs)

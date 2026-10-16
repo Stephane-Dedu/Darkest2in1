@@ -40,9 +40,9 @@ public sealed class ZoneProps
     public IReadOnlyList<(float Weight, string Id)> Table(string name) =>
         _tables.TryGetValue(name, out var t) ? t : new List<(float, string)>();
 
-    public string Pick(string table, Rng rng, string fallback = null)
+    public string Pick(string table, Rng rng, string fallback = null, ISet<string> exclude = null)
     {
-        var t = Table(table);
+        var t = exclude == null ? Table(table) : Table(table).Where(e => !exclude.Contains(e.Id)).ToList();
         if (t.Count == 0) return fallback;
         double roll = rng.NextDouble() * t.Sum(e => e.Weight);
         foreach (var (w, id) in t)

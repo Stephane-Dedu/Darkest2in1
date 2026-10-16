@@ -394,16 +394,11 @@ internal sealed partial class HamletUi
 
     private void DrawWindow(Hamlet hamlet)
     {
+        using var skin = CampaignPanelSkin.Scope();
         string building = _panel == Panel.Hero || _panel == Panel.Log ? null : _building;
         var bg = building != null ? Art.BuildingBackground(building)
             : _panel == Panel.Log ? Art.Dd1("campaign", "town", "activity_log", "activitylog_bg.png") : null;
-        if (bg != null) GUI.DrawTexture(Window, bg);
-        else
-        {
-            Gui.Fill(Window, new Color(0.04f, 0.035f, 0.03f, 0.96f));
-            Gui.Fill(new Rect(Window.x, Window.y, Window.width, 2), new Color(0.35f, 0.29f, 0.18f));
-            Gui.Fill(new Rect(Window.x, Window.yMax - 2, Window.width, 2), new Color(0.35f, 0.29f, 0.18f));
-        }
+        CampaignPanelSkin.ServiceWindow(Window, bg);
 
         // Left: the building's keeper (or the hero), as DD1 frames it.
         if (building != null)
@@ -1292,6 +1287,8 @@ internal sealed partial class HamletUi
     public static string QuirkName(string id)
     {
         if (string.IsNullOrEmpty(id)) return "";
+        var localized = Assets.Code.Utils.Singleton<Assets.Code.Locale.Localization>.Instance?.TryGetString(id);
+        if (!string.IsNullOrEmpty(localized)) return Core.Dd2Data.TrinketDescriptions.Plain(localized);
         string s = id.StartsWith("quirk_") ? id.Substring(6) : id;
         foreach (var tag in new[] { "_negative", "_positive", "_neg", "_pos" })
             if (s.EndsWith(tag)) { s = s.Substring(0, s.Length - tag.Length); break; }

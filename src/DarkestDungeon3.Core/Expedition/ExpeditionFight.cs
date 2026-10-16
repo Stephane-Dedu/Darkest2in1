@@ -4,7 +4,8 @@ using System.Linq;
 
 namespace DarkestDungeon3.Core.Expedition;
 
-/// <summary>A fresh native fight must restart both teams from its beginning, not mix mid-fight heroes with fresh enemies.</summary>
+/// <summary>A fresh native fight restarts both teams, supplies and statuses from its beginning. The mod does
+/// not restore DD2's complete combat state, so it cannot retain mid-fight item spending or treatment either.</summary>
 public sealed class FightCheckpoint
 {
     public int RoomId, CorridorId, TileIndex;
@@ -14,6 +15,9 @@ public sealed class FightCheckpoint
     public bool NativePresentation, HeroesSurprised, MonstersSurprised;
     public float Light;
     public Dictionary<string, ExpeditionHeroState> PartyStates = new();
+    /// <summary>Absent in legacy checkpoints, which retain the pack/status state they already saved.</summary>
+    public Inventory Pack;
+    public List<TravelEffect> TravelEffects;
 
     public FightPlan Plan() => new()
     {
@@ -50,7 +54,8 @@ public static class ExpeditionFight
             Kind = plan.Kind, BattleId = battle, Arena = arena, Enemies = plan.Enemies?.ToList(),
             NativePresentation = plan.NativePresentation, Light = state.Light,
             HeroesSurprised = heroesSurprised, MonstersSurprised = monstersSurprised,
-            PartyStates = state.Party.ToDictionary(id => id, id => ExpeditionParty.Copy(state.PartyStates[id]))
+            PartyStates = state.Party.ToDictionary(id => id, id => ExpeditionParty.Copy(state.PartyStates[id])),
+            Pack = Copy(state.Pack), TravelEffects = Copy(state.TravelEffects)
         };
         return true;
     }
@@ -61,8 +66,21 @@ public static class ExpeditionFight
         if (saved == null) return false;
         state.PartyStates = state.Party.ToDictionary(id => id, id => ExpeditionParty.Copy(saved.PartyStates[id]));
         state.Light = saved.Light;
+        if (saved.Pack != null) state.Pack = Copy(saved.Pack);
+        if (saved.TravelEffects != null) state.TravelEffects = Copy(saved.TravelEffects);
         return true;
     }
+
+    private static Inventory Copy(Inventory pack) => pack == null ? null : new Inventory
+    {
+        Items = new Dictionary<string, int>(pack.Items), Layout = pack.Layout.ToList(),
+    };
+
+    private static List<TravelEffect> Copy(List<TravelEffect> effects) => effects?.Select(effect => new TravelEffect
+    {
+        HeroId = effect.HeroId, Kind = effect.Kind, DamageFraction = effect.DamageFraction,
+        TurnsLeft = effect.TurnsLeft, StepProgress = effect.StepProgress,
+    }).ToList();
 
     public static CrawlEvent Presentation(ExpeditionState state)
     {

@@ -27,6 +27,8 @@ public sealed class CrawlRules
     public float HungerHealFraction = 0.05f, StarveHpFraction = 0.2f, StarveStressDd1 = 15f;
     /// <summary>Eating a provision from the pack in the dungeon heals this much of max HP (provision_hp_heal).</summary>
     public float ProvisionHeal = 0.05f;
+    public int MaxProvisionsBeforeFull = 4;
+    public float DotHallwayStepRatio = 0.5f;
     public float ScoutChanceBase = 0.25f;
     public float ScoutCriticalChance = 0.5f;
     public float ScoutEntryChance;
@@ -107,6 +109,8 @@ public sealed class CrawlRules
         r.CampPoints = (int)Get(rules, "camp_start_camping_points", r.CampPoints);
         r.CampRestoreTorch = Get(rules, "camp_restore_torch", r.CampRestoreTorch);
         r.ProvisionHeal = Get(rules, "provision_hp_heal", r.ProvisionHeal);
+        r.MaxProvisionsBeforeFull = (int)Get(rules, "max_provisions_before_full", r.MaxProvisionsBeforeFull);
+        r.DotHallwayStepRatio = Get(rules, "dotHallwayStepRatio", r.DotHallwayStepRatio);
         r.AmbushTorchChange = Get(rules, "ambush_torch_reduction", r.AmbushTorchChange);
         foreach (var m in rules["meals_table"] ?? new JArray())
         {
