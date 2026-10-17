@@ -14,7 +14,7 @@ namespace DarkestDungeon3.Ui;
 /// The dungeon, laid out like DD1's raid screen (positions from DD1's scripts/layout/screen.raid.darkest):
 /// scene and party on top, torch above, banner + hero panel bottom-left, map/inventory bottom-right.
 /// </summary>
-internal sealed class CrawlUi
+internal sealed partial class CrawlUi
 {
     private static readonly float[] HeroX = { 788, 620, 452, 284 };   // rank 1..4 (DD1 overlays.hero_start_pos/spacing)
     private const float Feet = 680;
@@ -51,7 +51,7 @@ internal sealed class CrawlUi
             return;
         }
 
-        DrawScene(crawl, exp, zone);
+        DrawScene(crawl, exp, zone,doorInput:_curioPanel==null && _sheetHeroId==null);
         if (exp.Camp != null) DrawCampfire();
         DrawHeroes(exp);
         float fade = D.FadeAlpha;
@@ -153,7 +153,7 @@ internal sealed class CrawlUi
 
     // ---------------- scene ----------------
 
-    private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone, bool atmosphere = true)
+    private static void DrawScene(Crawl crawl, ExpeditionState exp, string zone, bool atmosphere = true,bool doorInput=false)
     {
         Gui.Fill(new Rect(0, 0, Gui.W, 720), new Color(0, 0, 0, GUI.color.a));
         float slide = D.SceneSlide;
@@ -180,11 +180,11 @@ internal sealed class CrawlUi
             var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
             float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
             CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
-                CorridorPanoramaLayout.ViewProgress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha);
-            DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
+                CorridorPanoramaLayout.ViewProgress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha,tileCount:corridor.Tiles.Count);
         }
         if (atmosphere && regional != null) DungeonAtmosphereUi.DrawCurrent();
         DrawProps(crawl, exp, slide);
+        if (!exp.InRoom) DrawDoors(crawl,exp,zone,slide,regional!=null,doorInput);
 
         // DD1's darkness: the dimmer the torch, the heavier the shadow, strongest at the edges.
         float dark = Mathf.Clamp01((75f - exp.Light) / 110f);
@@ -260,23 +260,6 @@ internal sealed class CrawlUi
             foreach (var layer in plan.Layers.Where(layer => layer.Ground)) DrawSceneryLayer(layer, camera, reverse);
         }
         finally { GUI.color = old; }
-    }
-
-    private static void DrawArrivalCue(Crawl crawl, ExpeditionState exp, RegionalScenery plan, float slide, float alpha)
-    {
-        int count = crawl.CurrentCorridor.Tiles.Count;
-        bool reverse = exp.HeadingRoomId != crawl.CurrentCorridor.RoomB;
-        float opening = CorridorSceneryLayout.Opening(exp.TileIndex, count, reverse, slide);
-        if (opening <= 0 || alpha <= 0) return;
-        int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
-        var cue = new Color(0.85f, 0.81f, 0.7f, GUI.color.a * alpha * opening * 0.8f);
-        var choice = RegionSceneryArt.CorridorChoice(plan, exp.Seed, crawl.CurrentCorridor.Id);
-        var panorama = RegionSceneryArt.RoomAlpha(choice?.FileName) >= .999f ? RegionSceneryArt.RoomTextureFor(choice?.FileName) : null;
-        foreach (float x in new[] {
-            600 + CorridorSceneMotion.PropOffset(panorama?.width ?? 0, panorama?.height ?? 0, count, -1 - here, slide),
-            600 + CorridorSceneMotion.PropOffset(panorama?.width ?? 0, panorama?.height ?? 0, count, count - here, slide) })
-            if (x > -140 && x < Gui.W + 140)
-                Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
     }
 
     private static void DrawRoomPanorama(RegionalScenery plan, int seed, Room room, float nativeAlpha)

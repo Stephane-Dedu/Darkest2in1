@@ -21,14 +21,22 @@ public static class CorridorPanoramaLayout
         float position = heading - slide / 720f;
         // Include the half-square approach at each door. Clamping at the first
         // and last square centres froze the floor while the party still walked.
-        return Clamp(.5f + (position - (tileCount - 1) * .5f) / Math.Max(9, tileCount));
+        return Clamp(.5f + (position - (tileCount - 1) * .5f) / TravelSpan(tileCount));
     }
 
-    // Uniform 8% overscan protects the frame edges. Wider plates provide more lateral travel.
-    // Keep the authored y=680 contact fixed; walking props retain their physical square coordinates.
-    public static PanoramaCrop Crop(int width, int height, float progress)
+    public static int TravelSpan(int tileCount) => Math.Max(6,tileCount);
+
+    // Base overscan protects edges; hall length can increase zoom up to1.6x to retain useful travel.
+    // Keep the authored y=680 contact fixed, with props on the same physical square coordinates.
+    public static PanoramaCrop Crop(int width, int height, float progress, int tileCount=0)
     {
         float scale = Math.Max(1920f / width, 720f / height) * 1.08f;
+        if (tileCount>0)
+        {
+            // Bound zoom while giving the painting a useful physical walking distance.
+            float required=(1920+TravelSpan(tileCount)*360f)/width;
+            scale=Math.Max(scale,Math.Min(required,scale*1.6f));
+        }
         float w = width * scale, h = height * scale;
         float top = 680f / 720 * h - 680;
         return new PanoramaCrop((w - 1920) * Clamp(progress) / w, (h - top - 720) / h, 1920 / w, 720 / h);

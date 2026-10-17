@@ -475,3 +475,28 @@ teardown. The actual linked panorama draw is checked for coverage, matching
 source edges, floor alignment, reversed/mirrored travel, scaled/letterboxed
 canvases and restoring draw state on failure. Native playtest observations
 and outstanding checks are recorded in MODLOG.md and PARITY.md.
+
+## Clickable passages and travel distance, round258
+
+Crawl.Step never enters a room. CanEnterDoor/EnterDoor check endpoint, direction,
+battle/modal state and retain room-retreat metadata. The Driver owns one0.3s fade-out
+request per Crawl instance, followed by entry/fade-in. Held input and map routes stop
+at the half-square approach. Walking near a passage does not start a fade.
+
+CrawlUi.Doors keeps legacy DD1 door walls. In DD2 scenes it reads the corresponding
+installed DD1 doorway and applies CorridorDoorLayout.Alpha to a cached runtime texture.
+No derived assets are shipped or written to game files. Door art sits behind heroes at
+y680. Interaction labels are omitted from battle captures. Both doors share projection.
+
+TravelSpan=max(6,tileCount), targeting360px per square with at most1.6x base overscan.
+Very long/narrow plates may cap below target. Main4096x768 paintings yield360â€“371.2px
+per square in tested3/6/9/12-square halls, versus185.6â€“247.5 before. The1.2s square
+duration and existing pose/stride algorithm stay unchanged. Camera, props, doors,
+atmosphere and feet use the same projected distance.
+
+Private local-art/corridor-doors-v13 contains8 initial red symptom cases, green/full
+logs and four offline regional crop/door compositions. The old compiled Core supplies
+before crops. Frozen Release+1,266 Core+237 UI pass. Native hover/click placement,
+animation comfort, blocked doors, fades/battle/return remain unverified because the
+owner requires DD2 stay closed until explicit OK. Installed440-source build preserves
+round257 typography and prior systems/art. Use a fresh rollback before later deployment.

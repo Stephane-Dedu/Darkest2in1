@@ -69,6 +69,7 @@ public class LoopTests
                 var next = exp.Map.Neighbours(exp.RoomId).OrderBy(n => exp.Map.Room(n).Visited).First();
                 crawl.Travel(next);
             }
+            else if (crawl.CanEnterDoor(crawl.State.HeadingRoomId)) crawl.EnterDoor(crawl.State.HeadingRoomId);
             else crawl.Step(forward: true);
         }
         Assert.True(exp.QuestComplete);

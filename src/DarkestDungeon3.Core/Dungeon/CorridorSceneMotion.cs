@@ -24,7 +24,7 @@ public sealed class CorridorSceneMotion
         if (width > 0 && height > 0)
         {
             var crop = CorridorPanoramaLayout.Crop(width,height,
-                CorridorPanoramaLayout.ViewProgress(tile,count,reverse,slide));
+                CorridorPanoramaLayout.ViewProgress(tile,count,reverse,slide),count);
             return 1920 * crop.X / crop.Width;
         }
         return (reverse ? count - 1 - tile : tile) * 720 - slide;
@@ -33,9 +33,9 @@ public sealed class CorridorSceneMotion
     public static float PropOffset(int width, int height, int count, int neighbor, float slide)
     {
         if (width <= 0 || height <= 0) return neighbor * 720 + slide;
-        var start = CorridorPanoramaLayout.Crop(width, height, 0);
-        var end = CorridorPanoramaLayout.Crop(width, height, 1);
-        float square = 1920 * (end.X - start.X) / start.Width / Math.Max(9, count);
+        var start = CorridorPanoramaLayout.Crop(width, height, 0,count);
+        var end = CorridorPanoramaLayout.Crop(width, height, 1,count);
+        float square = 1920 * (end.X - start.X) / start.Width / CorridorPanoramaLayout.TravelSpan(count);
         return (neighbor + slide / 720) * square;
     }
 

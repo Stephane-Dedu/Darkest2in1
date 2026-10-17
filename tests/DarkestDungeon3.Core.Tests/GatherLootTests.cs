@@ -225,7 +225,7 @@ public class GatherLootTests
         Assert.True(crawl.TakeLeftBehind(first.LeftBehind, 0));
         Assert.True(crawl.DismissCurio(first));
         crawl.Travel(1);
-        if (!hall) crawl.Step(true);
+        if (!hall) crawl.EnterDoor(crawl.State.HeadingRoomId);
         Assert.Equal(goal.CurioName, crawl.CurioHere);
         var second = crawl.InteractCurio("h", null, out var nextOverflow);
         Assert.NotNull(second);

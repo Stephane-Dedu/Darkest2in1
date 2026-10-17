@@ -1,5 +1,25 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round258 adds explicit corridor doors and stronger projected travel. Movement/map routes
+stop at both ends; click the passage to enter/return through0.3s fade-out and existing
+fade-in. Core validates endpoints/pending events; traps/obstacles permit return behind
+them, fights pin both doors. Reload/retreat metadata and single-square halls are covered.
+Outdoor passages use runtime-masked installed DD1 doorway art; legacy walls remain.
+
+Camera targets360px per square with six-square minimum span and1.6x maximum zoom.
+Tested native plates move360â€“371px versus186â€“247; pose/stride code and1.2s square
+duration are unchanged. Props/doors/particles/feet share the actual crop. First8 red
+symptom cases now pass. Frozen Release+1,266 Core+237 UI and four offline compositions
+pass. Native comfort/click/hover/fade/battle acceptance remains [?].
+
+KEEP DD2 CLOSED until the owner explicitly says OK. No launch/input/estate access in258.
+Installed440-source build retains typography/stress/loading/heroes and190 scenery/model
+files. Independent Shieldbreaker WIP is excluded. Fresh round257 rollback, exact source/
+overlay, logs/compositions and artifact hashes: local-art/corridor-doors-v13. Next round259.
+Make a fresh baseline; historical restore scripts would undo current changes.
+Earlier handoffs are historical.
+
+
 Round257 makes native DD2 typography the shared default, beginning with trinkets. Dunkel
 headings/Alegreya body use explicit virtual-pixel sizes with consistent measurement. No
 DD1 bitmap scaling outside campaign panels. Trinket tooltips match native24/30px sizes,

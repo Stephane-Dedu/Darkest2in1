@@ -64,7 +64,7 @@ public class PlotSecretRoomTests
         Assert.False(state.QuestComplete);
         crawl.Travel(1);
         Assert.False(state.InRoom);
-        crawl.Step(true);
+        crawl.EnterDoor(1);
         Assert.True(state.InRoom);
         Assert.True(state.QuestComplete);
     }

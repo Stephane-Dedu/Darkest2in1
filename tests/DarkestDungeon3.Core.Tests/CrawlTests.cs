@@ -179,6 +179,8 @@ public class CrawlTests
         }
         else
         {
+            Assert.False(state.InRoom);
+            crawl.EnterDoor(0);
             Assert.True(state.InRoom);
             Assert.Equal(0, state.RoomId);
         }
@@ -261,7 +263,7 @@ public class CrawlTests
         Assert.Equal(94f, afterFirst);
         if (crawl.IsBlocked) crawl.ResolveBattle();
         if (crawl.LastSpoils != null) Assert.True(crawl.DismissSpoils(crawl.LastSpoils));
-        crawl.Step(forward: false); // back into the entrance room
+        crawl.EnterDoor(map.EntranceRoomId); // explicitly return through its door
         Assert.True(crawl.State.InRoom);
         crawl.Travel(other);        // the first square again: already visited
         Assert.Equal(afterFirst - 1f, crawl.State.Light);
@@ -333,7 +335,8 @@ public class CrawlTests
                 else
                 {
                     if (crawl.CurrentTile.Content == HallContent.Trap && !crawl.CurrentTile.Resolved) crawl.DisarmTrap();
-                    crawl.Step(forward: true);
+                    if (crawl.CanEnterDoor(crawl.State.HeadingRoomId)) crawl.EnterDoor(crawl.State.HeadingRoomId);
+                    else crawl.Step(forward: true);
                 }
             }
             Assert.True(crawl.State.QuestComplete, $"{zone} {size} {type} seed {seed} not complete after {guard} moves\n{map.ToAscii()}");

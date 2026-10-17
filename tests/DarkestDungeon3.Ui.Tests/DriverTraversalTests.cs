@@ -84,14 +84,20 @@ public class DriverTraversalTests
     }
 
     [Fact]
-    public void ReachingTheRoomStartsItsFadeOnTheSameFrameAndKeepsRoomPropsStill()
+    public void WalkingStopsInTheHallAndClickingTheDoorOwnsTheWholeFade()
     {
         var driver = Ready(HallContent.Empty); Time.unscaledTime = 100;
         driver.Step(true);
         driver.SeedWalkProgress(.25f);
         Time.unscaledTime = 102; driver.Step(true);
+        Assert.False(driver.Expedition.InRoom);
+        Assert.True(driver.EnterDoor(1));
+        Assert.False(driver.EnterDoor(1)); // double click cannot restart the transition
+        Time.unscaledTime=102.15f;driver.TickDoorTransition();
+        Assert.False(driver.Expedition.InRoom);Assert.InRange(driver.DoorFade,.49f,.51f);
+        Time.unscaledTime=102.31f;driver.TickDoorTransition();
         Assert.True(driver.Expedition.InRoom);
-        Assert.Equal(102, driver.RoomTransitionAt);
+        Assert.Equal(102.31f, driver.RoomTransitionAt);
         Assert.Equal(0, driver.LastStepDir);
         Assert.Equal(-10, driver.LastStepTime);
         Assert.Equal(0, driver.WalkProgress);

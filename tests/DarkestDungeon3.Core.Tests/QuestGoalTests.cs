@@ -371,6 +371,7 @@ public class QuestGoalTests
                 if (next < 0) break;
                 crawl.Travel(next);
             }
+            else if (crawl.CanEnterDoor(crawl.State.HeadingRoomId)) crawl.EnterDoor(crawl.State.HeadingRoomId);
             else crawl.Step(forward: true);
         }
     }

@@ -15,7 +15,7 @@ public class CorridorSceneMotionTests
         float start = CorridorSceneMotion.Camera(4096,768,0,count,false,0);
         float after = CorridorSceneMotion.Camera(4096,768,0,count,false,-720*dt/1.2f);
         float speed = (after-start)/dt;
-        Assert.True(speed <= 260,$"A {count}-square hall fast-forwards the walking ground at {speed:0} px/s.");
+        Assert.True(speed <= 340,$"A {count}-square hall fast-forwards the walking ground at {speed:0} px/s.");
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public class CorridorSceneMotionTests
             float after = CorridorSceneMotion.Camera(4096,768,2,6,false,CorridorSceneMotion.Slide((i+1)*dt,1,0));
             maximum = Math.Max(maximum,(after-before)/dt);
         }
-        Assert.True(maximum <= 330,$"A button step drives the ground at {maximum:0} px/s.");
+        Assert.True(maximum <= 500,$"A button step drives the ground at {maximum:0} px/s.");
     }
 
     [Theory]

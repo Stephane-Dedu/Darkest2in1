@@ -93,7 +93,7 @@ public class ExploreGoalTests
         var crawl = Crawl(state);
         Assert.DoesNotContain(crawl.Begin(), e => e.Type == CrawlEventType.QuestComplete);
         crawl.Travel(1);
-        Assert.Single(crawl.Step(true), e => e.Type == CrawlEventType.QuestComplete);
+        Assert.Single(crawl.EnterDoor(1), e => e.Type == CrawlEventType.QuestComplete);
         Assert.True(state.QuestComplete);
         Assert.False(state.Ended);
 
@@ -103,7 +103,7 @@ public class ExploreGoalTests
         crawl.CheckQuest();
         Assert.Equal(rng, state.RandomCounter);
         Assert.DoesNotContain(crawl.Travel(2), e => e.Type == CrawlEventType.QuestComplete);
-        Assert.DoesNotContain(crawl.Step(true), e => e.Type == CrawlEventType.QuestComplete);
+        Assert.DoesNotContain(crawl.EnterDoor(2), e => e.Type == CrawlEventType.QuestComplete);
         Assert.True(state.Map.Room(2).Visited);
         Assert.False(state.Ended);
         Assert.True(crawl.TryLeave());

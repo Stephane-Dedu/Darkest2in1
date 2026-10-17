@@ -8,6 +8,24 @@ namespace DarkestDungeon3.Ui.Tests;
 public class CorridorPanoramaUiTests
 {
     [Fact]
+    public void ActualPaintDrawUsesTheSameHallLengthAndTravelAsPropsAndFeet()
+    {
+        var texture=new Texture2D(4096,768,TextureFormat.RGBA32,false);
+        var draws=new List<Rect>();
+        GUI.color=Color.white;
+        GUI.ObserveTextureDraw=(rect,tex,uv,matrix,color)=>draws.Add(uv);
+        try
+        {
+            foreach(float slide in new[] {0f,-720f})
+                CorridorPanoramaUi.Draw(texture,CorridorPanoramaLayout.ViewProgress(6,12,false,slide),1,tileCount:12);
+            Assert.Equal(2,draws.Count);
+            float drawn=1920*(draws[1].x-draws[0].x)/draws[0].width;
+            float physical=CorridorSceneMotion.Camera(4096,768,6,12,false,-720)-CorridorSceneMotion.Camera(4096,768,6,12,false,0);
+            Assert.Equal(physical,drawn,3);Assert.InRange(drawn,350,400);
+        }
+        finally { GUI.ObserveTextureDraw=null; }
+    }
+    [Fact]
     public void OptionalDepthAvailabilityCannotChangeTheBakedPerspectiveCrop()
     {
         var plate = new Texture2D(4096,768,TextureFormat.RGBA32,false);

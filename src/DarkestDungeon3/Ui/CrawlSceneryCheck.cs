@@ -173,7 +173,11 @@ internal static class CrawlSceneryCheck
                 case 13: d.Step(true); Advance("corridor-penultimate",d,14); break;
                 case 14: d.Step(true); Advance("corridor-last",d,15); break;
                 case 15:
-                    d.Step(true); Require(exp.InRoom && exp.RoomId == 1 && d.Phase == Phase.Fighting,"Room entry did not start native battle");
+                    d.Step(true); Require(!exp.InRoom,"Walking bypassed the room door");
+                    Require(d.EnterDoor(1),"Room door refused its explicit interaction");
+                    Advance("door-clicked",d,150,.45f);break;
+                case 150:
+                    Require(exp.InRoom && exp.RoomId == 1 && d.Phase == Phase.Fighting,"Room entry did not start native battle");
                     Advance("room-battle-start",d,16); break;
                 case 16:
                     if (!Dd1Backdrop.Ready || Dd2Combat.CoverAlpha > .001f) return;
@@ -242,15 +246,15 @@ internal static class CrawlSceneryCheck
                 Require(model.NativeWalkReady && Time.frameCount-model.SampledFrame<=1,"Imported Vilhelm pose stopped updating");
         float progress = CorridorPanoramaLayout.ViewProgress(exp.TileIndex,corridor.Tiles.Count,
             exp.HeadingRoomId != corridor.RoomB,d.SceneSlide);
-        var crop = CorridorPanoramaLayout.Crop(texture.width,texture.height,progress);
+        var crop = CorridorPanoramaLayout.Crop(texture.width,texture.height,progress,corridor.Tiles.Count);
         float camera = 1920*crop.X/crop.Width, now = Time.unscaledTime;
         if (_motionSampled && now > _motionTime)
         {
             float dt = now-_motionTime, distance = Mathf.Abs(camera-_motionCamera);
             // The ordinary forward route moves one square per 1.2s. A bounded panorama
             // uses a centred span in short halls, including carry at crossings.
-            float maximum = (texture.width*720f/texture.height*1.08f-1920)
-                /Mathf.Max(9,corridor.Tiles.Count-1)/CorridorSceneMotion.StepSeconds;
+            float maximum = CorridorSceneMotion.PropOffset(texture.width,texture.height,corridor.Tiles.Count,1,0)
+                /CorridorSceneMotion.StepSeconds*1.5f;
             Require(distance <= maximum*dt+3,"Panorama jumped at a tile boundary or reversal");
             _motionMaximum = Mathf.Max(_motionMaximum,distance/dt); _motionFrames++;
         }

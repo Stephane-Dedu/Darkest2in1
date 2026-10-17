@@ -58,10 +58,10 @@ internal static class CorridorPreview
             if (_rooms) RoomPanoramaUi.Draw(texture, false, RegionSceneryArt.RoomAlpha(choice?.FileName), true, 610);
             else
             {
-                CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName));
+                CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName),tileCount:6);
             }
             if (texture != null) DungeonAtmosphereUi.Draw(region, 2719 ^ _variant, Time.unscaledTime, 100,
-                _rooms ? new PanoramaCrop(0,0,1,1) : CorridorPanoramaLayout.Crop(texture.width,texture.height,travel),file: choice.FileName);
+                _rooms ? new PanoramaCrop(0,0,1,1) : CorridorPanoramaLayout.Crop(texture.width,texture.height,travel,6),file: choice.FileName);
             // Full-body DD1 reference silhouettes at the crawl's party anchors and footline.
             // The preview never builds a native combat party; live DD2 model contact is separate acceptance.
             for (int i = 0; i < Heroes.Length; i++)

@@ -91,7 +91,7 @@ public class EndedCrawlTests
         Assert.Contains(crawl.Travel(1), e => e.Type == CrawlEventType.EnteredTile);
         Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.EnteredTile);
         Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.EnteredTile);
-        Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.EnteredRoom);
+        Assert.Contains(crawl.EnterDoor(1), e => e.Type == CrawlEventType.EnteredRoom);
         Assert.True(crawl.CanCamp);
         crawl.MakeCamp();
         Assert.True(crawl.EatMeal(Meal.Full));

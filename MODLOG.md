@@ -7306,3 +7306,61 @@ scaling, localized fallback and full campaign/expedition layouts remain unverifi
 renderer uses native source fonts through IMGUI; TMP's SDF materials and inline token
 sprites are not reproduced. See tools/ui_typography.md. Next round258. Preserve the
 combined436-source baseline and independent Shieldbreaker work.
+
+## Round258: clickable corridor doors and stronger scene travel (2026-10-17)
+
+Owner: stop automatic corridor-to-room entry and click a door as in DD1. The corrected
+movement report concerns how little the background moves, not the hero's walking pose.
+The explicit no-launch hold remains. No DD2 launch, OS input or estate access occurred.
+
+Feedback first:8 new red cases reproduce both symptoms against real Core functions.
+Four direction/end combinations enter rooms through Crawl.Step; four native plate/length
+cases move only185.6â€“247.5 virtual pixels per square. The Unity port's RaidHallSector/
+RaidDoor activation and installed DD1 doorway textures were inspected privately.
+
+Crawl.Step now stops at either boundary. CanEnterDoor/EnterDoor validate an explicit
+interaction before room visits, scouting, quest progress or battles happen. Pending
+loot/camp/encounters block entry; fights pin both doors, while traps/obstacles permit
+returning through the entrance behind them. CameFrom retains the retreat square.
+Single-square halls expose both destinations. Reload stays in the hallway without
+replaying tile effects. Existing headless quest/scouting/loot tests explicitly enter doors.
+
+Visible passages have hover/entry labels and click targets. Legacy DD1 scenes keep their
+walls; outdoor DD2 scenes use installed DD1 doorway paint with a cached feathered arch
+mask, without its square wall tile. No derived assets are shipped or written to game
+files. Both entrances share the ground projection. Captures retain world geometry but
+omit interaction labels. Clicking starts0.3s fade-out, then entry/existing fade-in.
+Duplicate clicks cannot restart it. Pending requests belong to their Crawl instance.
+Held input/map routes stop at the half-square approach without an automatic fade or
+additional footsteps at the limit.
+
+Bounded panorama travel targets360px per square with a minimum six-square span.
+Longer halls can zoom up to1.6x original overscan, retaining aspect and authored y680
+contact. Actual4096x768 plates travel360â€“371.2px per square in the tested3/6/9/12-square
+cases. Very long/narrow plates may cap below target. There is one finite painting,
+without repeated architecture or an independently moving floor. Props, doors, particles
+and the existing distance-driven feet share this crop. Pose/stride code,1.2s logical-
+square duration and half-speed backtracking stay unchanged.
+
+Frozen Release+1,266 Core+237 UI pass. Coverage includes blocked doors, both headings,
+single-square halls, reload, one-time entry, retreat metadata, duplicate-click/fade timing,
+actual paint draw versus physical camera/props/doors, crop bounds/aspect/footline.
+Four offline compositions use real regional paintings, the old compiled crop and new
+Core crop/mask. These are previews, not DD2 screenshots or gameplay acceptance.
+The future native scenery fixture now clicks doors and uses the new physical bound.
+
+Installed440-source normal build overlays26 owned files onto round257's436-source
+typography baseline. Typography, stress, loading, installed heroes and earlier corridor
+repairs remain. Four artifacts match;190 scenery/model files,13 other plugin files and
+the checked plugin config are unchanged. Fresh round257 rollback, exact source/overlay,
+red/green/full logs, compositions and deployment hashes: local-art/corridor-doors-v13.
+Independent Shieldbreaker source/art/journal work is excluded.
+
+## Status 2026-10-17: corridor doors/travel installed offline; keep DD2 closed
+
+Round258 is installed. Click a passage to enter/return; movement stops at corridor ends.
+Background travel is larger while pose/stride code stays unchanged. Native pointer
+placement, comfort/rig contact, controls, fades and room/battle/return acceptance remain [?].
+Keep DD2 closed until the owner explicitly says OK. No launch/input/estate access.
+Next round259. Preserve typography/stress/loading/scenery/heroes and Shieldbreaker WIP;
+capture a fresh baseline and never run historical restores over this build.

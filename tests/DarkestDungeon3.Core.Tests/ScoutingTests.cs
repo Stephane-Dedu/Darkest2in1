@@ -87,7 +87,7 @@ public class ScoutingTests
         Assert.DoesNotContain(crawl.Begin(), e => e.Type == CrawlEventType.Scouted);
         crawl.Travel(1);
         for (int i = 0; i < 3; i++) crawl.Step(true);
-        Assert.Contains(crawl.Step(true), e => e.Type == CrawlEventType.Scouted);
+        Assert.Contains(crawl.EnterDoor(1), e => e.Type == CrawlEventType.Scouted);
         Assert.Equal(expected, state.Map.Corridor(0).Tiles.Count(t => t.Scouted));
         state.Map.AllTiles.ToList().ForEach(t => t.Scouted = false);
         state.Map.Rooms.ForEach(r => { r.Scouted = false; r.Visited = false; });

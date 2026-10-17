@@ -194,6 +194,27 @@ public sealed class Crawl
     /// Destination obstacles are separate: the party may still back away from an unopened obstacle or trap.</summary>
     public bool CanNavigate => !State.Ended && !HasPendingEvent && State.Camp == null;
 
+    public bool CanEnterDoor(int roomId)
+    {
+        if (!CanNavigate || State.InRoom || CurrentCorridor == null) return false;
+        var c=CurrentCorridor;
+        if (c.Tiles.Count==0 || State.TileIndex<0 || State.TileIndex>=c.Tiles.Count || roomId<0 || roomId>=Map.Rooms.Count) return false;
+        bool atEnd=(roomId==c.RoomA && State.TileIndex==0) || (roomId==c.RoomB && State.TileIndex==c.Tiles.Count-1);
+        if (!atEnd) return false;
+        return !IsBlocked || (roomId!=State.HeadingRoomId && CurrentTile.Content!=HallContent.Battle);
+    }
+
+    /// <summary>Room entry is an explicit door interaction, never a side effect of walking beyond a hall.</summary>
+    public List<CrawlEvent> EnterDoor(int roomId)
+    {
+        _events.Clear();
+        if (!CanEnterDoor(roomId)) return Blocked();
+        State.CameFromCorridorId=State.CorridorId;State.CameFromTileIndex=State.TileIndex;
+        State.RoomId=roomId;State.CorridorId=State.TileIndex=State.HeadingRoomId=-1;
+        EnterRoom(Map.Room(roomId));
+        return Flush();
+    }
+
     /// <summary>A fight or obstacle the party has to deal with before it can go on.</summary>
     public bool IsBlocked =>
         State.InRoom
@@ -329,21 +350,9 @@ public sealed class Crawl
         int next = State.TileIndex + dir;
 
         if (next < 0 || next >= corridor.Tiles.Count)
-        {
-            int roomId = next < 0 ? corridor.RoomA : corridor.RoomB;
-            State.CameFromCorridorId = corridor.Id;
-            State.CameFromTileIndex = State.TileIndex;
-            State.RoomId = roomId;
-            State.CorridorId = -1;
-            State.TileIndex = -1;
-            State.HeadingRoomId = -1;
-            EnterRoom(Map.Room(roomId));
-        }
-        else
-        {
-            State.TileIndex = next;
-            EnterTile(forward);
-        }
+            return Blocked();
+        State.TileIndex = next;
+        EnterTile(forward);
         return Flush();
     }
 

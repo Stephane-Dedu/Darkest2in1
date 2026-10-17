@@ -346,6 +346,7 @@ internal sealed partial class Driver : MonoBehaviour
     private void Walk(UnityEngine.InputSystem.Keyboard kb)
     {
         _walkVelocity = 0;
+        if (UpdateDoorTransition()) { _mouseWalk=0;return; }
         if (!Crawl.CanNavigate || Ui.UiRoot.ModalOpen)
         {
             _mouseWalk = 0;
@@ -407,12 +408,21 @@ internal sealed partial class Driver : MonoBehaviour
             StopWalking();
             return;
         }
+        var hall=Crawl.CurrentCorridor;
+        int outwardRoom=forward ? Expedition.HeadingRoomId : hall.Other(Expedition.HeadingRoomId);
+        bool atDoor=Crawl.CanEnterDoor(outwardRoom);
+        if (atDoor && (forward ? WalkProgress>=.5f : WalkProgress<=-.5f)) { StopWalking();return; }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
         if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.55f : 0.8f); }
         float beforeProgress = WalkProgress;
         WalkProgress += speed * Time.unscaledDeltaTime;
         if (Mathf.Abs(WalkProgress) < 0.5f) return;
+        if (atDoor)
+        {
+            WalkProgress=forward ? .5f : -.5f;
+            _walkVelocity=0;StopWalking();return;
+        }
         float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
         _continuousStep = true;
         bool moved;
@@ -486,17 +496,7 @@ internal sealed partial class Driver : MonoBehaviour
             float now = Time.unscaledTime;
             if (_travelTo >= 0) return Mathf.Clamp01((now - _travelFrom) / FadeSeconds);
             float fadeIn = 1f - Mathf.Clamp01((now - _fadeInFrom) / (FadeSeconds * 1.4f));
-            // Walking into a door at either end of the hallway: the room fades in.
-            float door = 0f;
-            if (Crawl != null && !Expedition.InRoom && _walkVelocity != 0)
-            {
-                var c = Crawl.CurrentCorridor;
-                bool towardB = Expedition.HeadingRoomId == c.RoomB;
-                int last = towardB ? c.Tiles.Count - 1 : 0, first = towardB ? 0 : c.Tiles.Count - 1;
-                if (_walkVelocity > 0 && Expedition.TileIndex == last && !Crawl.IsBlocked) door = (WalkProgress - 0.1f) / 0.4f;
-                if (_walkVelocity < 0 && Expedition.TileIndex == first) door = (-WalkProgress - 0.1f) / 0.4f;
-            }
-            return Mathf.Clamp01(Mathf.Max(fadeIn, door));
+            return Mathf.Clamp01(Mathf.Max(fadeIn, DoorFade));
         }
     }
 
