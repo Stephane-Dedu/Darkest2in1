@@ -1,5 +1,25 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round256 fixes corridor projection and traversal clocks. Props/arrival cues now share the
+painted ground's projected square spacing, endpoints include the half-square door approach,
+and visible known props survive the old neighbour limit. One registered perspective plate
+replaces independently shifted baked depths; complete scenes suppress tiled roads under
+battle opacity. Actual Driver traversal marks only moved locations, preserves rejected-step
+carry, removes the extra hall-entry sweep and starts room fade on the same frame.
+
+Red/green cases reproduce all three reported symptoms; owner says camera jumps are worst.
+Final combined Release+1,250 Core+228 UI pass. Installed430-source normal build layers these
+fixes onto the verified round255 stress425-source build, retaining loading and installed
+Shieldbreaker/Vilhelm.190 scenery files/config are unchanged. Native comfort, mouse/input,
+rig, asset adoption and full room-hall-battle handoff remain UNVERIFIED. KEEP DD2 CLOSED until
+the owner lifts the hold; no launch/input/save access in round256.
+
+Exact source hashes, fresh round255 rollback, red/green logs and deployed artifact hashes:
+local-art/corridor-motion-v12. Normal DLL bfc9b693b5054fa5f8e94a4c2ad32d15d5681a82ab79d29e8467b0f69e06767e.
+Capture a fresh installed baseline for future QA; older walkthrough/gait/loading/stress
+restores would undo the current combined build. Preserve Shieldbreaker WIP. Next round257.
+Earlier handoffs below record historical deployments and remaining checks.
+
 Round255 stress rework is installed and offline checked. DD1 resolve at100, seven afflictions,
 five virtues, cure at0 and200-stress heart attacks replace normal DD2 meltdown for expedition
 heroes. Flagellant retains native Toxic self-effects through the quest/reload, without stress

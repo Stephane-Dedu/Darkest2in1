@@ -1,5 +1,30 @@
 # Private DD2 corridor scenery
 
+## Registered camera movement, round256, October 16, 2026
+
+The complete native perspective plate now supplies the corridor image throughout
+walking and battle covers. Independently translating its baked depth passes broke
+occlusion edges and shifted landmarks when companions finished loading. Gameplay
+and the unsaved preview no longer request those depth uploads. The private passes
+remain available for authoring; the installed v09 artwork is unchanged.
+
+The floor, hero distance clock, curios, obstacles, traps, arrival cues and native
+atmosphere use the same bounded view. One square projects to the plate's horizontal
+travel divided by `max(9, squareCount)`. Props formerly retained DD1's720px spacing
+while the painted ground moved about247px. Legacy DD1 scenery retains its720px
+coordinates. Visible known props are considered across the corridor so they do
+not disappear at the former one-neighbour draw limit.
+
+The projection includes a half-square approach at both doors, including one-square
+halls. Floor movement no longer freezes at the first/last square centre. A refused
+step or trap action cannot start a camera pan. Room transitions use their fade;
+hall entry adds no unrequested step, and room entry starts its fade on the same frame.
+
+Red/green regression evidence and the combined frozen build are private in
+`local-art/corridor-motion-v12`. Native visual/mouse/rig acceptance remains pending
+while the owner's instruction to keep DD2 closed is active. Earlier depth-motion
+and endpoint acceptance below describe historical rendering behavior.
+
 ## Shroud water surface, v09, October 16, 2026
 
 The v09 pack replaces the Shroud's uniform black water band with restrained native

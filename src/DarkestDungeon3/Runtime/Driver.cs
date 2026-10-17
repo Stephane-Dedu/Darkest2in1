@@ -306,24 +306,6 @@ internal sealed partial class Driver : MonoBehaviour
 
     // ---------------- Crawl ----------------
 
-    public void Travel(int roomId)
-    {
-        if (!Crawl.CanNavigate) return;
-        MarkStep(+1);
-        Handle(Crawl.Travel(roomId));
-    }
-
-    public void Step(bool forward)
-    {
-        if (!Crawl.CanNavigate) return;
-        // A second button step would reset the easing from a new square and
-        // teleport the ground underneath the feet. Held movement owns its carry.
-        if (!_continuousStep && Time.unscaledTime-LastStepTime < SecondsPerSquare) return;
-        if (Crawl.IsBlocked && !forward && Crawl.CurrentTile?.Content == Core.Dungeon.HallContent.Battle) return;
-        MarkStep(forward ? +1 : -1);
-        Handle(Crawl.Step(forward));
-    }
-
     public bool EnterSecretRoom() => ChangeSecretRoom(enter: true);
     public bool ExitSecretRoom() => ChangeSecretRoom(enter: false);
 
@@ -340,13 +322,6 @@ internal sealed partial class Driver : MonoBehaviour
         _fadeInFrom = Time.unscaledTime;
         Dd1Audio.Play("/general/map/room_transition");
         return true;
-    }
-
-    private void MarkStep(int dir)
-    {
-        LastStepDir = dir;
-        // Held-key walking scrolls continuously (WalkProgress); only discrete steps get the slide animation.
-        LastStepTime = _continuousStep ? -10f : Time.unscaledTime;
     }
 
     // ---- DD1 walking: hold D/→ to walk the hallway (A/← backs up at half speed); in a room the arrows pick the exit ----
@@ -429,19 +404,26 @@ internal sealed partial class Driver : MonoBehaviour
         bool forward = intent > 0;
         if (forward && Crawl.IsBlocked)   // an obstacle or a fight in this square: no further than its middle
         {
-            WalkProgress = Mathf.Min(WalkProgress, 0f);
             StopWalking();
             return;
         }
         float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
         _walkVelocity = speed;
         if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.55f : 0.8f); }
+        float beforeProgress = WalkProgress;
         WalkProgress += speed * Time.unscaledDeltaTime;
         if (Mathf.Abs(WalkProgress) < 0.5f) return;
         float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
         _continuousStep = true;
-        Step(forward);
-        _continuousStep = false;
+        bool moved;
+        try { moved = TryStep(forward); }
+        finally { _continuousStep = false; }
+        if (Expedition == null) { WalkProgress = 0; StopWalking(); return; }
+        if (!moved)
+        {
+            WalkProgress = beforeProgress; _walkVelocity = 0;
+            StopWalking(); return;
+        }
         WalkProgress = Expedition.InRoom ? 0 : carry;
         if (Expedition.InRoom) Dd1Audio.Play("/general/map/room_transition");
         // Something happened (a fight, a curio, a trap, a room): stop and let the player look.

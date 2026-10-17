@@ -58,8 +58,7 @@ internal static class CorridorPreview
             if (_rooms) RoomPanoramaUi.Draw(texture, false, RegionSceneryArt.RoomAlpha(choice?.FileName), true, 610);
             else
             {
-                var layers = RegionSceneryArt.CorridorLayers(choice?.FileName, out float blend);
-                CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName), layers, blend);
+                CorridorPanoramaUi.Draw(texture, travel, RegionSceneryArt.RoomAlpha(choice?.FileName));
             }
             if (texture != null) DungeonAtmosphereUi.Draw(region, 2719 ^ _variant, Time.unscaledTime, 100,
                 _rooms ? new PanoramaCrop(0,0,1,1) : CorridorPanoramaLayout.Crop(texture.width,texture.height,travel),file: choice.FileName);

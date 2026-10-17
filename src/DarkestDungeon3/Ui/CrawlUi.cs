@@ -160,8 +160,18 @@ internal sealed class CrawlUi
 
         var regional = RegionalScenery.For(exp.Quest.Dungeon);
         float nativeAlpha = regional == null ? 0 : RegionSceneryArt.Alpha(exp.Quest.Dungeon);
-        if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
-        if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        var panoramaChoice = regional == null ? null : exp.InRoom
+            ? RegionSceneryArt.RoomChoice(regional, exp.Seed, crawl.CurrentRoom)
+            : RegionSceneryArt.CorridorChoice(regional, exp.Seed, crawl.CurrentCorridor.Id);
+        bool completeScene = RegionSceneryArt.RoomAlpha(panoramaChoice?.FileName) >= .999f
+            && (!exp.InRoom || RegionSceneryArt.PrivateRoom(panoramaChoice?.FileName));
+        // A battle cover fades the complete scene. Drawing tiled roads below a
+        // translucent complete painting reveals a second, differently moving floor.
+        if (!completeScene)
+        {
+            if (nativeAlpha < 1) DrawLegacyScene(crawl, exp, zone, slide);
+            if (nativeAlpha > 0) DrawRegionalScene(crawl, exp, regional, slide, nativeAlpha);
+        }
         if (regional != null && exp.InRoom) DrawRoomPanorama(regional, exp.Seed, crawl.CurrentRoom, nativeAlpha);
         if (regional != null && !exp.InRoom)
         {
@@ -169,9 +179,8 @@ internal sealed class CrawlUi
             bool reverse = exp.HeadingRoomId != corridor.RoomB;
             var choice = RegionSceneryArt.CorridorChoice(regional, exp.Seed, corridor.Id);
             float panoramaAlpha = RegionSceneryArt.RoomAlpha(choice?.FileName);
-            var layers = RegionSceneryArt.CorridorLayers(choice?.FileName, out float depthBlend);
             CorridorPanoramaUi.Draw(RegionSceneryArt.RoomTextureFor(choice?.FileName),
-                CorridorPanoramaLayout.ViewProgress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha, layers, depthBlend);
+                CorridorPanoramaLayout.ViewProgress(exp.TileIndex, corridor.Tiles.Count, reverse, slide), panoramaAlpha);
             DrawArrivalCue(crawl, exp, regional, slide, Mathf.Max(nativeAlpha, panoramaAlpha));
         }
         if (atmosphere && regional != null) DungeonAtmosphereUi.DrawCurrent();
@@ -261,7 +270,11 @@ internal sealed class CrawlUi
         if (opening <= 0 || alpha <= 0) return;
         int here = reverse ? count - 1 - exp.TileIndex : exp.TileIndex;
         var cue = new Color(0.85f, 0.81f, 0.7f, GUI.color.a * alpha * opening * 0.8f);
-        foreach (float x in new[] { 600 + (-1 - here) * 720 + slide, 600 + (count - here) * 720 + slide })
+        var choice = RegionSceneryArt.CorridorChoice(plan, exp.Seed, crawl.CurrentCorridor.Id);
+        var panorama = RegionSceneryArt.RoomAlpha(choice?.FileName) >= .999f ? RegionSceneryArt.RoomTextureFor(choice?.FileName) : null;
+        foreach (float x in new[] {
+            600 + CorridorSceneMotion.PropOffset(panorama?.width ?? 0, panorama?.height ?? 0, count, -1 - here, slide),
+            600 + CorridorSceneMotion.PropOffset(panorama?.width ?? 0, panorama?.height ?? 0, count, count - here, slide) })
             if (x > -140 && x < Gui.W + 140)
                 Gui.Text(new Rect(x - 140, 546, 280, 34), plan.ArrivalName, 22, cue, TextAnchor.MiddleCenter, heading: true);
     }
@@ -327,10 +340,12 @@ internal sealed class CrawlUi
         }
         var c = crawl.CurrentCorridor;
         int dir = exp.HeadingRoomId == c.RoomB ? 1 : -1;
-        for (int k = -1; k <= 1; k++)
+        var plan = RegionalScenery.For(exp.Quest.Dungeon);
+        var choice = plan != null ? RegionSceneryArt.CorridorChoice(plan, exp.Seed, c.Id) : null;
+        var panorama = RegionSceneryArt.RoomAlpha(choice?.FileName) >= .999f ? RegionSceneryArt.RoomTextureFor(choice?.FileName) : null;
+        for (int i = 0; i < c.Tiles.Count; i++)
         {
-            int i = exp.TileIndex + k * dir;
-            if (i < 0 || i >= c.Tiles.Count) continue;
+            int k = (i - exp.TileIndex) * dir;
             var tile = c.Tiles[i];
             if (k != 0 && !tile.Visited && !tile.Scouted) continue;
             string kind = tile.Content switch
@@ -340,7 +355,8 @@ internal sealed class CrawlUi
                 HallContent.Trap when tile.Scouted && !tile.Resolved => "traps",
                 _ => null,
             };
-            if (kind != null) DrawProp(kind, tile.ContentId, kind == "curios" && tile.Resolved, PropX + k * 720 + slide, hoverable: k == 0);
+            if (kind != null) DrawProp(kind, tile.ContentId, kind == "curios" && tile.Resolved,
+                PropX + CorridorSceneMotion.PropOffset(panorama?.width ?? 0, panorama?.height ?? 0, c.Tiles.Count, k, slide), hoverable: k == 0);
         }
     }
 

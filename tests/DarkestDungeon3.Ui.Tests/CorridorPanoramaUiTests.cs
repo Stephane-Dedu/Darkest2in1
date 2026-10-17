@@ -8,36 +8,23 @@ namespace DarkestDungeon3.Ui.Tests;
 public class CorridorPanoramaUiTests
 {
     [Fact]
-    public void CompleteDepthsHaveSeparateBoundedMotionButCoversAndPartialSetsUseOnePlate()
+    public void OptionalDepthAvailabilityCannotChangeTheBakedPerspectiveCrop()
     {
-        var texture = new Texture2D(4096,768,TextureFormat.RGBA32,false);
+        var plate = new Texture2D(4096,768,TextureFormat.RGBA32,false);
         var layers = Enumerable.Range(0,3).Select(_ => new Texture2D(4096,768,TextureFormat.RGBA32,false)).ToArray();
-        var draws = new List<(Texture2D Texture,Rect Uv,Color Color)>();
-        GUI.color = Color.white;
-        GUI.ObserveTextureDraw = (rect,tex,uv,matrix,color) => draws.Add(((Texture2D)tex,uv,color));
+        var draws = new List<(Texture2D Texture,Rect Uv)>();
+        GUI.ObserveTextureDraw = (rect,tex,uv,matrix,color) => draws.Add(((Texture2D)tex,uv));
         try
         {
-            CorridorPanoramaUi.Draw(texture,0,1,layers,1);
-            Assert.Equal(3,draws.Count);
-            Assert.Same(layers[0],draws[0].Texture); Assert.Same(layers[2],draws[2].Texture);
-            Assert.True(draws[0].Uv.x > draws[1].Uv.x && draws[1].Uv.x > draws[2].Uv.x);
-            Assert.All(draws,d => { Assert.Equal(1,d.Color.a); Assert.True(d.Uv.x >= 0 && d.Uv.xMax <= 1.00001f); });
-            Assert.Equal(draws[0].Uv.y,draws[2].Uv.y);
-            draws.Clear();
-            CorridorPanoramaUi.Draw(texture,.5f,1,layers,1);
-            Assert.Equal(draws[0].Uv,draws[1].Uv); Assert.Equal(draws[1].Uv,draws[2].Uv);
-            foreach (float blend in new[] { 0f,1 })
-            {
-                draws.Clear(); CorridorPanoramaUi.Draw(texture,0,.5f,layers,blend);
-                Assert.Same(texture,Assert.Single(draws).Texture);
-            }
-            GUI.color = new Color(1,1,1,.5f);
-            draws.Clear(); CorridorPanoramaUi.Draw(texture,0,1,layers,1);
-            Assert.Same(texture,Assert.Single(draws).Texture);
             GUI.color = Color.white;
-            layers[1] = null;
-            draws.Clear(); CorridorPanoramaUi.Draw(texture,0,1,layers,1);
-            Assert.Same(texture,Assert.Single(draws).Texture);
+            CorridorPanoramaUi.Draw(plate,.25f,1); var expected = Assert.Single(draws);
+            foreach (bool complete in new[] { true,false })
+            {
+                if (!complete) layers[1] = null;
+                draws.Clear(); CorridorPanoramaUi.Draw(plate,.25f,1,layers,1);
+                var actual = Assert.Single(draws);
+                Assert.Same(plate,actual.Texture); Assert.Equal(expected.Uv,actual.Uv);
+            }
         }
         finally { GUI.ObserveTextureDraw = null; GUI.color = Color.white; }
     }

@@ -7189,3 +7189,64 @@ Keep DD2 closed until the owner explicitly lifts the hold. Next round256. Use th
 installed baseline, never historical rollback scripts that would undo round254/255.
 Preserve independent corridor and Shieldbreaker work. Native acceptance scenarios and
 remaining trait adaptations are listed in tools/stress_system.md.
+
+## Round256 (2026-10-16): coherent corridor projection and traversal camera
+
+Owner reports scenery direction/jumps, foot-step bugs and separating layers; all three are
+noticeable, with camera jumps the worst. This round stays offline under the active request
+to keep DD2 closed. No native visual/rig acceptance is claimed.
+
+The previous complete4096x768 plate panned about247px per square, while curios/obstacles/
+traps retained720px. This made props slide roughly2.9times as fast as the floor. Props and
+arrival cues now use the actual crop's projected square spacing. Legacy scenery keeps its
+720px coordinates. All visible known hallway props are considered, avoiding disappearance
+at the old one-neighbour limit when square spacing is smaller. Atmosphere and hero feet
+already use the same complete-plate crop/distance clock; they remain coupled to that view.
+
+Old ViewProgress clamped at the first/last square centres, freezing the floor for a half-
+square while movement continued. The bounded view now reserves the half-square approach at
+both doors, including single-square halls. Tile carries remain continuous in both headings,
+with unchanged painting orientation, scale and y680 contact. Short halls keep bounded speed.
+
+The baked perspective depths had another camera of their own. Late companion readiness
+moved far/middle landmarks even while the party stood still; battle covers switched to the
+full plate and then back, causing another rearrangement. Gameplay/preview now draw the
+complete native plate with one crop throughout. Depth passes remain private authoring data;
+no companion decode/upload is requested in gameplay. Fully loaded complete corridor/room
+scenes also suppress the tiled road beneath them, preventing a second floor showing through
+battle-cover alpha. Native image assets, resolution, colours and geometry are unchanged.
+
+Actual Driver traversal was extracted into Driver.Traversal.cs so tests link its real
+methods with Core Crawl. Obstacle rejection, a trap action with no move and refused room
+travel reproduced camera steps with no state movement. A clock step is now accepted only
+when the location changes. Held movement restores its previous fractional position on a
+refused step instead of applying another tile's carry; blocked input cannot recenter the
+floor. Hall entry uses its room fade without a second unrequested sweep. Room entry clears
+the slide/progress and starts its fade on that same frame, avoiding a clear frame before
+fade-in. The continuous-step flag is restored even if event handling throws.
+
+Feedback: initial projection cases fail4/7, stationary-depth registration fails1/1 and
+real traversal fails3/4. Final focused projection/motion checks pass23 and focused render/
+traversal/locomotion checks pass33 before additional room-transition coverage. Final combined
+Release+1,250 Core+228 UI pass. Registration checks cover stationary views, companion arrival,
+partial sets and battle opacity; projection checks cover both headings, endpoints, short/
+long/single-square halls, tile carry and unchanged legacy spacing. Traversal covers accepted,
+repeated and refused inputs, trap handling and both door transitions. No game launch/input
+or save access. DD2 remains closed at the owner's request.
+
+The final430-source normal build layers only these walking changes onto the other chat's
+verified425-source round255 stress build, retaining round254 loading and installed hero
+models. All upstream hashes match. Four installed DLL/PDB hashes match the frozen Release;
+190 scenery/model files and config are preserved. No private observer hooks. Fresh exact
+round255 rollback, source manifests, red/green logs and deployment record are in
+local-art/corridor-motion-v12. Normal DLL is bfc9b693b5054fa5f8e94a4c2ad32d15d5681a82ab79d29e8467b0f69e06767e.
+Independent Shieldbreaker source/art/journal WIP is preserved. Historical gait/stress/loading
+restores would undo this combined build; future QA needs a fresh installed baseline.
+
+## Status 2026-10-16: corridor projection fixes installed, native QA held
+
+Round256 is installed on top of rounds254/255. All three reported walking problems have
+reproduced code defects and offline repairs. Native visual comfort, real input/rig response,
+asset-adoption/fade behavior and full corridor-room-battle walkthrough remain unverified.
+Keep DD2 closed until the owner lifts the hold. Next round257. Preserve the combined430-source
+baseline and independent Shieldbreaker WIP.
