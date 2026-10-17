@@ -1,5 +1,23 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round260 addresses distance per visible walking step. Round259 retained only0.726 projected
+leg lengths per footfall despite reducing speed. Contact arc1.24 at unchanged62% stance
+now covers1.0 projected leg length/step,37.8% longer. Rate uses the same arc, preserving
+planted-foot/floor velocity. Ground speed remains180px/s; recorded102.6px rig replay
+gives103px/step and1.75steps/s versus74px/2.42. Imported Vilhelm root motion is separate.
+
+Three crop/gait and five actual held-loop red cases reproduced the short step. Full
+Release+1,266 Core+256 UI and51 focused reach/restart/contact checks pass. Installed
+442-source normal build overlays only3 code/test files on round259, with exact source
+hashes and fresh rollback in local-art/walk-stride-v15. Native comfort is NOT verified.
+
+Keep DD2 CLOSED until the owner explicitly says OK. No launch/input/estate access this
+round. Sustained four-region walking, rig projection/comfort and handoffs remain open.
+Preserve current scenery/doors/typography/stress/loading/heroes and independent
+Shieldbreaker WIP.190 scenery/model files,13 other plugin files and both configs retained.
+Capture a fresh installed baseline; historical restores would undo this build.
+See tools/corridor_heroes.md. Next round261. Earlier handoffs are historical.
+
 Round259 addresses the owner's remaining issue during continuous walking. Real held keys,
 mouse and routes were extracted into Driver.Walking.cs and replayed against Core Crawl,
 actual projection and gait. Nine red cases found309/600px/s,4.15 steps/s on the recorded

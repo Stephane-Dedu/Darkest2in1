@@ -83,6 +83,48 @@ public class ContinuousWalkTests
     }
 
     [Theory]
+    [InlineData(6, 4096, 768, 55f)]
+    [InlineData(6, 4096, 768, 102.6f)]
+    [InlineData(6, 4096, 768, 134.5f)]
+    [InlineData(20, 4096, 768, 102.6f)]
+    [InlineData(6, 0, 0, 102.6f)]
+    public void EachVisibleFootfallAdvancesTheActualFloorByOneProjectedLegLength(int count, int width, int height, float leg)
+    {
+        var driver = Ready(count, width, height, leg);
+        var cycle = new CorridorWalkCycle(.2);
+        const float dt = 1f/120;
+        Time.unscaledTime = 100;
+        float prior = Camera(driver), lastLanding = 0;
+        bool haveLanding = false;
+        int steps = 0;
+        for (int frame = 0; frame < 480; frame++)
+        {
+            bool left = CorridorWalkCycle.Sample(cycle.Phase).Planted;
+            bool right = CorridorWalkCycle.Sample(cycle.Phase+.5).Planted;
+            Time.unscaledTime += dt;
+            driver.AdvanceHeldTick(true,dt);
+            float ground = Camera(driver);
+            cycle.Advance(CorridorWalkCycle.Rate(ground-prior,leg,dt),dt,true);
+            bool landed = (!left && CorridorWalkCycle.Sample(cycle.Phase).Planted)
+                       || (!right && CorridorWalkCycle.Sample(cycle.Phase+.5).Planted);
+            if (landed)
+            {
+                if (haveLanding)
+                {
+                    float distance = (ground-lastLanding)/leg;
+                    Assert.True(distance >= .95f && distance <= 1.05f,
+                        $"The floor advances only {distance:0.000} projected leg lengths between visible footfalls.");
+                    steps++;
+                }
+                lastLanding = ground;
+                haveLanding = true;
+            }
+            prior = ground;
+        }
+        Assert.True(steps >= 3,"The replay must include multiple alternating footfalls.");
+    }
+
+    [Theory]
     [InlineData(4096, 768)]
     [InlineData(0, 0)]
     public void ARenderStallCannotTeleportTheFloorByMoreThanAReadableContactStep(int width, int height)

@@ -7414,3 +7414,39 @@ until the owner explicitly says OK. No launch/input/save access this round. See
 tools/corridor_heroes.md. Next round260. Preserve the442-source baseline, room/corridor art,
 doors, typography, stress, loading, installed heroes and independent Shieldbreaker work.
 Capture a fresh installed baseline; historical restores would undo this build.
+
+
+## Round260 (2026-10-17): longer native corridor strides
+
+Owner says distance per step is still underwhelming. Round259 reduced ground speed/cadence
+but retained the 0.90-leg contact arc, only0.726 projected leg lengths per footfall. Three
+crop/gait cases fail the longer-step acceptance, and five actual held-loop cases fail at
+0.72–0.73 leg lengths between alternating landings. Native visuals are not observed here.
+
+Increase the native gait contact arc to1.24 at unchanged62% stance. Rate consumes the same
+arc, preserving planted-foot/floor velocity. Each step now covers one projected leg length,
+37.8% more distance. Physical ground speed stays180px/s, with existing small-rig limit and
+half-speed reverse. Recorded102.6px rig replay gives102.6px/step and1.75steps/s, versus
+74.5px/2.42;55px scale gives55px/1.80steps/s. Imported Vilhelm root motion is separate.
+Existing restart, reverse, contact continuity, body support and reachable soft-knee checks
+pass. Long-frame test inputs now specify skipped phases so stride changes retain the same
+missed liftoff/landing scenario. All51 focused checks, Release+1,266 Core+256 UI pass.
+
+An initial private old-source copy kept its old timestamp, so incremental MSBuild reused
+the new test assembly. Touching the copied input forced recompilation: all five held-loop
+cases then failed on the old stride and passed after restoring the new stride. The final
+native Release was rebuilt with --no-incremental. Red/green logs and metrics are private in
+local-art/walk-stride-v15, alongside exact442-source manifest and fresh round259 rollback.
+Only3 code/test files overlay the prior normal baseline; all other source hashes match.
+All four installed artifacts match compiled output.190 scenery/model files,13 other
+plugin files and both configs preserved. Independent Shieldbreaker WIP remains intact.
+Normal plugin SHA256 ea5eacd8127a1eb182d59cab8b6a709380ee511b983b1fae90c6f5c5a21bdcf1.
+
+## Status 2026-10-17: longer stride installed; native comfort pending
+
+The reproducible short stride is corrected offline. User-visible smoothness is not declared
+resolved. Keep DD2 closed until the owner explicitly says OK. No launch, OS input or estate
+access this round. Native rig projection/comfort, sustained four-region walking, controls
+and battle handoffs remain pending. See tools/corridor_heroes.md. Next round261. Preserve
+the442-source normal snapshot, artwork, doors, typography, stress/loading and installed
+heroes. Capture a fresh installed baseline; historical restores would undo this build.

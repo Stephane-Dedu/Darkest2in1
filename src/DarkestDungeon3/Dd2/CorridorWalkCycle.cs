@@ -6,9 +6,10 @@ namespace DarkestDungeon3.Dd2;
 internal sealed class CorridorWalkCycle
 {
     internal const double Stance = 0.62;
-    // The planted arc must cover a walking step. A .46-leg arc forced two
-    // gait cycles into the distance of one ordinary stride, producing a shuffle.
-    internal const float Stride = 0.90f;
+    // Distance per footstep is Stride/(2*Stance). A 1.24-leg contact arc gives
+    // one projected leg length per step; .90 still shuffled at .73 legs/step.
+    // Rate uses the same arc, keeping planted feet attached to the moving floor.
+    internal const float Stride = 1.24f;
     internal double Phase { get; private set; }
     internal float Weight { get; private set; }
 

@@ -29,12 +29,15 @@ public class CorridorLocomotionTests
     }
 
     [Theory]
-    [InlineData(1.161883f)]
-    [InlineData(2.4f)]
-    [InlineData(-1.161883f)]
-    [InlineData(-2.4f)]
-    public void ALongFrameThatSkipsLiftoffAndLandingStartsANewGroundContact(float distance)
+    [InlineData(.8f)]
+    [InlineData(1.65f)]
+    [InlineData(-.8f)]
+    [InlineData(-1.65f)]
+    public void ALongFrameThatSkipsLiftoffAndLandingStartsANewGroundContact(float cycles)
     {
+        // Specify the missed lift/landing in phase units so a stride adjustment
+        // cannot accidentally turn this into a frame ending in mid-swing.
+        float distance = cycles*CorridorWalkCycle.Stride/(float)CorridorWalkCycle.Stance;
         var contact = new CorridorFootContact();
         double start = distance > 0 ? .55 : .2;
         contact.Forward(CorridorWalkCycle.Sample(start),-.3f,.002f*Math.Sign(distance));
@@ -43,7 +46,7 @@ public class CorridorLocomotionTests
         Assert.True(foot.Planted);
         float target = contact.Forward(foot,0,distance);
         Assert.Equal(foot.Forward,target,4);
-        Assert.InRange(target,-.46f,.46f);
+        Assert.InRange(target,-.66f,.66f);
     }
 
     [Theory]
@@ -53,8 +56,8 @@ public class CorridorLocomotionTests
     public void WalkingTakesReadableStepsRatherThanRapidShortShuffles(int squares, float legPixels)
     {
         // Replay one ordinary 1.2-second corridor square through the actual crop,
-        // distance clock and sampler. Target a step covering .65..85 of the fitted
-        // projected leg, rather than spending multiple cycles on a tiny foot arc.
+        // distance clock and sampler. Each step should cover roughly one fitted
+        // projected leg length, with the planted foot still matching the floor.
         const int frames = 72;
         const float dt = 1.2f / frames;
         var cycle = new CorridorWalkCycle(.2);
@@ -71,7 +74,7 @@ public class CorridorLocomotionTests
             previousGround = ground;
         }
         double stepInLegLengths = distance / (2*cycles*legPixels);
-        Assert.True(stepInLegLengths >= .65 && stepInLegLengths <= .85,
+        Assert.True(stepInLegLengths >= .95 && stepInLegLengths <= 1.05,
             $"A step covers only {stepInLegLengths:0.000} projected leg lengths, with {2*cycles/1.2:0.00} steps/s in this hall.");
     }
 

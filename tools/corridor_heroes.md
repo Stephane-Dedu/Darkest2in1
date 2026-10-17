@@ -6,6 +6,32 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Longer steps, round260, October 17, 2026
+
+The owner still finds distance per step underwhelming. Round259 corrected held movement
+speed but retained a 0.90-leg contact arc and 62% stance, which covers only 0.726 projected
+leg lengths per footfall. Three crop/gait acceptance failures and five actual held-loop
+failures reproduce the short step across native paintings, fallback and fitted rig sizes.
+
+The native DD2 corridor gait now uses a 1.24-leg contact arc at the same 62% stance.
+`Rate` consumes that same arc, so the planted foot retains the ground's pixel velocity.
+Distance per footfall becomes one projected leg length, 37.8% longer. Ground speed remains
+180px/s with the existing small-rig limit and half-speed reverse. At the previously recorded
+102.6px projected leg this gives about 103px per step and 1.75 steps/s, versus 74px/2.42.
+The imported Vilhelm clip uses its own extracted root-motion calibration and is separate.
+
+The held-loop regression detects alternating landings and measures actual camera travel
+between them, rather than asserting only a gait constant. Existing contact/restart/reverse,
+swing continuity, body support and reachable soft-knee checks pass. The long-frame contact
+fixture now specifies skipped phases, preserving its lift/landing scenario across stride
+changes. All 51 focused checks, Release and full 1,266 Core / 256 UI checks pass.
+Exact normal source snapshot, red/green logs, metrics and fresh rollback live in
+`local-art/walk-stride-v15`. The normal build contains no temporary observer.
+
+Native visual comfort remains unverified. Keep DD2 closed until the owner explicitly says
+OK. No game launch, OS input or estate access this round. This section supersedes the
+shorter-stride measurements below; the ground clock and scenery registration remain.
+
 ## Continuous walking pace, round259, October 17, 2026
 
 The owner reports that steps and scenery are still wrong while walking continuously.
