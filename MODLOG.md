@@ -7502,3 +7502,50 @@ every class/scale, combat-idle body translations and imported Vilhelm acceptance
 work. See tools/corridor_heroes.md. Next round262. Preserve442-source normal baseline, existing
 art/doors/typography/stress/loading/heroes and independent Shieldbreaker WIP. Use fresh hashes
 before any QA/deployment; historical restores would undo this build.
+
+
+## Round262 (2026-10-17): softer foot recovery and hip handover
+
+Owner finds the steps a little rigid/stiff. Actual sampler tests reproduce ankle angular-
+velocity jumps170.7/285.7 degrees/cycle, a17-degree toe-down swing at40% recovery and abrupt
+vertical acceleration. Quintic contact roll, toe recovery and earlier0.12-leg lift replace
+the old0.08 low arc. Five initial red cases; roll alone passes2 with3 lift/recovery failures.
+Horizontal ground-contact travel, step distance,55% stance and fitted pace remain unchanged.
+
+Existing native bone traces expose the larger support-bit defect:516/606 contact changes
+jump over5px, max32.03. Four red coupled-pelvis cases reproduce0.0594-leg discontinuities.
+The body now releases old support over the first25% of swing and prepares the next landing
+over its last40%, leaving middle swing unconstrained. Ground support remains full. Relaxed
+hip height0.925 keeps earlier soft-knee/height bounds. Moving airborne targets initially
+spread the impulse but produced larger drops, so prediction uses ground anchors instead.
+Native nominal-anchor testing then exposed retained wide combat poses: the support release
+must capture the actual liftoff anchor. CorridorSupportContact handles both directions and
+resets on stop/visibility/restart. Two negative controls reproduce the nominal-anchor snap.
+Bounded easing also avoids negative roundoff weights;12 new regression cases overall.
+
+Final unsaved Leper/Shieldbreaker/Flagellant/Jester routes pass forward/reverse/stop/repeated
+buttons in all four regions.35-second footage and100ms poses inspected.15,490 actor-motion
+samples give16/576 contact jumps over5px, max7.23, versus516/606/max32.03 before. Largest
+all-frame height jump32.03->15.43;95th percentile unchanged3.52px. Continuous planted-foot
+slip0.578px and IK target error0.1953px remain sub-pixel. Fitted pace remains about278px/s.
+This is a measured reduction in rigid contacts; some startup/class/native idle motion and
+imported Vilhelm's separate animation still need broader aesthetic acceptance.
+
+Release+1,266 Core+274 UI checks pass,69 focused.442-source normal build overlays3 owned
+files on round261, preserving non-owned source hashes. Temporary observer and private class
+fixture excluded. Four installed artifacts match compiled output.190 scenery/model files,
+13 other plugin files,both configs,estate2 and39 native profile files preserved; protected1/3
+not accessed. User's estate2 backed up and current window closed gracefully before unsaved
+QA. Independent Shieldbreaker WIP intact. All owned QA closed. Normal DLL SHA256 3740fef2df138dcc7c12fe6ffb7c348cfb47a7b8c88b02af77ebbe43226ca9d6.
+Private evidence, failed native iterations, source manifests/fresh rollback and revised
+walk-preview.mp4: local-art/walk-softness-v17. See tools/corridor_heroes.md.
+
+## Status 2026-10-17: softer native walk installed
+
+Foot roll/recovery and actual-anchor hip handover now have native four-region evidence on
+the owner's displayed four classes.69 focused and full Release+1,266 Core+274 UI pass.
+Normal442-source build installed without temporary observers; QA closed, saves/profiles
+preserved. Step distance and fitted pacing retained. Owner's launch/record authorization
+remains current. Broader class/scale/saved-campaign/startup and native idle polish remains.
+Next round263. Preserve current scenery/doors/fonts/stress/loading/heroes and Shieldbreaker
+WIP. Capture fresh installed hashes; older restore scripts would undo this build.

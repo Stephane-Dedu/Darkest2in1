@@ -1,5 +1,26 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round262 softens the owner's stiff walking. Quintic ankle roll/toe recovery and earlier
+0.12-leg lift retain existing horizontal foot travel, step distance,55% stance and fitted
+pace. Native traces exposed a hard support-bit hip jump. Ground-anchor anticipation/release
+now preserves each actual liftoff combat stance through CorridorSupportContact, including
+reverse travel. Middle swing remains free and ground constraints retain full support.
+
+12 new red/green cases;69 focused and Release+1,266 Core+274 UI pass. Final unsaved owner's
+Leper/Shieldbreaker/Flagellant/Jester pass all four regions, forward/reverse/stop/repeated
+buttons. Video/100ms poses inspected. Contact jumps>5px516/606->16/576, max32.03->7.23px;
+all-frame max32.03->15.43px,95th percentile unchanged3.52px. Foot slip0.578px, IK error0.1953px.
+Some startup/native idle/class/scale motion and saved-campaign handoffs still need broader
+acceptance. Vilhelm imported motion is separate. See tools/corridor_heroes.md. Next round263.
+
+Installed442-source normal baseline,3-file overlay,fresh rollback,failed native iterations,
+bone comparison/red-green logs and walk-preview.mp4: local-art/walk-softness-v17. Observer
+and private fixture excluded.190 scenery/model files,13 other plugin files,both configs,
+estate2 and39 native profiles preserved; protected1/3 untouched. Shieldbreaker WIP intact.
+All owned QA closed; owner permits launch/record. Capture fresh installed hashes before
+another deployment; older restore scripts would undo this build. Earlier handoffs below
+are historical.
+
 Round261 uses new owner authorization: "you can launch and record". The earlier launch hold
 is superseded. Use unsaved QA or estate2 only, never protected1/3. All owned QA is now closed.
 

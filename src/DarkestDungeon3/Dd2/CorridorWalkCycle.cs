@@ -60,8 +60,7 @@ internal sealed class CorridorWalkCycle
         {
             double t = p / Stance;
             // Constant backwards speed during contact, with a heel strike and a late toe-off.
-            double pitch = 10 * Math.Pow(Math.Max(0, 1 - t / 0.18), 2)
-                         - 14 * Math.Pow(Math.Max(0, (t - 0.8) / 0.2), 2);
+            double pitch = 10 * (1-Ease(t/.20)) - 14 * Ease((t-.72)/.28);
             return new Foot(Stride * (0.5 - t), 0, pitch, true);
         }
         double u = (p - Stance) / (1 - Stance);
@@ -69,26 +68,75 @@ internal sealed class CorridorWalkCycle
         // Hermite tangents match the planted foot velocity at both ends of the swing.
         double x = 3 * u2 - 2 * u3 - 0.5
                  - (1 - Stance) / Stance * (2 * u3 - 3 * u2 + u);
-        double lift = 0.08 * Math.Pow(Math.Sin(Math.PI * u), 2);
-        double pitchSwing = -14 + 24 * (3 * u2 - 2 * u3) - 12 * Math.Sin(Math.PI * u);
+        // Lift early enough to fold the knee before the legs pass. Quintic
+        // easing joins the grounded foot with zero vertical velocity/acceleration.
+        double lift = .12 * (u < .4 ? Ease(u/.4) : 1-Ease((u-.4)/.6));
+        // Recover the toe as the knee bends. Match zero angular velocity at
+        // liftoff/landing instead of snapping from a toe-down swing to contact.
+        double pitchSwing = u < .4 ? -14+21*Ease(u/.4) : 7+3*Ease((u-.4)/.6);
         return new Foot(Stride * x, lift, pitchSwing, false, u);
     }
 
     // Combat idle is a crouch. Raise that pose toward a relaxed walking height, retaining soft knees
     // and a small weight transfer instead of compressing the already bent native stance further.
     internal static float PelvisLift(float legLength, float nativeHipHeight, double phase) =>
-        Math.Max(0, legLength * 0.93f - nativeHipHeight)
+        Math.Max(0, legLength * 0.925f - nativeHipHeight)
         + legLength * (-0.015f - 0.008f * (float)Math.Cos((phase - Handover) * Math.PI * 4));
 
     internal static float PelvisContactDrop(float reach, float horizontalSquared, float vertical, bool supporting = true) =>
         supporting ? Math.Max(0,vertical-(float)Math.Sqrt(Math.Max(0,reach*reach*.98f*.98f-horizontalSquared))) : 0;
 
+    // Settle before landing and release the trailing foot gradually. The middle
+    // of the airborne swing cannot pull the body down; planted contacts keep full support.
+    internal static float SupportWeight(Foot foot) => foot.Planted ? 1
+        : (float)(1-Ease(foot.SwingProgress/.25)+Ease((foot.SwingProgress-.60)/.40));
+
+    // Body support transfers between ground anchors. The lifted foot's recovery
+    // arc must not drag the hips around while a contact is released or prepared.
+    internal static Foot SupportPose(Foot foot) => foot.Planted ? foot
+        : new Foot(foot.SwingProgress < .5 ? -Stride*.5 : Stride*.5,0,foot.Pitch,false,foot.SwingProgress);
+
+    internal static float PelvisContactDrop(float reach, float horizontalSquared, float vertical, Foot foot) =>
+        PelvisContactDrop(reach,horizontalSquared,vertical)*SupportWeight(foot);
+
     // Centre the transfer in double support; the body then passes over each planted foot.
     private const double Handover = (Stance - 0.5) / 2;
     internal static float SupportShift(double phase) => (float)Math.Sin((phase - Handover) * Math.PI * 2);
 
+    private static double Ease(double value)
+    {
+        double t = Math.Max(0,Math.Min(1,value));
+        return Math.Max(0,Math.Min(1,t*t*t*(t*(t*6-15)+10)));
+    }
+
     internal static double Wrap(double phase) => double.IsNaN(phase) || double.IsInfinity(phase)
         ? 0 : phase - Math.Floor(phase);
+}
+
+/// <summary>Release the actual planted pose, including a retained combat-stance offset.</summary>
+internal sealed class CorridorSupportContact
+{
+    private bool _anchored;
+    private float _anchor;
+    private int _direction;
+
+    internal void Reset() { _anchored = false; _direction = 0; }
+
+    internal float Forward(CorridorWalkCycle.Foot foot, float observedForward, float distanceInLegLengths)
+    {
+        if (Math.Abs(distanceInLegLengths)<.000001f) { Reset(); return observedForward; }
+        int direction = distanceInLegLengths>0 ? 1 : -1;
+        if (foot.Planted) { Reset(); return observedForward; }
+        bool releasing = direction>0 ? foot.SwingProgress<.5f : foot.SwingProgress>.5f;
+        if (releasing)
+        {
+            if (!_anchored || _direction!=direction) _anchor = observedForward;
+            _anchored = true; _direction = direction;
+            return _anchor;
+        }
+        Reset();
+        return CorridorWalkCycle.SupportPose(foot).Forward;
+    }
 }
 
 /// <summary>Keep a planted foot on the moving ground even while the upper body blends out of combat idle.</summary>

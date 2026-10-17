@@ -42,6 +42,7 @@ internal sealed class CorridorHeroMotion
         internal float Side, AnkleY;
         internal Quaternion FlatRotation;
         internal readonly CorridorFootContact Contact = new();
+        internal readonly CorridorSupportContact Support = new();
     }
 
     internal static CorridorHeroMotion TryCreate(ActorBhv actor, Transform slot, int rank)
@@ -159,12 +160,13 @@ internal sealed class CorridorHeroMotion
     {
         ContactErrorPixels = 0;
         if (_slot == null || _animator == null || !_animator.gameObject.activeInHierarchy || !visible)
-        { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); return; }
+        { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); _left.Support.Reset(); _right.Support.Reset(); return; }
         float legPixels = ProjectedLegPixels;
         bool moving = Mathf.Abs(distancePixels) > .000001f;
         if (moving && !_walking)
         {
             _left.Contact.Reset(); _right.Contact.Reset();
+            _left.Support.Reset(); _right.Support.Reset();
             _cycle.Begin(CorridorWalkCycle.StartPhase(ObservedForward(_left),ObservedForward(_right),distancePixels<0));
         }
         _walking = moving;
@@ -206,11 +208,10 @@ internal sealed class CorridorHeroMotion
         var rightTarget = FootTarget(_right,rightFoot,weight,distanceInLegLengths);
         // A retained combat contact can be wider than the settled walk. Raising
         // the hips past that leg's reach makes IK clamp and slide the foot.
-        // Fit the common pelvis before solving either leg, retaining both targets.
-        // A swinging leg cannot pull the whole body down to reach its free foot.
-        // Only ground contacts constrain the pelvis; retain both while stopping.
-        float drop = Mathf.Max(ContactDrop(_left,leftTarget,leftFoot.Planted || !moving),
-            ContactDrop(_right,rightTarget,rightFoot.Planted || !moving));
+        // Anticipate a landing and release the rear support gradually, instead
+        // of snapping pelvis height when a contact bit changes. Mid-swing stays free.
+        float drop = Mathf.Max(ContactDrop(_left,leftTarget,leftFoot,distanceInLegLengths),
+            ContactDrop(_right,rightTarget,rightFoot,distanceInLegLengths));
         _pelvis.position -= Vector3.up*drop;
         PoseLeg(_left, leftFoot, weight, worldForward, worldSide,leftTarget,distanceInLegLengths);
         PoseLeg(_right, rightFoot, weight, worldForward, worldSide,rightTarget,distanceInLegLengths);
@@ -235,11 +236,20 @@ internal sealed class CorridorHeroMotion
         return Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
     }
 
-    private static float ContactDrop(Leg leg, Vector3 target, bool supporting)
+    private float ContactDrop(Leg leg, Vector3 target, CorridorWalkCycle.Foot foot, float distanceInLegLengths)
     {
+        bool moving = Mathf.Abs(distanceInLegLengths)>.000001f;
+        float observed = Vector3.Dot(_slot.InverseTransformPoint(target)-Neutral(leg),_forward)/_legLength;
+        float support = leg.Support.Forward(foot,observed,distanceInLegLengths);
+        if (moving && !foot.Planted)
+        {
+            target = _slot.TransformPoint(Neutral(leg)+_forward*(support*_legLength));
+        }
         float reach = Vector3.Distance(leg.Hip.position,leg.Knee.position)+Vector3.Distance(leg.Knee.position,leg.Ankle.position);
         var delta = leg.Hip.position-target;
-        return CorridorWalkCycle.PelvisContactDrop(reach,delta.x*delta.x+delta.z*delta.z,delta.y,supporting);
+        float horizontal = delta.x*delta.x+delta.z*delta.z;
+        return moving ? CorridorWalkCycle.PelvisContactDrop(reach,horizontal,delta.y,foot)
+            : CorridorWalkCycle.PelvisContactDrop(reach,horizontal,delta.y);
     }
 
     private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,Vector3 target,float distanceInLegLengths)

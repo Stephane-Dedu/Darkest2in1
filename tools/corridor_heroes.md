@@ -6,6 +6,42 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Softer contacts and foot recovery, round262, October 17, 2026
+
+The owner still finds the steps stiff. The sampler's ankle rotation had170–286 degrees/cycle
+velocity discontinuities at contact changes. The swing toe remained17 degrees down at40%
+recovery, with only0.08-leg lift. Five new red cases reproduce those defects. Contact roll and
+toe recovery now use bounded quintic easing; lift rises earlier, peaking at0.12 leg lengths.
+Its vertical velocity and acceleration reach zero at liftoff and landing. Horizontal planted
+travel, step length, stance fraction and fitted walking pace remain unchanged.
+
+Recorded round261 bones also expose a real hip step:516/606 contact changes jump more than
+5 virtual pixels, max32.03. The common-pelvis constraint previously switched on/off at the
+contact bit. Four red coupled-geometry cases reproduce a0.0594-leg discontinuity. Body support
+now releases over the first25% of swing and prepares contact over its last40%, using ground
+anchors. The middle swing remains free and planted feet retain full constraints. A slightly
+lower0.925-leg relaxed height keeps knee/hip excursion within the earlier bounds.
+
+Native iteration matters here. Following the moving airborne target spread the impulse but
+created larger downward steps; nominal anchors then exposed a retained combat-stance offset.
+`CorridorSupportContact` captures each actual liftoff anchor and supports both travel directions.
+Two negative-control cases reproduce the nominal-anchor snap. It resets on stop/visibility/
+restart. Future landing anchors stay nominal, matching the distance-driven contact tracker.
+Normal sources contain no temporary observer or private QA class substitution.
+
+Final unsaved Leper/Shieldbreaker/Flagellant/Jester routes pass forward/reverse/stop/repeated
+buttons across all four regions.35-second footage and100ms pose samples inspected. The native
+bone comparison records16/576 contact changes above5px, max7.23px; the largest all-frame
+height change falls32.03->15.43px. The95th percentile stays3.52px. Continuous planted-foot
+slip max0.58px and IK target error0.1953px remain sub-pixel. This reduces the abrupt contacts;
+some startup, native idle and class-specific motion still needs broader animation polish.
+
+Release+1,266 Core+274 UI checks pass,69 focused. Current442-source normal build overlays only
+three code/test files on round261. Evidence, failed intermediate passes, source manifests,
+fresh backup and walk-preview.mp4: `local-art/walk-softness-v17`. QA changes no estate; native
+profiles/config/scenery and independent Shieldbreaker work are preserved. Imported Vilhelm's
+root-motion animation is separate. Owner's launch/record authorization remains current.
+
 ## Native pose and fitted pace, round261, October 17, 2026
 
 The owner reopened DD2, then explicitly authorized launching and recording. This supersedes

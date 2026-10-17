@@ -84,8 +84,7 @@ public class CorridorWalkCycleTests
             double phase = i/1000.0;
             float height = nativeHeight+CorridorWalkCycle.PelvisLift(leg,nativeHeight,phase);
             var feet = new[] { CorridorWalkCycle.Sample(phase), CorridorWalkCycle.Sample(phase+.5) };
-            float drop = feet.Max(foot => CorridorWalkCycle.PelvisContactDrop(leg,
-                foot.Forward*foot.Forward*leg*leg,height-foot.Lift*leg,foot.Planted));
+            float drop = feet.Max(foot => SupportDrop(leg,height,foot));
             height -= drop;
             low = Math.Min(low,height); high = Math.Max(high,height);
             foreach (var foot in feet.Where(foot => foot.Planted))
@@ -105,6 +104,63 @@ public class CorridorWalkCycleTests
         Assert.Equal(0,CorridorWalkCycle.PelvisContactDrop(1,.7f*.7f,.9f,false));
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(CorridorWalkCycle.Stance)]
+    [InlineData(.5)]
+    [InlineData(.5+CorridorWalkCycle.Stance)]
+    public void WeightTransferDoesNotJumpTheHipsWhenFootSupportChanges(double boundary)
+    {
+        const float leg = .76f;
+        float jump = Math.Abs(HipHeight(boundary-.0001)-HipHeight(boundary+.0001));
+        Assert.True(jump <= leg*.001f,$"Changing foot support jumps the pelvis {jump/leg:0.0000} leg lengths.");
+    }
+
+    [Fact]
+    public void MidSwingCannotPullDownThePelvisAndGroundContactsRetainFullSupport()
+    {
+        var planted = CorridorWalkCycle.Sample(.2);
+        var airborne = CorridorWalkCycle.Sample((1+CorridorWalkCycle.Stance)/2);
+        Assert.Equal(CorridorWalkCycle.PelvisContactDrop(1,.49f,.9f),
+            CorridorWalkCycle.PelvisContactDrop(1,.49f,.9f,planted));
+        Assert.Equal(0,CorridorWalkCycle.PelvisContactDrop(1,.49f,.9f,airborne));
+        for (int i = 0; i < 1000; i++)
+            Assert.InRange(CorridorWalkCycle.SupportWeight(CorridorWalkCycle.Sample(i/1000.0)),0,1);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void SupportReleasesTheActualCombatFootAnchorInEitherDirection(bool backwards)
+    {
+        var contact = new CorridorSupportContact();
+        float direction = backwards ? -1 : 1;
+        float u = backwards ? .98f : .02f;
+        var foot = CorridorWalkCycle.Sample(CorridorWalkCycle.Stance+(1-CorridorWalkCycle.Stance)*u);
+        float observed = -.8f*direction;
+        Assert.Equal(observed,contact.Forward(foot,observed,.002f*direction));
+        // Its airborne arc can move on; the body must release the captured support
+        // instead of jumping immediately to the narrower nominal walk stance.
+        Assert.Equal(observed,contact.Forward(foot,observed-.1f*direction,.002f*direction));
+        contact.Forward(foot,0,0);
+        Assert.Equal(.2f,contact.Forward(foot,.2f,.002f*direction));
+    }
+
+    private static float HipHeight(double phase)
+    {
+        const float leg = .76f, nativeHeight = .60f;
+        float height = nativeHeight+CorridorWalkCycle.PelvisLift(leg,nativeHeight,phase);
+        var feet = new[] { CorridorWalkCycle.Sample(phase),CorridorWalkCycle.Sample(phase+.5) };
+        return height-feet.Max(foot => SupportDrop(leg,height,foot));
+    }
+
+    private static float SupportDrop(float leg, float height, CorridorWalkCycle.Foot foot)
+    {
+        var anchor = CorridorWalkCycle.SupportPose(foot);
+        return CorridorWalkCycle.PelvisContactDrop(leg,anchor.Forward*anchor.Forward*leg*leg,
+            height-anchor.Lift*leg,foot);
+    }
+
     [Fact]
     public void ContactFootStaysOnTheGroundAndTravelsAtConstantSpeed()
     {
@@ -116,7 +172,7 @@ public class CorridorWalkCycleTests
         Assert.Equal(0, b.Lift);
         Assert.Equal(a.Forward - b.Forward, b.Forward - c.Forward, 5);
         Assert.True(a.Forward > c.Forward);
-        Assert.InRange(CorridorWalkCycle.Sample((1+CorridorWalkCycle.Stance)/2).Lift, 0.079f, 0.081f);
+        Assert.InRange(CorridorWalkCycle.Sample((1+CorridorWalkCycle.Stance)/2).Lift, .11f, .13f);
     }
 
     [Fact]
@@ -125,6 +181,42 @@ public class CorridorWalkCycleTests
         for (int i = 0; i < 1000; i++)
             Assert.True(CorridorWalkCycle.Sample(i / 1000.0).Planted
                      || CorridorWalkCycle.Sample(i / 1000.0 + 0.5).Planted);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(CorridorWalkCycle.Stance)]
+    public void FootRotationDoesNotSnapToADifferentVelocityAtContactChanges(double boundary)
+    {
+        const double dt = .0001;
+        float before = CorridorWalkCycle.Sample(boundary-dt).Pitch;
+        float at = CorridorWalkCycle.Sample(boundary).Pitch;
+        float after = CorridorWalkCycle.Sample(boundary+dt).Pitch;
+        double incoming = (at-before)/dt, outgoing = (after-at)/dt;
+        Assert.True(Math.Abs(incoming-outgoing) <= 1,
+            $"Ankle rotation changes velocity abruptly by {Math.Abs(incoming-outgoing):0.0} degrees/cycle.");
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(CorridorWalkCycle.Stance)]
+    public void FootLiftDoesNotStartOrLandWithAnAccelerationSnap(double boundary)
+    {
+        const double dt = .0001;
+        float before = CorridorWalkCycle.Sample(boundary-dt).Lift;
+        float at = CorridorWalkCycle.Sample(boundary).Lift;
+        float after = CorridorWalkCycle.Sample(boundary+dt).Lift;
+        double acceleration = (before-2*at+after)/(dt*dt);
+        Assert.True(Math.Abs(acceleration) < .1,
+            $"Foot lift has a {acceleration:0.00} leg-length/cycle-squared acceleration jump at contact.");
+    }
+
+    [Fact]
+    public void SwingRecoversTheToeAndBendsTheKneeBeforePassingTheSupportingLeg()
+    {
+        var recovery = CorridorWalkCycle.Sample(CorridorWalkCycle.Stance+(1-CorridorWalkCycle.Stance)*.4);
+        Assert.True(recovery.Pitch >= 5,$"The swinging toe still points down at {recovery.Pitch:0.0} degrees.");
+        Assert.InRange(recovery.Lift,.10f,.14f);
     }
 
     [Theory]
