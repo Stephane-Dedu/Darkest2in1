@@ -7364,3 +7364,53 @@ placement, comfort/rig contact, controls, fades and room/battle/return acceptanc
 Keep DD2 closed until the owner explicitly says OK. No launch/input/estate access.
 Next round259. Preserve typography/stress/loading/scenery/heroes and Shieldbreaker WIP;
 capture a fresh baseline and never run historical restores over this build.
+
+
+## Round259 (2026-10-17): continuous walking clock and stall recovery
+
+Owner says steps/background remain wrong and clarifies "While walking continuously".
+DD2 remains closed until an explicit OK. No game launch, OS input or estate access.
+
+Earlier checks covered projection and planted-target distance, but not the real held-walk
+clock's physical speed. The unchanged continuous integration was extracted from Walk into
+Driver.Walking.cs so tests execute it with real Core Crawl, camera crop and gait functions.
+Nine red cases reproduce 309px/s native / 600px/s legacy travel, 4.15 steps/s on the 102.6px
+projected leg derived from the earlier native capture, 7.75 on a scaled55px leg, and247–480px
+ground jumps after an800ms delayed frame. Seven cases passed after fixing the clock, with
+both hitch cases still red at144px. Applying the movement catch-up cap then passed all.
+
+Held keys, mouse and routes now advance by physical rendered pixels: target180px/s,
+converted through the current projected square spacing. Native fitted rigs can lower
+the party limit to1.8 projected leg lengths/s. Imported models keep their own distance
+calibration; disabled3D models use the default limit. Reverse motion retains half speed.
+Only100ms of movement is consumed per frame, so a render/asset stall resumes from the
+visible position instead of catching up several unseen strides. Logical tile/curio/event
+semantics, crop/door geometry, artwork and native pose/stride arc remain unchanged.
+Walking a larger painted square now takes longer, about2.06s for the canonical six-square
+hall. Discrete developer-step easing remains1.2s and is separate from held gameplay input.
+
+Fourteen new actual-loop cases cover physical speed across6/12/20-square halls/fallback,
+native/small rig cadence, stalls, reverse motion,30/144Hz, exact tile carry and passage
+stopping. Combined crop/registration/locomotion checks pass42; full Release+1,266 Core+
+251 UI pass. Offline replays produce180px/s,2.42 steps/s and18px stall advance on the
+recorded short rig, and99px/s/2.48steps/s/9.9px for the55px scale. No new offline crop
+mismatch was found. The future native fixture now enforces physical held-walk speed,
+instead of permitting a fast1.2s-per-tile pan. No temporary observers in the normal build.
+
+The442-source normal build overlays12 owned code/test files onto round258's verified440
+source baseline. Non-owned source hashes match; all four installed artifacts match the
+compiled Release.190 scenery/model files,13 other plugin files and both configs preserved.
+Normal plugin SHA256 cf5e8b8a9a0972ce51ffd6f537eea9e438413120fc49a8cf0b89251470d3921e.
+Private evidence, extracted unchanged loop, red/speed-only/green/full logs, replay metrics,
+exact source manifest and fresh round258 rollback: local-art/walk-pace-v14.
+Independent Shieldbreaker WIP remains excluded and intact.
+
+## Status 2026-10-17: continuous walking pacing installed; native visual check held
+
+Round259 repairs reproducible continuous-movement speed/catch-up defects. The user-visible
+problem is not declared visually resolved: actual rig projection/comfort, loading adoption,
+input and sustained four-region walking still need native acceptance. Do not launch DD2
+until the owner explicitly says OK. No launch/input/save access this round. See
+tools/corridor_heroes.md. Next round260. Preserve the442-source baseline, room/corridor art,
+doors, typography, stress, loading, installed heroes and independent Shieldbreaker work.
+Capture a fresh installed baseline; historical restores would undo this build.

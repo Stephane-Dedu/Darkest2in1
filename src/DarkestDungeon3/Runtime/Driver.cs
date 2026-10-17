@@ -402,43 +402,7 @@ internal sealed partial class Driver : MonoBehaviour
         if (intent != 0) StopWalking();
         else if (IsWalking) intent = RouteIntent();
         if (intent == 0) return;   // the party stays where it stopped
-        bool forward = intent > 0;
-        if (forward && Crawl.IsBlocked)   // an obstacle or a fight in this square: no further than its middle
-        {
-            StopWalking();
-            return;
-        }
-        var hall=Crawl.CurrentCorridor;
-        int outwardRoom=forward ? Expedition.HeadingRoomId : hall.Other(Expedition.HeadingRoomId);
-        bool atDoor=Crawl.CanEnterDoor(outwardRoom);
-        if (atDoor && (forward ? WalkProgress>=.5f : WalkProgress<=-.5f)) { StopWalking();return; }
-        float speed = (forward ? 1f : -0.5f) / SecondsPerSquare;
-        _walkVelocity = speed;
-        if (Time.unscaledTime >= _nextFootstep) { Dd1Audio.Play("/general/party/hero_step"); _nextFootstep = Time.unscaledTime + (forward ? 0.55f : 0.8f); }
-        float beforeProgress = WalkProgress;
-        WalkProgress += speed * Time.unscaledDeltaTime;
-        if (Mathf.Abs(WalkProgress) < 0.5f) return;
-        if (atDoor)
-        {
-            WalkProgress=forward ? .5f : -.5f;
-            _walkVelocity=0;StopWalking();return;
-        }
-        float carry = WalkProgress - Mathf.Sign(WalkProgress);   // -0.5 + overshoot in the next square
-        _continuousStep = true;
-        bool moved;
-        try { moved = TryStep(forward); }
-        finally { _continuousStep = false; }
-        if (Expedition == null) { WalkProgress = 0; StopWalking(); return; }
-        if (!moved)
-        {
-            WalkProgress = beforeProgress; _walkVelocity = 0;
-            StopWalking(); return;
-        }
-        WalkProgress = Expedition.InRoom ? 0 : carry;
-        if (Expedition.InRoom) Dd1Audio.Play("/general/map/room_transition");
-        // Something happened (a fight, a curio, a trap, a room): stop and let the player look.
-        if (_interruptsThisStep || (IsWalking && Crawl.CurioHere != null)) { _interruptsThisStep = false; StopWalking(); }
-        if (_routeTargetTile.corridor >= 0 && !Expedition.InRoom && Expedition.TileIndex == _routeTargetTile.tile) StopWalking();
+        AdvanceWalk(intent > 0, Time.unscaledDeltaTime);
     }
 
     private int _mouseWalk;

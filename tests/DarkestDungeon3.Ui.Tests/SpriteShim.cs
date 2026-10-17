@@ -54,6 +54,8 @@ public struct Matrix4x4
 }
 public static class Mathf
 {
+    public static float Abs(float value) => MathF.Abs(value);
+    public static float Sign(float value) => value < 0 ? -1 : 1;
     public static float Min(float a, float b) => MathF.Min(a, b);
     public static float Max(float a, float b) => MathF.Max(a, b);
     public static int Max(int a, int b) => Math.Max(a, b);

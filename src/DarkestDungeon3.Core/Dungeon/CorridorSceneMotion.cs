@@ -6,6 +6,25 @@ namespace DarkestDungeon3.Core.Dungeon;
 public sealed class CorridorSceneMotion
 {
     public const float StepSeconds = 1.2f;
+    public const float WalkingPixelsPerSecond = 180f;
+    public const float MaximumWalkingFrameSeconds = .1f;
+
+    // Keep a fitted short-legged hero at walking cadence, rather than making it
+    // spend multiple gait cycles on one logical square. Very small model scales
+    // also reduce camera speed. Native step arc/poses remain untouched.
+    public static float WalkingSpeedForLeg(float projectedLegPixels) =>
+        float.IsNaN(projectedLegPixels) || float.IsInfinity(projectedLegPixels) || Math.Abs(projectedLegPixels) < 1
+            ? WalkingPixelsPerSecond : Math.Min(WalkingPixelsPerSecond, Math.Abs(projectedLegPixels) * 1.8f);
+
+    public static float WalkingDelta(float seconds, float squarePixels, float speedLimit, bool forward)
+    {
+        if (float.IsNaN(seconds) || float.IsInfinity(seconds) || seconds <= 0
+            || float.IsNaN(squarePixels) || float.IsInfinity(squarePixels) || squarePixels <= 0
+            || float.IsNaN(speedLimit) || float.IsInfinity(speedLimit) || speedLimit <= 0) return 0;
+        // A render/asset stall is not time spent walking unseen. Resume from the
+        // last visible position rather than catching up with a multi-stride jump.
+        return Math.Min(seconds, MaximumWalkingFrameSeconds) * speedLimit / squarePixels * (forward ? 1 : -.5f);
+    }
     private bool _sampled;
     private int _seed, _corridor, _heading, _width, _height;
     private string _art;

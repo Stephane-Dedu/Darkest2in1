@@ -251,10 +251,9 @@ internal static class CrawlSceneryCheck
         if (_motionSampled && now > _motionTime)
         {
             float dt = now-_motionTime, distance = Mathf.Abs(camera-_motionCamera);
-            // The ordinary forward route moves one square per 1.2s. A bounded panorama
-            // uses a centred span in short halls, including carry at crossings.
-            float maximum = CorridorSceneMotion.PropOffset(texture.width,texture.height,corridor.Tiles.Count,1,0)
-                /CorridorSceneMotion.StepSeconds*1.5f;
+            // This samples held routes, after the separate button-step test.
+            // One physical walking limit applies across hall lengths and crop zoom.
+            float maximum = HeroStage.Instance?.WalkingSpeedLimit ?? CorridorSceneMotion.WalkingPixelsPerSecond;
             Require(distance <= maximum*dt+3,"Panorama jumped at a tile boundary or reversal");
             _motionMaximum = Mathf.Max(_motionMaximum,distance/dt); _motionFrames++;
         }

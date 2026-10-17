@@ -1,5 +1,26 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round259 addresses the owner's remaining issue during continuous walking. Real held keys,
+mouse and routes were extracted into Driver.Walking.cs and replayed against Core Crawl,
+actual projection and gait. Nine red cases found309/600px/s,4.15 steps/s on the recorded
+102.6px leg and247–480px stall jumps. Physical180px/s target, smaller fitted-rig limit and
+100ms movement catch-up cap now produce180px/s,2.42 steps/s and18px stall advance. Reverse
+motion is half speed. Crop/art/poses/stride and explicit doors remain; larger logical
+squares take longer to traverse. The separate developer-step easing stays1.2s.
+
+Fourteen new cases and42 focused checks pass; full Release+1,266 Core+251 UI pass. Native
+visual resolution is NOT claimed. Keep DD2 CLOSED until the owner explicitly says OK.
+No launch/input/estate access. Sustained four-region walking, rig projection/comfort,
+asset adoption and real controls remain UNVERIFIED. See tools/corridor_heroes.md.
+
+Installed442-source normal snapshot,12-file overlay, fresh round258 rollback, red/speed-
+only/green/full logs and actual-loop replay metrics: local-art/walk-pace-v14. Normal DLL
+cf5e8b8a9a0972ce51ffd6f537eea9e438413120fc49a8cf0b89251470d3921e.
+190 scenery/model files,13 other plugin files and both configs preserved. Retain doors,
+typography, loading, stress, installed heroes and independent Shieldbreaker WIP. Capture
+a fresh installed baseline; historical restores would undo this build. Next round260.
+Earlier handoffs are historical.
+
 Round258 adds explicit corridor doors and stronger projected travel. Movement/map routes
 stop at both ends; click the passage to enter/return through0.3s fade-out and existing
 fade-in. Core validates endpoints/pending events; traps/obstacles permit return behind

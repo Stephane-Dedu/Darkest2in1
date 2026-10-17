@@ -43,6 +43,7 @@ namespace DarkestDungeon3.Runtime
     }
     internal static class Dd1Audio
     {
+        public static void Play(string path) { }
         public static bool Hush;
         public static readonly List<int> StartThreads = new();
         public static Stream Last;

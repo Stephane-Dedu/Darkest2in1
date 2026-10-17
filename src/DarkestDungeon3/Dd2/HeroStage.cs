@@ -67,9 +67,20 @@ internal sealed class HeroStage : MonoBehaviour
     private bool _haveRoadLighting;
 
     public static float HeroScale = 1f;
-    /// <summary>Signed corridor speed: 1 forward, -0.5 backing up, 0 stopped.</summary>
+    /// <summary>Signed ground speed in world units per second; backing up uses half the forward speed.</summary>
     public static float WalkSpeed;
     public static float WalkDistancePixels;
+    internal float WalkingSpeedLimit
+    {
+        get
+        {
+            float speed = Core.Dungeon.CorridorSceneMotion.WalkingPixelsPerSecond;
+            foreach (var (_, _, actor) in _heroes)
+                if (actor != null && actor.GetComponent<ExportedHeroModel>() == null && _motion.TryGetValue(actor, out var motion))
+                    speed = Mathf.Min(speed, Core.Dungeon.CorridorSceneMotion.WalkingSpeedForLeg(motion.ProjectedLegPixels));
+            return speed;
+        }
+    }
     public static float WalkContactErrorPixels { get; private set; }
     private readonly Dictionary<ActorBhv, CorridorHeroMotion> _motion = new();
     private readonly HashSet<ActorBhv> _motionUnavailable = new();

@@ -153,12 +153,14 @@ internal sealed class CorridorHeroMotion
         _saved.Clear();
     }
 
+    internal float ProjectedLegPixels => _slot != null ? _slot.TransformVector(_forward * _legLength).x * HeroStage.PixelsPerUnit : 0;
+
     internal void Apply(float distancePixels, float deltaTime, bool visible)
     {
         ContactErrorPixels = 0;
         if (_slot == null || _animator == null || !_animator.gameObject.activeInHierarchy || !visible)
         { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); return; }
-        float legPixels = _slot.TransformVector(_forward * _legLength).x * 100;
+        float legPixels = ProjectedLegPixels;
         bool moving = Mathf.Abs(distancePixels) > .000001f;
         if (moving && !_walking)
         {

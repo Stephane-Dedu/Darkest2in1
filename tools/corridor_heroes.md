@@ -6,7 +6,40 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
-## Current cadence, round252, October 16, 2026
+## Continuous walking pace, round259, October 17, 2026
+
+The owner reports that steps and scenery are still wrong while walking continuously.
+Tests previously exercised distance matching and isolated traversal, but did not constrain
+the actual held-walk clock's physical speed. The unchanged integration is now extracted to
+`Driver.Walking.cs` so tests run real held movement against Core Crawl and the actual crop.
+
+Nine initial failures reproduce 309px/s native / 600px/s fallback travel, up to 4.15 steps/s
+on the 102.6px projected leg derived from the earlier native capture, and 247–480px jumps
+after a delayed frame. Red/green evidence is in `local-art/walk-pace-v14`.
+
+Held movement now targets 180 virtual pixels/s, using the rendered square spacing rather
+than a fixed 1.2 seconds per logical tile. Short fitted native rigs can lower the party's
+speed to 1.8 projected leg lengths/s. Imported clips retain their own distance calibration.
+Backing up is half the same physical speed. Only 100ms of movement can be consumed in one
+frame; a render stall no longer catches up by moving several strides unseen. The logical
+square count, camera crop, artwork, stride arc, poses and explicit passage interaction remain.
+Logical walking time per square is therefore longer in larger crops, about 2.06s for the
+six-square canonical painting. The separate discrete developer-step easing stays at 1.2s.
+
+Replay through the real held integration gives 180px/s across six/twenty-square paintings
+and the legacy fallback, 2.42 steps/s on the recorded short native rig, and an 18px maximum
+advance after the tested 800ms stall. A scaled 55px leg gets 99px/s and 2.48 steps/s. Fourteen
+new cases also cover backwards travel, frame rate, tile carry and stopping at a passage;
+42 focused checks and full Release / 1,266 Core / 251 UI checks pass. The future native
+motion fixture now enforces the physical held-walk limit rather than the old tile timer.
+
+These are code/recorded-size replays, not a new native observation. DD2 must stay closed
+until the owner explicitly says OK. Native comfort, exact rig projection, asset adoption,
+real controls and sustained walking through all four regions remain pending. The final
+normal build contains no temporary observer. Existing loading, typography, stress,
+passages, scenery and installed heroes are retained; capture a fresh baseline before QA.
+
+## Earlier cadence, round252, October 16, 2026
 
 The gait follows signed rendered ground distance, including the fitted rig's
 projected leg length. Its contact arc is now 0.90 leg lengths with 62% stance,

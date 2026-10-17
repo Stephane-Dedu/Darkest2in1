@@ -19,6 +19,7 @@
     <Compile Include="../../src/DarkestDungeon3/Ui/CrawlMapUi.cs" Link="CrawlMapUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/Driver.MapNavigation.cs" Link="Driver.MapNavigation.cs" />
     <Compile Include="../../src/DarkestDungeon3/Runtime/Driver.Traversal.cs" Link="Driver.Traversal.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Runtime/Driver.Walking.cs" Link="Driver.Walking.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CorridorGroundUi.cs" Link="CorridorGroundUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/CorridorPanoramaUi.cs" Link="CorridorPanoramaUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/RoomPanoramaUi.cs" Link="RoomPanoramaUi.cs" />
