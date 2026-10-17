@@ -46,6 +46,7 @@ confirmation and removes that estate's save and recovery backup. Estates are sav
 - `tests/` - Core tests against the DD1 install.
 - `MODLOG.md` - the working journal: findings, decisions, what still needs checking in game.
 - `tools/` - playtest scripts and a type-by-type decompiler for reading DD2's code locally.
+- `presentation/` - the Remotion source of the presentation video (footage is cut locally, never committed).
 
 For binary investigations, follow [the REA usage guide](tools/rea_usage.md).
 It covers the installed skill, CLI commands, private evidence and current Windows

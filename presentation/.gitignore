@@ -1,0 +1,4 @@
+node_modules/
+out/
+# Trailer cuts, game captures and stills: Red Hook's footage and game art, never committed.
+public/media/
