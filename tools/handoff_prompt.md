@@ -1,5 +1,26 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round261 uses new owner authorization: "you can launch and record". The earlier launch hold
+is superseded. Use unsaved QA or estate2 only, never protected1/3. All owned QA is now closed.
+
+Native video/bones exposed a common-pelvis squat from long rear contact and airborne targets.
+Stance55% and supporting-only walking pelvis constraints retain1.0 projected leg/step through
+Stride=2*Stance. Current154–202px fitted rigs also exposed slow0.89–1.17steps/s under180px/s.
+Ceiling320 keeps the party-minimum1.8 leg lengths/s rule, giving277–279px/s native travel.
+Reverse stays half speed;100ms catch-up cap/tiles/doors/scenery remain. Vilhelm is separate.
+
+Release+1,266 Core+262 UI/57 focused checks pass. Two unsaved parties cover eight native
+classes across all four regions; owner's Leper/Shieldbreaker/Flagellant/Jester included.
+Videos/100ms poses inspected. Their continuous contact slip<0.58px, IK error max0.1953px.
+Not every class/scale or saved-campaign handoff is certified; some startup/native idle poses
+remain deeper than idealized geometry. See tools/corridor_heroes.md. Next round262.
+
+Installed442-source normal snapshot,6-file overlay, fresh rollback, red/green/native logs,
+bone traces and walk-preview.mp4: local-art/walk-observe-v16. Observer/private QA class list
+excluded.190 scenery/model files,13 other plugin files,both configs,estate2 and39 native
+profiles preserved. Independent Shieldbreaker WIP intact. Capture a fresh installed baseline;
+historical restores would undo this build. Earlier handoffs below are historical.
+
 Round260 addresses distance per visible walking step. Round259 retained only0.726 projected
 leg lengths per footfall despite reducing speed. Contact arc1.24 at unchanged62% stance
 now covers1.0 projected leg length/step,37.8% longer. Rate uses the same arc, preserving

@@ -125,6 +125,18 @@ public class ContinuousWalkTests
     }
 
     [Theory]
+    [InlineData(154.1f)]
+    [InlineData(161.4f)]
+    [InlineData(170.5f)]
+    [InlineData(201.6f)]
+    public void RecordedFullSizeNativeRigsKeepAWalkingCadence(float leg)
+    {
+        var result = Replay(Ready(6,leg:leg));
+        Assert.True(result.MaximumSteps >= 1.3f && result.MaximumSteps <= 1.85f,
+            $"The fitted {leg:0.0}px native rig takes only {result.MaximumSteps:0.00} steps/s.");
+    }
+
+    [Theory]
     [InlineData(4096, 768)]
     [InlineData(0, 0)]
     public void ARenderStallCannotTeleportTheFloorByMoreThanAReadableContactStep(int width, int height)
@@ -144,7 +156,7 @@ public class ContinuousWalkTests
     public void BacktrackingRemainsHalfTheSamePhysicalSpeed(int width, int height)
     {
         var result = Replay(Ready(6, width, height), forward: false);
-        Assert.InRange(result.Speed, -90.1f, -89.9f);
+        Assert.InRange(result.Speed, -92.4f, -92.3f);
         Assert.InRange(result.MaximumSteps, 0, 1.3f);
     }
 
@@ -166,7 +178,7 @@ public class ContinuousWalkTests
         driver.AdvanceHeldTick(true, 1f / 60);
         Assert.Equal(3, driver.Expedition.TileIndex);
         Assert.InRange(driver.WalkProgress, -.5f, .5f);
-        Assert.InRange(Camera(driver) - before, 2.999f, 3.001f);
+        Assert.InRange(Camera(driver) - before, 3.077f, 3.079f);
     }
 
     [Fact]

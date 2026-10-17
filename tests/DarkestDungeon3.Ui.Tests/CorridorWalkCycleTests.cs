@@ -73,6 +73,39 @@ public class CorridorWalkCycleTests
     }
 
     [Fact]
+    public void SharedPelvisSupportsBothFeetWithoutASquatAtEachHandover()
+    {
+        // The native solver lowers one common pelvis for both legs. Checking a
+        // supporting leg alone missed the other leg's deep crouch at handover.
+        const float leg = .76f, nativeHeight = .60f;
+        float low = float.MaxValue, high = 0;
+        for (int i = 0; i < 1000; i++)
+        {
+            double phase = i/1000.0;
+            float height = nativeHeight+CorridorWalkCycle.PelvisLift(leg,nativeHeight,phase);
+            var feet = new[] { CorridorWalkCycle.Sample(phase), CorridorWalkCycle.Sample(phase+.5) };
+            float drop = feet.Max(foot => CorridorWalkCycle.PelvisContactDrop(leg,
+                foot.Forward*foot.Forward*leg*leg,height-foot.Lift*leg,foot.Planted));
+            height -= drop;
+            low = Math.Min(low,height); high = Math.Max(high,height);
+            foreach (var foot in feet.Where(foot => foot.Planted))
+            {
+                double reach = Math.Sqrt(height*height+foot.Forward*foot.Forward*leg*leg)/leg;
+                double bend = 2*Math.Acos(Math.Min(1,reach))*180/Math.PI;
+                Assert.True(bend <= 55,$"The other foot forces a {bend:0.0}-degree supporting knee bend.");
+            }
+        }
+        Assert.True(high-low <= leg*.12f,$"Each stride lowers and raises the pelvis by {(high-low)/leg:0.000} leg lengths.");
+    }
+
+    [Fact]
+    public void AnAirborneFootCannotPullTheBodyDownToReachItsSwingTarget()
+    {
+        Assert.True(CorridorWalkCycle.PelvisContactDrop(1,.7f*.7f,.9f,true) > .2f);
+        Assert.Equal(0,CorridorWalkCycle.PelvisContactDrop(1,.7f*.7f,.9f,false));
+    }
+
+    [Fact]
     public void ContactFootStaysOnTheGroundAndTravelsAtConstantSpeed()
     {
         var a = CorridorWalkCycle.Sample(0.1);
@@ -83,7 +116,7 @@ public class CorridorWalkCycleTests
         Assert.Equal(0, b.Lift);
         Assert.Equal(a.Forward - b.Forward, b.Forward - c.Forward, 5);
         Assert.True(a.Forward > c.Forward);
-        Assert.InRange(CorridorWalkCycle.Sample(0.81).Lift, 0.079f, 0.081f);
+        Assert.InRange(CorridorWalkCycle.Sample((1+CorridorWalkCycle.Stance)/2).Lift, 0.079f, 0.081f);
     }
 
     [Fact]

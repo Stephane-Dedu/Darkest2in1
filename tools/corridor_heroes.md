@@ -6,6 +6,42 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Native pose and fitted pace, round261, October 17, 2026
+
+The owner reopened DD2, then explicitly authorized launching and recording. This supersedes
+the launch hold below. Early live captures caught idle/door stops, so acceptance uses an
+isolated unsaved fixture with controlled routes and temporary read-only bone measurements.
+
+Native footage exposed a common-pelvis issue that isolated single-leg checks missed. A long
+rear contact and even an airborne foot could force the whole body down. The 62% stance /
+1.24 contact arc produced supporting knee bends above90 degrees on the test rigs. Reduce
+stance to55%, with Stride=2*Stance retaining one projected leg length per footfall. Only
+supporting contacts constrain pelvis height while walking. Swing targets remain free IK
+targets; both legs retain the earlier reach constraint while blending back to idle.
+Two geometry regressions cover shared support and airborne targets. The shared-support
+case first failed at63.8 degrees; releasing earlier alone still failed at55.2, and supporting
+contacts only passed. Contact/restart/reverse continuity and full step distance remain tested.
+
+The current fitted native legs measure154–202px, considerably larger than the102.6px older
+recorded-size replay. A fixed180px/s ceiling gave only0.89–1.17 steps/s. Four red actual held-
+loop cases reproduce that slow cadence. Raise the physical ceiling to320px/s and retain the
+party's minimum1.8 projected leg lengths/s limit. The native test party consequently walks
+at about277px/s with1.38–1.80 steps/s across the four rigs. Reverse remains half speed and
+the100ms stall catch-up cap remains. This changes travel time, not distance per footfall.
+
+Release,1,266 Core and262 UI checks pass, including57 focused locomotion cases. Native
+forward/reverse/stop/repeated-button routes pass in all four regions. The first fixture
+uses Highwayman, Grave Robber, Plague Doctor and Man-at-Arms; an additional private fixture
+uses Leper, Shieldbreaker, Flagellant and Jester as seen in the owner's live party.
+The latter changes only the private QA class list. No estate is selected or persisted.
+Native videos, bone traces, red/green logs, exact442-source normal snapshot and fresh
+rollback are in `local-art/walk-observe-v16`. Final normal sources exclude the observer and
+private class fixture. Preserve native profiles, estate2, scenery, config and unrelated WIP.
+
+Observed improvement is narrower than a complete animation audit. Combat idle translations,
+every class/scale and loaded-campaign handoffs still need broader acceptance. The imported
+Vilhelm root-motion animation remains separate. Earlier launch-hold notes are historical.
+
 ## Longer steps, round260, October 17, 2026
 
 The owner still finds distance per step underwhelming. Round259 corrected held movement

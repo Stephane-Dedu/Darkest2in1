@@ -207,7 +207,10 @@ internal sealed class CorridorHeroMotion
         // A retained combat contact can be wider than the settled walk. Raising
         // the hips past that leg's reach makes IK clamp and slide the foot.
         // Fit the common pelvis before solving either leg, retaining both targets.
-        float drop = Mathf.Max(ContactDrop(_left,leftTarget),ContactDrop(_right,rightTarget));
+        // A swinging leg cannot pull the whole body down to reach its free foot.
+        // Only ground contacts constrain the pelvis; retain both while stopping.
+        float drop = Mathf.Max(ContactDrop(_left,leftTarget,leftFoot.Planted || !moving),
+            ContactDrop(_right,rightTarget,rightFoot.Planted || !moving));
         _pelvis.position -= Vector3.up*drop;
         PoseLeg(_left, leftFoot, weight, worldForward, worldSide,leftTarget,distanceInLegLengths);
         PoseLeg(_right, rightFoot, weight, worldForward, worldSide,rightTarget,distanceInLegLengths);
@@ -232,11 +235,11 @@ internal sealed class CorridorHeroMotion
         return Vector3.Lerp(leg.Ankle.position, _slot.TransformPoint(goal), footWeight);
     }
 
-    private static float ContactDrop(Leg leg, Vector3 target)
+    private static float ContactDrop(Leg leg, Vector3 target, bool supporting)
     {
         float reach = Vector3.Distance(leg.Hip.position,leg.Knee.position)+Vector3.Distance(leg.Knee.position,leg.Ankle.position);
         var delta = leg.Hip.position-target;
-        return CorridorWalkCycle.PelvisContactDrop(reach,delta.x*delta.x+delta.z*delta.z,delta.y);
+        return CorridorWalkCycle.PelvisContactDrop(reach,delta.x*delta.x+delta.z*delta.z,delta.y,supporting);
     }
 
     private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,Vector3 target,float distanceInLegLengths)

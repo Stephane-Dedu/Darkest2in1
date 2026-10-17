@@ -5,11 +5,12 @@ namespace DarkestDungeon3.Dd2;
 /// <summary>In-place gait in leg-length units. The stage owns position; this owns foot contacts.</summary>
 internal sealed class CorridorWalkCycle
 {
-    internal const double Stance = 0.62;
-    // Distance per footstep is Stride/(2*Stance). A 1.24-leg contact arc gives
-    // one projected leg length per step; .90 still shuffled at .73 legs/step.
-    // Rate uses the same arc, keeping planted feet attached to the moving floor.
-    internal const float Stride = 1.24f;
+    // Release the rear foot before its long contact forces the shared pelvis
+    // down into a squat. Ten percent double support retains a grounded walk.
+    internal const double Stance = 0.55;
+    // Distance per footstep is Stride/(2*Stance): retain one leg per step as
+    // contact timing changes, with the same distance clock for feet and floor.
+    internal const float Stride = 2*(float)Stance;
     internal double Phase { get; private set; }
     internal float Weight { get; private set; }
 
@@ -79,8 +80,8 @@ internal sealed class CorridorWalkCycle
         Math.Max(0, legLength * 0.93f - nativeHipHeight)
         + legLength * (-0.015f - 0.008f * (float)Math.Cos((phase - Handover) * Math.PI * 4));
 
-    internal static float PelvisContactDrop(float reach, float horizontalSquared, float vertical) =>
-        Math.Max(0,vertical-(float)Math.Sqrt(Math.Max(0,reach*reach*.98f*.98f-horizontalSquared)));
+    internal static float PelvisContactDrop(float reach, float horizontalSquared, float vertical, bool supporting = true) =>
+        supporting ? Math.Max(0,vertical-(float)Math.Sqrt(Math.Max(0,reach*reach*.98f*.98f-horizontalSquared))) : 0;
 
     // Centre the transfer in double support; the body then passes over each planted foot.
     private const double Handover = (Stance - 0.5) / 2;

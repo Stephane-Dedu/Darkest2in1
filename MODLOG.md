@@ -7450,3 +7450,55 @@ access this round. Native rig projection/comfort, sustained four-region walking,
 and battle handoffs remain pending. See tools/corridor_heroes.md. Next round261. Preserve
 the442-source normal snapshot, artwork, doors, typography, stress/loading and installed
 heroes. Capture a fresh installed baseline; historical restores would undo this build.
+
+
+## Round261 (2026-10-17): native walking pose and fitted pace
+
+Owner reopened DD2 and explicitly said "you can launch and record", lifting the launch hold.
+Read-only live captures caught idle/door stops, so repeatable acceptance used unsaved native
+fixtures, with no estate selected or persisted. Estate2 was backed up/hashed, never modified;
+protected1/3 were not accessed. Temporary observer, native profiles and all assets/config
+were captured from a fresh round260 baseline before testing, then restored after owned QA.
+
+Actual bone/video measurements expose what the offline single-leg replay missed: the common
+pelvis was lowered by both long rear contacts and airborne swing targets, producing some
+supporting knee bends above90 degrees. The new shared-support test first fails at63.8 degrees.
+Reducing stance62%->55% alone still fails at55.2; limiting walking pelvis constraints to ground
+contacts then passes. Stride=2*Stance keeps1.0 projected leg length per footfall, and Rate
+shares the same arc. Stopping retains the earlier two-leg reach constraint. Reverse, restart,
+contact continuity, lift/landing, reachable knees and floor-distance checks remain covered.
+
+The currently fitted native legs measure154–202px, much larger than the102.6px older replay.
+The180px/s ceiling therefore forced0.89–1.17 steps/s. Four actual held-loop cases reproduce
+that slow cadence. Raising the physical ceiling to320px/s retains the existing party-minimum
+1.8 projected leg lengths/s limit: native parties now move277–279px/s, with half-speed reverse
+and unchanged100ms movement catch-up cap. Smaller rigs still slow the party; step distance
+and logical tiles/events/doors remain intact. Imported Vilhelm root motion remains separate.
+
+Red/green evidence, Release+1,266 Core+262 UI and57 focused checks pass. Native all-four-region
+forward/reverse/stop/repeated-button routes pass first with Highwayman/Grave Robber/Plague
+Doctor/Man-at-Arms, then Leper/Shieldbreaker/Flagellant/Jester as seen in the owner's party.
+Bone traces and35-second videos accompany both revised parties; sampled100ms poses inspected.
+Final owner's-party continuous contact slip stays below0.58 virtual pixels; planted IK target
+error max0.1953. Some class/startup poses still bend more than the idealized math fixture;
+this is observed improvement, not an every-class animation or ordinary-campaign certification.
+
+An observer attempt initially read a stale prior launch log before BepInEx truncated it;
+later final runs require a fresh log write and show the new277–279px/s limit. Final validation
+uses those fresh logs. Private QA class substitution is confined to its fixture. The normal
+442-source build overlays6 owned files on round260 and excludes all temporary observation.
+All4 installed artifacts match compiled output.190 scenery/model files,13 other plugin files,
+both configs, estate2 and39 native profile files preserved. Shieldbreaker WIP remains intact.
+Normal DLL SHA256 aaa763e1ae486156797d8ae44f48d06c4bc0a5b3d89886f669b533faf48b0f95.
+Private source/backup/logs/bone traces/video: local-art/walk-observe-v16. walk-preview.mp4
+shows the revised Leper/Shieldbreaker/Flagellant/Jester party. All owned QA games closed.
+
+## Status 2026-10-17: native-tested walking fix installed
+
+Owner permits launch/record again. Current gait/pace has native four-region checks on eight
+classes in two unsaved parties, with real footage and contact measurements. Full Release+
+1,266 Core+262 UI pass; normal build installed and observer removed. Ordinary estate handoffs,
+every class/scale, combat-idle body translations and imported Vilhelm acceptance remain broader
+work. See tools/corridor_heroes.md. Next round262. Preserve442-source normal baseline, existing
+art/doors/typography/stress/loading/heroes and independent Shieldbreaker WIP. Use fresh hashes
+before any QA/deployment; historical restores would undo this build.

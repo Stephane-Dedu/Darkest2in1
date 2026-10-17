@@ -19,9 +19,9 @@ public class CorridorLocomotionTests
     public void ReversingAcrossLandingReleasesTheOldSwingOffset()
     {
         var contact = new CorridorFootContact();
-        var swing = CorridorWalkCycle.Sample(.64);
+        var swing = CorridorWalkCycle.Sample(CorridorWalkCycle.Stance+.02);
         contact.Forward(swing,-.1f,-.01f);
-        var foot = CorridorWalkCycle.Sample(.61);
+        var foot = CorridorWalkCycle.Sample(CorridorWalkCycle.Stance-.01);
         Assert.True(foot.Planted);
         float distance = -.03f*CorridorWalkCycle.Stride/(float)CorridorWalkCycle.Stance;
         float after = contact.Forward(foot,0,distance);
@@ -30,16 +30,16 @@ public class CorridorLocomotionTests
 
     [Theory]
     [InlineData(.8f)]
-    [InlineData(1.65f)]
+    [InlineData(2f)]
     [InlineData(-.8f)]
-    [InlineData(-1.65f)]
+    [InlineData(-2f)]
     public void ALongFrameThatSkipsLiftoffAndLandingStartsANewGroundContact(float cycles)
     {
         // Specify the missed lift/landing in phase units so a stride adjustment
         // cannot accidentally turn this into a frame ending in mid-swing.
         float distance = cycles*CorridorWalkCycle.Stride/(float)CorridorWalkCycle.Stance;
         var contact = new CorridorFootContact();
-        double start = distance > 0 ? .55 : .2;
+        double start = distance > 0 ? CorridorWalkCycle.Stance-.07 : .2;
         contact.Forward(CorridorWalkCycle.Sample(start),-.3f,.002f*Math.Sign(distance));
         double next = start+distance*CorridorWalkCycle.Stance/CorridorWalkCycle.Stride;
         var foot = CorridorWalkCycle.Sample(next);

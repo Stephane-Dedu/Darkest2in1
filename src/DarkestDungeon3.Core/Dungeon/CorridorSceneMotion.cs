@@ -6,7 +6,7 @@ namespace DarkestDungeon3.Core.Dungeon;
 public sealed class CorridorSceneMotion
 {
     public const float StepSeconds = 1.2f;
-    public const float WalkingPixelsPerSecond = 180f;
+    public const float WalkingPixelsPerSecond = 320f;
     public const float MaximumWalkingFrameSeconds = .1f;
 
     // Keep a fitted short-legged hero at walking cadence, rather than making it
