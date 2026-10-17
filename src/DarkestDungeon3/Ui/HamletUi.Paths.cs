@@ -121,9 +121,8 @@ internal sealed partial class HamletUi
 
     private static void ScrollText(Rect area, string text, ref Vector2 scroll, int size)
     {
-        var style = new GUIStyle(GUI.skin.label) { fontSize = size, wordWrap = true };
-        // Give the native font room even while it loads. Scrolling retains the complete effect text.
-        float height = Mathf.Max(area.height, style.CalcHeight(new GUIContent(text ?? ""), area.width - 24) * 1.3f + 12);
+        var style = ExpeditionSkin.PanelTextStyle(size, TextAnchor.UpperLeft, false);
+        float height = Mathf.Max(area.height, style.CalcHeight(new GUIContent(text ?? ""), area.width - 24) + 12);
         scroll = GUI.BeginScrollView(area, scroll, new Rect(0, 0, area.width - 20, height));
         ExpeditionSkin.Text(new Rect(0, 0, area.width - 24, height), text, size, ExpeditionSkin.Ivory);
         GUI.EndScrollView();

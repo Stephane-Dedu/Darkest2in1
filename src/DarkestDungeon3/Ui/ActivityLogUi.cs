@@ -12,18 +12,18 @@ internal sealed class ActivityLogUi
     private Estate _estate;
     private ActivityLogLayout _layout;
     private int _week, _weeks, _town, _raids;
-    private Dd1Font _font;
+    private Font _font;
     private Vector2 _goalScroll;
     private IReadOnlyList<string> _goalSource;
     private List<string> _goalClasses, _goalTexts;
     private List<float> _goalHeights;
-    private Dd1Font _goalFont;
+    private Font _goalFont;
     private bool _showQuests = true;
     private Vector2 _questScroll;
     private Estate _questEstate;
     private Dd1Campaign _questCampaign;
     private int _questRegions, _questCompleted;
-    private Dd1Font _questFont;
+    private Font _questFont;
     private IReadOnlyList<CaretakerQuestGoal> _questGoals;
     private List<string> _questTexts;
     private List<float> _questHeights;
@@ -33,7 +33,7 @@ internal sealed class ActivityLogUi
         Gui.Text(new Rect(window.x + 70, window.y + 35, 570, 65), "Activity Log", 36, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         var current = estate.ActivityLog?.FirstOrDefault(w => w.Week == estate.Week);
         int weeks = estate.ActivityLog?.Count ?? 0, town = current?.Town.Count ?? 0, raids = current?.Raids.Count ?? 0;
-        var font = Dd1Font.Body;
+        var font = ExpeditionSkin.NativeFont(false);
         if (_estate != estate || _layout == null || _week != estate.Week || _weeks != weeks || _town != town || _raids != raids || _font != font)
         {
             if (_estate != estate) { scroll = Vector2.zero; _goalScroll = Vector2.zero; _questScroll = Vector2.zero; _showQuests = true; }
@@ -64,7 +64,7 @@ internal sealed class ActivityLogUi
             : lore.Text("str_caretaker_goals_roster_goals_heading") ?? "Roster Goals";
         Gui.Text(new Rect(window.x + 720, window.y + 123, 550, 32), heading, 24, Gui.Dd1Name, heading: true);
         var source = session.Catalog.RecruitableClasses;
-        var font = Dd1Font.Body;
+        var font = ExpeditionSkin.NativeFont(false);
         if (_goalSource != source || _goalClasses == null || _goalFont != font)
         {
             _goalSource = source; _goalFont = font;

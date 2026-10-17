@@ -1,11 +1,10 @@
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace DarkestDungeon3.Ui;
 
 /// <summary>IMGUI helpers: a 1920x1080 virtual canvas scaled to the window, DD-ish colours, and an input blocker.</summary>
-internal static class Gui
+internal static partial class Gui
 {
     public const float W = 1920f, H = 1080f;
 
@@ -15,7 +14,7 @@ internal static class Gui
     public static readonly Color Dim = new(0.55f, 0.52f, 0.47f);
 
     private static Texture2D _panel, _white;
-    private static GUIStyle _label, _title, _button, _small, _box;
+    private static GUIStyle _button, _box;
 
     /// <summary>Call first in OnGUI: maps the 1920x1080 layout onto the real window.</summary>
     public static void Begin()
@@ -24,20 +23,23 @@ internal static class Gui
         float ox = (Screen.width - W * s) / 2f, oy = (Screen.height - H * s) / 2f;
         GUI.matrix = Matrix4x4.TRS(new Vector3(ox, oy, 0), Quaternion.identity, new Vector3(s, s, 1));
         EnsureStyles();
+        TooltipInput();
     }
 
     private static void EnsureStyles()
     {
-        if (_label != null) return;
-        _panel = Solid(new Color(0.05f, 0.04f, 0.04f, 0.86f));
-        _white = Solid(Color.white);
-        _label = new GUIStyle(GUI.skin.label) { fontSize = 20, wordWrap = true, richText = true, normal = { textColor = Parchment } };
-        _small = new GUIStyle(_label) { fontSize = 16 };
-        _title = new GUIStyle(_label) { fontSize = 34, fontStyle = FontStyle.Bold, normal = { textColor = Gold } };
-        _button = new GUIStyle(GUI.skin.button) { fontSize = 20, wordWrap = true, richText = true };
-        _button.normal.textColor = Parchment;
-        _button.hover.textColor = Color.white;
-        _box = new GUIStyle(GUI.skin.box) { normal = { background = _panel } };
+        if (_box == null)
+        {
+            _panel = Solid(new Color(0.05f, 0.04f, 0.04f, 0.86f));
+            _white = Solid(Color.white);
+            _button = new GUIStyle(GUI.skin.button) { fontSize = 20, fontStyle = FontStyle.Normal, wordWrap = true, richText = true };
+            _button.normal.textColor = Parchment;
+            _button.hover.textColor = Color.white;
+            _box = new GUIStyle(GUI.skin.box) { normal = { background = _panel } };
+        }
+        // Fonts can finish loading after the first menu frame. Never cache the
+        // default Unity face permanently, or synthesize bold over DD2's bold face.
+        _button.font = ExpeditionSkin.NativeFont(true);
     }
 
     private static Texture2D Solid(Color c)
@@ -63,9 +65,9 @@ internal static class Gui
         if (tex != null) GUI.DrawTexture(r, tex, mode);
     }
 
-    public static void Title(Rect r, string text) => GUI.Label(r, text, _title);
-    public static void Label(Rect r, string text) => GUI.Label(r, text, _label);
-    public static void Small(Rect r, string text) => GUI.Label(r, text, _small);
+    public static void Title(Rect r, string text) => Text(r, text, 34, Gold, heading: true);
+    public static void Label(Rect r, string text) => Text(r, text, 24, Parchment);
+    public static void Small(Rect r, string text) => Text(r, text, 20, Dim);
 
     public static bool Button(Rect r, string text, bool enabled = true)
     {
@@ -94,32 +96,12 @@ internal static class Gui
     public static readonly Color Dd1Health = new(0.75f, 0f, 0f);
     public static readonly Color Dd1Text = new(0.82f, 0.78f, 0.68f);
 
-    /// <summary>Text in DD1's fonts (DwarvenAxe for headings, Ubuntu for body), falling back to IMGUI.</summary>
-    /// <summary>DD1 draws its fonts at their native size (DwarvenAxe-m: 40 px lines at 1080p); our layouts asked for
-    /// less, so headings came out small and thin. Sizes are scaled up to DD1's proportions here.</summary>
-    public const float HeadingScale = 1.3f, BodyScale = 1.08f;
-
+    /// <summary>DD2's installed Dunkel/Alegreya fonts, measured and drawn in 1080p virtual pixels.</summary>
     public static float TextHeight(string text, float size, float width, bool heading = false)
-    {
-        if (CampaignPanelSkin.Active) return CampaignPanelSkin.TextHeight(text, size, width, heading);
-        size *= heading ? HeadingScale : BodyScale;
-        var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
-        if (font != null) return font.Measure(text, size, width).y;
-        EnsureStyles();
-        return new GUIStyle(_label) { fontSize = (int)(size * 0.8f) }.CalcHeight(new GUIContent(text), width);
-    }
+        => CampaignPanelSkin.TextHeight(text, size, width, heading);
 
     public static void Text(Rect r, string text, float size, Color colour, TextAnchor align = TextAnchor.UpperLeft, bool heading = false)
-    {
-        if (CampaignPanelSkin.Active) { CampaignPanelSkin.Text(r, text, size, colour, align, heading); return; }
-        size *= heading ? HeadingScale : BodyScale;
-        // The large DwarvenAxe page (63 px lines) stays sharp for titles.
-        var font = heading ? (size >= 44 ? Runtime.Dd1Font.HeadingLarge ?? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Heading) : Runtime.Dd1Font.Body;
-        if (font != null) { font.Draw(r, text, size, colour, align); return; }
-        EnsureStyles();
-        var style = new GUIStyle(_label) { fontSize = (int)(size * 0.8f), alignment = align, normal = { textColor = colour } };
-        GUI.Label(r, text, style);
-    }
+        => CampaignPanelSkin.Text(r, text, size, colour, align, heading);
 
     /// <summary>Draw a DD1 texture at its natural size with its top-left at (x, y).</summary>
     public static Rect At(Texture tex, float x, float y, bool flipX = false)
@@ -131,95 +113,14 @@ internal static class Gui
         return r;
     }
 
-    /// <summary>A DD1-style text button: dark plate, thin gold frame, DwarvenAxe label, brighter on hover.</summary>
+    /// <summary>DD2's painted button banner and installed heading face.</summary>
     public static bool DdButton(Rect r, string label, bool enabled = true, float size = 26)
     {
-        if (CampaignPanelSkin.Active) return CampaignPanelSkin.Button(r, label, enabled, size);
-        bool hover = enabled && r.Contains(Event.current.mousePosition);
-        Fill(r, new Color(0.06f, 0.05f, 0.04f, 0.92f));
-        var frame = enabled ? (hover ? Gold : new Color(0.45f, 0.38f, 0.24f)) : new Color(0.25f, 0.23f, 0.2f);
-        Fill(new Rect(r.x, r.y, r.width, 2), frame);
-        Fill(new Rect(r.x, r.yMax - 2, r.width, 2), frame);
-        Fill(new Rect(r.x, r.y, 2, r.height), frame);
-        Fill(new Rect(r.xMax - 2, r.y, 2, r.height), frame);
-        Text(r, label, size, enabled ? (hover ? Color.white : Dd1Name) : Dim, TextAnchor.MiddleCenter, heading: true);
-        bool clicked = enabled && GUI.Button(r, GUIContent.none, GUIStyle.none);
-        if (clicked) Runtime.Dd1Audio.Play("/ui/shared/button_click");
-        return clicked;
+        return CampaignPanelSkin.Button(r, label, enabled, size);
     }
 
     /// <summary>An invisible click area (for art that acts as a button).</summary>
     public static bool Hotspot(Rect r) => GUI.Button(r, GUIContent.none, GUIStyle.none);
-
-    // ---- DD1 tooltips: one per frame by the mouse, drawn over everything (DrawTip at the end of the frame) ----
-
-    private sealed class TipLine
-    {
-        public string Text;
-        public Color Colour;
-        public float Size;
-        public bool Heading;
-        public float Height;
-        public bool Campaign;
-    }
-    private static System.Collections.Generic.List<TipLine> _tip;
-
-    /// <summary>A DD1 tooltip by the mouse this frame. Its first line is the title (in <paramref name="title"/>).</summary>
-    public static void Tip(string text, Color? title = null)
-    {
-        if (Event.current.type != EventType.Repaint || string.IsNullOrEmpty(text)) return;
-        _tip = text.Split('\n').Select((line, i) => new TipLine
-            { Text = line, Size = i == 0 ? 20 : 17, Colour = i == 0 ? title ?? Dd1Name : Dd1Text, Heading = i == 0, Campaign = CampaignPanelSkin.Active }).ToList();
-    }
-
-    public static void EquipmentTip(string name, string rarity, Color rarityColour, string requirement, string effects, string hint = null)
-    {
-        if (Event.current.type != EventType.Repaint) return;
-        var neutral = Runtime.Dd1Palette.Get("equipment_tooltip_body", Dd1Class);
-        _tip = new System.Collections.Generic.List<TipLine>
-        {
-            new() { Text = name, Size = 20, Colour = Runtime.Dd1Palette.Get("equipment_tooltip_title", Gold), Campaign = CampaignPanelSkin.Active },
-            new() { Text = rarity, Size = 17, Colour = rarityColour, Campaign = CampaignPanelSkin.Active },
-        };
-        foreach (string part in new[] { requirement, effects, hint }.Where(p => !string.IsNullOrEmpty(p)))
-            _tip.AddRange(part.Split('\n').Select(line => new TipLine { Text = line, Size = 17, Colour = neutral, Campaign = CampaignPanelSkin.Active }));
-    }
-
-    public static void DrawTip()
-    {
-        if (_tip == null || Event.current.type != EventType.Repaint) return;
-        EnsureStyles();
-        using var skin = CampaignPanelSkin.Scope(_tip.Any(line => line.Campaign));
-        const float width = 420f;
-        foreach (var line in _tip)
-        {
-            if (CampaignPanelSkin.Active)
-            {
-                line.Height = TextHeight(line.Text, line.Size, width - 28, line.Heading) + 5;
-                continue;
-            }
-            float size = line.Size * (line.Heading ? HeadingScale : BodyScale);
-            var font = line.Heading ? Runtime.Dd1Font.Heading : Runtime.Dd1Font.Body;
-            var fallback = font == null ? new GUIStyle(_label) { fontSize = (int)(size * 0.8f) } : null;
-            line.Height = (font?.Measure(line.Text, size, width - 28).y ?? Mathf.Max(size, fallback.CalcHeight(new GUIContent(line.Text), width - 28))) + 5;
-        }
-        var m = Event.current.mousePosition;
-        var r = new Rect(Mathf.Clamp(m.x + 20, 8, W - width - 8), 0, width, 20 + _tip.Sum(l => l.Height));
-        r.y = Mathf.Max(8, Mathf.Min(m.y + 20, H - r.height - 8));
-        Fill(r, new Color(0.02f, 0.016f, 0.012f, 0.96f));
-        var edge = new Color(0.42f, 0.36f, 0.25f);
-        Fill(new Rect(r.x, r.y, r.width, 2), edge);
-        Fill(new Rect(r.x, r.yMax - 2, r.width, 2), edge);
-        Fill(new Rect(r.x, r.y, 2, r.height), edge);
-        Fill(new Rect(r.xMax - 2, r.y, 2, r.height), edge);
-        float y = r.y + 10;
-        foreach (var line in _tip)
-        {
-            Text(new Rect(r.x + 14, y, width - 28, line.Height), line.Text, line.Size, line.Colour, TextAnchor.UpperLeft, heading: line.Heading);
-            y += line.Height;
-        }
-        _tip = null;
-    }
 
     // ---- announcements (DD1 shows events as a banner, not a log) ----
 

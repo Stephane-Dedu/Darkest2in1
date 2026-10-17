@@ -13,6 +13,7 @@ public sealed class Sprite
     public Vector2[] vertices, uv;
     public ushort[] triangles;
     public float pixelsPerUnit = 100;
+    public Vector4 border;
     public Rect Region;
     public int RectReads;
     public Rect textureRect
@@ -24,6 +25,10 @@ public sealed class Sprite
             return Region;
         }
     }
+}
+public readonly struct Vector4(float x, float y, float z, float w)
+{
+    public readonly float x = x, y = y, z = z, w = w;
 }
 public readonly struct Vector3(float x, float y, float z)
 {

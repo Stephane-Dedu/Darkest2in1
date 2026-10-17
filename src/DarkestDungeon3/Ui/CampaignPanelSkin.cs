@@ -36,7 +36,9 @@ internal static class CampaignPanelSkin
         return result;
     }
 
-    private static int Size(float size, bool heading) => Mathf.RoundToInt(heading ? Mathf.Max(22, size * 1.10f) : Mathf.Max(21, size * 1.08f));
+    // A size means the same thing inside and outside a campaign window. DD1's
+    // bitmap line-height multipliers do not apply to DD2's vector font em size.
+    private static int Size(float size, bool heading) => Mathf.RoundToInt(Mathf.Max(16, size));
 
     internal static float TextHeight(string text, float size, float width, bool heading) =>
         ExpeditionSkin.PanelTextStyle(Size(size, heading), TextAnchor.UpperLeft, heading).CalcHeight(new GUIContent(text ?? ""), width);
@@ -44,22 +46,25 @@ internal static class CampaignPanelSkin
     internal static void Text(Rect rect, string text, float size, Color colour, TextAnchor align, bool heading)
     {
         if (string.IsNullOrEmpty(text) || rect.width <= 0 || rect.height <= 0) return;
-        int pixels = Size(size, heading), minimum = rect.height < 25 ? 16 : 18;
+        int pixels = Size(size, heading), minimum = Mathf.Min(pixels, rect.height < 25 ? 16 : 18);
         var content = new GUIContent(text);
         var style = ExpeditionSkin.PanelTextStyle(pixels, align, heading);
-        while (pixels > minimum && style.CalcHeight(content, rect.width) > rect.height)
-            style = ExpeditionSkin.PanelTextStyle(--pixels, align, heading);
+        bool singleLine = text.IndexOf('\n') < 0 && rect.height < style.lineHeight * 1.8f;
+        style = ExpeditionSkin.PanelTextStyle(pixels, align, heading, wrap: !singleLine);
+        bool Fits(GUIContent value) => singleLine ? style.CalcSize(value).x <= rect.width : style.CalcHeight(value, rect.width) <= rect.height;
+        while (pixels > minimum && !Fits(content))
+            style = ExpeditionSkin.PanelTextStyle(--pixels, align, heading, wrap: !singleLine);
         // Fixed rows stay fixed. Long names get an ellipsis and retain their full text on hover.
         // Larger prose rectangles continue to wrap, measured by the very same native font/style.
-        if (style.CalcHeight(content, rect.width) > rect.height)
+        if (!Fits(content))
         {
             string shortened = System.Text.RegularExpressions.Regex.Replace(text, "<[^>]+>", "");
-            while (shortened.Length > 1 && style.CalcHeight(new GUIContent(shortened + "…"), rect.width) > rect.height)
+            while (shortened.Length > 1 && !Fits(new GUIContent(shortened + "…")))
                 shortened = shortened.Substring(0, shortened.Length - 1);
             content.text = shortened.TrimEnd() + "…";
             if (rect.Contains(Event.current.mousePosition)) Gui.Tip(text);
         }
-        style.normal.textColor = Colour(colour);
+        style.normal.textColor = Active ? Colour(colour) : colour;
         GUI.Label(rect, content, style);
     }
 

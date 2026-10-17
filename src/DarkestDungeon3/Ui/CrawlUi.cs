@@ -649,8 +649,7 @@ internal sealed class CrawlUi
         if (portrait != null) Art.DrawSprite(new Rect(262, 738, 96, 96), portrait);
         if (RightClicked(new Rect(250, 728, 270, 120))) _sheetHeroId = hero.Id;
         float nameSize = 30;
-        var font = Dd1Font.Heading;
-        while (font != null && nameSize > 18 && font.Measure(hero.Name, nameSize * Gui.HeadingScale).x > 146) nameSize -= 2;
+        while (nameSize > 18 && ExpeditionSkin.Width(hero.Name, nameSize, heading: true) > 146) nameSize -= 2;
         Gui.Text(new Rect(366, 742, 150, 36), hero.Name, nameSize, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         Gui.Text(new Rect(366, 780, 150, 26), HamletUi.Pretty(hero.ClassId), 18, Gui.Dd1Class, TextAnchor.MiddleLeft);
         Gui.Text(new Rect(366, 804, 150, 24), $"Resolve {hero.ResolveLevel}", 17, Gui.Dd1Class, TextAnchor.MiddleLeft);

@@ -1,5 +1,27 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round257 makes native DD2 typography the shared default, beginning with trinkets. Dunkel
+headings/Alegreya body use explicit virtual-pixel sizes with consistent measurement. No
+DD1 bitmap scaling outside campaign panels. Trinket tooltips match native24/30px sizes,
+120% headings/80% hints, installed colours and the nine-sliced native frame. Long content
+widens/scrolls without shrinking; localized names strip presentation tags. Font loading
+waits for the catalog and is independent of scenery/node art. Activity/memorial/path/hero
+measurements now use the rendered native font.
+
+Release+1,250 Core+236 UI pass;382 offline native-font layouts have no horizontal overflow.
+Installed436-source normal build overlays only17 owned files onto round256's verified430
+source baseline.190 scenery/model files and both configs preserved. No launch/input/estate
+access. The owner explicitly renewed the hold on2026-10-17: KEEP DD2 CLOSED UNTIL THEY SAY OK.
+Native visual/hover/scroll/large-font/window/localization acceptance remains UNVERIFIED.
+IMGUI uses native source fonts; TMP SDF materials/inline token sprites are not reproduced.
+
+Source/artifact manifests, fresh round256 backup, extracted metadata,191 trinket descriptions,
+font-packing checks, contact sheet and logs: local-art/typography-v01. Normal plugin SHA256
+7dc3e07dc9ac051ad45b7d6719da155da8b2c023dd9aa2c8c8b405b0d14aa2c2.
+See tools/ui_typography.md. Preserve independent Shieldbreaker WIP and capture a fresh
+baseline before future QA; historical restores would undo this build. Next round258.
+Earlier handoffs below are historical.
+
 Round256 fixes corridor projection and traversal clocks. Props/arrival cues now share the
 painted ground's projected square spacing, endpoints include the half-square door approach,
 and visible known props survive the old neighbour limit. One registered perspective plate

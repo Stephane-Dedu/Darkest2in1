@@ -1028,7 +1028,7 @@ internal sealed partial class HamletUi
     private bool _epiloguePrepared;
     private Estate _memorialEstate;
     private int _memorialJournalCount = -1;
-    private Dd1Font _memorialJournalFont;
+    private Font _memorialJournalFont;
     private MemorialJournalLayout _memorialJournals;
     private MemorialNarrationLayout _memorialNarrations;
     private int _memorialPlotCount = -1, _memorialRegions;
@@ -1040,10 +1040,10 @@ internal sealed partial class HamletUi
         int regions = 17;
         foreach (string region in CampaignRegions.Options) regions = unchecked(regions * 31 + (CampaignRegions.Enabled(E, region) ? 1 : 0));
         if (_memorialEstate != E || _memorialCampaign != S.Campaign || _memorialRegions != regions || _memorialPlotCount != E.CompletedPlotQuests.Count
-            || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != Dd1Font.Body)
+            || _memorialJournalCount != E.CollectedJournalPages.Count || _memorialJournalFont != ExpeditionSkin.NativeFont(false))
         {
             if (_memorialEstate != E) _memorialScroll = Vector2.zero;
-            _memorialEstate = E; _memorialJournalCount = E.CollectedJournalPages.Count; _memorialJournalFont = Dd1Font.Body;
+            _memorialEstate = E; _memorialJournalCount = E.CollectedJournalPages.Count; _memorialJournalFont = ExpeditionSkin.NativeFont(false);
             _memorialCampaign = S.Campaign; _memorialRegions = regions; _memorialPlotCount = E.CompletedPlotQuests.Count;
             _memorialJournals = MemorialJournalLayout.Build(Memorial.Journals(E, S.Lore),
                 title => Gui.TextHeight(title, 23, 560), text => Gui.TextHeight(text, 20, 560));

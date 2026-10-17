@@ -302,14 +302,15 @@ internal static class HeroSheet
         {
             var loc = Assets.Code.Utils.Singleton<Assets.Code.Locale.Localization>.Instance;
             string name = loc?.TryGetString("item_name_" + id);
-            if (!string.IsNullOrEmpty(name) && !name.StartsWith("item_name_")) return name;
+            if (!string.IsNullOrEmpty(name) && !name.StartsWith("item_name_"))
+                return Core.Dd2Data.TrinketDescriptions.Plain(name);
         }
         catch (Exception) { }
         string s = id.StartsWith("trinket_") ? id.Substring(8) : id;
         return HamletUi.Pretty(s.Replace("tiered_", ""));
     }
 
-    /// <summary>DD1's trinket tooltip: name, rarity, class requirement, then DD2's effects.</summary>
+    /// <summary>DD2's type hierarchy around the campaign's native or DD1 trinket effects.</summary>
     public static void TrinketTip(string id, string hint = null)
     {
         if (Dd2.Dd1TrinketData.Get(id) is { } memory)
@@ -324,18 +325,12 @@ internal static class HeroSheet
             t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only", Dd2.ItemText.Effects(id), hint);
     }
 
-    /// <summary>DD2 rarity labels use the closest DD1 palette tier; the item name has its own title colour.</summary>
+    /// <summary>DD2 rarity labels retain the installed palette; DD1 memories retain their own rarity tiers.</summary>
     public static Color RarityColour(string id)
     {
         if (Dd2.Dd1TrinketData.Get(id) is { } memory) return Dd1Palette.Get(memory.Rarity, Gui.Dd1Class);
         string rarity = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var t) ? t.Rarity : null;
-        string colour = rarity switch
-        {
-            "epic" => "very_rare",
-            "cultist" => "harmful",
-            _ => rarity ?? "common",
-        };
-        return Dd1Palette.Get(colour, Gui.Dd1Class);
+        return Dd2Palette.Get("trinket_" + (rarity ?? "common"), Gui.Dim);
     }
 
     private static void Tip(string text) => Gui.Tip(text);

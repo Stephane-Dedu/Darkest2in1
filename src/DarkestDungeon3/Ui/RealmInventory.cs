@@ -44,9 +44,9 @@ internal static class RealmInventory
         CampaignPanelSkin.Frame(panel, Ri("realminv_bg.png"), .24f);
         ExpeditionSkin.Banner(At(136, 22, 300, 64), new Color(.50f, .43f, .30f));
         if (Ri("realm_inventory.icon.png") is { } icon) GUI.DrawTexture(At(23, 22, 113, 113), icon);
-        Gui.Text(At(150, 24, 276, 62), Str("town_name_realm_inventory", "Trinket Inventory"), 32, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
+        Gui.Text(At(150, 24, 276, 62), Str("town_name_realm_inventory", "Trinket Inventory"), 34, Gui.Dd1Name, TextAnchor.MiddleLeft, heading: true);
         ExpeditionSkin.Rule(At(26, 142, 600, 6), CampaignPanelSkin.Brass);
-        Gui.Text(At(30, 155, 560, 30), hero == null ? $"{E.Trinkets.Count} stored trinkets" : $"{E.Trinkets.Count} stored · drag to {hero.Name}'s trinket slots", 20, Gui.Dd1Text, TextAnchor.MiddleLeft);
+        Gui.Text(At(30, 153, 560, 34), hero == null ? $"{E.Trinkets.Count} stored trinkets" : $"{E.Trinkets.Count} stored · drag to {hero.Name}'s trinket slots", 22, Gui.Dd1Text, TextAnchor.MiddleLeft);
         Gui.Fill(At(Grid.x - 6, Grid.y - 4, Columns * Cell.x + 12, 533), new Color(.018f, .023f, .022f, .96f));
 
         bool shift = Event.current.shift;

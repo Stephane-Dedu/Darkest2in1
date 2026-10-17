@@ -7250,3 +7250,59 @@ reproduced code defects and offline repairs. Native visual comfort, real input/r
 asset-adoption/fade behavior and full corridor-room-battle walkthrough remain unverified.
 Keep DD2 closed until the owner lifts the hold. Next round257. Preserve the combined430-source
 baseline and independent Shieldbreaker WIP.
+
+
+## Round257 (2026-10-17): native DD2 typography, starting with trinkets
+
+Owner requests DD2 fonts, style and sizing, with trinkets first, and explicitly says
+not to launch DD2 until they say OK. This round performs no game launch, input or estate
+access. Extracted reference assets stay private.
+
+Installed fonts are NDDunkelD-Bold and AlegreyaSans-Regular. Shared Gui text previously
+fell back to DD1 bitmap faces outside campaign skin scopes, with different line-height
+multipliers. Equipment names also lacked their heading flag and used body20/effects17.
+Shared text/measurement now use the same installed DD2 faces and explicit virtual-pixel
+sizes throughout. Styles use normal weight over the native bold heading face. Short
+fixed rows fit by width; prose wraps. Activity/memorial caches, path-effect measurement
+and hero-name width now track the actual native font. Fonts load separately from art
+and wait for DD2's catalog, avoiding failed GUID-only lookups during initial loading.
+
+Native TooltipCanvasElement prefab confirms regular24 / large30, no automatic font
+shrinking, zero added character/line spacing and40px background padding. ItemDescription
+uses Dunkel at120% for the title and80% hints. Trinket tooltips now use that hierarchy,
+DD2's larger-tooltip option, installed name/effect/type/hint/rarity colours and the
+painted ui_tooltip sprite. Nine-slicing retains authored borders. DD1 memory rarity data
+remains supported. Localized item names strip presentation tags, including Dark Impulse's
+colour markup. Inventory title/status rows get explicit native sizes and alignment.
+
+The shared tooltip pass replaces the separate expedition tip renderer. It grows from460
+to640px before scrolling long descriptions, without shrinking the text. Wheel handling
+runs before underlying scroll views at the hover point. New content resets scroll, and
+duplicate local/root passes within one frame preserve it. Eight new geometry checks
+cover corners, long-content scrolling and atlas/border registration.
+
+Offline evidence: actual font bundles and TooltipCanvasElement extracted with UnityPy;
+prefab sizes and source font references agree with decompilation. Native IronCrown and
+compile reference hashes both dd97e30f2f37e2a287633ab322b8fd18bcfe9e240903713a5c2ae00c894692e6.
+All191 installed trinkets produce382 regular/large Pillow layouts with no horizontal
+overflow. The contact sheet uses actual native fonts/frame and data, but is an offline
+approximation, not a game screenshot. Release,1,250 Core and236 UI checks pass. An initial
+Core run had one missing private catalog fixture; copying the installed read-only catalog
+into the isolated fixture restored the complete suite without source changes.
+
+The436-source normal build layers only17 owned typography code/test files onto round256's
+verified430-source installed baseline. Non-owned source hashes match. Four DLL/PDBs match
+the compiled Release;190 private scenery/model files and both configs are unchanged.
+Normal plugin SHA256 7dc3e07dc9ac051ad45b7d6719da155da8b2c023dd9aa2c8c8b405b0d14aa2c2.
+Fresh round256 backup, source/artifact manifests, asset metadata, data/packing checks,
+preview and test logs are in local-art/typography-v01. Independent Shieldbreaker WIP is
+preserved. Older backups would undo this build; use a fresh baseline for future QA.
+
+## Status 2026-10-17: DD2 typography installed; native visual acceptance held
+
+Round257 is installed and offline checked. DD2 remains closed until the owner explicitly
+says OK. Native rasterization, real hover/wheel and larger-tooltip option, smaller window
+scaling, localized fallback and full campaign/expedition layouts remain unverified. The
+renderer uses native source fonts through IMGUI; TMP's SDF materials and inline token
+sprites are not reproduced. See tools/ui_typography.md. Next round258. Preserve the
+combined436-source baseline and independent Shieldbreaker work.

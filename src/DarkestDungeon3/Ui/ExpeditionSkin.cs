@@ -18,21 +18,36 @@ internal static class ExpeditionSkin
     private static readonly Dictionary<string, AsyncOperationHandle<Sprite>> Sprites = new();
     private static readonly Dictionary<string, AsyncOperationHandle<ResourceNodeType>> Nodes = new();
     private static readonly Dictionary<(int, TextAnchor, bool), GUIStyle> Styles = new();
-    private static readonly Dictionary<(int, TextAnchor, bool), GUIStyle> PanelStyles = new();
+    private static readonly Dictionary<(int, TextAnchor, bool, bool), GUIStyle> PanelStyles = new();
     private static readonly Dictionary<Type, Dictionary<string, IResourceLocation>> Locations = new();
     private static readonly Vector2[] OutlineOffsets = { new(-1.4f, 0), new(1.4f, 0), new(0, -1.4f), new(0, 1.4f),
         new(-1, -1), new(1, -1), new(-1, 1), new(1, 1) };
     private static AsyncOperationHandle<Font> _heading, _body;
-    private static bool _started;
+    private static bool _started, _fontsStarted;
+
+    private static bool HasCatalog()
+    {
+        foreach (var _ in Addressables.ResourceLocators) return true;
+        return false;
+    }
+
+    private static void PrepareFonts()
+    {
+        // Gui.Begin also runs during DD2's initial loading. Wait for its catalog
+        // rather than caching failed GUID-only font lookups from that first frame.
+        if (_fontsStarted || !HasCatalog()) return;
+        _fontsStarted = true;
+        _heading = Load<Font>("Assets/Data/Font/AddressableResources/Font/NDDunkelD-Bold.otf");
+        _body = Load<Font>("Assets/Data/Font/AlegreyaSans-Regular.ttf");
+    }
 
     public static void Prepare()
     {
-        if (_started) return;
+        PrepareFonts();
+        if (_started || !HasCatalog()) return;
         _started = true;
-        _heading = Load<Font>("Assets/Data/Font/AddressableResources/Font/NDDunkelD-Bold.otf");
-        _body = Load<Font>("Assets/Data/Font/AlegreyaSans-Regular.ttf");
         foreach (string name in new[] { "ui_button_banner", "ui_labelbg", "ui_divider_long", "ui_arrow",
-                     "ui_frame_ability", "ui_frame_ability_selected", "ui_selection_indicator", "ui_routetype_bg", "ui_trinket_slot" })
+                     "ui_frame_ability", "ui_frame_ability_selected", "ui_selection_indicator", "ui_routetype_bg", "ui_trinket_slot", "ui_tooltip" })
             Sprites[name] = Load<Sprite>("Assets/Art/UI/HUD/" + name + ".png");
         foreach (string name in new[] { "watch_tower", "story_resist", "dungeon", "cache", "story_hero" })
             Nodes[name] = Load<ResourceNodeType>("Assets/Data/Node/" + name + ".asset");
@@ -69,9 +84,10 @@ internal static class ExpeditionSkin
         return handle;
     }
 
-    private static Font Font(bool heading)
+    internal static Font NativeFont(bool heading)
     {
-        Prepare();
+        PrepareFonts();
+        if (!_fontsStarted) return null;
         var h = heading ? _heading : _body;
         return h.IsDone && h.Status == AsyncOperationStatus.Succeeded ? h.Result : null;
     }
@@ -83,19 +99,20 @@ internal static class ExpeditionSkin
             Styles[key] = style = new GUIStyle(GUI.skin.label)
             {
                 fontSize = key.Item1, alignment = align, wordWrap = true, richText = false,
+                fontStyle = FontStyle.Normal,
                 padding = new RectOffset(), margin = new RectOffset()
             };
-        style.font = Font(heading);
+        style.font = NativeFont(heading);
         return style;
     }
 
     /// <summary>Campaign panels share the installed typefaces, with their existing inline colour markup.</summary>
-    internal static GUIStyle PanelTextStyle(float size, TextAnchor align, bool heading)
+    internal static GUIStyle PanelTextStyle(float size, TextAnchor align, bool heading, bool wrap = true)
     {
-        var key = (Mathf.RoundToInt(size), align, heading);
+        var key = (Mathf.RoundToInt(size), align, heading, wrap);
         if (!PanelStyles.TryGetValue(key, out var style))
-            PanelStyles[key] = style = new GUIStyle(Style(size, align, heading)) { richText = true };
-        style.font = Font(heading);
+            PanelStyles[key] = style = new GUIStyle(Style(size, align, heading)) { richText = true, wordWrap = wrap };
+        style.font = NativeFont(heading);
         return style;
     }
 
@@ -167,31 +184,32 @@ internal static class ExpeditionSkin
         Prepare();
         string key = type switch { "kill_boss" => "dungeon", "cleanse" => "story_resist", "gather" => "cache",
             "activate" or "inventory_activate" => "story_hero", _ => "watch_tower" };
-        var h = Nodes[key];
+        if (!Nodes.TryGetValue(key, out var h)) return;
         if (!h.IsDone || h.Status != AsyncOperationStatus.Succeeded || h.Result?.m_Icon == null) return;
         var old = GUI.color; GUI.color = colour;
         Art.DrawSprite(r, h.Result.m_Icon);
         GUI.color = old;
     }
 
-    public static void Tip(Rect r, string text)
+    internal static void TooltipFrame(Rect rect)
     {
-        if (Event.current.type != EventType.Repaint || !r.Contains(Event.current.mousePosition) || string.IsNullOrEmpty(text)) return;
-        _tip = text;
+        Gui.Fill(rect, new Color(.012f, .012f, .012f, .98f));
+        Prepare();
+        if (Sprites.TryGetValue("ui_tooltip", out var handle) && handle.IsDone
+            && handle.Status == AsyncOperationStatus.Succeeded && handle.Result != null)
+        {
+            var old = GUI.color;
+            GUI.color = Color.white;
+            try { SlicedSpriteUi.Draw(rect, handle.Result); }
+            finally { GUI.color = old; }
+        }
+        else Rule(new Rect(rect.x, rect.y, rect.width, 3), Muted);
     }
 
-    private static string _tip;
-    public static void DrawTip()
+    public static void Tip(Rect r, string text)
     {
-        if (Event.current.type != EventType.Repaint || _tip == null) return;
-        const float width = 360;
-        var style = Style(22, TextAnchor.UpperLeft, false);
-        float height = style.CalcHeight(new GUIContent(_tip), width - 36) + 32;
-        var mouse = Event.current.mousePosition;
-        var r = new Rect(Mathf.Clamp(mouse.x + 22, 8, Gui.W - width - 8), Mathf.Clamp(mouse.y + 20, 8, Gui.H - height - 8), width, height);
-        Gui.Fill(r, Ink);
-        Rule(new Rect(r.x, r.y, width, 3), Brass);
-        Text(new Rect(r.x + 18, r.y + 16, width - 36, height - 32), _tip, 22, Ivory);
-        _tip = null;
+        if (r.Contains(Event.current.mousePosition)) Gui.Tip(text);
     }
+
+    public static void DrawTip() => Gui.DrawTip();
 }
