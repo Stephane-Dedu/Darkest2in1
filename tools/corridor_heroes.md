@@ -6,6 +6,46 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Rear thigh recovery, round263, October 17, 2026
+
+The owner points out that the whole upper leg swings too far behind the body.
+An added private native hip/knee probe confirms 35.67 degrees of rear extension
+during continuous walking, with the knee almost straight just after liftoff.
+Startup and retained combat contacts reach 42.78 degrees. The delayed low part
+of the foot arc could demand more reach than the free leg has, so ordinary
+two-bone IK extended the thigh instead of folding the knee.
+
+`CorridorKneeRecovery` retains each last supporting thigh angle at liftoff, then
+relaxes its allowable rear extension toward 20 degrees over a 60ms response.
+Only the free knee goal changes. The shin aims toward its original target, so
+the airborne ankle rises and retracts naturally with the knee. Planted IK,
+contact offsets, footstep distance, timing, pelvis support and fitted pace stay
+unchanged. Stop, restart and hidden-stage paths reset the recovery state.
+
+Three geometry regressions first fail on the excessive rear angle using the
+real sampler and coupled pelvis. A fourth covers retained wide toe-off, grounded
+contacts, frontward knee movement and resets. Release, 1,266 Core and 278 UI
+checks pass, including 73 focused locomotion checks.
+
+Unsaved native Leper, Shieldbreaker, Flagellant and Jester routes pass forward,
+reverse and stops in all four regions. The settled comparison starts after
+2.5 projected leg lengths from each stop or direction change. Its worst airborne
+rear angle falls 35.67 to 22.58 degrees; worst angle including supporting legs
+is 23.94 degrees. All-frame maximum falls 42.78 to 30.75 degrees. Wide initial
+combat contacts deliberately blend out rather than snapping to the settled
+limit. 13,794 baseline and 11,486 revised actor samples support the comparison.
+Continuous contact slip is at most 0.527 virtual pixels, IK target error 0.1953.
+
+The 35-second revised native capture and pose sheet were inspected. The first
+baseline video was only a small window strip, so baseline angle evidence comes
+from its native bone trace, not that video. Revised recording is 1600x900.
+Evidence, red/green commands, normal 442-source snapshot, fresh rollback and
+`walk-preview.mp4`: `local-art/walk-rear-reach-v18`. Only three source/test files
+overlay round262; private observers and class substitutions are excluded from
+the installed normal build. Saves, profiles, scenery and independent work are
+preserved. Other classes/scales and Vilhelm's separate imported animation remain
+outside this native acceptance pass.
+
 ## Softer contacts and foot recovery, round262, October 17, 2026
 
 The owner still finds the steps stiff. The sampler's ankle rotation had170–286 degrees/cycle

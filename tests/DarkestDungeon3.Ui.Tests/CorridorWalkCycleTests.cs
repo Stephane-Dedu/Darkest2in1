@@ -175,6 +175,44 @@ public class CorridorWalkCycleTests
         Assert.InRange(CorridorWalkCycle.Sample((1+CorridorWalkCycle.Stance)/2).Lift, .11f, .13f);
     }
 
+    [Theory]
+    [InlineData(.45f,.55f)]
+    [InlineData(.50f,.50f)]
+    [InlineData(.55f,.45f)]
+    public void FreeRecoveryFoldsTheKneeInsteadOfThrowingTheThighBehindTheBody(float upper, float lower)
+    {
+        var recovery=new CorridorKneeRecovery();
+        for (int i=0;i<1000;i++)
+        {
+            double phase=i/1000.0;
+            var foot=CorridorWalkCycle.Sample(phase);
+            float hip=HipHeight(phase)/.76f;
+            float rear=-foot.Forward, down=hip-foot.Lift;
+            double distance=Math.Sqrt(rear*rear+down*down);
+            double cosine=Math.Clamp((upper*upper-lower*lower+distance*distance)/(2*upper*distance),-1,1);
+            double thighRear=(Math.Atan2(rear,down)-Math.Acos(cosine))*180/Math.PI;
+            double corrected=thighRear-recovery.Bend((float)thighRear,foot.Planted,.001f);
+            if (!foot.Planted)
+                Assert.True(corrected<=25,$"At phase {phase:0.000}, the free thigh extends {corrected:0.0} degrees behind the hip.");
+        }
+    }
+
+    [Fact]
+    public void RecoveryPreservesGroundContactsAndEasesOutOfAWideToeOff()
+    {
+        var recovery=new CorridorKneeRecovery();
+        Assert.Equal(0,recovery.Bend(32,true,.016f));
+        Assert.Equal(0,recovery.Bend(32,false,0));
+        float first=40-recovery.Bend(40,false,.016f);
+        Assert.InRange(first,28,32);
+        for (int i=0;i<60;i++) recovery.Bend(40,false,.016f);
+        Assert.InRange(40-recovery.Bend(40,false,.016f),20,20.001f);
+        Assert.Equal(0,recovery.Bend(-30,false,.016f));
+        Assert.Equal(0,recovery.Bend(35,true,.016f));
+        recovery.Reset();
+        Assert.Equal(20,40-recovery.Bend(40,false,.016f));
+    }
+
     [Fact]
     public void BothFeetNeverLeaveTheGroundTogether()
     {

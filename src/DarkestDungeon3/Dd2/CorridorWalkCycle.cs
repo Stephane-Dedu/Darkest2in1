@@ -113,6 +113,24 @@ internal sealed class CorridorWalkCycle
         ? 0 : phase - Math.Floor(phase);
 }
 
+/// <summary>Fold the free knee without changing a planted contact or snapping at toe-off.</summary>
+internal sealed class CorridorKneeRecovery
+{
+    private float _limit = 20;
+
+    internal void Reset() => _limit = 20;
+
+    internal float Bend(float rearAngle, bool planted, float deltaTime)
+    {
+        if (planted) { _limit = Math.Max(20,rearAngle); return 0; }
+        // Preserve the last supporting thigh angle at liftoff, then relax toward
+        // a modest extension. A wide initial combat pose must not snap to 20 degrees.
+        if (!float.IsNaN(deltaTime) && !float.IsInfinity(deltaTime) && deltaTime>0)
+            _limit = 20+(_limit-20)*(float)Math.Exp(-deltaTime/.06);
+        return Math.Max(0,rearAngle-_limit);
+    }
+}
+
 /// <summary>Release the actual planted pose, including a retained combat-stance offset.</summary>
 internal sealed class CorridorSupportContact
 {

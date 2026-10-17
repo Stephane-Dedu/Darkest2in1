@@ -7549,3 +7549,49 @@ preserved. Step distance and fitted pacing retained. Owner's launch/record autho
 remains current. Broader class/scale/saved-campaign/startup and native idle polish remains.
 Next round263. Preserve current scenery/doors/fonts/stress/loading/heroes and Shieldbreaker
 WIP. Capture fresh installed hashes; older restore scripts would undo this build.
+
+
+## Round263 (2026-10-17): stop throwing the free thigh backward
+
+Owner reports the quad/hamstring and whole upper leg extending too far behind
+the body. A fresh private native hip/knee observer reproduces 35.67 degrees
+during sustained walking, with almost straight knees just after liftoff. The
+all-frame maximum including retained combat contacts is 42.78 degrees. Existing
+two-bone IK tries to reach the delayed early swing arc by extending the thigh.
+
+CorridorKneeRecovery preserves the last supporting thigh angle at toe-off and
+relaxes toward 20 degrees with a 60ms response. Only free knee goals change;
+the shin still aims at its original target, lifting/retracting the free ankle.
+Ground contacts, footstep distance, pace, phase, pelvis support and reverse
+travel retain their contracts. Stop/hidden/restart paths reset the new state.
+Three coupled sampler/pelvis/geometry cases first fail on rear extension;
+fourth regression covers wide toe-off, unchanged plants, frontward movement
+and reset. Release +1,266 Core +278 UI pass, including73 focused locomotion.
+
+Unsaved Leper/Shieldbreaker/Flagellant/Jester forward/reverse/stop routes pass
+all four native regions. Settled samples start after2.5 leg lengths from each
+actual stop/direction change. Airborne rear maximum35.67->22.58 degrees; all
+settled legs max23.94. Across all frames42.78->30.75; retained initial combat
+contacts deliberately blend out instead of snapping.13,794 baseline and11,486
+revised actor samples. Contact slip max0.527px; IK target error0.1953px. Revised
+35s1600x900 footage/pose sheet inspected. Baseline video captured a tiny strip;
+its native bone measurements, not that video, establish the baseline.
+
+Normal442-source build overlays3 owned source/test files on round262. Private
+observer/class fixture excluded. Four installed artifacts match built output,
+plugin SHA256 a356b1d6e09e90cae1827af3dca0c78b1038ac8a83715bf85219c1ba42e68f16.190 scenery/model files,13 other plugin files,2 configs,
+estate2 and39 native profile files preserved. Protected estates1/3 not accessed.
+Independent Shieldbreaker/README/presentation/journal work retained. Both owned
+QA windows closed; launch/record remains authorized. Other classes/scales,
+ordinary saved handoffs and Vilhelm's separate motion need broader acceptance.
+Private evidence/red-green scripts/fresh backup/video: local-art/walk-rear-reach-v18.
+
+## Status 2026-10-17: rear thigh recovery installed
+
+Round263 reduces the owner's excessive rearward thigh swing by folding only the
+free knee; planted contacts/step distance/fitted pace remain unchanged. Native
+owner-party four-region routes and Release+1,544 tests pass. Installed normal
+snapshot excludes observers, preserves assets/config/saves/profiles and unrelated
+work. DD2 stopped. Native steady airborne rear angle35.67->22.58; startup combat
+stance still blends out. See tools/corridor_heroes.md. Next round264. Use fresh
+installed hashes before deployment; older rollback scripts would undo this build.

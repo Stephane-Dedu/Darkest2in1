@@ -1,5 +1,29 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round263 corrects excessive backward thigh swing. Native hip/knee traces show
+35.67 degrees during continuous walking with an almost locked knee after liftoff.
+CorridorKneeRecovery retains last support angle, then relaxes toward20 degrees
+over60ms. Only the free knee goal changes; the shin aims at its original target,
+allowing the free ankle to lift/retract. Plants/step distance/pace/support remain
+unchanged. Hidden/stop/restart paths reset recovery state.
+
+Three red geometry cases +one ground/toe-off/reset case. Release+1,266 Core+278 UI
+pass,73 focused. Unsaved owner's Leper/Shieldbreaker/Flagellant/Jester pass all
+four native regions forward/reverse/stop. Settled airborne maximum35.67->22.58,
+all settled legs23.94 degrees; all-frame42.78->30.75. Contact slip0.527px, IK error
+0.1953px. Revised35s1600x900 recording/poses inspected. Baseline video was a tiny
+strip, so baseline evidence is native bone traces. Wide initial combat contacts
+still blend out. Other classes/scales/saved handoffs and Vilhelm remain broader
+acceptance work. See tools/corridor_heroes.md. Next round264.
+
+Installed442-source normal snapshot,3-file overlay,fresh backup/red-green/native
+comparison and walk-preview.mp4: local-art/walk-rear-reach-v18. Observer/private
+fixture excluded.190 scenery/model files,13 other plugin files,2 configs,estate2
+and39 native profiles preserved; protected1/3 untouched. Shieldbreaker/README/
+presentation/journal WIP retained. All owned QA closed; owner permits launch and
+record. Capture fresh installed hashes before deployment. Older restores would
+undo this build. Earlier handoffs below are historical.
+
 Round262 softens the owner's stiff walking. Quintic ankle roll/toe recovery and earlier
 0.12-leg lift retain existing horizontal foot travel, step distance,55% stance and fitted
 pace. Native traces exposed a hard support-bit hip jump. Ground-anchor anticipation/release

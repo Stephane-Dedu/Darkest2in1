@@ -43,6 +43,7 @@ internal sealed class CorridorHeroMotion
         internal Quaternion FlatRotation;
         internal readonly CorridorFootContact Contact = new();
         internal readonly CorridorSupportContact Support = new();
+        internal readonly CorridorKneeRecovery Recovery = new();
     }
 
     internal static CorridorHeroMotion TryCreate(ActorBhv actor, Transform slot, int rank)
@@ -160,13 +161,14 @@ internal sealed class CorridorHeroMotion
     {
         ContactErrorPixels = 0;
         if (_slot == null || _animator == null || !_animator.gameObject.activeInHierarchy || !visible)
-        { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); _left.Support.Reset(); _right.Support.Reset(); return; }
+        { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); _left.Support.Reset(); _right.Support.Reset(); _left.Recovery.Reset(); _right.Recovery.Reset(); return; }
         float legPixels = ProjectedLegPixels;
         bool moving = Mathf.Abs(distancePixels) > .000001f;
         if (moving && !_walking)
         {
             _left.Contact.Reset(); _right.Contact.Reset();
             _left.Support.Reset(); _right.Support.Reset();
+            _left.Recovery.Reset(); _right.Recovery.Reset();
             _cycle.Begin(CorridorWalkCycle.StartPhase(ObservedForward(_left),ObservedForward(_right),distancePixels<0));
         }
         _walking = moving;
@@ -213,8 +215,8 @@ internal sealed class CorridorHeroMotion
         float drop = Mathf.Max(ContactDrop(_left,leftTarget,leftFoot,distanceInLegLengths),
             ContactDrop(_right,rightTarget,rightFoot,distanceInLegLengths));
         _pelvis.position -= Vector3.up*drop;
-        PoseLeg(_left, leftFoot, weight, worldForward, worldSide,leftTarget,distanceInLegLengths);
-        PoseLeg(_right, rightFoot, weight, worldForward, worldSide,rightTarget,distanceInLegLengths);
+        PoseLeg(_left, leftFoot, weight, worldForward, worldSide,leftTarget,distanceInLegLengths,deltaTime);
+        PoseLeg(_right, rightFoot, weight, worldForward, worldSide,rightTarget,distanceInLegLengths,deltaTime);
         if (_sword != null)
         {
             _sword.position = _swordHand.TransformPoint(gripPosition);
@@ -252,16 +254,19 @@ internal sealed class CorridorHeroMotion
             : CorridorWalkCycle.PelvisContactDrop(reach,horizontal,delta.y);
     }
 
-    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,Vector3 target,float distanceInLegLengths)
+    private void PoseLeg(Leg leg, CorridorWalkCycle.Foot foot, float weight, Vector3 forward, Vector3 side,Vector3 target,float distanceInLegLengths,float deltaTime)
     {
-        SolveLeg(leg.Hip, leg.Knee, leg.Ankle, target, forward);
+        bool moving = Mathf.Abs(distanceInLegLengths) > .000001f;
+        if (!moving) leg.Recovery.Reset();
+        SolveLeg(leg.Hip, leg.Knee, leg.Ankle, target, forward,moving ? leg.Recovery : null,foot.Planted,deltaTime);
         if (foot.Planted && Mathf.Abs(distanceInLegLengths) > .000001f)
             ContactErrorPixels = Mathf.Max(ContactErrorPixels,Mathf.Abs(leg.Ankle.position.x-target.x)*100);
         var flat = _slot.rotation * leg.FlatRotation;
         leg.Ankle.rotation = Quaternion.Slerp(leg.Ankle.rotation, Quaternion.AngleAxis(-foot.Pitch, side) * flat, weight);
     }
 
-    private static void SolveLeg(Transform hip, Transform knee, Transform ankle, Vector3 target, Vector3 pole)
+    private static void SolveLeg(Transform hip, Transform knee, Transform ankle, Vector3 target, Vector3 pole,
+        CorridorKneeRecovery recovery,bool planted,float deltaTime)
     {
         float upper = Vector3.Distance(hip.position, knee.position), lower = Vector3.Distance(knee.position, ankle.position);
         var delta = target - hip.position;
@@ -273,6 +278,15 @@ internal sealed class CorridorHeroMotion
         float along = (upper * upper - lower * lower + distance * distance) / (2 * distance);
         float height = Mathf.Sqrt(Mathf.Max(0, upper * upper - along * along));
         var kneeGoal = hip.position + axis * along + bend * height;
+        if (recovery != null)
+        {
+            var thigh = kneeGoal-hip.position;
+            float rear = Mathf.Atan2(-Vector3.Dot(thigh,pole),-thigh.y)*Mathf.Rad2Deg;
+            float correction = recovery.Bend(rear,planted,deltaTime);
+            // The free ankle can rise and retract as the knee folds. Grounded
+            // legs keep their exact two-bone target and distance-driven contact.
+            kneeGoal = hip.position+Quaternion.AngleAxis(correction,Vector3.Cross(pole,Vector3.up).normalized)*thigh;
+        }
         hip.rotation = Quaternion.FromToRotation(knee.position - hip.position, kneeGoal - hip.position) * hip.rotation;
         knee.rotation = Quaternion.FromToRotation(ankle.position - knee.position, hip.position + axis * distance - knee.position) * knee.rotation;
     }
