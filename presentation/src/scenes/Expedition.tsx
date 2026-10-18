@@ -31,11 +31,10 @@ const CORRIDOR = 100;
 const DD1_BATTLE = 220;
 const REVEAL = 80; // wipe start, relative to DD1_BATTLE
 const ENTER = 570;
-const PUNISH = 736;
-const JUDGEMENT = 799;
-const CHOP = 859;
-const DEATHBLOW = 910;
-export const EXPEDITION_FRAMES = 988;
+const SMITE = 702;
+const CHOP = 795;
+const DEATHBLOW = 888;
+export const EXPEDITION_FRAMES = 958;
 
 /** DD2's road and DD1's halls, then our corridors and a battle that starts where the party stands. */
 export const ExpeditionScene: React.FC = () => (
@@ -53,25 +52,22 @@ export const ExpeditionScene: React.FC = () => (
         from={<Clip name="dd1-battle" seconds={3.8} rate={0.9} fadeIn={8} />}
         to={
           <Sequence from={REVEAL}>
-            <Clip name="our-walk" seconds={9} />
+            <Clip name="our-sprawl-walk" seconds={9} />
           </Sequence>
         }
       />
     </Sequence>
-    <Sequence from={ENTER} durationInFrames={PUNISH - ENTER}>
-      <Clip name="our-enter" seconds={5.55} />
+    <Sequence from={ENTER} durationInFrames={SMITE - ENTER}>
+      <Clip name="our-sprawl-enter" seconds={4.4} />
     </Sequence>
-    <Sequence from={PUNISH} durationInFrames={JUDGEMENT - PUNISH}>
-      <Clip name="our-punish" seconds={2.1} />
-    </Sequence>
-    <Sequence from={JUDGEMENT} durationInFrames={CHOP - JUDGEMENT}>
-      <Clip name="our-judgement" seconds={2.0} />
+    <Sequence from={SMITE} durationInFrames={CHOP - SMITE}>
+      <Clip name="our-sprawl-smite" seconds={3.1} volume={0.7} />
     </Sequence>
     <Sequence from={CHOP} durationInFrames={DEATHBLOW - CHOP}>
-      <Clip name="our-chop" seconds={1.7} />
+      <Clip name="our-sprawl-chop" seconds={3.1} volume={0.7} />
     </Sequence>
     <Sequence from={DEATHBLOW} durationInFrames={EXPEDITION_FRAMES - DEATHBLOW}>
-      <Clip name="our-deathblow" seconds={2.6} />
+      <Clip name="our-sprawl-deathblow" seconds={70 / 30} volume={0.7} />
     </Sequence>
 
     <Caption game="dd2" text="Heroes, the stagecoach and the road" start={COACH + 8} end={CORRIDOR - 4} />
@@ -79,12 +75,12 @@ export const ExpeditionScene: React.FC = () => (
     <Caption game="dd1" text="Battles fought in the halls where the party stands" start={DD1_BATTLE + 8} end={DD1_BATTLE + REVEAL} />
     <Caption
       game="ours"
-      text="DD1's rooms and corridors, walked by DD2's 3D heroes through DD2's regions"
+      text="Explore the Sprawl on foot"
       start={DD1_BATTLE + REVEAL + 50}
       end={ENTER - 6}
     />
-    <Caption game="ours" text="Battles begin where you stand: no map load, no loading screen" start={ENTER + 8} end={PUNISH - 6} />
-    <Caption game="ours" text="Darkest Dungeon II's heroes, skills and finishing blows" start={PUNISH + 4} end={EXPEDITION_FRAMES - 6} />
+    <Caption game="ours" text="Battle begins where you stand" start={ENTER + 8} end={SMITE - 6} />
+    <Caption game="ours" text="Steel and fire in the Sprawl" start={SMITE + 4} end={EXPEDITION_FRAMES - 6} />
     {/* The Ancestor's line from DD1's release trailer lands on the reveal (bed-b, see Trailer.tsx). */}
     <Subtitle text="“Now, like me, you are a part of this place.”" start={351} end={556} top={58} size={42} />
   </AbsoluteFill>

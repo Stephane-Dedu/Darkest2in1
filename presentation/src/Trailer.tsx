@@ -67,7 +67,9 @@ export const Trailer: React.FC = () => (
     </Sequence>
     {/* DD1, release trailer: the Ancestor's line, the climax, then the fade under the end card. */}
     <Sequence from={BED_B} durationInFrames={TOTAL_FRAMES - BED_B}>
-      <Audio src={staticFile("media/bed-b.wav")} volume={(f) => ramp(f, [0, 12], [0, 0.84])} />
+      <Audio src={staticFile("media/bed-b.wav")} volume={(f) => ramp(f,
+        [0, 12, EXPEDITION + 690 - BED_B, EXPEDITION + 702 - BED_B, RECAP - BED_B, RECAP + 18 - BED_B],
+        [0, 0.84, 0.84, 0.42, 0.42, 0.84])} />
     </Sequence>
   </AbsoluteFill>
 );

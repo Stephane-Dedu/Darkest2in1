@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round265 refreshes the Remotion trailer. presentation/out/darkest2in1.mp4
+(darkest2in1-v02.mp4 alongside) is 79.03 s, 1080p30, H.264/AAC 48 kHz stereo.
+New unsaved Sprawl footage of Leper/Crusader/Flagellant/Jester with the accepted
+round264 walk: 9 s walking, a 4.4 s battle opening, then 8.53 s of Smite and two
+native Leper deathblows; the full battle is not shown. Game audio normalized to
+-20 LUFS under ducked music. Raw takes, private fixture, backups and
+video-verification.json: local-art/presentation-v02; no media committed. Render
+with concurrency 1, a 512 MB video cache and TEMP on D: (C: is nearly full).
+
+Game closed; the round264 normal build, assets, configs, estate 2 and native
+profiles match the backups; protected 1/3 never accessed. Independent
+Shieldbreaker/journal WIP retained. Gameplay and accepted gait unchanged. Owner
+permits launch/record. Next round266. Capture fresh installed hashes before
+deploying; old restore scripts would undo current work.
+
 Round264 adapts the owner's private Vilhelm walk to native heroes. HumanoidWalk
 samples coordinated hips/spine/knees/foot roll; native proportions and weapon
 poses remain. HumanoidFootContact supports the rolling heel/toe, with incoming

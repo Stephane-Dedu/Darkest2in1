@@ -7656,3 +7656,56 @@ profiles and unrelated work preserved. DD2 stopped. Launch/record authorization
 remains current. Next round265. Use fresh installed hashes before deployment;
 older restores would undo this build. Other native classes/scales and ordinary
 saved transitions remain broader acceptance work. Keep the accepted steady gait.
+
+## Round265 (2026-10-18): Sprawl footage in the trailer
+
+Owner asks to refresh the existing Remotion trailer with the accepted walking,
+the burning city and Crusader in place of Shieldbreaker. Follow-up: "you can use
+corridor walking, deathblows on attacks and the battle start, don't show the
+whole battle".
+
+Recorded a transient, unsaved Sprawl route with Leper, Crusader, Flagellant and
+Jester on a copy of the installed round264 build (447-source snapshot). A private
+fixture (TrailerCombat.cs) picks each hero's first valid skill and a living enemy
+through DD2's own skill/target queries and events, so the kills in the footage
+are native deathblows, not debug kills.
+
+The expedition chapter now cuts 9 s of walking, a 4.4 s battle opening
+("Enemies ahead!") and 8.53 s of attacks: Crusader's Smite on the Pit Fighter
+(3.1 s), Leper's Chop deathblow on the Whipper (3.1 s) and Leper's Chop
+deathblow on the Pit Fighter (2.33 s). The rest of the battle is left out. The
+Hamlet, map and comparison chapters are unchanged. Shorter captions: "Explore
+the Sprawl on foot", "Battle begins where you stand", "Steel and fire in the
+Sprawl". prepare-media.mjs normalizes the game audio to -20 LUFS (true peak
+-3 dB); it plays at 70% while bed-b ducks from 0.84 to 0.42 under the attacks
+and comes back for the recap. Total 79.03 s, 2371 frames, 1080p30.
+
+The first full render failed to fetch a combat frame. The combat section alone
+rendered, and the final render passed with concurrency 1, a 512 MB
+OffthreadVideo cache and TEMP on D:\dd3-video-render-tmp (C: had 3.8 GB free).
+Checks: TypeScript; contact sheets of the expedition and the whole video; both
+deathblows stepped at 200-250 ms; full decode, 2371 frames, H.264 with AAC
+48 kHz stereo, peak -1.8 dBFS. Section loudness: walk -13.7, opening -12.4,
+attacks -16.7, recap -20.6 LUFS.
+
+Output: presentation/out/darkest2in1.mp4 (SHA256 7dd315d7...), with
+darkest2in1-v02.mp4 alongside; the previous render is kept as
+local-art/presentation-v02/darkest2in1-v01.mp4. Raw takes, fixture, QA and
+cleanup scripts, contact sheets and video-verification.json are in
+local-art/presentation-v02. No media committed.
+
+DD2 closed and the round264 normal plugin restored. 190 scenery files, 66
+private model files, 13 other plugin files, 2 configs, estate 2 and 39 native
+profile files match the pre-recording backups. Protected estates 1 and 3 not
+accessed. Independent Shieldbreaker/journal work left uncommitted. No gameplay
+change.
+
+## Status 2026-10-18: trailer refreshed with Sprawl footage
+
+Round265 refreshes the presentation (79 s, 1080p30) with the accepted round264
+walk in the Sprawl, the battle opening and three native attacks, two of them
+deathblows; the full battle is not shown. The installed build is still the
+round264 normal snapshot; take fresh installed hashes before any deployment.
+DD2 stopped. Launch/record authorization remains current. Next round266. Other
+native classes/scales and ordinary saved transitions remain broader acceptance
+work. Keep the accepted steady gait.

@@ -2,12 +2,13 @@ import React from "react";
 import { AbsoluteFill, Easing, Freeze, Img, interpolate, OffthreadVideo, staticFile, useCurrentFrame } from "remotion";
 import { FPS, HEIGHT, WIDTH } from "../theme";
 
-/** A muted footage cut from public/media, filling the frame; it holds its last frame when the scene runs longer. */
-export const Clip: React.FC<{ name: string; seconds: number; rate?: number; fadeIn?: number; style?: React.CSSProperties }> = ({
+/** A footage cut from public/media; official trailer clips are muted by default. */
+export const Clip: React.FC<{ name: string; seconds: number; rate?: number; fadeIn?: number; volume?: number; style?: React.CSSProperties }> = ({
   name,
   seconds,
   rate = 1,
   fadeIn = 0,
+  volume = 0,
   style,
 }) => {
   const frame = useCurrentFrame();
@@ -18,7 +19,8 @@ export const Clip: React.FC<{ name: string; seconds: number; rate?: number; fade
       <Freeze frame={last} active={frame > last}>
         <OffthreadVideo
           src={staticFile(`media/${name}.mp4`)}
-          muted
+          muted={volume === 0}
+          volume={(f) => volume * interpolate(f, [0, 3, Math.max(4, last - 3), last], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" })}
           playbackRate={rate}
           style={{ width: "100%", height: "100%", objectFit: "cover", ...style }}
         />
