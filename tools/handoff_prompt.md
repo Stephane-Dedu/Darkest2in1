@@ -1,5 +1,29 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round266 installs a cinematic Hamlet pass, focused separately from the other
+agent's gameplay fixes. DD1 epilogue25.5sec is the reference: lower camera,
+larger services, original dark rock/UV scale with stronger contrast, native
+Valley roof infill, small Sprawl estate and cropped DD1 cloudy sky instead of
+the huge Mountain/starry Camp sky. All buildings remain3D. Compact title/
+controls and dark roster header improve framing. Finally installs the approved
+v15 Abbey/Guild/Sanitarium/Tavern details; six other models/textures unchanged.
+
+Release+1,267 Core+284 UI, native unsaved ten-service/controls/full-release/
+reload/cache/resize/keyboard/still-camera fixture pass. Final1920x1080 native
+skyline inspected;189 renderers/four plumes, zero buffer reallocations/5.042sec.
+Forced release/resize can leave roster portraits black; fresh launch correct.
+Cause unestablished. Bespoke facade/cliff paint, NPC/upgrade exteriors, saved
+transactions/controller/arbitrary sizes/full performance remain open.
+
+Frozen HEAD7846597+12 owned files excludes concurrent gameplay/Shieldbreaker
+WIP. Normal plugin installed, SHA2562d3a3b7079521a125a2b07bf0d04185622ef66388c32e300d8ed52a040e859f3;
+nine scenery file changes only.66 hero model files,13 other plugin files,2 configs,
+estate2 and39 native profiles preserved; protected1/3 never accessed. Game closed.
+Evidence/Blender/layout/build/source hashes/fresh baseline/deployment.json:
+local-art/ui-overhaul/hamlet-cinematic-v16. Use fresh installed hashes before
+deploying; old QA restores would undo this build. See tools/hamlet_3d.md and
+tools/hamlet_models/README.md. Next round267. Earlier handoffs are historical.
+
 Round265 refreshes the Remotion trailer. presentation/out/darkest2in1.mp4
 (darkest2in1-v02.mp4 alongside) is 79.03 s, 1080p30, H.264/AAC 48 kHz stereo.
 New unsaved Sprawl footage of Leper/Crusader/Flagellant/Jester with the accepted

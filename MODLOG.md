@@ -7709,3 +7709,73 @@ round264 normal snapshot; take fresh installed hashes before any deployment.
 DD2 stopped. Launch/record authorization remains current. Next round266. Other
 native classes/scales and ordinary saved transitions remain broader acceptance
 work. Keep the accepted steady gait.
+
+## Round266 (2026-10-18): cinematic Hamlet composition and detailed models installed
+
+Owner shifts this conversation to the functional but visually weak 3D Hamlet;
+another agent owns gameplay fixes. Reference: actual DD1 epilogue town view at
+25.5 seconds, plus House of Ruin/Old Road contact sheets. Official DD1 media
+pages confirm the cinematic context; local installed movies supply the frames.
+The useful composition is overlapping roofs, light sky, dark foreground and
+a small estate on the rear ridge. No extracted game files committed.
+
+HamletLayout now targets (12,12,20), offset (2,36,-112), vertical FOV37.5.
+Larger coach/tavern/abbey/guild/forge/wagon fill the view; Survivalist moves
+inward. That move initially made its last stair too steep; corrected the actual
+landing. Ground-paint fixture hashes change with footprints/doors; the lamp
+test's outside point now lies outside all neighbouring pools. Original dark
+native cliff paint/UV scale retained, rock/paving darkened, stronger cool key
+and shadow facets. Three native Valley cottages fill roof gaps. Four native
+Sprawl assemblies form a small estate beyond the Abbey/Guild. It is decorative,
+never a service or picking bound. An oversized/clipped first estate and floating
+centre tower were rejected; final native capture checks joined towers and framing.
+
+The huge native Mountain/starry Camp sky is replaced by the cloudy upper part
+of installed DD1 town_bg.png on a distant plane. Every building remains 3D.
+Art cache prepares it asynchronously before stage readiness; stage owns only
+sky mesh/material and releases them normally. Neutral sky fallback. Compact
+estate title/camera controls, hints on hover and actual UI input bounds free
+more scene area; a dark roster header preserves text/icon contrast.
+
+Found approved round242/v15 finish package never deployed. Installed its four
+finished Abbey/Guild/Sanitarium/Tavern pairs plus matching manifest: exactly
+nine changed PrivateScenery files, six models and all textures unchanged.
+54 hashed assets in private HamletModels package (59.7MB). Original paint kept;
+no new generated art. LayoutExport/town_preview reproduce the same geometry,
+camera, native sky, scenery and grading; Blender lighting is approximate.
+
+Frozen clean HEAD7846597 +12 owned files excludes concurrent gameplay and
+Shieldbreaker WIP. Release +1,267 Core +284 UI pass. Native unsaved1600x900
+fixture passes ten service world clicks/Escape, pan/zoom/reset, full resource
+release/reload/re-entry, Embark same-texture park/cache/resume,1440x900 resize/
+restore, keyboard Enter/back and still-camera/smoke. Zero live input events.
+Final skyline-only adjustments checked in fresh1920x1080 native overviews;
+189 renderers, four plumes, native B10G11R11_UFloatPack32. Zero repeated
+buffer reallocations in final5.042sec; not a full frame-time benchmark.
+
+Observed limitation: after the forced full-release/resize stress path, roster
+portrait slots can go black. Fresh launch displays all correctly. Cause not
+established; separate asset-lifecycle follow-up. Bespoke cliff/facade painting,
+NPC/upgrade exteriors, controller/arbitrary text/window sizes, saved transactions
+and long-session performance remain open. This improves composition and model
+finish; it does not establish full DD2 production-art parity.
+
+Normal final plugin installed with fresh baseline/hash guards. DLL SHA256
+2d3a3b7079521a125a2b07bf0d04185622ef66388c32e300d8ed52a040e859f3.
+Only four plugin artifacts and the approved nine scenery files change.66 hero
+model files,13 other plugin files,2 configs,estate2 and39 native profile files
+preserved; protected1/3 never accessed. Native profiles restored after every
+QA launch. Game closed. Private evidence, final layout/Blender scene, native
+capture/logs, source hashes, failed studies, baseline and deployment.json:
+local-art/ui-overhaul/hamlet-cinematic-v16. Do not run its QA restore helper over
+later builds; capture fresh installed hashes first. See tools/hamlet_3d.md and
+tools/hamlet_models/README.md. Next round267.
+
+## Status 2026-10-18: cinematic Hamlet installed
+
+Round266 installs lower camera/larger services, darker native cliffs, native
+sky/Valley cottages/distant Sprawl estate and the previously approved four
+detailed service models. Release+1,551 tests, unsaved native interaction/cache/
+resize checks and final1920 overview pass. Normal frozen build installed;
+game closed; save/config/profile hashes preserved. Concurrent gameplay WIP
+excluded and retained. Remaining art/lifecycle acceptance above. Next round267.

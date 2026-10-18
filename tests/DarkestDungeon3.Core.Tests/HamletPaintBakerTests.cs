@@ -5,16 +5,16 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class HamletPaintBakerTests
 {
-    // Portable reference run of the original GroundPaint/ValleyPaint loops with deterministic RGBA tiles,
-    // including variable source alpha. The worker must preserve colour, world projection and lane blending.
+    // Deterministic RGBA tiles on the cinematic layout, including variable source alpha.
+    // Footprint/door changes intentionally update these paint fixtures; source pixels remain immutable.
     [Theory]
-    [InlineData(true, "6886AAD111A88DF81D5700C817EA232743BB87F7D9B5C8DF0E24B565D279B786",
-        "8D841C40E97C1B88DBC0200253D308DABB1FD4F3EFE1F6907C7C54D1E6952A5B",
-        "445ED5643A84FE5C5DA963825769E79208381D08D4C1C4FC102436394496F7D5")]
-    [InlineData(false, "F37E04EC288111E175DB5E2FB576CF76ABFC49874169B8F87E1C9E3DB4F3694C",
-        "FCBF4E3D5179D8C2E95B07C11CD726E211EDE7F7BED216C99405E700FF9B6C7B",
-        "F4A1C31604FCB0403117FB0951F1D9E2D46B545A6108C693C718044A01EAAB48")]
-    public async Task WorkerPreservesTheExistingPaint(bool grass, string ground, string lanes, string valley)
+    [InlineData(true, "08D1CA1E36B698AFBCC6218EA745876C4BD964C354301639EC58AC9BF6000425",
+        "55EF6DC12CF451939F4E6BD7DE37F02807A03086BD333483D3510AC311C7FD8E",
+        "8D5EBFB5E3034CC802F9C1983A385081F8896B0D058A4352DD9DCC1AAB45D952")]
+    [InlineData(false, "ACC5A591AE68097163C48B9F1F65DCF2067F58DFB5755444F4CDAC4EED7C4E3A",
+        "D76DBC9A21EBF537316F870C6CFA0BA1885A1FE0EC63696E7AA858D13D0398F0",
+        "686B73FE5C66949DC91D14849F03723CEA7799FF128B797C0F46E6FC14EFC474")]
+    public async Task WorkerPreservesTheCinematicLayoutPaint(bool grass, string ground, string lanes, string valley)
     {
         var soil = Tile(11); var stone = Tile(63); var turf = grass ? Tile(123) : null; var rock = Tile(209);
         var baked = await Task.Run(() => HamletPaintBaker.Bake(soil, stone, turf, rock, size: 64, fieldSize: 16));

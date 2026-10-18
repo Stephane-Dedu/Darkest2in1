@@ -31,7 +31,6 @@ internal sealed partial class HamletStage : MonoBehaviour
     private const string Common = "Assets/Data/Biome/Common/Map/NodeTiles/";
     private const string Models = "Assets/Art/Models/Environments/Common/Models/Nodes/";
     private const string Valley = "Assets/Data/Biome/ValleyCommon/Map/";
-    private const string Mountains = "Assets/Art/Models/Environments/Common/Models/MainMenu/";
     private const string PaintTemplate = Models + "inn_lvl_03_prefab.prefab";
     private sealed class Piece
     {
@@ -54,9 +53,6 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "DecorTiles/valley_tile_02.prefab", 49, -1.8f, 29, 18, -20),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", -50, 0, -3, 6, 15),
         new(null, "Assets/Art/Models/Environments/Camp/camp_bush_01.fbx", 44, 0, -7, 6, -25),
-        // Bury the broad lower mass beyond the civic ridge so the Mountain encloses the town backdrop.
-        new(null, Mountains + "mainmenu_mountain_mdl.fbx", -12, -78, 112, 500, 180, heightScale: .52f, depthScale: .15f,absolute:true),
-        new(null, "Assets/Art/Models/Environments/Camp/camp_sky.fbx", 0, -95, 152, 460),
         new(null, "Assets/Art/Models/Environments/Camp/camp_crate.fbx", -50, 0, 23, 2),
         new(null, "Assets/Art/Models/Environments/Camp/camp_barrel.fbx", -51, 0, 21, 1.5f),
         new(null, "Assets/Art/Models/Environments/Camp/camp_firepit.fbx", -51, 0, 17, 2.5f),
@@ -72,7 +68,9 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, Valley + "DecorTiles/valley_tile_09.prefab", -1, -.2f, 41, 6, 15),
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", -59, -2, -7, 15, 15),
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", 49, -1, 25, 18, -25),
-    }.Concat(HamletLandscape.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
+    }.Concat(HamletVista.Pieces.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
+        heightScale:p.HeightScale,depthScale:p.DepthScale,absolute:true,background:p.Distant)))
+    .Concat(HamletLandscape.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
         heightScale:p.HeightScale,absolute:true,background:true)))
         .Concat(HamletSetDressing.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,absolute:true))).ToArray();
 
@@ -229,6 +227,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         ResetView();
         MoveCamera(1);
         BeginModels();
+        if (Session.Current?.Dd1 is { } dd1) Art.PrepareImage(dd1.PathOf("campaign","town","town_bg.png"));
         foreach (var piece in Pieces)
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
@@ -269,6 +268,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 AdvanceGroundPaint();
                 if (!AdvanceModels()) return;
                 if (_buildings.Count != Services.Length) throw new InvalidOperationException("Some town services have no model.");
+                if (!BuildEstateSky(_assets[PaintTemplate].Result.layer)) return;
                 if (!BuildGround()) return;
                 _built = true;
                 _camera.enabled = true;
@@ -362,16 +362,14 @@ internal sealed partial class HamletStage : MonoBehaviour
                 renderer.sharedMaterials=renderer.sharedMaterials.Select(m=>
                 {
                     var painted=new Material(m) { name="Hamlet distant woodland "+m.name }; _details.Add(painted);
-                    Grade(painted,piece.Path.Contains("/Forest/")?HamletPalette.Wildwood:
+                    Grade(painted,piece.Path.Contains("/City/")?new HamletPalette.Paint(.42f,.46f,.54f,.002f,.35f):piece.Path.Contains("/Forest/")?HamletPalette.Wildwood:
                         piece.Position.z>110?HamletPalette.DistantWoodland:HamletPalette.Woodland,false); return painted;
                 }).ToArray();
             }
-            else if (piece.Path.EndsWith("camp_sky.fbx"))
-                renderer.sharedMaterials = source.sharedMaterials.Select(BackdropMaterial).ToArray();
-            else if (piece.Path.StartsWith(Mountains))
-                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Mountain);
             else if (piece.Path.Contains("barricade_military_decor_rocks") || piece.Path.Contains("coast_skirt_cliffs"))
                 foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Rubble);
+            else if (piece.Path.Contains("/Valley/Models/Buildings/"))
+                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Building,false);
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
             var block = new MaterialPropertyBlock();
@@ -555,6 +553,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         _details.Clear();
         _gradedMaterials.Clear(); _gradedPaint.Clear();
         _smokeMaterial = null;
+        _estateSkyBuilt = false;
         foreach (var handle in _assets.Values) if (handle.IsValid()) Addressables.Release(handle);
         if (_terrainAsset.IsValid()) Addressables.Release(_terrainAsset);
         if (_earthAsset.IsValid()) Addressables.Release(_earthAsset);

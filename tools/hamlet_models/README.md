@@ -1,7 +1,13 @@
 # Hamlet building models
 
-The current approved finish pass preserves the original dark native cliffs and improves the Mountain,
-road margins and four building exteriors. `finish.py` imports the verifiedv02 GLBs and adds fitted Abbey
+Round266 installs the approved private finish package and reframes the scene from DD1's town cinematic:
+larger services, lower camera, darker supporting cliffs, native Valley roof infill and a small Sprawl
+estate on the rear ridge. The oversized Mountain is replaced by a cloudy native DD1 sky. Final native
+capture/build/source hashes: `local-art/ui-overhaul/hamlet-cinematic-v16`. See [the Hamlet guide](../hamlet_3d.md)
+for camera values, lifecycle/interaction checks and remaining art limits. No new generated art.
+
+The approved finish pass preserves the original dark native cliffs and improves road margins and four
+building exteriors. `finish.py` imports the verifiedv02 GLBs and adds fitted Abbey
 coping/ridge/buttress caps, Sanitarium drip/hip courses, Guild doorway trim and Tavern sign/lantern details.
 It checks the architectural envelopes, re-imported topology and embedded paint; six GLBs remain unchanged.
 All models, extracted paint and packed Blender documents stay outside Git.
@@ -15,10 +21,10 @@ library. Run `finish.py` through Blender, then package its output with the ordin
 ```
 
 The approved package is already prepared at `local-art/ui-overhaul/hamlet-surface-v15/HamletModels`: ten
-models,54 hashed files,59.7 MB. Its final native capture is `native-dark-rocks.png`. Native service camera
-controls/cache/resize acceptance precedes the final rock revision; Release+54 Hamlet cases and the final
-overview pass. The review restored the original installation. Deploy the approved package only with DD2
-stopped and current shared plugin sources. The following sections describe the earlier model studies.
+models, 54 hashed files, 59.7 MB. Its original native capture is `native-dark-rocks.png`. Round266 finally
+installs it with a verified isolated plugin build; the earlier review had restored the older package.
+Capture fresh installed hashes before deployment and deploy only while DD2 is stopped. The following
+sections describe earlier model studies; their rollback/flag directions are superseded by the Hamlet guide.
 
 Ten separate 3D building studies, based on DD1's fully repaired `town_<building>_level03` exteriors.
 The graveyard uses `town_graveyard`. These are private asset authoring outputs, not replacements for the

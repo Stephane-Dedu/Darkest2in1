@@ -12,6 +12,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
 {
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
+    EstateSky=new { HamletVista.SkyDepth,HamletVista.SkyWidth,HamletVista.SkyBottom,HamletVista.SkyTop },
     Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
     Outcrops=HamletSetDressing.BuildRocks(),Mists=HamletSetDressing.Mists,
     EntranceLight=Enumerable.Range(0,256*256).Select(i=>HamletSetDressing.EntranceLight(
@@ -50,7 +51,6 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("camp_bush_01",-50,0,-3,6,15),Scenery("camp_bush_01",44,0,-7,6,-25),
         Scenery("camp_crate",-50,0,23,2),Scenery("camp_barrel",-51,0,21,1.5f),Scenery("camp_firepit",-51,0,17,2.5f),
         Scenery("common_prop_lamppost",-6,0,4,1.5f),Scenery("common_prop_lamppost",22,0,10,1.5f),
-        Scenery("mainmenu_mountain_mdl",-12,-78,112,500,180,heightScale:.52f,depthScale:.15f,absolute:true),Scenery("camp_sky",0,-95,152,460),
         Scenery("barricade_military_decor_rocks_01",-44,-.25f,5,7,25),
         Scenery("barricade_military_decor_rocks_02",-25,-.35f,16,4,-20),
         Scenery("barricade_military_decor_rocks_03",34,-.3f,12,6,15),
@@ -58,7 +58,9 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("valley_tile_09",-46,-.25f,-10,9,20),Scenery("valley_tile_09",-16,-.2f,-14,7,-10),
         Scenery("valley_tile_09",43,-.25f,10,7,65),Scenery("valley_tile_09",-1,-.2f,41,6,15),
         Scenery("coast_skirt_cliffs_mdl_01",-59,-2,-7,15,15),Scenery("coast_skirt_cliffs_mdl_01",49,-1,25,18,-25)
-    }.Concat(HamletLandscape.Props.Select(p=>(object)new
+    }.Concat(HamletVista.Pieces.Select(p=>(object)new
+    { Id=p.Asset,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,p.DepthScale,Background=p.Distant }))
+    .Concat(HamletLandscape.Props.Select(p=>(object)new
     { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,DepthScale=1,Background=true }))
     .Concat(HamletSetDressing.Props.Select(p=>(object)new { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,p.DepthScale }))
 },new JsonSerializerOptions { IncludeFields=true }));

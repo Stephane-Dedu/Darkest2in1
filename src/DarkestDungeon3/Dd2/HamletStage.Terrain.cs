@@ -19,6 +19,8 @@ internal sealed partial class HamletStage
         if (_groundPaintTask == null || !PaintReady || !UploadGroundPaint()) return false;
         var paving=_groundPaving; var rock=_groundRock; var stone=_groundStone; var valley=_groundValley;
         int layer=_groundLayer;
+        SetPaintTint(paving,new Color(.72f,.75f,.80f,1));
+        SetPaintTint(stone,new Color(.82f,.84f,.87f,1));
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
         _groundMesh.colors=data.Shade.Select(s=>new Color(s,s,s,1)).ToArray();
@@ -34,7 +36,7 @@ internal sealed partial class HamletStage
         for (int i=0;i<3;i++)
         {
             materials[i+1]=new Material(rock) { name="Hamlet cliff facet "+i };
-            float tint=.72f+i*.14f;
+            float tint=(.72f+i*.14f)*.68f;
             SetPaintTint(materials[i+1],new Color(tint,tint,tint,1)); _details.Add(materials[i+1]);
         }
         _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);

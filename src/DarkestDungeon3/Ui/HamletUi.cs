@@ -211,9 +211,9 @@ internal sealed partial class HamletUi
 
     private void DrawEstateTitle()
     {
-        ExpeditionSkin.Banner(new Rect(110, 30, 650, 106), ExpeditionSkin.Ivory);
-        ExpeditionSkin.OutlinedHeading(new Rect(160, 44, 550, 52), E.Name, 40, ExpeditionSkin.Ivory);
-        ExpeditionSkin.Text(new Rect(162, 96, 530, 32), $"Week {E.Week + 1}", 22, ExpeditionSkin.Brass);
+        ExpeditionSkin.Banner(EstateTitleBounds, ExpeditionSkin.Ivory);
+        ExpeditionSkin.OutlinedHeading(new Rect(146, 38, 445, 45), E.Name, 34, ExpeditionSkin.Ivory);
+        ExpeditionSkin.Text(new Rect(148, 81, 435, 28), $"Week {E.Week + 1}", 20, ExpeditionSkin.Brass);
     }
 
     private void DrawNav()
@@ -243,6 +243,8 @@ internal sealed partial class HamletUi
 
     private void DrawRoster()
     {
+        // The brighter estate sky must not wash out roster capacity and sort controls.
+        Gui.Fill(new Rect(RosterX,0,Gui.W-RosterX,132),new Color(.02f,.018f,.017f,.97f));
         // Resolve a recruit's release before the roster's click handlers can change the open page.
         if (_panel == Panel.StageCoach && Drag.Drop<RecruitDrag>(RosterColumn.Area, out var hired))
         {

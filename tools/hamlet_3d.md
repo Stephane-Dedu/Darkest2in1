@@ -1,16 +1,40 @@
 # Perspective Hamlet
 
-Round242 is the owner-approved visual revision. Keep the original dark native cliff paint and texture
-scale. The detailed Mountain face, charcoal-blue grading, rocky foothills and raised mist frame the town;
-world-space paving has worn margins. Fitted trim on four service models and selective slate/masonry grades
-retain their original envelopes and painted UVs. Private source/package/capture: `local-art/ui-overhaul/
-hamlet-surface-v15`. See `tools/hamlet_models/README.md` for reproducing the private model finishes.
+Round266 follows the owner's request for a more cinematic, less sparse Hamlet. The reference is the
+town view at 25.5 seconds in DD1's installed `video/epilog.ogv`: low, overlapping roofs, light sky and a
+small estate on a distant ridge. The native overview is
+`local-art/ui-overhaul/hamlet-cinematic-v16/native-overview.png`. Reference frames, failed studies,
+source hashes, isolated build, QA logs and rollback are alongside it.
 
-Release+54 Hamlet cases pass. The final unsaved native overview was approved, with181 renderers and zero
-repeated buffer allocations in5.040sec. v14 full interaction/cache/resize acceptance covers the retained
-paths. After review the exact pre-test plugin, model package and config were restored. Install the approved
-private package with the next current-source deployment while DD2 is stopped. Saves and full performance
-remain separate acceptance.
+The camera targets (12,12,20), offset (2,36,-112), with a 37.5-degree vertical FOV. Larger service
+footprints fill the frame, and the Survivalist moves inward with a corrected stair landing. The
+original dark native cliff paint and texture scale remain, with darker rock/paving and stronger
+light/shadow grading on building facets. Three native Valley cottages fill roof gaps. Four native
+Sprawl wall/tower assemblies form the small distant estate; they have no service ID or picking bounds.
+The former huge Mountain and starry Camp sky are removed. Only a cropped cloudy sky from the installed
+DD1 town background is used on a distant plane; every building is still 3D. The existing image cache
+loads it before readiness, and owned sky geometry/materials release with the stage. Missing source art
+uses a neutral sky.
+
+The previously approved round242 private package was still absent from the install. This pass installs
+its Abbey, Guild, Sanitarium and Tavern trim with the other six unchanged models. The 54 hashed assets
+are in `local-art/ui-overhaul/hamlet-surface-v15/HamletModels`; no extracted models/paint belong in Git.
+The estate title/controls are smaller, hints appear on control hover, and the roster header has a dark
+backing against the brighter sky. World input follows the actual title/control bounds.
+
+Release + 1,267 Core + 284 UI checks pass in a frozen HEAD+Hamlet build, excluding the other agent's
+gameplay WIP. Native 1600x900 checks pass all ten world services, Escape, pan/zoom/reset, full release/
+reload/re-entry, quest-selector cache/park/resume, 1440x900 resize/restore, keyboard and still-camera/
+smoke controls. Final 1920x1080 overview is inspected. 189 renderers, four chimney plumes, native HDR
+target; five-second buffer probes show zero repeated reallocations. This is buffer stability, not a
+full frame-time benchmark. Unsaved fixture, no selected estate; native profiles/config/test estate
+restored after QA.
+
+The forced full resource-release/resize stress fixture can leave roster portrait slots black; a fresh
+launch displays them correctly. The cause is not established by this art pass. Saved transactions,
+controller comfort, arbitrary text/window sizes, long-session performance, NPC/upgrade exteriors and
+bespoke painting/sculpting of inferred architecture remain open. This pass does not claim DD2
+production-art parity. Earlier Mountain/camera/package-install directions below are historical.
 
 The 3D Hamlet is the standard view. Round239 removes painted/hybrid/DD1 town drawing completely.
 Cold entry and retry show an opaque torch page until the actual town has rendered; failure offers Retry

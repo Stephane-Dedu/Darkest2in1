@@ -101,7 +101,7 @@ public static class HamletSetDressing
     {
         // Albedo grading, not emission. Preserve ink shadows and painted warm windows.
         float key=nx*-.35f+ny*.75f+nz*-.55f;
-        return key>.35f ? new(.98f,1.04f,1.12f) : key<-.15f ? new(.76f,.79f,.84f) : new(.93f,.94f,.96f);
+        return key>.35f ? new(1.04f,1.10f,1.15f) : key<-.15f ? new(.70f,.74f,.82f) : new(.88f,.92f,.96f);
     }
     public static HamletTerrain.Surface BuildRocks()
     {

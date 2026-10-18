@@ -135,7 +135,7 @@ def quiet_building_materials(objects):
 
 def building_facets(objects):
     """Match the runtime's three bounded albedo tints, without changing UVs or silhouettes."""
-    tints=[(.76,.79,.84,1),(.93,.94,.96,1),(.98,1.04,1.12,1)]
+    tints=[(.70,.74,.82,1),(.88,.92,.96,1),(1.04,1.10,1.15,1)]
     for obj in objects:
         originals=list(obj.data.materials); original_slots=[p.material_index for p in obj.data.polygons]
         obj.data.materials.clear()
@@ -244,8 +244,12 @@ def main(args):
     palette=data['Palette']
     earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
     rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
+    emission=next(n for n in rock.node_tree.nodes if n.type=='EMISSION')
+    emission.inputs['Strength'].default_value=.68
     paving=paving or painted_ground('Native foundation paving',texture,palette['Paving'])
     stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
+    for material,factor in [(paving,.75),(stone,.84)]:
+        next(n for n in material.node_tree.nodes if n.type=='EMISSION').inputs['Strength'].default_value=factor
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
     if 'Outcrops' in data: surface('Broken cliff ledges',data['Outcrops'],[rock],shade=data['Outcrops']['Shade'])
@@ -297,10 +301,17 @@ def main(args):
             paint=palette['Woodland' if piece.get('Background') else 'Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
             if piece.get('Background') and piece['Z']>110: paint=palette['DistantWoodland']
             if piece['Id'].startswith('forest_tile_'): paint=palette['Wildwood']
+            if piece['Id'].startswith('city_'): paint={'Tint':{'X':.42,'Y':.46,'Z':.54},'Brightness':.002,'Saturation':.35,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
             for obj in objects:
                 for slot in obj.material_slots:
                     texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')
                     slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint,cutout=piece.get('Background',False))
+    if 'EstateSky' in data:
+        sky=data['EstateSky'];w=sky['SkyWidth']/2;z=sky['SkyDepth']
+        image=bpy.data.images.load(str(args.kit.parent/'dd1-reference-kit/town/base/town_bg.png'))
+        neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
+        surface('Native overcast estate sky',{'Positions':[-w,sky['SkyBottom'],z,-w,sky['SkyTop'],z,w,sky['SkyTop'],z,w,sky['SkyBottom'],z],
+            'Uv':[0,.65,0,1,1,1,1,.65],'Indices':[0,1,2,0,2,3]},[painted_ground('Estate sky',image,neutral)])
     depth_mist(data.get('Mists',[]))
     target=data['CameraTarget']; offset=data['CameraOffset']
     aim=Vector((target['X'],target['Z'],target['Y']))

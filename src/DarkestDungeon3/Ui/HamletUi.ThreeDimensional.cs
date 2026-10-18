@@ -7,8 +7,9 @@ namespace DarkestDungeon3.Ui;
 
 internal sealed partial class HamletUi
 {
-    internal static readonly Rect ResetViewButton = new(1320, 42, 190, 42);
-    internal static readonly Rect CameraMotionButton = new(1010, 42, 295, 42);
+    internal static readonly Rect EstateTitleBounds = new(110,30,520,90);
+    internal static readonly Rect ResetViewButton = new(1340, 36, 170, 38);
+    internal static readonly Rect CameraMotionButton = new(1100, 36, 230, 38);
     private string _townKeyboardFocus;
 
     private static void DrawTownLoading(HamletStage stage)
@@ -27,11 +28,12 @@ internal sealed partial class HamletUi
     private void DrawTownControls()
     {
         bool failed=HamletStage.Instance?.Failure!=null;
-        if (TownControl(ResetViewButton, failed?"Retry scenery":"Reset view", 22))
+        if (TownControl(ResetViewButton, failed?"Retry scenery":"Reset view", 20))
         { if (failed) HamletStage.Instance?.Retry(); else HamletStage.Instance?.ResetView(); }
-        if (TownControl(CameraMotionButton,HamletStage.MotionEnabled ? "Camera motion: On" : "Camera motion: Off",22))
+        if (TownControl(CameraMotionButton,HamletStage.MotionEnabled ? "Camera motion: On" : "Camera motion: Off",20))
             HamletStage.SetMotion(!HamletStage.MotionEnabled);
-        ExpeditionSkin.Text(new Rect(780, 105, 730, 28), HamletStage.Instance?.Failure ?? (HamletStage.Instance?.Ready == true ? "Tab / arrows to select · Enter to open · Wheel / middle-drag" : "Preparing town scenery…"), 20,
+        bool hint=failed || ResetViewButton.Contains(Event.current.mousePosition) || CameraMotionButton.Contains(Event.current.mousePosition);
+        if (hint) ExpeditionSkin.Text(new Rect(800, 80, 710, 26), HamletStage.Instance?.Failure ?? "Tab / arrows to select · Enter to open · Wheel / middle-drag", 18,
             HamletStage.Instance?.Failure != null ? ExpeditionSkin.Red : ExpeditionSkin.Muted, TextAnchor.MiddleRight);
     }
 
@@ -54,7 +56,7 @@ internal sealed partial class HamletUi
         if (HamletPreview.OwnsSession && HamletPreview.PaintAuditRequested)
             GUI.DrawTexture(new Rect(125,685,260,220),stage.GroundPaintTexture,ScaleMode.ScaleToFit);
         var mouse = Event.current.mousePosition;
-        bool overNav = mouse.x < 120 || mouse.y<180 || ResetViewButton.Contains(mouse) || CameraMotionButton.Contains(mouse);
+        bool overNav = mouse.x < 120 || EstateTitleBounds.Contains(mouse) || ResetViewButton.Contains(mouse) || CameraMotionButton.Contains(mouse);
         bool canHit = interactive && GUI.enabled && !_exchangeOpen && !overNav && mouse.x < RosterX && mouse.y < BarY;
         stage.SetFocus(_panel == Panel.Town ? null : _building);
         foreach (var id in HamletStage.Services) stage.SetAvailable(id, IsOpen(id));

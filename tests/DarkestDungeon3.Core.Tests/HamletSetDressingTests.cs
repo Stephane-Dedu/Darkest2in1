@@ -45,8 +45,12 @@ public class HamletSetDressingTests
         foreach (var light in HamletSetDressing.Lights)
         {
             Assert.InRange(HamletSetDressing.EntranceLight(light.X,light.Z),.1f,.2f);
-            Assert.Equal(0,HamletSetDressing.EntranceLight(light.X+light.Radius+1,light.Z+light.Radius+1));
         }
+        // Enlarged service footprints can put this lamp's old test point inside
+        // a neighbouring pool. Check a point outside the entire lit settlement.
+        Assert.Equal(0,HamletSetDressing.EntranceLight(
+            HamletSetDressing.Lights.Max(l=>l.X+l.Radius)+1,
+            HamletSetDressing.Lights.Max(l=>l.Z+l.Radius)+1));
         float back=HamletLayout.Sites.Max(s=>s.Z+s.FootprintDepth/2);
         Assert.All(HamletSetDressing.Mists,m=>Assert.True(m.Z>back+20 && m.Opacity<=.15f));
         var roof=HamletSetDressing.FacetTint(0,1,0);
