@@ -7,6 +7,11 @@ Personal project. **No game files are included**: everything from DD1 (data, art
 own DD1 install, and DD2 is patched in memory. Keep it that way: never commit game files, extracted assets or
 decompiled code (see `.gitignore`).
 
+https://github.com/user-attachments/assets/49c55fae-f46f-4b2e-9c7d-16dae09b236b
+
+A 79-second presentation, made with Remotion in [`presentation/`](presentation/). It includes clips from the official
+Darkest Dungeon and Darkest Dungeon II trailers; that footage belongs to Red Hook Studios.
+
 ## Requirements
 - Darkest Dungeon II v2.04 (Unity 2022.3, Mono) with [BepInEx 5](https://github.com/BepInEx/BepInEx) installed in its folder.
 - Darkest Dungeon 1 installed (Steam is found automatically; otherwise set `Paths.DarkestDungeon1Folder` in

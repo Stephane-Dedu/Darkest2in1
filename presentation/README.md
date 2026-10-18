@@ -40,6 +40,14 @@ captures use a transient campaign; the normal plugin and native profiles were re
 
 ## Sharing it
 
-Upload the rendered MP4 to a GitHub release or drop it into the README editor on GitHub (it becomes a
-`user-attachments` link). Keep the end-card disclaimer: this is an unofficial fan project, and the trailer footage
-belongs to Red Hook Studios.
+GitHub plays a video inline only from a `user-attachments` link: drag the file into a comment or the README editor on
+github.com and copy the link it inserts. Free accounts accept videos up to 10 MB, so the repository README uses a 720p
+copy (about 9.5 MB):
+
+```sh
+ffmpeg -i out/darkest2in1.mp4 -vf scale=1280:720:flags=lanczos -c:v libx264 -preset slow -b:v 860k -pass 1 -an -f null -
+ffmpeg -i out/darkest2in1.mp4 -vf scale=1280:720:flags=lanczos -c:v libx264 -preset slow -b:v 860k -maxrate 2000k \
+  -bufsize 4000k -pass 2 -c:a aac -b:a 96k -movflags +faststart out/darkest2in1-github.mp4
+```
+
+Keep the end-card disclaimer: this is an unofficial fan project, and the trailer footage belongs to Red Hook Studios.
