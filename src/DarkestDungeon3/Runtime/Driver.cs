@@ -326,7 +326,6 @@ internal sealed partial class Driver : MonoBehaviour
 
     // ---- DD1 walking: hold D/→ to walk the hallway (A/← backs up at half speed); in a room the arrows pick the exit ----
 
-    private const float SecondsPerSquare = Core.Dungeon.CorridorSceneMotion.StepSeconds;
     private bool _continuousStep;
 
     /// <summary>Where the party stands in its square, from -0.5 (just in from behind) to +0.5 (about to leave

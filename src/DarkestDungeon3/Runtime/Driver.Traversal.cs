@@ -74,6 +74,7 @@ internal sealed partial class Driver
     private void MarkStep(int dir)
     {
         LastStepDir = dir;
+        if (!_continuousStep) CaptureStepDuration(dir);
         // Held-key walking scrolls continuously (WalkProgress); only discrete steps get the slide animation.
         LastStepTime = _continuousStep ? -10f : Time.unscaledTime;
     }

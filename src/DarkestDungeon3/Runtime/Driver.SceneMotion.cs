@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Runtime;
 internal sealed partial class Driver
 {
     private readonly CorridorSceneMotion _sceneMotion = new();
-    public float SceneSlide => CorridorSceneMotion.Slide(Time.unscaledTime - LastStepTime,LastStepDir,WalkProgress);
+    public float SceneSlide => StepSlide;
     public double SceneTravel => _sceneMotion.Travel;
 
     private float WalkingPixelsPerSecond => Plugin.HeroModels.Value

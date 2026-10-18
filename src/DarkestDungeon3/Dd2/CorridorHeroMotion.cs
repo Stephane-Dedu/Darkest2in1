@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Dd2;
 /// A corridor-only animation layer over the owner's native hero mesh. It never changes a shared mesh,
 /// controller or combat actor. Foot targets and anatomical axes come from the loaded skeleton.
 /// </summary>
-internal sealed class CorridorHeroMotion
+internal sealed partial class CorridorHeroMotion
 {
     private readonly Transform _slot, _pelvis, _spine, _chest, _head;
     private readonly Transform _sword, _swordHand;
@@ -41,6 +41,9 @@ internal sealed class CorridorHeroMotion
         internal Transform Hip, Knee, Ankle;
         internal float Side, AnkleY;
         internal Quaternion FlatRotation;
+        internal Vector3 ToeLocal;
+        internal float FlatToeY;
+        internal readonly Core.Presentation.HumanoidFootContact AuthoredContact = new();
         internal readonly CorridorFootContact Contact = new();
         internal readonly CorridorSupportContact Support = new();
         internal readonly CorridorKneeRecovery Recovery = new();
@@ -91,6 +94,13 @@ internal sealed class CorridorHeroMotion
             leg.Side = Vector3.Dot(Position(leg.Hip) - center, bindSide);
             leg.AnkleY = ground;
             leg.FlatRotation = bindToPose * bind[leg.Ankle].rotation;
+            var toe = Find(leg == left ? "l_Leg_BallSHJnt" : "r_Leg_BallSHJnt");
+            if (toe != null && bind.ContainsKey(toe))
+            {
+                var offset = bindToPose*(Position(toe)-Position(leg.Ankle));
+                leg.ToeLocal = Quaternion.Inverse(leg.FlatRotation)*offset;
+                leg.FlatToeY = offset.y;
+            }
         }
         // The camera is at -Z. Show the front as well as the right-facing profile, irrespective of the prefab yaw.
         var unturned = slot.localRotation;
@@ -164,6 +174,8 @@ internal sealed class CorridorHeroMotion
         { _walking = false; _left.Contact.Reset(); _right.Contact.Reset(); _left.Support.Reset(); _right.Support.Reset(); _left.Recovery.Reset(); _right.Recovery.Reset(); return; }
         float legPixels = ProjectedLegPixels;
         bool moving = Mathf.Abs(distancePixels) > .000001f;
+        bool starting = moving && !_walking;
+        if (!_walking) _authored ??= AuthoredSource();
         if (moving && !_walking)
         {
             _left.Contact.Reset(); _right.Contact.Reset();
@@ -176,6 +188,8 @@ internal sealed class CorridorHeroMotion
         float weight = _cycle.Weight;
         if (weight <= 0) return;
         foreach (var bone in _driven) _saved.Add(new SavedBone(bone));
+        if (_authored != null)
+        { ApplyAuthored(distancePixels,deltaTime,weight,starting);return; }
         var gripPosition = _sword != null ? _swordHand.InverseTransformPoint(_sword.position) : Vector3.zero;
         var gripRotation = _sword != null ? Quaternion.Inverse(_swordHand.rotation) * _sword.rotation : Quaternion.identity;
 

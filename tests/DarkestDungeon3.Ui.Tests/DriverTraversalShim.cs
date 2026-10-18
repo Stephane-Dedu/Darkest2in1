@@ -21,7 +21,6 @@ internal sealed partial class Driver
     private float _fadeInFrom = -10;
     public float RoomTransitionAt => _fadeInFrom;
     public bool TickDoorTransition() => UpdateDoorTransition();
-    private const float SecondsPerSquare = CorridorSceneMotion.StepSeconds;
     public List<CrawlEvent> TraversalEvents { get; private set; }
     private void Handle(List<CrawlEvent> events) => TraversalEvents = events;
 }

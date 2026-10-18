@@ -39,7 +39,45 @@ public class ContinuousWalkTests
 
     private static float Camera(Driver driver) => CorridorSceneMotion.Camera(driver.SceneryWidth, driver.SceneryHeight,
         driver.Expedition.TileIndex, driver.Crawl.CurrentCorridor.Tiles.Count, false,
-        CorridorSceneMotion.Slide(Time.unscaledTime - driver.LastStepTime, driver.LastStepDir, driver.WalkProgress));
+        driver.StepSlide);
+
+    [Theory]
+    [InlineData(6,4096,768,154.1f,true)]
+    [InlineData(6,4096,768,201.6f,true)]
+    [InlineData(12,4096,768,154.1f,true)]
+    [InlineData(6,0,0,154.1f,true)]
+    [InlineData(6,4096,768,154.1f,false)]
+    public void FirstButtonStepCannotRushFasterThanTheAcceptedSteadyWalk(int count,int width,int height,float leg,bool forward)
+    {
+        var d=Ready(count,width,height,leg);Time.unscaledTime=100;
+        float before=Camera(d);d.Step(forward);
+        Assert.InRange(Math.Abs(Camera(d)-before),0,.001f);
+        float duration=d.StepAnimationSeconds,previous=Camera(d),max=0;
+        int frames=(int)Math.Ceiling(duration*120);
+        for(int i=1;i<=frames;i++)
+        {
+            float dt=duration/frames;Time.unscaledTime=100+i*dt;
+            float next=Camera(d);max=Math.Max(max,Math.Abs(next-previous)/dt);previous=next;
+        }
+        float limit=CorridorSceneMotion.WalkingSpeedForLeg(leg)*(forward ? 1 : .5f);
+        Assert.True(max<=limit+1,$"The opening button step peaks at {max:0.0}px/s, above the normal {limit:0.0}px/s walk.");
+        float square=CorridorSceneMotion.PropOffset(width,height,count,1,0);
+        Assert.InRange(Math.Abs(Math.Abs(Camera(d)-before)-square),0,.02f);
+    }
+
+    [Fact]
+    public void ButtonPanKeepsItsCapturedDurationAndRejectsInputUntilItFinishes()
+    {
+        var d=Ready(6,leg:154.1f);Time.unscaledTime=100;d.Step(true);
+        float duration=d.StepAnimationSeconds;Assert.True(duration>1.2f);
+        int tile=d.Expedition.TileIndex;
+        d.ProjectedLegPixels=201.6f; // A late model/scale update cannot retime an active pan.
+        Time.unscaledTime=101.21f;d.Step(true);
+        Assert.Equal(tile,d.Expedition.TileIndex);Assert.Equal(duration,d.StepAnimationSeconds);
+        Time.unscaledTime=100+duration+.01f;d.Step(true);
+        Assert.Equal(tile+1,d.Expedition.TileIndex);
+        Assert.True(d.StepAnimationSeconds<duration);
+    }
 
     private static (float Speed, float MaximumSteps) Replay(Driver driver, bool forward = true, float dt = 1f / 60, int frames = 72)
     {

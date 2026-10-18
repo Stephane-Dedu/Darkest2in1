@@ -9,6 +9,15 @@ public sealed class CorridorSceneMotion
     public const float WalkingPixelsPerSecond = 320f;
     public const float MaximumWalkingFrameSeconds = .1f;
 
+    public static float StepDuration(float squarePixels,float speedLimit,bool forward)
+    {
+        if (float.IsNaN(squarePixels) || float.IsInfinity(squarePixels) || squarePixels<=0
+            || float.IsNaN(speedLimit) || float.IsInfinity(speedLimit) || speedLimit<=0) return StepSeconds;
+        // Smoothstep's peak speed is 1.5 times its average. A discrete pan must
+        // obey the same fitted walking limit as held movement, including reverse.
+        return Math.Max(StepSeconds,1.5f*squarePixels/(speedLimit*(forward ? 1 : .5f)));
+    }
+
     // Keep a fitted short-legged hero at walking cadence, rather than making it
     // spend multiple gait cycles on one logical square. Very small model scales
     // also reduce camera speed. Native step arc/poses remain untouched.
@@ -31,9 +40,9 @@ public sealed class CorridorSceneMotion
     private float _camera;
     public double Travel { get; private set; }
 
-    public static float Slide(float secondsSinceStep, int stepDirection, float walkProgress)
+    public static float Slide(float secondsSinceStep, int stepDirection, float walkProgress,float duration=StepSeconds)
     {
-        float t = Math.Max(0, Math.Min(1, secondsSinceStep / StepSeconds));
+        float t = Math.Max(0, Math.Min(1, secondsSinceStep / duration));
         float eased = t * t * (3 - 2 * t);
         return stepDirection * 720 * (1 - eased) - walkProgress * 720;
     }

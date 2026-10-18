@@ -6,6 +6,62 @@ The corridor keeps the owner's DD2 hero meshes, textures, palette and weapons.
 No replacement mesh or extracted game asset is distributed, and shared animation
 controllers are not modified. The walk layer affects only the corridor actors.
 
+## Authored walk and opening pace, round264, October 18, 2026
+
+The owner finds the procedural steps sequential and names Vilhelm's walk as the
+reference. The old layer pins each ankle flat until liftoff and calculates its
+return separately from the body. The owned original clip rolls onto the toe
+before recovery, coordinating hips, spine and both legs throughout that transfer.
+
+`HumanoidWalk` samples the installed private clip into a shared distance-space
+pose table. It retains body sway, world rotation deltas, knee positions and foot
+roll, while `CorridorHeroMotion.Authored` fits these to each native rig. The
+native weapon pose is retained, including Leper's separate sword grip. Body
+rotations start from a captured native pose instead of adding unrelated combat
+idle fidgets to each step. Vilhelm's own renderer and animation remain unchanged.
+No animation tracks or game assets are committed. The existing procedural walk
+remains the fallback if the private pack is missing or cannot be sampled.
+
+Contact is the supporting heel or toe, rather than a flat ankle. The first live
+attempt planted an incoming heel while it was still reaching forward, stretching
+the locked foot and pulling the hips down. Contact now requires backward sole
+movement, with travel calibrated against the supporting sole. `HumanoidFootContact`
+allows ankle roll above that contact and preserves starting offsets through
+recovery. Prediction and rendering use the same blended foot rotation, including
+the first frames from combat stance. The shared pose cache is prepared off-thread
+and introduces no extra runtime assembly dependency.
+
+The owner accepts the steady walk, then reports an opening burst. Native traces
+identify the separate fixed 1.2-second button pan: 463.9px/s versus the accepted
+279px/s held pace. `Driver.StepTiming` captures a duration from rendered square
+distance and the party's fitted speed. Smoothstep peaks at 1.5 times its average,
+so that factor belongs in the duration. Reverse uses the existing half-speed
+limit. Scene slide, input guards and the native fixture use that captured duration;
+the accepted steady animation, held pace and full distance are unchanged.
+
+Two contact tests first fail, and a negative control catches premature heel
+support. Five actual Driver/crop replays first reproduce opening peaks of
+450–900px/s; they pass with fitted timing. Another test preserves an active pan's
+duration through a late scale change and rejects repeated input until completion.
+Release, 1,270 Core and 284 UI checks pass. A transient reference party with
+Leper, Highwayman, Vilhelm and Jester passes four native regions; subsequent
+Leper, Shieldbreaker, Flagellant and Jester passes cover the final normal build.
+Forward, reverse, stops and repeated button input are included.
+
+Final button peaks are 278.3–279.0px/s, with held peaks about 279.1px/s. All 16,343
+actor samples use the authored path. Sole slip stays below 0.63 virtual pixels,
+with a 95th percentile below 0.238; IK target error is at most 0.1953px. Native
+35-second captures and pose sheets were inspected. The final preview includes
+the first pan. These checks cover five native classes, not every class/scale or
+ordinary saved-campaign transition.
+
+Evidence, failed passes, red/green commands, source manifests and fresh rollback:
+`local-art/walk-authored-v19`. The installed normal build contains 447 source/data/
+test/project files with 14 owned overlays; private observers and class substitutions
+are excluded. All 190 scenery files, 66 private model files, 13 other plugin files,
+both configs, estate2 and 39 native profile files are preserved. Protected estates
+are not accessed, and independent Shieldbreaker work remains separate.
+
 ## Rear thigh recovery, round263, October 17, 2026
 
 The owner points out that the whole upper leg swings too far behind the body.

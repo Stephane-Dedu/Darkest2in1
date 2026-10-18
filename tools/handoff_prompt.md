@@ -1,5 +1,34 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round264 adapts the owner's private Vilhelm walk to native heroes. HumanoidWalk
+samples coordinated hips/spine/knees/foot roll; native proportions and weapon
+poses remain. HumanoidFootContact supports the rolling heel/toe, with incoming
+heels planted only once moving backward. Prediction/rendering use the same
+blended foot rotation. Vilhelm's own motion is unchanged; missing/bad private
+packs fall back to the previous procedural layer. No game assets committed.
+
+Owner accepts normal-paced walking, then flags a fast beginning. Actual opening
+button pan463.9px/s versus held279px/s. Driver.StepTiming captures duration from
+square pixels and fitted speed, including smoothstep's1.5 peak/mean factor.
+Reverse stays half speed, distance and accepted steady gait unchanged. All
+slide/input/fixture clocks share that duration. Final button278.3-279.0px/s.
+
+Release+1,270 Core+284 UI pass. Contact red/green and premature-heel negative
+control, five red opening-pace cases plus duration/repeat guard. Transient native
+reference party with Vilhelm and final owner party pass all four regions,
+button/forward/reverse/stop/repeated input. Final16,343 authored actor samples,
+sole slip<0.630px/P95<0.238px, IK error0.1953px.35s native videos/poses inspected;
+final walk-preview.mp4 includes the opening step. Other classes/scales and
+ordinary saved handoffs remain broader acceptance. Keep accepted steady gait.
+
+Installed447-source normal snapshot,14 owned files, manifests/fresh rollback,
+failed native iterations/red-green logs: local-art/walk-authored-v19. Temporary
+observer/private classes excluded.190 scenery,66 model,13 other plugin,2 config,
+estate2 and39 native profile files preserved; protected1/3 untouched. Independent
+Shieldbreaker/journal work retained. All owned QA closed; owner permits launch/
+record. Next round265. Capture fresh hashes before deploying; old restore scripts
+would undo this build. See tools/corridor_heroes.md. Earlier handoffs historical.
+
 Round263 corrects excessive backward thigh swing. Native hip/knee traces show
 35.67 degrees during continuous walking with an almost locked knee after liftoff.
 CorridorKneeRecovery retains last support angle, then relaxes toward20 degrees

@@ -7595,3 +7595,64 @@ snapshot excludes observers, preserves assets/config/saves/profiles and unrelate
 work. DD2 stopped. Native steady airborne rear angle35.67->22.58; startup combat
 stance still blends out. See tools/corridor_heroes.md. Next round264. Use fresh
 installed hashes before deployment; older rollback scripts would undo this build.
+
+
+## Round264 (2026-10-18): authored walk and a capped opening pan
+
+Owner finds steps sequential, with Vilhelm's original walk the desired reference.
+The old native layer pins an ankle flat until liftoff, then schedules recovery
+separately from the body. HumanoidWalk samples the installed owned clip into a
+shared distance-space pose table. Native rig proportions receive coordinated
+pelvis/spine/leg motion and rolling heel/toe support. Source knee poles avoid
+the old free-thigh clamp plateau. Native weapon poses and Leper's sword grip
+are retained; Vilhelm's own renderer/clock are unchanged. Optional sampling
+is prepared off-thread. Missing/bad private packs keep the procedural fallback.
+No extra runtime assemblies or game-derived assets are distributed.
+
+First native pass catches premature heel support while the arriving foot is
+still reaching forward. It stretches a locked contact and drops the body.
+Support now requires backward sole movement, and retargeted travel is calibrated
+to the supporting sole. Contact prediction and rendering share the same blended
+ankle rotation, removing startup sole drift. Two contact tests first red; the
+owned clip check plus a negative control catch the premature heel plant.
+
+Owner then accepts the steady result but reports the opening burst. Its separate
+1.2s button pan actually peaks at 463.9px/s versus 279px/s held movement. Five
+red actual Driver/crop replays show 450-900px/s across size/fallback/reverse cases.
+Driver.StepTiming captures each pan's duration from rendered square pixels and
+fitted party speed, accounting for smoothstep's 1.5x peak/mean factor. Reverse
+retains half speed. Slide and all input guards share the captured duration; a
+late model/scale update cannot retime an active pan. Sixth regression verifies
+that guard and repeat rejection. The accepted steady gait and held pace stay
+unchanged, and the full square distance is retained.
+
+Release +1,270 Core +284 UI checks pass. A shared Core build-output collision
+during parallel test builds is recorded privately; sequential rerun passes.
+Transient Leper/Highwayman/Vilhelm/Jester comparison and owner-party Leper/
+Shieldbreaker/Flagellant/Jester routes pass all four regions. Final fixture
+also measures button pans, then forward/reverse/stop/repeated-input routes.
+Button peaks 278.3-279.0px/s, held about279.1px/s. Final16,343 actor samples all
+use authored motion; sole slip max0.630px, P95<0.238px, IK error0.1953px. Several
+native35s1600x900 captures/pose sheets inspected; final preview includes the
+opening step. Owner accepts steady feel. Other classes/scales and ordinary saved
+handoffs remain broader acceptance work; do not claim universal perfection.
+
+Installed447-source normal snapshot overlays14 owned source/test files on263.
+Private observer/class substitutions excluded. Four artifacts match build,
+plugin SHA256 4e5a0dab9c46a4dec2b2495e5e5ea0a9dbd38e4878c3d489983795de10fbf75e.190 scenery files,66 private model files,13 other plugin
+files,2 configs,estate2 and39 native profiles preserved. Protected estates1/3
+not accessed. Independent Shieldbreaker/journal work retained. All owned QA
+closed. Evidence, failed iterations, source manifests, fresh rollback and
+walk-preview.mp4: local-art/walk-authored-v19. See tools/corridor_heroes.md.
+
+## Status 2026-10-18: authored walking and opening pace installed
+
+Round264 uses the owner's existing private Vilhelm clip to coordinate native
+body/leg/foot roll. Steady feel accepted by owner. The initial fixed-duration
+button burst is capped to the same fitted walking speed, 464->279px/s. Release
+and1,554 tests pass, with final owner-party four-region native evidence. Normal
+447-source/14-file snapshot installed, observer removed, assets/config/saves/
+profiles and unrelated work preserved. DD2 stopped. Launch/record authorization
+remains current. Next round265. Use fresh installed hashes before deployment;
+older restores would undo this build. Other native classes/scales and ordinary
+saved transitions remain broader acceptance work. Keep the accepted steady gait.

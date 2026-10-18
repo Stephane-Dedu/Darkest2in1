@@ -38,7 +38,7 @@ internal static class CrawlSceneryCheck
         if (s == null || d == null) return;
         try
         {
-            if (MotionChecking && _step >= 100 && _step <= 102 && OwnsSession
+            if (MotionChecking && _step >= 99 && _step <= 102 && OwnsSession
                 && d.Phase == Phase.Crawling && !d.Expedition.InRoom)
                 ObserveMotion(d);
             if (Time.unscaledTime < _next) return;
@@ -96,8 +96,8 @@ internal static class CrawlSceneryCheck
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
                         d.Travel(1);
-                        // Travel uses the shared walking-duration easing.
-                        // Measure the ordinary held route once that transition has settled.
+                        // Hall entry uses its room fade; the next case exercises
+                        // an actual button step before the ordinary held route.
                         _step = 98; _next = Time.unscaledTime+CorridorSceneMotion.StepSeconds+.1f; _wait = Time.unscaledTime; break;
                     }
                     Advance("entrance-native-actors",d,2,VilhelmChecking ? 15 : 1.5f); break;
@@ -106,9 +106,12 @@ internal static class CrawlSceneryCheck
                     Require(exp.TileIndex == 1,"First ordinary button step was rejected");
                     d.Step(true);
                     Require(exp.TileIndex == 1,"A repeated button step skipped ahead while the ground was moving");
+                    _motionSampled=false;_motionFrames=0;_motionMaximum=0;
                     Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} button; repeated step rejected during the walking-duration pan");
-                    _step = 99; _next = Time.unscaledTime+CorridorSceneMotion.StepSeconds+.1f; break;
+                    _step = 99; _next = Time.unscaledTime+d.StepAnimationSeconds+.1f; break;
                 case 99:
+                    Require(_motionFrames>10,"Button pan was not observed");
+                    Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} button-finished; maximumPanSpeed={_motionMaximum:0.0}");
                     d.WalkToTile(0,5);
                     _motionSampled = false; _motionFrames = 0; _motionMaximum = 0;
                     Plugin.Log.LogInfo($"[crawl motion] {Regions[_region]} forward; continuous ordinary map route; nativeActors={HeroStage.Lit}");
@@ -251,8 +254,8 @@ internal static class CrawlSceneryCheck
         if (_motionSampled && now > _motionTime)
         {
             float dt = now-_motionTime, distance = Mathf.Abs(camera-_motionCamera);
-            // This samples held routes, after the separate button-step test.
-            // One physical walking limit applies across hall lengths and crop zoom.
+            // Button steps and held routes share one physical walking limit,
+            // across hall lengths and crop zoom.
             float maximum = HeroStage.Instance?.WalkingSpeedLimit ?? CorridorSceneMotion.WalkingPixelsPerSecond;
             Require(distance <= maximum*dt+3,"Panorama jumped at a tile boundary or reversal");
             _motionMaximum = Mathf.Max(_motionMaximum,distance/dt); _motionFrames++;
