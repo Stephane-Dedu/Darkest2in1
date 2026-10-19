@@ -7840,3 +7840,31 @@ Evidence, originals, prompts, provenance, both mesh iterations, audit, native ca
 baseline/deployment records: local-art/ui-overhaul/hamlet-material-v20. Further quality work:
 forge roof/hood/anvil, wagon joinery, physical Guild crest, bespoke facade wear and more native
 lighting integration. Do not claim final DD2 production-art parity from texture detail alone.
+
+
+## Round269 — workshop materials and fitted details (2026-10-19)
+
+Round269 refines the forge, Nomad Wagon and Guild crest. The forge has a thick slate
+canopy, correctly oriented small firebrick courses, recessed hearth, faceted iron anvil
+and working-face detail. The wagon has worn plum canvas without the repeated atlas,
+fitted door boards, open stair treads and enclosed side/rear walls. The Guild crest has
+tapered blades, guards, pommels and a steel-edged shield. Three new generated paintings
+use native DD2 references; an earlier cracked iron painting was rejected. Native cottage,
+Hoarder and camp component geometry/UVs are preserved. Seven source GLBs are byte-identical.
+
+Three exported-model review passes caught rotated chimney UVs, oversized stair grain and
+the original wagon's open sides. Final GLBs pass re-imported topology/bounds/image checks;
+the complete ten-model audit finds none of the six old DD1 detail bitmaps. Asset-only:
+normal267 plugin unchanged, no new C# test claim. See private native.log and deployment.json
+for exact final native acceptance and installation, rather than inferring it from renders.
+
+Private evidence and reproducible inputs: local-art/ui-overhaul/hamlet-workshops-v21.
+The remaining native cottage thatch is softer than the new canopy, forge roof joins need
+further architectural work, and wagon end-board grain remains large. Broader lighting,
+NPC/upgrade exteriors, saved transactions and long-session memory are unfinished. The
+packager still duplicates embedded image payloads; this round does not fix that cost.
+
+
+## Status 2026-10-19: workshop pass installed
+
+Final native fixture PASS: ten services, camera, full release/reload, Embark cache/resume, resize, keyboard and still camera/smoke. Zero live OS input; no estate selected/saved. Fresh1920 overview inspected;214renderers,0 repeated buffer allocations/5.039sec. Final asset package installed, normal267 plugin unchanged, native profiles/config/estate2 restored and hashes verified. DD2 CLOSED. Protected estates untouched. Next round270.

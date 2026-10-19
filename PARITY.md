@@ -656,3 +656,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round268 separate Abbey/Guild/Sanitarium wall finishes, detailed roofs/wood and DD2-redesigned service emblems. Native glass/physical rose replace old DD1 imagery. Ten-GLB pixel audit, exported bounds/images/four-view checks and native unsaved service/lifecycle fixture pass; plugin unchanged. Evidence:local-art/ui-overhaul/hamlet-material-v20.
 - [ ] Material/design finish remains open: forge roof/hood/anvil, wagon joinery, physical Guild crest, facade-specific weathering and native lighting. Package memory/size, saved transactions, controller and full performance remain unverified.
+
+- [x] Round269 offline workshop pass: three refined models, seven exact source GLBs, native component geometry/UV retention, exported topology/bounds/paint checks and ten-model legacy pixel audit. Forge firebrick/canopy/anvil, wagon canvas/boards/treads/enclosure and physical Guild crest.
+- [?] Round269 remaining art: softer native cottage thatch, forge roof joins, large wagon end grain, lighting/NPC/exterior variants and package image duplication. See local-art/ui-overhaul/hamlet-workshops-v21/CONTINUE.md for final native/deployment evidence.
+
+- [x] Round269 final native acceptance: Final native fixture PASS: ten services, camera, full release/reload, Embark cache/resume, resize, keyboard and still camera/smoke. Zero live OS input; no estate selected/saved. Fresh1920 overview inspected;214renderers,0 repeated buffer allocations/5.039sec. Final asset package installed, normal267 plugin unchanged, native profiles/config/estate2 restored and hashes verified. DD2 CLOSED. Protected estates untouched. Next round270.

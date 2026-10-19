@@ -1,5 +1,15 @@
 # Hamlet building models
 
+Round269 workshop package and evidence: `local-art/ui-overhaul/hamlet-workshops-v21`.
+Use `prepare_workshops.py` with `--source` v20/models, `--paintings` v21/paintings and
+a new private `--out`. Then run `workshops.py` through Blender with the same source,
+output and `--kit ../local-art/dd2-native-kit`, followed by the ordinary `package.py`.
+The preparer copies the three reviewed paintings without resampling. The Blender pass
+refines three models, preserves seven GLBs exactly, checks native geometry/UV retention,
+re-imports exports and renders four views each. Consult CONTINUE.md before deployment.
+
+Earlier package notes follow.
+
 Round268's installed material package is `local-art/ui-overhaul/hamlet-material-v20/HamletModels`:
 ten models,61 hashed files,117.5MB. Three services have independent wall/roof/wood finishes;
 Guild/forge/wagon emblems are repainted and DD1 glass is replaced. The Abbey rose is

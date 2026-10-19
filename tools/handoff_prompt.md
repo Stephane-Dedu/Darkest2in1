@@ -1,5 +1,10 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round269 workshop materials/geometry: read local-art/ui-overhaul/hamlet-workshops-v21/CONTINUE.md
+first for exact final native/deployment status. Three revised services, seven unchanged GLBs.
+Preserve foreign gameplay WIP and protected estates. Usage reserve7-8%; check before work.
+Next round270. Earlier handoffs are historical.
+
 Round268: independent service materials and removal of legacy DD1 building-detail bitmaps.
 Read local-art/ui-overhaul/hamlet-material-v20/CONTINUE.md for current deployment, native
 evidence and remaining work. Asset-only round; normal267 plugin unchanged. Nine generated

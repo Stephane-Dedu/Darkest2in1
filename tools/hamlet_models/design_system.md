@@ -59,3 +59,15 @@ Runtime fits the longest horizontal model dimension to `Site.Width`, so changing
 depth also changes the apparent height and width. Review in the full town after
 every substantial silhouette change. Verify all ten service clicks, scene release,
 reload and cached return before marking an installed round complete.
+
+
+## Workshop finish, v21
+
+Forge firebricks use world-height courses at a 3.5-unit period so imported local axes
+cannot turn them vertical. Thin slate canopy, warm brick, black recess and worn metal
+distinguish the workshop. Caravan cloth maps once along its full length; narrow boards
+and physical tread gaps define the joinery. Native cottage/Hoarder atlases retain their
+original UVs. The three new paints are generated reference paintings, not extracted art.
+Review all sides: a convincing front can conceal missing side walls. Inspect roof joins
+and texture scale in the town before accepting another reuse. Native thatch and large
+wagon end grain remain candidates for a better fitted architectural finish.
