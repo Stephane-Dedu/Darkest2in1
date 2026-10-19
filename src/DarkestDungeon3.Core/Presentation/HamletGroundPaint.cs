@@ -25,7 +25,7 @@ public static class HamletGroundPaint
         float height=HamletLayout.Height(x,z),rise=0,contact=0;
         foreach (var d in new[] { (-2.5f,0f),(2.5f,0f),(0f,-2.5f),(0f,2.5f) })
             rise=Math.Max(rise,HamletLayout.Height(x+d.Item1,z+d.Item2)-height);
-        foreach (var site in HamletLayout.Sites)
+        foreach (var site in HamletLayout.Foundations)
         {
             float a=site.Yaw*(float)Math.PI/180,c=(float)Math.Cos(a),s=(float)Math.Sin(a);
             float dx=x-site.X,dz=z-site.Z;

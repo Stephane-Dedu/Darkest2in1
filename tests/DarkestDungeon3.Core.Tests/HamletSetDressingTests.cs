@@ -55,7 +55,7 @@ public class HamletSetDressingTests
         Assert.All(HamletSetDressing.Mists,m=>Assert.True(m.Z>back+20 && m.Opacity<=.15f));
         var roof=HamletSetDressing.FacetTint(0,1,0);
         var wall=HamletSetDressing.FacetTint(1,0,0);
-        Assert.True(roof.Z>roof.X && roof.Y>wall.Y);
+        Assert.True(roof.X>roof.Z && roof.Y>wall.Y); // Warm dusk key against cooler shaded stone.
         Assert.All(new[] { roof.X,roof.Y,roof.Z,wall.X,wall.Y,wall.Z },v=>Assert.InRange(v,.7f,1.15f));
     }
 }

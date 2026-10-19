@@ -31,7 +31,7 @@ public class HamletLayoutTests
     [Fact]
     public void EveryRotatedBuildingFootprintHasLevelGround()
     {
-        foreach (var site in HamletLayout.Sites)
+        foreach (var site in HamletLayout.Foundations)
         {
             double angle=site.Yaw*Math.PI/180;
             foreach (float x in new[] { -.5f, 0, .5f }) foreach (float z in new[] { -.5f, 0, .5f })

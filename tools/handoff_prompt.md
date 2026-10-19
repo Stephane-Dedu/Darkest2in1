@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round267: fuller town plus rebuilt Abbey/Guild/Sanitarium. Latest private checkpoint:
+local-art/ui-overhaul/hamlet-material-v19/CONTINUE.md. Read it before deployment. Native
+unsaved lifecycle/service checks and1551 tests pass; art parity remains unfinished.
+Source/package/provenance/build/QA records are in v19. Owner wants continued iteration,
+especially buildings, while stopping with7-8% account usage left; hourly heartbeat resumes
+after reset. Check usage first. Never touch estates1/3. Other gameplay/Shieldbreaker work
+is foreign and must stay intact. Next round268. Earlier handoffs are historical.
+
 Round266 installs a cinematic Hamlet pass, focused separately from the other
 agent's gameplay fixes. DD1 epilogue25.5sec is the reference: lower camera,
 larger services, original dark rock/UV scale with stronger contrast, native

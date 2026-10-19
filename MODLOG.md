@@ -7779,3 +7779,36 @@ detailed service models. Release+1,551 tests, unsaved native interaction/cache/
 resize checks and final1920 overview pass. Normal frozen build installed;
 game closed; save/config/profile hashes preserved. Concurrent gameplay WIP
 excluded and retained. Remaining art/lifecycle acceptance above. Next round267.
+
+
+## Round267 — fuller Hamlet and service architecture (2026-10-19)
+
+Round267 combines a fuller town with rebuilt Abbey, Guild and Sanitarium architecture.
+Fifteen grounded native DD2 lots, a windmill and three streets use shared terrain pads and
+vegetation clearance. Native decorative building paint retains up to2048px; cached terrain,
+lanes and valley paint use4096px (192MiB retained managed paint, plus GPU textures).
+
+The three services now have cut door/window recesses, physical arch stones, sagged thick roofs
+and side windows. The Abbey has its DD1 rose and a native Sprawl tower. The Guild has a plaster/
+timber upper hall, oxblood dormers and sword standards. The Sanitarium combines a uniformly
+scaled native Academic house with a stone turret, green casement and apothecary porch.
+Seven other models match the previous approved package. Abbey's terrain pad is widened.
+
+Private v19 materials combine native wood, plaster, cut stone and courtyard paving with the
+v18 generated ashlar/slate/red-roof paintings. The v17 generated masonry was rejected and is
+not installed. Optional v17 sky/cliff paintings remain, with native fallback. Provenance and
+prompts stay outside Git. All generated art remains under visual review: the new masonry is
+still too regular beside native DD2 facades, and the other seven services need further review.
+
+Frozen HEADa2914aa plus owned Hamlet files excludes concurrent gameplay/Shieldbreaker changes.
+Release,1267 Core and284 UI tests pass. Unsaved native fixture passes ten services, Escape,
+pan/zoom/reset, full release/reload/re-entry, Embark park/cache/resume, resize/restore, keyboard
+and still-camera/smoke.208 renderers; zero repeated buffer allocations over5.032sec. This does
+not establish full frame-time/long-session performance or saved campaign transactions.
+Evidence and guarded deployment scripts: local-art/ui-overhaul/hamlet-material-v19.
+Protected estates1/3 were never accessed. See that folder's CONTINUE.md for current deployment.
+The following round266 notes are historical where they conflict with this pass.
+
+Native1920x1080 overview and final deployment are recorded separately in the private
+checkpoint. Generated stone remains too regular for final DD2 art parity; subsequent work
+must improve painted shapes and weathering rather than merely adding texture resolution.

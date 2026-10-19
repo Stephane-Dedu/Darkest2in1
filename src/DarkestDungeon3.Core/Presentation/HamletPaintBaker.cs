@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Presentation;
 public static class HamletPaintBaker
 {
     public const int TileSize = 512;
-    public const int PaintSize = 2048;
+    public const int PaintSize = 4096;
 
     public sealed class Result
     {

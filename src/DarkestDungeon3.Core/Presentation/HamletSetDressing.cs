@@ -51,9 +51,9 @@ public static class HamletSetDressing
         new("camp_building","stage_coach",-42,-9,5.2f,12),
         new("camp_chest","stage_coach",-40,-12,1.5f,-8),
         new("common_prop_lamppost","stage_coach",-39,-14,1.15f,15),
-        new("camp_barrel","sanitarium",-24.5f,25,1.4f,-12),
-        new("camp_crate","sanitarium",-24,27,1.8f,8),
-        new("common_prop_lamppost","sanitarium",-23.8f,22.5f,1.1f),
+        new("camp_barrel","sanitarium",-21,17,1.4f,-12),
+        new("camp_crate","sanitarium",-19.5f,18.5f,1.8f,8),
+        new("common_prop_lamppost","sanitarium",-20,14.5f,1.1f),
         new("camp_axe","guild",36,24,1.5f,-20),
         new("camp_chest","guild",36.3f,22,1.9f,90),
         new("camp_crate","blacksmith",43.8f,-2,1.8f,17),
@@ -101,7 +101,7 @@ public static class HamletSetDressing
     {
         // Albedo grading, not emission. Preserve ink shadows and painted warm windows.
         float key=nx*-.35f+ny*.75f+nz*-.55f;
-        return key>.35f ? new(1.04f,1.10f,1.15f) : key<-.15f ? new(.70f,.74f,.82f) : new(.88f,.92f,.96f);
+        return key>.35f ? new(1.14f,1.08f,.96f) : key<-.15f ? new(.70f,.76f,.86f) : new(.95f,.94f,.93f);
     }
     public static HamletTerrain.Surface BuildRocks()
     {

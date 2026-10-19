@@ -31,11 +31,11 @@ public static class HamletLandscape
     public static readonly Prop[] Props =
     {
         // Gnarled Tangle trees, roots and broken palisades enclose the inhabited clearing.
-        new("forest_tile_12",Forest+"forest_tile_12.prefab",-75,49,30,18,.86f),
-        new("forest_tile_01",Forest+"forest_tile_01.prefab",-49,75,28,-20,.85f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",-82,49,30,18,.86f),
+        new("forest_tile_01",Forest+"forest_tile_01.prefab",-64,92,28,-20,.85f),
         new("forest_tile_12",Forest+"forest_tile_12.prefab",-16,94,32,35,.80f),
         new("forest_tile_01",Forest+"forest_tile_01.prefab",38,88,30,12,.85f),
-        new("forest_tile_12",Forest+"forest_tile_12.prefab",70,59,30,-25,.85f),
+        new("forest_tile_12",Forest+"forest_tile_12.prefab",82,66,30,-25,.85f),
         new("forest_tile_01",Forest+"forest_tile_01.prefab",78,28,28,20,.80f),
         new("forest_tile_12",Forest+"forest_tile_12.prefab",-80,4,28,35,.82f),
         new("forest_tile_01",Forest+"forest_tile_01.prefab",-70,26,26,-38,.85f),
@@ -43,7 +43,7 @@ public static class HamletLandscape
         new("forest_tile_12",Forest+"forest_tile_12.prefab",61,-19,22,25,.60f),
         new("forest_tile_01",Forest+"forest_tile_01.prefab",-77,-22,23,-15,.70f),
         new("forest_tile_04",Forest+"forest_tile_04.prefab",-29,-49,18,15,.90f),
-        new("forest_tile_04",Forest+"forest_tile_04.prefab",31,-43,19,-25,.90f),
+        new("forest_tile_04",Forest+"forest_tile_04.prefab",54,-53,19,-25,.90f),
         new("forest_tile_12",Forest+"forest_tile_12.prefab",-15,-45,16,45,.40f),
         new("forest_tile_12",Forest+"forest_tile_12.prefab",50,-42,17,-30,.45f),
         new("valley_tile_02",Valley+"valley_tile_02.prefab",-106,98,23,-8,.72f),

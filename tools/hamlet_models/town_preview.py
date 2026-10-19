@@ -75,7 +75,7 @@ def painted_ground(name, texture, paint, vertex_shade=False, cutout=False):
 
 def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=None,lanes=None):
     """Approximate the native one-time world paint bake with the exported Core stain field."""
-    size=2048
+    size=4096
     def tile(image,paint,u,v):
         pixels=np.array(image.pixels[:],dtype=np.float32).reshape(image.size[1],image.size[0],4)
         mirror=lambda value:1-np.abs(np.mod(value,2)-1)
@@ -135,7 +135,7 @@ def quiet_building_materials(objects):
 
 def building_facets(objects):
     """Match the runtime's three bounded albedo tints, without changing UVs or silhouettes."""
-    tints=[(.70,.74,.82,1),(.88,.92,.96,1),(1.04,1.10,1.15,1)]
+    tints=[(.70,.76,.86,1),(.95,.94,.93,1),(1.14,1.08,.96,1)]
     for obj in objects:
         originals=list(obj.data.materials); original_slots=[p.material_index for p in obj.data.polygons]
         obj.data.materials.clear()
@@ -238,12 +238,14 @@ def main(args):
     texture=bpy.data.images.load(str(out/'road_rough_patch.png'))
     soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
     cliff=bpy.data.images.load(str(out/'farm_eroded_hill.png'))
+    private_cliff=out/'hamlet-cliff-v17.png'
+    if private_cliff.exists(): cliff=bpy.data.images.load(str(private_cliff))
     wall=bpy.data.images.load(str(out/'foundation_panel_06.png'))
     grass=bpy.data.images.load(str(out/'grass_dry.png'))
     tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
     earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
-    rock=painted_ground('Native painted rock',cliff,palette['Rock'],True)
+    rock=painted_ground('Hamlet cliff paint',cliff,data['CliffPaint'] if private_cliff.exists() else palette['Rock'],True)
     emission=next(n for n in rock.node_tree.nodes if n.type=='EMISSION')
     emission.inputs['Strength'].default_value=.68
     paving=paving or painted_ground('Native foundation paving',texture,palette['Paving'])
@@ -266,6 +268,14 @@ def main(args):
         before=set(bpy.data.objects)
         bpy.ops.import_scene.gltf(filepath=str(path))
         objects=[obj for obj in bpy.data.objects if obj not in before and obj.type=='MESH']
+        masonry=out/'hamlet-masonry-v17.png'
+        if masonry.exists():
+            image=bpy.data.images.load(str(masonry),check_existing=True)
+            for obj in objects:
+                for slot in obj.material_slots:
+                    if not any(part in slot.material.name.lower() for part in ['carved masonry','pale coping','weathered sill','stone threshold','sooty forge']): continue
+                    for node in slot.material.node_tree.nodes:
+                        if node.type=='TEX_IMAGE': node.image=image
         points=np.array([tuple(obj.matrix_world@v.co) for obj in objects for v in obj.data.vertices])
         lo,hi=points.min(0),points.max(0); scale=site['Width']/max((hi-lo)[:2])
         center=Vector(((lo[0]+hi[0])/2,(lo[1]+hi[1])/2,lo[2]))
@@ -302,16 +312,19 @@ def main(args):
             if piece.get('Background') and piece['Z']>110: paint=palette['DistantWoodland']
             if piece['Id'].startswith('forest_tile_'): paint=palette['Wildwood']
             if piece['Id'].startswith('city_'): paint={'Tint':{'X':.42,'Y':.46,'Z':.54},'Brightness':.002,'Saturation':.35,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
+            if piece.get('Architecture'): paint=palette['Building']
             for obj in objects:
                 for slot in obj.material_slots:
                     texture_node=next(n for n in slot.material.node_tree.nodes if n.type=='TEX_IMAGE')
                     slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint,cutout=piece.get('Background',False))
     if 'EstateSky' in data:
         sky=data['EstateSky'];w=sky['SkyWidth']/2;z=sky['SkyDepth']
-        image=bpy.data.images.load(str(args.kit.parent/'dd1-reference-kit/town/base/town_bg.png'))
+        private_sky=out/'hamlet-sky-v17.png'
+        image=bpy.data.images.load(str(private_sky if private_sky.exists() else args.kit.parent/'dd1-reference-kit/town/base/town_bg.png'))
         neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
-        surface('Native overcast estate sky',{'Positions':[-w,sky['SkyBottom'],z,-w,sky['SkyTop'],z,w,sky['SkyTop'],z,w,sky['SkyBottom'],z],
-            'Uv':[0,.65,0,1,1,1,1,.65],'Indices':[0,1,2,0,2,3]},[painted_ground('Estate sky',image,neutral)])
+        shift=-80 if private_sky.exists() else 0;low=0 if private_sky.exists() else .65
+        surface('Estate sky',{'Positions':[shift-w,sky['SkyBottom'],z,shift-w,sky['SkyTop'],z,shift+w,sky['SkyTop'],z,shift+w,sky['SkyBottom'],z],
+            'Uv':[0,low,0,1,1,1,1,low],'Indices':[0,1,2,0,2,3]},[painted_ground('Estate sky',image,neutral)])
     depth_mist(data.get('Mists',[]))
     target=data['CameraTarget']; offset=data['CameraOffset']
     aim=Vector((target['X'],target['Z'],target['Y']))

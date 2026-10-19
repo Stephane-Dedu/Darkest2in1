@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DarkestDungeon3.Core.Presentation;
+using DarkestDungeon3.Runtime;
 using UnityEngine;
 
 namespace DarkestDungeon3.Dd2;
@@ -16,6 +17,7 @@ internal sealed partial class HamletStage
 
     private void AdvanceGroundPaint()
     {
+        if (_cliffPaintPath!=null && !Art.ImageFinished(_cliffPaintPath)) return;
         if (_groundMaterial == null) PrepareGround();
         if (_groundPaintTask != null) return;
         var inputs = new[] { BaseTexture(_groundMaterial), BaseTexture(_groundPaving), _groundGrass, BaseTexture(_groundRock) };
@@ -39,7 +41,7 @@ internal sealed partial class HamletStage
     {
         if (!_groundPaintTask.IsCompleted) return false;
         _groundPaint ??= _groundPaintTask.GetAwaiter().GetResult();
-        // One owned 2048px texture per frame. The torch can animate between uploads.
+        // One owned texture per frame. The torch can animate between uploads.
         if (_groundUpload == 0)
         {
             SetPaintTexture(_groundValley, UploadPaint(_groundPaint.Valley, "Hamlet painted valley and outward road"));
@@ -60,7 +62,7 @@ internal sealed partial class HamletStage
     private Texture2D UploadPaint(byte[] pixels, string name)
     {
         var texture = new Texture2D(_groundPaint.Size, _groundPaint.Size, TextureFormat.RGBA32, true, false)
-        { name = name, wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
+        { name = name, wrapMode = TextureWrapMode.Clamp, filterMode = FilterMode.Trilinear, anisoLevel = 8 };
         _details.Add(texture); texture.SetPixelData(pixels, 0); texture.Apply(true, true); return texture;
     }
 

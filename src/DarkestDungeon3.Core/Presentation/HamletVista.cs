@@ -21,9 +21,6 @@ public static class HamletVista
         new("city_tower_01",City+"city_tower_01.fbx",43.5f,18,156,5.5f,heightScale:1.1f,distant:true),
         new("city_tower_03",City+"city_tower_03.fbx",61,15.8f,156,5.5f,heightScale:1.1f,distant:true),
         new("city_tower_02",City+"city_tower_02.fbx",52,21,157,4.4f,heightScale:1.7f,distant:true),
-        new("valley_cottage_01",Valley+"valley_cottage_01.fbx",-31,HamletLayout.Height(-31,30),30,8,12),
-        new("valley_cottage_02",Valley+"valley_cottage_02.fbx",36,HamletLayout.Height(36,36),36,8,-8),
-        new("valley_cottage_01",Valley+"valley_cottage_01.fbx",-24,HamletLayout.Height(-24,50),50,9,15),
     };
     public const float SkyDepth=230,SkyWidth=600,SkyBottom=-120,SkyTop=220;
 }

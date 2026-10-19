@@ -13,6 +13,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
     EstateSky=new { HamletVista.SkyDepth,HamletVista.SkyWidth,HamletVista.SkyBottom,HamletVista.SkyTop },
+    CliffPaint=HamletTownscape.CliffPaint,
     Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
     Outcrops=HamletSetDressing.BuildRocks(),Mists=HamletSetDressing.Mists,
     EntranceLight=Enumerable.Range(0,256*256).Select(i=>HamletSetDressing.EntranceLight(
@@ -60,6 +61,8 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
         Scenery("coast_skirt_cliffs_mdl_01",-59,-2,-7,15,15),Scenery("coast_skirt_cliffs_mdl_01",49,-1,25,18,-25)
     }.Concat(HamletVista.Pieces.Select(p=>(object)new
     { Id=p.Asset,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,p.DepthScale,Background=p.Distant }))
+    .Concat(HamletTownscape.Lots.Select(l=>(object)new
+    { Id=l.Asset,l.Pad.X,l.Pad.Y,l.Pad.Z,l.Pad.Width,l.Pad.Yaw,HeightScale=1,DepthScale=1,Architecture=true }))
     .Concat(HamletLandscape.Props.Select(p=>(object)new
     { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,DepthScale=1,Background=true }))
     .Concat(HamletSetDressing.Props.Select(p=>(object)new { p.Id,p.X,p.Y,p.Z,p.Width,p.Yaw,p.HeightScale,p.DepthScale }))

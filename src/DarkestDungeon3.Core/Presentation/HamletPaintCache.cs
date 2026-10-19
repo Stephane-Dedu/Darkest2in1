@@ -29,7 +29,7 @@ public sealed class HamletPaintCache
             hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
             key = BitConverter.ToString(hash.Hash);
         }
-        // All callers are managed workers. Serializing misses avoids duplicate 48MiB bakes.
+        // All callers are managed workers. Serializing misses avoids duplicate terrain bakes.
         lock (_gate)
         {
             cancellation.ThrowIfCancellationRequested();

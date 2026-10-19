@@ -70,6 +70,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         new(null, "Assets/Art/Models/Environments/Coast/Models/Skirt/coast_skirt_cliffs_mdl_01.fbx", 49, -1, 25, 18, -25),
     }.Concat(HamletVista.Pieces.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
         heightScale:p.HeightScale,depthScale:p.DepthScale,absolute:true,background:p.Distant)))
+    .Concat(HamletTownscape.Lots.Select(l=>new Piece(null,l.Path,l.Pad.X,l.Pad.Y,l.Pad.Z,l.Pad.Width,l.Pad.Yaw,absolute:true)))
     .Concat(HamletLandscape.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,
         heightScale:p.HeightScale,absolute:true,background:true)))
         .Concat(HamletSetDressing.Props.Select(p=>new Piece(null,p.Path,p.X,p.Y,p.Z,p.Width,p.Yaw,absolute:true))).ToArray();
@@ -227,7 +228,7 @@ internal sealed partial class HamletStage : MonoBehaviour
         ResetView();
         MoveCamera(1);
         BeginModels();
-        if (Session.Current?.Dd1 is { } dd1) Art.PrepareImage(dd1.PathOf("campaign","town","town_bg.png"));
+        PrepareTownArt();
         foreach (var piece in Pieces)
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);
@@ -368,8 +369,8 @@ internal sealed partial class HamletStage : MonoBehaviour
             }
             else if (piece.Path.Contains("barricade_military_decor_rocks") || piece.Path.Contains("coast_skirt_cliffs"))
                 foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Rubble);
-            else if (piece.Path.Contains("/Valley/Models/Buildings/"))
-                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Building,false);
+            else if (piece.Path.Contains("/Models/Buildings/") || piece.Path.Contains("city_building_"))
+                foreach (var painted in renderer.sharedMaterials) Grade(painted,HamletPalette.Building,false,2048);
             renderer.shadowCastingMode = ShadowCastingMode.Off;
             renderer.receiveShadows = false;
             var block = new MaterialPropertyBlock();

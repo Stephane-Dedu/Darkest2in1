@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed partial class HamletStage
 {
     private readonly HashSet<Material> _gradedMaterials=new();
-    private readonly Dictionary<(int,HamletPalette.Paint,bool),Texture2D> _gradedPaint=new();
+    private readonly Dictionary<(int,HamletPalette.Paint,bool,int),Texture2D> _gradedPaint=new();
     private sealed class PaintJob
     {
         internal Texture Source;
@@ -23,16 +23,16 @@ internal sealed partial class HamletStage
     private CancellationTokenSource _paintCancellation;
     private bool PaintReady => _paintJobs.Count == 0;
 
-    private void Grade(Material material,HamletPalette.Paint paint,bool crop=true)
+    private void Grade(Material material,HamletPalette.Paint paint,bool crop=true,int maximum=0)
     {
         if (material==null || !_gradedMaterials.Add(material)) return;
         if (BaseTexture(material) is { } source)
         {
-            var key=(source.GetInstanceID(),paint,crop);
+            int size=maximum>0?maximum:material.name.StartsWith("Hamlet paint ")?2048:material.name.Contains("mountain")
+                || material.name=="Hamlet worn stone paths" || material.name=="Hamlet exposed cliff rock"?1024:512;
+            var key=(source.GetInstanceID(),paint,crop,size);
             if (!_gradedPaint.TryGetValue(key,out var texture))
             {
-                int size=material.name.StartsWith("Hamlet paint ")?2048:material.name.Contains("mountain")
-                    || material.name=="Hamlet worn stone paths" || material.name=="Hamlet exposed cliff rock"?1024:512;
                 texture=PaintCopy(source,paint,crop,size); _gradedPaint.Add(key,texture);
             }
             SetPaintTexture(material,texture);

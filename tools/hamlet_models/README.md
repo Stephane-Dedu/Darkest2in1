@@ -1,5 +1,23 @@
 # Hamlet building models
 
+Round267's current building package is `local-art/ui-overhaul/hamlet-material-v19/HamletModels`:
+ten models,58 hashed files,72.1MB. Abbey/Guild/Sanitarium are rebuilt; seven others match the
+approved v15 package. `design_system.md` records the architectural and material rules.
+
+Reproduce in a new private output (the material preparer rejects existing directories):
+
+```powershell
+python tools/hamlet_models/prepare_architecture.py --source ../local-art/ui-overhaul/hamlet-architecture-v18 --kit ../local-art/dd2-native-kit --out ../local-art/ui-overhaul/hamlet-next/models
+& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b --threads 4 --python-exit-code 1 --python tools/hamlet_models/architecture.py -- --source ../local-art/ui-overhaul/hamlet-surface-v14/models --out ../local-art/ui-overhaul/hamlet-next/models --kit ../local-art/dd2-native-kit --resolution 900 --samples 12
+python tools/hamlet_models/package.py --source ../local-art/ui-overhaul/hamlet-next/models --out ../local-art/ui-overhaul/hamlet-next/HamletModels
+```
+
+The exporter re-imports each GLB, checks topology/bounds/embedded images and renders four
+views. Native full-town review is still required. The v17 masonry repaint experiment is
+superseded; its tool remains for reproducibility. Sky/cliff private files from v17 remain.
+Native evidence, source hashes, baseline and deployment records are in the v19 folder.
+See [the Hamlet guide](../hamlet_3d.md) for checks and remaining quality limitations.
+
 Round266 installs the approved private finish package and reframes the scene from DD1's town cinematic:
 larger services, lower camera, darker supporting cliffs, native Valley roof infill and a small Sprawl
 estate on the rear ridge. The oversized Mountain is replaced by a cloudy native DD1 sky. Final native

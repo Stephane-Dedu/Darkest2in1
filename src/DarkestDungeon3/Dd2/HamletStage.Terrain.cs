@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using DarkestDungeon3.Core.Presentation;
+using DarkestDungeon3.Runtime;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.ResourceManagement.AsyncOperations;
@@ -102,7 +103,10 @@ internal sealed partial class HamletStage
         { SetPaintTexture(rock,rockTexture); rockLoaded=true; }
         if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
             SetPaintTexture(stone,wallTexture);
-        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded); Grade(rock,HamletPalette.Rock,rockLoaded);
+        var privateRock=_cliffPaintPath!=null?Art.Png(_cliffPaintPath):null;
+        if (privateRock!=null) SetPaintTexture(rock,privateRock);
+        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded);
+        Grade(rock,privateRock!=null?HamletTownscape.CliffPaint:HamletPalette.Rock,rockLoaded,2048);
         Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
         Texture grass=null;
         if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)

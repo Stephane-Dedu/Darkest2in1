@@ -15,9 +15,9 @@ public static class HamletLayout
     public sealed class Site
     {
         public readonly string Id;
-        public readonly float X, Y, Z, Width, Yaw, FootprintWidth, FootprintDepth;
-        public Site(string id, float x, float y, float z, float width, float yaw = 0, float footprintWidth = 1, float footprintDepth = 1)
-        { Id = id; X = x; Y = y; Z = z; Width = width; Yaw = yaw; FootprintWidth = width * footprintWidth; FootprintDepth = width * footprintDepth; }
+        public readonly float X, Y, Z, Width, Yaw, FootprintWidth, FootprintDepth, GroundBlend;
+        public Site(string id, float x, float y, float z, float width, float yaw = 0, float footprintWidth = 1, float footprintDepth = 1,float groundBlend=1.8f)
+        { Id = id; X = x; Y = y; Z = z; Width = width; Yaw = yaw; FootprintWidth = width * footprintWidth; FootprintDepth = width * footprintDepth; GroundBlend=groundBlend; }
         public Point Entrance
         {
             get
@@ -38,7 +38,7 @@ public static class HamletLayout
     public const float MinX = -66, MaxX = 58, MinZ = -36, MaxZ = 69, FieldOfView = 37.5f;
     // A lower cinematic view separates roof silhouettes while keeping all ten services accessible.
     public static readonly Point CameraTarget = new(12, 12, 20), CameraOffset = new(2, 36, -112);
-    // Footprint ratios come from the authored v02 bounds. Rectangular pads allow a compact town without buried corners.
+    // Ratios follow the authored building envelopes, including the wider rebuilt Abbey.
     public static readonly IReadOnlyList<Site> Sites = new[]
     {
         new Site("stage_coach", -34, -.5f, -9, 12, 12, 1, .43f),
@@ -46,7 +46,7 @@ public static class HamletLayout
         new Site("camping_trainer", -43, 24, 24, 12, 8, 1, .84f),
         new Site("sanitarium", -13, 8, 26, 18, 2, .95f),
         new Site("graveyard", 2, 12.5f, 24, 10, 0, .93f),
-        new Site("abbey", 10, 17, 43, 25, 0, .64f),
+        new Site("abbey", 10, 17, 43, 25, 0, .68f),
         new Site("guild", 27, 6, 22, 16, -4, 1, .83f),
         new Site("blacksmith", 35, 0, -1, 17, -8, 1, .82f),
         new Site("statue", 0, 0, -5, 4.5f, 0, 1, .89f),
@@ -67,7 +67,8 @@ public static class HamletLayout
         new Route("statue", 3, new(-8,0,0), new(-4,0,-8), Door("statue")),
         new Route("nomad_wagon", 3.4f, new(-4,0,-8), new(2,0,-16), Door("nomad_wagon")),
         new Route("blacksmith", 3.4f, new(2,0,-16), new(20,0,-18), new(29,0,-12), Door("blacksmith")),
-    };
+    }.Concat(HamletTownscape.Streets).ToArray();
+    public static readonly IReadOnlyList<Site> Foundations = Sites.Concat(HamletTownscape.Lots.Select(l=>l.Pad)).ToArray();
 
     private static float Smooth(float a, float b, float x)
     { float t = Math.Max(0, Math.Min(1, (x-a)/(b-a))); return t*t*(3-2*t); }
@@ -111,13 +112,13 @@ public static class HamletLayout
         }
         y = y*(1-best) + roadHeight*best;
         best = 0; Site closest = null;
-        foreach (var site in Sites)
+        foreach (var site in Foundations)
         {
             float angle = site.Yaw*(float)Math.PI/180, c = (float)Math.Cos(angle), s = (float)Math.Sin(angle);
             float dx = x-site.X, dz = z-site.Z;
             float localX = dx*c-dz*s, localZ = dx*s+dz*c;
             float distance = Math.Max(Math.Abs(localX)-site.FootprintWidth/2-.35f, Math.Abs(localZ)-site.FootprintDepth/2-.35f);
-            float weight = 1-Smooth(0, 1.8f, distance);
+            float weight = 1-Smooth(0, site.GroundBlend, distance);
             if (weight > best) { best = weight; closest = site; }
         }
         return closest == null ? y : y*(1-best)+closest.Y*best;

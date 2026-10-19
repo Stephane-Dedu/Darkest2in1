@@ -32,7 +32,7 @@ public static class HamletVegetation
             float rx=x-a.X-dx*t,rz=z-a.Z-dz*t;
             clearance=Math.Min(clearance,(float)Math.Sqrt(rx*rx+rz*rz)-route.Width*.5f);
         }
-        foreach (var site in HamletLayout.Sites)
+        foreach (var site in HamletLayout.Foundations)
         {
             float angle=site.Yaw*(float)Math.PI/180,c=(float)Math.Cos(angle),s=(float)Math.Sin(angle);
             float dx=x-site.X,dz=z-site.Z;
