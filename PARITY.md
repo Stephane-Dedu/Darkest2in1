@@ -652,3 +652,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round267 fuller Hamlet/rebuilt service architecture:15 native lots,3 streets,4K cached ground,2048px native decorative paint; Abbey/Guild/Sanitarium recesses, roofs, DD1 emblems and native trim. Release+1267 Core+284 UI; native unsaved ten-service/camera/release/cache/resize/keyboard fixture and5.032sec zero-reallocation probe pass. Private evidence:local-art/ui-overhaul/hamlet-material-v19.
 - [ ] Round267 art remains iterative: regular masonry/roof repetitions, bespoke facade weathering, remaining seven services, NPC/upgrade/event exteriors, forced-reload portraits, saved transactions/controller/arbitrary sizes and full performance. Native checks do not establish DD2 production-art parity.
+
+
+- [x] Round268 separate Abbey/Guild/Sanitarium wall finishes, detailed roofs/wood and DD2-redesigned service emblems. Native glass/physical rose replace old DD1 imagery. Ten-GLB pixel audit, exported bounds/images/four-view checks and native unsaved service/lifecycle fixture pass; plugin unchanged. Evidence:local-art/ui-overhaul/hamlet-material-v20.
+- [ ] Material/design finish remains open: forge roof/hood/anvil, wagon joinery, physical Guild crest, facade-specific weathering and native lighting. Package memory/size, saved transactions, controller and full performance remain unverified.

@@ -2,7 +2,7 @@
 
 The Hamlet retains DD1's service silhouettes. DD2 supplies the rendering language:
 large painted planes, irregular ink shadows, worn edge catches and restrained colour.
-The current v19 study rebuilds the Abbey, Guild and Sanitarium. Native-game acceptance
+The current v20 study separates their material identities and replaces legacy DD1 bitmap details. Native-game acceptance
 is tracked separately in MODLOG and PARITY; a Blender render is not an in-game result.
 
 ## Architecture
@@ -23,26 +23,35 @@ native components, or rebuild the required architecture around their original UV
 
 | Material | Shape and colour | Placement |
 |---|---|---|
-| Ashlar | Calm blue-gray block faces, selective pale chipped edges, black corner wedges | Structural walls and plinths; authored UV period 3.8 model units |
-| Slate | Muted charcoal purple, broad staggered shingles, dark overlap shadows | Abbey and Sanitarium; courses run from each eave uphill |
-| Red roof | Dusty oxblood and clay, same shingle scale as slate | Guild; avoid bright red or pink wall panels |
-| Timber | Native DD2 painted wood and black joints | Posts, braces, door planks and eaves |
-| Plaster | Native cracked lime panel, without window or brace pixels | Upper halls and turret infill |
+| Abbey | Worn limestone, lime remnants, varied repair stones, dark fractured joints | Metric 5.5 by 3.6-unit wall painting; cropped individual stones for trim |
+| Guild | Warm sandstone, old brick repairs and broad broken taupe plaster | Metric 5.5 by 4.2-unit lower wall; selected plaster area on upper infill |
+| Sanitarium | Cold green-grey limewash, thin rubble courses and damp mineral streaks | Metric 4.8-unit walls; continuous cylindrical tower map, cropped upper infill |
+| Slate | Charcoal/plum, cleft mineral planes, chipped selective edges and repair slates | Abbey and Sanitarium; courses run from each eave uphill |
+| Red roof | Worn oxblood clay, scraped surfaces, soot and mixed repair ages | Guild; avoid uniform red fill or bright orange |
+| Timber | Long angular grain, dark fissures and selected weathered splinters | Painted at full resolution; follows each beam/door's long axis |
 | Iron | Near black, small dull edge catches | Hinges, straps, finials and mullions |
 | Glass | Small amber areas; restrained green for the Sanitarium | Recessed behind tracery; never broad luminous walls |
 
-The v18 roof and ashlar paintings are newly generated from native reference crops.
-Their source images, exact prompts and outputs stay in the private v18 folder.
-Native timber, glass grain, emblems and complete prefab atlases retain their existing
-pixels. The former tiny plaster crop included a brace and produced false black stripes;
-v19 uses a clean native panel with a 2.3 by1.7-unit projection. Timber follows the long axis of each member; terrace and stair tops use native courtyard paving. Increasing bitmap dimensions does not establish quality: inspect
-painted shape, repeat seams, scale on the mesh and visibility at the game camera.
+The nine v20 paintings (three walls, two roofs, wood, three emblems) use native DD2
+atlases as references. They are generated art, not native extracted textures. Exact
+prompts, originals, provenance and two mesh iterations stay in the private v20 folder.
+The old DD1 Guild banner, forge sign and wagon eye are replaced by new paintings.
+Window grain comes from DD2's Academic house; the Abbey rose uses that glass behind
+physical six-lobed tracery. Whole native building atlases retain their original UVs.
+
+Before reusing any texture, inspect it against native DD2 art and on the exported mesh
+at both close range and the actual Hamlet camera. Check value grouping, irregular
+painted shapes, middle-scale wear, edge definition, UV direction, repetition and alpha.
+A tiny strip blurred across a door is unacceptable even when its source is native.
+Increasing resolution alone does not satisfy this gate. Keep separate architectural
+identities; common trim can share paint, but all main walls must not use one brick tile.
+Floor/stair tops use native courtyard paving at a smaller scale than v19.
 
 ## Review and delivery
 
-`architecture.py` exports three replacement GLBs, re-imports those files, checks
+`architecture.py` exports three rebuilt and two detail-repainted GLBs, re-imports those files, checks
 triangle counts and bounds, decodes every embedded image and renders four views.
-It preserves the seven other verified source GLBs byte-for-byte. The authoring budget
+It preserves the five other verified source GLBs byte-for-byte. The authoring budget
 is 45,000 triangles per rebuilt service; material batching remains the runtime's job.
 
 Keep the stone foundation and stairs inside the service's grounded terrain pad.

@@ -19,21 +19,22 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geometry as G
 from render import camera, finish_scene
 
+SERVICE = None
 
 def stone():
-    return G.material('Hamlet ashlar v18', (.94, .98, 1, 1), 'ashlar_v18', .45)
+    return G.material('Hamlet '+SERVICE+' wall v20', (.90, .94, .97, 1), SERVICE+'_wall', .45)
 
 
 def trim():
-    return G.material('Hamlet worn limestone edges', (.95, .98, 1, 1), 'cutstone_native', .4)
+    return G.material('Hamlet worn limestone edges', (.83, .87, .90, 1), 'abbey_wall', .4)
 
 
 def plaster():
-    return G.material('Hamlet smoke stained lime', (.72, .70, .64, 1), 'lime_native', .4)
+    return G.material('Hamlet smoke stained lime', (.88, .90, .88, 1), SERVICE+'_wall', .4)
 
 
 def wood():
-    return G.material('Hamlet continuous native timber', (.88,.78,.66,1), 'beam_native', .45)
+    return G.material('Hamlet continuous painted timber', (.85,.82,.78,1), 'wood_v20', .45)
 
 
 def paving():
@@ -55,17 +56,31 @@ def finish_authored_paint():
                 face.material_index=paving_index
                 for li in face.loop_indices:
                     v=ob.matrix_world@ob.data.vertices[ob.data.loops[li].vertex_index].co
-                    uv.data[li].uv=(v.x/5.5,v.y/5.5)
+                    uv.data[li].uv=(v.x/3.0,v.y/3.0)
             elif material.name.startswith(('Hamlet continuous','Hamlet worn limestone')):
                 axis=max(range(3),key=lambda k:abs(face.normal[k]));across=next(k for k in range(3) if k not in (long,axis)) if long!=axis else (long+1)%3
                 for li in face.loop_indices:
                     v=ob.data.vertices[ob.data.loops[li].vertex_index].co
-                    uv.data[li].uv=(.02+.96*(v[long]-lo[long])/span[long],.06+.88*(v[across]-lo[across])/span[across])
+                    u=(v[long]-lo[long])/span[long];w=(v[across]-lo[across])/span[across]
+                    uv.data[li].uv=(.085+.17*u,.845+.07*w) if material.name.startswith('Hamlet worn') else (.02+.96*u,.06+.88*w)
             elif material.name.startswith('Hamlet smoke stained'):
                 axis=max(range(3),key=lambda k:abs(face.normal[k]));axes=[k for k in range(3) if k!=axis]
                 for li in face.loop_indices:
                     v=ob.data.vertices[ob.data.loops[li].vertex_index].co
-                    uv.data[li].uv=((v[axes[0]]-lo[axes[0]])/2.3,(v[axes[1]]-lo[axes[1]])/1.7)
+                    u=(v[axes[0]]-lo[axes[0]])/span[axes[0]];w=(v[axes[1]]-lo[axes[1]])/span[axes[1]]
+                    uv.data[li].uv=(.12+.50*u,.28+.47*w) if SERVICE=='guild' else (.13+.58*u,.24+.60*w)
+
+
+def replace_legacy_paint():
+    """The remaining older services keep their geometry but lose their DD1 bitmap details."""
+    for mat in bpy.data.materials:
+        if not mat.use_nodes: continue
+        for node in mat.node_tree.nodes:
+            if node.type!='TEX_IMAGE' or not node.image: continue
+            name=node.image.name.split('.')[0]
+            if name in ('guild_banner','forge_sign','nomad_eye','window_grain'):
+                node.image=bpy.data.images.load(str(G.OUT/'textures'/f'{name}.png'),check_existing=True)
+                node.image.name=name+'_dd2_v20'
 
 
 def project(ob, period=3.8):
@@ -76,7 +91,11 @@ def project(ob, period=3.8):
         axes = [k for k in range(3) if k != axis]
         for li in face.loop_indices:
             co = ob.matrix_world @ ob.data.vertices[ob.data.loops[li].vertex_index].co
-            uv.data[li].uv = (co[axes[0]] / period, co[axes[1]] / period)
+            # Wall paintings describe a large area of wear, not a tiny repeating brick tile.
+            # Preserve metric courses across neighbouring structural pieces.
+            wall=ob.data.materials[face.material_index].name.startswith('Hamlet '+str(SERVICE)+' wall')
+            u,v=(5.5,3.6) if SERVICE=='abbey' else (5.5,4.2) if SERVICE=='guild' else (4.8,4.8)
+            uv.data[li].uv = (co[axes[0]]/(u if wall else period),co[axes[1]]/(v if wall else period))
     return ob
 
 
@@ -194,8 +213,8 @@ def opening(name, wall, x, y, z, width, height, glass=False, green=False, depth=
 
 def roof(name, x, z, length, width, base, rise, red=False, along_x=True, close=True):
     """Sagged roof with curved slope, thickness, courses, ridge caps and proper UV distance."""
-    mat = G.material('DD2 roof_red v18' if red else 'DD2 roof_slate v18',
-                     (1,.95,.93,1) if red else (1,1,1,1), 'red_v18' if red else 'slate_v18', .5)
+    mat = G.material('DD2 roof_red v20' if red else 'DD2 roof_slate v20',
+                     (1,.95,.93,1) if red else (1,1,1,1), 'red_v20' if red else 'slate_v20', .5)
     rows = [(-.5,0),(-.36,.13),(-.23,.35),(-.10,.71),(0,1),(.10,.71),(.23,.35),(.36,.13),(.5,0)]
     def pos(t,u,v):
         sag = .13*(1-(2*t/length)**2)
@@ -242,12 +261,20 @@ def buttress(name,x,z,bottom=1.25,top=5.2):
 def rose(wall,x,y,z,radius):
     outline=[(x+radius*math.cos(a),y+radius*math.sin(a)) for a in np.linspace(0,2*math.pi,24,endpoint=False)]
     subtract(wall,prism('Rose opening cutter',outline,z-.1,z+.45,G.ink()))
-    glass=G.material('Abbey rose amber glass',(.95,.88,.74,1),'abbey_rose',1.2)
+    glass=G.material('Abbey native amber glass',(.92,.43,.08,1),'window_grain',1.2)
     pane=prism('Deep amber rose',outline,z+.32,z+.35,glass)
     for face in pane.data.polygons:
         for li in face.loop_indices:
             v=pane.data.vertices[pane.data.loops[li].vertex_index].co
-            pane.data.uv_layers.active.data[li].uv=(.08+.86*((v.x-x)/(radius*2)+.5),.08+.84*((v.z-y)/(radius*2)+.5))
+            pane.data.uv_layers.active.data[li].uv=((v.x-x)/(radius*2)+.5,(v.z-y)/(radius*2)+.5)
+    # Raised six-lobed tracery and central boss replace the old flat DD1 rose sprite.
+    for i in range(6):
+        angle=i*math.pi/3
+        cx=x+radius*.48*math.cos(angle);cy=y+radius*.48*math.sin(angle)
+        for j in range(10):
+            a=j*math.tau/10;b=(j+1)*math.tau/10
+            G.beam('Rose lead petal',(cx+radius*.24*math.cos(a),cy+radius*.24*math.sin(a),z+.18),
+                   (cx+radius*.24*math.cos(b),cy+radius*.24*math.sin(b),z+.18),.045,G.ink())
     for i in range(24):
         a=i*math.pi/12;b=(i+1)*math.pi/12
         G.beam('Rose limestone circle',(x+radius*math.cos(a),y+radius*math.sin(a),z-.04),
@@ -297,7 +324,7 @@ def guild():
         G.beam('Guild overhang corbel',(x,3.1,-2.45),(x,3.68,-2.64),.16,G.wood())
     opening('Guild armoured portal',lower,-.65,.45,-2.53,1.65,2.65,depth=.43)
     for x in [-2.55,-.65,1.25]:opening('Guild upper slit',upper,x,5.35,-2.57,.43,.9,True,depth=.25)
-    for x in [-2.35,1.05]:G.banner('DD1 sword standard',x,2.75,-2.78,.85,2.3)
+    for x in [-2.35,1.05]:G.banner('Guild painted sword standard',x,2.75,-2.78,.85,2.3)
     steel=G.material('Guild worn steel',(.11,.12,.115,1),emission=.45)
     for sign in [-1,1]:
         G.beam('Guild crossed sword',(-.65-sign*.60,3.75,-2.80),(-.65+sign*.60,4.95,-2.80),.095,steel)
@@ -320,7 +347,7 @@ def guild():
 
 
 def tower_cap(x,z,base,radius,height):
-    mat=G.material('DD2 roof_slate turret v18',(1,1,1,1),'slate_v18',.5)
+    mat=G.material('DD2 roof_slate turret v20',(1,1,1,1),'slate_v20',.5)
     profile=[(1,0),(.91,.13),(.69,.34),(.40,.66),(.13,.90),(0,1)]
     n=12;verts=[];faces=[];uv=[]
     for r,h in profile:
@@ -346,7 +373,7 @@ def sanitarium():
     before_tower=set(bpy.data.objects)
     tower=G.cylinder('Sanitarium round stair tower',(-3,3.4,-2.0),1.38,4.6,stone(),16)
     from buildings_v02 import wrap_tower
-    wrap_tower(tower,2.6,1.4)
+    wrap_tower(tower,1.8,1.0)
     for y,r in [(1.25,1.47),(3.0,1.43),(5.65,1.55)]:G.cylinder('Sanitarium tower course',(-3,y,-2),r,.15,trim(),16)
     stage=G.cylinder('Sanitarium overhanging timber stage',(-3,6.45,-2),1.58,1.6,plaster(),8)
     stage.rotation_euler.z=math.pi/8
@@ -394,6 +421,7 @@ BUILDERS={'abbey':abbey,'guild':guild,'sanitarium':sanitarium}
 
 
 def run(args):
+    global SERVICE
     source,out,kit=args.source.resolve(),args.out.resolve(),args.kit.resolve()
     repo=Path(__file__).resolve().parents[2]
     if out==source or out==repo or repo in out.parents:raise ValueError('Use a separate private output.')
@@ -407,10 +435,15 @@ def run(args):
         if hashlib.sha256(original.read_bytes()).hexdigest()!=oldchecks[key]['sha256']:
             raise ValueError('Unverified source: '+key)
         folder=out/key;folder.mkdir(exist_ok=True)
-        if key not in BUILDERS:
+        if key not in BUILDERS and key not in ('blacksmith','nomad_wagon'):
             shutil.copy2(original,out/record['glb']);checks[key]=oldchecks[key];continue
-        L.reset();G.configure(kit,out,L,'v02');G.wood=wood;BUILDERS[key]();bpy.context.view_layer.update()
-        finish_authored_paint()
+        SERVICE=key
+        L.reset();G.configure(kit,out,L,'v02');G.wood=wood
+        if key in BUILDERS:
+            BUILDERS[key]();bpy.context.view_layer.update();finish_authored_paint()
+        else:
+            bpy.ops.import_scene.gltf(filepath=str(original));bpy.context.view_layer.update()
+        replace_legacy_paint()
         objects=[o for o in bpy.data.objects if o.type=='MESH']
         points=np.array([tuple(o.matrix_world@v.co) for o in objects for v in o.data.vertices])
         lo,hi=points.min(0),points.max(0)
@@ -447,15 +480,15 @@ def run(args):
             views[name]=key+'/'+name+'.png'
         bpy.ops.file.pack_all();bpy.ops.wm.save_as_mainfile(filepath=str(folder/(key+'.blend')))
         record.update(triangles=triangles,mesh_objects=len(meshes),bounds_blender=[lo.tolist(),hi.tolist()],views=views,
-            design='v19: native trim/plaster/paving, coherent metric paint, cut openings on front and sides, DD1 identity.',
+            design='v20: distinct service wall paintings, DD2-redesigned emblems, native glass and physical rose tracery.',
             native_parts=native_parts)
         checks[key]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'triangles':triangles,'bounds_error':error,
                      'embedded_images':len(images),'verification':'Exported GLB re-imported; topology, volume, embedded paint and four views.'}
         print('VERIFIED',key,triangles,'triangles',len(images),'images',flush=True)
-    records['detail_pass']='v19'
+    records['detail_pass']='v20'
     (out/'models.json').write_text(json.dumps(records,indent=2))
     (out/'verified.json').write_text(json.dumps(checks,indent=2))
-    print('PASS: three services rebuilt and seven source GLBs preserved.',flush=True)
+    print('PASS: three services rebuilt, two legacy detail sets repainted and five source GLBs preserved.',flush=True)
 
 
 if __name__=='__main__':

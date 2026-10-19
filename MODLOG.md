@@ -7812,3 +7812,31 @@ The following round266 notes are historical where they conflict with this pass.
 Native1920x1080 overview and final deployment are recorded separately in the private
 checkpoint. Generated stone remains too regular for final DD2 art parity; subsequent work
 must improve painted shapes and weathering rather than merely adding texture resolution.
+
+
+## Round268 — distinct service materials and DD2 detail replacements (2026-10-19)
+
+Round268 responds to the owner's screenshot of bland shared brickwork and mismatched DD1
+details. Abbey/Guild/Sanitarium now use separate paintings: worn limestone, warm masonry with
+broken plaster, and cool damp limewash respectively. Nine native-reference paintings include
+those walls, slate/clay roofs, continuous wood and three service emblems. Original DD2 atlases
+remain style references; generated paint is not described as native extraction. Low-resolution
+wood/plaster strips are replaced on the rebuilt services, stone trim uses a selected worn block,
+and paving is finer. UVs retain metric courses and follow each timber's long axis.
+
+Guild banner, forge sign and wagon eye have new DD2-style paintings. Window grain comes from
+DD2's Academic house, with physical rose tracery replacing the Abbey's DD1 sprite. Pixel-hash
+inspection of all ten exported GLBs finds none of the six legacy DD1 detail inputs. Five GLBs
+are unchanged; Abbey adds720 triangles (9393 total), all models remain under45k. Two iterations
+were rendered after GLB re-import. The source preparer reproduces ten selected textures exactly.
+
+Asset-only change: the installed round267 plugin is unchanged, and gameplay WIP is excluded.
+Native unsaved fixture passes ten world services, Escape, camera, full release/reload/re-entry,
+Embark park/cache/resume, resize, keyboard and still-camera/smoke. No estate selected or saved.
+Private package: ten models,61 hashed files,117.5MB. The existing packager duplicates embedded
+image payloads in mesh buffers; package size/long-session memory remain optimization work.
+
+Evidence, originals, prompts, provenance, both mesh iterations, audit, native captures and fresh
+baseline/deployment records: local-art/ui-overhaul/hamlet-material-v20. Further quality work:
+forge roof/hood/anvil, wagon joinery, physical Guild crest, bespoke facade wear and more native
+lighting integration. Do not claim final DD2 production-art parity from texture detail alone.
