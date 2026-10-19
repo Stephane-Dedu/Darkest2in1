@@ -7868,3 +7868,31 @@ packager still duplicates embedded image payloads; this round does not fix that 
 ## Status 2026-10-19: workshop pass installed
 
 Final native fixture PASS: ten services, camera, full release/reload, Embark cache/resume, resize, keyboard and still camera/smoke. Zero live OS input; no estate selected/saved. Fresh1920 overview inspected;214renderers,0 repeated buffer allocations/5.039sec. Final asset package installed, normal267 plugin unchanged, native profiles/config/estate2 restored and hashes verified. DD2 CLOSED. Protected estates untouched. Next round270.
+
+
+## Round270 — fitted smithy and detailed thatch (2026-10-19)
+
+Round270 replaces the forge's intersecting native cottage and slate canopy with one
+continuous thick thatched roof, fitted dormer, real chimney openings and enclosed timber/
+lime workshop. A higher eave reveals the anvil and recessed furnace; the sign hangs clear
+of the roof. Three generated native-reference paintings supply detailed reed, stained
+lime and static furnace fire. This is generated paint, not newly extracted native art.
+
+Three offline iterations corrected the low eave, hidden sign, glass-textured hearth and
+side-window placement. The final exported smithy has 5,630 triangles and ten embedded
+images, re-imported for topology/bounds/paint checks and four review views. Native camp
+barrel/crate geometry and UVs are retained; only the cottage is explicitly rebuilt.
+Nine other service GLBs are byte-identical to v21. Ten-model decoded-pixel audit excludes
+the six old DD1 detail bitmaps. Prepared inputs exactly match rendered texture files.
+
+Asset-only round: normal267 plugin unchanged; no new C# test claim. Native unsaved fixture
+passes ten services, camera, full release/reload/re-entry, Embark cache/resume, resize,
+keyboard and still-camera/smoke. No estate selected or saved; no live OS input. Inspect
+native-overview.png, native.log, native-buffer-probe.json and deployment.json in
+local-art/ui-overhaul/hamlet-smithy-v22 for final visual, allocation and install evidence.
+
+Remaining work: wagon end grain/wheels, service-specific facade wear, remaining old
+service architecture and broader lighting. Thatch repetition and straight roof side
+edges can still improve. The furnace painting is static. Package is 164.2 MB/64 hashed
+files and still duplicates embedded images in buffers; no full performance claim.
+NPC/upgrade exteriors, saved transactions and forced-reload portrait defects remain.

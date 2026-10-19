@@ -12,6 +12,7 @@ is tracked separately in MODLOG and PARITY; a Blender render is not an in-game r
 | Abbey | Left projecting portal, amber rose, three lancets, rear bell tower | Broad nave, stepped buttresses, sagged slate roof, native Sprawl tower at uniform scale |
 | Guild | Oxblood dormered roof, sword standards and crossed blades | Stone ground floor, plaster/timber upper hall, recessed iron-bound door, smaller armory wing |
 | Sanitarium | Round stone tower, timber jetty, pointed slate cap, green glass | Uniformly scaled native Academic house, separate octagonal turret and projecting apothecary porch |
+| Blacksmith | Sweeping thatched roof, unequal chimneys, small dormer, open anvil bay | One thick roof over the enclosed workshop and sheltered working area; brick hearth, lime infill and timber framing |
 
 Service doors must remain visually distinct at the normal Hamlet camera distance.
 Entrances and windows use cut recesses, a dark backing, physical jambs and sills.
@@ -71,3 +72,21 @@ original UVs. The three new paints are generated reference paintings, not extrac
 Review all sides: a convincing front can conceal missing side walls. Inspect roof joins
 and texture scale in the town before accepting another reuse. Native thatch and large
 wagon end grain remain candidates for a better fitted architectural finish.
+
+## Smithy reconstruction, v22
+
+Replace the cottage/canopy collision with one continuous roof, real chimney openings,
+a fitted dormer and closed side gables. Keep the eave high enough to expose the anvil
+and furnace at the town camera. Side windows belong between braces, with actual cut
+recesses. A sign must hang clear of the roof rather than disappear behind it.
+
+Dense grey-brown reed, stained lime and warm small-course firebrick give the smithy a
+different material identity from the civic services. Thatch follows the roof surface
+distance; plaster uses a shared world projection. Avoid shrinking painted straw into
+many noisy repetitions. The hearth uses a purpose-made static painting behind separate
+coal geometry; the native window atlas is appropriate for glass, not fire.
+
+The three new paintings are generated, with native DD2 references retained privately.
+Judge them against those references and the full-town capture, not resolution alone.
+Native camp props retain their original geometry and UVs; only the old cottage mesh
+is explicitly replaced. Nine other service GLBs remain byte-identical to v21.

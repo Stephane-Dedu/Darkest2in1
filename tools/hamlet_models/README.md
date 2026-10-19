@@ -1,5 +1,21 @@
 # Hamlet building models
 
+Round270 rebuilds the smithy around one continuous thatched roof. Evidence, paintings,
+provenance and deployment status: `local-art/ui-overhaul/hamlet-smithy-v22/CONTINUE.md`.
+The native cottage is replaced explicitly; native barrel/crate geometry and UVs remain.
+The other nine source GLBs are preserved exactly. Reproduce into a new private folder:
+
+```powershell
+python tools/hamlet_models/prepare_workshops.py --study smithy --source ../local-art/ui-overhaul/hamlet-workshops-v21/models --paintings ../local-art/ui-overhaul/hamlet-smithy-v22/paintings --out ../local-art/ui-overhaul/hamlet-next/models
+& 'C:/Program Files/Blender Foundation/Blender 5.2/blender.exe' -b --threads 4 --python-exit-code 1 --python tools/hamlet_models/smithy.py -- --source ../local-art/ui-overhaul/hamlet-workshops-v21/models --out ../local-art/ui-overhaul/hamlet-next/models --kit ../local-art/dd2-native-kit --resolution 1100 --samples 16
+python tools/hamlet_models/package.py --source ../local-art/ui-overhaul/hamlet-next/models --out ../local-art/ui-overhaul/hamlet-next/HamletModels
+```
+
+Three reviewed generated paintings supply reed thatch, soot-stained lime and a static
+furnace recess. They reference DD2's cottage/Academic materials and DD1's smithy silhouette.
+The exported GLB is re-imported and rendered from four angles before native review.
+The existing `workshops.py` command retains its v21 defaults.
+
 Round269 workshop package and evidence: `local-art/ui-overhaul/hamlet-workshops-v21`.
 Use `prepare_workshops.py` with `--source` v20/models, `--paintings` v21/paintings and
 a new private `--out`. Then run `workshops.py` through Blender with the same source,

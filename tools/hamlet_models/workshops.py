@@ -243,7 +243,9 @@ def crest():
 REFINERS={'blacksmith':forge,'nomad_wagon':caravan,'guild':crest}
 
 
-def run(args):
+def run(args, refiners=None, detail='v21', replaced_native=(), design=None):
+    refiners = REFINERS if refiners is None else refiners
+    design = design or 'v21: fitted forge workshop, caravan cloth/joinery and physical Guild crest'
     source,out,kit=[p.resolve() for p in (args.source,args.out,args.kit)]
     repo=Path(__file__).resolve().parents[2]
     if out==source or out==repo or repo in out.parents:raise ValueError('Use a separate private output.')
@@ -252,17 +254,22 @@ def run(args):
     for key,record in records['models'].items():
         path=source/record['glb'];folder=out/key;folder.mkdir(parents=True,exist_ok=True)
         if hashlib.sha256(path.read_bytes()).hexdigest()!=old[key]['sha256']:raise ValueError('Changed source '+key)
-        if key not in REFINERS:
+        if key not in refiners:
             shutil.copy2(path,out/record['glb']);checks[key]=old[key];continue
         bpy.ops.wm.read_factory_settings(use_empty=True);G.configure(kit,out,None,'v02');A.SERVICE=key
         bpy.ops.import_scene.gltf(filepath=str(path));bpy.context.view_layer.update()
         native={o.name:(o.data.copy(),o.matrix_world.copy()) for o in bpy.data.objects if o.type=='MESH' and ' / ' in o.name}
-        REFINERS[key]();bpy.context.view_layer.update()
+        refiners[key]();bpy.context.view_layer.update()
+        retained=[];replaced=[]
         for name,(mesh,transform) in native.items():
+            if name in replaced_native:
+                assert name not in bpy.data.objects, 'Replacement must remove the old native mesh: '+name
+                replaced.append(name);continue
             ob=bpy.data.objects[name]
             assert np.allclose(ob.matrix_world,transform) and len(ob.data.vertices)==len(mesh.vertices),name
             assert all(a.co==b.co for a,b in zip(ob.data.vertices,mesh.vertices)),name
             assert all(a.uv==b.uv for a,b in zip(ob.data.uv_layers.active.data,mesh.uv_layers.active.data)),name
+            retained.append(name)
         objects=[o for o in bpy.data.objects if o.type=='MESH']
         points=np.array([tuple(o.matrix_world@v.co) for o in objects for v in o.data.vertices]);lo,hi=points.min(0),points.max(0)
         triangles=sum(len(p.vertices)-2 for o in objects for p in o.data.polygons)
@@ -285,11 +292,11 @@ def run(args):
             else:cam.location=loc;cam.rotation_euler=(Vector(target)-cam.location).to_track_quat('-Z','Y').to_euler()
             bpy.context.scene.render.filepath=str(folder/(name+'.png'));bpy.ops.render.render(write_still=True);views[name]=key+'/'+name+'.png'
         bpy.ops.file.pack_all();bpy.ops.wm.save_as_mainfile(filepath=str(folder/(key+'.blend')))
-        record.update(triangles=triangles,mesh_objects=len(meshes),bounds_blender=[lo.tolist(),hi.tolist()],views=views,design='v21: fitted forge workshop, caravan cloth/joinery and physical Guild crest')
-        checks[key]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'triangles':triangles,'bounds_error':error,'embedded_images':len(images),'native_parts_preserved':list(native),'verification':'Re-imported GLB topology, bounds, decoded paint and four review views'}
+        record.update(triangles=triangles,mesh_objects=len(meshes),bounds_blender=[lo.tolist(),hi.tolist()],views=views,design=design)
+        checks[key]={'sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'triangles':triangles,'bounds_error':error,'embedded_images':len(images),'native_parts_preserved':retained,'native_parts_rebuilt':replaced,'verification':'Re-imported GLB topology, bounds, decoded paint and four review views'}
         print('VERIFIED',key,triangles,'triangles',len(images),'images',flush=True)
-    records['detail_pass']='v21';(out/'models.json').write_text(json.dumps(records,indent=2));(out/'verified.json').write_text(json.dumps(checks,indent=2))
-    print('PASS: three refined models and seven byte-identical source GLBs.',flush=True)
+    records['detail_pass']=detail;(out/'models.json').write_text(json.dumps(records,indent=2));(out/'verified.json').write_text(json.dumps(checks,indent=2))
+    print('PASS:',len(refiners),'refined models and',len(checks)-len(refiners),'byte-identical source GLBs.',flush=True)
 
 
 if __name__=='__main__':

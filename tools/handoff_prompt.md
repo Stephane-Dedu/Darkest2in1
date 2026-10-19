@@ -1,5 +1,11 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round270 smithy reconstruction: read local-art/ui-overhaul/hamlet-smithy-v22/CONTINUE.md
+first for final deployment/evidence. Continuous thatch and enclosed workshop replace
+the old cottage/canopy collision. Nine other GLBs unchanged; asset-only, normal267 plugin.
+Next round271. Check usage first; stop with 7-8% reserve. Preserve foreign gameplay WIP,
+protected estates and current installed hashes. Earlier handoffs are historical.
+
 Round269 workshop materials/geometry: read local-art/ui-overhaul/hamlet-workshops-v21/CONTINUE.md
 first for exact final native/deployment status. Three revised services, seven unchanged GLBs.
 Preserve foreign gameplay WIP and protected estates. Usage reserve7-8%; check before work.
