@@ -664,3 +664,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round270 smithy: continuous thick thatch, fitted dormer/chimney openings, enclosed lime workshop, visible working bay and static furnace painting. Three generated native-reference paints; 5,630 triangles, native camp parts retained, nine exact source GLBs. Four-view export review, ten-model legacy pixel audit and native unsaved ten-service/lifecycle checks pass. Evidence: local-art/ui-overhaul/hamlet-smithy-v22.
 - [ ] Round270 broader art remains iterative: wagon end grain/wheels, remaining service architecture, facade wear, lighting/NPC/upgrade exteriors, static furnace, repeated roof motifs and package image duplication. Saved transactions/full performance and forced-reload portraits remain outside this asset pass.
+
+- [x] Round271 ground/nurse: native small street cobbles, generated detailed earth, fuller native grass, matched road edges, nurse-free Sanitarium and foreground figure removed; memorial interaction retained. Release+1268 Core checks+284 UI checks; native unsaved lifecycle/service checks. Evidence:local-art/ui-overhaul/hamlet-ground-v23.
+- [ ] Ground still needs broader native scene dressing/lighting; larger building-plinth paving and old offline ground preview remain. Saved transactions/full performance and other existing art limits are unchanged.

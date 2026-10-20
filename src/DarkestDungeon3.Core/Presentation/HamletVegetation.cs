@@ -46,30 +46,41 @@ public static class HamletVegetation
         float clearance=Clearance(x,z);
         if (clearance<=.4f) return 0;
         float patch=(float)(Math.Sin(x*.14+Math.Sin(z*.09)*1.7)*Math.Cos(z*.16-x*.04));
-        return Smooth(.4f,3.5f,clearance)*Smooth(-.65f,.55f,patch)*.82f;
+        return Smooth(.4f,1.9f,clearance)*Smooth(-.9f,.4f,patch)*.82f;
     }
     private static float Smooth(float a,float b,float value)
     { float t=Math.Max(0,Math.Min(1,(value-a)/(b-a))); return t*t*(3-2*t); }
     private static Clump[] Place()
     {
         var result=new List<Clump>();
-        for (int row=0;row<31;row++) for (int col=0;col<36;col++)
+        for (int row=0;row<43;row++) for (int col=0;col<50;col++)
         {
             int seed=row*137+col*73;
-            float x=HamletLayout.MinX+2+col*3.4f+(float)Math.Sin(seed*1.73)*1.1f;
-            float z=HamletLayout.MinZ+2+row*3.3f+(float)Math.Cos(seed*2.31)*1.1f;
+            float x=HamletLayout.MinX+2+col*2.45f+(float)Math.Sin(seed*1.73)*.8f;
+            float z=HamletLayout.MinZ+2+row*2.4f+(float)Math.Cos(seed*2.31)*.8f;
+            if (seed%3!=0 || Cover(x,z)<.58f) continue;
+            float height=1.6f+.65f*(.5f+.5f*(float)Math.Sin(seed*3.17));
+            Add(x,z,height,seed);
+            // Irregular small groups read as growth along sheltered margins, not a grid of dark dots.
+            Add(x+.55f,z+.30f,height*.72f,seed+1);
+            Add(x-.46f,z-.22f,height*.62f,seed+2);
+        }
+        return result.ToArray();
+
+        void Add(float x,float z,float height,int seed)
+        {
             if (x<HamletLayout.MinX+2 || z<HamletLayout.MinZ+2 || x>HamletLayout.MaxX-2 || z>HamletLayout.MaxZ-2
-                || Cover(x,z)<.58f || Clearance(x,z)<1.5f || Clearance(x,z)>7) continue;
+                || Cover(x,z)<.52f || Clearance(x,z)<1.5f || Clearance(x,z)>7) return;
             float y=HamletLayout.Height(x,z);
             // Avoid floating tufts on sharp terrace faces or the edge of a stair cutting.
             float slope=0;
             foreach (var d in new[] { (1f,0f),(-1f,0f),(0f,1f),(0f,-1f) })
                 slope=Math.Max(slope,Math.Abs(HamletLayout.Height(x+d.Item1,z+d.Item2)-y));
-            if (slope>.65f) continue;
-            float height=.62f+.40f*(.5f+.5f*(float)Math.Sin(seed*3.17));
-            result.Add(new(x,y-.15f,z,height,(float)Math.Sin(seed*1.19)*32,seed%3));
+            if (slope>.65f) return;
+            // The atlas contains a broad black basal mass. Plant it below the soil
+            // so the visible silhouette is made of blades rather than a square foot.
+            result.Add(new(x,y-height*.35f,z,height,(float)Math.Sin(seed*1.19)*32,seed%3));
         }
-        return result.ToArray();
     }
     public static HamletTerrain.Surface Build()
     {

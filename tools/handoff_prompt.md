@@ -1,5 +1,10 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round271 ground/nurse pass: read local-art/ui-overhaul/hamlet-ground-v23/CONTINUE.md first.
+New native street cobbles, generated earth, grouped native grass, no Sanitarium nurse or foreground humanoid.
+Private frozen build excludes foreign gameplay WIP. Check final native/deployment status
+and usage before work; preserve7-8% reserve and protected estates. Next round272.
+
 Round270 smithy reconstruction: read local-art/ui-overhaul/hamlet-smithy-v22/CONTINUE.md
 first for final deployment/evidence. Continuous thatch and enclosed workshop replace
 the old cottage/canopy collision. Nine other GLBs unchanged; asset-only, normal267 plugin.

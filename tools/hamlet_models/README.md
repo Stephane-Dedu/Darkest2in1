@@ -1,5 +1,16 @@
 # Hamlet building models
 
+Round271 ground/nurse pass: `local-art/ui-overhaul/hamlet-ground-v23/CONTINUE.md`.
+Run `prepare_ground.py --game <DD2 install> --out <private folder>` through the UM Python
+environment to extract unmodified cobblestones. The optional runtime files are
+`PrivateScenery/HamletMaterials/hamlet-cobbles-v23.png` and `hamlet-earth-v23.png`.
+Earth was generated with the built-in image tool; exact prompt/original stay in v23.
+Run `remove_nurse.py` through Blender with v22/models as `--source`, a new private `--out`,
+and `--kit ../local-art/dd2-native-kit`, then `package.py`. Copy reviewed `abbey_wall.png` and the native v23 cobble tile as `cobbles_native.png`
+into the output textures folder; retain source provenance beside the new models.
+The stone memorial remains interactive; eight other GLBs remain exact. The older town_preview
+ground recipe is approximate and predates this pass; final evidence must be native.
+
 Round270 rebuilds the smithy around one continuous thatched roof. Evidence, paintings,
 provenance and deployment status: `local-art/ui-overhaul/hamlet-smithy-v22/CONTINUE.md`.
 The native cottage is replaced explicitly; native barrel/crate geometry and UVs remain.

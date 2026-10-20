@@ -7896,3 +7896,44 @@ service architecture and broader lighting. Thatch repetition and straight roof s
 edges can still improve. The furnace painting is static. Package is 164.2 MB/64 hashed
 files and still duplicates embedded images in buffers; no full performance claim.
 NPC/upgrade exteriors, saved transactions and forced-reload portrait defects remain.
+
+
+## Round271 — ground detail and nurse removal (2026-10-20)
+
+Round271 addresses the owner's ground screenshots and removes the Sanitarium nurse.
+Streets use DD2's unmodified cobblestones_base tile at4.8m, with repeat wrapping instead
+of mirrored rocks. Generated1254px earth supplies small gravel, clay wear and dead leaves;
+native grass remains, with finer4.2m mapping, fuller sheltered margins and187 plants grouped into irregular clumps.
+The lane image already blends final ground pixels, so the second runtime paving tint
+is removed. Terrain stays4096px with512px construction readbacks and cached worker bakes.
+Two optional private PNGs prepare asynchronously and retain the previous native fallback.
+
+Enlarged native samples proved the atlas UVs and alpha clipping are correct. The early
+small, heavily tinted tufts exposed the painting's black basal mass and read as stumps.
+Final plants are grouped, taller and brighter, with 35% planted below the soil. All 187
+plants preserve route/apron/slope clearances. The runtime uses explicit alpha clipping.
+No new grass art was generated. Diagnostic giant cards/readback are excluded from the build.
+
+The static Sanitarium nurse and the blue robe-shaped foreground Ancestor figure are
+removed. The latter matches the figure in the owner's road screenshot. Its stone plinth,
+steps, native candles and memorial service remain. Both legacy authoring paths now omit
+the figure. Eight other GLBs are byte-identical to round270. The first model refinement
+caught 30 figure/detail meshes rather than the 14 old base meshes; the final recipe removes
+all 30 and preserves the native candles and retained model geometry/UVs. The exposed
+memorial plinth replaces its stretched tiny crop with the reviewed limestone painting
+and native small paving at a consistent world scale.
+
+Release build, 1268 Core checks and 284 UI checks pass. The final vegetation revision
+passes all 72 focused Hamlet checks. A frozen-checkout catalog-path
+failure was resolved by supplying the exact installed catalog, then rerunning that case.
+Paint snapshots/count/wear expectations reflect the intended new art; route/apron/slope
+invariants remain. A new lane-margin case checks exact agreement with the ground image.
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard checks pass; no
+estate selected or saved. Final evidence and deployment hashes are recorded privately in
+local-art/ui-overhaul/hamlet-ground-v23. Foreign gameplay/curio/Shieldbreaker work excluded.
+
+Street cobbles and ground grass are native 512px paint; tuft atlas is 4096px.
+Generated earth and the reused v20 limestone painting are not native extraction. Ground painting is
+still flatter than native dressed scenes, service plinths retain larger paving, and fuller
+lighting/foliage treatment remains. No full frame-time/long-session claim. The old offline
+town_preview approximation does not yet reproduce this ground; use the native captures.

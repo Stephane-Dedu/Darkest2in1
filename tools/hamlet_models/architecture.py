@@ -414,7 +414,6 @@ def sanitarium():
     block('Apothecary cross upright',(2.3,3.12,-3.7),(.16,.58,.10),brass)
     block('Apothecary cross arm',(2.3,3.18,-3.7),(.53,.15,.10),brass)
     G.lantern(-.87,2.65,-3.6)
-    G.native('common_field_hospital_prefab',(3.25,1.1,-3.1),width=1.1,include=['nurse'],shade=1.7)
 
 
 BUILDERS={'abbey':abbey,'guild':guild,'sanitarium':sanitarium}

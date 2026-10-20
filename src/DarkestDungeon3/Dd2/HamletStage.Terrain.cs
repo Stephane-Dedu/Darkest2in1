@@ -20,7 +20,9 @@ internal sealed partial class HamletStage
         if (_groundPaintTask == null || !PaintReady || !UploadGroundPaint()) return false;
         var paving=_groundPaving; var rock=_groundRock; var stone=_groundStone; var valley=_groundValley;
         int layer=_groundLayer;
-        SetPaintTint(paving,new Color(.72f,.75f,.80f,1));
+        // Lane edge pixels already contain the final ground colour. A second tint
+        // here creates a dark ribbon at every geometry boundary.
+        SetPaintTint(paving,Color.white);
         SetPaintTint(stone,new Color(.82f,.84f,.87f,1));
         var data=_modelPack.Terrain;
         _groundMesh=MeshData("Compact DD1 cliff terrain",data.Positions,data.Uv);
@@ -63,9 +65,16 @@ internal sealed partial class HamletStage
         }
         if (_grassTuftAsset.Status==AsyncOperationStatus.Succeeded && _grassTuftAsset.Result!=null)
         {
-            var tufts=TownMaterial(_grassTuftAsset.Result);
+            // Native grass uses its own terrain effects and UV transforms. These
+            // authored cards need the reviewed atlas UVs and explicit alpha clipping.
+            var tufts=new Material(_groundMaterial.shader) { name="Hamlet grass cutout",renderQueue=2450 };
+            _details.Add(tufts);
+            SetPaintTexture(tufts,BaseTexture(_grassTuftAsset.Result));
             var paint=HamletPalette.GrassTuft;
-            tufts.SetColor(Tint,new Color(paint.Tint.X,paint.Tint.Y,paint.Tint.Z,1));
+            SetPaintTint(tufts,new Color(paint.Tint.X,paint.Tint.Y,paint.Tint.Z,1));
+            if (tufts.HasProperty("_AlphaClip")) tufts.SetFloat("_AlphaClip",1);
+            if (tufts.HasProperty("_Cutoff")) tufts.SetFloat("_Cutoff",.35f);
+            tufts.EnableKeyword("_ALPHATEST_ON");
             if (tufts.HasProperty("_Cull")) tufts.SetFloat("_Cull",0);
             tufts.DisableKeyword("_WIND");
             foreach (string property in new[] { "_WindFlutter","_WindSwing" })
@@ -104,10 +113,15 @@ internal sealed partial class HamletStage
         if (_wallAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_wallAsset.Result) is { } wallTexture)
             SetPaintTexture(stone,wallTexture);
         var privateRock=_cliffPaintPath!=null?Art.Png(_cliffPaintPath):null;
+        var privateEarth=_earthPaintPath!=null?Art.Png(_earthPaintPath):null;
+        var privatePaving=_pavingPaintPath!=null?Art.Png(_pavingPaintPath):null;
         if (privateRock!=null) SetPaintTexture(rock,privateRock);
-        Grade(_groundMaterial,HamletPalette.Soil,soilLoaded);
+        if (privateEarth!=null) SetPaintTexture(_groundMaterial,privateEarth);
+        if (privatePaving!=null) SetPaintTexture(paving,privatePaving);
+        Grade(_groundMaterial,privateEarth!=null?HamletPalette.EarthDetail:HamletPalette.Soil,privateEarth==null&&soilLoaded,1024);
         Grade(rock,privateRock!=null?HamletTownscape.CliffPaint:HamletPalette.Rock,rockLoaded,2048);
-        Grade(paving,HamletPalette.Paving); Grade(stone,HamletPalette.Masonry);
+        Grade(paving,privatePaving!=null?HamletPalette.CobbleDetail:HamletPalette.Paving,privatePaving==null,1024);
+        Grade(stone,HamletPalette.Masonry);
         Texture grass=null;
         if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
             grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);

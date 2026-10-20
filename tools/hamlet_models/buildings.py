@@ -80,7 +80,6 @@ def sanitarium():
         arch('Sanitarium green glass',x,4.65,-2.56,.67,1.28,True,green)
     arch('Sanitarium gable glass',.9,6.65,-2.92,1.25,1.65,True,green)
     stairs(.9,0,-2.4,2.4,1.1,7,3.2)
-    native('common_field_hospital_prefab',(3.3,0,-3.5),width=1.25,include=['nurse'],shade=1.7)
     lantern(-.5,2.7,-2.8)
     chimney(2.8,6.3,2.2,2.3,.6)
 
@@ -249,47 +248,11 @@ def graveyard():
 
 
 def statue():
-    # DD1's figure has a bare head, a long coat/cape and crossed hands resting on a staff.
+    # Keep the memorial service and stone base without the unwanted foreground figure.
     for i,(w,h) in enumerate([(5.2,.28),(4.5,.28),(3.8,.32)]):
         box('Memorial stone step',(0,sum([.28,.28,.32][:i])+h/2,0),(w,h,w*.88),stone(),.08)
     cylinder('Tapered statue plinth',(0,1.7,0),1.5,1.65,stone(),4,1.12).rotation_euler.z=math.pi/4
     box('Plinth cornice',(0,2.65,0),(2.8,.27,2.35),stone(),.06)
-    robe=material('Ancestor carved gray stone',(1.45,1.5,1.4,1),'statue_stone',.65)
-    vertices=[]
-    # Deliberately uneven rings create carved folds rather than a smooth cone.
-    rings=[(2.8,.95),(3.8,.83),(5.1,.72),(6.1,1.1),(6.6,.62)]
-    n=14
-    for r,(yy,rad) in enumerate(rings):
-        for i in range(n):
-            a=i*math.pi*2/n
-            rr=rad*(1 if i%2 else .83)
-            vertices.append((math.cos(a)*rr,yy,math.sin(a)*rr*.75))
-    faces=[]
-    for r in range(len(rings)-1):
-        for i in range(n):
-            faces.append([r*n+i,r*n+(i+1)%n,(r+1)*n+(i+1)%n,(r+1)*n+i])
-    mesh('Folded ancestor robes',vertices,faces,robe)
-    face=material('Ancestor face stone',(.30,.32,.29,1),emission=.5)
-    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2,radius=1,location=p((0,6.95,-.05)))
-    head=bpy.context.object; head.name='Carved bare ancestor head'; head.scale=(.38,.32,.55); head.data.materials.append(face)
-    cylinder('Statue neck',(0,6.47,-.05),.21,.3,face,8)
-    for x in [-.16,.16]:
-        beam('Carved brow',(x-.07,7.07,-.35),(x+.07,7.05,-.36),.04,ink())
-    mesh('Ancestor nose',[(-.07,7.10,-.35),(.07,7.10,-.35),(0,6.91,-.50),(0,6.86,-.35)],[[0,1,2],[1,3,2],[3,0,2]],face)
-    mesh('Long coat lapels',[(-.6,6.35,-.53),(0,5.65,-.8),(-.12,6.35,-.7),(.6,6.35,-.53),(.12,6.35,-.7)],[[0,1,2],[3,4,1]],face)
-    def limb(name,a,b,r1=.24,r2=.20):
-        start,end=Vector(p(a)),Vector(p(b))
-        ob=cylinder(name,(0,0,0),r1,(end-start).length,robe,8,r2)
-        ob.location=(start+end)/2
-        ob.rotation_euler=(end-start).to_track_quat('Z','Y').to_euler()
-    limb('Left upper sleeve',(-.9,6.0,0),(-.85,5.35,-.45),.31,.25)
-    limb('Left folded forearm',(-.85,5.35,-.45),(-.5,5.55,-.88),.25,.19)
-    limb('Right upper sleeve',(.9,6.0,0),(.7,5.3,-.50),.31,.25)
-    limb('Right folded forearm',(.7,5.3,-.50),(-.42,5.35,-.83),.25,.18)
-    for x,y,z in [(-.5,5.55,-.88),(-.42,5.35,-.83)]:
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1,radius=.19,location=p((x,y,z)))
-        bpy.context.object.name='Carved ancestor hand'; bpy.context.object.data.materials.append(face)
-    beam('Ancestor walking staff',(-.52,2.8,-.9),(-.52,5.65,-.9),.095,face)
     native('common_altar_of_hope_prefab',(1.65,.9,-.7),width=.8,include=['candle'],shade=1.8)
 
 
@@ -307,5 +270,5 @@ DESIGN = {
     'stage_coach': 'Dark enclosed passenger carriage, iron shod wheels, lanterns, waiting trunks and a coach-stop sign.',
     'nomad_wagon': 'Curved plum caravan, eye crest, door and steps, side wheels, sagging shop awning and tassels.',
     'graveyard': 'Raised burial terrace, masonry retaining wall, scattered headstones, spear fence and entry stair.',
-    'statue': 'Bare-headed Ancestor in a long coat/cape, crossed hands on a staff, tapered plinth and stepped stone base.',
+    'statue': 'Weathered memorial plinth, cornice, candle and stepped stone base; no foreground humanoid.',
 }

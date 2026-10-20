@@ -65,10 +65,10 @@ public static class HamletPaintBaker
                 laneField[i] = HamletGroundPaint.LaneCover(px, pz);
             }
         });
-        var earthSamples = new TileSamples(earth, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 10, 3);
-        var gravelSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 5.5f, 5.5f, .37f, .19f);
-        var turfSamples = turf != null ? new TileSamples(turf, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 7.5f, 7.5f) : null;
-        var laneSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 5, 5);
+        var earthSamples = new TileSamples(earth, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 5, 5);
+        var gravelSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.8f, 4.8f, .37f, .19f, repeat: true);
+        var turfSamples = turf != null ? new TileSamples(turf, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.2f, 4.2f) : null;
+        var laneSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.8f, 4.8f, repeat: true);
         Rows(size, cancellation, y =>
         {
             cancellation.ThrowIfCancellationRequested();
@@ -105,10 +105,10 @@ public static class HamletPaintBaker
                     Lerp(HamletLandscape.MinX, HamletLandscape.MaxX, (float)x / (fieldSize - 1)),
                     Lerp(HamletLandscape.MinZ, HamletLandscape.MaxZ, (float)y / (fieldSize - 1)));
         });
-        var earthSamples = new TileSamples(earth, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 10, 3);
-        var gravelSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 5.5f, 5.5f, .37f, .19f);
-        var turfSamples = new TileSamples(turf, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 7.5f, 7.5f);
-        var laneSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 5, 5);
+        var earthSamples = new TileSamples(earth, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 5, 5);
+        var gravelSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.8f, 4.8f, .37f, .19f, repeat: true);
+        var turfSamples = new TileSamples(turf, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.2f, 4.2f);
+        var laneSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.8f, 4.8f, repeat: true);
         var rockSamples = new TileSamples(bedrock, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 28, 18);
         Rows(size, cancellation, y =>
         {
@@ -148,13 +148,14 @@ public static class HamletPaintBaker
         private readonly byte[] _tile;
         private readonly int[] _x, _y;
         public TileSamples(byte[] tile, int size, float minX, float maxX, float minZ, float maxZ,
-            float scaleX, float scaleZ, float offsetX = 0, float offsetZ = 0)
+            float scaleX, float scaleZ, float offsetX = 0, float offsetZ = 0, bool repeat = false)
         {
             _tile = tile; _x = new int[size]; _y = new int[size];
+            float Wrap(float v) => repeat ? v - (float)Math.Floor(v) : PingPong(v);
             for (int i = 0; i < size; i++)
             {
-                _x[i] = (int)(PingPong(Lerp(minX, maxX, (i + .5f) / size) / scaleX + offsetX) * (TileSize - 1)) * 4;
-                _y[i] = (int)(PingPong(Lerp(minZ, maxZ, (i + .5f) / size) / scaleZ + offsetZ) * (TileSize - 1)) * TileSize * 4;
+                _x[i] = (int)(Wrap(Lerp(minX, maxX, (i + .5f) / size) / scaleX + offsetX) * (TileSize - 1)) * 4;
+                _y[i] = (int)(Wrap(Lerp(minZ, maxZ, (i + .5f) / size) / scaleZ + offsetZ) * (TileSize - 1)) * TileSize * 4;
             }
         }
         public Rgb At(int x, int y)

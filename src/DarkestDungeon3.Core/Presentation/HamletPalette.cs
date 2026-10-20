@@ -18,6 +18,8 @@ public static class HamletPalette
     }
     // Exposed hills use fractured native rock; dressed masonry is reserved for built retaining courses.
     public static readonly Paint Soil = new(.72f,.73f,.66f,.009f,.65f,vScale:.30f,vOffset:.70f);
+    public static readonly Paint EarthDetail = new(.75f,.81f,.70f,.001f,.72f);
+    public static readonly Paint CobbleDetail = new(.78f,.84f,.82f,.001f,.65f);
     public static readonly Paint Rock = new(1.70f,1.85f,2.05f,.008f,.45f,
         uScale:960f/1024,vScale:760f/1024,uOffset:32f/1024,vOffset:144f/1024);
     public const float RockTexelAspect=760f/960;
@@ -31,7 +33,7 @@ public static class HamletPalette
     public static readonly Paint Wildwood = new(.62f,.66f,.60f,.003f,.24f);
     public static readonly Paint Building = new(.94f,.96f,1,.001f,.76f);
     public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
-    public static readonly Paint GrassTuft = new(.31f,.44f,.30f,0,.7f);
+    public static readonly Paint GrassTuft = new(.55f,.63f,.46f,0,.7f);
 
     public static (int Width,int Height) PaintExtent(int width,int height,int maximum,Paint paint,bool crop)
     {

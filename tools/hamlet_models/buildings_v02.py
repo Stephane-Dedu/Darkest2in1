@@ -172,27 +172,6 @@ def graveyard():
 
 def statue():
     B.statue()
-    # Readable carved anatomy and coat seams replace the white featureless head and stretched robe grain.
-    stone_gray=material('Ancestor sculpted weathered stone',(.13,.15,.15,1),emission=.4)
-    shadow=material('Recessed carved stone',(.045,.055,.055,1),emission=.65)
-    replace_material('Ancestor face stone',stone_gray)
-    replace_material('Ancestor carved gray stone',material('Ancestor coat stone',(.3,.34,.34,1),'sculpture_native',.5))
-    remove('Carved brow','Ancestor nose')
-    for x in [-.15,.15]:
-        box('Carved eye socket',(x,7.04,-.365),(.13,.065,.045),shadow,.015)
-        beam('Carved brow ridge',(x-.095,7.105,-.375),(x+.08,7.085,-.375),.055,stone_gray)
-        beam('Cheekbone plane',(x,6.97,-.38),(x*1.5,6.90,-.27),.075,stone_gray)
-    mesh('Carved nose ridge',[(-.065,7.09,-.35),(.065,7.09,-.35),(-.07,6.91,-.47),(.07,6.91,-.47),
-         (0,6.89,-.51),(0,6.84,-.35)],[[0,1,3,2],[2,3,4],[2,4,5],[3,5,4]],stone_gray)
-    beam('Carved mouth',( -.105,6.82,-.34),(.105,6.82,-.34),.023,shadow)
-    beam('Chin plane',(-.14,6.72,-.27),(.14,6.72,-.27),.08,stone_gray)
-    for x in [-.43,.43]:
-        beam('Ancestor coat shoulder',(x*.4,6.46,-.18),(x*1.9,6.12,-.25),.17,stone_gray)
-        beam('Ancestor coat opening',(x*.2,5.65,-.80),(x*.45,2.95,-.69),.035,shadow)
-    for y in [5.1,4.65,4.2]:
-        cylinder('Carved coat button',(.13,y,-.72),.055,.04,stone_gray,8).rotation_euler.x=math.pi/2
-    for i in range(3):
-        beam('Carved crossed fingers',(-.65+i*.09,5.55,-1.02),(-.65+i*.09,5.43,-1.02),.035,stone_gray)
 
 
 BUILDERS={name:globals()[name] for name in B.BUILDERS}
@@ -201,5 +180,5 @@ DESIGN={**B.DESIGN,
     'sanitarium':B.DESIGN['sanitarium']+' Native Academic house façade, carved tower courses and painted slate cap.',
     'guild':B.DESIGN['guild']+' Native Sprawl masonry frontage, painted roof geometry and detailed side wing.',
     'nomad_wagon':B.DESIGN['nomad_wagon']+' Native Hoarder joinery and stitched canvas panels.',
-    'statue':B.DESIGN['statue']+' Recessed eyes, brows, cheekbones, nose, mouth, fingers and coat seams.',
+    'statue':B.DESIGN['statue'],
 }

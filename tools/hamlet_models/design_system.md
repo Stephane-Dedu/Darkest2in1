@@ -90,3 +90,16 @@ The three new paintings are generated, with native DD2 references retained priva
 Judge them against those references and the full-town capture, not resolution alone.
 Native camp props retain their original geometry and UVs; only the old cottage mesh
 is explicitly replaced. Nine other service GLBs remain byte-identical to v21.
+
+
+## Ground, v23
+
+Use small worn native cobbles for streets, larger flags for building aprons and distinct
+earth/grass between them. Keep original paint detail at plausible world scale. Avoid
+mirrored stone courses and a second material tint across blended lane edges. Grass must
+leave entrances and stairs clear; upright cards require explicit alpha clipping and the
+reviewed atlas UVs. Generated earth is a missing-material supplement, not extracted art.
+Bury the black basal third of the native grass painting; group blades rather than scatter
+small isolated dots. Check a full-size diagnostic sample before blaming the atlas or shader.
+The Sanitarium has no nurse and the central memorial retains its stonework without the
+robe-shaped figure. Review ground and silhouettes at the native town camera.

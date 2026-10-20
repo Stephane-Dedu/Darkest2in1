@@ -8,12 +8,12 @@ public class HamletPaintBakerTests
     // Deterministic RGBA tiles on the cinematic layout, including variable source alpha.
     // Footprint/door changes intentionally update these paint fixtures; source pixels remain immutable.
     [Theory]
-    [InlineData(true, "6E30ED0271B14ACD0D92E54E2D735C4D57D5CC675A1D4BCEF6F105DDCFACD384",
-        "3C092EA4A7A96B91E429FD430B60D5632AE93A20A45D7DB5DB669972A1ED3153",
-        "2ECBD9E217F6E329FA21FD3FE0C4582DC7FC774AB76BE560BBFE283A2DAEEA01")]
-    [InlineData(false, "95A222F3D469AAD20170B15DAF43A3BDF7EC429825A2665A9FC7DB2C22350164",
-        "7CC3FD9111652C1ACDD2283BACE44406170578DC1B2A153AB8B92A296485FA05",
-        "A025A87C1C03FA3FC8F5CE581CEDB129A31016787A62DBE49FE4546C56B4F18A")]
+    [InlineData(true, "27A25A22CA43FB00865B0326FCBC1BC69380DA105F6756855CE9C3D2802B597D",
+        "7FFF8E80E30B9A52F5668A43DFE1B97545C8ABDE6C5C12E222E7BC1D77ACD36C",
+        "8548D720F407636B42498DFAB8C1CBBF4BAE296182DA25DFE5EEFD62ADD28134")]
+    [InlineData(false, "46C54BDC16924B0D597C46DF8216F05F00AAF17B13A092A4600713C0DDAD38B4",
+        "E1275335FF351153B93B655AA129BE2767713416FAB450630EBFF200FF55B659",
+        "7B5E7D410AA1AB66AB27D70D09DD56A69848F6DF7AF8059F84909EC47F449B7F")]
     public async Task WorkerPreservesTheCinematicLayoutPaint(bool grass, string ground, string lanes, string valley)
     {
         var soil = Tile(11); var stone = Tile(63); var turf = grass ? Tile(123) : null; var rock = Tile(209);
@@ -22,6 +22,21 @@ public class HamletPaintBakerTests
         Assert.Equal(ground, Digest(baked.Ground)); Assert.Equal(lanes, Digest(baked.Lanes)); Assert.Equal(valley, Digest(baked.Valley));
         Assert.Equal(Tile(11), soil); Assert.Equal(Tile(63), stone); Assert.Equal(Tile(209), rock);
         if (grass) Assert.Equal(Tile(123), turf);
+    }
+
+    [Fact]
+    public void LaneMarginsReuseTheExactGroundPixels()
+    {
+        const int size=96;
+        var paint=HamletPaintBaker.Bake(Tile(11),Tile(63),Tile(123),Tile(209),size:size,fieldSize:64);
+        int equal=0,different=0;
+        for (int i=0;i<paint.Ground.Length;i+=4)
+        {
+            bool same=paint.Ground.AsSpan(i,4).SequenceEqual(paint.Lanes.AsSpan(i,4));
+            if (same) equal++; else different++;
+        }
+        Assert.True(equal>size*size*.7, "Most of the lane image must exactly match the underlying ground.");
+        Assert.True(different>20, "Actual roads must retain visible stone paint.");
     }
 
     [Fact]

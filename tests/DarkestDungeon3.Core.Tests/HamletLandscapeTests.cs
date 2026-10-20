@@ -119,11 +119,11 @@ public class HamletLandscapeTests
         foreach (var site in HamletLayout.Sites)
         {
             Assert.InRange(HamletGroundPaint.ContactShade(site.X,site.Z),.7599f,.761f);
-            Assert.Equal(.42f,HamletGroundPaint.EdgeWear(site.X,site.Z));
+            Assert.Equal(.18f,HamletGroundPaint.EdgeWear(site.X,site.Z));
         }
         var samples=Enumerable.Range(0,500).Select(i=>(X:i%25*4-50f,Z:i/25*4-30f)).ToArray();
         Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.ContactShade(p.X,p.Z),.7599f,1));
-        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.EdgeWear(p.X,p.Z),0,.42f));
+        Assert.All(samples,p=>Assert.InRange(HamletGroundPaint.EdgeWear(p.X,p.Z),0,.18f));
         Assert.Contains(samples,p=>HamletVegetation.Clearance(p.X,p.Z)>3 && HamletGroundPaint.EdgeWear(p.X,p.Z)==0);
         Assert.Contains(samples,p=>HamletGroundPaint.ContactShade(p.X,p.Z)>.98f);
     }
@@ -134,10 +134,10 @@ public class HamletLandscapeTests
         var samples=Enumerable.Range(0,120).Select(i=>HamletGroundPaint.At(i%12*10-60,i/12*10-30)).ToArray();
         Assert.All(samples,s=>
         {
-            Assert.InRange(s.Gravel,0,.6f);
+            Assert.InRange(s.Gravel,0,.16f);
             Assert.InRange(s.Tint.X,.6f,1); Assert.InRange(s.Tint.Y,.6f,1); Assert.InRange(s.Tint.Z,.6f,1);
         });
-        Assert.True(samples.Max(s=>s.Gravel)-samples.Min(s=>s.Gravel)>.15f);
+        Assert.True(samples.Max(s=>s.Gravel)-samples.Min(s=>s.Gravel)>.10f);
         Assert.True(samples.Max(s=>s.Tint.X)-samples.Min(s=>s.Tint.X)>.15f);
     }
 

@@ -27,18 +27,19 @@ public class HamletVegetationTests
     [Fact]
     public void TuftsSitOnGentleGroundAndKeepAVisibleGapFromBuildingsAndStairs()
     {
-        Assert.InRange(HamletVegetation.Clumps.Count,35,120);
+        Assert.InRange(HamletVegetation.Clumps.Count,100,220);
         Assert.Equal(3,HamletVegetation.Clumps.Select(c=>c.Variant).Distinct().Count());
         foreach (var clump in HamletVegetation.Clumps)
         {
             Assert.InRange(clump.X,HamletLayout.MinX+1,HamletLayout.MaxX-1);
             Assert.InRange(clump.Z,HamletLayout.MinZ+1,HamletLayout.MaxZ-1);
             Assert.True(HamletVegetation.Clearance(clump.X,clump.Z)>=1.5f);
-            Assert.InRange(clump.Height,.62f,1.02f);
+            Assert.InRange(clump.Height,.99f,2.25f);
             Assert.InRange(HamletVegetation.Clearance(clump.X,clump.Z),1.5f,7);
-            Assert.InRange(MathF.Abs(clump.Y+.15f-HamletLayout.Height(clump.X,clump.Z)),0,.0001f);
+            float plantedHeight=clump.Y+clump.Height*.35f;
+            Assert.InRange(MathF.Abs(plantedHeight-HamletLayout.Height(clump.X,clump.Z)),0,.0001f);
             foreach (var d in new[] { (1f,0f),(-1f,0f),(0f,1f),(0f,-1f) })
-                Assert.InRange(MathF.Abs(HamletLayout.Height(clump.X+d.Item1,clump.Z+d.Item2)-(clump.Y+.15f)),0,.6501f);
+                Assert.InRange(MathF.Abs(HamletLayout.Height(clump.X+d.Item1,clump.Z+d.Item2)-plantedHeight),0,.6501f);
         }
     }
     [Fact]
