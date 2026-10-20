@@ -65,7 +65,15 @@ public class HamletLandscapeTests
                 int a=face+edge.Item1,b=face+edge.Item2;
                 float length=MathF.Sqrt(Enumerable.Range(0,3).Sum(i=>MathF.Pow(stairs.Positions[a*3+i]-stairs.Positions[b*3+i],2)));
                 float texel=MathF.Sqrt(Enumerable.Range(0,2).Sum(i=>MathF.Pow(stairs.Uv[a*2+i]-stairs.Uv[b*2+i],2)));
-                Assert.InRange(MathF.Abs(length/texel-3),0,.001f);
+                Assert.InRange(MathF.Abs(length/texel-4.8f),0,.001f);
+            }
+        // Successive treads sample one floor plane, rather than restarting the same
+        // dark strip of a wall atlas on every step.
+        for (int block=0;block<stairs.Positions.Length/3;block+=24)
+            for (int i=block+16;i<block+20;i++)
+            {
+                Assert.InRange(MathF.Abs(stairs.Uv[i*2]*4.8f-stairs.Positions[i*3]),0,.0001f);
+                Assert.InRange(MathF.Abs(stairs.Uv[i*2+1]*4.8f-stairs.Positions[i*3+2]),0,.0001f);
             }
         var uvByPoint=new Dictionary<(float,float,float),(float,float)>();
         foreach (int i in terrain.Rock)

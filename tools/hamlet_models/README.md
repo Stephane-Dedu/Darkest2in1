@@ -1,5 +1,17 @@
 # Hamlet building models
 
+Round272 terrace recipe and evidence: `local-art/ui-overhaul/hamlet-terraces-v24/`.
+Run `prepare_terraces.py --game <DD2 install> --out <new private model folder>
+--earth <reviewed hamlet-earth-v23.png>` with the UM Python environment. It extracts
+native cobbles and foundation_panel_06, crops the intact courses, and records provenance.
+The supplied earth is the existing generated painting, not native extraction.
+Then run Blender with `--background --python terraces.py -- --source <v23/models-reviewed>
+--out <same new folder> --kit <local-art/dd2-native-kit> --resolution 900 --samples 12`.
+Package with `package.py --source <new folder> --out <private HamletModels folder>`.
+Six services change authored UVs/materials only; four GLBs remain exact. The recorded
+v24 final library is `models-final` (a graveyard-only refinement follows `models`).
+Native components retain geometry and UVs. Validate the complete town before installation.
+
 Round271 ground/nurse pass: `local-art/ui-overhaul/hamlet-ground-v23/CONTINUE.md`.
 Run `prepare_ground.py --game <DD2 install> --out <private folder>` through the UM Python
 environment to extract unmodified cobblestones. The optional runtime files are

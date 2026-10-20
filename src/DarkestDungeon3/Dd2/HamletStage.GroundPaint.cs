@@ -76,7 +76,7 @@ internal sealed partial class HamletStage
         // Abandoned work owns only bytes. Observe errors and never publish into a replacement town.
         _groundPaintTask?.ContinueWith(t => { var ignored = t.Exception; }, TaskContinuationOptions.OnlyOnFaulted);
         _groundPaintTask = null; _groundPaint = null; _groundUpload = 0;
-        _groundPaving = _groundRock = _groundStone = _groundValley = null;
+        _groundPaving = _groundRock = _groundStone = _groundSteps = _groundValley = null;
         _groundGrass = null;
     }
 

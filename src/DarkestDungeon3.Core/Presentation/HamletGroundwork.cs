@@ -9,7 +9,7 @@ internal static class HamletGroundwork
 {
     internal static void Build(out HamletTerrain.Surface paving,out HamletTerrain.Surface masonry,out HamletTerrain.Surface stairs)
     {
-        var paths=new Builder(); var walls=new Builder(); var stepsMesh=new Builder();
+        var paths=new Builder(); var walls=new Builder(); var stepsMesh=new Builder(4.8f,4.8f);
         var landings=new HashSet<HamletLayout.Point>();
         foreach (var route in HamletLayout.Routes)
         {
@@ -87,6 +87,9 @@ internal static class HamletGroundwork
 
     private sealed class Builder
     {
+        private readonly float _horizontalPeriod,_verticalPeriod;
+        public Builder(float horizontalPeriod=3.8f,float verticalPeriod=1.8f)
+        { _horizontalPeriod=horizontalPeriod; _verticalPeriod=verticalPeriod; }
         private readonly List<float> _positions=new(),_uv=new();
         private readonly List<int> _indices=new();
         public int Count=>_positions.Count/3;
@@ -105,8 +108,11 @@ internal static class HamletGroundwork
                 for (int i=0;i<4;i++)
                 {
                     var p=corners[faces[face*4+i]]; float px=p.Item1*width/2,pz=p.Item3*depth/2;
-                    float u=face<2 || face>=4?width:depth,v=face<4?height:depth;
-                    Vertex(x+px*c+pz*s,y+p.Item2*height/2,z-px*s+pz*c,(i>1?u:0)/3,(i==1||i==2?v:0)/3);
+                    float wx=x+px*c+pz*s,wy=y+p.Item2*height/2,wz=z-px*s+pz*c;
+                    // World projections keep the paint phase across adjacent steps and courses.
+                    float u=face>=4?wx:face<2?wx*c-wz*s:wx*s+wz*c;
+                    float v=face>=4?wz:wy;
+                    Vertex(wx,wy,wz,u/_horizontalPeriod,v/(face>=4?_horizontalPeriod:_verticalPeriod));
                 }
                 Triangle(start,start+1,start+2); Triangle(start,start+2,start+3);
             }

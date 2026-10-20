@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Dd2;
 
 internal sealed partial class HamletStage
 {
-    private Material _groundPaving, _groundRock, _groundStone, _groundValley;
+    private Material _groundPaving, _groundRock, _groundStone, _groundSteps, _groundValley;
     private Texture _groundGrass;
     private int _groundLayer;
 
@@ -58,7 +58,7 @@ internal sealed partial class HamletStage
         Surface(outcropMesh,materials[2],layer).sharedMaterials=materials.Skip(1).ToArray();
         var surroundings=MeshData(valley.name,data.Surroundings.Positions,data.Surroundings.Uv);
         surroundings.triangles=data.Surroundings.Indices; _details.Add(surroundings); Surface(surroundings,valley,layer);
-        foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone),(data.Stairs,stone) })
+        foreach (var part in new[] { (data.Paving,paving),(data.Masonry,stone),(data.Stairs,_groundSteps) })
         {
             var mesh=MeshData(part.Item2.name,part.Item1.Positions,part.Item1.Uv);
             mesh.triangles=part.Item1.Indices; _details.Add(mesh); Surface(mesh,part.Item2,layer);
@@ -122,6 +122,14 @@ internal sealed partial class HamletStage
         Grade(rock,privateRock!=null?HamletTownscape.CliffPaint:HamletPalette.Rock,rockLoaded,2048);
         Grade(paving,privatePaving!=null?HamletPalette.CobbleDetail:HamletPalette.Paving,privatePaving==null,1024);
         Grade(stone,HamletPalette.Masonry);
+        // Stairs need a floor tile, not the loose rubble at the bottom of a wall panel.
+        _groundSteps=PaintSurface("Hamlet continuous stone steps"); _details.Add(_groundSteps);
+        if (privatePaving!=null)
+        {
+            SetPaintTexture(_groundSteps,privatePaving);
+            Grade(_groundSteps,HamletPalette.CobbleDetail,false,1024);
+        }
+        else SetPaintTexture(_groundSteps,BaseTexture(stone));
         Texture grass=null;
         if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
             grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);

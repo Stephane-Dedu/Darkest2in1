@@ -1,5 +1,11 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round272 service terraces: read local-art/ui-overhaul/hamlet-terraces-v24/CONTINUE.md first.
+Six services use native paving/retaining paint at consistent scale; connecting stairs
+use continuous floor UVs. Graveyard reuses reviewed earth. Final ten-service native
+checks and fresh overview passed. Check deployment hashes and usage before work,
+preserve7-8% reserve and protected estates. Foreign gameplay WIP excluded. Next round273.
+
 Round271 ground/nurse pass: read local-art/ui-overhaul/hamlet-ground-v23/CONTINUE.md first.
 New native street cobbles, generated earth, grouped native grass, no Sanitarium nurse or foreground humanoid.
 Private frozen build excludes foreign gameplay WIP. Check final native/deployment status

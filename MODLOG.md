@@ -7937,3 +7937,34 @@ Generated earth and the reused v20 limestone painting are not native extraction.
 still flatter than native dressed scenes, service plinths retain larger paving, and fuller
 lighting/foliage treatment remains. No full frame-time/long-session claim. The old offline
 town_preview approximation does not yet reproduce this ground; use the native captures.
+
+
+## Round272 — native service terraces and continuous stair paving (2026-10-20)
+
+Round272 replaces stretched service-court paint with native DD2 cobbles and intact
+foundation_panel_06 stone courses. Abbey, Guild, Sanitarium, Tavern, Blacksmith and
+Graveyard retain their geometry; the other four GLBs remain byte-identical to round271.
+Authored surfaces account for the runtime fit of each service, keeping paving at a
+6.2-unit period and retaining courses at 3.8 by 1.8. Individual graveyard blocks use
+individual painted stones rather than a miniature brick wall on each block.
+The burial surface reuses the reviewed round271 generated earth; no new art generated.
+
+Connecting stairs use native street cobbles at 4.8 units, with continuous world UVs
+instead of restarting one wall-panel strip per tread. Native retaining paint excludes
+the panel's cap and loose black rubble. The added stair material shares the cached
+graded cobble texture and follows the existing scene-release ownership.
+
+Release build and all 1268 Core checks pass. Six exported models were re-imported,
+rendered from four sides and verified; the final graveyard earth revision was separately
+re-imported and rendered. Triangle counts remain unchanged. The native unsaved fixture
+passes ten service clicks, camera, release/reload/re-entry, cache, resize and keyboard.
+Fresh 1920x1080 overview and a five-second buffer-allocation probe were inspected.
+No estate selected or saved. Frozen HEAD0796f84 plus five owned runtime/test files
+excludes concurrent gameplay/curio/Shieldbreaker work. Evidence and deployment hashes:
+local-art/ui-overhaul/hamlet-terraces-v24.
+
+Remaining art work: broad cliff repetition, lighting, roof repetition and service-specific
+facade wear. Ground still lacks the dressing of native DD2 scenes. The old offline town
+preview predates the current ground; native captures remain the acceptance reference.
+The package still embeds duplicate image bytes in buffers. No full frame-time,
+long-session, controller or saved-transaction claim; forced-reload portrait issue remains.

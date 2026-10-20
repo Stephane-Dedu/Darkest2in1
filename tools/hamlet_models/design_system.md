@@ -103,3 +103,16 @@ Bury the black basal third of the native grass painting; group blades rather tha
 small isolated dots. Check a full-size diagnostic sample before blaming the atlas or shader.
 The Sanitarium has no nurse and the central memorial retains its stonework without the
 robe-shaped figure. Review ground and silhouettes at the native town camera.
+
+
+## Service terraces, v24
+
+Use native cobbles for horizontal courts and intact painted courses for retaining walls.
+Crop foundation_panel_06 to pixels (5,88)-(507,293); its cap and loose rubble do not tile
+as a wall. Keep courtyard paving at a 6.2-unit world period, retaining stone at 3.8 by
+1.8, accounting for each service's runtime fit. Connecting stairs use the street's
+4.8-unit cobbles and one world-space phase across treads. A physical block gets one
+painted stone, not a miniature brick wall. Keep main facade material identities distinct.
+Graveyard soil reuses the reviewed generated earth at a 5-unit period. Native source
+pixels remain unmodified except cropping; generated earth is labelled separately.
+Inspect re-imported GLBs and the native town, including the routes joining the terraces.

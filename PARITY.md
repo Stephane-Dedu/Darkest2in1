@@ -667,3 +667,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round271 ground/nurse: native small street cobbles, generated detailed earth, fuller native grass, matched road edges, nurse-free Sanitarium and foreground figure removed; memorial interaction retained. Release+1268 Core checks+284 UI checks; native unsaved lifecycle/service checks. Evidence:local-art/ui-overhaul/hamlet-ground-v23.
 - [ ] Ground still needs broader native scene dressing/lighting; larger building-plinth paving and old offline ground preview remain. Saved transactions/full performance and other existing art limits are unchanged.
+
+- [x] Round272 terraces: six service courts/retaining surfaces use native DD2 stone at consistent scale; connecting stairs use continuous native paving; graveyard has reviewed earth. Release +1268 Core checks and native unsaved ten-service/lifecycle fixture pass. Evidence: local-art/ui-overhaul/hamlet-terraces-v24.
+- [ ] Broader cliff/roof repetition, facade wear, lighting and ground dressing remain; old offline ground preview and package image duplication remain. No full performance or saved-transaction claim.
