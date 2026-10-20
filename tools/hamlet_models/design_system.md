@@ -116,3 +116,18 @@ painted stone, not a miniature brick wall. Keep main facade material identities 
 Graveyard soil reuses the reviewed generated earth at a 5-unit period. Native source
 pixels remain unmodified except cropping; generated earth is labelled separately.
 Inspect re-imported GLBs and the native town, including the routes joining the terraces.
+
+
+## Fitted masonry, v25
+
+Build long jambs from separate fitted stone courses. Give arch heads individual
+voussoirs, projecting hood moulds and sills with shadowed drip edges. Buttresses
+should taper through real ashlar courses, with outward-sloping weathering caps.
+Sample individual detailed stones from the reviewed painting; do not stretch a
+tiny strip over a whole pier or map a miniature brick wall onto each physical block.
+Corbels under the eaves connect roof and wall without hiding the windows.
+
+The Sanitarium's green glass, pale weathered lime, turret and small cellar apertures
+keep it distinct from the Abbey. Map cylindrical plaster after world transforms;
+avoid recurring horizontal bands. Check backs as well as fronts, and retain the
+native house/tower UVs. Added depth must stay within the established service footprint.

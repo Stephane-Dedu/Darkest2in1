@@ -670,3 +670,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round272 terraces: six service courts/retaining surfaces use native DD2 stone at consistent scale; connecting stairs use continuous native paving; graveyard has reviewed earth. Release +1268 Core checks and native unsaved ten-service/lifecycle fixture pass. Evidence: local-art/ui-overhaul/hamlet-terraces-v24.
 - [ ] Broader cliff/roof repetition, facade wear, lighting and ground dressing remain; old offline ground preview and package image duplication remain. No full performance or saved-transaction claim.
+
+- [x] Round273 Abbey/Sanitarium: fitted stone arches/buttresses, sloping caps/eave detail, real cellar/rear apertures and revised tower plaster. Two iterations, four re-imported views each, exact outer bounds/native parts and eight unchanged GLBs. Native unsaved ten-service/lifecycle and fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-masonry-v25.
+- [ ] Roof edges/repetition, wider lighting/cliff/ground dressing, package image duplication and old offline ground preview remain. Saved/full-performance and forced-reload portrait limits remain.

@@ -1,5 +1,33 @@
 # Perspective Hamlet
 
+Round273 fits new masonry to the Abbey and Sanitarium while preserving their native
+components and exact outer bounds. The Abbey has separate arch courses, stepped ashlar
+buttresses, outward-sloping weathering caps, eave corbels, drip courses and rear lancets.
+The Sanitarium has fitted portal stones, recessed front/rear cellar windows, corner
+quoins and revised cylindrical plaster mapping. Eight other GLBs are byte-identical.
+
+This pass reuses the reviewed v20 generated stone/plaster paintings and native DD2
+glass. No new bitmap art is generated. Individual stone faces sample detailed portions
+of the approved full painting instead of a tiny stretched band. Native tower, house and
+candle geometry/UVs remain exact. The final Abbey has16988 triangles and Sanitarium14975;
+both exported bounds match the source exactly. Two complete offline iterations were
+re-imported, checked for decoded images/topology/bounds and rendered from four sides.
+The second adds rear openings and corrects side-cap orientation.
+
+Asset-only installation: normal round272 plugin unchanged, no new C# test run.
+Native unsaved ten-service, camera, full release/reload/re-entry, cache, resize and
+keyboard checks pass with zero live input. Fresh1920x1080 overview inspected; see the
+five-second allocation probe and deployment hashes in local-art/ui-overhaul/hamlet-masonry-v25.
+No estate selected/saved; config, estate2, native profiles and other assets preserved.
+Foreign gameplay/curio/Shieldbreaker work excluded.
+
+Native production parity remains unfinished. Roof repetition/edges, broad cliff
+repetition, scene lighting and ground dressing still need work. The offline town
+preview predates the new ground; use native captures. Package still duplicates image
+bytes in buffers. Forced-reload portraits, saved transactions, controller support and
+full frame-time/long-session validation remain outside this art pass.
+
+
 Round272 replaces stretched service-court paint with native DD2 cobbles and intact
 foundation_panel_06 stone courses. Abbey, Guild, Sanitarium, Tavern, Blacksmith and
 Graveyard retain their geometry; the other four GLBs remain byte-identical to round271.

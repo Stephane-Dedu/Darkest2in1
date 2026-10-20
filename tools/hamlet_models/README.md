@@ -1,5 +1,16 @@
 # Hamlet building models
 
+Round273 Abbey/Sanitarium masonry: evidence in `local-art/ui-overhaul/hamlet-masonry-v25`.
+Prepare a new private output `textures/` directory containing the reviewed v20
+`abbey_wall.png`, `sanitarium_wall.png`, `wood_v20.png` and native `window_grain.png`.
+The exact inputs/hashes are recorded in v25/texture-sources.json. Run Blender with
+`--background --python masonry_detail.py -- --source <v24/models-final> --out <new folder>
+--kit <local-art/dd2-native-kit> --resolution 900 --samples 16`, then package.py.
+Final v25 source is `models`; `models-first` is the earlier review without rear windows.
+The authoring pass preserves all native meshes/UVs and eight other GLBs, and keeps
+both modified buildings' outer bounds. Re-import and inspect all four views, then
+the native Hamlet. No new image generation or runtime binary is needed for this pass.
+
 Round272 terrace recipe and evidence: `local-art/ui-overhaul/hamlet-terraces-v24/`.
 Run `prepare_terraces.py --game <DD2 install> --out <new private model folder>
 --earth <reviewed hamlet-earth-v23.png>` with the UM Python environment. It extracts
