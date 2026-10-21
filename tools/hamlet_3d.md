@@ -1,5 +1,28 @@
 # Perspective Hamlet
 
+Round277 replaces six primitive glowing cubes with native DD2 assistance lamps:
+square amber lamps at the Guild/Tavern and round pale lamps at the Sanitarium/Caravan.
+Original geometry proportions, painted UVs, chain, ring and cage are retained.
+No new generated art. Fitted brackets attach the lamps to walls. Native geometry
+queries revealed the Tavern's previous lamps sat two to three units ahead of its
+facades; both now sit beside actual walls, outside the passage. The Sanitarium
+bracket reaches its porch jamb and the Caravan supports reach its timber facade.
+
+Two four-service exported/re-imported iterations follow the earlier three-lamp
+reference study. All six new lamp meshes match native reference proportions/UVs;
+all original native components retained, six other GLBs byte-identical and all
+service bounds unchanged. The first candidate's detached mounts were corrected.
+Source hashes, mesh audit, render reviews and package are private in
+local-art/ui-overhaul/hamlet-lanterns-v29. No C# changes/build/tests; normal272 binaries.
+
+Final native unsaved ten-service/camera/release/reload/re-entry/Embark/cache/resize/
+keyboard/still-camera checks pass. Fresh 1920x1080 overview inspected, five-second
+buffer-allocation probe passes. No live OS input or estate selection/saving. Config,
+estate2, native profiles, other assets and foreign WIP preserved; protected estates
+untouched. Wider lighting and facade wear remain. These lamps use painted light;
+this pass does not add dynamic lights or prove full frame-time performance.
+
+
 Round276 gives the Guild fitted clay courses, folded ridge saddles, dormer
 flashing and exposed eave rafters. The Sanitarium gets fitted turret and porch
 slate courses, retaining its original hip bindings. The native Academic's house

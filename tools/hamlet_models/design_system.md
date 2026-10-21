@@ -170,3 +170,16 @@ clearance with rays as well as four rendered angles. Keep original thin hip bind
 when they close seams and define model bounds. Fold ridge saddles onto both pitches;
 seat dormer aprons against the curved roof and support long eaves with timber rafters.
 Geometry and paint must read at the native town camera before accepting a candidate.
+
+
+## Native entrance lamps, v29
+
+Use DD2's assistance lamp geometry and painted glass at uniform scale. The square
+amber lamp fits Guild/Tavern timber architecture; the narrower round pale lamp fits
+Sanitarium/Caravan entries. Preserve cage, chain, ring and original UVs. Match the
+new model at the actual town camera; source resolution alone is not acceptance.
+Supports must meet physical walls or overhead beams. Check the native geometry:
+old placeholder positions can be metres ahead of the facade. The Tavern's open
+passage needs clear space, so its lamp now attaches beside the door. Use a diagonal
+bracket where a lamp sits outside the porch jamb. These are painted light sources;
+dynamic lighting and wider scene illumination remain separate work.

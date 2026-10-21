@@ -1,5 +1,13 @@
 # Hamlet building models
 
+Round277 native lamps: run `lanterns.py --source <v28/models-final> --out <new private folder>
+--kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
+It selects `common_prop_lamp_01/02` from `common_story_assist_prefab`, records extraction
+hashes and changes four services. No new texture files needed. The native helper is
+loaded freshly per service to avoid stale Blender material references. Accepted source:
+v29/models-final. Independent lamp geometry/UV audit, four views and native checks precede
+acceptance. The initial models-study and models folders remain superseded drafts.
+
 Round276 Guild/Sanitarium roofs: run `roof_joinery.py --source <v27/models-accepted>
 --out <new private folder> --kit <local-art/dd2-native-kit> --resolution 900 --samples 16`
 under background Blender. Copy reviewed `red_v20.png`, `slate_v20.png`, `wood_v20.png`
