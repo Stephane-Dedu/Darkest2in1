@@ -1,5 +1,20 @@
 # Perspective Hamlet
 
+Round278 fixes the Tavern's floating sign and two old lantern backplates.
+Move the complete sign toward the tower, brace its bracket and give both suspension
+chains a crossbar. Seat the backplates behind the newly installed native lamps.
+The initial private study lacked the crossbar; final source models-final includes it.
+Existing paint, native parts and UVs are retained. No new bitmap or C# changes.
+
+One exported/re-imported Tavern, four rendered views, native component preservation,
+nine byte-identical other GLBs and exact service bounds. Tavern17981 triangles.
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard checks PASS.
+Fresh1920x1080 overview inspected; five-second buffer probe recorded in private
+hamlet-signs-v30. Normal272 binary unchanged. No estate selection/save or live OS
+input. Configs, estate2, native profiles and foreign WIP preserved; protected estates
+untouched. Wider facade wear/lighting, cliff repetition and ground dressing remain.
+
+
 Round277 replaces six primitive glowing cubes with native DD2 assistance lamps:
 square amber lamps at the Guild/Tavern and round pale lamps at the Sanitarium/Caravan.
 Original geometry proportions, painted UVs, chain, ring and cage are retained.

@@ -686,3 +686,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round277 six native DD2 entrance lamps across Guild/Tavern/Sanitarium/Caravan, with fitted physical supports. Original proportions/UVs, six exact other GLBs and exact service bounds. Two export iterations with four views each; final entrance mounts reviewed, native unsaved lifecycle/fresh overview and allocation probe pass. Normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-lanterns-v29.
 - [ ] Wider lighting/facade wear, old Tavern sign attachment, cliff repetition and ground dressing remain. Painted lamp light only; saved/controller/full-frame-time and forced-reload portrait limits remain.
+
+- [x] Round278 Tavern sign/backplates fitted to walls, bracket brace and chain crossbar. Nine exact other GLBs, exact bounds, retained native paint/parts; native lifecycle/overview and allocation probe PASS. Evidence local-art/ui-overhaul/hamlet-signs-v30.

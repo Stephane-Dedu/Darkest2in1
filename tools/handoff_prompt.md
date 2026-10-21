@@ -1,9 +1,9 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
-Round278 support study: read local-art/ui-overhaul/hamlet-signs-v30/CONTINUE.md first.
-Offline Tavern sign/backplate correction rendered and audited; NOT installed/native tested.
-Accepted deployment remains277, normal272 binary, game closed. Usage gate and fresh
-baseline required before native QA. Next implementation round remains278.
+Round278 Tavern supports: read local-art/ui-overhaul/hamlet-signs-v30/CONTINUE.md first.
+Accepted source models-final; sign/backplates attached, chain crossbar added.
+Native lifecycle/overview passed. Normal272 plugin unchanged, game closed.
+Fresh baseline/usage gate first. Next round279; older handoffs historical.
 
 Round277 native building lanterns: read local-art/ui-overhaul/hamlet-lanterns-v29/CONTINUE.md first.
 Six native lamps on four services, fitted brackets, original proportions/UVs,

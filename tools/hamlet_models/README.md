@@ -1,5 +1,11 @@
 # Hamlet building models
 
+Round278 Tavern supports: run `supports.py --source <v29/models-final> --out <new private folder>
+--kit <local-art/dd2-native-kit> --resolution 900 --samples 12` under background Blender.
+No additional textures. Nine exact GLBs, native components/UVs preserved. Final v30 source
+is models-final; models-study lacks the chain crossbar. Export/re-import, four views and
+native acceptance required. Do not reuse old deployment baselines for a new round.
+
 Round277 native lamps: run `lanterns.py --source <v28/models-final> --out <new private folder>
 --kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
 It selects `common_prop_lamp_01/02` from `common_story_assist_prefab`, records extraction

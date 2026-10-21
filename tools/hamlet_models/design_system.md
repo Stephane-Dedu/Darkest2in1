@@ -183,3 +183,12 @@ old placeholder positions can be metres ahead of the facade. The Tavern's open
 passage needs clear space, so its lamp now attaches beside the door. Use a diagonal
 bracket where a lamp sits outside the porch jamb. These are painted light sources;
 dynamic lighting and wider scene illumination remain separate work.
+
+
+## Physical fixture support, v30
+
+Move complete sign assemblies together, including relief, rim and chains. Each
+suspension link must meet an actual crossbar. Trace inherited wall backplates when
+replacing lamps; leaving them at old placeholder coordinates creates floating props
+in the passage. Keep native painted lamps unchanged and check support placement in
+side and town views, not only the flattering front angle.
