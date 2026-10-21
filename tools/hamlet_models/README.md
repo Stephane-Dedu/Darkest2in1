@@ -1,5 +1,17 @@
 # Hamlet building models
 
+Round274 roof courses: evidence in `local-art/ui-overhaul/hamlet-roofs-v26`.
+Run Blender `--background --python roof_detail.py -- --source <v25/models>
+--out <new private folder> --kit <local-art/dd2-native-kit> --resolution 900 --samples 16`.
+Prepare the output's `textures/` with the unchanged reviewed `slate_v20.png` and
+`thatch_v22.png`; exact sources/hashes are in v26/texture-sources.json.
+Final library is `models-final`; earlier iterations are reviews, not installation sources.
+Re-import/topology/packed paint/native-part checks run in the shared pipeline, then
+four views and native Hamlet acceptance. Run package.py on the verified final library.
+The recipe fits the original exported roof thickness and clips reed pieces before
+combining them. Do not boolean a self-intersecting bundle mesh: it can lose coverage.
+Private coverage-audit.json compares a rejected negative control to the final roof.
+
 Round273 Abbey/Sanitarium masonry: evidence in `local-art/ui-overhaul/hamlet-masonry-v25`.
 Prepare a new private output `textures/` directory containing the reviewed v20
 `abbey_wall.png`, `sanitarium_wall.png`, `wood_v20.png` and native `window_grain.png`.

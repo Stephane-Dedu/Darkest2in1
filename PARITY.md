@@ -673,3 +673,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round273 Abbey/Sanitarium: fitted stone arches/buttresses, sloping caps/eave detail, real cellar/rear apertures and revised tower plaster. Two iterations, four re-imported views each, exact outer bounds/native parts and eight unchanged GLBs. Native unsaved ten-service/lifecycle and fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-masonry-v25.
 - [ ] Roof edges/repetition, wider lighting/cliff/ground dressing, package image duplication and old offline ground preview remain. Saved/full-performance and forced-reload portrait limits remain.
+
+- [x] Round274 roofs: Abbey individual slate/folded ridge and Smithy thick reed bundles, real penetrations/painted underlay. Four re-imported four-view iterations; rejected coverage control, exact footprints/native parts and eight byte-identical GLBs. Native unsaved ten-service/lifecycle and fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-roofs-v26.
+- [ ] Other service roof trim, wider lighting/cliff/ground dressing, package image duplication and old offline ground preview remain. Saved/full-performance and forced-reload portrait limits remain.

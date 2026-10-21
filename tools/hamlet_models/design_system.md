@@ -131,3 +131,19 @@ The Sanitarium's green glass, pale weathered lime, turret and small cellar apert
 keep it distinct from the Abbey. Map cylindrical plaster after world transforms;
 avoid recurring horizontal bands. Check backs as well as fronts, and retain the
 native house/tower UVs. Added depth must stay within the established service footprint.
+
+
+## Physical roof courses, v26
+
+Slate and thatch need different edge construction. Slate uses thin overlapping
+pieces, restrained corner chips, staggered joints and folded ridge saddles.
+Reed bundles have broad grouped grain, thicker lower ends and uneven cut tips.
+Keep the pitch, dipped ridge and flared eaves; avoid uniform teeth or unrelated
+random noise. Use whole reviewed slate faces and reed clumps at useful resolution.
+
+Fit courses to the exported outer roof surface, including solidified thickness.
+Retain a painted shadow underlay. Cut individual bundles around chimney/dormer
+openings before merging; booleans on overlapping solids can remove valid neighbours
+while still exporting a technically valid mesh. Review roof coverage from both sides.
+Combine pieces by material to keep renderers bounded. Preserve service footprint,
+native components and the accepted wall/terrace work.

@@ -1,5 +1,39 @@
 # Perspective Hamlet
 
+Round274 replaces the Abbey's smooth painted roof surfaces with individual,
+overlapping slate courses and folded ridge caps. The Smithy has thick, irregular
+reed bundles around real chimney and dormer openings, with a painted underlay.
+The service footprints and all accepted masonry stay exact; eight other GLBs
+are byte-identical. Native mesh positions, transforms and UVs remain unchanged.
+
+This reuses the reviewed v20 slate and v22 reed paintings without generating
+new bitmap art. Native Farm/Valley cottage silhouettes and the retained Sprawl
+tower are the references. The final Abbey has 29012 triangles;
+the Smithy has 17590. Pieces share combined meshes/materials.
+
+Four offline iterations were exported, re-imported and rendered from four sides.
+Early versions were rejected: the old thick roof intersected the new courses,
+and boolean cuts on intersecting reed bundles silently removed neighbouring
+pieces. The final pass fits the exported outer surface and clips each bundle
+before joining. A sampled top-surface audit catches the rejected Smithy's 34%
+coverage and measures 99.5% on the accepted roof; it is not a complete watertightness
+proof. Full native appearance remains the acceptance check.
+
+Asset-only installation, normal round272 plugin unchanged; no new C# test run.
+Native unsaved ten-service, camera, full release/reload/re-entry, cache, resize,
+keyboard and still-camera checks pass. Fresh1920x1080 overview inspected, plus
+the five-second buffer-allocation probe. No estate selected/saved, zero live input.
+The interrupted hidden-window launch did not initialize the OnGUI preview; the visible
+game-window rerun renders and completes the fixture with the identical binary/assets.
+Config, estate2, native profiles and other assets preserved. Foreign gameplay,
+curio and Shieldbreaker work excluded. Evidence: local-art/ui-overhaul/hamlet-roofs-v26.
+
+Native production parity remains unfinished. Smithy underlay/end-grain detail, Guild/Sanitarium roof trim, broad
+cliff repetition, lighting and ground dressing remain. Package image duplication,
+old offline ground preview, forced-reload portrait and saved/full-performance
+acceptance limits remain unchanged.
+
+
 Round273 fits new masonry to the Abbey and Sanitarium while preserving their native
 components and exact outer bounds. The Abbey has separate arch courses, stepped ashlar
 buttresses, outward-sloping weathering caps, eave corbels, drip courses and rear lancets.
