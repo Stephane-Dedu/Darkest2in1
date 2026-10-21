@@ -1,5 +1,10 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round277 lantern preparation: read local-art/ui-overhaul/hamlet-lanterns-v29/CONTINUE.md first.
+Native candidate comparison and Guild offline proof saved, NOT installed or native tested.
+Accepted deployment remains round276/source v28/models-final; normal272 plugin, game closed.
+Usage gate and fresh baseline first. Next implementation round remains277.
+
 Round276 Guild/Sanitarium roof joins: read local-art/ui-overhaul/hamlet-roof-joinery-v28/CONTINUE.md first.
 Accepted source models-final. Fitted clay/slate courses, ridge saddles, dormer flashing,
 eave rafters and retained turret bindings. Eight exact GLBs, exact outer bounds.

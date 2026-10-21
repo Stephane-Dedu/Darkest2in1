@@ -8086,3 +8086,15 @@ No C# edit/build/test this round. Evidence: local-art/ui-overhaul/hamlet-roof-jo
 The town still needs broader lighting, cliff repetition and ground dressing work.
 Facade-specific wear, NPC/upgrade exteriors, saved transactions/controller/full
 performance, forced-reload portraits and package image duplication remain open.
+
+
+## Round277 preparation - native lantern study (2026-10-21)
+
+Round277 preparation: native lantern comparison and a private Guild proof are saved in
+local-art/ui-overhaul/hamlet-lanterns-v29. Installed state remains verified round276
+(commit9197120), normal272 plugin, game closed; hashes rechecked. No new deployment.
+The common lamppost/cropped head is rejected. Native assistance square/round lamps
+are suitable candidates with original paint/UVs; hero-selection cage is unlit and
+needs further treatment. Guild square-lamp proof exported/re-imported with nine exact
+other GLBs, four renders produced, hero view reviewed. It is not yet tested in game.
+No generated art needed. Next round remains277; fresh baseline required before deploy.

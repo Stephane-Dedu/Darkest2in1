@@ -681,3 +681,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round276 Guild/Sanitarium: fitted clay/slate courses, ridge saddles, dormer flashing, eave rafters and retained turret bindings. Three offline reviews, sampled coverage checks, exact outer bounds/native components and eight exact GLBs. Final native unsaved lifecycle/fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-roof-joinery-v28.
 - [ ] Broader lighting/cliff/ground dressing and facade wear remain; full saved/controller/performance acceptance, forced-reload portraits and package size remain outside this art pass.
+
+- [?] Round277 preparation: native assistance lanterns and an offline Guild replacement studied in local-art/ui-overhaul/hamlet-lanterns-v29. Original paint/UVs, nine exact other GLBs. Not installed or native tested; round276 remains accepted.
