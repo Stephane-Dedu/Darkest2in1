@@ -1,5 +1,11 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round275 Smithy roof finish: read local-art/ui-overhaul/hamlet-roof-finish-v27/CONTINUE.md first.
+Accepted source models-accepted. Raised underlay and side/end-cap UV repair; nine exact
+GLBs, all bounds/counts retained. Offline and native lifecycle/overview PASS, normal272 binary.
+Check usage/current deployment first, fresh baseline for further work; preserve7-8%
+reserve, foreign WIP and protected estates. Next round276. Earlier handoffs are historical.
+
 Round274 physical roof courses: read local-art/ui-overhaul/hamlet-roofs-v26/CONTINUE.md first.
 Abbey fitted slate/ridge caps and Smithy overlapping reed bundles with painted underlay.
 Final source models-final; four offline reviews, coverage and native lifecycle/overview pass.

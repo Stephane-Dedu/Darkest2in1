@@ -147,3 +147,12 @@ openings before merging; booleans on overlapping solids can remove valid neighbo
 while still exporting a technically valid mesh. Review roof coverage from both sides.
 Combine pieces by material to keep renderers bounded. Preserve service footprint,
 native components and the accepted wall/terrace work.
+
+
+## Reed edge finish, v27
+
+Keep the thatch underlay close to its fitted outer bundles, leaving only clearance.
+A low second sheet reads as a floating rim. Side UVs need finite painted area across
+thickness; repeating a single texture line produces stretched streaks. Bent n-gons
+also triangulate into small vertical end caps made entirely from upper vertices.
+Give those caps a planar local mapping while preserving the main roof painting.

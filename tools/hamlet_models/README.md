@@ -1,5 +1,12 @@
 # Hamlet building models
 
+Round275 Smithy roof finish: `roof_finish.py --source <v26/models-final> --out <new private folder>
+--kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
+No extra textures needed; it reuses the packed reviewed painting. Accepted v27 library:
+`models-accepted`. Re-import/four-view and native checks are required before installation.
+Private `edge-audit.json` verifies preserved upper/lower paint/course geometry and reduction
+of collapsed side UVs. Nine other service GLBs remain byte-identical. See v27/CONTINUE.md.
+
 Round274 roof courses: evidence in `local-art/ui-overhaul/hamlet-roofs-v26`.
 Run Blender `--background --python roof_detail.py -- --source <v25/models>
 --out <new private folder> --kit <local-art/dd2-native-kit> --resolution 900 --samples 16`.

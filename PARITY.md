@@ -676,3 +676,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round274 roofs: Abbey individual slate/folded ridge and Smithy thick reed bundles, real penetrations/painted underlay. Four re-imported four-view iterations; rejected coverage control, exact footprints/native parts and eight byte-identical GLBs. Native unsaved ten-service/lifecycle and fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-roofs-v26.
 - [ ] Other service roof trim, wider lighting/cliff/ground dressing, package image duplication and old offline ground preview remain. Saved/full-performance and forced-reload portrait limits remain.
+
+- [x] Round275 Smithy: fitted underlay and reed side/end-cap UV repair. Original course geometry/upper-lower paint exact; all bounds/counts and nine other GLBs unchanged. Three offline reviews, independent edge audit and native unsaved lifecycle/fresh overview pass. Normal272 binary unchanged; evidence local-art/ui-overhaul/hamlet-roof-finish-v27.

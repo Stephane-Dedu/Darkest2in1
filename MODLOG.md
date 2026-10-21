@@ -8034,3 +8034,26 @@ Native production parity remains unfinished. Smithy underlay/end-grain detail, G
 cliff repetition, lighting and ground dressing remain. Package image duplication,
 old offline ground preview, forced-reload portrait and saved/full-performance
 acceptance limits remain unchanged.
+
+
+## Round275 — Smithy roof underlay and edge paint (2026-10-21)
+
+Round275 fits the Smithy underlay closely beneath its reed courses and repairs
+collapsed texture coordinates on the bundle sides and curved end caps. The original
+upper/lower reed painting and course geometry remain exact. Nine other GLBs are
+byte-identical; all service bounds and triangle counts are unchanged. Smithy17590 triangles.
+No new images or C# changes; no new C# tests. Existing reviewed v22 paint is retained.
+
+Three offline variants were exported/re-imported and rendered from four sides.
+The independent edge audit confirms identical course geometry/upper-lower painting;
+nondegenerate faces with collapsed UVs fall from6433 to24 on the main roof and369 to0
+on the dormer. Five tiny pre-existing degenerate side triangles remain unchanged.
+This is a refinement, not a claim that every mesh issue is resolved.
+
+Native unsaved ten-service/camera/release/reload/re-entry/Embark/cache/resize/keyboard/
+still-camera checks pass, with zero live input and no estate selected/saved. Fresh
+1920x1080 overview reviewed and five-second allocation probe passes. Asset-only:
+normal272 binaries unchanged. Saves/config/other assets and foreign gameplay WIP
+preserved; protected estates1/3 untouched. Evidence: local-art/ui-overhaul/hamlet-roof-finish-v27.
+Guild/Sanitarium roofs, broader lighting/cliff/ground dressing, full saved/controller/
+performance acceptance and the existing forced-reload portrait gap remain open.
