@@ -156,3 +156,17 @@ A low second sheet reads as a floating rim. Side UVs need finite painted area ac
 thickness; repeating a single texture line produces stretched streaks. Bent n-gons
 also triangulate into small vertical end caps made entirely from upper vertices.
 Give those caps a planar local mapping while preserving the main roof painting.
+
+
+## Service roof joins, v28
+
+Use smaller, irregular physical courses at the service camera scale. Retain the
+Guild's red clay identity and the Sanitarium's slate turret, with the native
+Academic's house as the nearby detail reference. Use individual painted tile faces,
+excluding baked shadows from neighbouring courses; these create false holes when
+remapped onto new pieces. Dark painted cut edges retain the game's graphic seams.
+Fit each course to the actual exported deck, including solidified thickness. Check
+clearance with rays as well as four rendered angles. Keep original thin hip bindings
+when they close seams and define model bounds. Fold ridge saddles onto both pitches;
+seat dormer aprons against the curved roof and support long eaves with timber rafters.
+Geometry and paint must read at the native town camera before accepting a candidate.

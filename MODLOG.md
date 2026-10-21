@@ -8057,3 +8057,32 @@ normal272 binaries unchanged. Saves/config/other assets and foreign gameplay WIP
 preserved; protected estates1/3 untouched. Evidence: local-art/ui-overhaul/hamlet-roof-finish-v27.
 Guild/Sanitarium roofs, broader lighting/cliff/ground dressing, full saved/controller/
 performance acceptance and the existing forced-reload portrait gap remain open.
+
+
+## Round276 - Guild and Sanitarium roof joins (2026-10-21)
+
+Round276 gives the Guild fitted clay courses, folded ridge saddles, dormer
+flashing and exposed eave rafters. The Sanitarium gets fitted turret and porch
+slate courses, retaining its original hip bindings. The native Academic's house
+and all other native components keep their geometry and UVs. Existing reviewed
+clay/slate/oak/iron paintings reused; no new bitmap generation. Eight service
+GLBs are byte-identical and all ten outer bounds retained. Guild 25115 triangles;
+Sanitarium 21551 triangles. Asset-only, normal272 binaries unchanged.
+
+Three exported/re-imported four-view iterations. First clay crops included baked
+shadow bands, making false holes despite full main-roof coverage. Interior face
+crops and dark physical edges fix this. A separate small-roof underlay correction
+eliminates sampled intersections. Final sampled coverage is 100% for the Guild
+main/armory and Sanitarium porch, 99.84% for the turret. This is a sampled coverage
+check, not a watertightness proof. Restoring the narrow hip bindings preserves the
+original bounds after the second candidate contracted the turret eave by 2 cm.
+
+Final native unsaved ten-service/camera/release/reload/re-entry/Embark/cache/resize/
+keyboard/still-camera checks pass. Fresh 1920x1080 overview inspected; five-second
+buffer probe passes. No live OS input or estate selection/saving. Config, estate2,
+native profiles, other assets and foreign WIP preserved; protected estates untouched.
+No C# edit/build/test this round. Evidence: local-art/ui-overhaul/hamlet-roof-joinery-v28.
+
+The town still needs broader lighting, cliff repetition and ground dressing work.
+Facade-specific wear, NPC/upgrade exteriors, saved transactions/controller/full
+performance, forced-reload portraits and package image duplication remain open.

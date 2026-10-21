@@ -1,5 +1,12 @@
 # Hamlet building models
 
+Round276 Guild/Sanitarium roofs: run `roof_joinery.py --source <v27/models-accepted>
+--out <new private folder> --kit <local-art/dd2-native-kit> --resolution 900 --samples 16`
+under background Blender. Copy reviewed `red_v20.png`, `slate_v20.png`, `wood_v20.png`
+and `iron_v21.png` to the output's `textures` first. Accepted source is v28/models-final.
+Four exported/re-imported views, roof-coverage audit and actual native checks precede
+acceptance. Eight exact GLBs and native component geometry/UVs retained. See v28/CONTINUE.md.
+
 Round275 Smithy roof finish: `roof_finish.py --source <v26/models-final> --out <new private folder>
 --kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
 No extra textures needed; it reuses the packed reviewed painting. Accepted v27 library:

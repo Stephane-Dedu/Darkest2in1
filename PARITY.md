@@ -678,3 +678,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Other service roof trim, wider lighting/cliff/ground dressing, package image duplication and old offline ground preview remain. Saved/full-performance and forced-reload portrait limits remain.
 
 - [x] Round275 Smithy: fitted underlay and reed side/end-cap UV repair. Original course geometry/upper-lower paint exact; all bounds/counts and nine other GLBs unchanged. Three offline reviews, independent edge audit and native unsaved lifecycle/fresh overview pass. Normal272 binary unchanged; evidence local-art/ui-overhaul/hamlet-roof-finish-v27.
+
+- [x] Round276 Guild/Sanitarium: fitted clay/slate courses, ridge saddles, dormer flashing, eave rafters and retained turret bindings. Three offline reviews, sampled coverage checks, exact outer bounds/native components and eight exact GLBs. Final native unsaved lifecycle/fresh overview pass; normal272 binary unchanged. Evidence: local-art/ui-overhaul/hamlet-roof-joinery-v28.
+- [ ] Broader lighting/cliff/ground dressing and facade wear remain; full saved/controller/performance acceptance, forced-reload portraits and package size remain outside this art pass.
