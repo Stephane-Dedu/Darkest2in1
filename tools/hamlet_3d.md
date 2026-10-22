@@ -1015,3 +1015,13 @@ Use Core's colour families and contact hierarchy when reviewing service art.
 The previous diffuse authoring preview made approved buildings look too dark.
 Do not repaint accepted surfaces to compensate for a mismatched preview. Preserve
 native geometry/UVs and explicit resize/shader limits; inspect the actual game.
+
+
+Round296 Guild frontage: local-art/ui-overhaul/hamlet-guild-frontage-v51/CONTINUE.md.
+Raw models-reviewed/; baked HamletModels-reviewed/. Three native Tangle swords
+and a native battered shield on shared oak replace the tiny axe. Original native
+2048 paint/UVs/proportions,616 retained Guild meshes, bounds/normalization and
+nine other raw+baked services exact. Four views/matched town/native full fixture/
+fresh1920 overview/buffer PASS,256 renderers. Runtime293 unchanged, game CLOSED.
+Fresh usage/baseline next297; no pending restore. Shared civic colours retained.
+Asset-only pass; no C# change/build/test rerun. Unsaved preview only; no estate selected/saved.

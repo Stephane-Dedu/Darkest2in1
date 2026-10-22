@@ -8662,3 +8662,33 @@ Review tools accepted; normal293 and camp292 package installed, game CLOSED,
 no pending restore. Stop with usage reserve and resume fresh usage/baseline next296.
 Use the matched preview to judge remaining service-detail/lighting work; native
 DD2 production-art parity and directional shadows remain open.
+
+
+## Round296 - native Guild entrance weaponry (2026-10-22)
+
+DD1 Guild frontage reference has a weapon stand beside its door. Replaces the
+tiny camp axe with three complete native Tangle sword meshes and one battered
+native military shield on eight beams using the Guild's existing oak paint.
+Native source props retain original2048x1024/2048x2048 decoded paint, alpha,
+UVs and uniform proportions. Empty dummy export and black silhouette-only arena
+swords rejected; original FBX exports loaded with Forest/Common dependencies.
+Native battlefield rack with skulls/cyan scraps rejected for civic colour harmony.
+No new painting/generation or palette change. Guild28621 triangles;616 original
+meshes and other UVs/material factors/decoded paint retained. Geometry max delta
+2.39e-7m, native UV float error at most2.98e-8. Exact service bounds/normalization
+and nine other raw GLBs/baked glTF+bin. All contact scalars/paint/geometry guards pass.
+
+Four model views and matched Core-material whole-town render inspected. Full
+unsaved ten-service/camera/release/reload/re-entry/Embark-cache/resize/keyboard/
+still-camera/smoke fixture PASS. Fresh1920x1080 overview inspected;256 renderers,
+three plumes, zero render-buffer reallocations over5.023sec. Runtime293 exact;
+asset-only, no C# build/test rerun. Game CLOSED. All configs/estate2/native profiles/
+other assets/plugins/foreign WIP retained, protected estates untouched. No estate
+selected/saved. Evidence hamlet-guild-frontage-v51, native inputs remain private.
+
+## Status round296
+
+Accepted Guild frontage installed, raw models-reviewed/, baked HamletModels-reviewed/,
+runtime293, game CLOSED, no pending restore. Fresh usage/baseline next297. Main
+service colours remain coherent; directional cast shadows, broader scene dressing
+and final native DD2 production-art parity remain open.

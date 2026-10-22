@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round296 Guild frontage: local-art/ui-overhaul/hamlet-guild-frontage-v51/CONTINUE.md.
+Raw models-reviewed/; baked HamletModels-reviewed/. Three native Tangle swords
+and a native battered shield on shared oak replace the tiny axe. Original native
+2048 paint/UVs/proportions,616 retained Guild meshes, bounds/normalization and
+nine other raw+baked services exact. Four views/matched town/native full fixture/
+fresh1920 overview/buffer PASS,256 renderers. Runtime293 unchanged, game CLOSED.
+Fresh usage/baseline next297; no pending restore. Shared civic colours retained.
+
 Round295 Core material review: local-art/ui-overhaul/hamlet-material-review-v50/CONTINUE.md.
 ModelReviewExport uses the actual Core glTF reader, palette, tint, contact bands
 and world placement.41 graded paint variants; native_model_review.py binds unlit

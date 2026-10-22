@@ -516,3 +516,14 @@ This is private art-review output. No game deployment is needed. Core validates
 native2048px paint extents; the one oversized Guild standard currently uses a
 recorded PIL bilinear approximation of GPU sampling. Other source pixels retain
 their dimensions. Shader/camera comparison in DD2 remains the final acceptance.
+
+Guild frontage authoring uses `guild_frontage.py` with `--source <verified raw
+library> --out <new private library> --kit <kit> --native-root <private exports>`.
+Export the original `forest_weapon_sword_01.fbx`, `forest_weapon_sword_02.fbx`
+and `barricade_military_decor_shield_01.fbx` with the kit's exporter, loading the
+Forest/Common assets and high-model bundles together. Keep that export outside
+Git. The script replaces the tiny camp axe with four native props on an oak
+stand, retains original prop proportions/UVs/paint and the Guild's existing
+horizontal bounds, and copies nine other verified GLBs exactly. Native battlefield
+skulls, cyan scraps and weapon-rack geometry are excluded. Package raw output,
+bake contact once and review all sides/full town/native controls before accepting.

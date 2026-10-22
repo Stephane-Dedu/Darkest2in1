@@ -728,3 +728,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [x] Round295 offline Core model/material review: ten exact triangle counts, world positions within5.58e-6m, UV/winding exact,41 grade variants/decoded PNG/alpha, Core contact/tints, packed-scene/source guards and render comparison PASS. One recorded Guild-standard resize/shader limits remain approximate. Tool-only; normal293/camp292 unchanged, DD2 closed. Evidence hamlet-material-review-v50.
+
+
+- [x] Round296 Guild entrance weapon stand: three native Tangle swords/battered military shield, original2048 paint/alpha/UVs/uniform proportions,616 retained Guild meshes/materials and exact bounds/normalization. Nine other raw+baked services exact; four views/matched town/audits/native lifecycle/fresh overview/buffer PASS.256 renderers, runtime293 unchanged, game closed. Evidence hamlet-guild-frontage-v51. Broader art parity remains.

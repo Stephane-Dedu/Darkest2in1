@@ -10,7 +10,7 @@ is tracked separately in MODLOG and PARITY; a Blender render is not an in-game r
 | Service | Primary recognition | Construction |
 |---|---|---|
 | Abbey | Left projecting portal, amber rose, three lancets, rear bell tower | Broad nave, stepped buttresses, sagged slate roof, native Sprawl tower at uniform scale |
-| Guild | Oxblood dormered roof, sword standards and crossed blades | Stone ground floor, plaster/timber upper hall, recessed iron-bound door, smaller armory wing |
+| Guild | Oxblood dormered roof, sword standards, crossed blades and entrance weapon stand | Stone ground floor, plaster/timber upper hall, recessed iron-bound door, smaller armory wing; native DD2 swords/shield on shared oak |
 | Sanitarium | Round stone tower, timber jetty, pointed slate cap, green glass | Uniformly scaled native Academic house, separate octagonal turret and projecting apothecary porch |
 | Blacksmith | Sweeping thatched roof, unequal chimneys, small dormer, open anvil bay | One thick roof over the enclosed workshop and sheltered working area; brick hearth, lime infill and timber framing |
 
