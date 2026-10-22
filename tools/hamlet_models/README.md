@@ -527,3 +527,14 @@ stand, retains original prop proportions/UVs/paint and the Guild's existing
 horizontal bounds, and copies nine other verified GLBs exactly. Native battlefield
 skulls, cyan scraps and weapon-rack geometry are excluded. Package raw output,
 bake contact once and review all sides/full town/native controls before accepting.
+
+`shadow_field.py` is an offline study tool. Run it with Blender and
+`--layout <matching LayoutExport JSON> --review <ModelReviewExport review.json>
+--out <new private directory>`. `--size 1024 --direction .60 .45 .55 --disc 3
+--samples 4 --floor .6` bakes opaque service/terrain occlusion into a grayscale
+data PNG and NPZ. The direction uses Unity Y-up; the PNG top row is MaxZ. Core,
+reader and source-package guards reject stale inputs. `--self-test` checks an
+actual procedural occluder and ray orientation. Generated fields remain private.
+This tool does not install or load shadows in DD2. Alpha scenery, trees and
+background buildings are excluded. Preserve that limit when judging the study;
+native integration, cache invalidation and final appearance are still pending.

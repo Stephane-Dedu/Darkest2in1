@@ -8692,3 +8692,34 @@ Accepted Guild frontage installed, raw models-reviewed/, baked HamletModels-revi
 runtime293, game CLOSED, no pending restore. Fresh usage/baseline next297. Main
 service colours remain coherent; directional cast shadows, broader scene dressing
 and final native DD2 production-art parity remain open.
+
+
+## Round297 - private directional-shadow study (2026-10-22)
+
+Two controlled EEVEE off/on comparisons preserve Core graded paint/facets with
+an occlusion multiplier. The current steep key has little visible ground effect;
+a lower sunset direction aligns with the bright sky and improves grounding.
+This is a Blender study, not native shader parity. No existing paint was repainted.
+
+shadow_field.py derives a1024 ground field from actual Core-reviewed opaque
+service/terrain meshes,192332 caster triangles and named service terraces.
+Unity light(.60,.45,.55),3-degree disc/four samples, floor.6. Main bounds
+X[-66,58],Z[-36,69]. PNG top=MaxZ, native bottom=MinZ, pixel centres; decoded
+gray bytes and NPZ rows exact. Source Core/reader/package stamps reject stale
+inputs before output creation. Procedural box/plane cases verify ray direction,
+occlusion, clear side, no self-contact and vertical sun. All source models and
+paints retained. Reprojected field affects two existing offline ground materials;
+packed Cycles render inspected. Alpha scenery/trees/background cottages excluded.
+
+Tool/study only. No native shadow loader, worker/cache change or game deployment;
+runtime293/Guild296 art remain installed, game CLOSED. Native lifecycle acceptance
+remains296; no redundant full Core/native suite for offline-only code. Foreign
+gameplay WIP/journals retained; protected estates never accessed. Evidence v52.
+
+## Status round297
+
+Shadow study and guarded baker saved; game still uses the verified296 art. Next298
+native shadow integration requires source/model staleness guards, mask-aware paint
+cache keys, correct data/row sampling and native appearance/performance checks.
+Do not install the private Blender study as production or alter service colours
+to compensate. Wider architecture/material/native production-art parity remains.

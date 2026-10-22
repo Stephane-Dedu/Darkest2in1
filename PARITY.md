@@ -731,3 +731,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [x] Round296 Guild entrance weapon stand: three native Tangle swords/battered military shield, original2048 paint/alpha/UVs/uniform proportions,616 retained Guild meshes/materials and exact bounds/normalization. Nine other raw+baked services exact; four views/matched town/audits/native lifecycle/fresh overview/buffer PASS.256 renderers, runtime293 unchanged, game closed. Evidence hamlet-guild-frontage-v51. Broader art parity remains.
+
+
+- [?] Round297 directional shadows: guarded offline1024 geometry-derived field, two controlled light directions and packed ground reprojection inspected; procedural/stale-input/decoded-pixel/row tests PASS. STUDY ONLY; runtime loader/cache/native appearance pending. Normal293/Guild296 art unchanged, DD2 closed. Evidence hamlet-shadow-study-v52.

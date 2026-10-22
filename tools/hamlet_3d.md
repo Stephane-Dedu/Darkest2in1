@@ -1025,3 +1025,13 @@ nine other raw+baked services exact. Four views/matched town/native full fixture
 fresh1920 overview/buffer PASS,256 renderers. Runtime293 unchanged, game CLOSED.
 Fresh usage/baseline next297; no pending restore. Shared civic colours retained.
 Asset-only pass; no C# change/build/test rerun. Unsaved preview only; no estate selected/saved.
+
+
+Round297 offline shadow study: local-art/ui-overhaul/hamlet-shadow-study-v52/CONTINUE.md.
+shadow_field.py bakes guarded geometry-derived ground occlusion from matching
+Core layout/model reviews.1024 data PNG/NPZ, original geometry/paint untouched;
+procedural rays/stale source/pixel-row guards and packed reprojected render PASS.
+Two light directions compared; lower sunset helps grounding. STUDY ONLY: no
+runtime shadow loader, no game launch/deploy. Normal293/Guild296 art installed,
+game CLOSED. Native shadow appearance/cache integration remains next298.
+Latest native lifecycle evidence remains296; the offline lighting study is not native acceptance.

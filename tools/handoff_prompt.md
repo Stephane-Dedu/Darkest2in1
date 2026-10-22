@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round297 offline shadow study: local-art/ui-overhaul/hamlet-shadow-study-v52/CONTINUE.md.
+shadow_field.py bakes guarded geometry-derived ground occlusion from matching
+Core layout/model reviews.1024 data PNG/NPZ, original geometry/paint untouched;
+procedural rays/stale source/pixel-row guards and packed reprojected render PASS.
+Two light directions compared; lower sunset helps grounding. STUDY ONLY: no
+runtime shadow loader, no game launch/deploy. Normal293/Guild296 art installed,
+game CLOSED. Native shadow appearance/cache integration remains next298.
+
 Round296 Guild frontage: local-art/ui-overhaul/hamlet-guild-frontage-v51/CONTINUE.md.
 Raw models-reviewed/; baked HamletModels-reviewed/. Three native Tangle swords
 and a native battered shield on shared oak replace the tiny axe. Original native
