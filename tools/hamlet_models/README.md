@@ -1,5 +1,12 @@
 # Hamlet building models
 
+Round280 Guild masonry: run `guild_masonry.py --source <v30/models-final> --out <new private folder>
+--kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
+Prepare the output textures/abbey_wall.png using reviewed v21/reproduction-materials source;
+v33/paint-provenance.json records its hash. Native parts/UVs and nine GLBs retained.
+Re-import/four-view, bounds and native acceptance precede installation. Runtime279 shared
+palette applies to new limestone materials. Final private source v33/models.
+
 Round278 Tavern supports: run `supports.py --source <v29/models-final> --out <new private folder>
 --kit <local-art/dd2-native-kit> --resolution 900 --samples 12` under background Blender.
 No additional textures. Nine exact GLBs, native components/UVs preserved. Final v30 source

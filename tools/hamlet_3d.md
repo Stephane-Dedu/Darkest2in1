@@ -1,5 +1,22 @@
 # Perspective Hamlet
 
+Round280 refines the Guild portal, bonded corner stones and armory window surround.
+Replace long jamb strips with fitted limestone courses and drip mouldings. Corner
+stones turn onto both faces with alternating lengths. Reuse reviewed Abbey stone
+samples so new parts receive the shared279 limestone finish. No new bitmap, C# or
+native part changes. Native meshes and UVs retained; all service bounds exact,
+nine other GLBs byte-identical. Guild28127 triangles,65-file package176.1MB.
+
+One four-view exported/re-imported model reviewed. Side-window geometry was probed
+because the wing roof partly occludes the casements; glass/recesses are intact, so
+no window movement was made. Native unsaved ten-service/camera/release/reload/cache/
+resize/keyboard checks PASS; fresh1920x1080 overview inspected and buffer probe
+recorded. Runtime279 unchanged. No live input/estate selection/save. Configs,
+estate2/native profiles/other assets and foreign WIP preserved, protected estates
+untouched. Facade-specific wear, lighting contrast, cliff repetition and ground
+dressing still need work. This is an architectural refinement, not production parity.
+
+
 Round279 gives interactive buildings shared material finishes for limestone/lime,
 weathered timber, slate, clay and cloth. Keep service accents and warm glass/fire;
 preserve painted ink/shadows. Older and newer slate names now share the same finish.

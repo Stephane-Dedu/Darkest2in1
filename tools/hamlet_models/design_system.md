@@ -203,3 +203,13 @@ HamletPalette.BuildingSurface applies the family finish to actual material paint
 new material names must retain a recognizable family term. Mixed native atlases
 need gentle whole-paint grading because roofs, walls and lights share one image.
 Judge the buildings together at the actual town camera, not isolated swatches.
+
+
+## Bonded service stonework, v33
+
+Use individual arch courses and alternating corner stones at the building's scale.
+Return corner courses onto both wall faces. Keep joints visible and seat back edges
+inside the existing wall. Stone samples may share the reviewed limestone painting
+while each service keeps its own wall composition. Retain the shared palette and
+avoid adding a new saturation or brightness rule for every building. Inspect side
+views before treating a hidden pane as broken; a neighbouring roof may occlude it.

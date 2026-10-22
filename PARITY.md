@@ -690,3 +690,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round278 Tavern sign/backplates fitted to walls, bracket brace and chain crossbar. Nine exact other GLBs, exact bounds, retained native paint/parts; native lifecycle/overview and allocation probe PASS. Evidence local-art/ui-overhaul/hamlet-signs-v30.
 
 - [x] Round279 coherent service material families, native paint/geometry retained, Release and1274 Core tests, native lifecycle/overview/buffer checks PASS. Evidence local-art/ui-overhaul/hamlet-palette-v32. Broader lighting and terrain art remain.
+
+- [x] Round280 Guild fitted portal, bonded corner courses and armory surround. Four views, exact bounds/nine exact other GLBs, retained native parts, native lifecycle/overview/allocation PASS; runtime279 palette unchanged. Evidence local-art/ui-overhaul/hamlet-guild-masonry-v33.
