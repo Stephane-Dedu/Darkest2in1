@@ -384,3 +384,15 @@ Use Core's colour families and contact hierarchy when reviewing service art.
 The previous diffuse authoring preview made approved buildings look too dark.
 Do not repaint accepted surfaces to compensate for a mismatched preview. Preserve
 native geometry/UVs and explicit resize/shader limits; inspect the actual game.
+
+
+## Abbey eave pinnacles, v54
+
+DD1's Abbey has four slim pinnacles above its front buttresses. Reuse complete
+native Sprawl corner columns, with alternating original paint and small height
+variation. Keep their uniform proportions, full native UVs and the rear belfry's
+existing1024px material. Seat their feet inside the existing roof/buttresses;
+the tips remain below the belfry and the service bounds stay unchanged. Broad
+nave, left rose portal and three amber lancets retain the recognition hierarchy.
+Do not add a separate colour family or duplicate material batches for this trim.
+The ground field must be rebaked against the new service source identity.

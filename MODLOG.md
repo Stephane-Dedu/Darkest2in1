@@ -8757,3 +8757,37 @@ never rerun this round's old restore over the accepted package. Fresh usage and
 baseline before299. Trees/alpha scenery/background cottages, façade cast lighting,
 broader architecture/material polish and native production-art parity remain.
 Rebake the guarded field whenever service geometry or layout changes.
+
+
+## Round299 - Abbey eave pinnacles from native Sprawl stonework (2026-10-22)
+
+DD1's Abbey reference has four front pinnacles missing from the rebuilt nave.
+Adds four complete connected corner columns from native city_tower_02 above the
+existing buttresses. Alternating original columns and slight height variation;
+original1024 paint/UVs and uniform proportions. Reuses the rear belfry's existing
+materials, with no new decoded painting or GPU material batch.755 original Abbey
+meshes/all UVs retained at max4.77e-7m; native parts max2.38e-7, original bounds/
+normalization exact. Abbey30272triangles; nine other raw/baked services exact.
+Contact bake preserves original buffer prefix; guarded ground field rebaked against
+the new source identity. Broad roof, rose portal, lancets and common colours retained.
+
+Four model views inspected; geometry/material/decoded-paint/native-part/package
+audits PASS. Native unsaved full ten-service/camera/release/reload/Embark-cache/
+resize/keyboard/still-camera/smoke fixture PASS; fresh1920 overview inspected.
+256 renderers; zero buffer reallocations/5.024sec. Asset-only, runtime298
+exact, no C# build/test rerun. Configs/profiles/estate2/other private assets/foreign
+WIP retained; no estate selected/saved, protected estates untouched. Game CLOSED.
+
+C: filled during preliminary Blender exports. Only this task's duplicate review
+outputs and fresh model backup were copied to D:, SHA verified before removing
+their original duplicate files. Local art/ and models-before/ links retain paths.
+Initial E: transfer was stopped as unusually slow; no accepted assets were moved.
+Partial early studies are not accepted. Complete output is under v54/art/.
+
+## Status round299
+
+Accepted Abbey299 + matching ground field installed, runtime298 unchanged. No
+pending restore; fresh usage/baseline next300. Keep the shared material hierarchy.
+Broader service architecture, native lighting/scenery and production-art parity
+remain open. This is a focused recognition detail, not a completed visual overhaul.
+New bulky work belongs on D: while C: is nearly full. Evidence hamlet-abbey-roof-v54.

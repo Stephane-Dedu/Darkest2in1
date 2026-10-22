@@ -1,5 +1,15 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round299 accepted Abbey pinnacles: local-art/ui-overhaul/hamlet-abbey-roof-v54/CONTINUE.md.
+Four complete native Sprawl corner columns restore DD1's front eave pinnacles.
+Original native1024 paint/UVs/proportions,755 Abbey meshes and all other material
+factors retained; shared rear-belfry materials, no added render batches. Bounds/
+normalization and nine other raw/baked services exact. Abbey30272 triangles.
+Four views/geometry/paint/native-part audits, full native fixture/fresh1920 overview/
+buffer PASS;256 renderers,0 reallocations/5.024sec. Matching shadow field
+rebaked. Runtime298 unchanged, game CLOSED, no pending restore. Fresh usage/baseline
+next300. art/ and models-before/ link to D: task storage after C: filled; preserve links.
+
 Round298 accepted ground shadows: local-art/ui-overhaul/hamlet-native-shadows-v53/CONTINUE.md.
 Runtime298 plus unchanged Guild296 models; optional private HamletShadows-ref/
 package installed. Geometry-derived sunlight shades existing earth/paving maps

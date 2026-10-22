@@ -554,3 +554,13 @@ No additional GPU texture, material batch or per-frame ray is introduced. Alpha
 scenery, trees, background cottages and building façade cast lighting are excluded.
 Rebake after service geometry/layout changes; do not judge those omissions as
 complete DD2 shadow parity. Native evidence/checkpoint: hamlet-native-shadows-v53.
+
+`abbey_pinnacles.py --source <verified raw library> --out <new private library>
+--kit <native kit>` restores the four front Abbey pinnacles seen in DD1. It takes
+complete disconnected corner columns from native `city_tower_02`, retaining their
+UVs,1024px paint and uniform proportions. The rear belfry's existing materials are
+reused; no new decoded paint/material is added. Columns rise through the eave
+above the existing buttresses without changing service bounds/normalization.
+Package the new Abbey, bake its contact scalars and rebake the guarded ground
+field against the new complete package. Preserve nine other baked services exactly.
+Private recipe and evidence: hamlet-abbey-roof-v54; `art/` uses linked D: storage.

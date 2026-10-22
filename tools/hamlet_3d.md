@@ -1051,3 +1051,15 @@ not a controlled performance baseline. Full frame-time/long-session work remains
 Runtime298/unchanged Guild296 art installed, game CLOSED. Fresh usage/baseline next299.
 Trees/alpha scenery/background cottages and façade cast lighting remain outside
 this ground field. No estate selected/saved; foreign WIP/profiles/configs retained.
+
+
+Round299 accepted Abbey pinnacles: local-art/ui-overhaul/hamlet-abbey-roof-v54/CONTINUE.md.
+Four complete native Sprawl corner columns restore DD1's front eave pinnacles.
+Original native1024 paint/UVs/proportions,755 Abbey meshes and all other material
+factors retained; shared rear-belfry materials, no added render batches. Bounds/
+normalization and nine other raw/baked services exact. Abbey30272 triangles.
+Four views/geometry/paint/native-part audits, full native fixture/fresh1920 overview/
+buffer PASS;256 renderers,0 reallocations/5.024sec. Matching shadow field
+rebaked. Runtime298 unchanged, game CLOSED, no pending restore. Fresh usage/baseline
+next300. art/ and models-before/ link to D: task storage after C: filled; preserve links.
+Asset-only pass; no C# change/build/test rerun. Native unsaved preview only; no estate selected/saved.
