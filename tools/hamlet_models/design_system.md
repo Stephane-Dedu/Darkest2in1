@@ -280,3 +280,17 @@ A painting's edge wear is lost if UVs sample only its quiet centre. Fit the usef
 paint to the physical wall height; map a circular tower once with the join against
 the house. Give the exposed platform top paving instead of vertical limewash.
 Inspect all service views and the actual town camera, not just texture swatches.
+
+
+## Painted tile faces at useful resolution, v41
+
+Physical roof courses need useful painted face samples. Enlarging a tiny patch
+from a complete roof painting preserves neither brushwork nor detail. Review
+larger separate slate/clay faces against the native Academic/Inn roofs, retain
+the existing fitted geometry, and map each old sample rectangle into an inset
+atlas cell. Keep seams/shadows from adjacent painted courses out of the face.
+
+Respect the shared slate/clay colour families and material factors. Give thin
+cut sides a finite local paint area; a collapsed UV line stretches one pixel
+over the edge. Review reimported models, original geometry/UV/material retention
+and the actual native town before accepting. Keep older underlaps/native art.

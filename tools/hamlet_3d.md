@@ -1,5 +1,33 @@
 # Perspective Hamlet
 
+Round287 fits larger native-reference painted faces onto the existing Abbey,
+Guild and Sanitarium roof courses. Two new private1254px atlases hold twelve
+slate/clay faces each. Reviewed sampling windows are about292x389px, replacing
+the earlier47–187px-wide,45–116px-high samples. Broad grey/plum slate and muted
+maroon clay brushwork replace busy mottling; the shared279 colour families remain.
+Built-in image generation used native Academic/Inn03 atlases as references, with
+prompts/provenance saved privately. No artificial upscaling or native atlas edits.
+
+Retain every physical tile, overlap, ridge saddle, dormer, flashing and underlap.
+Remap only the recorded physical roof face meshes. Previously collapsed Abbey
+cut-side UVs receive finite local paint and one shared dark slate edge material.
+All geometry, bounds and triangle counts exact; all other UVs/material factors/
+decoded pixels and native art retained. Seven other raw/baked services exact.
+Wall286 and door284/285 retained. Twelve reimported views and geometry/paint/atlas/
+contact audits reviewed. Accepted raw models-reviewed and baked HamletModels-reviewed.
+
+Native unsaved ten-service lifecycle/camera/release/reload/Embark-cache/resize/
+keyboard/still-camera/smoke PASS. Fresh1920x1080 overview inspected. Allocation
+probe 0 reallocations over5.031sec. Runtime283 DLL/PDBs
+unchanged; asset-only, no C# build/test rerun. No estate selected/saved. Native
+profiles/estate2/config/other assets and foreign WIP preserved; protected estates
+untouched. Game closed after QA. Private evidence hamlet-roof-paints-v41.
+
+The roof painting now shares the walls' broader painted forms. Older fitted trim
+painting, ground dressing, cliff silhouette and scene lighting still need work.
+Whole-town native DD2 production parity remains open.
+
+
 Round286 replaces the primary Abbey, Guild and Sanitarium wall paintings with
 three private native-reference paintings. Broad painted stone facets, deliberate
 ink seams and quieter wear fit the extracted DD2 inn/Academic's house language.

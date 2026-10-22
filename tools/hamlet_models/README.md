@@ -1,5 +1,14 @@
 # Hamlet building models
 
+Round287: Blender roof_paints.py --source <v40/models-reviewed> --out <new private>
+--kit <dd2-native-kit>. Supply reviewed textures/slate_v41.png and clay_v41.png.
+Each1254px atlas has twelve4x3 faces, with3.5% inset per cell. Refit existing UV
+sample rectangles to larger painted faces; keep all course geometry/underlaps.
+Abbey cut sides receive finite mapping/dark slate. Accepted v41/models-reviewed
+and baked HamletModels-reviewed. Twelve views, geometry/paint/contact and native
+lifecycle/overview/allocation reviewed; runtime283 unchanged. Private prompts and
+native references/provenance stay beside the art in hamlet-roof-paints-v41.
+
 Round286: Blender facade_paints.py --source <v39/models> --out <new private output>
 --kit <dd2-native-kit>. Supply reviewed textures/<service>_wall_v40.png for Abbey,
 Guild and Sanitarium. Accepted raw v40/models-reviewed; baked HamletModels-reviewed.

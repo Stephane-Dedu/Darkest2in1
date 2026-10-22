@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round287 roof paint: newest checkpoint local-art/ui-overhaul/hamlet-roof-paints-v41/CONTINUE.md.
+Accepted raw models-reviewed/ and baked HamletModels-reviewed/. Two large-face
+slate/clay atlases, all courses/geometry retained; finite Abbey cut-side mapping.
+Runtime283 unchanged; native lifecycle/fresh overview/allocation PASS, game closed.
+New usage/baseline first, never accepted restores. Next288 fitted stone trim paint
+still has the older mottled finish; keep native references/common service colours.
+
 Round286 facade paint: newest checkpoint local-art/ui-overhaul/hamlet-facade-paints-v40/CONTINUE.md.
 Accepted raw models-reviewed/ and baked HamletModels-reviewed/. Three native-reference
 wall paintings, Sanitarium mapping/paved platform; geometry/native paint retained.
