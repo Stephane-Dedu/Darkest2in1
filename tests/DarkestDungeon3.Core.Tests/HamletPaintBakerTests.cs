@@ -6,13 +6,13 @@ namespace DarkestDungeon3.Core.Tests;
 public class HamletPaintBakerTests
 {
     // Deterministic RGBA tiles on the cinematic layout, including variable source alpha.
-    // Footprint/door changes intentionally update these paint fixtures; source pixels remain immutable.
+    // Footprint/door/illumination changes intentionally update these fixtures; source pixels remain immutable.
     [Theory]
     [InlineData(true, "27A25A22CA43FB00865B0326FCBC1BC69380DA105F6756855CE9C3D2802B597D",
-        "7FFF8E80E30B9A52F5668A43DFE1B97545C8ABDE6C5C12E222E7BC1D77ACD36C",
+        "242F42D8B492D5DA7EF7112F6E657FF603706BC26355AA70C9C14546C2F60820",
         "8548D720F407636B42498DFAB8C1CBBF4BAE296182DA25DFE5EEFD62ADD28134")]
     [InlineData(false, "46C54BDC16924B0D597C46DF8216F05F00AAF17B13A092A4600713C0DDAD38B4",
-        "E1275335FF351153B93B655AA129BE2767713416FAB450630EBFF200FF55B659",
+        "43B73759BE21BD5CB2987C15DA756BEEF50FDD6A96E4F038134EE4AB70C09BAA",
         "7B5E7D410AA1AB66AB27D70D09DD56A69848F6DF7AF8059F84909EC47F449B7F")]
     public async Task WorkerPreservesTheCinematicLayoutPaint(bool grass, string ground, string lanes, string valley)
     {
@@ -37,6 +37,58 @@ public class HamletPaintBakerTests
         }
         Assert.True(equal>size*size*.7, "Most of the lane image must exactly match the underlying ground.");
         Assert.True(different>20, "Actual roads must retain visible stone paint.");
+    }
+
+    [Fact]
+    public void PavedApproachesKeepContactShadeAndOpenRoadsStayBright()
+    {
+        const int size = 256;
+        var white = Enumerable.Repeat((byte)255, HamletPaintBaker.TileSize * HamletPaintBaker.TileSize * 4).ToArray();
+        var paint = HamletPaintBaker.Bake(white, white, null, white, size: size, fieldSize: 256);
+        int shaded = 0, open = 0;
+        for (int y = 0; y < size; y++) for (int x = 0; x < size; x++)
+        {
+            float px = HamletLayout.MinX + (x + .5f) / size * (HamletLayout.MaxX - HamletLayout.MinX);
+            float pz = HamletLayout.MinZ + (y + .5f) / size * (HamletLayout.MaxZ - HamletLayout.MinZ);
+            if (HamletGroundPaint.LaneCover(px, pz) < .999f || HamletSetDressing.EntranceLight(px, pz) > 0) continue;
+            int i = (y * size + x) * 4;
+            float contact = HamletGroundPaint.ContactShade(px, pz);
+            if (contact < .80f)
+            {
+                // White paving beside a foundation must keep its contact shadow.
+                Assert.InRange(paint.Lanes[i], 0, 220);
+                shaded++;
+            }
+            else if (contact > .999f && Math.Abs(px + 40) < .7f && Math.Abs(pz + 30) < .7f)
+            {
+                // The centre of the southern approach is clear of foundations
+                // and of the interpolated road margins.
+                Assert.InRange(paint.Lanes[i], 250, 255);
+                open++;
+            }
+        }
+        Assert.True(shaded > 10, "Check actual paved building approaches.");
+        Assert.True(open > 4, "Check the unaffected open southern road as well.");
+    }
+
+    [Fact]
+    public void DoorwayLightReachesFullyPavedStone()
+    {
+        const int size = 256;
+        var black = new byte[HamletPaintBaker.TileSize * HamletPaintBaker.TileSize * 4];
+        var paint = HamletPaintBaker.Bake(black, black, null, black, size: size, fieldSize: 256);
+        int lit = 0;
+        for (int y = 0; y < size; y++) for (int x = 0; x < size; x++)
+        {
+            float px = HamletLayout.MinX + (x + .5f) / size * (HamletLayout.MaxX - HamletLayout.MinX);
+            float pz = HamletLayout.MinZ + (y + .5f) / size * (HamletLayout.MaxZ - HamletLayout.MinZ);
+            if (HamletGroundPaint.LaneCover(px, pz) < .999f || HamletSetDressing.EntranceLight(px, pz) < .04f) continue;
+            int i = (y * size + x) * 4;
+            Assert.True(paint.Lanes[i] > paint.Lanes[i + 1] && paint.Lanes[i + 1] > paint.Lanes[i + 2],
+                "Warm entry light must survive complete stone coverage.");
+            lit++;
+        }
+        Assert.True(lit > 5, "Check actual paved entrances inside the native lamp pools.");
     }
 
     [Fact]

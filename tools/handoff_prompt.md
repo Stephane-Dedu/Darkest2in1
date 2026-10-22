@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round293 accepted: checkpoint local-art/ui-overhaul/hamlet-paving-light-v48/CONTINUE.md.
+Paving retains existing foundation contact shade and doorway glow at full stone
+coverage. Earth/valley paint exact; road margins retain ground pixels. No new art,
+geometry, material batch or palette change. Two regressions reproduced the old
+loss; Release/1287 Core/native lifecycle/fresh overview/buffer PASS. Runtime293,
+unchanged camp292 art,254 renderers, game CLOSED. Fresh usage/baseline next294.
+
 Round292 accepted: checkpoint local-art/ui-overhaul/hamlet-camp-v47/CONTINUE.md.
 Raw models-scaled/; baked HamletModels-scaled-reviewed/. Native Tangle double-peak
 tent replaces21 coarse shelter/rope/bedroll pieces. Original2048 paint/UVs/uniform

@@ -982,3 +982,12 @@ Horizontal service footprint retained, intentional taller5.3m tent. Small6.4m st
 rejected; final width8.7m. Native lifecycle/fresh overview/buffer PASS,254 renderers,
 runtime291 unchanged, game CLOSED. Fresh usage/baseline next293; shared colours retained.
 Asset-only pass; no C# change/build/test rerun. Unsaved preview only, no estate selected/saved.
+
+
+Round293 accepted: checkpoint local-art/ui-overhaul/hamlet-paving-light-v48/CONTINUE.md.
+Paving retains existing foundation contact shade and doorway glow at full stone
+coverage. Earth/valley paint exact; road margins retain ground pixels. No new art,
+geometry, material batch or palette change. Two regressions reproduced the old
+loss; Release/1287 Core/native lifecycle/fresh overview/buffer PASS. Runtime293,
+unchanged camp292 art,254 renderers, game CLOSED. Fresh usage/baseline next294.
+Only frozen HEAD8baca3c plus two owned Core/test files; no foreign WIP built. Unsaved preview only.

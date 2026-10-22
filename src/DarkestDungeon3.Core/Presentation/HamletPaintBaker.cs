@@ -87,7 +87,12 @@ public static class HamletPaintBaker
                     color.G * sample.Tint.Y * light + glow * .24f, color.B * sample.Tint.Z * light + glow * .065f));
                 // The paving blends the final quantized ground colour, as in the original renderer.
                 var ground = new Rgb(pixels[i] / 255f, pixels[i + 1] / 255f, pixels[i + 2] / 255f);
-                Write(lanePixels, i, Mix(ground, laneSamples.At(x, y), Field(laneField, fieldSize, fx, fy)));
+                // Full stone coverage must retain the same foundation contact and
+                // doorway light as earth, rather than painting over both with raw albedo.
+                var lane = laneSamples.At(x, y);
+                var paved = new Rgb(lane.R * light + glow * .40f,
+                    lane.G * light + glow * .24f, lane.B * light + glow * .065f);
+                Write(lanePixels, i, Mix(ground, paved, Field(laneField, fieldSize, fx, fy)));
             }
         });
         output.Ground = pixels; output.Lanes = lanePixels;

@@ -8582,3 +8582,29 @@ Accepted scaled campsite package installed, raw models-scaled/ and baked
 HamletModels-scaled-reviewed/, runtime291, game CLOSED, no pending restore.
 Fresh usage/baseline next293. Maintain service material harmony; wider lighting,
 terrain dressing and native production-art parity remain open.
+
+
+## Round293 - paving illumination continuity (2026-10-22)
+
+HamletPaintBaker previously blended unshaded lane stone over lit earth, erasing
+foundation contact and warm doorway pools at full paving coverage. The stone now
+receives the same existing world light before the original margin blend. No new
+paint/geometry/material batches/palette; earth and valley hashes unchanged, exact
+ground pixels outside roads retained. Does not add directional cast shadows.
+
+Two meaningful regressions fail on the old bake: white paved foundations stay255
+and black paving loses warm entrance light. Final checks cover actual shaded
+approaches, clear southern road centres and native lamp pools. Only the two lane
+golden hashes change. Frozen HEAD8baca3c plus owned Core/test files excludes all
+foreign WIP. Release and all1287 Core checks PASS, including private native catalog
+fixture supplied before the suite. Native complete unsaved ten-service/camera/
+release/reload/Embark-cache/resize/keyboard/still-camera/smoke PASS. Fresh1920x1080
+overview inspected;254 renderers/three chimney plumes and zero reallocations.
+All art/configs/estate2/native profiles/other plugins/foreign WIP exact; protected
+estates untouched, no estate selected/saved. Game CLOSED. Evidence hamlet-paving-light-v48.
+
+## Status round293
+
+Runtime293 and unchanged camp292 model package installed, game CLOSED. No pending
+restore. Fresh usage/baseline next294. Wider directional lighting, scene dressing
+and whole-town native DD2 production-art parity remain open.

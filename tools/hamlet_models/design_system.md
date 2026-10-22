@@ -350,3 +350,13 @@ whole native town: the initial6.4m study passed interaction but looked too small
 The accepted8.7m shelter remains inside the old horizontal footprint with a taller
 silhouette. Keep shared service colour grading and verify four views/source paint,
 proportions, retained geometry and the native town before accepting.
+
+
+## Ground light continuity, round293
+
+Surface quality includes its surroundings. Carry the same existing foundation
+contact shade and warm entrance pools through both earth and paving. Mixing raw
+stone over lit earth erases the lighting at complete coverage. Keep open-road
+albedo, original paint, building palette, exact ground pixels outside the road
+and smooth margins. Verify actual shaded approaches, open road centres and fully
+paved lamp pools; this is contact continuity, not directional cast shadows.
