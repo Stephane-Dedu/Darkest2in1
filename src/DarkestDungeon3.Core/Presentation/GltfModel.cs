@@ -28,6 +28,8 @@ public sealed class GltfModel
         public string Mesh;
         public int Material = -1, Node = -1;
         public float[] Positions, Normals, Uv, Weights;
+        // Optional private Hamlet bake: ambient visibility per triangle, not painted colour.
+        public float[] ContactShade;
         public int[] Joints, Triangles;
         public int VertexCount => Positions.Length / 3;
 
@@ -40,6 +42,7 @@ public sealed class GltfModel
         {
             if (Uv == null) return this;
             var kept = new List<int>(Triangles.Length);
+            var shade = ContactShade == null ? null : new List<float>();
             for (int i = 0; i + 2 < Triangles.Length; i += 3)
             {
                 int a = Triangles[i], b = Triangles[i + 1], c = Triangles[i + 2];
@@ -47,9 +50,9 @@ public sealed class GltfModel
                 bool seen = alpha(au, av) >= cutoff || alpha(bu, bv) >= cutoff || alpha(cu, cv) >= cutoff
                     || alpha((au + bu) / 2, (av + bv) / 2) >= cutoff || alpha((bu + cu) / 2, (bv + cv) / 2) >= cutoff
                     || alpha((au + cu) / 2, (av + cv) / 2) >= cutoff || alpha((au + bu + cu) / 3, (av + bv + cv) / 3) >= cutoff;
-                if (seen) { kept.Add(a); kept.Add(b); kept.Add(c); }
+                if (seen) { kept.Add(a); kept.Add(b); kept.Add(c); shade?.Add(ContactShade[i / 3]); }
             }
-            return With(Positions, Normals, Uv, Joints, Weights, kept.ToArray());
+            return With(Positions, Normals, Uv, Joints, Weights, kept.ToArray(), shade?.ToArray());
         }
 
         /// <summary>Seen from both sides, for shaders that cull back faces: each vertex again with its normal turned
@@ -68,13 +71,13 @@ public sealed class GltfModel
                 triangles[Triangles.Length + i + 1] = Triangles[i + 2] + n;
                 triangles[Triangles.Length + i + 2] = Triangles[i + 1] + n;
             }
-            return With(Twice(Positions), normals, Twice(Uv), TwiceInts(Joints), Twice(Weights), triangles);
+            return With(Twice(Positions), normals, Twice(Uv), TwiceInts(Joints), Twice(Weights), triangles, Twice(ContactShade));
         }
 
-        private Primitive With(float[] positions, float[] normals, float[] uv, int[] joints, float[] weights, int[] triangles) => new()
+        private Primitive With(float[] positions, float[] normals, float[] uv, int[] joints, float[] weights, int[] triangles, float[] contactShade) => new()
         {
             Mesh = Mesh, Material = Material, Node = Node,
-            Positions = positions, Normals = normals, Uv = uv, Joints = joints, Weights = weights, Triangles = triangles,
+            Positions = positions, Normals = normals, Uv = uv, Joints = joints, Weights = weights, Triangles = triangles, ContactShade = contactShade,
         };
     }
 
@@ -239,6 +242,15 @@ public sealed class GltfModel
                     Weights = a["WEIGHTS_0"] != null ? Floats((int)a["WEIGHTS_0"]) : null,
                     Triangles = Rewind(Ints((int)p["indices"])),
                 };
+                if (p["extras"]?["hamlet_contact_shade"] is JToken contact)
+                {
+                    int index = (int)contact;
+                    if ((string)accessors[index]["type"] != "SCALAR") throw new FormatException("Hamlet contact shade must be scalar");
+                    prim.ContactShade = Floats(index);
+                    if (prim.ContactShade.Length != prim.Triangles.Length / 3
+                        || prim.ContactShade.Any(v => float.IsNaN(v) || float.IsInfinity(v) || v < 0 || v > 1))
+                        throw new FormatException("Invalid Hamlet contact shade");
+                }
                 model.Primitives.Add(prim);
             }
         return model;

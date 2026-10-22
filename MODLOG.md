@@ -8177,3 +8177,34 @@ recorded. Runtime279 unchanged. No live input/estate selection/save. Configs,
 estate2/native profiles/other assets and foreign WIP preserved, protected estates
 untouched. Facade-specific wear, lighting contrast, cliff repetition and ground
 dressing still need work. This is an architectural refinement, not production parity.
+
+
+## Round281 - architectural contact shading (2026-10-22)
+
+Round281 adds static contact visibility to service geometry using a private Blender
+BVH bake.16 short hemisphere rays per triangle, radius1 authoring unit. Connected
+coplanar triangles share area-weighted visibility to avoid diagonal wall patches.
+Native lamps/candles/flames and explicit emissive objects retain their prior shade.
+Opaque non-light surfaces occlude; alpha-cutout cards do not cast solid box shadows.
+The existing three material facets consume the optional scalar accessor, so the
+renderer count remains255. Palette279, source geometry, UVs, materials and PNGs stay
+exact; audit verifies original binary prefixes and all original accessors/nodes.
+
+Private glTF extras hamlet_contact_shade references a SCALAR visibility accessor per
+primitive triangle. Loader validates count/range/finite values, and CutOut/back-face
+helpers preserve triangle correspondence. Older/non-Hamlet models omit it and keep
+their existing shading. Source data is plain arrays; no per-frame rays or new lights.
+Future art changes must repackage raw GLBs and rebake, not bake an already baked pack.
+
+Two-building study and first whole-town preview inspected before planar averaging.
+Final native full ten-service/camera/release/reload/cache/resize/keyboard checks PASS,
+all ten contact accessor counts present in native logs. Fresh1920x1080 final overview
+inspected, five-second allocation probe recorded. Release build and1282 Core tests
+pass. Synthetic covered/open planes and coplanar/folded faces pass. Native lamps
+and shared colours retained. The effect is restrained contact depth; dynamic shadows
+between buildings, broader lighting direction, cliff/ground dressing remain.
+
+Frozen HEAD plus four owned runtime/test files excludes foreign WIP. Configs/estate2/
+native profiles/other assets preserved; protected estates untouched. No live OS input,
+no estate selected/saved. Evidence local-art/ui-overhaul/hamlet-contact-v34. Raw source
+geometry remains v33/models, accepted runtime package is HamletModels-reviewed.

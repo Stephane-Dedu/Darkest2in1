@@ -1,5 +1,17 @@
 # Hamlet building models
 
+Round281 static contact visibility: first run package.py on accepted raw GLBs. Then run
+Blender `bake_contact.py --source <raw package> --out <new private package> --models
+<service ids> --rays 16 --radius 1.0`. All ten ids are required for the accepted whole-town
+pack. Never bake on top of an already baked package. Original geometry/UV/material/paint
+bytes are retained; appended scalar accessors referenced by primitive extras describe
+visibility. The runtime uses the existing three facets, with open/partial/deep bands.
+The native shader ignores vertex colour, so this metadata is consumed explicitly.
+Compare in game; the ordinary raw-GLB Blender preview does not show these shadows.
+Evidence v34: HamletModels-study and HamletModels-final are earlier drafts; accepted
+is HamletModels-reviewed. Audit prefixes/paint, synthetic probes, native lifecycle and
+final overview before accepting. Source topology edits require a fresh bake.
+
 Round280 Guild masonry: run `guild_masonry.py --source <v30/models-final> --out <new private folder>
 --kit <local-art/dd2-native-kit> --resolution 900 --samples 16` under background Blender.
 Prepare the output textures/abbey_wall.png using reviewed v21/reproduction-materials source;

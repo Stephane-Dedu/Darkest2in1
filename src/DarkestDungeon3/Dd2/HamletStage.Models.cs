@@ -120,6 +120,7 @@ internal sealed partial class HamletStage
         foreach (var batch in model.Primitives.GroupBy(p => p.Material))
         {
             var vertices = new List<Vector3>(); var normals = new List<Vector3>(); var uv = new List<Vector2>(); var triangles = new List<int>();
+            var contact = new List<float>();
             var info = batch.Key >= 0 ? model.Materials[batch.Key] : new GltfModel.MaterialInfo();
             foreach (var primitive in batch)
             {
@@ -144,8 +145,9 @@ internal sealed partial class HamletStage
                 {
                     int a = start + primitive.Triangles[i], b = start + primitive.Triangles[i + (mirror ? 2 : 1)], c = start + primitive.Triangles[i + (mirror ? 1 : 2)];
                     triangles.Add(a); triangles.Add(b); triangles.Add(c);
+                    contact.Add(primitive.ContactShade == null ? 1 : primitive.ContactShade[i / 3]);
                     // DD2's environment shader variants do not all expose culling. Keep torn canvas/foliage two-sided.
-                    if (info.DoubleSided) { triangles.Add(a); triangles.Add(c); triangles.Add(b); }
+                    if (info.DoubleSided) { triangles.Add(a); triangles.Add(c); triangles.Add(b); contact.Add(contact[contact.Count - 1]); }
                 }
             }
             var mesh = new Mesh { name = site.Id + " " + info.Name, indexFormat = IndexFormat.UInt32 };
@@ -165,7 +167,7 @@ internal sealed partial class HamletStage
             {
                 var n=rotation*(normals[triangles[i]]+normals[triangles[i+1]]+normals[triangles[i+2]]).normalized;
                 float key=Vector3.Dot(n,new Vector3(-.35f,.75f,-.55f));
-                int band=light?1:key<-.15f?0:key>.35f?2:1;
+                int band=HamletPalette.BuildingLightBand(key,contact[i / 3],light);
                 bands[band].AddRange(new[] { triangles[i],triangles[i+1],triangles[i+2] });
             }
             mesh.subMeshCount=3;
@@ -207,7 +209,7 @@ internal sealed partial class HamletStage
             building.HitBounds.Add(world);
         }
         _buildings.Add(building);
-        Plugin.Log.LogInfo($"[hamlet 3d model] {site.Id}: {model.TriangleCount} source triangles, {renderers.Count} material batches; position {group.localPosition}, size {building.Bounds.size}; {template.shader.name}");
+        Plugin.Log.LogInfo($"[hamlet 3d model] {site.Id}: {model.TriangleCount} source triangles, {renderers.Count} material batches; position {group.localPosition}, size {building.Bounds.size}; {template.shader.name}; contact bake {model.Primitives.Sum(p => p.ContactShade?.Length ?? 0)} triangles");
     }
 
     private Material PaintMaterial(GltfModel.MaterialInfo info, Material template)

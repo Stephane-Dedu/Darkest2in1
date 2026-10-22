@@ -64,6 +64,14 @@ public static class HamletPalette
         return Building;
     }
 
+    /// <summary>Reuses the existing three facets for baked architectural recesses.</summary>
+    public static int BuildingLightBand(float key, float visibility, bool light)
+    {
+        if (light) return 1;
+        int directional = key < -.15f ? 0 : key > .35f ? 2 : 1;
+        return visibility < .40f ? 0 : visibility < .75f ? Math.Min(directional, 1) : directional;
+    }
+
     public static (int Width,int Height) PaintExtent(int width,int height,int maximum,Paint paint,bool crop)
     {
         if (width<1 || height<1 || maximum<1) throw new System.ArgumentOutOfRangeException(nameof(width));

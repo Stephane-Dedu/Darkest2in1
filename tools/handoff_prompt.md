@@ -1,5 +1,10 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round281 contact shading: read local-art/ui-overhaul/hamlet-contact-v34/CONTINUE.md first.
+Accepted runtime281 and baked package HamletModels-reviewed; raw geometry v33/models.
+Shared palette retained.1282 Core tests/synthetic probes/native lifecycle/fresh overview
+PASS,255 renderers unchanged, game closed. Fresh baseline/usage first. Next282.
+
 Round280 Guild masonry: read local-art/ui-overhaul/hamlet-guild-masonry-v33/CONTINUE.md first.
 Accepted models source v33/models; runtime279 shared palette retained. Fitted portal,
 bonded quoins, armory surround; nine exact other GLBs and exact bounds. Native checks/

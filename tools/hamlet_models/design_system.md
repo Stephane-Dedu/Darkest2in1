@@ -213,3 +213,15 @@ inside the existing wall. Stone samples may share the reviewed limestone paintin
 while each service keeps its own wall composition. Retain the shared palette and
 avoid adding a new saturation or brightness rule for every building. Inspect side
 views before treating a hidden pane as broken; a neighbouring roof may occlude it.
+
+
+## Architectural contact shade, v34
+
+Shade the eave undersides and enclosed reveals from nearby geometry while retaining
+material colour. Use short opaque-surface visibility rays, preserve painted lights,
+and exclude alpha cards as opaque occluders. Connected coplanar faces share one
+area-weighted value; raw triangle-centre results can create diagonal wall patches.
+Keep a control plane and a covered plane in the bake check. Reuse the three existing
+facet shades rather than adding renderer/material variants for every occlusion level.
+This is static contact depth. Directional lighting and shadows between buildings
+remain separate work. Judge it at the actual town camera and keep the palette279.

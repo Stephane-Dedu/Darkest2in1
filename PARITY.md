@@ -692,3 +692,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round279 coherent service material families, native paint/geometry retained, Release and1274 Core tests, native lifecycle/overview/buffer checks PASS. Evidence local-art/ui-overhaul/hamlet-palette-v32. Broader lighting and terrain art remain.
 
 - [x] Round280 Guild fitted portal, bonded corner courses and armory surround. Four views, exact bounds/nine exact other GLBs, retained native parts, native lifecycle/overview/allocation PASS; runtime279 palette unchanged. Evidence local-art/ui-overhaul/hamlet-guild-masonry-v33.
+
+- [x] Round281 static service contact visibility, coplanar averaging, painted light preservation and existing three shade bands. Original geometry/UV/paint exact,255 renderers retained;1282 Core tests, synthetic checks and native lifecycle/overview/allocation PASS. Evidence local-art/ui-overhaul/hamlet-contact-v34. Directional/dynamic scene shadows and cliff/ground art remain.
