@@ -8821,3 +8821,37 @@ lighting/controller/saved-transaction/long-session acceptance remains open.
 ## Status round300
 
 Accepted300 art/field, runtime298; game CLOSED. Fresh usage/baseline next301.
+
+
+## Round301 - Sanitarium plaster at architectural scale (2026-10-23)
+
+Round301 accepted Sanitarium plaster finish: local-art/ui-overhaul/hamlet-native-plaster-v56/CONTINUE.md.
+One new1774x887 painting references native DD2 Academic-house plaster. Broad value
+facets replace fine scratch noise; restrained cracks/peeling stone fit physical
+wall scale. Four authored surfaces remapped, all446 meshes/geometry/native paints
+and material factors retained. Sanitarium21925 triangles; nine other raw/baked
+services exact. Native atlas enlargement and first generated grain study rejected.
+Final source art/models-accepted/; baked art/HamletModels-reviewed/ plus matching
+guarded shadow field. Four views/geometry/paint/package audits/native full unsaved
+fixture/fresh1920 overview/buffer PASS;256 renderers,0 reallocations/5.025sec.
+Runtime298 unchanged, game CLOSED, no pending restore. Fresh usage/baseline next302.
+Generated paint/prompts/provenance stay private; bulky output on linked D: storage.
+
+Built-in image_gen provided the missing continuous2:1 lime painting. Final prompt
+is plaster-prompt-02.txt; original pixels retained without processing/upscaling.
+plaster_finish.py keeps the existing shared stone material factors and palette;
+native roof, oak, green glass, medical cross and foundation relief stay intact.
+Only tower, upper framed stage, porch and undercroft wall UVs change. Finite cap
+mapping and one continuous cylindrical unwrap avoid repeated enlarged damage.
+Geometry/retained UV error at most2.39e-7m. Contact bake preserves the raw buffer
+prefix. Source-matched ground field rebaked after model source identity changed.
+No C# changes, build/test suite not rerun; latest runtime1294 Core PASS from298.
+Native full fixture covers ten services, Escape, camera/reset/release/reload,
+Embark-cache/return, resize/keyboard/still camera/smoke. Fresh1920 view inspected.
+Native profiles/configs/estate2/other private assets and foreign tracked work
+retained. No estate selected/saved; protected estates untouched. Wider architecture,
+terrain dressing, lighting and saved/controller/long-session acceptance remain.
+
+## Status round301
+
+Accepted301 art/field, runtime298; game CLOSED. Fresh usage/baseline next302.

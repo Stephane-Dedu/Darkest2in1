@@ -406,3 +406,21 @@ material. Their hidden black backing faces are unsuitable above ground; exclude
 those faces and let the original solid tower close the relief. Preserve inked
 edges on the painted faces. Keep the added stones within the existing service
 bounds, below the green lancet, and rebake contact and the matching ground field.
+
+
+## Continuous plaster at architectural scale, v56
+
+Native art can fail when its sampling scale changes. Tiny wall samples from a
+mixed atlas turned thin native cracks into thick black bands on the tall turret.
+Reject that result before deployment. A missing continuous wall painting can be
+generated using the native house as reference, but inspect the physical model,
+all sides and the actual town before accepting it. Prefer broad value facets,
+restrained thin cracks and localized exposed stone over fine all-over scratches.
+
+The reviewed2:1 sheet describes7.5m by4.2m of wall. Sample the porch/undercroft at
+that scale, unwrap the lower turret once with its seam against the house, and
+use an intact middle band on the timber-framed upper stage. Keep caps finite.
+Retain the native roof/oak/green glass and existing shared stone material factors.
+Keep generated art/provenance separate from extracted native sources. Original
+geometry, unaffected UVs, decoded native paints and matching ground-field guards
+must still pass; this improves plaster finish, not complete production-art parity.

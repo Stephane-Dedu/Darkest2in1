@@ -572,3 +572,16 @@ Black backing faces are excluded because they were hidden in the source ground;
 the original solid tower closes the relief. Reuse the existing house material.
 Check all sides, original bounds, retained geometry/paint and matching shadow data
 before native acceptance. Private final inputs/output: hamlet-sanitarium-plinth-v55/art/final.
+
+
+`plaster_finish.py --source <verified raw library> --out <new private library>
+--kit <native kit> --paint <reviewed2:1 wall painting>` fits the Sanitarium's four
+authored plaster surfaces. Keep broad painted facets and thin cracks legible at
+the town camera. Do not enlarge tiny native window-side samples over the turret;
+the rejected study produced thick black ribbons. A new continuous painting was
+compared against the native Academic house, then reimported in four model views
+and verified in the native town. All original geometry/native paint/material
+factors and other nine services stay intact. The complete1774x887 generated image,
+prompt, provenance and native evidence are private in hamlet-native-plaster-v56.
+Package/contact/guarded-shadow rebake follow the existing pipeline. Keep older
+native-atlas/grain studies out of the game; accepted raw is art/models-accepted/.

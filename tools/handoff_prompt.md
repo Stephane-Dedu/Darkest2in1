@@ -1,5 +1,17 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round301 accepted Sanitarium plaster finish: local-art/ui-overhaul/hamlet-native-plaster-v56/CONTINUE.md.
+One new1774x887 painting references native DD2 Academic-house plaster. Broad value
+facets replace fine scratch noise; restrained cracks/peeling stone fit physical
+wall scale. Four authored surfaces remapped, all446 meshes/geometry/native paints
+and material factors retained. Sanitarium21925 triangles; nine other raw/baked
+services exact. Native atlas enlargement and first generated grain study rejected.
+Final source art/models-accepted/; baked art/HamletModels-reviewed/ plus matching
+guarded shadow field. Four views/geometry/paint/package audits/native full unsaved
+fixture/fresh1920 overview/buffer PASS;256 renderers,0 reallocations/5.025sec.
+Runtime298 unchanged, game CLOSED, no pending restore. Fresh usage/baseline next302.
+Generated paint/prompts/provenance stay private; bulky output on linked D: storage.
+
 Round300 accepted Sanitarium rubble relief: local-art/ui-overhaul/hamlet-sanitarium-plinth-v55/CONTINUE.md.
 Three staggered courses use52 placements of six native Academic-house stone faces.
 Original2048 paint/retained UVs/uniform proportions; hidden black backing removed,
