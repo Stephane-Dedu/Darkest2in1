@@ -1,5 +1,11 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round282 native Tavern sign: newest checkpoint is local-art/ui-overhaul/hamlet-cliff-relief-v35/CONTINUE.md.
+Raw geometry now v35/models; baked runtime package v35/HamletModels-reviewed. Runtime281
+and shared palette unchanged. Native checks/overview/allocation PASS; game closed.
+Native cliff study is rejected/uninstalled. Next283: fix private seamless cliff crop/
+mirror/aspect and compare native. Fresh baseline and ordinary usage first.
+
 Round281 contact shading: read local-art/ui-overhaul/hamlet-contact-v34/CONTINUE.md first.
 Accepted runtime281 and baked package HamletModels-reviewed; raw geometry v33/models.
 Shared palette retained.1282 Core tests/synthetic probes/native lifecycle/fresh overview

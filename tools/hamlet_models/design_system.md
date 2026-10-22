@@ -225,3 +225,13 @@ Keep a control plane and a covered plane in the bake check. Reuse the three exis
 facet shades rather than adding renderer/material variants for every occlusion level.
 This is static contact depth. Directional lighting and shadows between buildings
 remain separate work. Judge it at the actual town camera and keep the palette279.
+
+
+## Painted native fixtures, v35
+
+Prefer a complete native painted assembly when its original scale, palette and
+function fit a service. Preserve the crest, links and crossbar together, fit a
+physical arm to the wall, and compare its UVs/proportions with the native source.
+A source asset being native does not establish suitability: distant cliff cards
+and sparse rock meshes in the same study did not meet the central-terrace detail
+need. Keep those studies out of the installed scene.

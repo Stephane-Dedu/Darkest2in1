@@ -1,5 +1,12 @@
 # Hamlet building models
 
+Round282 native Tavern sign: Blender native_sign.py --source <v33/models> --out
+<new private folder> --kit <dd2-native-kit>. The native inn_lvl_02_prefab sign replaces
+nine primitive sign parts. Keep its original proportions/UVs and wall support.
+Package raw GLBs, then bake contact with the round281 recipe. Nine other raw and
+baked models remain exact. Accepted v35/models and v35/HamletModels-reviewed; folder
+hamlet-cliff-relief-v35 also holds rejected native cliff studies, not installed.
+
 Round281 static contact visibility: first run package.py on accepted raw GLBs. Then run
 Blender `bake_contact.py --source <raw package> --out <new private package> --models
 <service ids> --rays 16 --radius 1.0`. All ten ids are required for the accepted whole-town

@@ -1,5 +1,28 @@
 # Perspective Hamlet
 
+Round282 replaces the Tavern's primitive tankard sign with the native DD2 inn
+crest from inn_lvl_02_prefab/the_inn_sign_01. Retain its painted wood/gold, crossbar,
+links, original proportions and UVs. A fitted arm and existing diagonal brace join
+it to the tower wall. No new bitmap or C# change. Palette279/contact281 retained.
+Tavern18167 triangles; all service bounds unchanged. Nine other raw GLBs and their
+baked glTF/binaries are byte-identical. Four exported/re-imported views reviewed;
+native source triangle/UV comparison passes within2e-6. Full contact bake audited.
+
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard checks PASS;
+fresh1920x1080 overview inspected and allocation probe recorded. Runtime281 binaries
+unchanged, so no build/test rerun for this asset-only round. No estate selected/saved.
+Estate2/native profiles/configs/other assets/foreign WIP preserved; protected estates
+untouched. One window focus after idle>7hours resumed the native startup splash;
+no click/key input was sent. Game closed after QA.
+
+Private evidence: local-art/ui-overhaul/hamlet-cliff-relief-v35. Despite its study
+folder name, accepted art is the Tavern sign; the native cliff candidates were
+rejected as insufficient detail for the central terraces. They are not installed.
+The private seamless cliff texture still uses the native atlas crop and mirror
+wrap; test full-tile repeat/aspect before replacing any more art. Broader terrain,
+facade wear and directional lighting remain; production parity is not established.
+
+
 Round281 adds static contact visibility to service geometry using a private Blender
 BVH bake.16 short hemisphere rays per triangle, radius1 authoring unit. Connected
 coplanar triangles share area-weighted visibility to avoid diagonal wall patches.
