@@ -1,5 +1,16 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round300 accepted Sanitarium rubble relief: local-art/ui-overhaul/hamlet-sanitarium-plinth-v55/CONTINUE.md.
+Three staggered courses use52 placements of six native Academic-house stone faces.
+Original2048 paint/retained UVs/uniform proportions; hidden black backing removed,
+solid original tower closes the relief. Reuses the existing native house material.
+All445 original meshes/UVs/factors, bounds/normalization and nine other raw/baked
+services retained;199 added triangles, Sanitarium21925. Contact/matching ground field
+rebaked. Four views/geometry/paint/native-face/package audits and full unsaved native
+fixture/fresh1920 overview/buffer PASS;256 renderers,0 reallocations/5.025sec.
+Runtime298 unchanged, game CLOSED, no pending restore. Fresh usage/baseline next301.
+Accepted output art/final/ on linked D: storage; earlier studies are rejected.
+
 Round299 accepted Abbey pinnacles: local-art/ui-overhaul/hamlet-abbey-roof-v54/CONTINUE.md.
 Four complete native Sprawl corner columns restore DD1's front eave pinnacles.
 Original native1024 paint/UVs/proportions,755 Abbey meshes and all other material

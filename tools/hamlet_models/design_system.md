@@ -396,3 +396,13 @@ the tips remain below the belfry and the service bounds stay unchanged. Broad
 nave, left rose portal and three amber lancets retain the recognition hierarchy.
 Do not add a separate colour family or duplicate material batches for this trim.
 The ground field must be rebaked against the new service source identity.
+
+## Sanitarium rubble base, v55
+
+DD1's Sanitarium has rough masonry below its cracked plaster. Native Academic-house
+foundation fragments supply the painted relief in three staggered courses. Retain
+their original UVs,2048px paint and uniform proportions, and the existing house
+material. Their hidden black backing faces are unsuitable above ground; exclude
+those faces and let the original solid tower close the relief. Preserve inked
+edges on the painted faces. Keep the added stones within the existing service
+bounds, below the green lancet, and rebake contact and the matching ground field.

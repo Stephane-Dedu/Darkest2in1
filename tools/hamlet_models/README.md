@@ -564,3 +564,11 @@ above the existing buttresses without changing service bounds/normalization.
 Package the new Abbey, bake its contact scalars and rebake the guarded ground
 field against the new complete package. Preserve nine other baked services exactly.
 Private recipe and evidence: hamlet-abbey-roof-v54; `art/` uses linked D: storage.
+
+`sanitarium_plinth.py` accepts the same source/out/kit arguments. It fits three
+staggered courses of native Academic-house rubble around the existing tower.
+Retained painted faces keep their original2048px atlas, UVs and uniform proportions.
+Black backing faces are excluded because they were hidden in the source ground;
+the original solid tower closes the relief. Reuse the existing house material.
+Check all sides, original bounds, retained geometry/paint and matching shadow data
+before native acceptance. Private final inputs/output: hamlet-sanitarium-plinth-v55/art/final.
