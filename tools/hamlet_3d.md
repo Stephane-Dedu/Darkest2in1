@@ -1035,3 +1035,19 @@ Two light directions compared; lower sunset helps grounding. STUDY ONLY: no
 runtime shadow loader, no game launch/deploy. Normal293/Guild296 art installed,
 game CLOSED. Native shadow appearance/cache integration remains next298.
 Latest native lifecycle evidence remains296; the offline lighting study is not native acceptance.
+
+
+Round298 accepted: checkpoint local-art/ui-overhaul/hamlet-native-shadows-v53/CONTINUE.md.
+Optional private HamletShadows-ref/ field shades daylight on existing ground and
+paving maps, before entrance light. Original models/UVs/paint and service colour
+families retained. Complete geometry/site/model/data guards,0.1mm float tolerance
+with exact topology; native CLR/Mono maximum0.032mm. Missing/stale/broken fields
+retain old paint. No extra GPU texture/material batch or per-frame rays.
+Frozen Release and1294 Core cases PASS. Unsaved ten-service/camera/release/reload/
+Embark-cache/resize/keyboard/still-camera/smoke fixture and fresh1920 overview PASS;
+256 renderers, zero buffer reallocations/5.025sec. Cold native paint17.422sec,
+cached rebuild0.047sec. Earlier rejected-field run14.979sec is an unpaired reference,
+not a controlled performance baseline. Full frame-time/long-session work remains.
+Runtime298/unchanged Guild296 art installed, game CLOSED. Fresh usage/baseline next299.
+Trees/alpha scenery/background cottages and façade cast lighting remain outside
+this ground field. No estate selected/saved; foreign WIP/profiles/configs retained.

@@ -8723,3 +8723,37 @@ native shadow integration requires source/model staleness guards, mask-aware pai
 cache keys, correct data/row sampling and native appearance/performance checks.
 Do not install the private Blender study as production or alter service colours
 to compensate. Wider architecture/material/native production-art parity remains.
+
+
+## Round298 - native ground sunlight and grounding (2026-10-22)
+
+Optional1024 single-channel private field derives from unchanged Core terrain
+and all ten reviewed service models. The paint worker applies bilinear visibility
+to daylight in linear space before doorway glow, using existing4096px earth and
+paving maps. Valley/source paint and all service colours/geometry remain intact.
+White/missing field retains exact existing pixels. Field identity invalidates
+the paint cache. No extra GPU texture/material batch or per-frame rays.
+
+Package guards validate bounds, raw length/SHA, ten source GLB hashes and complete
+site/terrain reference arrays. Native Mono differed from offline CLR by at most
+0.00003195m; numeric tolerance0.0001m retains exact triangle topology. An initial
+exact-SHA candidate safely fell back to old paint and was rejected. Corrupted
+reference/data, stale models/geometry and malformed packages also fall back.
+The procedural ray and PNG/native-row guards remain; baked source pixels exact.
+
+Frozen HEADc6af565 plus eight owned files only: Release and1294 Core cases PASS.
+Native unsaved full ten-service/camera/release/reload/re-entry/Embark-cache/resize/
+keyboard/still-camera/smoke fixture PASS with active field; fresh1920 overview
+inspected.256 renderers; zero buffer reallocations over5.025sec. Cold native paint
+17.422sec, cached rebuild0.047sec; the earlier14.979sec no-field run is unpaired,
+not a controlled performance comparison. Profiles/configs/estate2/foreign WIP
+retained, no estate selected/saved; protected estates untouched. Game CLOSED.
+Private evidence hamlet-native-shadows-v53; no game art committed.
+
+## Status round298
+
+Accepted runtime298/field installed, unchanged Guild296 models. No pending restore;
+never rerun this round's old restore over the accepted package. Fresh usage and
+baseline before299. Trees/alpha scenery/background cottages, façade cast lighting,
+broader architecture/material polish and native production-art parity remain.
+Rebake the guarded field whenever service geometry or layout changes.

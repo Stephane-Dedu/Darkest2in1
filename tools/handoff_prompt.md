@@ -1,5 +1,15 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round298 accepted ground shadows: local-art/ui-overhaul/hamlet-native-shadows-v53/CONTINUE.md.
+Runtime298 plus unchanged Guild296 models; optional private HamletShadows-ref/
+package installed. Geometry-derived sunlight shades existing earth/paving maps
+on the worker, before doorway light; no new GPU texture or per-frame rays.
+Complete geometry/model guards allow only0.1mm CLR/Mono numeric differences;
+native maximum0.032mm, topology exact. Release/1294 Core/native lifecycle/fresh
+1920 overview/buffer PASS,256 renderers. Game CLOSED, no pending restore.
+Fresh usage/baseline before299; preserve source colour harmony. Trees/background
+cottages and façade cast lighting remain outside this field. Keep those limits.
+
 Round297 offline shadow study: local-art/ui-overhaul/hamlet-shadow-study-v52/CONTINUE.md.
 shadow_field.py bakes guarded geometry-derived ground occlusion from matching
 Core layout/model reviews.1024 data PNG/NPZ, original geometry/paint untouched;

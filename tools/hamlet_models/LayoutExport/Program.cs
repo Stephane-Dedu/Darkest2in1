@@ -21,7 +21,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
     EstateSky=new { HamletVista.SkyDepth,HamletVista.SkyWidth,HamletVista.SkyBottom,HamletVista.SkyTop },
     CliffPaint=HamletTownscape.CliffPaint,
-    Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
+    Terrain=terrain,ShadowSceneHash=HamletSunShadow.SceneDigest(terrain),Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
     Outcrops=HamletSetDressing.BuildRocks(fullCliffTile),Mists=HamletSetDressing.Mists,
     EntranceLight=Enumerable.Range(0,256*256).Select(i=>HamletSetDressing.EntranceLight(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,

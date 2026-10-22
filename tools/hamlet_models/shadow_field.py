@@ -28,6 +28,26 @@ def source_hash(path):
     return hashlib.sha256(path.read_text(encoding='utf-8').replace('\r\n', '\n').encode()).hexdigest()
 
 
+def scene_reference(layout):
+    """Match Core's runtime-verifiable little-endian geometry/site contract."""
+    digest = bytearray()
+    def text(value):
+        raw = value.encode('utf-8');digest.extend(struct.pack('<i', len(raw)));digest.extend(raw)
+    def array(values, dtype):
+        raw = np.asarray(values, dtype=dtype);digest.extend(struct.pack('<i', len(raw)));digest.extend(raw.tobytes())
+    text('DD3-shadow-scene-v1')
+    terrain = layout['Terrain'];positions = np.asarray(terrain['Positions']).reshape(-1, 3)
+    digest.extend(struct.pack('<ffff', positions[:, 0].min(), positions[:, 0].max(), positions[:, 2].min(), positions[:, 2].max()))
+    digest.extend(struct.pack('<i', len(layout['Sites'])))
+    for site in layout['Sites']:
+        text(site['Id'])
+        digest.extend(struct.pack('<8f', *(site[k] for k in ('X', 'Y', 'Z', 'Width', 'Yaw', 'FootprintWidth', 'FootprintDepth', 'GroundBlend'))))
+    array(terrain['Positions'], '<f4');array(terrain['Ground'], '<i4');array(terrain['Rock'], '<i4')
+    for key in ('Paving', 'Masonry', 'Stairs'):
+        array(terrain[key]['Positions'], '<f4');array(terrain[key]['Indices'], '<i4')
+    return bytes(digest)
+
+
 def add(vertices, faces, points, indices):
     start = len(vertices)
     vertices.extend(Vector((x, z, y)) for x, y, z in np.asarray(points).reshape(-1, 3))
@@ -96,6 +116,10 @@ def bake(args):
     if not .35 <= args.floor <= 1 or not all(math.isfinite(v) for v in args.direction):
         raise ValueError('Use a finite direction and a shadow floor0.35-1.')
     layout, review = inputs(args.layout.resolve(), args.review.resolve(), repo)
+    reference = scene_reference(layout)
+    scene = hashlib.sha256(reference).hexdigest()
+    if layout.get('ShadowSceneHash') != scene:
+        raise ValueError('Scene digest disagrees with Core; export a fresh layout.')
     terrain = layout['Terrain']
     points = np.asarray(terrain['Positions']).reshape(-1, 3)
     minx, minz = points[:, [0, 2]].min(0)
@@ -134,9 +158,15 @@ def bake(args):
     assert np.isfinite(shade).all() and args.floor - 1e-6 <= shade.min() <= 1 and shade.max() <= 1
     out.mkdir(parents=True)
     pixel_hash = png(out / 'ground-shadow.png', shade)
+    # Native worker reads this single-channel data directly, without a GPU upload
+    # or sRGB conversion. Row zero matches native paint's MinZ bottom row.
+    (out / 'ground-shadow.gray').write_bytes(np.rint(shade * 255).astype(np.uint8).tobytes())
+    (out / 'scene-reference.bin').write_bytes(reference)
     np.savez_compressed(out / 'ground-shadow.npz', shade=shade)
     (out / 'manifest.json').write_text(json.dumps({
-        'notice': __doc__, 'size': args.size,
+        'version': 1, 'notice': __doc__, 'size': args.size, 'scene_sha256': scene,
+        'raw_file': 'ground-shadow.gray', 'raw_sha256': sha(out / 'ground-shadow.gray'),
+        'reference_file': 'scene-reference.bin',
         'bounds': dict(MinX=float(minx), MaxX=float(maxx), MinZ=float(minz), MaxZ=float(maxz)),
         'rows': 'PNG top=MaxZ, native bottom=MinZ; pixel-centre sampling; grayscale data, no gamma tag',
         'direction_unity': args.direction, 'sun_disc_degrees': args.disc, 'samples': args.samples,

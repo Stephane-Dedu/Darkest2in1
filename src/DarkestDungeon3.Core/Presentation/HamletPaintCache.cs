@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 
 namespace DarkestDungeon3.Core.Presentation;
@@ -13,13 +14,14 @@ public sealed class HamletPaintCache
 
     /// <summary>Returned buffers are shared, read-only paint. Never clear or edit them after upload.</summary>
     public HamletPaintBaker.Result GetOrBake(byte[] soil, byte[] stone, byte[] grass, byte[] rock,
-        CancellationToken cancellation = default, int size = HamletPaintBaker.PaintSize, int fieldSize = 256)
+        CancellationToken cancellation = default, int size = HamletPaintBaker.PaintSize, int fieldSize = 256, HamletSunShadow sun = null)
     {
         cancellation.ThrowIfCancellationRequested();
         string key;
         using (var hash = SHA256.Create())
         {
-            foreach (var bytes in new[] { BitConverter.GetBytes(size), BitConverter.GetBytes(fieldSize), soil, stone, grass, rock })
+            foreach (var bytes in new[] { BitConverter.GetBytes(size), BitConverter.GetBytes(fieldSize), soil, stone, grass, rock,
+                sun == null ? null : Encoding.UTF8.GetBytes(sun.Identity) })
             {
                 cancellation.ThrowIfCancellationRequested();
                 var length = BitConverter.GetBytes(bytes?.Length ?? -1);
@@ -34,7 +36,7 @@ public sealed class HamletPaintCache
         {
             cancellation.ThrowIfCancellationRequested();
             if (_key == key) return _paint;
-            var paint = HamletPaintBaker.Bake(soil, stone, grass, rock, cancellation, size, fieldSize);
+            var paint = HamletPaintBaker.Bake(soil, stone, grass, rock, cancellation, size, fieldSize, sun);
             cancellation.ThrowIfCancellationRequested();
             _paint = paint; _key = key;
             return paint;

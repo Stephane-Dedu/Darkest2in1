@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed partial class HamletStage
 {
     private static readonly HamletPaintCache GroundPaintCache = new();
-    private Task<HamletPaintBaker.Result> _groundPaintTask;
+    private Task<(HamletPaintBaker.Result Paint, double Seconds)> _groundPaintTask;
     private CancellationTokenSource _groundPaintCancellation;
     private HamletPaintBaker.Result _groundPaint;
     private int _groundUpload;
@@ -36,13 +36,27 @@ internal sealed partial class HamletStage
         var turf = grass != null ? ReadPaint(grass) : null; var bedrock = ReadPaint(rock);
         _groundPaintCancellation = new CancellationTokenSource();
         var cancellation = _groundPaintCancellation.Token;
-        _groundPaintTask = Task.Run(() => GroundPaintCache.GetOrBake(earth, gravel, turf, bedrock, cancellation), cancellation);
+        var models = _modelTask;
+        _groundPaintTask = Task.Run(async () =>
+        {
+            // The model task already owns terrain/package validation. Share its
+            // optional field without delaying main-thread texture/model uploads.
+            var pack = await models.ConfigureAwait(false);
+            var timer = System.Diagnostics.Stopwatch.StartNew();
+            var paint = GroundPaintCache.GetOrBake(earth, gravel, turf, bedrock, cancellation, sun: pack.Sun);
+            return (paint, timer.Elapsed.TotalSeconds);
+        }, cancellation);
     }
 
     private bool UploadGroundPaint()
     {
         if (!_groundPaintTask.IsCompleted) return false;
-        _groundPaint ??= _groundPaintTask.GetAwaiter().GetResult();
+        if (_groundPaint == null)
+        {
+            var completed = _groundPaintTask.GetAwaiter().GetResult();
+            _groundPaint = completed.Paint;
+            Plugin.Log.LogInfo($"[hamlet ground paint] {completed.Paint.Size}px maps ready in {completed.Seconds:F3}s; sunlight {_modelPack.Sun != null}");
+        }
         // One owned texture per frame. The torch can animate between uploads.
         if (_groundUpload == 0)
         {

@@ -20,6 +20,8 @@ internal sealed partial class HamletStage
         public readonly Dictionary<string, byte[]> Paint = new();
         public HamletTerrain Terrain;
         public bool FullCliffTile;
+        public HamletSunShadow Sun;
+        public string SunStatus;
     }
     private Task<ModelPack> _modelTask;
     private ModelPack _modelPack;
@@ -49,6 +51,7 @@ internal sealed partial class HamletStage
                 string hash = BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-", "").ToLowerInvariant();
                 if (hash != (string)file.Value) throw new FormatException("Damaged Hamlet asset: " + file.Name);
             }
+        var sourceHashes = new Dictionary<string, string>();
         foreach (var site in HamletLayout.Sites)
         {
             var entry = manifest["models"]?[site.Id];
@@ -56,11 +59,14 @@ internal sealed partial class HamletStage
             var model = GltfModel.Load(Path.Combine(folder, site.Id + ".gltf"));
             if (model.TriangleCount != (int)entry["triangles"]) throw new FormatException("Incomplete Hamlet geometry: " + site.Id);
             pack.Models.Add(site.Id, model);
+            sourceHashes.Add(site.Id, (string)entry["source_sha256"]);
             foreach (var material in model.Materials)
                 foreach (string path in new[] { material.BaseColor, material.Emissive }.Where(p => p != null))
                     if (!pack.Paint.ContainsKey(path)) pack.Paint.Add(path, File.ReadAllBytes(path));
         }
         pack.Terrain = HamletTerrain.Build(fullCliffTile: fullCliffTile);
+        pack.Sun = HamletSunShadow.ReadOptional(Path.Combine(Path.GetDirectoryName(folder), "HamletShadows"),
+            pack.Terrain, sourceHashes, out pack.SunStatus);
         return pack;
     }
 
@@ -71,6 +77,7 @@ internal sealed partial class HamletStage
         {
             if (!_modelTask.IsCompleted) return false;
             _modelPack = _modelTask.GetAwaiter().GetResult();
+            Plugin.Log.LogInfo("[hamlet sunlight] " + _modelPack.SunStatus);
             _paintQueue = _modelPack.Paint.ToArray();
         }
         if (_paintIndex < _paintQueue.Length)

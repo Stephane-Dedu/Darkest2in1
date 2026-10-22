@@ -528,13 +528,29 @@ horizontal bounds, and copies nine other verified GLBs exactly. Native battlefie
 skulls, cyan scraps and weapon-rack geometry are excluded. Package raw output,
 bake contact once and review all sides/full town/native controls before accepting.
 
-`shadow_field.py` is an offline study tool. Run it with Blender and
+`shadow_field.py` is an offline baker. Run it with Blender and
 `--layout <matching LayoutExport JSON> --review <ModelReviewExport review.json>
 --out <new private directory>`. `--size 1024 --direction .60 .45 .55 --disc 3
 --samples 4 --floor .6` bakes opaque service/terrain occlusion into a grayscale
-data PNG and NPZ. The direction uses Unity Y-up; the PNG top row is MaxZ. Core,
+data PNG/NPZ, `ground-shadow.gray`, `scene-reference.bin` and `manifest.json`.
+The direction uses Unity Y-up; PNG top row is MaxZ, raw row zero is MinZ. Core,
 reader and source-package guards reject stale inputs. `--self-test` checks an
-actual procedural occluder and ray orientation. Generated fields remain private.
-This tool does not install or load shadows in DD2. Alpha scenery, trees and
-background buildings are excluded. Preserve that limit when judging the study;
-native integration, cache invalidation and final appearance are still pending.
+actual procedural occluder and ray orientation. Generated fields remain private;
+the baker does not deploy or launch the game. Its export metadata records that
+no native acceptance has happened at generation time.
+
+Round298 accepts the optional runtime package under `PrivateScenery/HamletShadows`:
+copy only the manifest, raw gray bytes and scene reference after checking the
+matching native model/layout inputs. Core verifies source GLB hashes, complete
+terrain/site arrays and topology, bounds, raw length/SHA and reference SHA. Mono
+may differ from the offline CLR by up to0.1mm per numeric coordinate; topology
+must match exactly. The accepted native maximum was0.032mm. Missing/stale/damaged
+optional fields fall back to the existing paint rather than blocking the torch.
+
+The worker shades daylight in the existing ground/paving images before adding
+doorway light. The field identity participates in the paint cache. White/missing
+fields preserve existing bytes; source textures and valley paint stay unchanged.
+No additional GPU texture, material batch or per-frame ray is introduced. Alpha
+scenery, trees, background cottages and building façade cast lighting are excluded.
+Rebake after service geometry/layout changes; do not judge those omissions as
+complete DD2 shadow parity. Native evidence/checkpoint: hamlet-native-shadows-v53.

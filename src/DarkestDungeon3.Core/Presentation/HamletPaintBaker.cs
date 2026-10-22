@@ -26,7 +26,7 @@ public static class HamletPaintBaker
     }
 
     public static Result Bake(byte[] soil, byte[] stone, byte[] grass, byte[] rock,
-        CancellationToken cancellation = default, int size = PaintSize, int fieldSize = 256)
+        CancellationToken cancellation = default, int size = PaintSize, int fieldSize = 256, HamletSunShadow sun = null)
     {
         ValidateTile(soil, nameof(soil)); ValidateTile(stone, nameof(stone)); ValidateTile(rock, nameof(rock));
         if (grass != null) ValidateTile(grass, nameof(grass));
@@ -34,7 +34,7 @@ public static class HamletPaintBaker
         if (fieldSize < 2 || fieldSize > 256) throw new ArgumentOutOfRangeException(nameof(fieldSize));
         cancellation.ThrowIfCancellationRequested();
         var result = new Result(size);
-        Ground(result, soil, stone, grass, fieldSize, cancellation);
+        Ground(result, soil, stone, grass, fieldSize, cancellation, sun);
         Valley(result, soil, stone, grass ?? soil, rock, fieldSize, cancellation);
         return result;
     }
@@ -45,7 +45,7 @@ public static class HamletPaintBaker
             throw new ArgumentException("Paint readbacks must contain a 512 by 512 RGBA tile.", name);
     }
 
-    private static void Ground(Result output, byte[] earth, byte[] gravel, byte[] turf, int fieldSize, CancellationToken cancellation)
+    private static void Ground(Result output, byte[] earth, byte[] gravel, byte[] turf, int fieldSize, CancellationToken cancellation, HamletSunShadow sun)
     {
         int size = output.Size;
         var pixels = new byte[size * size * 4]; var lanePixels = new byte[pixels.Length];
@@ -82,16 +82,19 @@ public static class HamletPaintBaker
                 var color = Mix(a, b, Math.Max(sample.Gravel, Field(wear, fieldSize, fx, fy)));
                 if (turf != null) color = Mix(color, turfSamples.At(x, y), Field(cover, fieldSize, fx, fy));
                 float light = Field(shade, fieldSize, fx, fy), glow = HamletSetDressing.EntranceLight(px, pz);
+                float sunlight = sun?.At(px, pz) ?? 1;
                 int i = (y * size + x) * 4;
-                Write(pixels, i, new Rgb(color.R * sample.Tint.X * light + glow * .40f,
-                    color.G * sample.Tint.Y * light + glow * .24f, color.B * sample.Tint.Z * light + glow * .065f));
+                Write(pixels, i, new Rgb(HamletSunShadow.Daylight(color.R * sample.Tint.X * light, sunlight) + glow * .40f,
+                    HamletSunShadow.Daylight(color.G * sample.Tint.Y * light, sunlight) + glow * .24f,
+                    HamletSunShadow.Daylight(color.B * sample.Tint.Z * light, sunlight) + glow * .065f));
                 // The paving blends the final quantized ground colour, as in the original renderer.
                 var ground = new Rgb(pixels[i] / 255f, pixels[i + 1] / 255f, pixels[i + 2] / 255f);
                 // Full stone coverage must retain the same foundation contact and
                 // doorway light as earth, rather than painting over both with raw albedo.
                 var lane = laneSamples.At(x, y);
-                var paved = new Rgb(lane.R * light + glow * .40f,
-                    lane.G * light + glow * .24f, lane.B * light + glow * .065f);
+                var paved = new Rgb(HamletSunShadow.Daylight(lane.R * light, sunlight) + glow * .40f,
+                    HamletSunShadow.Daylight(lane.G * light, sunlight) + glow * .24f,
+                    HamletSunShadow.Daylight(lane.B * light, sunlight) + glow * .065f);
                 Write(lanePixels, i, Mix(ground, paved, Field(laneField, fieldSize, fx, fy)));
             }
         });
