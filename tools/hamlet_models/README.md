@@ -1,5 +1,13 @@
 # Hamlet building models
 
+Round288: Blender trim_paints.py --source <v41/models-reviewed> --out <new private>
+--kit <dd2-native-kit>. Supply unchanged reviewed textures/abbey_wall_v40.png.
+Eight whole stone faces keep painted edge contrast; interior-only study rejected.
+Remap fitted limestone across three services, preserving geometry/factors/native
+art and all non-trim UVs. Accepted v42/models-reviewed and HamletModels-reviewed.
+Twelve views, paint/geometry/UV/contact and native lifecycle/overview/allocation
+reviewed. No new bitmap or runtime change. Evidence hamlet-trim-paints-v42.
+
 Round287: Blender roof_paints.py --source <v40/models-reviewed> --out <new private>
 --kit <dd2-native-kit>. Supply reviewed textures/slate_v41.png and clay_v41.png.
 Each1254px atlas has twelve4x3 faces, with3.5% inset per cell. Refit existing UV

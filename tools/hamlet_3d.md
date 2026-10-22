@@ -1,5 +1,30 @@
 # Perspective Hamlet
 
+Round288 unifies fitted stone courses across Abbey, Guild and Sanitarium with
+the unchanged reviewed wall286 painting. Eight whole stone-face windows retain
+painted edge highlights and dark seams. The first interior-only crop study was
+too flat and is not installed. No new bitmap generation or material-factor change.
+Stable per-mesh selection varies faces while preserving the shared stone palette.
+
+All geometry, service bounds and triangle counts retained. Only recorded fitted
+limestone UVs/paint change; other UVs/material factors/decoded pixels remain exact,
+including native art, wall286, roof287 and oak285/iron284. Seven other raw GLBs
+and baked glTF/bin byte-identical. Twelve reimported views and geometry/paint/
+noncollapsed trim UV/contact audits reviewed. Accepted raw models-reviewed and
+baked HamletModels-reviewed. Shared279 palette and runtime283 remain unchanged.
+
+Native unsaved ten-service lifecycle/camera/release/reload/Embark-cache/resize/
+keyboard/still-camera/smoke PASS. Fresh1920x1080 overview inspected. Probe reports
+0 reallocations over5.03sec. Asset-only; no C# build/test
+rerun. No estate selected/saved. Estate2/native profiles/config/other assets and
+foreign WIP preserved; protected estates untouched. Game closed after QA.
+
+Evidence local-art/ui-overhaul/hamlet-trim-paints-v42. Main service stone/roof
+finishes now share broader native-reference paint forms. Legacy moulding/verge
+painting, ground dressing, cliff silhouette and scene lighting remain. Whole-town
+native DD2 production parity is still open.
+
+
 Round287 fits larger native-reference painted faces onto the existing Abbey,
 Guild and Sanitarium roof courses. Two new private1254px atlases hold twelve
 slate/clay faces each. Reviewed sampling windows are about292x389px, replacing

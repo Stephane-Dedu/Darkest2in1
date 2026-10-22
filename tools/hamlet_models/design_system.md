@@ -294,3 +294,14 @@ Respect the shared slate/clay colour families and material factors. Give thin
 cut sides a finite local paint area; a collapsed UV line stretches one pixel
 over the edge. Review reimported models, original geometry/UV/material retention
 and the actual native town before accepting. Keep older underlaps/native art.
+
+
+## Fitted stone and painted edge hierarchy, v42
+
+Reusing a good wall painting does not automatically produce good architectural
+trim. Quiet interior-only crops remove its painted edge hierarchy and can make
+the geometry read as bare grey blocks. Review whole stone faces with controlled
+rim highlights and ink seams, fit them to individual courses, and retain common
+stone material factors. Stable per-mesh choices avoid identical wear on every
+block. Preserve all architecture and native art; check noncollapsed UVs, close
+views and the whole town before accepting a shared finish.
