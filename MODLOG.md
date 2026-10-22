@@ -8458,3 +8458,28 @@ native DD2 production parity is still open.
 ## Status round288
 
 Accepted v42 fitted trim/models installed, runtime283 retained, game closed. No pending restore. Next289 legacy moulding/verge/ground/cliff/lighting work.
+
+
+## Round289 - coherent window and verge stone (2026-10-22)
+
+Replaces the legacy moulding paint on182 Abbey/Guild/Sanitarium pieces with
+unchanged reviewed wall286 stone faces. Stable per-mesh variation retains painted
+rim/ink detail. Local face axes orient each member and give end caps finite UVs.
+No new bitmap generation or material-factor change. All geometry/service bounds/
+triangles and all non-moulding UVs/material pixels retained, including native art,
+wall286, roof287, fitted stone288 and entry oak285/iron284. Seven other raw GLBs
+and baked glTF/bin exact. Twelve reimported views, geometry/decoded-paint/finite-UV/
+contact audits PASS. Accepted raw models-reviewed and baked HamletModels-reviewed.
+
+Native unsaved ten-service/camera/release/reload/Embark-cache/resize/keyboard/
+still-camera/smoke fixture PASS; fresh1920x1080 overview reviewed. Five-second
+buffer probe PASS. Runtime283 DLL/PDBs unchanged, asset-only, no C# build/test rerun.
+Game closed after QA. Estate2/native profiles/configs/other assets and foreign WIP
+preserved; protected estates untouched. Private evidence hamlet-moulding-paints-v43.
+Shared service stone now reads consistently. Ground dressing, cliff form, lighting
+and small signs remain; whole-town native DD2 production parity is still open.
+
+## Status round289
+
+Accepted v43 installed, runtime283 retained, game CLOSED. No pending restore.
+Next290 wider ground/cliff/lighting or small service details, maintaining shared colours.

@@ -1,5 +1,14 @@
 # Hamlet building models
 
+Round289: Blender moulding_paints.py --source <v42/models-reviewed> --out
+<new private> --kit <dd2-native-kit>. Supply unchanged textures/abbey_wall_v40.png.
+182 legacy window-surround/verge/sill pieces use varied whole stone-face windows,
+oriented along each member with finite end caps. Geometry/factors/native paint and
+all other UVs retained; seven other raw/baked services exact. Accepted raw
+v43/models-reviewed and baked HamletModels-reviewed. Twelve views, geometry/paint/
+UV/contact and native lifecycle/fresh overview/buffer checks PASS. Runtime283
+unchanged. Evidence hamlet-moulding-paints-v43. No new bitmap generation.
+
 Round288: Blender trim_paints.py --source <v41/models-reviewed> --out <new private>
 --kit <dd2-native-kit>. Supply unchanged reviewed textures/abbey_wall_v40.png.
 Eight whole stone faces keep painted edge contrast; interior-only study rejected.

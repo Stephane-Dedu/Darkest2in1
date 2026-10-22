@@ -708,3 +708,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round287 larger native-reference slate/clay faces on existing Abbey/Guild/Sanitarium courses, finite Abbey cut-side UVs. Geometry/bounds/triangles, native art, wall286 and door284/285 retained. Seven other raw/baked services exact. Twelve views and geometry/paint/contact audits; native lifecycle/fresh overview/allocation PASS. Evidence v41. Trim/wider scene parity remains.
 
 - [x] Round288 fitted limestone shares reviewed wall286 whole-stone paint across Abbey/Guild/Sanitarium. Interior-only study rejected; no new bitmap/factor change. Geometry/native art/non-trim UVs/roof287/door284/285 retained; seven other raw+baked services exact. Twelve views, paint/geometry/noncollapsed UV/contact and native lifecycle/fresh overview/allocation PASS. Evidence v42. Wider scene parity remains.
+
+
+- [x] Round289 coherent stone on182 legacy Abbey/Guild/Sanitarium moulding/verge/sill pieces; unchanged wall286 painting, finite end caps, retained geometry/factors/native art/other UVs. Seven other raw+baked services exact. Twelve views and geometry/paint/UV/contact/native lifecycle/fresh overview/buffer checks PASS, runtime283 unchanged. Evidence v43. Wider scene parity remains open.

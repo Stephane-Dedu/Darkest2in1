@@ -305,3 +305,15 @@ rim highlights and ink seams, fit them to individual courses, and retain common
 stone material factors. Stable per-mesh choices avoid identical wear on every
 block. Preserve all architecture and native art; check noncollapsed UVs, close
 views and the whole town before accepting a shared finish.
+
+
+## Legacy mouldings, round289
+
+Window surrounds, deep sills and roof verges share the unchanged reviewed wall286
+stone painting with the fitted trim. Eight varied complete stone-face windows keep
+the ink and edge catches; orient the painting along each short physical member.
+Map end caps on their own face axes rather than collapsing the long-axis UV.
+The 182 recorded pieces retain geometry and material factors. Whole native atlases,
+the three independent wall finishes, roof courses and entry oak/iron stay exact.
+No new bitmap is generated. Native full-town review is required after model views.
+Terrain/cliff form, directional scene lighting and small signs still need review.
