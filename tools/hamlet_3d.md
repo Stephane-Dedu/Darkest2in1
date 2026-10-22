@@ -1,5 +1,21 @@
 # Perspective Hamlet
 
+Round279 gives interactive buildings shared material finishes for limestone/lime,
+weathered timber, slate, clay and cloth. Keep service accents and warm glass/fire;
+preserve painted ink/shadows. Older and newer slate names now share the same finish.
+Mixed native inn/coach/prop atlases receive a gentle common grade. Source textures,
+meshes, UVs, all ten asset models and scene geometry are unchanged. No generated art.
+
+Release build passes,1274 Core tests pass. Initial isolated test run missed its
+relative game catalog; copied the installed catalog privately and all tests passed.
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard checks PASS;
+fresh1920x1080 palette overview inspected, buffer probe recorded. Build from clean
+HEAD plus three owned files; concurrent foreign changes excluded. Configs, estate2,
+native profiles/other assets preserved, protected estates untouched. No live input
+or estate selection/save. Colour harmony improved; full lighting, cliff repetition,
+ground dressing and additional facade wear remain. Do not claim production parity.
+
+
 Round278 fixes the Tavern's floating sign and two old lantern backplates.
 Move the complete sign toward the tower, brace its bracket and give both suspension
 chains a crossbar. Seat the backplates behind the newly installed native lamps.

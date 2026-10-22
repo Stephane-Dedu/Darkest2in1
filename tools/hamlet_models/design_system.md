@@ -192,3 +192,14 @@ suspension link must meet an actual crossbar. Trace inherited wall backplates wh
 replacing lamps; leaving them at old placeholder coordinates creates floating props
 in the passage. Keep native painted lamps unchanged and check support placement in
 side and town views, not only the flattering front angle.
+
+
+## Shared service colours, round279
+
+The owner requires harmony across interactive buildings. Use a shared cool limestone
+and lime family, restrained warm timber, cool slate and muted clay. Plum cloth and
+oxblood banners remain small service accents. Keep warm windows/fire and dark ink.
+HamletPalette.BuildingSurface applies the family finish to actual material paint;
+new material names must retain a recognizable family term. Mixed native atlases
+need gentle whole-paint grading because roofs, walls and lights share one image.
+Judge the buildings together at the actual town camera, not isolated swatches.

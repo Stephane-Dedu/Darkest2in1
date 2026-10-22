@@ -1,5 +1,11 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round279 shared service palette: read local-art/ui-overhaul/hamlet-palette-v32/CONTINUE.md first.
+Owner requires harmony across interactive buildings. Common stone/wood/slate/clay/cloth
+finishes installed; native detail and service accents retained. All ten models remain
+accepted278 v30/models-final; runtime279. Native checks/build1274 tests PASS, game closed.
+Usage gate/fresh baseline first. Next round280; earlier handoffs historical.
+
 Round278 Tavern supports: read local-art/ui-overhaul/hamlet-signs-v30/CONTINUE.md first.
 Accepted source models-final; sign/backplates attached, chain crossbar added.
 Native lifecycle/overview passed. Normal272 plugin unchanged, game closed.

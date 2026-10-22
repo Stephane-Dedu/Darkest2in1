@@ -5,6 +5,51 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class HamletPaletteTests
 {
+    [Fact]
+    public void ServiceStonePaintingsConvergeWithoutErasingInkOrAlpha()
+    {
+        var cold=HamletPalette.BuildingSurface("Sanitarium fitted lime v25");
+        var warm=HamletPalette.BuildingSurface("Hamlet guild wall v20");
+        static int Chroma(int rgb)
+        {
+            int[] values={rgb>>16,(rgb>>8)&255,rgb&255};
+            return values.Max()-values.Min();
+        }
+        foreach (var sample in new[] {(r:(byte)116,g:(byte)139,b:(byte)109), (r:(byte)155,g:(byte)128,b:(byte)96)})
+        {
+            int before=HamletPalette.GradeRgb(sample.r,sample.g,sample.b,HamletPalette.Building);
+            int after=HamletPalette.GradeRgb(sample.r,sample.g,sample.b,cold);
+            Assert.True(Chroma(after)<Chroma(before));
+            Assert.Equal(after,HamletPalette.GradeRgb(sample.r,sample.g,sample.b,warm));
+        }
+        var pixels=new byte[] {0,0,0,0,90,115,80,91,210,199,178,255};
+        HamletPalette.GradeRgba(pixels,cold);
+        Assert.Equal(new byte[] {0,91,255},new[] {pixels[3],pixels[7],pixels[11]});
+        Assert.True(pixels[8]-pixels[0]>170, "Keep strong painted light/dark separation.");
+    }
+
+    [Theory]
+    [InlineData("Hamlet amber glass")]
+    [InlineData("Campfire")]
+    [InlineData("Slate underlap shadow v26")]
+    [InlineData(null)]
+    public void HarmonyKeepsLightsInkAndUnknownMaterialsOnTheirExistingFinish(string name)
+    {
+        int before=HamletPalette.GradeRgb(224,99,31,HamletPalette.Building);
+        Assert.Equal(before,HamletPalette.GradeRgb(224,99,31,HamletPalette.BuildingSurface(name)));
+    }
+
+    [Fact]
+    public void NewAndOlderRoofCoursesShareFinishesWhileKeepingRoofIdentities()
+    {
+        int oldSlate=HamletPalette.GradeRgb(112,104,118,HamletPalette.BuildingSurface("DD2 roof_slate turret v20"));
+        int newSlate=HamletPalette.GradeRgb(112,104,118,HamletPalette.BuildingSurface("Service weathered slate v28"));
+        Assert.Equal(oldSlate,newSlate);
+        int clay=HamletPalette.GradeRgb(143,76,62,HamletPalette.BuildingSurface("Guild aged clay courses v28"));
+        Assert.True((clay>>16)>(clay&255), "Clay should remain warm.");
+        Assert.True((newSlate&255)>(newSlate>>16), "Slate should remain cool.");
+    }
+
     [Theory]
     [InlineData(0,0,0)]
     [InlineData(19,63,121)]

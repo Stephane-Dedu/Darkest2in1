@@ -8140,3 +8140,21 @@ Fresh1920x1080 overview inspected; five-second buffer probe recorded in private
 hamlet-signs-v30. Normal272 binary unchanged. No estate selection/save or live OS
 input. Configs, estate2, native profiles and foreign WIP preserved; protected estates
 untouched. Wider facade wear/lighting, cliff repetition and ground dressing remain.
+
+
+## Round279 - shared service palette (2026-10-22)
+
+Round279 gives interactive buildings shared material finishes for limestone/lime,
+weathered timber, slate, clay and cloth. Keep service accents and warm glass/fire;
+preserve painted ink/shadows. Older and newer slate names now share the same finish.
+Mixed native inn/coach/prop atlases receive a gentle common grade. Source textures,
+meshes, UVs, all ten asset models and scene geometry are unchanged. No generated art.
+
+Release build passes,1274 Core tests pass. Initial isolated test run missed its
+relative game catalog; copied the installed catalog privately and all tests passed.
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard checks PASS;
+fresh1920x1080 palette overview inspected, buffer probe recorded. Build from clean
+HEAD plus three owned files; concurrent foreign changes excluded. Configs, estate2,
+native profiles/other assets preserved, protected estates untouched. No live input
+or estate selection/save. Colour harmony improved; full lighting, cliff repetition,
+ground dressing and additional facade wear remain. Do not claim production parity.

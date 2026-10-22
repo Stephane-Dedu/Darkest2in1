@@ -222,12 +222,7 @@ internal sealed partial class HamletStage
             if (material.HasProperty(property)) { material.SetTexture(property, texture); material.SetTextureScale(property, Vector2.one); material.SetTextureOffset(property, Vector2.zero); }
         if (path!=null)
         {
-            var finish=HamletPalette.Building;
-            if (info.Name?.StartsWith("DD2 roof_slate",StringComparison.Ordinal)==true)
-                finish=new HamletPalette.Paint(.78f,.90f,1.12f,.001f,.7f);
-            else if (info.Name?.StartsWith("Abbey native carved",StringComparison.Ordinal)==true)
-                finish=new HamletPalette.Paint(1.04f,1.08f,1.12f,.002f,.70f);
-            Grade(material,finish,false);
+            Grade(material,HamletPalette.BuildingSurface(info.Name),false);
         }
         var color=HamletPalette.BuildingTint(new(b[0],b[1],b[2]),new(e[0],e[1],e[2]),paintedEmission);
         var tint = new Color(color.X,color.Y,color.Z,b[3]);

@@ -688,3 +688,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Wider lighting/facade wear, old Tavern sign attachment, cliff repetition and ground dressing remain. Painted lamp light only; saved/controller/full-frame-time and forced-reload portrait limits remain.
 
 - [x] Round278 Tavern sign/backplates fitted to walls, bracket brace and chain crossbar. Nine exact other GLBs, exact bounds, retained native paint/parts; native lifecycle/overview and allocation probe PASS. Evidence local-art/ui-overhaul/hamlet-signs-v30.
+
+- [x] Round279 coherent service material families, native paint/geometry retained, Release and1274 Core tests, native lifecycle/overview/buffer checks PASS. Evidence local-art/ui-overhaul/hamlet-palette-v32. Broader lighting and terrain art remain.

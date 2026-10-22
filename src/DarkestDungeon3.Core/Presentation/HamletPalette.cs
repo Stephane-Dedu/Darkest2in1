@@ -34,8 +34,35 @@ public static class HamletPalette
     public static readonly Paint DistantWoodland = new(.40f,.60f,.82f,.009f,.24f);
     public static readonly Paint Wildwood = new(.62f,.66f,.60f,.003f,.24f);
     public static readonly Paint Building = new(.94f,.96f,1,.001f,.76f);
+    private static readonly Paint BuildingStone = new(.98f,1,1.02f,.002f,.42f);
+    private static readonly Paint BuildingTimber = new(1.02f,.97f,.87f,.001f,.60f);
+    private static readonly Paint BuildingSlate = new(.90f,.97f,1.08f,.001f,.55f);
+    private static readonly Paint BuildingClay = new(1,.94f,.87f,.001f,.60f);
+    private static readonly Paint BuildingCloth = new(.98f,.94f,.90f,.001f,.60f);
+    private static readonly Paint BuildingNative = new(1.01f,.98f,.92f,.001f,.66f);
     public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
     public static readonly Paint GrassTuft = new(.55f,.63f,.46f,0,.7f);
+
+    /// <summary>Shared finishes across service buildings, retaining their painted local accents.</summary>
+    public static Paint BuildingSurface(string materialName)
+    {
+        string name=(materialName??string.Empty).ToLowerInvariant();
+        // Glass/fire and deeply painted seams retain their authored contrast and warm signals.
+        if (name.Contains("glass") || name.Contains("flame") || name.Contains("fire")
+            || name.Contains("shadow") || name.Contains("underlap") || name.Contains("ink edges")) return Building;
+        if (name.Contains("slate")) return BuildingSlate;
+        if (name.Contains("clay") || name.Contains("roof_red")) return BuildingClay;
+        if (name.Contains("limestone") || name.Contains("masonry") || name.Contains("retaining courses")
+            || name.Contains("cut stone") || name.Contains(" wall ") || name.Contains(" lime")) return BuildingStone;
+        if (name.Contains("timber") || name.Contains("wood") || name.Contains("oak")) return BuildingTimber;
+        if (name.Contains("canvas") || name.Contains("standard")) return BuildingCloth;
+        // These original DD2 atlases mix roof, stone, wood and windows. Grade the whole
+        // painting gently; do not force it into one of the single-material families.
+        if (name.StartsWith("the_inn") || name.StartsWith("inn_") || name.StartsWith("wagon_body")
+            || name.StartsWith("camp_props") || name.StartsWith("city_spires")
+            || name.StartsWith("academic") || name.StartsWith("valley_academic")) return BuildingNative;
+        return Building;
+    }
 
     public static (int Width,int Height) PaintExtent(int width,int height,int maximum,Paint paint,bool crop)
     {
