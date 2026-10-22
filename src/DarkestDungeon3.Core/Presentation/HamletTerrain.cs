@@ -14,19 +14,23 @@ public sealed class HamletTerrain
     public float[] Positions, Uv, Shade;
     public int[] Ground, Rock;
     public Surface Paving, Masonry, Stairs, Surroundings;
-    public static HamletTerrain Build(float spacing = 1, bool fullCliffTile = false)
+    public static HamletTerrain Build(float spacing = 1, bool fullCliffTile = false, bool cliffRelief = true)
     {
         if (spacing < .5f || spacing > 4 || float.IsNaN(spacing)) throw new ArgumentOutOfRangeException(nameof(spacing));
         var positions = new List<float>(); var uv = new List<float>(); var shade = new List<float>();
         var ground = new List<int>(); var rock = new List<int>();
         int columns = (int)Math.Ceiling((HamletLayout.MaxX-HamletLayout.MinX)/spacing);
         int rows = (int)Math.Ceiling((HamletLayout.MaxZ-HamletLayout.MinZ)/spacing);
-        HamletLayout.Point At(int x, int z)
+        var points = new HamletLayout.Point[columns+1,rows+1];
+        // Shared samples keep adjoining facets watertight and avoid resampling
+        // the layout four times for every heightfield cell.
+        for (int z=0;z<=rows;z++) for (int x=0;x<=columns;x++)
         {
             float px = HamletLayout.MinX+x*(HamletLayout.MaxX-HamletLayout.MinX)/columns;
             float pz = HamletLayout.MinZ+z*(HamletLayout.MaxZ-HamletLayout.MinZ)/rows;
-            return new(px, HamletLayout.Height(px,pz)-.12f, pz);
+            points[x,z] = cliffRelief ? HamletCliffForm.At(px,pz) : new(px,HamletLayout.Height(px,pz)-.12f,pz);
         }
+        HamletLayout.Point At(int x,int z) => points[x,z];
         void Triangle(HamletLayout.Point a, HamletLayout.Point b, HamletLayout.Point c, bool skirt = false)
         {
             float ux=b.X-a.X, uy=b.Y-a.Y, uz=b.Z-a.Z, vx=c.X-a.X, vy=c.Y-a.Y, vz=c.Z-a.Z;

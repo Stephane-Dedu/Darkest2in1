@@ -8528,3 +8528,30 @@ lighting and whole-town native DD2 production parity remain open.
 
 v45 medical detail package installed, runtime283, game CLOSED. No pending restore.
 Next291 terrain/cliff form/lighting, preserving DD1 composition and shared colours.
+
+
+## Round291 - bounded cliff relief (2026-10-22)
+
+Adds angular physical relief to steep natural faces, outside fixed building pads,
+routes and outer boundaries. Shared grid samples keep adjoining facets closed and
+avoid four repeated layout lookups per cell. Retains reviewed cliff paint, shared
+service colours, all building/native assets and exact paving/masonry/stairs. No new
+bitmap, vertex-count increase or material batch.80868 terrain vertices;15162 render
+vertices move, max0.594436m. Diagnostic matched-camera smooth/relief renders and
+export audit reviewed. Native full-town overview confirms the restrained shape change.
+
+Frozen HEAD9fef53d plus only three owned geometry/test files excludes foreign WIP.
+Release PASS.1285 Core checks PASS in aggregate:1284 initial suite passes, one
+catalog-fixture path failure rerun PASS after supplying the private read-only
+native catalog.89 Hamlet checks pass. No product/test source workaround for fixture.
+Complete unsaved ten-service/camera/release/reload/Embark-cache/resize/keyboard/
+still-camera/smoke PASS; fresh1920x1080 overview inspected;258 renderers and zero
+buffer reallocations. Runtime291 installed, v45 model package byte-identical.
+Game closed; estate2/native profiles/config/other assets and foreign WIP preserved,
+protected estates untouched. No estate selected/saved. Evidence hamlet-cliff-form-v46.
+
+## Status round291
+
+Accepted runtime291 and unchanged v45 art installed, game CLOSED, no pending restore.
+Next292 service-detail quality: Survivalist canvas uses a tiny thatch strip. Native
+forest_tent_01/02 are available with2048 art. Ground/lighting and wider parity remain.

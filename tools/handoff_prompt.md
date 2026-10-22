@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round291 accepted: checkpoint local-art/ui-overhaul/hamlet-cliff-form-v46/CONTINUE.md.
+Bounded angular cliff relief outside fixed routes/building pads/boundaries, cached
+shared grid, unchanged painting/assets/constructed geometry. Release/1285 Core
+checks/native lifecycle/fresh overview/buffer PASS. Runtime291 installed, same
+v45 medical/model package,258 renderers, game CLOSED. Fresh usage/baseline next292.
+Survivalist canvas still uses a small thatch strip; native Tangle tents are in kit.
+
 Round290 accepted: checkpoint local-art/ui-overhaul/hamlet-medical-review-v45/CONTINUE.md.
 Raw ../hamlet-medical-sign-v44/models-reviewed; baked v45/HamletModels-reviewed.
 Native rope-bound medical cross retains original UV/2048 paint/proportions; nine

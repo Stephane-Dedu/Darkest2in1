@@ -963,3 +963,12 @@ other raw/baked services exact. Native lifecycle/fresh overview/buffer PASS,
 runtime283 unchanged, game CLOSED. Fresh usage/baseline before next291.
 Wider terrain/cliff form/lighting remain; preserve service colour harmony.
 No C# change/build/test rerun. Unsaved native preview only, no estate selected or saved.
+
+
+Round291 accepted: checkpoint local-art/ui-overhaul/hamlet-cliff-form-v46/CONTINUE.md.
+Bounded angular cliff relief outside fixed routes/building pads/boundaries, cached
+shared grid, unchanged painting/assets/constructed geometry. Release/1285 Core
+checks/native lifecycle/fresh overview/buffer PASS. Runtime291 installed, same
+v45 medical/model package,258 renderers, game CLOSED. Fresh usage/baseline next292.
+Survivalist canvas still uses a small thatch strip; native Tangle tents are in kit.
+Diagnostic cliff-smooth/relief renders compare shape only; native overview establishes final appearance.

@@ -714,3 +714,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [x] Round290 native medical cross with original115 triangles/UVs/2048 paint;444 original meshes/other paints and nine other raw+baked services exact. Four views, source/shape/contact audits and native lifecycle/fresh overview/buffer PASS. Runtime283 unchanged,258 renderers. Accepted source v44/models-reviewed, baked v45 package; game closed. Evidence hamlet-medical-review-v45.
+
+
+- [x] Round291 bounded cliff relief outside fixed building/road/boundary surfaces, shared cached grid, exact constructed geometry and private assets. Matched diagnostic renders/export audit, Release/1285 aggregate Core checks/native lifecycle/fresh overview/buffer PASS. Runtime291, unchanged v45 art,258 renderers, game closed. Evidence hamlet-cliff-form-v46. Broader lighting/art parity remains.

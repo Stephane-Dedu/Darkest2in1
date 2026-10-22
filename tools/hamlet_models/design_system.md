@@ -327,3 +327,13 @@ Keep the original2048 painting, native proportions and UVs. A rigid yaw faces th
 approach; the back seats against the wall. Retain green glass and shared service
 colours. Four reimported views, exact native UV/pixel/triangle-edge checks and the
 full native town view precede acceptance. Source/candidate provenance stays private.
+
+
+## Cliff support, round291
+
+Keep the reviewed cliff painting and shared service colours. Bounded angular
+relief belongs on steep natural slopes, outside roads, building aprons and the
+outer terrain boundary. Cache one position per grid coordinate to keep adjoining
+facets closed. Preserve paving, stairs and masonry exactly. Shape comparison and
+native whole-town inspection are required; finer surface relief does not establish
+full scene lighting or native DD2 production parity.
