@@ -713,4 +713,4 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round289 coherent stone on182 legacy Abbey/Guild/Sanitarium moulding/verge/sill pieces; unchanged wall286 painting, finite end caps, retained geometry/factors/native art/other UVs. Seven other raw+baked services exact. Twelve views and geometry/paint/UV/contact/native lifecycle/fresh overview/buffer checks PASS, runtime283 unchanged. Evidence v43. Wider scene parity remains open.
 
 
-- [?] Round290 native hospital medical-cross candidate replaces Sanitarium flat emblem; four model views, retained geometry/paint, native UV/shape/pixels/bounds and nine other GLBs PASS. NOT installed; native fixture/overview/probe pending. Accepted289/runtime283 remain exact. Evidence hamlet-medical-sign-v44.
+- [x] Round290 native medical cross with original115 triangles/UVs/2048 paint;444 original meshes/other paints and nine other raw+baked services exact. Four views, source/shape/contact audits and native lifecycle/fresh overview/buffer PASS. Runtime283 unchanged,258 renderers. Accepted source v44/models-reviewed, baked v45 package; game closed. Evidence hamlet-medical-review-v45.

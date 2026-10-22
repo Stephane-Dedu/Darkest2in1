@@ -954,3 +954,12 @@ v43/models-reviewed and baked HamletModels-reviewed. Twelve views, geometry/pain
 UV/contact and native lifecycle/fresh overview/buffer checks PASS. Runtime283
 unchanged. Evidence hamlet-moulding-paints-v43. No new bitmap generation.
 Asset-only round; no C# build/test rerun. Unsaved preview only, no estate selected or saved.
+
+
+Round290 accepted: checkpoint local-art/ui-overhaul/hamlet-medical-review-v45/CONTINUE.md.
+Raw ../hamlet-medical-sign-v44/models-reviewed; baked v45/HamletModels-reviewed.
+Native rope-bound medical cross retains original UV/2048 paint/proportions; nine
+other raw/baked services exact. Native lifecycle/fresh overview/buffer PASS,
+runtime283 unchanged, game CLOSED. Fresh usage/baseline before next291.
+Wider terrain/cliff form/lighting remain; preserve service colour harmony.
+No C# change/build/test rerun. Unsaved native preview only, no estate selected or saved.

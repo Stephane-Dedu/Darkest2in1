@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round290 accepted: checkpoint local-art/ui-overhaul/hamlet-medical-review-v45/CONTINUE.md.
+Raw ../hamlet-medical-sign-v44/models-reviewed; baked v45/HamletModels-reviewed.
+Native rope-bound medical cross retains original UV/2048 paint/proportions; nine
+other raw/baked services exact. Native lifecycle/fresh overview/buffer PASS,
+runtime283 unchanged, game CLOSED. Fresh usage/baseline before next291.
+Wider terrain/cliff form/lighting remain; preserve service colour harmony.
+
 Round290 prepared, native QA PENDING: local-art/ui-overhaul/hamlet-medical-sign-v44/CONTINUE.md.
 models-reviewed/ is offline only; accepted289 v43 remains installed, runtime283,
 game CLOSED. Native hospital rope-bound medical cross replaces two flat primitives.

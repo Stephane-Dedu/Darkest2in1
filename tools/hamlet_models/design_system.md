@@ -317,3 +317,13 @@ The 182 recorded pieces retain geometry and material factors. Whole native atlas
 the three independent wall finishes, roof courses and entry oak/iron stay exact.
 No new bitmap is generated. Native full-town review is required after model views.
 Terrain/cliff form, directional scene lighting and small signs still need review.
+
+
+## Native medical detail, round290
+
+The Sanitarium's flat mint emblem is replaced by DD2's115-triangle rope-bound
+hospital cross, isolated from the native hospital mesh by its complete UV island.
+Keep the original2048 painting, native proportions and UVs. A rigid yaw faces the
+approach; the back seats against the wall. Retain green glass and shared service
+colours. Four reimported views, exact native UV/pixel/triangle-edge checks and the
+full native town view precede acceptance. Source/candidate provenance stays private.

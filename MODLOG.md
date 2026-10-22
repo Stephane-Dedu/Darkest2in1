@@ -8504,3 +8504,27 @@ fixture/fresh overview/probe. Preserve all concurrent work and protected estates
 ## Status round290 preparation
 
 Offline candidate reviewed, native QA pending. Installed acceptance remains289.
+
+
+## Round290 acceptance - native medical sign (2026-10-22)
+
+Accepted the prepared v44 Sanitarium detail after native QA. Native rope-bound
+hospital cross replaces two flat mint primitives. Original115 triangles,2048 paint,
+UVs and uniform proportions retained; rigid facing/grounded wall attachment.
+444 original Sanitarium meshes/UVs and all other material pixels/factors retained.
+Bounds exact; nine other raw GLBs and baked glTF/bin byte-identical. Contact bake
+audited across all ten services. Raw source v44/models-reviewed, installed baked
+package v45/HamletModels-reviewed. No new bitmap generation or C# changes.
+
+Complete unsaved ten-service/camera/full-release/reload/Embark-cache/resize/keyboard/
+still-camera/smoke fixture PASS. Fresh1920x1080 overview viewed;258 renderers.
+Buffer probe zero reallocations. Runtime283 binaries exact, no build/test rerun.
+Game closed after QA. Estate2/native profiles/config/other assets/foreign WIP
+preserved; protected estates untouched. Evidence hamlet-medical-review-v45.
+This supersedes290 preparation's pending native status. Broader terrain/cliff form,
+lighting and whole-town native DD2 production parity remain open.
+
+## Status round290 accepted
+
+v45 medical detail package installed, runtime283, game CLOSED. No pending restore.
+Next291 terrain/cliff form/lighting, preserving DD1 composition and shared colours.
