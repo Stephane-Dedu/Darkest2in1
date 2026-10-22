@@ -1,5 +1,15 @@
 # Hamlet building models
 
+Round286: Blender facade_paints.py --source <v39/models> --out <new private output>
+--kit <dd2-native-kit>. Supply reviewed textures/<service>_wall_v40.png for Abbey,
+Guild and Sanitarium. Accepted raw v40/models-reviewed; baked HamletModels-reviewed.
+Three1254px native-reference paintings; all geometry, native textures and trim
+retained. Three Sanitarium UV layouts fitted; exposed platform top uses native
+paving. Seven other services exact. Twelve views, geometry/paint/contact audits
+and native lifecycle/overview/allocation reviewed. Runtime283 unchanged.
+Generation prompts, native reference paths, rejected studies and provenance stay
+private alongside the paintings in hamlet-facade-paints-v40.
+
 Round285: Blender oak_planks.py --source <v37/models-reviewed> --out <new private>
 --kit <dd2-native-kit>. Supply reviewed v21 reproduction textures/wood_v20.png.
 Six planks clipped to the existing pointed oak backing use continuous900x80 grain

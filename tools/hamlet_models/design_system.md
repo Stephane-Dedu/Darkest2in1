@@ -265,3 +265,18 @@ Match the strip's pixel aspect to the physical board; shorten its U range for
 shorter boards. Small kerfs and preserved local wear provide age while keeping
 the oak structurally readable. Share existing paint and colour, retain fitted iron,
 and compare close detail and the actual town camera before accepting.
+
+
+## Painted form and service wall harmony, v40
+
+DD2 detail uses confident seams, broad painted facets, occasional decisive cracks
+and quiet surface areas. Uniform photographic mottling can hide the form at town
+scale. Compare with the complete native inn and Academic's house before accepting
+generated paint. Share a restrained grey stone/lime palette across services while
+keeping distinct finishes. Preserve authored trim and native atlases unless a
+separate comparison supports replacement.
+
+A painting's edge wear is lost if UVs sample only its quiet centre. Fit the useful
+paint to the physical wall height; map a circular tower once with the join against
+the house. Give the exposed platform top paving instead of vertical limewash.
+Inspect all service views and the actual town camera, not just texture swatches.

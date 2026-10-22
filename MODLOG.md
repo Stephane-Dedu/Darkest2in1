@@ -8358,3 +8358,38 @@ not whole-town native DD2 production parity.
 ## Status 2026-10-22, round285
 
 Installed fitted oak/iron Abbey, runtime283 retained, game closed. Latest v39/CONTINUE.md. No pending restores. Next286 broader materials/terrain/light.
+
+
+## Round286 - shared native-reference wall paintings (2026-10-22)
+
+Round286 replaces the primary Abbey, Guild and Sanitarium wall paintings with
+three private native-reference paintings. Broad painted stone facets, deliberate
+ink seams and quieter wear fit the extracted DD2 inn/Academic's house language.
+Keep distinct stone, broken lime and clinical lime finishes in the shared279
+palette; retain all native atlases, fitted trim, roof and oak/iron work. New full
+paintings are1254px, without artificial upscaling. Built-in image generation was
+used; prompts, native references and rejected studies are saved privately in v40.
+
+Fit one painting around the Sanitarium tower. Fit the undercroft/porch wall height
+to expose worn paint edges; the exposed undercroft top reuses the native courtyard
+paving. All geometry and service bounds retained. Seven other raw GLBs and baked
+glTF/binaries byte-identical. Geometry/UV audit retains all original surfaces;
+only three named Sanitarium UV layouts intentionally change. Non-wall material
+factors/decoded pixels and native parts remain exact. Twelve reimported model
+views, tile study, original paint/geometry and contact bake audits reviewed.
+
+Native unsaved ten-service lifecycle/camera/release/reload/Embark-cache/resize/
+keyboard/still-camera/smoke PASS. Fresh1920x1080 overview inspected. Allocation
+probe 0 reallocations over5.042sec. Runtime283 unchanged;
+no C# change or build/test rerun for this asset-only pass. Palette279/contact281/
+sign282/cliff283/iron284/oak285 retained. Game closed after QA. No estate selected
+or saved. Estate2/native profiles/config/other assets and foreign WIP preserved;
+protected estates untouched. Accepted raw models-reviewed/; baked HamletModels-reviewed/.
+
+Private evidence local-art/ui-overhaul/hamlet-facade-paints-v40. More work remains
+on the older roof/trim paintings, ground dressing, cliff form and scene lighting.
+This improves the service wall language; whole-town native production parity is open.
+
+## Status round286
+
+Accepted v40 paintings/models installed, runtime283 retained, game closed. No pending restore. Next287 roof/trim painting or wider lighting/terrain.
