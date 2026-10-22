@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round295 Core material review: local-art/ui-overhaul/hamlet-material-review-v50/CONTINUE.md.
+ModelReviewExport uses the actual Core glTF reader, palette, tint, contact bands
+and world placement.41 graded paint variants; native_model_review.py binds unlit
+geometry through town_preview --native-models. Geometry/UV/winding/paint/alpha and
+packed-scene audits PASS, render compared with native294. One Guild standard resize
+and remaining shader differences are approximate. Tool-only; normal293/camp292
+art unchanged, game CLOSED. Fresh usage/baseline next296; no pending restore.
+
 Round294 offline ground review: local-art/ui-overhaul/hamlet-native-paint-v49/CONTINUE.md.
 native_paint_capture.py prepares a PRIVATE frozen capture fixture, then converts
 the game's three4096px maps with exact decoded pixels/row origin. town_preview.py

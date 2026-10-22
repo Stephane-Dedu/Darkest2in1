@@ -371,3 +371,16 @@ sRGB and clamp sampling. Apply no second tint, vertex shade or emission reductio
 Core source stamps and image hashes reject stale/changed maps. This fixes the
 historical ground approximation; model lighting and other native shader behaviour
 still require a native comparison. A good offline image alone is insufficient.
+
+
+Round295 Core material review: local-art/ui-overhaul/hamlet-material-review-v50/CONTINUE.md.
+ModelReviewExport uses the actual Core glTF reader, palette, tint, contact bands
+and world placement.41 graded paint variants; native_model_review.py binds unlit
+geometry through town_preview --native-models. Geometry/UV/winding/paint/alpha and
+packed-scene audits PASS, render compared with native294. One Guild standard resize
+and remaining shader differences are approximate. Tool-only; normal293/camp292
+art unchanged, game CLOSED. Fresh usage/baseline next296; no pending restore.
+Use Core's colour families and contact hierarchy when reviewing service art.
+The previous diffuse authoring preview made approved buildings look too dark.
+Do not repaint accepted surfaces to compensate for a mismatched preview. Preserve
+native geometry/UVs and explicit resize/shader limits; inspect the actual game.

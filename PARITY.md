@@ -725,3 +725,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [x] Round294 offline native-ground contract: three captured4096 maps, decoded pixels/row origin exact, source/hash guards, no duplicate grade/tint, unchanged Core geometry and reviewed model paint. Native capture/packed Blender render inspected; private fixture removed, normal293/camp292 restored exact, game closed. Evidence hamlet-native-paint-v49. Offline building lighting remains approximate.
+
+
+- [x] Round295 offline Core model/material review: ten exact triangle counts, world positions within5.58e-6m, UV/winding exact,41 grade variants/decoded PNG/alpha, Core contact/tints, packed-scene/source guards and render comparison PASS. One recorded Guild-standard resize/shader limits remain approximate. Tool-only; normal293/camp292 unchanged, DD2 closed. Evidence hamlet-material-review-v50.

@@ -18,7 +18,7 @@ from mathutils import Matrix, Vector
 def surface(name, data, materials, groups=None, shade=None):
     vertices=np.asarray(data['Positions'],dtype=float).reshape(-1,3)[:,[0,2,1]]
     groups=groups or [data['Indices']]
-    indices=np.concatenate(groups).reshape(-1,3)[:,::-1]
+    indices=np.concatenate(groups).astype(np.int32).reshape(-1,3)[:,::-1]
     mesh=bpy.data.meshes.new(name)
     mesh.from_pydata(vertices.tolist(),[],indices.tolist()); mesh.update()
     obj=bpy.data.objects.new(name,mesh); bpy.context.collection.objects.link(obj)
@@ -261,14 +261,15 @@ def main(args):
     import bl_lib as L
     L.reset()
     L.DROP_MATS.append('forest_ground_dark') # Match the runtime's hidden backing beneath Tangle clumps.
-    texture=bpy.data.images.load(str(out/'road_rough_patch.png'))
-    soil=bpy.data.images.load(str(out/'farm_ground_hill_transition.png'))
-    cliff=bpy.data.images.load(str(out/'farm_eroded_hill.png'))
-    private_cliff=out/'hamlet-cliff-v17.png'
+    resources=args.resources.resolve() if args.resources else out
+    texture=bpy.data.images.load(str(resources/'road_rough_patch.png'))
+    soil=bpy.data.images.load(str(resources/'farm_ground_hill_transition.png'))
+    cliff=bpy.data.images.load(str(resources/'farm_eroded_hill.png'))
+    private_cliff=resources/'hamlet-cliff-v17.png'
     if private_cliff.exists(): cliff=bpy.data.images.load(str(private_cliff))
-    wall=bpy.data.images.load(str(out/'foundation_panel_06.png'))
-    grass=bpy.data.images.load(str(out/'grass_dry.png'))
-    tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
+    wall=bpy.data.images.load(str(resources/'foundation_panel_06.png'))
+    grass=bpy.data.images.load(str(resources/'grass_dry.png'))
+    tufts=bpy.data.images.load(str(resources/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
     native=captured_ground(args.native_ground,data.get('PaintSources')) if args.native_ground else None
     if native:earth,paving=native['ground'],native['lanes']
@@ -289,14 +290,19 @@ def main(args):
     surface('Core surrounding valley',terrain['Surroundings'],[native['valley'] if native else world_valley(soil,texture,grass,cliff,palette,data['Valley'])])
     surface('Core native grass tufts',data['Vegetation'],[painted_ground('Native grass silhouettes',tufts,palette['GrassTuft'],cutout=True)])
     buildings={}
+    if args.native_models:
+        sys.path.insert(0,str(Path(__file__).resolve().parent))
+        from native_model_review import load
+        buildings=load(args.native_models,data.get('PaintSources'),verified,surface)
     for site in data['Sites']:
         key=site['Id']; path=args.models/models[key]['glb']
         if hashlib.sha256(path.read_bytes()).hexdigest()!=verified[key]['sha256']:
             raise ValueError('Model changed after verification: '+key)
+        if args.native_models:continue
         before=set(bpy.data.objects)
         bpy.ops.import_scene.gltf(filepath=str(path))
         objects=[obj for obj in bpy.data.objects if obj not in before and obj.type=='MESH']
-        masonry=out/'hamlet-masonry-v17.png'
+        masonry=resources/'hamlet-masonry-v17.png'
         if masonry.exists() and not native:
             image=bpy.data.images.load(str(masonry),check_existing=True)
             for obj in objects:
@@ -319,7 +325,7 @@ def main(args):
     missing=[]
     for piece in data['Scenery']:
         folder=args.kit/'exp'/piece['Id']
-        if not (folder/'scene.json').exists(): folder=out/'exp'/piece['Id']
+        if not (folder/'scene.json').exists(): folder=resources/'exp'/piece['Id']
         if not (folder/'scene.json').exists(): missing.append(piece['Id']); continue
         lo,hi=L.bbox(folder)
         if not np.isfinite(hi-lo).all(): raise ValueError('Invalid native scenery: '+piece['Id'])
@@ -347,7 +353,7 @@ def main(args):
                     slot.material=painted_ground('Graded '+piece['Id'],texture_node.image,paint,cutout=piece.get('Background',False))
     if 'EstateSky' in data:
         sky=data['EstateSky'];w=sky['SkyWidth']/2;z=sky['SkyDepth']
-        private_sky=out/'hamlet-sky-v17.png'
+        private_sky=resources/'hamlet-sky-v17.png'
         image=bpy.data.images.load(str(private_sky if private_sky.exists() else args.kit.parent/'dd1-reference-kit/town/base/town_bg.png'))
         neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
         shift=-80 if private_sky.exists() else 0;low=0 if private_sky.exists() else .65
@@ -391,6 +397,8 @@ if __name__=='__main__':
     parser.add_argument('--kit',type=Path,required=True)
     parser.add_argument('--layout',type=Path,required=True)
     parser.add_argument('--native-ground',type=Path,help='Converted private native_paint_capture output; exact ground, lane and valley pixels.')
+    parser.add_argument('--native-models',type=Path,help='Private ModelReviewExport output with Core geometry, palette, tints and contact bands.')
+    parser.add_argument('--resources',type=Path,help='Read existing landscape source images/exp cache without overwriting an earlier preview directory.')
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--width',type=int,default=1920)
     parser.add_argument('--samples',type=int,default=16)

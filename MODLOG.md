@@ -8634,3 +8634,31 @@ than native DD2; retain that limit rather than treating the render as final art.
 Native-ground art-review tool saved; normal293/camp292 art installed, game CLOSED.
 Fresh usage/baseline next295: align service material preview with actual native
 palette/tints/contact. Wider lighting and native production-art parity remain open.
+
+
+## Round295 - Core material review (2026-10-22)
+
+Offline tools use actual Core GltfModel, HamletPalette/BuildingTint/LightBand and
+SetDressing facet tints. Exported world geometry/UVs/winding, native contact bands,
+41 shared grade variants and pure emission review materials replace the older
+diffuse authoring-light approximation. Native models/ground keep source/version/
+image/reader guards. --resources reads previous extracted cache into a new output.
+All ten geometry audits pass, max world-position difference5.58e-6m, UV float32 and
+winding exact; original triangle counts retained.41 decoded graded PNG/alpha
+checks pass. Packed scene reopens with121 retained images and exact ten-service
+triangle counts/unlit band materials. Render inspected against native294 evidence.
+
+One724x2172 Guild standard resizes to683x2048 via recorded PIL bilinear; Core
+validates target extent, GPU filtering remains approximate. Native shader effects
+and final production-art parity are not established by the offline render.
+Tool Release build PASS. No runtime rule change or redundant Core/native lifecycle
+rerun. No game launched/deployed in295. Normal293/camp292 art, all configs/assets/
+estate2/native profiles/foreign WIP exact, protected estates untouched. Game CLOSED.
+Evidence hamlet-material-review-v50; raw/candidate art remains unchanged.
+
+## Status round295
+
+Review tools accepted; normal293 and camp292 package installed, game CLOSED,
+no pending restore. Stop with usage reserve and resume fresh usage/baseline next296.
+Use the matched preview to judge remaining service-detail/lighting work; native
+DD2 production-art parity and directional shadows remain open.

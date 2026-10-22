@@ -1,5 +1,13 @@
 # Hamlet building models
 
+Round295 Core material review: local-art/ui-overhaul/hamlet-material-review-v50/CONTINUE.md.
+ModelReviewExport uses the actual Core glTF reader, palette, tint, contact bands
+and world placement.41 graded paint variants; native_model_review.py binds unlit
+geometry through town_preview --native-models. Geometry/UV/winding/paint/alpha and
+packed-scene audits PASS, render compared with native294. One Guild standard resize
+and remaining shader differences are approximate. Tool-only; normal293/camp292
+art unchanged, game CLOSED. Fresh usage/baseline next296; no pending restore.
+
 Round294 offline ground review: local-art/ui-overhaul/hamlet-native-paint-v49/CONTINUE.md.
 native_paint_capture.py prepares a PRIVATE frozen capture fixture, then converts
 the game's three4096px maps with exact decoded pixels/row origin. town_preview.py
@@ -493,3 +501,18 @@ Use the same six surface exports and existing `exp/` cache, then export a new `l
 `--name hamlet-overlook-v08 --blend`. The final packed scene contains all scenery. Native color conversion still
 differs from Blender; use the native overview/service captures and checks recorded in `tools/hamlet_3d.md` for
 runtime acceptance. Preview scripts do not install files, launch the game or read estates.
+
+
+Native material review recipe, from a frozen HEAD snapshot with owned tools copied:
+1. `dotnet run --project tools/hamlet_models/ModelReviewExport -c Release -- <private baked package> <new private review>`
+2. `python tools/hamlet_models/native_model_review.py <review>`
+3. `dotnet run --project tools/hamlet_models/ModelReviewExport -c Release -- --grade <review>`
+4. `python tools/hamlet_models/native_model_review.py <review> --finish`
+5. Blender town_preview.py with matching `--layout`, `--native-ground`,
+   `--native-models <review>`, `--resources <existing native landscape cache>` and
+   a fresh `--out`. Keep raw `--models` for source-hash verification.
+
+This is private art-review output. No game deployment is needed. Core validates
+native2048px paint extents; the one oversized Guild standard currently uses a
+recorded PIL bilinear approximation of GPU sampling. Other source pixels retain
+their dimensions. Shader/camera comparison in DD2 remains the final acceptance.
