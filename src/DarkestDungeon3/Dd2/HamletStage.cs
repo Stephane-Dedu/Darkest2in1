@@ -227,8 +227,8 @@ internal sealed partial class HamletStage : MonoBehaviour
         _look = Overview;
         ResetView();
         MoveCamera(1);
-        BeginModels();
         PrepareTownArt();
+        BeginModels();
         foreach (var piece in Pieces)
             if (!_assets.ContainsKey(piece.Path)) _assets[piece.Path] = NativeAssets.Load<GameObject>(piece.Path);
         _assets[PaintTemplate] = NativeAssets.Load<GameObject>(PaintTemplate);

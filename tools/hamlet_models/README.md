@@ -1,5 +1,11 @@
 # Hamlet building models
 
+Round283: LayoutExport <private-json-path> --full-cliff-tile exports square UVs for
+hamlet-cliff-v17.png. Omit the flag for the native farm_eroded_hill atlas fallback.
+The private painting uses full-image Repeat and its original shared grade. Never
+apply the native atlas crop to an already seamless painting. Runtime283, raw/baked
+service models remain v35. Evidence and native full view are in hamlet-cliff-sampling-v36.
+
 Round282 native Tavern sign: Blender native_sign.py --source <v33/models> --out
 <new private folder> --kit <dd2-native-kit>. The native inn_lvl_02_prefab sign replaces
 nine primitive sign parts. Keep its original proportions/UVs and wall support.

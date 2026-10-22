@@ -103,7 +103,7 @@ public static class HamletSetDressing
         float key=nx*-.35f+ny*.75f+nz*-.55f;
         return key>.35f ? new(1.14f,1.08f,.96f) : key<-.15f ? new(.70f,.76f,.86f) : new(.95f,.94f,.93f);
     }
-    public static HamletTerrain.Surface BuildRocks()
+    public static HamletTerrain.Surface BuildRocks(bool fullCliffTile = false)
     {
         var vertices=new List<float>(); var uv=new List<float>(); var indices=new List<int>(); var shade=new List<float>();
         int seed=0;
@@ -127,7 +127,7 @@ public static class HamletSetDressing
                 float length=(float)Math.Sqrt(nx*nx+ny*ny+nz*nz);
                 float light=Math.Max(.65f,Math.Min(1,.84f+.14f*(nx*-.35f+ny*.8f+nz*-.48f)/length));
                 foreach (var p in new[] { a,b,d })
-                { vertices.Add(p.X); vertices.Add(p.Y); vertices.Add(p.Z); uv.Add((p.X+p.Z*.5f)/HamletPalette.RockPeriod); uv.Add(p.Y/(HamletPalette.RockPeriod*HamletPalette.RockTexelAspect)); shade.Add(light); }
+                { vertices.Add(p.X); vertices.Add(p.Y); vertices.Add(p.Z); uv.Add((p.X+p.Z*.5f)/HamletPalette.RockPeriod); uv.Add(p.Y/(HamletPalette.RockPeriod*(fullCliffTile?1:HamletPalette.RockTexelAspect))); shade.Add(light); }
                 indices.Add(start); indices.Add(start+1); indices.Add(start+2);
             }
             for (int ring=0;ring<2;ring++) for (int i=0;i<7;i++)

@@ -5,8 +5,8 @@ namespace DarkestDungeon3.Core.Presentation;
 /// <summary>Residential streets surround the service buildings. Lots have real grounded pads, never service IDs.</summary>
 public static class HamletTownscape
 {
-    public static readonly HamletPalette.Paint CliffPaint=new(.95f,.99f,1.05f,.001f,.65f,
-        uScale:960f/1024,vScale:760f/1024,uOffset:32f/1024,vOffset:144f/1024);
+    // The private painting is a seamless square tile, not the native rock atlas.
+    public static readonly HamletPalette.Paint CliffPaint=new(.95f,.99f,1.05f,.001f,.65f);
     public sealed class Lot
     {
         public readonly string Asset, Path;

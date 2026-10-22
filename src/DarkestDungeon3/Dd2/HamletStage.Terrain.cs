@@ -45,7 +45,7 @@ internal sealed partial class HamletStage
         _groundMesh.subMeshCount=4; _groundMesh.SetTriangles(data.Ground,0);
         for (int i=0;i<3;i++) _groundMesh.SetTriangles(rockBands[i],i+1);
         Surface(_groundMesh,_groundMaterial,layer).sharedMaterials=materials;
-        var outcrops=HamletSetDressing.BuildRocks();
+        var outcrops=HamletSetDressing.BuildRocks(_modelPack.FullCliffTile);
         var outcropMesh=MeshData("Hamlet broken cliff ledges",outcrops.Positions,outcrops.Uv);
         outcropMesh.subMeshCount=3; _details.Add(outcropMesh);
         var outcropBands=new[] { new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>(),new System.Collections.Generic.List<int>() };
@@ -119,7 +119,9 @@ internal sealed partial class HamletStage
         if (privateEarth!=null) SetPaintTexture(_groundMaterial,privateEarth);
         if (privatePaving!=null) SetPaintTexture(paving,privatePaving);
         Grade(_groundMaterial,privateEarth!=null?HamletPalette.EarthDetail:HamletPalette.Soil,privateEarth==null&&soilLoaded,1024);
-        Grade(rock,privateRock!=null?HamletTownscape.CliffPaint:HamletPalette.Rock,rockLoaded,2048);
+        Grade(rock,privateRock!=null?HamletTownscape.CliffPaint:HamletPalette.Rock,privateRock==null&&rockLoaded,2048);
+        if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
+            Plugin.Log.LogInfo($"[hamlet 3d] cliff paint: {(privateRock!=null?"whole tile / Repeat / square UV":"native atlas crop / Mirror / native aspect")}");
         Grade(paving,privatePaving!=null?HamletPalette.CobbleDetail:HamletPalette.Paving,privatePaving==null,1024);
         Grade(stone,HamletPalette.Masonry);
         // Stairs need a floor tile, not the loose rubble at the bottom of a wall panel.

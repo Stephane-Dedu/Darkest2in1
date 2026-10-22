@@ -235,3 +235,13 @@ physical arm to the wall, and compare its UVs/proportions with the native source
 A source asset being native does not establish suitability: distant cliff cards
 and sparse rock meshes in the same study did not meet the central-terrace detail
 need. Keep those studies out of the installed scene.
+
+
+## Whole paintings and atlas windows, v36
+
+Keep texture format and projection together. The native eroded-hill atlas needs its
+rock-only rectangular crop, corresponding world aspect and mirrored boundary. A
+seamless square painting needs its full image, Repeat and equal world periods.
+Reusing the atlas metadata silently discards painted detail and creates alternating
+mirrored columns. Match terrain and outcrop projection; keep the same service colours
+while comparing from the actual camera. This corrects sampling, not cliff silhouette.

@@ -19,6 +19,7 @@ internal sealed partial class HamletStage
         public readonly Dictionary<string, GltfModel> Models = new();
         public readonly Dictionary<string, byte[]> Paint = new();
         public HamletTerrain Terrain;
+        public bool FullCliffTile;
     }
     private Task<ModelPack> _modelTask;
     private ModelPack _modelPack;
@@ -29,15 +30,16 @@ internal sealed partial class HamletStage
     private void BeginModels()
     {
         string folder = Path.Combine(Plugin.NativeRoomSceneryPath.Value, "HamletModels");
-        _modelTask = Task.Run(() => ReadModels(folder));
+        bool fullCliffTile = _cliffPaintPath != null;
+        _modelTask = Task.Run(() => ReadModels(folder, fullCliffTile));
     }
 
-    private static ModelPack ReadModels(string folder)
+    private static ModelPack ReadModels(string folder, bool fullCliffTile)
     {
         if (!Directory.Exists(folder)) throw new DirectoryNotFoundException("Private HamletModels package is missing.");
         var manifest = JObject.Parse(File.ReadAllText(Path.Combine(folder, "manifest.json")));
         if ((int?)manifest["version"] != 1) throw new FormatException("Unsupported Hamlet model package.");
-        var pack = new ModelPack();
+        var pack = new ModelPack { FullCliffTile = fullCliffTile };
         // Validate the complete package before submitting any texture or geometry to Unity.
         using (var sha = SHA256.Create())
             foreach (var file in ((JObject)manifest["files"]).Properties())
@@ -58,7 +60,7 @@ internal sealed partial class HamletStage
                 foreach (string path in new[] { material.BaseColor, material.Emissive }.Where(p => p != null))
                     if (!pack.Paint.ContainsKey(path)) pack.Paint.Add(path, File.ReadAllBytes(path));
         }
-        pack.Terrain = HamletTerrain.Build();
+        pack.Terrain = HamletTerrain.Build(fullCliffTile: fullCliffTile);
         return pack;
     }
 

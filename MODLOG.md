@@ -8237,3 +8237,35 @@ facade wear and directional lighting remain; production parity is not establishe
 ## Status 2026-10-22, round282
 
 Accepted sign package installed, runtime281 retained, game closed. See v35/CONTINUE.md. Next283 private cliff full-tile sampling test. No pending restores.
+
+
+## Round283 - whole cliff painting (2026-10-22)
+
+Round283 corrects private cliff painting: hamlet-cliff-v17.png is a whole square
+seamless tile, but previously received the farm_eroded_hill atlas crop, Mirror wrap
+and cropped-atlas aspect. It now receives full-image Repeat and square world UVs
+across both terrain and outcrops. Preserve the existing private colour grade and
+16-unit period. Native fallback keeps its original rock crop, Mirror and760/960
+aspect. PrepareTownArt precedes the model worker so it can select the UV contract.
+
+No new texture, model, layout, material colour, building or renderer group. Palette279,
+contact281 and native sign282 retained;254 renderers. All private assets byte-exact.
+One regression verifies unchanged hillside/outcrop geometry, unchanged earth UVs and
+world density for full tiles/native fallback. All1283 Core tests and Release pass.
+LayoutExport accepts --full-cliff-tile so the offline cliff UVs match the native scene;
+its private full layout export succeeds. Native unsaved ten-service/camera/release/
+reload/cache/resize/keyboard/still-camera/smoke PASS; full-tile mode confirmed in log.
+Fresh1920x1080 overview inspected and allocation probe recorded. No estate selected/
+saved. Configs/estate2/native profiles/other assets/foreign WIP preserved, protected
+estates untouched. Game closed after QA. Frozen HEAD plus seven owned runtime/test
+files excludes concurrent agents' work.
+
+Evidence local-art/ui-overhaul/hamlet-cliff-sampling-v36. Native raw/baked models
+remain v35/models and v35/HamletModels-reviewed. Runtime283. Whole painting is now
+used coherently; broad cliff silhouettes, facade wear, ground dressing, directional
+lighting and long-session acceptance remain. Native fallback is covered structurally
+and by the density regression; no separate native launch with private paint absent.
+
+## Status 2026-10-22, round283
+
+Runtime283 and native Tavern sign package282 installed. Game closed, no pending restores. Latest v36/CONTINUE.md; next284 cliff geometry/ground dressing/facade wear. No extra assets generated.

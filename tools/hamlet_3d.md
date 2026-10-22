@@ -1,5 +1,31 @@
 # Perspective Hamlet
 
+Round283 corrects private cliff painting: hamlet-cliff-v17.png is a whole square
+seamless tile, but previously received the farm_eroded_hill atlas crop, Mirror wrap
+and cropped-atlas aspect. It now receives full-image Repeat and square world UVs
+across both terrain and outcrops. Preserve the existing private colour grade and
+16-unit period. Native fallback keeps its original rock crop, Mirror and760/960
+aspect. PrepareTownArt precedes the model worker so it can select the UV contract.
+
+No new texture, model, layout, material colour, building or renderer group. Palette279,
+contact281 and native sign282 retained;254 renderers. All private assets byte-exact.
+One regression verifies unchanged hillside/outcrop geometry, unchanged earth UVs and
+world density for full tiles/native fallback. All1283 Core tests and Release pass.
+LayoutExport accepts --full-cliff-tile so the offline cliff UVs match the native scene;
+its private full layout export succeeds. Native unsaved ten-service/camera/release/
+reload/cache/resize/keyboard/still-camera/smoke PASS; full-tile mode confirmed in log.
+Fresh1920x1080 overview inspected and allocation probe recorded. No estate selected/
+saved. Configs/estate2/native profiles/other assets/foreign WIP preserved, protected
+estates untouched. Game closed after QA. Frozen HEAD plus seven owned runtime/test
+files excludes concurrent agents' work.
+
+Evidence local-art/ui-overhaul/hamlet-cliff-sampling-v36. Native raw/baked models
+remain v35/models and v35/HamletModels-reviewed. Runtime283. Whole painting is now
+used coherently; broad cliff silhouettes, facade wear, ground dressing, directional
+lighting and long-session acceptance remain. Native fallback is covered structurally
+and by the density regression; no separate native launch with private paint absent.
+
+
 Round282 replaces the Tavern's primitive tankard sign with the native DD2 inn
 crest from inn_lvl_02_prefab/the_inn_sign_01. Retain its painted wood/gold, crossbar,
 links, original proportions and UVs. A fitted arm and existing diagonal brace join

@@ -14,7 +14,7 @@ public sealed class HamletTerrain
     public float[] Positions, Uv, Shade;
     public int[] Ground, Rock;
     public Surface Paving, Masonry, Stairs, Surroundings;
-    public static HamletTerrain Build(float spacing = 1)
+    public static HamletTerrain Build(float spacing = 1, bool fullCliffTile = false)
     {
         if (spacing < .5f || spacing > 4 || float.IsNaN(spacing)) throw new ArgumentOutOfRangeException(nameof(spacing));
         var positions = new List<float>(); var uv = new List<float>(); var shade = new List<float>();
@@ -43,7 +43,7 @@ public sealed class HamletTerrain
                 // A continuous diagonal projection avoids flipping the wall atlas at each changing facet normal.
                 uv.Add(cliff ? (p.X+p.Z*.5f)/period : (p.X-HamletLayout.MinX)/(HamletLayout.MaxX-HamletLayout.MinX));
                 // A cropped atlas is rectangular paint. Preserve its texel aspect on square world coordinates.
-                float cropHeight = cliff ? HamletPalette.RockTexelAspect : HamletPalette.Soil.UvScale.Y;
+                float cropHeight = cliff ? (fullCliffTile ? 1 : HamletPalette.RockTexelAspect) : HamletPalette.Soil.UvScale.Y;
                 uv.Add(cliff ? p.Y/(period*cropHeight) : (p.Z-HamletLayout.MinZ)/(HamletLayout.MaxZ-HamletLayout.MinZ)); shade.Add(light);
             }
         }

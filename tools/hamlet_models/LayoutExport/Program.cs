@@ -1,13 +1,15 @@
 using System.Text.Json;
 using DarkestDungeon3.Core.Presentation;
 
-if (args.Length!=1) throw new ArgumentException("Pass one private output JSON path.");
+if (args.Length<1 || args.Length>2 || (args.Length==2 && args[1]!="--full-cliff-tile"))
+    throw new ArgumentException("Pass a private output JSON path and optional --full-cliff-tile.");
+bool fullCliffTile=args.Length==2;
 string path=Path.GetFullPath(args[0]);
 string repo=Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"../../../../../.."));
 if (path.StartsWith(repo+Path.DirectorySeparatorChar,StringComparison.OrdinalIgnoreCase))
     throw new ArgumentException("Preview geometry belongs outside Git.");
 Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-var terrain=HamletTerrain.Build();
+var terrain=HamletTerrain.Build(fullCliffTile:fullCliffTile);
 File.WriteAllText(path,JsonSerializer.Serialize(new
 {
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
@@ -15,7 +17,7 @@ File.WriteAllText(path,JsonSerializer.Serialize(new
     EstateSky=new { HamletVista.SkyDepth,HamletVista.SkyWidth,HamletVista.SkyBottom,HamletVista.SkyTop },
     CliffPaint=HamletTownscape.CliffPaint,
     Terrain=terrain,Vegetation=HamletVegetation.Build(),Clumps=HamletVegetation.Clumps,
-    Outcrops=HamletSetDressing.BuildRocks(),Mists=HamletSetDressing.Mists,
+    Outcrops=HamletSetDressing.BuildRocks(fullCliffTile),Mists=HamletSetDressing.Mists,
     EntranceLight=Enumerable.Range(0,256*256).Select(i=>HamletSetDressing.EntranceLight(
         HamletLayout.MinX+(HamletLayout.MaxX-HamletLayout.MinX)*(i%256)/255,
         HamletLayout.MinZ+(HamletLayout.MaxZ-HamletLayout.MinZ)*(i/256)/255)),
