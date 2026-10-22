@@ -245,3 +245,12 @@ seamless square painting needs its full image, Repeat and equal world periods.
 Reusing the atlas metadata silently discards painted detail and creates alternating
 mirrored columns. Match terrain and outcrop projection; keep the same service colours
 while comparing from the actual camera. This corrects sampling, not cliff silhouette.
+
+
+## Fitted entrance iron, v37/v38
+
+Give each oak leaf its own tapered hinge straps. Reuse the workshop metal paint
+for dark iron and restrained rubbed edges. Rings need plates and pivots; verify
+all supports in depth and seat backs into the oak. Preserve the arch, plank grain
+and service colours. Compare textured triangles rather than vertex indices after
+glTF re-export; legitimate reindexing can change vertex counts without changing paint.

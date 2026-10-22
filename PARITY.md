@@ -699,4 +699,4 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round283 full private cliff tile Repeat/square UVs, retained native atlas fallback; unchanged geometry, earth UVs, assets and254 renderers.1283 Core tests, Release, offline export and native lifecycle/overview/allocation PASS. Evidence local-art/ui-overhaul/hamlet-cliff-sampling-v36. Cliff silhouette/ground dressing and native production parity remain.
 
-- [?] Round284 Abbey fitted door iron candidate: four offline views/detail, original geometry/UVs, support contact, exact bounds/nine other raw+baked models PASS. Native startup stalled before Hamlet loaded; candidate uninstalled, accepted283 restored. Resume native acceptance from local-art/ui-overhaul/hamlet-abbey-iron-v37/CONTINUE.md.
+- [x] Round284 Abbey split hinges/studs/ring plates, retained oak/724 original meshes/UVs, exact bounds/nine other raw+baked models. Four-view/detail/support audits and native lifecycle/fresh overview/allocation PASS. Runtime283 unchanged,256 renderers. Accepted evidence local-art/ui-overhaul/hamlet-abbey-review-v38; source v37/models-reviewed.

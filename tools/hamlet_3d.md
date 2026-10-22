@@ -1,20 +1,28 @@
 # Perspective Hamlet
 
-Round284 preparation: Abbey split tapered hinges, hammered studs, pin/knuckle
-fittings and ring plates on the existing oak door. Reuse reviewed iron_v21; no new
-bitmap or C# change. Three private fitting studies; candidate models-reviewed,
-package HamletModels-reviewed. Abbey29588 triangles. All724 retained Abbey meshes
-keep textured triangles within4.77e-7; support and oak-contact checks pass. Nine
-other raw/baked models exact; all service bounds unchanged. Four model views and
-close door-detail.png reviewed; package/contact bake audited.
+Round284 is now accepted in the native Hamlet. Split tapered hinge straps,
+hammered studs, pin/knuckle fittings and ring plates refine the Abbey's existing
+oak entrance. Reuse reviewed workshop iron; no new bitmap or runtime change.
+Raw source remains v37/models-reviewed; accepted baked package v38/HamletModels-reviewed,
+byte-identical to the reviewed v37 candidate. Abbey29588 triangles. All724 retained
+Abbey meshes preserve textured triangles within4.77e-7. Ring supports and plates
+meet physically. All service bounds unchanged; nine other raw/baked models exact.
+Four final model views and door-detail.png reviewed in v37.
 
-Native acceptance pending: one unsaved preview attempt stalled at the publisher
-intro before any Hamlet model was loaded. Focus and one Escape key did not resolve
-startup. Candidate package was restored to the exact accepted round283 installation,
-game/observer closed. Runtime283 and accepted raw/baked v35 sign models remain
-installed. Configs/estate2/native profiles/other assets restored and verified;
-protected estates untouched. No build/test rerun for this asset-only preparation.
-Broader scene/texture quality remains; this is not native acceptance or production parity.
+Fresh v38 baseline captured after the usage reset, preserving intervening work.
+Full native unsaved ten-service/camera/release/reload/Embark-cache/resize/keyboard/
+still-camera/smoke checks PASS. Fresh1920x1080 overview reviewed; five-second buffer
+probe recorded.256 renderers, two more for the new iron paints. Runtime283 DLL/PDB
+files exact, no C# build/test rerun for this asset pass. Shared palette279, contact281,
+Tavern sign282 and cliff sampling283 retained. No estate selected/saved. Configs,
+estate2/native profiles/other assets/foreign WIP preserved; protected estates untouched.
+Game closed after QA. The earlier publisher-intro stall did not recur on this retry;
+its cause remains unestablished, and no startup code was changed.
+
+Commit ed0368d prepared the source; this acceptance supersedes its native-pending
+status. Private v38 contains final native evidence/deployment/checkpoint; v37 holds
+authoring studies. Wider facade/plank painting, ground dressing, cliff shape and
+scene lighting still need work. Native production parity is not established.
 
 
 Round283 corrects private cliff painting: hamlet-cliff-v17.png is a whole square
