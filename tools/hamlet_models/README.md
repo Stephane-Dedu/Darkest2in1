@@ -1,5 +1,22 @@
 # Hamlet building models
 
+Round284 preparation: Abbey split tapered hinges, hammered studs, pin/knuckle
+fittings and ring plates on the existing oak door. Reuse reviewed iron_v21; no new
+bitmap or C# change. Three private fitting studies; candidate models-reviewed,
+package HamletModels-reviewed. Abbey29588 triangles. All724 retained Abbey meshes
+keep textured triangles within4.77e-7; support and oak-contact checks pass. Nine
+other raw/baked models exact; all service bounds unchanged. Four model views and
+close door-detail.png reviewed; package/contact bake audited.
+
+Native acceptance pending: one unsaved preview attempt stalled at the publisher
+intro before any Hamlet model was loaded. Focus and one Escape key did not resolve
+startup. Candidate package was restored to the exact accepted round283 installation,
+game/observer closed. Runtime283 and accepted raw/baked v35 sign models remain
+installed. Configs/estate2/native profiles/other assets restored and verified;
+protected estates untouched. No build/test rerun for this asset-only preparation.
+Broader scene/texture quality remains; this is not native acceptance or production parity.
+
+
 Round283: LayoutExport <private-json-path> --full-cliff-tile exports square UVs for
 hamlet-cliff-v17.png. Omit the flag for the native farm_eroded_hill atlas fallback.
 The private painting uses full-image Repeat and its original shared grade. Never

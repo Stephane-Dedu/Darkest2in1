@@ -1,5 +1,12 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round284 pending native review: newest checkpoint local-art/ui-overhaul/hamlet-abbey-iron-v37/CONTINUE.md.
+Abbey iron candidate raw models-reviewed and baked HamletModels-reviewed passed all
+private geometry/UV/support/four-view/detail audits. One native launch stalled in
+publisher intro before Hamlet load. Candidate UNINSTALLED; exact accepted runtime283/
+v35 models restored, game/observer closed. Next: native review of284, not new art.
+Check usage/current deployment first; fresh backup if another agent changed anything.
+
 Round283 cliff sampling: newest checkpoint is local-art/ui-overhaul/hamlet-cliff-sampling-v36/CONTINUE.md.
 Installed runtime283 and unchanged baked v35 sign package. Whole private tile Repeat/
 square UVs, native fallback crop/aspect retained.1283 Core tests, Release/native checks/

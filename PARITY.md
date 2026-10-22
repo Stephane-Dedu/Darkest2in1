@@ -698,3 +698,5 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round282 native DD2 Tavern sign/complete suspension fitted to wall arm; native proportions/UVs checked, exact bounds/nine other raw+baked models. Four views and native lifecycle/overview/allocation PASS. Runtime281 unchanged. Evidence local-art/ui-overhaul/hamlet-cliff-relief-v35. Native cliff study uninstalled; full-tile private cliff sampling needs separate review.
 
 - [x] Round283 full private cliff tile Repeat/square UVs, retained native atlas fallback; unchanged geometry, earth UVs, assets and254 renderers.1283 Core tests, Release, offline export and native lifecycle/overview/allocation PASS. Evidence local-art/ui-overhaul/hamlet-cliff-sampling-v36. Cliff silhouette/ground dressing and native production parity remain.
+
+- [?] Round284 Abbey fitted door iron candidate: four offline views/detail, original geometry/UVs, support contact, exact bounds/nine other raw+baked models PASS. Native startup stalled before Hamlet loaded; candidate uninstalled, accepted283 restored. Resume native acceptance from local-art/ui-overhaul/hamlet-abbey-iron-v37/CONTINUE.md.
