@@ -254,3 +254,14 @@ for dark iron and restrained rubbed edges. Rings need plates and pivots; verify
 all supports in depth and seat backs into the oak. Preserve the arch, plank grain
 and service colours. Compare textured triangles rather than vertex indices after
 glTF re-export; legitimate reindexing can change vertex counts without changing paint.
+
+
+## Paint per physical plank, v39
+
+A detailed timber painting can still fail when the entire sheet is stretched across
+a door. Broad painted splits become oversized holes. Fit separate planks inside
+the existing outline, retain a backing, and sample continuous grain per member.
+Match the strip's pixel aspect to the physical board; shorten its U range for
+shorter boards. Small kerfs and preserved local wear provide age while keeping
+the oak structurally readable. Share existing paint and colour, retain fitted iron,
+and compare close detail and the actual town camera before accepting.

@@ -1,5 +1,13 @@
 # Hamlet building models
 
+Round285: Blender oak_planks.py --source <v37/models-reviewed> --out <new private>
+--kit <dd2-native-kit>. Supply reviewed v21 reproduction textures/wood_v20.png.
+Six planks clipped to the existing pointed oak backing use continuous900x80 grain
+strips; physical/paint aspect and variable plank length agree. Preserve iron284.
+Raw source v39/models; baked package v39/HamletModels-reviewed. Review export views,
+close detail, coverage/original surfaces/UVs/bounds, contact bake and native scene.
+No new image generation, runtime change or builds. Native acceptance recorded in v39.
+
 Round284 accepted: Blender abbey_iron.py --source <v35/models> --out <new private
 folder> --kit <dd2-native-kit>. Prepare textures/iron_v21.png from the reviewed v21
 workshop painting. Raw source v37/models-reviewed, accepted baked package

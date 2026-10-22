@@ -1,5 +1,34 @@
 # Perspective Hamlet
 
+Round285 gives the Abbey entrance six fitted oak planks. Clip each board to the
+existing pointed door, preserve the backing and all fitted iron, replace only five
+old ink joint rods. Four continuous900x80px grain strips from reviewed wood_v20
+match the roughly11:1 board aspect. Map by actual board length; narrow kerfs leave
+97.24% face coverage. This avoids stretching the painting's broad black splits
+across the whole door. Same wood colour/emission and shared timber family finish.
+No new bitmap generated or extracted. The engine samples the original full image;
+grain-strip-review.png is a diagnostic sheet, not installed paint.
+
+Abbey29624 triangles.749 retained Abbey meshes/textured surfaces remain within
+4.77e-7, including oak backing, native parts, iron, walls and roof. All service
+bounds exact; nine other raw GLBs and baked glTF/binaries byte-identical. Four
+exported/re-imported views and close detail reviewed; plank coverage/support and
+raw/baked contact audits pass. Accepted raw models/ and package HamletModels-reviewed.
+
+Native unsaved ten-service/camera/release/reload/cache/resize/keyboard/still-camera/
+smoke checks PASS; fresh1920x1080 overview inspected and allocation probe recorded.
+Runtime283 DLL/PDB files exact; no runtime change or build/test rerun for this asset
+pass. Shared palette279, contact281, sign282, cliff283 and iron284 retained. No
+estate selected/saved; configs/estate2/native profiles/other assets/foreign WIP
+preserved and protected estates untouched. Game closed after QA.
+
+Private evidence local-art/ui-overhaul/hamlet-oak-planks-v39. Source grain rects,
+source hash and dimensions are in plank-candidates.json; physical outlines/UVs/
+coverage in models/plank-fit.json. Wider facade painting, ground dressing, cliff
+silhouette and scene lighting remain. This is a local material/fit improvement,
+not whole-town native DD2 production parity.
+
+
 Round284 is now accepted in the native Hamlet. Split tapered hinge straps,
 hammered studs, pin/knuckle fittings and ring plates refine the Abbey's existing
 oak entrance. Reuse reviewed workshop iron; no new bitmap or runtime change.
