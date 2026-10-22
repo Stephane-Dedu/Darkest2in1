@@ -8555,3 +8555,30 @@ protected estates untouched. No estate selected/saved. Evidence hamlet-cliff-for
 Accepted runtime291 and unchanged v45 art installed, game CLOSED, no pending restore.
 Next292 service-detail quality: Survivalist canvas uses a tiny thatch strip. Native
 forest_tent_01/02 are available with2048 art. Ground/lighting and wider parity remain.
+
+
+## Round292 - native Survivalist shelter (2026-10-22)
+
+Replaces21 coarse authored shelter/pole/rope/seam/peg/bedroll meshes with DD2's
+complete double-peak Tangle tent. Original3420 triangles,2048 paint, UVs and uniform
+proportions retained; rigid yaw keeps plain canvas toward the approach. Eight
+original equipment/fire meshes and their UVs retained exactly. Camp now6000
+triangles/nine meshes. Nine other raw GLBs and baked glTF/bin byte-identical.
+Original horizontal footprint/normalization retained; taller5.3m silhouette is
+intentional. No bitmap generation. Shared service palette/contact shading retained.
+
+Four-view/source/proportion/paint/geometry/contact audits PASS. Initial width6.4
+study passed native checks but was rejected as too small in town; final width8.7
+passed a fresh complete unsaved ten-service/camera/release/reload/Embark-cache/
+resize/keyboard/still-camera/smoke fixture. Fresh1920x1080 overview inspected.
+254 renderers/three chimney plumes; zero reallocations over5.024sec. Normal
+runtime291 binaries exact; asset-only, no C# build/test rerun. Game CLOSED.
+Estate2/native profiles/config/other assets/foreign WIP preserved; protected
+estates untouched, no estate selected/saved. Evidence hamlet-camp-v47.
+
+## Status round292
+
+Accepted scaled campsite package installed, raw models-scaled/ and baked
+HamletModels-scaled-reviewed/, runtime291, game CLOSED, no pending restore.
+Fresh usage/baseline next293. Maintain service material harmony; wider lighting,
+terrain dressing and native production-art parity remain open.

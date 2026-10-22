@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round292 accepted: checkpoint local-art/ui-overhaul/hamlet-camp-v47/CONTINUE.md.
+Raw models-scaled/; baked HamletModels-scaled-reviewed/. Native Tangle double-peak
+tent replaces21 coarse shelter/rope/bedroll pieces. Original2048 paint/UVs/uniform
+proportions retained; eight camp equipment/flame meshes and nine other services exact.
+Horizontal service footprint retained, intentional taller5.3m tent. Small6.4m study
+rejected; final width8.7m. Native lifecycle/fresh overview/buffer PASS,254 renderers,
+runtime291 unchanged, game CLOSED. Fresh usage/baseline next293; shared colours retained.
+
 Round291 accepted: checkpoint local-art/ui-overhaul/hamlet-cliff-form-v46/CONTINUE.md.
 Bounded angular cliff relief outside fixed routes/building pads/boundaries, cached
 shared grid, unchanged painting/assets/constructed geometry. Release/1285 Core

@@ -717,3 +717,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [x] Round291 bounded cliff relief outside fixed building/road/boundary surfaces, shared cached grid, exact constructed geometry and private assets. Matched diagnostic renders/export audit, Release/1285 aggregate Core checks/native lifecycle/fresh overview/buffer PASS. Runtime291, unchanged v45 art,258 renderers, game closed. Evidence hamlet-cliff-form-v46. Broader lighting/art parity remains.
+
+
+- [x] Round292 native double-peak Tangle tent, original3420 triangles/UVs/2048 paint/uniform proportions,21 coarse pieces removed; eight original equipment/fire meshes and nine other raw+baked services exact. Horizontal footprint retained, taller silhouette; small study rejected, final8.7m width accepted. Four views/audits/native lifecycle/fresh overview/buffer PASS,254 renderers. Runtime291 unchanged, game closed. Evidence hamlet-camp-v47.

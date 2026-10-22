@@ -337,3 +337,16 @@ outer terrain boundary. Cache one position per grid coordinate to keep adjoining
 facets closed. Preserve paving, stairs and masonry exactly. Shape comparison and
 native whole-town inspection are required; finer surface relief does not establish
 full scene lighting or native DD2 production parity.
+
+
+## Native campsite silhouette, round292
+
+Fit a complete native Tangle canvas tent with uniform scale and rigid facing.
+Retain its original painted atlas, UVs, poles and ropes. Face the plain cloth
+toward the service approach while keeping the native decorated side intact.
+Remove the replaced authored shelter, floating seam/peg details and intersecting
+bedroll. Retain the original equipment and fire arrangement. Judge scale in the
+whole native town: the initial6.4m study passed interaction but looked too small.
+The accepted8.7m shelter remains inside the old horizontal footprint with a taller
+silhouette. Keep shared service colour grading and verify four views/source paint,
+proportions, retained geometry and the native town before accepting.
