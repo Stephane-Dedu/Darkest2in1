@@ -1,5 +1,12 @@
 # Hamlet building models
 
+Round290 prepared, native QA PENDING: local-art/ui-overhaul/hamlet-medical-sign-v44/CONTINUE.md.
+models-reviewed/ is offline only; accepted289 v43 remains installed, runtime283,
+game CLOSED. Native hospital rope-bound medical cross replaces two flat primitives.
+Four views, retained geometry/paint, native UV/shape/pixel/bounds audits PASS.
+Nine other GLBs exact. No new generation. Fresh usage and QA baseline, then package,
+contact bake/native lifecycle/fresh overview/probe before installing/accepting.
+
 Round289: Blender moulding_paints.py --source <v42/models-reviewed> --out
 <new private> --kit <dd2-native-kit>. Supply unchanged textures/abbey_wall_v40.png.
 182 legacy window-surround/verge/sill pieces use varied whole stone-face windows,

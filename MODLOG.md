@@ -8483,3 +8483,24 @@ and small signs remain; whole-town native DD2 production parity is still open.
 
 Accepted v43 installed, runtime283 retained, game CLOSED. No pending restore.
 Next290 wider ground/cliff/lighting or small service details, maintaining shared colours.
+
+
+## Round290 preparation - native medical sign (2026-10-22)
+
+Offline Sanitarium candidate replaces two flat mint cross primitives with DD2's
+115-triangle rope-bound hospital cross. Original2048 painting/UVs and uniform
+proportions retained; rigid yaw faces the approach and back seats against plaster.
+Initial oblique study retained privately, not selected. Four reimported views,
+444 retained meshes/UVs, material factors/decoded pixels, native triangle-edge
+lengths/UVs/paint, exact service bounds and nine other GLBs PASS.
+Private evidence hamlet-medical-sign-v44/models-reviewed, recipe medical_sign.py.
+
+NOT INSTALLED. Native full-town quality/lifecycle/performance QA pending. Accepted289
+v43 package/runtime283 exact, game remains closed, no launch/save access this round.
+No C# build/test rerun or generated art. Usage reserve requires checkpointing before
+native QA. Continue290 with fresh usage/baseline, package/contact bake and native
+fixture/fresh overview/probe. Preserve all concurrent work and protected estates.
+
+## Status round290 preparation
+
+Offline candidate reviewed, native QA pending. Installed acceptance remains289.
