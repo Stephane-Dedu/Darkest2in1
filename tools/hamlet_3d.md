@@ -991,3 +991,14 @@ geometry, material batch or palette change. Two regressions reproduced the old
 loss; Release/1287 Core/native lifecycle/fresh overview/buffer PASS. Runtime293,
 unchanged camp292 art,254 renderers, game CLOSED. Fresh usage/baseline next294.
 Only frozen HEAD8baca3c plus two owned Core/test files; no foreign WIP built. Unsaved preview only.
+
+
+Round294 offline ground review: local-art/ui-overhaul/hamlet-native-paint-v49/CONTINUE.md.
+native_paint_capture.py prepares a PRIVATE frozen capture fixture, then converts
+the game's three4096px maps with exact decoded pixels/row origin. town_preview.py
+--native-ground <capture> uses them without duplicate grade/tint, rejects stale
+Core source stamps/altered paint, and keeps reviewed model textures. Core layout
+exact; packed Blender render viewed. Normal293/camp292 art restored byte-exact,
+game CLOSED, no capture fixture installed. Buildings still render too dark offline;
+next295 align their material review with native evidence. Fresh usage first.
+Tool-only round; native capture overview reviewed, no new runtime rule or full lifecycle rerun.

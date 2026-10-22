@@ -360,3 +360,14 @@ stone over lit earth erases the lighting at complete coverage. Keep open-road
 albedo, original paint, building palette, exact ground pixels outside the road
 and smooth margins. Verify actual shaded approaches, open road centres and fully
 paved lamp pools; this is contact continuity, not directional cast shadows.
+
+
+## Native ground as the review reference, round294
+
+Use the game's baked4096px ground/lane/valley maps for composition review. Capture
+only through a frozen private preview fixture, restore normal binaries/profiles,
+then convert RGBA to PNG without changing decoded pixels. Preserve row origin,
+sRGB and clamp sampling. Apply no second tint, vertex shade or emission reduction.
+Core source stamps and image hashes reject stale/changed maps. This fixes the
+historical ground approximation; model lighting and other native shader behaviour
+still require a native comparison. A good offline image alone is insufficient.

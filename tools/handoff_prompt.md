@@ -1,5 +1,14 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round294 offline ground review: local-art/ui-overhaul/hamlet-native-paint-v49/CONTINUE.md.
+native_paint_capture.py prepares a PRIVATE frozen capture fixture, then converts
+the game's three4096px maps with exact decoded pixels/row origin. town_preview.py
+--native-ground <capture> uses them without duplicate grade/tint, rejects stale
+Core source stamps/altered paint, and keeps reviewed model textures. Core layout
+exact; packed Blender render viewed. Normal293/camp292 art restored byte-exact,
+game CLOSED, no capture fixture installed. Buildings still render too dark offline;
+next295 align their material review with native evidence. Fresh usage first.
+
 Round293 accepted: checkpoint local-art/ui-overhaul/hamlet-paving-light-v48/CONTINUE.md.
 Paving retains existing foundation contact shade and doorway glow at full stone
 coverage. Earth/valley paint exact; road margins retain ground pixels. No new art,

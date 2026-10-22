@@ -120,6 +120,32 @@ def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=Non
     return earth_material,painted_ground('World worn paving',image,neutral)
 
 
+def captured_ground(folder, sources):
+    """Use exact native baked pixels instead of the historical offline approximation."""
+    folder=folder.resolve()
+    manifest=json.loads((folder/'manifest.json').read_text())
+    if manifest.get('encoding')!='RGBA8_sRGB' or manifest.get('origin')!='bottom-left' or manifest.get('size')!=4096:
+        raise ValueError('Unexpected native ground capture contract.')
+    if not sources or manifest.get('paint_sources')!=sources:
+        raise ValueError('Native ground and Core layout have different source versions. Export matching geometry/capture.')
+    neutral={'Tint':{'X':1,'Y':1,'Z':1},'Brightness':0,'Saturation':1,
+             'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
+    materials={}
+    for name in ('ground','lanes','valley'):
+        path=folder/(name+'.png')
+        if hashlib.sha256(path.read_bytes()).hexdigest()!=manifest['files'][path.name]['sha256']:
+            raise ValueError('Changed native captured paint: '+name)
+        image=bpy.data.images.load(str(path),check_existing=True)
+        if tuple(image.size)!=(4096,4096):raise ValueError('Wrong native paint size: '+name)
+        image.colorspace_settings.name='sRGB'
+        # Paint already includes world stains, contact, wear and native input grade.
+        # Applying the preview's vertex shade or extra emission tint would grade it twice.
+        materials[name]=painted_ground('Captured native '+name,image,neutral)
+        texture=next(n for n in materials[name].node_tree.nodes if n.type=='TEX_IMAGE')
+        texture.extension='EXTEND'
+    return materials
+
+
 def quiet_building_materials(objects):
     # Composition preview only. DD2 still establishes native lighting/material acceptance.
     for material in {m for obj in objects for m in obj.data.materials if m}:
@@ -244,13 +270,15 @@ def main(args):
     grass=bpy.data.images.load(str(out/'grass_dry.png'))
     tufts=bpy.data.images.load(str(out/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
-    earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
+    native=captured_ground(args.native_ground,data.get('PaintSources')) if args.native_ground else None
+    if native:earth,paving=native['ground'],native['lanes']
+    else:earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
     rock=painted_ground('Hamlet cliff paint',cliff,data['CliffPaint'] if private_cliff.exists() else palette['Rock'],True)
     emission=next(n for n in rock.node_tree.nodes if n.type=='EMISSION')
     emission.inputs['Strength'].default_value=.68
     paving=paving or painted_ground('Native foundation paving',texture,palette['Paving'])
     stone=painted_ground('Native foundation retaining courses',wall,palette['Masonry'])
-    for material,factor in [(paving,.75),(stone,.84)]:
+    for material,factor in ([(stone,.84)] if native else [(paving,.75),(stone,.84)]):
         next(n for n in material.node_tree.nodes if n.type=='EMISSION').inputs['Strength'].default_value=factor
     terrain=data['Terrain']
     surface('Core cliff landscape',terrain,[earth,rock],[terrain['Ground'],terrain['Rock']],terrain['Shade'])
@@ -258,7 +286,7 @@ def main(args):
     surface('Core lanes and stairs',terrain['Paving'],[paving])
     surface('Core retaining courses',terrain['Masonry'],[stone])
     surface('Core stair flights and landings',terrain['Stairs'],[stone])
-    surface('Core surrounding valley',terrain['Surroundings'],[world_valley(soil,texture,grass,cliff,palette,data['Valley'])])
+    surface('Core surrounding valley',terrain['Surroundings'],[native['valley'] if native else world_valley(soil,texture,grass,cliff,palette,data['Valley'])])
     surface('Core native grass tufts',data['Vegetation'],[painted_ground('Native grass silhouettes',tufts,palette['GrassTuft'],cutout=True)])
     buildings={}
     for site in data['Sites']:
@@ -269,7 +297,7 @@ def main(args):
         bpy.ops.import_scene.gltf(filepath=str(path))
         objects=[obj for obj in bpy.data.objects if obj not in before and obj.type=='MESH']
         masonry=out/'hamlet-masonry-v17.png'
-        if masonry.exists():
+        if masonry.exists() and not native:
             image=bpy.data.images.load(str(masonry),check_existing=True)
             for obj in objects:
                 for slot in obj.material_slots:
@@ -362,6 +390,7 @@ if __name__=='__main__':
     parser.add_argument('--models',type=Path,required=True)
     parser.add_argument('--kit',type=Path,required=True)
     parser.add_argument('--layout',type=Path,required=True)
+    parser.add_argument('--native-ground',type=Path,help='Converted private native_paint_capture output; exact ground, lane and valley pixels.')
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--width',type=int,default=1920)
     parser.add_argument('--samples',type=int,default=16)

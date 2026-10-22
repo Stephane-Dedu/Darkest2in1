@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using DarkestDungeon3.Core.Presentation;
 
 if (args.Length<1 || args.Length>2 || (args.Length==2 && args[1]!="--full-cliff-tile"))
@@ -13,6 +15,9 @@ var terrain=HamletTerrain.Build(fullCliffTile:fullCliffTile);
 File.WriteAllText(path,JsonSerializer.Serialize(new
 {
     Notice="Private offline composition geometry; native lighting and UI acceptance still need DD2.",
+    PaintSources=Directory.EnumerateFiles(Path.Combine(repo,"src/DarkestDungeon3.Core/Presentation"),"Hamlet*.cs")
+        .OrderBy(p=>p).ToDictionary(p=>Path.GetRelativePath(repo,p).Replace('\\','/'),
+            p=>Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(File.ReadAllText(p).Replace("\r\n","\n")))).ToLowerInvariant()),
     HamletLayout.Sites,HamletLayout.Routes,HamletLayout.CameraTarget,HamletLayout.CameraOffset,HamletLayout.FieldOfView,
     EstateSky=new { HamletVista.SkyDepth,HamletVista.SkyWidth,HamletVista.SkyBottom,HamletVista.SkyTop },
     CliffPaint=HamletTownscape.CliffPaint,

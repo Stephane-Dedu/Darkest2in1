@@ -722,3 +722,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round292 native double-peak Tangle tent, original3420 triangles/UVs/2048 paint/uniform proportions,21 coarse pieces removed; eight original equipment/fire meshes and nine other raw+baked services exact. Horizontal footprint retained, taller silhouette; small study rejected, final8.7m width accepted. Four views/audits/native lifecycle/fresh overview/buffer PASS,254 renderers. Runtime291 unchanged, game closed. Evidence hamlet-camp-v47.
 
 - [x] Round293 paved approaches retain existing contact shade/doorway glow, exact earth/valley paint and road margins; unchanged geometry/palette/art. Two regressions reproduce old losses; Release/1287 Core/native lifecycle/fresh overview/buffer PASS,254 renderers. Runtime293, unchanged camp292 package, game closed. Evidence hamlet-paving-light-v48. Directional cast shadows remain separate.
+
+
+- [x] Round294 offline native-ground contract: three captured4096 maps, decoded pixels/row origin exact, source/hash guards, no duplicate grade/tint, unchanged Core geometry and reviewed model paint. Native capture/packed Blender render inspected; private fixture removed, normal293/camp292 restored exact, game closed. Evidence hamlet-native-paint-v49. Offline building lighting remains approximate.

@@ -8608,3 +8608,29 @@ estates untouched, no estate selected/saved. Game CLOSED. Evidence hamlet-paving
 Runtime293 and unchanged camp292 model package installed, game CLOSED. No pending
 restore. Fresh usage/baseline next294. Wider directional lighting, scene dressing
 and whole-town native DD2 production-art parity remain open.
+
+
+## Round294 - native ground in the art preview (2026-10-22)
+
+Adds private capture/conversion and town_preview --native-ground. Three actual
+4096px worker-result maps, exact decoded RGBA/row origin, sRGB/clamp and no repeated
+preview grade/tint. Core export records Hamlet source hashes; loader rejects stale
+sources/altered paint. Reviewed model paints no longer receive the legacy override
+in native-ground mode. Core exported geometry/layout exact against accepted291.
+Packed Blender render inspected. Native overview/capture from frozen HEAD9ea0a20
+plus one PRIVATE file-only capture injection compiled successfully. The fixture
+was closed and normal293 restored byte-exact before conversion/offline work.
+
+No production runtime source/art change. All normal binaries/assets/configs/
+estate2/native profiles/foreign WIP exact; protected estates untouched, no estate
+selected/saved. Game CLOSED, no pending restore, capture fixture NOT installed.
+Native lifecycle evidence remains293; no redundant full suite/fixture rerun for
+this tool-only change. Ground-map/source/hash/no-double-grade guards pass.
+Evidence hamlet-native-paint-v49. Offline authored buildings still look much darker
+than native DD2; retain that limit rather than treating the render as final art.
+
+## Status round294
+
+Native-ground art-review tool saved; normal293/camp292 art installed, game CLOSED.
+Fresh usage/baseline next295: align service material preview with actual native
+palette/tints/contact. Wider lighting and native production-art parity remain open.
