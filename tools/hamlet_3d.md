@@ -1140,3 +1140,38 @@ estate2/other private assets and foreign tracked work retained, protected estate
 untouched. No estate selected/saved. Saved/controller/full-frame-time/long-session
 acceptance and wider lighting/art quality remain open. New canvas is native art;
 the older authored wood on door/body still needs review against it.
+
+
+Round303 accepted Nomad joinery: local-art/ui-overhaul/hamlet-caravan-joinery-v58/CONTINUE.md.
+Original DD2 Assistance2048 paint replaces the old noisy wood on109 authored
+members. Seven finite native plank/beam samples follow the actual member grain
+and face aspect; wheel rims unwrap once. Existing302 oak material/tint reused,
+so no new paint/material and one fewer renderer. All175 meshes/geometry, canopy,
+native parts, other UVs, bounds/normalization and nine raw/baked services retained.
+Nomad remains5635 triangles. Matching contact and guarded ground field rebaked.
+Four views/geometry/paint/finite-UV/placement/package audits and native full unsaved
+fixture/fresh1920 overview/buffer PASS.256 renderers,0 reallocations/5.025sec.
+Runtime298 unchanged, game CLOSED. No generation or pending restore. Source
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched shadow field.
+Fresh usage/baseline next304; bulky output on D:. Preserve interactive colour harmony.
+
+All retained material factors and decoded paintings are exact. The old Workshop
+worn oak material becomes unused; new joinery shares the native canopy oak's
+existing material and original atlas. Seven finite source rectangles are selected
+from complete native plank/beam paint, fitted to face aspect without atlas tiling.
+Long side boards vary their samples to avoid repeating identical damage. The first
+study reused one long sill and looked repetitive; it was never installed. Caps
+stay inside finite samples. All109 changed members have UV triangles within one
+recorded original source rectangle, without bleed into adjacent atlas islands.
+Original175 geometries and other66 UVs match within4.77e-7. Core source bounds and
+normalization scale are exact; placed positions match within9.54e-7m. The302 cloth,
+hoops, fitted end caps and supports, old native props and nine other services stay.
+Contact bake preserves the raw buffer prefix and the source-matched1024 field was
+refreshed. No C# changes or test-suite rerun; latest1294 Core PASS is from298.
+Native fixture covers ten services, Escape/camera/reset/release/reload, return,
+Embark-cache, resize, keyboard and still camera/smoke. Fresh1920 town inspected.
+Native profiles/configs/estate2/other private assets and foreign tracked work are
+retained. No estate selected/saved; protected estates untouched. The original DD1
+eye crest remains; evaluate a DD2-style replacement separately. Wider architecture,
+terrain dressing, facade/alpha/tree/background lighting, saved/controller/full
+frame-time/long-session checks and production-art parity remain open.

@@ -598,3 +598,14 @@ and bury brace ends within existing hoop thickness to preserve the exact bounds.
 Package only the revised Nomad, bake contact and refresh the matching shadow field.
 Other nine raw/baked services stay exact. Private final source/evidence is
 hamlet-caravan-canopy-v57/art/final; earlier root studies were never installed.
+
+
+`caravan_joinery.py --source <verified raw library> --out <new private library>
+--kit <native kit>` replaces the old wood painting on109 authored Nomad members.
+It reuses the302 native Assistance atlas/oak material with finite aspect-fitted
+samples along each member's grain; torus rims unwrap once. Seven original plank/
+beam samples vary long boards. No raster edits, added geometry or material.
+All175 meshes, the canopy and native parts stay intact. Inspect all four views,
+audit finite UVs and preserve exact bounds/normalization. Package only the Nomad,
+rebake contact and refresh the matching shadow field. Private source/evidence:
+hamlet-caravan-joinery-v58/art/models-reviewed. The first study is superseded.

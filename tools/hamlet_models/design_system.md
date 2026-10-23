@@ -442,3 +442,19 @@ envelope. The awning uses the same native painting with a finite clean crop.
 Retain the entrance, lamps, shop windows and original bounds. Review in the
 actual town and refresh matching contact/shadow data before acceptance. Older
 authored body wood and wider lighting remain separate quality gaps.
+
+
+## Native timber grain at member scale, v58
+
+Use native plank and beam paint where its broad facets and ink edges survive
+the actual game camera. Sample individual members rather than whole sheets of
+unrelated boards. Match the sample aspect to the physical face and follow the
+long grain through the member's local transform. Keep end faces inside finite
+samples. Vary source rectangles on adjacent long boards so damage does not form
+a repeating pattern. Wheel rims need a cylindrical unwrap with a finite seam.
+
+The Nomad's body, doorway, stair and wheel joinery now share its canopy's native
+oak material and unchanged tint. Original2048 pixels are retained. This removes
+the previous noisy painting and one material batch while preserving geometry,
+placement and the common service palette. The original DD1 eye crest remains
+a separate art gap; this pass does not claim the whole town has native art parity.

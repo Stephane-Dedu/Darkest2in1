@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round303 accepted Nomad joinery: local-art/ui-overhaul/hamlet-caravan-joinery-v58/CONTINUE.md.
+Original DD2 Assistance2048 paint replaces the old noisy wood on109 authored
+members. Seven finite native plank/beam samples follow the actual member grain
+and face aspect; wheel rims unwrap once. Existing302 oak material/tint reused,
+so no new paint/material and one fewer renderer. All175 meshes/geometry, canopy,
+native parts, other UVs, bounds/normalization and nine raw/baked services retained.
+Nomad remains5635 triangles. Matching contact and guarded ground field rebaked.
+Four views/geometry/paint/finite-UV/placement/package audits and native full unsaved
+fixture/fresh1920 overview/buffer PASS.256 renderers,0 reallocations/5.025sec.
+Runtime298 unchanged, game CLOSED. No generation or pending restore. Source
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched shadow field.
+Fresh usage/baseline next304; bulky output on D:. Preserve interactive colour harmony.
+
 Round302 accepted Nomad canopy: local-art/ui-overhaul/hamlet-caravan-canopy-v57/CONTINUE.md.
 Native DD2 Assistance upper canvas and four oak hoops replace the simple barrel
 shell and thin ribs. Original 2048px atlas, selected face UVs, uniform proportions
