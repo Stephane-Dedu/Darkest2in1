@@ -506,3 +506,16 @@ physical ridge detail. A bright isolated clay study can clash with the town:
 check beside native Tavern paint, muted Abbey slate and cream plaster at normal
 zoom. Keep Guild red clay, armory slate and their readable silhouette, with muted
 families rather than identical colours on every interactive building.
+
+
+## Native timber chosen for its role, v63
+
+Share the oak family across service framing, eaves and fitted joinery, then choose
+source paint for the shape. Quiet cart-board interiors suit small broad members;
+continuous sills suit long beams. A whole doorway needs opening-board paint: a
+quiet cart sample can be blank at that scale and a broken plank can look like a
+hole. Preserve physical joints/iron, follow local grain and fit source aspect.
+Keep original pixels; compensate different source values with explicit material
+factors and judge colour harmony in native DD2. Inspect membership before replacing
+an old material: leather grips can share a material named oak. Retain them until
+their own surface can be reviewed.

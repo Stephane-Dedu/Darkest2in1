@@ -649,3 +649,14 @@ dormer flashing/ironwork. Muted clay and Abbey slate factors require native colo
 review. Keep other paint/geometry, source envelope and nine services; audit every
 material primitive, finite UVs, contact and matching field. Evidence v62/models-reviewed;
 the coarse and bright-clay studies are superseded. No generated or edited pixels.
+
+
+`guild_native_oak.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits original Assistance2048 paint to163 framing/eave members
+and native inn opening-board paint to one fitted doorway. Shared frame oak factor;
+separate source-compensating door factor. Finite aspect-fitted samples, no pixels
+edited/upscaled. Keep all624 geometries, roof/native frontage/iron and two leather
+grips; audit164 UV/material bindings, both decoded paint sources, source envelope,
+all material primitives, contact and matching field. Evidence
+hamlet-guild-joinery-v63/art/models-reviewed. Flat-door/cart-stripe studies are
+superseded. Review native town appearance; a material called oak can be leather.

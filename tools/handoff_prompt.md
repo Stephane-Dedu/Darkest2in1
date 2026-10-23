@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round308 accepted native Guild timber: local-art/ui-overhaul/hamlet-guild-joinery-v63/CONTINUE.md.
+Original DD2 Assistance2048 paint fits163 framing/eave members with the shared
+Nomad/Abbey oak factor. Native inn opening boards fit the one recessed doorway,
+with a separate factor for its darker source. Five finite aspect-fitted samples
+follow grain; both original atlases stay intact. Two older wood materials become
+two native ones. All624 meshes/12441 triangles,460 other UV sets, roofs, plaster,
+stone, iron/native frontage and two leather grips retained. Nine raw/baked services
+and source bounds/normalization exact. Four views/geometry/paint/finite-UV/placement/
+package audits, native full unsaved fixture/fresh1920 overview and0 buffer
+reallocations/5.017sec PASS.254 renderers unchanged. Contact and matching
+1024 field rebaked; runtime298 unchanged, DD2 CLOSED, no pending restore.
+No generation or native raster edits. Raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ plus art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next309; retain shared muted service colours. Heavy data D:.
+
 Round307 accepted native Guild roof paint: local-art/ui-overhaul/hamlet-guild-roof-v62/CONTINUE.md.
 Original DD2 inn2048 paint fits the hall, two dormers and armory. Two different
 intact sections provide denser courses on the tall hall; other slopes use finite

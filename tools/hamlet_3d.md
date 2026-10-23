@@ -1330,3 +1330,47 @@ plugin/private assets and foreign tracked work retained. No C# change or test-su
 rerun; latest1294 Core PASS remains from298. Other timber/roof details, terrain
 dressing, facade/alpha/tree/background lighting, saved/controller/full frame-time/
 long-session acceptance and whole-town native production-art parity remain open.
+
+
+Round308 accepted native Guild timber: local-art/ui-overhaul/hamlet-guild-joinery-v63/CONTINUE.md.
+Original DD2 Assistance2048 paint fits163 framing/eave members with the shared
+Nomad/Abbey oak factor. Native inn opening boards fit the one recessed doorway,
+with a separate factor for its darker source. Five finite aspect-fitted samples
+follow grain; both original atlases stay intact. Two older wood materials become
+two native ones. All624 meshes/12441 triangles,460 other UV sets, roofs, plaster,
+stone, iron/native frontage and two leather grips retained. Nine raw/baked services
+and source bounds/normalization exact. Four views/geometry/paint/finite-UV/placement/
+package audits, native full unsaved fixture/fresh1920 overview and0 buffer
+reallocations/5.017sec PASS.254 renderers unchanged. Contact and matching
+1024 field rebaked; runtime298 unchanged, DD2 CLOSED, no pending restore.
+No generation or native raster edits. Raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ plus art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next309; retain shared muted service colours. Heavy data D:.
+
+Material membership was inspected before replacement.90 continuous painted-timber
+members and74 Workshop worn oak v21.001 members form the building joinery; two
+other v21 members are leather grips and are deliberately retained. The frame/eaves
+use original Assistance2048 paint and.45/.38/.28 factor, with quiet cart-board
+samples on broad faces and continuous sill paint on long beams. Native grain
+follows each member's local axes and physical face aspect, without atlas repeat.
+The first cart-board doorway study was too plain. A broader cart-plank sample
+made a black stripe that read as a gap, so both studies are superseded. The final
+door uses a47x78 field of native inn opening-board paint at385/1855/432/1933;
+the original2048 atlas stays intact. This is not a2048px doorway painting or an
+upscale. Factor.9/.8/.65 compensates its darker source; existing physical plank
+joints, straps and rings stay. The diagnostic crop/grid is not game art.
+Both native source SHAs, decoded RGBA pixels, factors and164 material bindings
+are proved separately. All other paintings/factors, including leather grips and
+accepted307 roof colours, remain exact.164 UV maps change; all624 geometries and
+460 other UV sets remain. Raw geometry/retained UVs match within.477um; Core source
+bounds/normalization exact and placed geometry within1.907um. All material
+primitives are grouped per node for proof. Contact preserves raw buffer prefix;
+guarded1024 field matches current source hashes despite unchanged geometry.
+Full unsaved native fixture covers ten services, Escape, pan/zoom/reset, release,
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard and still
+camera/smoke. Fresh1920 town inspected beside Abbey/Nomad/Tavern. No estate
+selected/saved; protected estates untouched. Native profiles/configs/estate2,
+plugin/private assets and foreign tracked work retained. No C# change or test-suite
+rerun; latest1294 Core PASS remains from298. Other roof/banner details, terrain
+dressing, facade/alpha/tree/background lighting, saved/controller/full frame-time/
+long-session acceptance and whole-town native production-art parity remain open.
