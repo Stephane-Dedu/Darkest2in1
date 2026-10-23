@@ -650,3 +650,14 @@ Compare matched views with Core's real palette and light bands before native QA.
 The three-band result can give eaves and frames depth while retaining the town's
 colour family. It has limited spatial precision; inspect a bounded building before
 applying it elsewhere. Geometry and paint retention alone do not prove beauty.
+
+
+## Compare each service before sharing a treatment, v77
+
+The Abbey and Guild share the light direction and muted service colour family,
+but visibility must come from each building's architecture. Keep fitted stone,
+slate, oak and authored window colours when adding depth. Judge the existing
+palette's three bands on the actual town camera as well as isolated model views.
+Accept local recess separation without claiming a new painting or physically
+precise shadow map. Stop shade tuning after a useful bounded pass, then review
+the remaining architecture and material scale against native DD2 references.

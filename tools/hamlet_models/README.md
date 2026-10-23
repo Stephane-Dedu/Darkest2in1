@@ -781,3 +781,14 @@ actual band renders/native views. Acceptance currently covers Guild only. The
 three-band result is stylised self-shadowing; it does not create sharp moving
 boundaries or include unselected neighbor/terrain/tree casters. Source-output
 nesting is rejected. Keep the ground field if geometry/model identities retain.
+
+
+Abbey facade visibility is also accepted after four matched Core-band views and
+actual town review. Use `--models abbey` with a fresh contact-baked Abbey and the
+matching complete Core layout/review export. Retain the accepted Guild baked
+files when changing another service. Accepted complete package evidence is
+hamlet-abbey-facade-light-v77/art/HamletModels-reviewed; raw authoring remains
+hamlet-smithy-firebrick-v74/art/models-reviewed. Rebuilding Abbey or Guild from
+raw art requires its local contact bake followed by its directional bake. Do
+not silently discard either accepted visibility layer or repeatedly append a
+bake onto the same service. No new material or runtime API is needed.

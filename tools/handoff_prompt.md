@@ -1,5 +1,21 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round320 accepted Abbey facade visibility: local-art/ui-overhaul/hamlet-abbey-facade-light-v77/CONTINUE.md.
+The Abbey uses the same directional visibility treatment as the Guild, giving
+its recessed lancets, buttresses and eaves more separation through the existing
+material bands. The accepted detailed limestone, native slate, oak, amber panes
+and shared muted service palette remain intact. All 757 mesh members, 777 Core
+primitives and 18704 triangles retain their positions, normals, UVs, materials,
+bindings, source bounds and scale. Original buffer bytes remain as a prefix.
+Core review predicts 1724 triangles on 393 members moving to a darker band;
+2684 authored light/alpha triangles retain their bands. Nine other baked services,
+including Guild319, and ground field318 remain byte-exact. Four matched Core-band
+views, retention/reproduction/path tests, full unsaved 1920 fixture, fresh town
+and zero buffer reallocations over 5.019 seconds passed. 255 renderers and
+runtime298 remain unchanged. DD2 CLOSED, no pending restore. Complete accepted
+art/HamletModels-reviewed/ installed. Raw authoring library remains accepted317.
+Fresh usage/baseline next321; heavy data on D:.
+
 Round319 accepted Guild facade visibility: local-art/ui-overhaul/hamlet-guild-facade-light-v76/CONTINUE.md.
 The Guild's existing light bands now include directional self-shadow visibility,
 giving eaves, dormers and fitted frames more separation. Its muted ivory/clay/oak

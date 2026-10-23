@@ -1839,3 +1839,40 @@ build or new Core-suite run. Last1294 Core PASS remains298. Planar averaging and
 three bands do not produce sharp moving wall-shadow boundaries. Neighbor/terrain/
 tree/alpha casting, other service facades and broader architecture/material/native
 production-art/performance parity remain open. This pass is bounded to Guild.
+
+
+Round320 accepted Abbey facade visibility: local-art/ui-overhaul/hamlet-abbey-facade-light-v77/CONTINUE.md.
+The Abbey uses the same directional visibility treatment as the Guild, giving
+its recessed lancets, buttresses and eaves more separation through the existing
+material bands. The accepted detailed limestone, native slate, oak, amber panes
+and shared muted service palette remain intact. All 757 mesh members, 777 Core
+primitives and 18704 triangles retain their positions, normals, UVs, materials,
+bindings, source bounds and scale. Original buffer bytes remain as a prefix.
+Core review predicts 1724 triangles on 393 members moving to a darker band;
+2684 authored light/alpha triangles retain their bands. Nine other baked services,
+including Guild319, and ground field318 remain byte-exact. Four matched Core-band
+views, retention/reproduction/path tests, full unsaved 1920 fixture, fresh town
+and zero buffer reallocations over 5.019 seconds passed. 255 renderers and
+runtime298 remain unchanged. DD2 CLOSED, no pending restore. Complete accepted
+art/HamletModels-reviewed/ installed. Raw authoring library remains accepted317.
+Fresh usage/baseline next321; heavy data on D:.
+
+The tool reads Core world geometry/normals and the shared (-.35,.75,-.55) key.
+Seven area samples and four sun rays measure Abbey self-occlusion. Connected
+flat faces share area-weighted visibility to avoid diagonal patches, combined
+conservatively with retained contact shade. Existing lights and alpha parts are
+preserved. Only Abbey's glTF/bin and the package manifest differ. No new art,
+paint edits, runtime code, materials or renderer batches were introduced. The
+complete package reproduces byte-exact from the final public recipe.
+
+Native fixture covers ten service selections/Escape, pan/zoom/reset, release/
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard focus/Enter/
+back and still camera/smoke, followed by a fresh town capture and buffer probe.
+Zero live OS input events; no estate selected/saved. Plugin, config, native
+profiles, estate2 and foreign tracked work preserved. Frozen HEAD Core tools
+exported in Release; no gameplay build or new Core-suite run. Last 1294 Core
+PASS remains298. Native acceptance is a modest depth improvement, not complete
+town art parity. Three bands/flat-face averaging limit sharp shadow boundaries;
+neighbor, terrain, tree and alpha casting remain outside this bake. Broader
+service architecture, materials and saved/controller/long-session performance
+acceptance remain open. Return to native architecture/material comparison next.
