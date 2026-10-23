@@ -1,5 +1,22 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round323 accepted Sanitarium facade visibility: local-art/ui-overhaul/hamlet-sanitarium-depth-v80/CONTINUE.md.
+The Sanitarium now uses the existing directional visibility treatment accepted
+on the Guild and Abbey. It adds modest separation beneath projecting floors,
+eaves and porch details while preserving the owner's new322 lime painting,
+native slate, oak, green medical glass and shared muted service palette. All
+444 mesh members,456 Core primitives and15469 triangles retain positions,
+normals, UVs, material definitions/bindings, source bounds and scale. Original
+buffer bytes remain as a prefix.1498 triangles on158 members move to a darker
+Core band;63 authored light/alpha triangles retain their bands. Nine other
+baked services, including Guild319/Abbey320 visibility and Smithy321 UVs, every
+paint file and ground field318 remain byte-exact. Four matched Core-band views,
+retention/reproduction/path checks, full unsaved1920 fixture, fresh town capture
+and zero buffer reallocations over 5.020 seconds pass.255 renderers and
+runtime298 remain. DD2 CLOSED, no pending restore. Complete accepted baked
+art/HamletModels-reviewed/ installed. Raw authoring remains accepted322 in
+hamlet-sanitarium-finish-v79/art/models-reviewed. Fresh usage/baseline next324.
+
 Round322 accepted Sanitarium lime detail: local-art/ui-overhaul/hamlet-sanitarium-finish-v79/CONTINUE.md.
 The owner's feedback reopened the broad301 plaster finish. A reviewed1774x887
 detail edit now adds chipped layered lime, smaller wear, rain streaks, dirty damp

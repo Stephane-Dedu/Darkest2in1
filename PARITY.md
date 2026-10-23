@@ -784,3 +784,18 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round321 smithy roof underlay mapping:128 main/12 dormer collapsed UV triangles now have finite paint area, removing stretched edge stripes. All199 meshes/17590 triangles,17450 other triangle UVs, physical reed courses,24 materials/paint/bindings and nine raw/baked services retained including Guild319/Abbey320. All199 contact-band histograms/bounds/scale exact; placed error under1 micrometre; matched field parameters/pixels exact with refreshed source identity. Four Core-band views/raw geometry/UV/paint/material/Core/contact/field audits/full unsaved1920 fixture/fresh town/zero-buffer PASS.255 renderers/runtime298 unchanged, DD2 CLOSED. Evidence hamlet-smithy-reed-v78. No new art; broader architecture/materials/native parity remain open.
 
 - [x] Round322 Sanitarium lime detail: owner reopened301's broad finish; new reviewed1774x887 edit adds layered chips/weathering/damp/exposed masonry on four surfaces. Three paints change;444 meshes/15469 triangles/every UV/24 material factors/native paints/bindings/palette classes and nine raw/baked services retain including Guild319/Abbey320/Smithy321. All444 band histograms/bounds/scale/placement and field parameters/pixels exact; source identity refreshed. Four Core-band views/all geometry/UV/paint/material/palette/Core/contact/field audits/full unsaved1920 fixture/fresh town/zero-buffer PASS.255 renderers/runtime298 unchanged, DD2 CLOSED. Evidence hamlet-sanitarium-finish-v79 with generated source/full prompt/provenance. Wider native-art/performance parity remains open.
+
+
+- [x] Round323 Sanitarium self-occlusion uses the Guild/Abbey's existing directional
+  visibility treatment. Four Core-band views and native1920 unsaved fixture/fresh
+  town pass;255 renderers/zero buffer reallocations.444 members/456 Core primitives/
+  15469 triangles, normals, UVs, material definitions,322 lime/native paint and
+  palette retain.1498 triangles on158 members move to a darker band. Nine other
+  services, Guild319/Abbey320/Smithy321, all paint and ground field318 are exact.
+  Existing public recipe reproduces the whole package; no new gameplay/runtime
+  build or Core suite. Last1294 Core PASS298. DD2 CLOSED, no pending restore.
+  Private evidence: `local-art/ui-overhaul/hamlet-sanitarium-depth-v80/CONTINUE.md`.
+- [?] Broader Hamlet material/architecture quality remains open.323 model views
+  suggest the Sanitarium cap's native shingle scale merits comparison with its
+  finer Academic-house roof. Inspect the existing native field and unwrap first;
+  this is a candidate, not authority to replace good slate or add noise.

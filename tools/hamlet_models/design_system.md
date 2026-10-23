@@ -683,3 +683,13 @@ Compare with native paint and the other services through actual Core grading.
 Keep muted grey lime related to the town's stone, dark oak and slate; green glass
 and the medical cross carry identity. Existing good UVs and native art need no
 change when a new wall painting solves the specific visual gap.
+
+
+## Shared light, retained medical identity, v80
+
+The Sanitarium can share the Abbey/Guild light treatment without recolouring its
+lime or medical glass. Keep the updated wall painting and native architecture;
+measure visibility from its own projecting floors, porch and roof. Preserve
+window/lamp and alpha bands. Compare modest recess depth at the native town
+camera, and keep the improvement's limited precision explicit. A shading pass
+does not solve coarse material scale elsewhere on the building.

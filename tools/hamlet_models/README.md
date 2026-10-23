@@ -817,3 +817,14 @@ only Sanitarium and merge into the current complete baked pack to preserve
 Guild/Abbey visibility and Smithy UVs, then refresh the matching field identity.
 Private evidence hamlet-sanitarium-finish-v79/art/models-reviewed, with source
 painting/full prompt/provenance alongside. No generated or extracted art in Git.
+
+
+Sanitarium facade visibility is accepted on the detailed322 lime model. Use
+`bake_facade_light.py --models sanitarium` with matching Core layout/review and
+a fresh contact-baked Sanitarium, then retain other services' accepted files.
+The complete323 baked library is hamlet-sanitarium-depth-v80/art/HamletModels-reviewed;
+raw authoring remains hamlet-sanitarium-finish-v79/art/models-reviewed. Preserve
+Guild319/Abbey320 directional layers, Smithy321 UVs and source-matched field318.
+All444 members/456 Core primitives/15469 triangles, paints and material factors
+retain. Inspect all four Core-band views and the actual town before accepting a
+rebake. Do not append a second bake onto accepted visibility.

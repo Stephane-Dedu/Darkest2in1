@@ -1960,3 +1960,47 @@ An initial full-drive failure occurred before launch/installation. The owner
 then paused an owned native check for storage cleanup; baseline321 was restored.
 After approved cache cleanup, the final independent native fixture and fresh
 town capture passed. No project art was deleted to make room.
+
+
+Round323 accepted Sanitarium facade visibility: local-art/ui-overhaul/hamlet-sanitarium-depth-v80/CONTINUE.md.
+The Sanitarium now uses the existing directional visibility treatment accepted
+on the Guild and Abbey. It adds modest separation beneath projecting floors,
+eaves and porch details while preserving the owner's new322 lime painting,
+native slate, oak, green medical glass and shared muted service palette. All
+444 mesh members,456 Core primitives and15469 triangles retain positions,
+normals, UVs, material definitions/bindings, source bounds and scale. Original
+buffer bytes remain as a prefix.1498 triangles on158 members move to a darker
+Core band;63 authored light/alpha triangles retain their bands. Nine other
+baked services, including Guild319/Abbey320 visibility and Smithy321 UVs, every
+paint file and ground field318 remain byte-exact. Four matched Core-band views,
+retention/reproduction/path checks, full unsaved1920 fixture, fresh town capture
+and zero buffer reallocations over 5.020 seconds pass.255 renderers and
+runtime298 remain. DD2 CLOSED, no pending restore. Complete accepted baked
+art/HamletModels-reviewed/ installed. Raw authoring remains accepted322 in
+hamlet-sanitarium-finish-v79/art/models-reviewed. Fresh usage/baseline next324.
+
+The tool reads Core world geometry/normals and the shared (-.35,.75,-.55) key.
+Seven area samples/four sun rays measure Sanitarium self-occlusion; connected
+flat faces share area-weighted visibility to avoid diagonal patches. Existing
+contact shade, lights and alpha parts are preserved conservatively. Only the
+Sanitarium glTF/bin and complete manifest differ. The final recipe reproduces
+the whole package byte-exact; nested source output is rejected before copying.
+No new art, palette change, geometry, runtime code or renderer batch is added.
+
+Native fixture covers ten service selections/Escape, pan/zoom/reset, resource
+release/reload/re-entry, Embark park/cache/resume, resize/restore, keyboard focus/
+Enter/back and still camera/smoke, followed by fresh town and buffer evidence.
+Zero live OS input events; no estate selected or saved. Plugin/config/native
+profiles/estate2 and concurrent tracked work are preserved. Frozen HEAD0199d6c
+Core tools export in Release. No gameplay build or new Core suite; last1294
+Core PASS remains298. This is a bounded depth improvement, not complete native
+art parity. Three bands and flat-face averaging limit shadow precision; neighbor,
+terrain, tree, alpha and dynamic-light casting remain outside this bake.
+
+The tower cap's native shingles still read broad compared with the finer native
+Academic-house roof. Fresh323 front/hero/side views identify this as a possible
+next scale comparison. Inspect current native source rectangle and unwrap before
+repainting or enlarging another atlas. Do not automatically redo accepted slate
+or add noise. Broader architecture/material quality and saved/controller/long-
+session performance acceptance stay open. New heavy artifacts remain on D:;
+no extra cleanup or migration was performed after the approved cache deletion.
