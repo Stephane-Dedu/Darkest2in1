@@ -1104,3 +1104,39 @@ Embark-cache/return, resize/keyboard/still camera/smoke. Fresh1920 view inspecte
 Native profiles/configs/estate2/other private assets and foreign tracked work
 retained. No estate selected/saved; protected estates untouched. Wider architecture,
 terrain dressing, lighting and saved/controller/long-session acceptance remain.
+
+
+Round302 accepted Nomad canopy: local-art/ui-overhaul/hamlet-caravan-canopy-v57/CONTINUE.md.
+Native DD2 Assistance upper canvas and four oak hoops replace the simple barrel
+shell and thin ribs. Original 2048px atlas, selected face UVs, uniform proportions
+and winding retained; explicit muted plum/oak material tints. Native paint also
+replaces the old awning grain. Fitted end panels, eight hoop seats and two eye-sign
+brackets close/support the new roof. Door, crest, lamps and living body retained.
+158 old meshes retained, 55 roof/rib/end pieces replaced; 5635 triangles, 64 fewer.
+Exact source bounds/normalization and nine other raw/baked models retained.
+Final raw art/final/models-final/; baked art/final/HamletModels-reviewed/ plus
+matched shadow field. Four views/geometry/paint/native face/package audits and
+native full unsaved fixture/fresh1920 overview/buffer PASS. 257 renderers, one more;
+zero buffer reallocations over 5.031 sec. Runtime298 unchanged, game CLOSED.
+No generation, no pending restore. Fresh usage/baseline next303. Bulky output D:.
+
+Native cloth uses 144 original upper faces; the four upper hoop parts add 318.
+Hanging side curtains are excluded to retain shop windows and the existing body.
+All selected source positions/UVs match within 2.65e-7; original retained geometry/
+UVs within 4.77e-7. The retained sagging awning alone intentionally changes UVs.
+New end panels use the same native oak atlas; no decoded paint pixels changed.
+All other retained material factors/paintings are exact. Original roof studies
+were too bright and exposed floating sign posts. Final muted factors and ten
+seated braces pass all-side review. One early bound guard caught protruding brace
+bevels; final braces seat inside the end hoop thickness and bounds are exact.
+Core source bounds/scale match exactly and all retained world positions within
+2e-6m. Renderer world AABBs vary with the revised roof/material grouping; this
+does not change the model's normalization or the retained building placement.
+Contact bake retains raw buffer prefix; source-matched field rebaked. No C#
+change or test-suite rerun; latest runtime Core suite1294 PASS remains from298.
+Native fixture covers ten services, Escape/camera/reset/release/reload, return,
+Embark-cache, resize, keyboard and still camera/smoke. Native profiles/configs/
+estate2/other private assets and foreign tracked work retained, protected estates
+untouched. No estate selected/saved. Saved/controller/full-frame-time/long-session
+acceptance and wider lighting/art quality remain open. New canvas is native art;
+the older authored wood on door/body still needs review against it.

@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round302 accepted Nomad canopy: local-art/ui-overhaul/hamlet-caravan-canopy-v57/CONTINUE.md.
+Native DD2 Assistance upper canvas and four oak hoops replace the simple barrel
+shell and thin ribs. Original 2048px atlas, selected face UVs, uniform proportions
+and winding retained; explicit muted plum/oak material tints. Native paint also
+replaces the old awning grain. Fitted end panels, eight hoop seats and two eye-sign
+brackets close/support the new roof. Door, crest, lamps and living body retained.
+158 old meshes retained, 55 roof/rib/end pieces replaced; 5635 triangles, 64 fewer.
+Exact source bounds/normalization and nine other raw/baked models retained.
+Final raw art/final/models-final/; baked art/final/HamletModels-reviewed/ plus
+matched shadow field. Four views/geometry/paint/native face/package audits and
+native full unsaved fixture/fresh1920 overview/buffer PASS. 257 renderers, one more;
+zero buffer reallocations over 5.031 sec. Runtime298 unchanged, game CLOSED.
+No generation, no pending restore. Fresh usage/baseline next303. Bulky output D:.
+
 Round301 accepted Sanitarium plaster finish: local-art/ui-overhaul/hamlet-native-plaster-v56/CONTINUE.md.
 One new1774x887 painting references native DD2 Academic-house plaster. Broad value
 facets replace fine scratch noise; restrained cracks/peeling stone fit physical

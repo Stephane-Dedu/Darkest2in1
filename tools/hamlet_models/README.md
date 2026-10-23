@@ -585,3 +585,16 @@ factors and other nine services stay intact. The complete1774x887 generated imag
 prompt, provenance and native evidence are private in hamlet-native-plaster-v56.
 Package/contact/guarded-shadow rebake follow the existing pipeline. Keep older
 native-atlas/grain studies out of the game; accepted raw is art/models-accepted/.
+
+
+`caravan_canvas.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits the native Assistance wagon's upper cloth shell and four
+oak hoops to the Nomad caravan. Original atlas, selected UVs and uniform scale
+stay intact. The hanging side curtains are omitted; the shop body/windows stay.
+Explicit plum/oak factors retain the DD1 colour cue under shared material grading.
+The old awning reuses a finite native cloth rectangle; fitted end caps and ten
+short supports use native oak paint. Check rear views for a floating eye sign,
+and bury brace ends within existing hoop thickness to preserve the exact bounds.
+Package only the revised Nomad, bake contact and refresh the matching shadow field.
+Other nine raw/baked services stay exact. Private final source/evidence is
+hamlet-caravan-canopy-v57/art/final; earlier root studies were never installed.

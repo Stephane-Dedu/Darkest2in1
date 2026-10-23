@@ -424,3 +424,21 @@ Retain the native roof/oak/green glass and existing shared stone material factor
 Keep generated art/provenance separate from extracted native sources. Original
 geometry, unaffected UVs, decoded native paints and matching ground-field guards
 must still pass; this improves plaster finish, not complete production-art parity.
+
+
+## Native canvas with fitted supports, v57
+
+Use actual cloth geometry when a native source has useful folds and seams.
+The Assistance canopy's upper faces fit the Nomad with one rigid rotation and
+uniform scale. Its lower curtains would hide the existing shop and are excluded.
+Keep the original 2048px atlas and UVs. Explicit muted plum and oak material
+factors preserve the caravan's colour cue while using shared cloth/timber grading.
+Retain original pixels and distinguish those factors from native source colours.
+
+Roof replacement includes its supports. Fit wood end panels to the new curved
+profile, seat all four hoops on the living body and support the eye-sign posts.
+Inspect front, side and rear views. Brace bevels must not expand the service
+envelope. The awning uses the same native painting with a finite clean crop.
+Retain the entrance, lamps, shop windows and original bounds. Review in the
+actual town and refresh matching contact/shadow data before acceptance. Older
+authored body wood and wider lighting remain separate quality gaps.
