@@ -531,3 +531,14 @@ porch slopes must read uphill. Native coastal paint can fit Hamlet architecture
 without marine overlays; use an explicit muted slate finish and compare in town.
 Preserve original pixels and physical ridge detail. Add material slots before
 restoring face indices: otherwise Blender can silently erase the cut-edge mask.
+
+
+## Native hanging cloth, v66
+
+Keep cloth and rigid heraldic signs distinct. A native sprite can provide folds,
+torn contour and ropes with more legible brushwork than a stretched legacy crop.
+Preserve full original RGBA/aspect on simple supported planes; retain clear space
+around the service's physical identity crest. Compare actual native town size and
+colour. Ivory cloth with a small muted accent can sit beside warm clay/cool slate
+without another dominant colour. Do not mistake opaque grey atlas surroundings
+for transparency; isolate native faces/UVs before reusing combined props artwork.

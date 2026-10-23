@@ -1421,3 +1421,42 @@ plugin/private assets and foreign tracked work retained. No C# change or test-su
 rerun; latest1294 Core PASS remains from298. Other timber/banner details, terrain
 dressing, facade/alpha/tree/background lighting, saved/controller/full frame-time/
 long-session acceptance and whole-town native production-art parity remain open.
+
+
+Round310 accepted native Guild standards: local-art/ui-overhaul/hamlet-guild-standards-v66/CONTINUE.md.
+Two complete native DD2 Olde Guild Hall banners replace the DD1 cloth crops.
+Original347x572 RGBA, full UVs/alpha/aspect; ivory cloth with muted teal accents
+and explicit.90/.82/.68 factor. Existing rods/physical sword crest remain.
+624 meshes/12373 triangles,68 fewer;622 other geometries/UVs/paints exact.
+Nine raw/baked services and source envelope/normalization retained. Four model
+views/geometry/paint/UV/placement/package/contact/field audits, full unsaved native
+fixture/fresh1920 town view and0 buffer reallocations/5.037sec PASS.
+252 renderers unchanged. Runtime298 unchanged; DD2 CLOSED, no pending restore.
+No generation/raster edits. Accepted raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next311; retain shared service colours. Heavy data D:.
+
+The native cloth retains its painted folds, torn silhouette, ropes and crossbar.
+It hangs at uniform source aspect from the retained rods; no rectangular opaque
+atlas crop or deformation stretches the artwork. At1.10m width the whole source
+is1.813m tall. Native Crossed Swords signs were compared at the same width in four
+model views; two framed signs crowded the existing physical sword crest, so that
+study was never installed. Ivory/teal cloth was compared in the native town beside
+the shared clay/slate/oak services. The native inn props atlas has opaque grey
+surroundings and combined art; it is not a verified isolated cloth extraction.
+Keep its preliminary source inventory distinct from a usable mesh.
+The original347x572 pixels/alpha, factor/emission and both material bindings are
+proved. One DD1 banner material becomes one native material; no added renderer.
+All622 other meshes retain geometry/UVs within.477um and decoded paintings/factors
+are exact. Two36-triangle grids become two2-triangle planes; complete source
+envelope/scale exact, Core placed geometry within2.698um. The nine other raw and
+baked services remain byte-exact. Contact preserves the raw buffer prefix; the
+guarded1024 field matches all current source hashes. An offline path adaptation
+error was caught before installation; partial package output is retained separately.
+Full unsaved fixture covers ten services/Escape, pan/zoom/reset, complete release,
+reload/re-entry, Embark park/cache/resume, live resize/restore, keyboard and still
+camera/smoke. No estate selected/saved or OS input injected. Native profiles/config,
+estate2, plugin/private assets and foreign tracked work retained. No C# change or
+test-suite rerun; last1294 Core PASS remains298. Other timber details, terrain,
+facade/alpha/tree/background lighting, saved/controller/full frame-time/long-session
+acceptance and whole-town native production-art parity remain open.

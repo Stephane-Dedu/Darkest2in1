@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round310 accepted native Guild standards: local-art/ui-overhaul/hamlet-guild-standards-v66/CONTINUE.md.
+Two complete native DD2 Olde Guild Hall banners replace the DD1 cloth crops.
+Original347x572 RGBA, full UVs/alpha/aspect; ivory cloth with muted teal accents
+and explicit.90/.82/.68 factor. Existing rods/physical sword crest remain.
+624 meshes/12373 triangles,68 fewer;622 other geometries/UVs/paints exact.
+Nine raw/baked services and source envelope/normalization retained. Four model
+views/geometry/paint/UV/placement/package/contact/field audits, full unsaved native
+fixture/fresh1920 town view and0 buffer reallocations/5.037sec PASS.
+252 renderers unchanged. Runtime298 unchanged; DD2 CLOSED, no pending restore.
+No generation/raster edits. Accepted raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next311; retain shared service colours. Heavy data D:.
+
 Round309 accepted native Sanitarium shingles: local-art/ui-overhaul/hamlet-sanitarium-roof-v64/CONTINUE.md.
 Original DD2 coast_buildings_03 weathered shingle paint replaces the repeated
 turret/porch grids. Muted slate.65/.69/.76 retains the shared service palette.

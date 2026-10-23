@@ -671,3 +671,13 @@ original2048 pixels and shared muted slate factor; audit cone seam spans, finite
 UVs, both material masks, retained paints/geometry/source envelope, every material
 primitive, contact and matching field. Native town review is required. Evidence
 hamlet-sanitarium-roof-v64/art/models-reviewed; rejected mask study is superseded.
+
+
+`guild_native_standards.py --source <verified raw library> --out <new private library>
+--kit <native kit>` replaces two DD1 cloth grids with complete native Olde Guild
+Hall banners. Preserve original347x572 RGBA/full UVs/aspect on two planes, existing
+rods and physical sword crest; explicit muted ivory/teal finish. Retain622 other
+geometries/UVs/paints, envelope/scale and nine services. Prove decoded pixels/alpha,
+factor/emission/both bindings, all material primitives, contact and matching field.
+Review four model views and native town colours. Evidence hamlet-guild-standards-v66/
+art/models-reviewed; paired framed Crossed Swords study is superseded.
