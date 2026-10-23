@@ -693,3 +693,13 @@ measure visibility from its own projecting floors, porch and roof. Preserve
 window/lamp and alpha bands. Compare modest recess depth at the native town
 camera, and keep the improvement's limited precision explicit. A shading pass
 does not solve coarse material scale elsewhere on the building.
+
+
+## Match painted courses to the whole circumference, v81
+
+An intact native atlas can look coarse when a narrow field wraps a whole turret.
+Inspect source coverage and physical circumference before replacing pixels. More
+uphill courses and two finite half-wraps can keep recognizable native shingles
+at a scale related to the adjacent roof. Put joins beneath actual hip bindings
+and inspect all sides. This uses the same field twice; preserve original colour
+and weathering, then judge repetition and joins in the native town camera.

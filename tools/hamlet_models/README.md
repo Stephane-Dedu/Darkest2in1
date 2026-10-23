@@ -828,3 +828,15 @@ Guild319/Abbey320 directional layers, Smithy321 UVs and source-matched field318.
 All444 members/456 Core primitives/15469 triangles, paints and material factors
 retain. Inspect all four Core-band views and the actual town before accepting a
 rebake. Do not append a second bake onto accepted visibility.
+
+
+`sanitarium_roof_scale.py --source <accepted raw library> --out <new private
+library> --kit <native kit>` fits two finite full-height Shroud fields around the
+retained cap. Joins lie beneath existing105/285degree hips. Preserve all444 mesh
+members/15469 triangles,15349 other UV triangles,24 materials/native pixels and
+nine services. Audit120 changed UV triangles, all other geometry/paint/bindings,
+source envelope/Core placement, contact and the retained323 directional layer.
+Merge only Sanitarium into the latest complete baked library to keep Guild319/
+Abbey320/Smithy321 exact, then refresh the matching field identity. Four actual
+Core-band views and native town review precede acceptance. Evidence:
+hamlet-sanitarium-scale-v81/art/models-reviewed/. No new image generation.

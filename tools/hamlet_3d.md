@@ -2004,3 +2004,50 @@ repainting or enlarging another atlas. Do not automatically redo accepted slate
 or add noise. Broader architecture/material quality and saved/controller/long-
 session performance acceptance stay open. New heavy artifacts remain on D:;
 no extra cleanup or migration was performed after the approved cache deletion.
+
+
+Round324 accepted Sanitarium roof scale: local-art/ui-overhaul/hamlet-sanitarium-scale-v81/CONTINUE.md.
+The tower cap now uses two finite original DD2 Shroud roof fields beneath the
+existing opposite hip bindings. The fuller670x560 field replaces the670x350
+strip, doubling the shingle frequency around the cap and using1.6times as much uphill
+paint. Its smaller shingles sit more naturally beside the native Academic-house
+roof. No pixels or colours were changed or generated. Only120 turret UV triangles
+change; all444 mesh members/15469 triangles,15349 other UV triangles,24 material
+definitions/bindings,322 lime detail, native glass/oak/roof paint and service
+palette retain. Nine raw/baked services remain byte-exact, including Guild319/
+Abbey320 visibility and Smithy321 UVs. The Sanitarium's fresh contact/facade bake
+reproduces all444 accepted323 member-band histograms. Source bounds/normalization
+and placed geometry retain; raw maximum positional error is0.000000238419m and
+Core placed vertices match. Ground-field parameters and pixels remain318 while
+source identity is refreshed. Four matched Core-band views and native1920 unsaved
+fixture/fresh town/zero buffer reallocations over 5.023 seconds pass.
+255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore. Complete raw
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next325.
+
+Source inspection found that the original2048 coast_buildings_03 atlas already
+contains usable detail. The cap mapped a670x350 strip around about10m of eave
+circumference. The new recipe expands the uphill source field and uses two
+finite half-wraps, with joins at105/285degrees beneath retained physical hips.
+It preserves the original native atlas, current slate factors/emission/alpha,
+porch/caps and all other architecture. Each half reuses the same original native
+field; it is not a new unique seamless painting. Front/hero/side/rear views check
+the denser courses and joins. Output must be new and separate from the source;
+the pre-write guard rejects an existing/source output without touching it.
+
+Raw re-import/KD-tree triangle matching proves geometry and15349 other UVs retain;
+canonical material/decoded-paint/binding audits prove all24 paintings/factors
+retain. Core checks prove nine other models, all444 band histograms, tint/alpha/
+palette families, bounds/scale and matching ground bytes retain. Native fixture
+covers ten selections/Escape, camera/reset, release/reload/re-entry, Embark cache/
+return, resize/restore, keyboard focus/Enter/back and still camera/smoke. Zero live
+OS input events; no estate selected/saved. Plugin/config/native profiles/estate2
+and concurrent tracked/journal work preserved. Frozen HEADb98ec65 Core exports in
+Release; no gameplay build or new Core suite. Last1294 Core PASS remains298.
+Only the owned authoring recipe/docs enter Git; native paints/models stay private.
+
+This solves a specific cap-scale problem. Wider service architecture, remaining
+coarse fields, town material quality and saved/controller/long-session performance
+remain open. Keep the shared muted interactive palette and accepted medical wear.
+New heavy artifacts are on D:. No further cache cleanup or history migration was
+performed. Do not automatically repeat an accepted bake or repaint good art.

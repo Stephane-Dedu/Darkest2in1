@@ -1,5 +1,24 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round324 accepted Sanitarium roof scale: local-art/ui-overhaul/hamlet-sanitarium-scale-v81/CONTINUE.md.
+The tower cap now uses two finite original DD2 Shroud roof fields beneath the
+existing opposite hip bindings. The fuller670x560 field replaces the670x350
+strip, doubling the shingle frequency around the cap and using1.6times as much uphill
+paint. Its smaller shingles sit more naturally beside the native Academic-house
+roof. No pixels or colours were changed or generated. Only120 turret UV triangles
+change; all444 mesh members/15469 triangles,15349 other UV triangles,24 material
+definitions/bindings,322 lime detail, native glass/oak/roof paint and service
+palette retain. Nine raw/baked services remain byte-exact, including Guild319/
+Abbey320 visibility and Smithy321 UVs. The Sanitarium's fresh contact/facade bake
+reproduces all444 accepted323 member-band histograms. Source bounds/normalization
+and placed geometry retain; raw maximum positional error is0.000000238419m and
+Core placed vertices match. Ground-field parameters and pixels remain318 while
+source identity is refreshed. Four matched Core-band views and native1920 unsaved
+fixture/fresh town/zero buffer reallocations over 5.023 seconds pass.
+255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore. Complete raw
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next325.
+
 Round323 accepted Sanitarium facade visibility: local-art/ui-overhaul/hamlet-sanitarium-depth-v80/CONTINUE.md.
 The Sanitarium now uses the existing directional visibility treatment accepted
 on the Guild and Abbey. It adds modest separation beneath projecting floors,

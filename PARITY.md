@@ -799,3 +799,17 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   suggest the Sanitarium cap's native shingle scale merits comparison with its
   finer Academic-house roof. Inspect the existing native field and unwrap first;
   this is a candidate, not authority to replace good slate or add noise.
+
+
+- [x] Round324 Sanitarium cap has finer native Shroud shingle scale through two
+  finite half-wraps and a fuller uphill field. Only120 UV triangles change;
+  all444 members/15469 triangles,15349 other UVs,24 paintings/material factors,
+  322 lime/native glass/oak and palette retain. Nine raw/baked services, all444
+  323 visibility histograms and318 ground pixels retain. Four Core-band views,
+  full native1920 fixture/fresh town/zero buffer reallocations pass.255 renderers/
+  runtime298 unchanged; no estate selected/saved. DD2 CLOSED, no pending restore.
+  Evidence: `local-art/ui-overhaul/hamlet-sanitarium-scale-v81/CONTINUE.md`.
+- [?] Broader Hamlet architecture/material quality remains open. Compare physical
+  course scale on remaining smaller roof fields and service entrance details
+  with native references, preserving the shared muted palette. Do not infer that
+  an accepted native source or successful mapping audit establishes DD2 art parity.
