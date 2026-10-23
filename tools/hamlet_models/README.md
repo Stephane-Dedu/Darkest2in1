@@ -609,3 +609,12 @@ All175 meshes, the canopy and native parts stay intact. Inspect all four views,
 audit finite UVs and preserve exact bounds/normalization. Package only the Nomad,
 rebake contact and refresh the matching shadow field. Private source/evidence:
 hamlet-caravan-joinery-v58/art/models-reviewed. The first study is superseded.
+
+
+`nomad_crest.py --source <verified raw library> --out <new private library>
+--kit <native kit>` replaces the Nomad's DD1 eye cloth with DD2's native Nomad
+Wagon crest. Use its complete427x464 sprite, original pixels/alpha/aspect and
+a rigid hanging quad. Keep the existing crossbar/posts and other174 meshes.
+The source is private sprites2d/inn_crests/inn_crest_nomadwagon.png. Review all
+four views and in-game placement, retain exact bounds, bake contact and refresh
+the guarded shadow field. Evidence hamlet-nomad-sign-v59/art/models-reviewed/.

@@ -1,5 +1,16 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round304 accepted native Nomad crest: local-art/ui-overhaul/hamlet-nomad-sign-v59/CONTINUE.md.
+The native DD2 Nomad Wagon crest replaces the last DD1 eye sprite on this service.
+Original427x464 RGBA pixels, alpha/full UVs/aspect retained on a rigid hanging sign.
+Existing crossbar/posts, native303 oak/302 canvas and174 other meshes/UVs/paints
+stay intact. Exact bounds/normalization and nine other raw/baked services retained.
+Nomad5601 triangles,34 fewer;256 renderers unchanged. Contact/matching field rebaked.
+Four views/geometry/paint/aspect/placement/package audits, native full unsaved fixture,
+fresh1920 overview and0 buffer reallocations/5.027sec PASS. Runtime298 unchanged.
+Game CLOSED, no pending restore. No generation. Raw art/models-reviewed/; baked
+art/HamletModels-reviewed/ with matched shadow field. Fresh usage/baseline next305.
+
 Round303 accepted Nomad joinery: local-art/ui-overhaul/hamlet-caravan-joinery-v58/CONTINUE.md.
 Original DD2 Assistance2048 paint replaces the old noisy wood on109 authored
 members. Seven finite native plank/beam samples follow the actual member grain

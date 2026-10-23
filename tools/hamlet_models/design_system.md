@@ -458,3 +458,14 @@ oak material and unchanged tint. Original2048 pixels are retained. This removes
 the previous noisy painting and one material batch while preserving geometry,
 placement and the common service palette. The original DD1 eye crest remains
 a separate art gap; this pass does not claim the whole town has native art parity.
+
+
+## Merchant identity from native art, v59
+
+Check the native crest library before repainting a service symbol. DD2 already
+has a Nomad Wagon crest that includes the merchant eye and a painted caravan.
+Keep the full sprite, its original alpha and aspect. Fit the sign geometry to
+that aspect, with a rigid board on the existing suspension, rather than stretching
+the painting over the previous cloth grid. Use shared timber grading with the
+source's ochre/red wood. Check the lower edge against the canopy and entrance,
+preserve the model envelope and inspect the sign at actual town scale.

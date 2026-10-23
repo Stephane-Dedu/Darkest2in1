@@ -8938,3 +8938,41 @@ frame-time/long-session checks and production-art parity remain open.
 ## Status round303
 
 Accepted303 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next304.
+
+
+## Round304 - native DD2 Nomad merchant crest (2026-10-23)
+
+Round304 accepted native Nomad crest: local-art/ui-overhaul/hamlet-nomad-sign-v59/CONTINUE.md.
+The native DD2 Nomad Wagon crest replaces the last DD1 eye sprite on this service.
+Original427x464 RGBA pixels, alpha/full UVs/aspect retained on a rigid hanging sign.
+Existing crossbar/posts, native303 oak/302 canvas and174 other meshes/UVs/paints
+stay intact. Exact bounds/normalization and nine other raw/baked services retained.
+Nomad5601 triangles,34 fewer;256 renderers unchanged. Contact/matching field rebaked.
+Four views/geometry/paint/aspect/placement/package audits, native full unsaved fixture,
+fresh1920 overview and0 buffer reallocations/5.027sec PASS. Runtime298 unchanged.
+Game CLOSED, no pending restore. No generation. Raw art/models-reviewed/; baked
+art/HamletModels-reviewed/ with matched shadow field. Fresh usage/baseline next305.
+
+The sprite is the kit's sprites2d/inn_crests/inn_crest_nomadwagon.png, exported
+from DD2's Sprite atlas. It includes the wagon and merchant eye, ochre/red timber
+paint and suspension chains. A1.7m wide rigid quad keeps its427:464 aspect and
+hangs from the original6.60m crossbar. Its lower edge sits in front of the canopy
+at4.75m, without covering the entrance or enlarging the service envelope. The old
+wavy cloth grid had stretched the DD1 eye artwork. That mesh/material are removed.
+Original RGBA pixels are byte-exact after decoding, with no crop, upscale, image
+generation or paint edits. New material uses shared timber grading, base factors
+1/.95/.90 and.45 emission. All other material factors and decoded paintings remain.
+All174 retained geometries/UVs match within2.39e-7. Core bounds/scale are exact;
+placed positions match within2e-6m. Matching contact/1024 guarded field rebaked.
+Native full fixture covers ten services, camera/reset/release/reload, return,
+Embark-cache, resize, keyboard and still camera/smoke. Fresh1920 town inspected.
+No C# changes or test-suite rerun; latest1294 Core PASS remains from298. Native
+profiles/configs/estate2/other private assets and foreign tracked work retained.
+No estate selected/saved; protected estates untouched. Other services may still
+contain DD1-derived detail. Wider architecture, facade/alpha/tree/background
+lighting, terrain dressing and saved/controller/full-frame-time/long-session
+acceptance remain open. This pass does not claim whole-town native art parity.
+
+## Status round304
+
+Accepted304 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next305.
