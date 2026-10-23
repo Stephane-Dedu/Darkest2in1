@@ -519,3 +519,15 @@ Keep original pixels; compensate different source values with explicit material
 factors and judge colour harmony in native DD2. Inspect membership before replacing
 an old material: leather grips can share a material named oak. Retain them until
 their own surface can be reviewed.
+
+
+## Native shingles on a swept cap, v64
+
+Keep the recognizable turret profile and physical hips while replacing a repeated
+photographic chip with a continuous native weathered field. Match course scale
+to the cap and porch. Arc-length mapping follows the curve; place the single
+angular join beneath a rear hip and limit each triangle's source span. Opposite
+porch slopes must read uphill. Native coastal paint can fit Hamlet architecture
+without marine overlays; use an explicit muted slate finish and compare in town.
+Preserve original pixels and physical ridge detail. Add material slots before
+restoring face indices: otherwise Blender can silently erase the cut-edge mask.

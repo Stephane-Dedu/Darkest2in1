@@ -1,5 +1,21 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round309 accepted native Sanitarium shingles: local-art/ui-overhaul/hamlet-sanitarium-roof-v64/CONTINUE.md.
+Original DD2 coast_buildings_03 weathered shingle paint replaces the repeated
+turret/porch grids. Muted slate.65/.69/.76 retains the shared service palette.
+One finite670x350 field wraps the swept cap with its seam under a rear hip;
+porch/seven ridge saddles share a finite240x240 world projection. Original2048
+pixels stay intact. Two dense grids removed; original decks restored.035/.12m.
+444 meshes/15469 triangles,6456 fewer than308. Hips/finial, green windows,
+Academic house/native plinth/plaster and other architecture retained. Nine raw/
+baked services, source bounds/normalization and441 other UV sets exact.
+Four views/geometry/paint/finite-UV/placement/package audits, native full unsaved
+fixture/fresh1920 overview and0 buffer reallocations/5.039sec PASS.
+252 renderers, two fewer. Contact/matching1024 field rebaked; runtime298 unchanged.
+DD2 CLOSED, no pending restore. No generation or raster edits. Final raw
+art/models-reviewed/, baked art/HamletModels-reviewed/ plus matched field installed.
+Fresh usage/baseline next310; keep shared muted colours. Heavy data D:.
+
 Round308 accepted native Guild timber: local-art/ui-overhaul/hamlet-guild-joinery-v63/CONTINUE.md.
 Original DD2 Assistance2048 paint fits163 framing/eave members with the shared
 Nomad/Abbey oak factor. Native inn opening boards fit the one recessed doorway,

@@ -660,3 +660,14 @@ grips; audit164 UV/material bindings, both decoded paint sources, source envelop
 all material primitives, contact and matching field. Evidence
 hamlet-guild-joinery-v63/art/models-reviewed. Flat-door/cart-stripe studies are
 superseded. Review native town appearance; a material called oak can be leather.
+
+
+`sanitarium_native_roof.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits original coast_buildings_03 shingle paint to the retained
+swept turret and porch. One finite arc-length cap wrap with rear seam; finite
+porch/ridge projection. Remove two grids and restore deck heights.035/.12m. Keep
+hips/finial, native house/plinth, plaster, green panes and other geometry. Preserve
+original2048 pixels and shared muted slate factor; audit cone seam spans, finite
+UVs, both material masks, retained paints/geometry/source envelope, every material
+primitive, contact and matching field. Native town review is required. Evidence
+hamlet-sanitarium-roof-v64/art/models-reviewed; rejected mask study is superseded.
