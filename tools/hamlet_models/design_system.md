@@ -671,3 +671,15 @@ courses. Repair the collapsed faces with finite area and a shared member phase;
 retain good upper-face mappings and the accepted palette. Compare front and back
 at the actual Core bands, then the native town camera. A small native atlas can
 guide edge construction without being enlarged over a whole service roof.
+
+
+## Readable weathering on the medical service, v79
+
+The owner's current judgement can reopen an earlier quiet material finish. Keep
+broad connected lime masses, but place readable chips, repair edges, water marks
+and exposed masonry through the middle and upper wall as well as the base. New
+detail needs an architectural scale and value hierarchy, not a noise overlay.
+Compare with native paint and the other services through actual Core grading.
+Keep muted grey lime related to the town's stone, dark oak and slate; green glass
+and the medical cross carry identity. Existing good UVs and native art need no
+change when a new wall painting solves the specific visual gap.

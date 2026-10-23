@@ -1,5 +1,22 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round322 accepted Sanitarium lime detail: local-art/ui-overhaul/hamlet-sanitarium-finish-v79/CONTINUE.md.
+The owner's feedback reopened the broad301 plaster finish. A reviewed1774x887
+detail edit now adds chipped layered lime, smaller wear, rain streaks, dirty damp
+patches and exposed grey masonry through the tower, upper stage, porch and
+undercroft. It retains the muted stone family beside native oak, slate and green
+medical glass. Three material paintings change; all24 factors/emission/alpha/
+samplers,444 mesh members/15469 triangles, every UV, source bounds and scale
+remain. Native Academic-house paint, roof, oak, medical cross and nine raw/baked
+services remain byte-exact, including Guild319/Abbey320 visibility and Smithy321.
+All444 contact-band histograms and placed positions retain. Source-matched ground
+field is rebuilt with unchanged parameters and byte-identical pixels. Four
+matched Core-band views and geometry/UV/material/paint/palette/Core/contact/field
+audits pass. Full unsaved1920 fixture/fresh town/zero buffer reallocations over
+5.025 seconds pass;255 renderers/runtime298 unchanged. DD2 CLOSED, no pending
+restore. Complete accepted raw art/models-reviewed/, baked art/HamletModels-reviewed/
+and matched art/HamletShadows-reviewed/ installed. Fresh usage/baseline next323.
+
 Round321 accepted smithy roof-edge mapping: local-art/ui-overhaul/hamlet-smithy-reed-v78/CONTINUE.md.
 Collapsed UVs on140 triangles of the main/dormer roof underlays now sample finite
 painted areas, removing the stretched stripes along the reed edge. The detailed

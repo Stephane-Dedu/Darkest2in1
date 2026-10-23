@@ -1914,3 +1914,49 @@ Release. No gameplay build or new Core-suite run; last1294 Core PASS remains298.
 This removes a specific mapping artifact. Wider service architecture/materials,
 native production-art parity and saved/controller/long-session performance remain
 open. Keep interactive colours related while retaining their service identities.
+
+
+Round322 accepted Sanitarium lime detail: local-art/ui-overhaul/hamlet-sanitarium-finish-v79/CONTINUE.md.
+The owner's feedback reopened the broad301 plaster finish. A reviewed1774x887
+detail edit now adds chipped layered lime, smaller wear, rain streaks, dirty damp
+patches and exposed grey masonry through the tower, upper stage, porch and
+undercroft. It retains the muted stone family beside native oak, slate and green
+medical glass. Three material paintings change; all24 factors/emission/alpha/
+samplers,444 mesh members/15469 triangles, every UV, source bounds and scale
+remain. Native Academic-house paint, roof, oak, medical cross and nine raw/baked
+services remain byte-exact, including Guild319/Abbey320 visibility and Smithy321.
+All444 contact-band histograms and placed positions retain. Source-matched ground
+field is rebuilt with unchanged parameters and byte-identical pixels. Four
+matched Core-band views and geometry/UV/material/paint/palette/Core/contact/field
+audits pass. Full unsaved1920 fixture/fresh town/zero buffer reallocations over
+5.025 seconds pass;255 renderers/runtime298 unchanged. DD2 CLOSED, no pending
+restore. Complete accepted raw art/models-reviewed/, baked art/HamletModels-reviewed/
+and matched art/HamletShadows-reviewed/ installed. Fresh usage/baseline next323.
+
+Source inspection found the prior301 painting deliberately kept large flat
+planes with sparse damage. That earlier aesthetic decision is superseded by the
+owner's current request for more texture. Built-in ImageGen edited the existing
+tile using the original DD2 Academic-house atlas and current model as references.
+The selected source is retained unprocessed at art/sanitarium-lime-painted-v79.png;
+generation.json and paint-prompt.txt keep the full prompt/provenance. Resolution
+is unchanged. Source median RGB101/105/97 becomes111/113/104; mean98/100/93 becomes
+103/103/94. Material factors and Core palette classes remain, so the change comes
+from local painted weathering/contrast rather than a shared palette adjustment.
+The accepted cylindrical/world unwraps are retained. No native pixels, geometry,
+roof, oak, green glass or service proportions were altered.
+
+The normal game60116 was open at first; work stayed offline until it was already
+closed. A fresh closed-game baseline preceded installation. Native check covers
+ten selections/Escape, pan/zoom/reset, release/reload/re-entry, Embark cache/return,
+resize/restore, keyboard focus/Enter/back and still camera/smoke, followed by fresh
+town capture and buffer probe. Zero live OS input events; no estate selected/saved.
+Plugin, config, native profiles, estate2 and foreign tracked work preserved.
+Frozen HEAD2e4e04c Core tools exported in Release; no gameplay build or new Core
+suite run. Last1294 Core PASS298. Wider town native-art parity and saved/controller/
+long-session performance remain open. Generated material detail is a supplement
+for this authored wall, not an extracted native texture.
+
+An initial full-drive failure occurred before launch/installation. The owner
+then paused an owned native check for storage cleanup; baseline321 was restored.
+After approved cache cleanup, the final independent native fixture and fresh
+town capture passed. No project art was deleted to make room.

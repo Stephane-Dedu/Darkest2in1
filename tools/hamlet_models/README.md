@@ -804,3 +804,16 @@ baked library so Guild/Abbey facade visibility stays byte-exact. Rebuild the
 source-matched ground field; four Core-band views and native review precede
 acceptance. Evidence hamlet-smithy-reed-v78/art/models-reviewed. This corrects
 underlay edges missed by v27; no painting or geometry replacement is required.
+
+
+`sanitarium_lime_paint.py --source <accepted raw library> --out <new private
+library> --kit <native kit> --paint <reviewed2:1 PNG>` replaces the three sparse
+Sanitarium lime paintings on four retained surfaces. Preserve444 meshes/15469
+triangles, every UV,24 material factors/native paintings/bindings and nine raw
+services. The owner reopened301's broad finish; the accepted new1774x887 edit
+adds readable material wear without a resolution claim. Check generated RGBA,
+retained palette/tints, four actual Core-band views and native town. Contact-bake
+only Sanitarium and merge into the current complete baked pack to preserve
+Guild/Abbey visibility and Smithy UVs, then refresh the matching field identity.
+Private evidence hamlet-sanitarium-finish-v79/art/models-reviewed, with source
+painting/full prompt/provenance alongside. No generated or extracted art in Git.
