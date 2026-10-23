@@ -193,7 +193,14 @@ def self_test():
     assert visible(box, Vector((2, 0, 0)), rays) == 1
     assert visible(box, Vector((-2, 2, 0)), rays) == 1
     assert directions((0, 1, 0), 0, 1)[0].z == 1
-    print('PASS procedural occluder, ray direction, self-contact, outside shadow and vertical sun')
+    # The service light comes from negative X/Z. Check both horizontal axes so
+    # its ground shadow falls away from that key rather than into the lit side.
+    key = (-.35, .75, -.55)
+    rays = directions(key, 0, 1)
+    shadow = Vector((-key[0]*2/key[1], -key[2]*2/key[1], 0))
+    assert visible(box, shadow, rays) == 0
+    assert visible(box, -shadow, rays) == 1
+    print('PASS procedural occluder, ray direction, self-contact, outside shadow, vertical sun and service-key quadrant')
 
 
 if __name__ == '__main__':
@@ -202,7 +209,10 @@ if __name__ == '__main__':
     for name in ('layout', 'review', 'out'):
         parser.add_argument('--' + name, type=Path)
     parser.add_argument('--size', type=int, default=1024)
-    parser.add_argument('--direction', nargs=3, type=float, default=[.60, .45, .55], help='Unity X,Y-up,Z direction toward the sun')
+    # Match the existing native service key in HamletStage.Models.cs and
+    # HamletSetDressing.FacetTint. The earlier opposite key detached ground
+    # shadows from the facade highlights. Explicit overrides remain for studies.
+    parser.add_argument('--direction', nargs=3, type=float, default=[-.35, .75, -.55], help='Unity X,Y-up,Z direction toward the sun; default matches service lighting')
     parser.add_argument('--disc', type=float, default=3)
     parser.add_argument('--samples', type=int, default=4)
     parser.add_argument('--floor', type=float, default=.6)

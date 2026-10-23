@@ -1766,3 +1766,43 @@ profiles/estate2 and foreign tracked work preserved. No gameplay build or test-s
 rerun; last1294 Core PASS remains298. Whole-town native production-art parity and
 broader lighting/terrain/facade/alpha/tree/background/saved/controller/full-session
 performance acceptance remain open. Judge physical detail at actual town zoom.
+
+
+Round318 accepted shared sunlight direction: local-art/ui-overhaul/hamlet-sun-direction-v75/CONTINUE.md.
+The 1024px ground-shadow field now follows the existing service light key
+(-.35,.75,-.55), replacing the opposite (.60,.45,.55) bake. Building highlights
+and ground shadows agree in direction; shorter shadows leave the lit approaches
+readable. All ten building packages, geometry, UVs, material definitions, paintings
+and facade colours remain byte-exact. No new or generated art. The same .6 ambient
+floor, four samples, three-degree disc, receivers, casters and scene layout remain.
+Controlled/default fields match exactly. Ray self-tests, field/source/geometry/
+parameter audits, full unsaved1920 fixture, fresh town and zero buffer reallocations
+over 5.022sec PASS. 255 renderers and runtime298 unchanged. DD2 CLOSED,
+no pending restore. Accepted art/HamletShadows-reviewed/ installed; accepted317
+models retained. Fresh usage/baseline next319, heavy data D:.
+
+The earlier ground bake used a different horizontal direction and a lower sun
+than HamletStage.Models/ModelReviewExport and HamletSetDressing.FacetTint. The
+default in shadow_field.py now matches that existing native key. An explicit
+override remains available for controlled studies. The new negativeX/Z procedural
+test checks the projected shadow and clear lit side on a known box/plane, alongside
+the existing positiveX, vertical-light and self-contact checks. No runtime lighting
+formula or palette was changed to compensate for the mismatch.
+
+The control used the frozen HEAD898faf6 Core exports and all currently installed
+model sources. Its explicit direction reproduces the revised default bake byte
+for byte. All other bake parameters and the complete scene-reference geometry/
+topology remain exact. Field shadow coverage falls from52.68% to28.70%; those
+figures include terrain and building footprints, not just visible roads. They
+describe the field and are not a screen-space brightness or performance claim.
+
+Native fixture covers ten services/Escape, pan/zoom/reset, full release/reload/
+re-entry, Embark park/cache/resume, resize/restore, keyboard focus/Enter/back and
+still camera/smoke. A fresh1920 town capture and five-second buffer probe follow
+in the same owned process. Zero live OS input events; no estate selected/saved.
+Plugin/config/native profiles/estate2 and foreign tracked work preserved. No
+gameplay build or new Core-suite run; last1294 Core PASS remains298. The pass
+aligns ground shadows with existing facade light. Facade self-shadowing, alpha/
+tree/background casting, broader architecture/material/terrain art quality and
+saved/controller/long-session performance remain open. Native production-art
+parity for the whole Hamlet is not claimed.

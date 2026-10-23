@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round318 accepted shared sunlight direction: local-art/ui-overhaul/hamlet-sun-direction-v75/CONTINUE.md.
+The 1024px ground-shadow field now follows the existing service light key
+(-.35,.75,-.55), replacing the opposite (.60,.45,.55) bake. Building highlights
+and ground shadows agree in direction; shorter shadows leave the lit approaches
+readable. All ten building packages, geometry, UVs, material definitions, paintings
+and facade colours remain byte-exact. No new or generated art. The same .6 ambient
+floor, four samples, three-degree disc, receivers, casters and scene layout remain.
+Controlled/default fields match exactly. Ray self-tests, field/source/geometry/
+parameter audits, full unsaved1920 fixture, fresh town and zero buffer reallocations
+over 5.022sec PASS. 255 renderers and runtime298 unchanged. DD2 CLOSED,
+no pending restore. Accepted art/HamletShadows-reviewed/ installed; accepted317
+models retained. Fresh usage/baseline next319, heavy data D:.
+
 Round317 accepted Blacksmith brick courses: local-art/ui-overhaul/hamlet-smithy-firebrick-v74/CONTINUE.md.
 The retained brick painting now uses a common2.4m physical period on both chimneys,
 their caps and the furnace hood. Nominal course height falls from21.9cm to15cm,

@@ -627,3 +627,14 @@ an accepted muted painting when a new edit brightens the building or loses soot.
 The service colour family should survive each local improvement. Previous native
 review can also explain an intentionally broad surface; trace provenance before
 repeating a rejected noisy treatment.
+
+
+## One direction for facade highlights and ground shadows, v75
+
+Compare the light used by the material facets with the offline shadow bake before
+repainting a scene that feels disconnected. Their horizontal directions and sun
+heights must agree. Keep a controlled bake with every other parameter and all
+source geometry fixed, then judge the actual town camera. Shorter, correctly
+placed shadows can preserve readable entrances without brightening every building.
+Keep the shared muted palette. This alignment does not establish facade occlusion,
+tree/alpha casting or a complete physically lit scene.

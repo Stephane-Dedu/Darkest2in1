@@ -760,3 +760,12 @@ fitted arch mappings remain. Use `--source`, `--out` and `--kit`, then inspect a
 four views, audit retained geometry/paint and common world scale, package/contact/
 matching field, and verify the actual native camera before accepting. Two brighter
 generated paints were rejected; no new art is required for this recipe.
+
+
+Ground-shadow bakes default to the existing native service key
+`(-.35,.75,-.55)` in Unity X/Y-up/Z. Use matching Core layout/model-review exports
+and retain all model hashes. `--direction` remains an explicit study override;
+compare it with the facade key before installing. The procedural self-test covers
+the negativeX/Z service quadrant as well as positiveX and vertical light. A new
+field must survive source/geometry/parameter checks and actual DD2 review. The
+direction correction does not add facade shadow receivers or change paint pixels.
