@@ -1243,3 +1243,45 @@ No estate selected/saved; protected estates untouched. Roof paint repeats its
 chipped tile motif and deserves another native-reference review. Wider architecture,
 facade/alpha/tree/background lighting, terrain dressing, saved/controller/full
 frame-time/long-session acceptance and whole-town native art parity remain open.
+
+
+Round306 accepted native Abbey roof paint: local-art/ui-overhaul/hamlet-abbey-roof-v61/CONTINUE.md.
+Two continuous sections of the original DD2 inn2048 painting replace the dense
+repeating roof grids. Curved decks return .15m to their original height; physical
+ridge saddles, belfry/pinnacles, oak, stone and other service architecture remain.
+Native source is red clay, explicitly tinted .62/.88/.91 to muted slate in DD2.
+Original pixels retained. Two old meshes removed;757 meshes,18704 triangles,
+11568 fewer than305. Exact bounds/normalization and nine raw/baked services retained.
+Four views/geometry/paint/finite-UV/placement/package audits, native full unsaved
+fixture/fresh1920 overview and0 buffer reallocations/5.018sec PASS.
+254 renderers, one fewer. Contact and matching1024 field rebaked; runtime298 unchanged.
+DD2 CLOSED, no pending restore. No generation or raster edits. Raw models-reviewed/,
+baked HamletModels-reviewed/ and matched HamletShadows-reviewed/ under art/.
+Fresh usage/baseline next307; retain interactive colour harmony. Bulky output D:.
+
+The source is the original the_inn_lvl_03_left atlas, not a native grey-slate
+painting. A finite700x315 nave section and315x315 porch section are mapped once
+per slope, with arc-length mapping uphill. No tiled repeat, enlarged bitmap or
+pixel edits. Ten quiet native interiors fit the31 retained physical ridge saddles.
+The former individual slate course meshes are removed, while the two original
+closed decks rise .15 source metres. Other755 geometries and753 other UV sets
+remain; four UV maps intentionally change. Retained positions/UVs match within
+0.477um. Core source bounds and scale are exact; placed retained geometry matches
+within4.265um after the intentional deck rise. Placement proof aggregates every
+material primitive per node; a last-primitive dictionary loses split deck faces.
+The first per-tile studies looked patchy or sterile; the first continuous crop
+included an unpainted atlas patch. All are rejected. The next continuous candidate
+looked grey in Blender but turquoise in native DD2 with .25/.9/1 factors. Its
+package/native evidence lives in art/rejected-cyan. The final source recipe has
+only the continuous panel path, accurate design metadata and the native-reviewed
+.62/.88/.91 factor. Blender and native tint/paint pipelines are not interchangeable;
+native colour acceptance is required. Three old roof materials become two.
+Contact preserves the raw buffer prefix; guarded1024 field matches source hashes.
+Full unsaved native fixture covers ten services, Escape, pan/zoom/reset, release,
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard and still
+camera/smoke. Fresh1920 town appearance inspected beside other interactive services.
+No estate selected/saved; protected estates untouched. Native profiles/configs,
+estate2, plugin/private assets and foreign tracked work retained. No C# change or
+test-suite rerun; latest1294 Core PASS remains from298. Wider architecture,
+facade/alpha/tree/background lighting, terrain dressing, saved/controller/full
+frame-time/long-session acceptance and whole-town native art parity remain open.

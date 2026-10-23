@@ -627,3 +627,14 @@ the Nomad oak factor. Quieter boards suit fitted doors; continuous sill paint
 suits eaves. Retain all759 geometries and other744 UVs/materials. Audit finite
 UVs and all four views before native checking. Contact/field must match. Evidence
 hamlet-abbey-portal-v60/art/models-reviewed; initial study is superseded.
+
+
+`native_roof_paint.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits two finite sections of the original DD2 inn2048 roof
+painting to the Abbey's curved decks. It removes the two old dense tile grids,
+raises the existing decks .15m, and remaps retained physical ridge saddles. Native
+red clay is explicitly tinted to slate with .62/.88/.91, reviewed in DD2. No paint
+edits. Keep other architecture/paint and nine raw/baked services exact; audit source
+bounds, every retained material primitive and finite UVs. Rebuild matching contact
+and field. Evidence hamlet-abbey-roof-v61/art/models-reviewed; early per-tile/blank
+crop/cyan studies are rejected. Blender colour alone is not acceptance evidence.

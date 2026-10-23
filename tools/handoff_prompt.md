@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round306 accepted native Abbey roof paint: local-art/ui-overhaul/hamlet-abbey-roof-v61/CONTINUE.md.
+Two continuous sections of the original DD2 inn2048 painting replace the dense
+repeating roof grids. Curved decks return .15m to their original height; physical
+ridge saddles, belfry/pinnacles, oak, stone and other service architecture remain.
+Native source is red clay, explicitly tinted .62/.88/.91 to muted slate in DD2.
+Original pixels retained. Two old meshes removed;757 meshes,18704 triangles,
+11568 fewer than305. Exact bounds/normalization and nine raw/baked services retained.
+Four views/geometry/paint/finite-UV/placement/package audits, native full unsaved
+fixture/fresh1920 overview and0 buffer reallocations/5.018sec PASS.
+254 renderers, one fewer. Contact and matching1024 field rebaked; runtime298 unchanged.
+DD2 CLOSED, no pending restore. No generation or raster edits. Raw models-reviewed/,
+baked HamletModels-reviewed/ and matched HamletShadows-reviewed/ under art/.
+Fresh usage/baseline next307; retain interactive colour harmony. Bulky output D:.
+
 Round305 accepted Abbey native oak: local-art/ui-overhaul/hamlet-abbey-portal-v60/CONTINUE.md.
 Fifteen existing portal planks/backing/eave members use original DD2 Assistance2048
 paint and the same muted oak factor as the Nomad. Finite, aspect-fitted samples

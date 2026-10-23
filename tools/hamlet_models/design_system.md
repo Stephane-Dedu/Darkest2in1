@@ -480,3 +480,17 @@ continuous sill paint suits long eaves. Preserve the portal fit, ironwork and
 dressed-stone arch. Keep pixels intact, map at face aspect and check the actual
 town. A connected native facade is not a ready-made portal. Avoid distorting
 its paired windows or repainting it just to add more ornament.
+
+
+## Continuous native roof painting, v61
+
+Preserve painted course irregularity over the complete roof slope. A dense grid
+of identical individually chipped tiles creates repetition even at high pixel
+resolution. Use one finite, fully painted native panel per slope, mapped with
+distance along its curve. Keep silhouette and physical ridge detail; avoid blank
+atlas regions and neighbouring roof shadows. Original red clay can supply slate
+shapes, but its material tint must be explicit and checked through native DD2
+grading beside the other service buildings. Do not accept a Blender-only colour
+match: the v61 cyan study passed geometry checks and still failed town harmony.
+Use muted slate, warm oak and local clay accents without making every service
+the same colour. Prefer shared material families and retain readable identities.
