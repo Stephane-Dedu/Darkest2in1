@@ -813,3 +813,16 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   course scale on remaining smaller roof fields and service entrance details
   with native references, preserving the shared muted palette. Do not infer that
   an accepted native source or successful mapping audit establishes DD2 art parity.
+
+
+- [x] Round325 Sanitarium porch/caps use finer courses from a fuller native Shroud
+  field. Only272 UV triangles change;444 members/15469 triangles,15197 other UVs,
+  24 materials/decoded paintings,324 tower,322 lime/native details and palette
+  retain. Nine raw/baked services/all444 Sanitarium323 band histograms/318 ground
+  pixels retain. Four Core-band views/full native1920 fixture/fresh town/zero
+  buffer reallocations pass;255 renderers/runtime298 unchanged. DD2 CLOSED/no
+  pending restore; no estate selected/saved. Private evidence:
+  `local-art/ui-overhaul/hamlet-sanitarium-porch-v82/CONTINUE.md`.
+- [?] Wider Hamlet architecture/material quality remains open. Medical roof scale
+  is accepted324/325. Return to native references for other service families and
+  architectural details; do not blindly repaint or repeat accepted UV/shade passes.

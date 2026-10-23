@@ -1,5 +1,21 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round325 accepted Sanitarium porch courses: local-art/ui-overhaul/hamlet-sanitarium-porch-v82/CONTINUE.md.
+The porch now uses a fuller290x470 native Shroud field instead of240x240, giving
+it smaller painted courses beside the finer324 tower roof. Both slopes and the
+seven retained physical ridge caps share their existing world phase. Original
+native pixels and slate finish remain. Only272 UV triangles change,104 on the
+deck and168 on the caps; all444 members/15469 triangles,15197 other UV triangles,
+24 material definitions/bindings,324 cap,322 lime detail, native glass/oak and
+shared palette retain. Nine raw/baked services, Guild319/Abbey320/Smithy321 and
+all444 Sanitarium323 visibility histograms remain exact. Bounds/normalization
+and placed geometry retain; raw error is0.000000238419m. Ground-field parameters
+and pixels remain318 with refreshed source identity. Four Core-band views and
+native1920 unsaved fixture/fresh town/zero buffer reallocations over 5.025
+seconds pass.255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore.
+Complete raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next326.
+
 Round324 accepted Sanitarium roof scale: local-art/ui-overhaul/hamlet-sanitarium-scale-v81/CONTINUE.md.
 The tower cap now uses two finite original DD2 Shroud roof fields beneath the
 existing opposite hip bindings. The fuller670x560 field replaces the670x350

@@ -840,3 +840,14 @@ Merge only Sanitarium into the latest complete baked library to keep Guild319/
 Abbey320/Smithy321 exact, then refresh the matching field identity. Four actual
 Core-band views and native town review precede acceptance. Evidence:
 hamlet-sanitarium-scale-v81/art/models-reviewed/. No new image generation.
+
+
+`sanitarium_porch_scale.py --source <accepted raw library> --out <new private
+library> --kit <native kit>` fits a fuller native Shroud field to the retained
+porch and seven caps, preserving their world phase and24 materials. Only104 deck
+and168 cap UV triangles change; retain all444 members/15469 triangles,15197 other
+UVs, native pixels,324 turret and other services. Check raw/Core retention and
+rebuild Sanitarium contact plus323 visibility, merge with the current complete
+baked library and refresh the matching field. Four Core-band views and native
+town precede acceptance. Evidence hamlet-sanitarium-porch-v82/art/models-reviewed.
+No generated art. Recipe expects the prior v64 porch mapping, not its own output.

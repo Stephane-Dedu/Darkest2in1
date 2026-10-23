@@ -2051,3 +2051,47 @@ coarse fields, town material quality and saved/controller/long-session performan
 remain open. Keep the shared muted interactive palette and accepted medical wear.
 New heavy artifacts are on D:. No further cache cleanup or history migration was
 performed. Do not automatically repeat an accepted bake or repaint good art.
+
+
+Round325 accepted Sanitarium porch courses: local-art/ui-overhaul/hamlet-sanitarium-porch-v82/CONTINUE.md.
+The porch now uses a fuller290x470 native Shroud field instead of240x240, giving
+it smaller painted courses beside the finer324 tower roof. Both slopes and the
+seven retained physical ridge caps share their existing world phase. Original
+native pixels and slate finish remain. Only272 UV triangles change,104 on the
+deck and168 on the caps; all444 members/15469 triangles,15197 other UV triangles,
+24 material definitions/bindings,324 cap,322 lime detail, native glass/oak and
+shared palette retain. Nine raw/baked services, Guild319/Abbey320/Smithy321 and
+all444 Sanitarium323 visibility histograms remain exact. Bounds/normalization
+and placed geometry retain; raw error is0.000000238419m. Ground-field parameters
+and pixels remain318 with refreshed source identity. Four Core-band views and
+native1920 unsaved fixture/fresh town/zero buffer reallocations over 5.025
+seconds pass.255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore.
+Complete raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next326.
+
+Source inspection follows the accepted324 cap comparison. The small square
+porch field supplied broad rows while the intact native roof atlas had more
+usable courses uphill. Remapping its existing finite coordinates into a fuller
+field preserves slope orientation and cap phase. No new geometry, palette
+adjustment, painting generation or native raster edit is needed. The public
+recipe requires new output separate from its source and retains the24 existing
+materials. The source-domain guard expects accepted v64 porch mapping, not its
+own already-scaled output. A pre-write source/output guard was checked.
+
+Raw re-import/KD-tree matching proves all geometry and15197 other triangle UVs
+retain; canonical decoded-paint/material/binding audits prove native/source paint
+and factors retain. Core checks prove nine other models, all444 contact-band
+histograms, tints/alpha/palette, source envelope/scale and matching ground pixels
+retain. Native fixture covers ten selections/Escape, camera/reset, resource
+release/reload/re-entry, Embark cache/return, resize/restore, keyboard focus/Enter/
+back and still camera/smoke, then a fresh town capture and buffer probe. Zero
+live OS input events; no estate selected/saved. Plugin/config/native profiles/
+estate2 and concurrent tracked/journal changes preserved. Frozen HEADa185aa1
+Core exports in Release; no gameplay build or new Core suite. Last1294 Core PASS298.
+
+This completes a bounded scale review of the two medical roofs, not the wider
+Hamlet art overhaul. Keep the recognizable service silhouettes, detailed322
+lime, shared muted slate/oak/stone/clay family and accepted directional layers.
+Remaining architecture/material quality and saved/controller/long-session
+performance stay open. New bulky artifacts remain on D:, with no additional
+cache/history cleanup or migration. No further325 variant is pending.

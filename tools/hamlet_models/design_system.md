@@ -703,3 +703,12 @@ uphill courses and two finite half-wraps can keep recognizable native shingles
 at a scale related to the adjacent roof. Put joins beneath actual hip bindings
 and inspect all sides. This uses the same field twice; preserve original colour
 and weathering, then judge repetition and joins in the native town camera.
+
+
+## Related course scale across medical roofs, v82
+
+After correcting a turret's scale, compare its smaller porch at the same camera.
+A square native field may have too few uphill courses for the roof's pitch.
+Use a fuller intact field when it supplies the missing density. Preserve the
+deck's slope orientation and physical caps' shared phase; keep material factors
+and colours. Inspect joins and native town readability before accepting it.
