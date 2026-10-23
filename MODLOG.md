@@ -9309,3 +9309,48 @@ production-art parity remain open.
 ## Status round311
 
 Accepted311 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next312.
+
+
+## Round312 - native Blacksmith framing and continuous doorway (2026-10-23)
+
+Round312 accepted native Blacksmith timber: local-art/ui-overhaul/hamlet-smithy-joinery-v68/CONTINUE.md.
+Original Assistance2048 oak paint fits108 framing/window/roof-binding members;
+six fitted door boards share one continuous native inn paint field. Shared oak
+and source-compensating door factors retain service colour harmony. Five finite
+fields; original pixels intact. All199meshes/17590tri,85 other UVs/material bindings/
+paintings, native architecture/thatch/fire/iron/work props/sign and nine raw/baked
+services retained. Source envelope/scale exact. Four views/audits/contact/matching
+1024 field/full1920 unsaved fixture/fresh town PASS;0 buffer reallocations/
+5.02sec.254 renderers(+1). Runtime298 unchanged, DD2 CLOSED,
+no pending restore. No generation. Accepted raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next313; keep shared muted colours. Heavy data D:.
+
+The Assistance frame factor.45/.38/.28 matches the accepted Nomad/Abbey/Guild/
+Sanitarium family. Quiet native cart boards and continuous long sills fit physical
+member grain/aspect. Six separate door boards share the native inn92x152 field
+in world coordinates, with the same.90/.80/.65 source factor as Guild/Sanitarium.
+Physical board joints/door hardware remain. An initial per-board mapping study
+produced dark stripes and was rejected before installation. The final shared
+panel keeps warm closed wood; an independent affine UV/world regression across
+all six members has max residual1.73e-8, proving that each board does not restart
+the painting. Every modified triangle stays within a recorded native sample.
+Both original2048 decoded RGBA sources, factors/emission/all114 bindings and the
+other85 material bindings/paintings are proved. One old structure material becomes
+two native materials. Twelve work props and the DD1-derived anvil sign remain for
+separate role-specific review; no claim that all legacy art is replaced. All199
+geometries/other85UVs retained within.239um; source bounds/normalization exact,
+Core placed coordinates within.954um. Nine other raw/baked services byte-exact.
+Contact preserves the raw buffer prefix; guarded1024 field matches source hashes.
+Full unsaved fixture runs once at1920, then a fresh town capture/probe uses the
+same owned process. Ten services/Escape, pan/zoom/reset, full release/reload/
+re-entry, Embark park/cache/resume, live resize/restore, keyboard and still camera/
+smoke pass;0 live input events, no estate selected/saved. Profiles/config/estate2,
+plugin/private assets and foreign tracked work retained. No C# change/test-suite
+rerun; last1294 Core PASS remains298. Other signs/work props, material finish,
+terrain/facade/alpha/tree/background lighting, saved/controller/full performance
+acceptance and whole-town native production-art parity remain open.
+
+## Status round312
+
+Accepted312 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next313.

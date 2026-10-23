@@ -692,3 +692,14 @@ Audit both original2048 sources, factors/emission/bindings, member-specific fini
 UVs, source envelope/placed geometry, contact and matching field; inspect four views
 and native town. Evidence hamlet-sanitarium-joinery-v67/art/models-reviewed.
 The dark Academic-door study is rejected and was never installed.
+
+
+`smithy_native_oak.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits108 structural/window/roof-binding members to native
+Assistance oak. Six fitted door boards share one finite native inn field via
+world coordinates. Retain199meshes/17590tri,85 other UVs/materials, work props,
+anvil sign/native architecture/thatch/fire/iron and nine services. Audit both
+original2048 sources/factors/emission/114 bindings, member-specific finite UVs
+and continuous six-board projection, source envelope/placed geometry, contact
+and matching field. Four model views/native town review required. Evidence
+hamlet-smithy-joinery-v68/art/models-reviewed; per-board stripe study rejected.

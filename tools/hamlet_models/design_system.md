@@ -553,3 +553,14 @@ erase a service entrance even when its source pixels are authentic. Compare it
 with real hardware and shadow depth before reuse. Report selected field detail,
 not merely atlas size. Separate source factors may compensate for darker native
 paint while preserving the shared town colour family. Preserve the native atlas.
+
+
+## A continuous painting across separate door boards, v68
+
+Keep physical board joints while sampling one native door field across the whole
+assembly in world coordinates. Restarting a beam crop on each narrow board can
+create dark bars even with authentic source paint. Judge the complete entrance
+before packaging; prove shared affine UV/world mapping independently. Structural
+oak can share the town family while doors use a source-compensating finish.
+Workshop props need grain that fits their role, especially stump end grain and
+wheel rims; do not force them through the structural member recipe.
