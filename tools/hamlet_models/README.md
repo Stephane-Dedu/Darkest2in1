@@ -750,3 +750,13 @@ bindings, all geometry/UVs, major joint layout, bounds/Core placement, contact a
 matched field. Four views/native town review required. Evidence:
 hamlet-abbey-masonry-v73/art/models-reviewed; art/abbey-stone-painted-v73.png and
 generation.json preserve the private generated edit/full prompt/provenance.
+
+
+Blacksmith brick course fitting uses `smithy_brick_courses.py` from the accepted316
+raw library. It keeps the existing1254brick painting, all material factors and
+geometry, changing only five world-projected UV sets from a3.5m to2.4m period.
+Reprojecting also removes the rear stack's old post-move phase/stretch. Eleven
+fitted arch mappings remain. Use `--source`, `--out` and `--kit`, then inspect all
+four views, audit retained geometry/paint and common world scale, package/contact/
+matching field, and verify the actual native camera before accepting. Two brighter
+generated paints were rejected; no new art is required for this recipe.

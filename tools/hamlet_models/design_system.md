@@ -614,3 +614,16 @@ and model views; a prompt requesting exact alignment is not proof. Keep the broa
 facets readable under finer chips and tooling. Retaining material factors and
 palette classification keeps the stone family stable, though source colours still
 need actual camera review. Surface detail does not solve incorrect course scale.
+
+
+## Physical brick scale before another repaint, v74
+
+Inspect the currently embedded painting and its mapped size before generating
+more detail. A detailed material can still look crude when a narrow chimney shows
+fewer than two bricks across. Keep a common world period across the furnace and
+stacks, with fitted arch stones handled separately. A moved or stretched member
+may retain outdated UVs, so prove physical mapping on the final geometry. Retain
+an accepted muted painting when a new edit brightens the building or loses soot.
+The service colour family should survive each local improvement. Previous native
+review can also explain an intentionally broad surface; trace provenance before
+repeating a rejected noisy treatment.

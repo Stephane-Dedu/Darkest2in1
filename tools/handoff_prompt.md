@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round317 accepted Blacksmith brick courses: local-art/ui-overhaul/hamlet-smithy-firebrick-v74/CONTINUE.md.
+The retained brick painting now uses a common2.4m physical period on both chimneys,
+their caps and the furnace hood. Nominal course height falls from21.9cm to15cm,
+giving the narrow stacks more readable courses and smaller bricks. World projection
+also corrects the rear chimney's old mapping after it had been raised. The shared
+muted fired-clay colour, all24 materials/decoded paints/factors and11 fitted arch
+UVs remain. All199 meshes/17590 triangles,194 other UV sets, accepted wood/thatch/
+fire/iron/native props and nine raw/baked services retained. Four views, geometry/
+UV/material/binding/mapping/Core placement/package/contact/matched1024field audits,
+full unsaved1920 fixture, fresh town and0 buffer reallocations/5.025sec PASS.
+255 renderers and runtime298 unchanged. DD2 CLOSED, no pending restore. Accepted
+raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next318; heavy data D:.
+
 Round316 accepted Abbey masonry detail: local-art/ui-overhaul/hamlet-abbey-masonry-v73/CONTINUE.md.
 A new detail repaint enriches the existing limestone faces with chipped edges,
 fractured layers, fine tooling and restrained deposits. The same muted grey

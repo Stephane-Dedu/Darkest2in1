@@ -9562,3 +9562,54 @@ not claimed. Compare actual camera evidence before propagating a shared paint.
 ## Status round316
 
 Accepted316 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next317.
+
+
+## Round317 - Blacksmith physical brick courses (2026-10-23)
+
+Round317 accepted Blacksmith brick courses: local-art/ui-overhaul/hamlet-smithy-firebrick-v74/CONTINUE.md.
+The retained brick painting now uses a common2.4m physical period on both chimneys,
+their caps and the furnace hood. Nominal course height falls from21.9cm to15cm,
+giving the narrow stacks more readable courses and smaller bricks. World projection
+also corrects the rear chimney's old mapping after it had been raised. The shared
+muted fired-clay colour, all24 materials/decoded paints/factors and11 fitted arch
+UVs remain. All199 meshes/17590 triangles,194 other UV sets, accepted wood/thatch/
+fire/iron/native props and nine raw/baked services retained. Four views, geometry/
+UV/material/binding/mapping/Core placement/package/contact/matched1024field audits,
+full unsaved1920 fixture, fresh town and0 buffer reallocations/5.025sec PASS.
+255 renderers and runtime298 unchanged. DD2 CLOSED, no pending restore. Accepted
+raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next318; heavy data D:.
+
+Source review corrected two stale assumptions. The current Blacksmith has one
+deduplicated Forge soot stained brick v21 material on16 members; there is no
+separate warm-firebrick v22 material in its installed GLB. Its original1254painting
+already has detailed fired clay. Two generated detail edits brightened it and lost
+soot, so both were rejected before rendering/installing. Full prompts/outputs/
+references and measurements remain private. No generated replacement is used and
+no source pixels were edited. Selected mixed native Sprawl facade atlases lacked
+a suitable warm brick field. The name-search coven hit was a substring false hit.
+
+The mapping audit initially assumed the old rear stack UVs simply scaled with
+world height. Its cap revealed the earlier post-mapping move. An independent
+triangle-plane check proves the candidate's common world phase/physical period,
+with recorded old-projection differences. Geometry/material/other-UV checks
+separately preserve retained art. This is a course-scale correction rather than
+a texture-resolution increase or an architectural rebuild. It keeps the existing
+Blacksmith's warm identity within the service-building colour family.
+
+The Sanitarium's broad tower plaster was accepted in301/v56 after a noisy grain
+study was rejected. Keep it. The v73 next-source audit's repaint suggestion was
+based on incomplete provenance and is superseded by this review.
+
+Native fixture covers ten services/Escape, pan/zoom/reset, release/reload/re-entry,
+Embark park/cache/resume, resize/restore, keyboard focus/Enter/back and still
+camera/smoke. Fresh1920town view and5sec buffer probe follow in the same owned
+process. Zero OS input events, no estate selected or saved. Plugin/config/native
+profiles/estate2 and foreign tracked work preserved. No gameplay build or test-suite
+rerun; last1294 Core PASS remains298. Whole-town native production-art parity and
+broader lighting/terrain/facade/alpha/tree/background/saved/controller/full-session
+performance acceptance remain open. Judge physical detail at actual town zoom.
+
+## Status round317
+
+Accepted317 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next318.
