@@ -1,5 +1,17 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round326 completed an offline remaining-service review:
+local-art/ui-overhaul/hamlet-service-review-v83/CONTINUE.md.
+Installed art remains325 in hamlet-sanitarium-porch-v82: complete raw/baked/matched
+field, runtime298. DD2 CLOSED/no pending restore. Eight actual Core-band views
+preserve Stagecoach/Survivalist/native Nomad crest59; no repaint is justified.
+Graveyard four posts/four caps are the next material candidate: valid200 UV
+triangles, native512 foundation atlas with quiet individual-stone crops. Test
+original2048 native gravestone stone fields before new extraction/generation.
+See tools/hamlet_models/remaining_services_review.md. No candidate authored,
+deployment, native QA or save access this round. Fresh usage/baseline next327;
+keep7-8%reserve, preserve foreign work/protected estates and all accepted325 art.
+
 Round325 accepted Sanitarium porch courses: local-art/ui-overhaul/hamlet-sanitarium-porch-v82/CONTINUE.md.
 The porch now uses a fuller290x470 native Shroud field instead of240x240, giving
 it smaller painted courses beside the finer324 tower roof. Both slopes and the
@@ -387,7 +399,7 @@ Complete geometry/model guards allow only0.1mm CLR/Mono numeric differences;
 native maximum0.032mm, topology exact. Release/1294 Core/native lifecycle/fresh
 1920 overview/buffer PASS,256 renderers. Game CLOSED, no pending restore.
 Fresh usage/baseline before299; preserve source colour harmony. Trees/background
-cottages and façade cast lighting remain outside this field. Keep those limits.
+cottages and faÃ§ade cast lighting remain outside this field. Keep those limits.
 
 Round297 offline shadow study: local-art/ui-overhaul/hamlet-shadow-study-v52/CONTINUE.md.
 shadow_field.py bakes guarded geometry-derived ground occlusion from matching
@@ -723,8 +735,8 @@ is superseded. Use unsaved QA or estate2 only, never protected1/3. All owned QA 
 
 Native video/bones exposed a common-pelvis squat from long rear contact and airborne targets.
 Stance55% and supporting-only walking pelvis constraints retain1.0 projected leg/step through
-Stride=2*Stance. Current154–202px fitted rigs also exposed slow0.89–1.17steps/s under180px/s.
-Ceiling320 keeps the party-minimum1.8 leg lengths/s rule, giving277–279px/s native travel.
+Stride=2*Stance. Current154â€“202px fitted rigs also exposed slow0.89â€“1.17steps/s under180px/s.
+Ceiling320 keeps the party-minimum1.8 leg lengths/s rule, giving277â€“279px/s native travel.
 Reverse stays half speed;100ms catch-up cap/tiles/doors/scenery remain. Vilhelm is separate.
 
 Release+1,266 Core+262 UI/57 focused checks pass. Two unsaved parties cover eight native
@@ -760,7 +772,7 @@ See tools/corridor_heroes.md. Next round261. Earlier handoffs are historical.
 Round259 addresses the owner's remaining issue during continuous walking. Real held keys,
 mouse and routes were extracted into Driver.Walking.cs and replayed against Core Crawl,
 actual projection and gait. Nine red cases found309/600px/s,4.15 steps/s on the recorded
-102.6px leg and247–480px stall jumps. Physical180px/s target, smaller fitted-rig limit and
+102.6px leg and247â€“480px stall jumps. Physical180px/s target, smaller fitted-rig limit and
 100ms movement catch-up cap now produce180px/s,2.42 steps/s and18px stall advance. Reverse
 motion is half speed. Crop/art/poses/stride and explicit doors remain; larger logical
 squares take longer to traverse. The separate developer-step easing stays1.2s.
@@ -785,7 +797,7 @@ them, fights pin both doors. Reload/retreat metadata and single-square halls are
 Outdoor passages use runtime-masked installed DD1 doorway art; legacy walls remain.
 
 Camera targets360px per square with six-square minimum span and1.6x maximum zoom.
-Tested native plates move360â€“371px versus186â€“247; pose/stride code and1.2s square
+Tested native plates move360Ã¢â‚¬â€œ371px versus186Ã¢â‚¬â€œ247; pose/stride code and1.2s square
 duration are unchanged. Props/doors/particles/feet share the actual crop. First8 red
 symptom cases now pass. Frozen Release+1,266 Core+237 UI and four offline compositions
 pass. Native comfort/click/hover/fade/battle acceptance remains [?].
@@ -844,7 +856,7 @@ Round255 stress rework is installed and offline checked. DD1 resolve at100, seve
 five virtues, cure at0 and200-stress heart attacks replace normal DD2 meltdown for expedition
 heroes. Flagellant retains native Toxic self-effects through the quest/reload, without stress
 reset or replaying the onset heal/cooldowns. Compatible fractional saves, resolve persistence,
-permanent heart deaths and0–200 HUD are built. Frozen Release+1,242 Core+221 UI pass;24 native
+permanent heart deaths and0â€“200 HUD are built. Frozen Release+1,242 Core+221 UI pass;24 native
 method/field targets match metadata. Native gameplay acceptance remains [?]. Limits and exact
 acceptance cases: tools/stress_system.md. Private425-file source, overlay, original round254
 rollback, final artifact hashes and deployment: local-art/stress-system-v01.

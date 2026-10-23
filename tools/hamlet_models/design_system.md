@@ -712,3 +712,14 @@ A square native field may have too few uphill courses for the roof's pitch.
 Use a fuller intact field when it supplies the missing density. Preserve the
 deck's slope orientation and physical caps' shared phase; keep material factors
 and colours. Inspect joins and native town readability before accepting it.
+
+
+## Inspect source footprint and material purpose, v83
+
+A valid native stone crop can still be visually weak when used across a tall
+monolithic post. Compare its painted wear and edge language with adjacent native
+headstones, then inspect UVs and embedded pixels before choosing a replacement.
+Finite UV area alone proves mapping validity; atlas resolution alone proves no
+quality gain. Prefer a suitable intact native architectural field, fit it to
+the retained shape, and judge it on the model and actual town camera. Preserve
+services that already read well instead of applying a blanket repaint.

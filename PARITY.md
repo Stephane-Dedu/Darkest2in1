@@ -826,3 +826,13 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Wider Hamlet architecture/material quality remains open. Medical roof scale
   is accepted324/325. Return to native references for other service families and
   architectural details; do not blindly repaint or repeat accepted UV/shade passes.
+
+
+- [x] Round326 offline source/material review of Stagecoach, Nomad, Graveyard and
+  Survivalist completed in eight actual Core-band views. Installed325 unchanged;
+  no new native acceptance or game launch. See tools/hamlet_models/remaining_services_review.md.
+- [ ] Graveyard gatepost/cap material study: retain valid geometry/UV intent,
+  compare intact2048 native gravestone stone fields to current quiet512 foundation
+  samples. Fit/review all sides and native town before accepting; generation or
+  new extraction is not yet justified. Preserve325 roofs/lime/shading and native
+  Stagecoach/Survivalist/Nomad crest59.

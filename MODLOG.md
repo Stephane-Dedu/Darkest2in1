@@ -9990,3 +9990,27 @@ cache/history cleanup or migration. No further325 variant is pending.
 ## Status round325
 
 Accepted325 Sanitarium porch courses/matched field, runtime298; DD2 CLOSED. Fresh usage/baseline next326.
+
+
+## Round326 - Remaining service material review (2026-10-23)
+
+Offline read-only comparison of four remaining service families, using eight
+800px actual Core-band views from accepted325. Stagecoach and Survivalist native
+art remain coherent; preserve Nomad's accepted59 full native427x464 merchant
+crest rather than treating it as the removed DD1 sprite. Graveyard gateposts/
+caps are the next bounded material candidate: four posts/four caps,200 finite
+UV triangles, quiet64x35/84x44/53x43/61x27 stone fields from original512 native
+foundation_panel_06. Original2048 common_gravestones offers compatible chipped
+grey stone for a study before further extraction/generation. Altar2048 is a
+secondary warmer reference; common_cathedral_prefab export is empty. No candidate
+field has been fitted or accepted. See tools/hamlet_models/remaining_services_review.md
+and private local-art/ui-overhaul/hamlet-service-review-v83/CONTINUE.md.
+
+Installed art325/raw/baked/matched field and runtime298 remain unchanged. No game
+launch, deployment, protected/save access, new native acceptance or gameplay/Core
+suite run. Existing native acceptance remains325,255 renderers/zero reallocations.
+All new image data on D:. Shared journals and foreign tracked work preserved.
+
+## Status round326
+
+Offline review complete, installed325/runtime298 unchanged; DD2 CLOSED/no pending restore. Fresh usage/baseline next327.
