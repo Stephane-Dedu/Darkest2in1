@@ -1,5 +1,12 @@
 # Remaining service review, round326
 
+Status after327: the Graveyard post/cap material study below is accepted. Its
+original2048 common_gravestones paint is fitted with an intact cap field and
+local linear-light compensation. Existing Hamlet headstones retain their
+separate field_hospital_node native painting. Installed art now comes from
+hamlet-graveyard-stone-v84. The observations below retain their325 baseline.
+
+
 This is an offline diagnosis, not an installed art change. Accepted325 models,
 field and runtime298 stay installed. Source is v82 art/review-study, matched
 against the installed package and raw verified library. Eight unlit actual

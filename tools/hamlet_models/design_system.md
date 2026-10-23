@@ -723,3 +723,26 @@ Finite UV area alone proves mapping validity; atlas resolution alone proves no
 quality gain. Prefer a suitable intact native architectural field, fit it to
 the retained shape, and judge it on the model and actual town camera. Preserve
 services that already read well instead of applying a blanket repaint.
+
+
+### Native stone fields and colour harmony (round327)
+
+Match native paint to the architectural part. The Graveyard's posts benefit
+from larger chipped stone fields than the retaining wall's quiet foundation
+samples. Keep caps intact: a large black source fracture can read as a physical
+opening when fitted across a small pointed solid.
+
+Higher source resolution alone is insufficient. Compare the actual Core-graded
+paint and rendered town before accepting it. Here the original 2048px native
+common_gravestones painting required 0.39 linear-light material compensation to
+sit beside the accepted retaining stone. This value belongs to that new material
+and source field, not to other service buildings. Source pixels, original 11
+materials and the separate field_hospital_node headstones stay intact. Muted
+mineral colours connect interactive buildings while distinct native wear gives
+each material character.
+
+Review all sides, finite UVs, contact bands and the placed town. Round327 retains
+all geometry, nine services and field318 pixels. Its extra static material batch
+is explicit: 256 native renderers, previously255. The first bright study was
+rejected offline and retained for comparison; its geometry audits did not make
+it visually acceptable.

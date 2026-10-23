@@ -1,5 +1,14 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round327 accepted native Graveyard post stone: local-art/ui-overhaul/hamlet-graveyard-stone-v84/CONTINUE.md.
+Four existing posts and their pointed caps now use chipped, uninscribed stone
+from the original 2048px DD2 common_gravestones atlas. Intact cap paint and local
+0.39 linear-light compensation keep the new detail within the Hamlet's muted
+stone palette. No source pixels were edited or generated. Four matched Core-band
+views and the native 1920px unsaved fixture/fresh town capture pass. The complete
+raw, baked and matched-field libraries in v84 are installed; runtime298 remains.
+DD2 CLOSED, no pending restore. Fresh usage/baseline next328; keep 7–8% reserve.
+
 Round326 completed an offline remaining-service review:
 local-art/ui-overhaul/hamlet-service-review-v83/CONTINUE.md.
 Installed art remains325 in hamlet-sanitarium-porch-v82: complete raw/baked/matched

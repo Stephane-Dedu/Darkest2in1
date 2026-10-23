@@ -2095,3 +2095,45 @@ lime, shared muted slate/oak/stone/clay family and accepted directional layers.
 Remaining architecture/material quality and saved/controller/long-session
 performance stay open. New bulky artifacts remain on D:, with no additional
 cache/history cleanup or migration. No further325 variant is pending.
+
+
+Round327 accepted native Graveyard post stone: local-art/ui-overhaul/hamlet-graveyard-stone-v84/CONTINUE.md.
+Four existing posts and their pointed caps now use chipped, uninscribed stone
+from the original 2048px DD2 common_gravestones atlas. Intact cap paint and local
+0.39 linear-light compensation keep the new detail within the Hamlet's muted
+stone palette. No source pixels were edited or generated. Four matched Core-band
+views and the native 1920px unsaved fixture/fresh town capture pass. The complete
+raw, baked and matched-field libraries in v84 are installed; runtime298 remains.
+DD2 CLOSED, no pending restore. Fresh usage/baseline next328; keep 7–8% reserve.
+
+Source inspection distinguished the new common_gravestones atlas from the
+existing Hamlet headstones' field_hospital_node painting. Both are native DD2
+assets; the latter remains unchanged. Native source SHA256 is recorded in
+paint-audit.json. Two post fields and an intact horizontal cap field replace the
+quiet samples from the older 512px foundation atlas. Finite projections follow
+each retained member's world axes. The original 11 material definitions remain
+exact; one new material clones their flags and samplers, with its base/emission
+RGB compensated for the brighter source. Core-graded source medians suggested a
+0.39375 linear ratio; visual review determined the final 0.39 value.
+
+Only eight bindings and 200 UV triangles change. All 126 mesh members, 137 Core
+primitives and 10033 triangles retain their geometry. The other 9833 UV triangles
+and 118 bindings remain exact. All 126 contact-band histograms, source bounds,
+normalization and placed vertices retain. Nine other raw/baked services remain
+byte-exact, including Guild319, Abbey320, Smithy321 and Sanitarium322–325. Ground
+field parameters and pixels remain318, with refreshed source identity.
+
+The first study was rejected before installation because pale posts and a dark
+cap fracture read poorly. It is retained intact under art/rejected-first; its
+moved file hashes and relocated review paths were verified. The accepted study
+uses an intact cap and compensated finish. No new extraction was needed.
+
+Native QA confirms 256 renderers and 12 Graveyard material batches, an increase
+of one static batch and one native 2048px painting. The full synthetic fixture,
+fresh town view and zero renderer-buffer reallocations over 5.025 seconds
+pass. This short check does not establish long-session performance. No gameplay
+build was made; runtime298 is retained. The owned preview was closed and normal
+config, profiles and estate2 verified/restored before final closed-game install.
+Protected estates were not accessed. Foreign tracked work and journal hunks
+remain intact. New heavy artifacts stay on D:; no additional cache cleanup or
+historical migration was performed.

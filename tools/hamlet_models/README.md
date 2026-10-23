@@ -851,3 +851,25 @@ rebuild Sanitarium contact plus323 visibility, merge with the current complete
 baked library and refresh the matching field. Four Core-band views and native
 town precede acceptance. Evidence hamlet-sanitarium-porch-v82/art/models-reviewed.
 No generated art. Recipe expects the prior v64 porch mapping, not its own output.
+
+
+### Graveyard native stone (round327)
+
+`graveyard_native_stone.py` fits the original DD2 common_gravestones painting to
+the four retained Graveyard posts and their caps. Use the accepted325 raw library
+in `hamlet-sanitarium-porch-v82/art/models-reviewed` as `--source`, a new separate
+folder as `--out`, and the extracted `dd2-native-kit` as `--kit`. Run through
+Blender's background Python entry point, as with the other workshop recipes.
+Do not feed its own already-remapped output back into this recipe.
+
+It changes 200 UV triangles and eight material bindings, retaining all geometry
+and original 11 material definitions. The new clone uses two finite stone fields,
+an intact cap field and 0.39 linear-light source compensation. Original native
+RGBA remains exact. Existing headstones keep their separate field_hospital_node
+paint. Rebuild contact only for the Graveyard and preserve the other nine bakes.
+
+Accepted raw/baked/matched-field libraries and four Core-band views are in
+`local-art/ui-overhaul/hamlet-graveyard-stone-v84`. Native1920 QA passes with
+256 renderers, one more than325, and zero buffer reallocations during the short
+probe. See its CONTINUE.md and audits. The rejected first bright/cap-hole study
+is retained under `art/rejected-first` and must not be installed.

@@ -831,8 +831,24 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [x] Round326 offline source/material review of Stagecoach, Nomad, Graveyard and
   Survivalist completed in eight actual Core-band views. Installed325 unchanged;
   no new native acceptance or game launch. See tools/hamlet_models/remaining_services_review.md.
-- [ ] Graveyard gatepost/cap material study: retain valid geometry/UV intent,
-  compare intact2048 native gravestone stone fields to current quiet512 foundation
-  samples. Fit/review all sides and native town before accepting; generation or
-  new extraction is not yet justified. Preserve325 roofs/lime/shading and native
-  Stagecoach/Survivalist/Nomad crest59.
+- [x] Graveyard gatepost/cap material study accepted327 with original2048 native
+  common_gravestones paint, intact cap field and local source compensation.
+  Geometry, other material/UVs, medical325 work and nine services retain. Four
+  Core-band views/native town pass; no new extraction or generated art required.
+
+
+## Round327 — Graveyard native stone (2026-10-24)
+
+- [x] Four posts/four caps use original2048 DD2 common_gravestones detail, intact
+  cap fields and a locally compensated finish. Four actual Core-band views and
+  a fresh native1920 town view confirm the muted service palette is retained.
+- [x] Only200 UV triangles/eight bindings change. All126 members/10033 triangles,
+  original11 materials, other9833 UV triangles/118 bindings, all contact bands,
+  nine raw/baked services and field318 pixels remain exact. Existing native
+  headstones retain their separate field_hospital_node paint.
+- [x] Full unsaved fixture passes at256 renderers/12 Graveyard material batches;
+  short buffer probe reports zero reallocations. Runtime298 retained, preview
+  closed, normal config/profiles/estate2 verified and no pending restore.
+- [ ] Continue broader service architecture/material review against native DD2
+  references from accepted327. Start with fresh usage and closed-game baseline;
+  retain accepted medical322–325 detail and the shared muted palette.
