@@ -494,3 +494,15 @@ grading beside the other service buildings. Do not accept a Blender-only colour
 match: the v61 cyan study passed geometry checks and still failed town harmony.
 Use muted slate, warm oak and local clay accents without making every service
 the same colour. Prefer shared material families and retain readable identities.
+
+
+## Roof course scale and colour harmony, v62
+
+Fit native roof detail to each architectural role. One cropped section can make
+tiles oversized on a tall pitch. Two different intact sections can join at an
+existing deck row, giving more courses without repeating a motif or adding dense
+geometry. Keep source pixels, inspect the join, vary dormer samples and retain
+physical ridge detail. A bright isolated clay study can clash with the town:
+check beside native Tavern paint, muted Abbey slate and cream plaster at normal
+zoom. Keep Guild red clay, armory slate and their readable silhouette, with muted
+families rather than identical colours on every interactive building.

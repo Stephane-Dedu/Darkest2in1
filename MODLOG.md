@@ -9066,3 +9066,54 @@ frame-time/long-session acceptance and whole-town native art parity remain open.
 ## Status round306
 
 Accepted306 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next307.
+
+
+## Round307 - native Guild clay and slate roofs (2026-10-23)
+
+Round307 accepted native Guild roof paint: local-art/ui-overhaul/hamlet-guild-roof-v62/CONTINUE.md.
+Original DD2 inn2048 paint fits the hall, two dormers and armory. Two different
+intact sections provide denser courses on the tall hall; other slopes use finite
+panels. Warm clay.70/.65/.59 and slate.62/.88/.91 retain identity and town harmony.
+Four dense tile meshes removed, four original decks raised.12m;47 physical ridge
+saddles, dormer flashing, ironwork/native frontage and other architecture retained.
+624 meshes/12441 triangles,16180 fewer than306. Exact source bounds/normalization,
+616 other UV sets and nine raw/baked services retained. Four views/geometry/paint/
+finite-UV/placement/package audits, native full unsaved fixture/fresh1920 overview
+and0 buffer reallocations/5.036sec PASS.254 renderers unchanged.
+Contact and matching1024 field rebaked. Runtime298 unchanged, DD2 CLOSED, no pending
+restore. No generation or native raster edits. Final raw art/models-reviewed/;
+baked art/HamletModels-reviewed/ plus art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next308; retain shared muted colour families. Heavy data D:.
+
+The first Guild study used one section on the tall hall and made tiles too large.
+Five finite panel sections now fit four roof assemblies: two different native
+paintings join at an existing curved-deck row on each tall-hall slope, without
+repeating a small patch or adding geometry. Arc-length mapping follows the curve;
+opposite slopes run uphill correctly. The two dormers sample different intact
+regions. Ten quiet interiors fit47 original ridge saddles. Native pixels are exact.
+The inn source is red clay, explicitly tinted for the armory's slate. A first
+native overview rejected.86/.82/.78 clay as too bright/pink beside the Tavern;
+that whole package/evidence remains in art/rejected-bright-clay. Muted.70/.65/.59
+passes native colour review. The armory retains the Abbey's accepted slate factor.
+Four old face/underlap materials become four native ones. The original charcoal
+cut-edge material remains on unchanged dormer flashing; its main metal painting,
+all other factors and decoded paint are retained. This pass does not claim that
+every remaining service texture is native. Four decks rise.12 source metres;
+620 other geometries and616 other UV sets remain. Eight UV maps intentionally
+change. Raw geometry/retained UVs match within.477um; Core source bounds/scale exact,
+placed geometry within2.697um after the intended rise. Placement proof groups
+every material primitive per node. Source envelope is exact; removing tile tips
+can slightly change the rotated renderer AABB. Contact preserves raw buffer prefix;
+matching guarded1024 field is rebuilt from current source hashes.
+Full unsaved native fixture covers ten services, Escape, pan/zoom/reset, release,
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard and still
+camera/smoke. Fresh1920 town inspected beside Abbey/Tavern/Sanitarium. No estate
+selected/saved, protected estates untouched. Native profiles/configs/estate2,
+plugin/private assets and foreign tracked work retained. No C# change or test-suite
+rerun; latest1294 Core PASS remains from298. Other timber/roof details, terrain
+dressing, facade/alpha/tree/background lighting, saved/controller/full frame-time/
+long-session acceptance and whole-town native production-art parity remain open.
+
+## Status round307
+
+Accepted307 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next308.

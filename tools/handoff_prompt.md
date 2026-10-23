@@ -1,5 +1,20 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round307 accepted native Guild roof paint: local-art/ui-overhaul/hamlet-guild-roof-v62/CONTINUE.md.
+Original DD2 inn2048 paint fits the hall, two dormers and armory. Two different
+intact sections provide denser courses on the tall hall; other slopes use finite
+panels. Warm clay.70/.65/.59 and slate.62/.88/.91 retain identity and town harmony.
+Four dense tile meshes removed, four original decks raised.12m;47 physical ridge
+saddles, dormer flashing, ironwork/native frontage and other architecture retained.
+624 meshes/12441 triangles,16180 fewer than306. Exact source bounds/normalization,
+616 other UV sets and nine raw/baked services retained. Four views/geometry/paint/
+finite-UV/placement/package audits, native full unsaved fixture/fresh1920 overview
+and0 buffer reallocations/5.036sec PASS.254 renderers unchanged.
+Contact and matching1024 field rebaked. Runtime298 unchanged, DD2 CLOSED, no pending
+restore. No generation or native raster edits. Final raw art/models-reviewed/;
+baked art/HamletModels-reviewed/ plus art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next308; retain shared muted colour families. Heavy data D:.
+
 Round306 accepted native Abbey roof paint: local-art/ui-overhaul/hamlet-abbey-roof-v61/CONTINUE.md.
 Two continuous sections of the original DD2 inn2048 painting replace the dense
 repeating roof grids. Curved decks return .15m to their original height; physical

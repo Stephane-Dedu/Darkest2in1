@@ -638,3 +638,14 @@ edits. Keep other architecture/paint and nine raw/baked services exact; audit so
 bounds, every retained material primitive and finite UVs. Rebuild matching contact
 and field. Evidence hamlet-abbey-roof-v61/art/models-reviewed; early per-tile/blank
 crop/cyan studies are rejected. Blender colour alone is not acceptance evidence.
+
+
+`guild_native_roof.py --source <verified raw library> --out <new private library>
+--kit <native kit>` fits five finite sections of the original DD2 inn2048 painting
+to four curved Guild roofs. The tall hall joins two different intact sections at
+an existing row for more courses; other roofs use single panels. Remove four dense
+tile meshes, raise their original closed decks.12m, retain47 ridge saddles and
+dormer flashing/ironwork. Muted clay and Abbey slate factors require native colour
+review. Keep other paint/geometry, source envelope and nine services; audit every
+material primitive, finite UVs, contact and matching field. Evidence v62/models-reviewed;
+the coarse and bright-clay studies are superseded. No generated or edited pixels.
