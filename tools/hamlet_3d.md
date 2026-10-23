@@ -1207,3 +1207,39 @@ No estate selected/saved; protected estates untouched. Other services may still
 contain DD1-derived detail. Wider architecture, facade/alpha/tree/background
 lighting, terrain dressing and saved/controller/full-frame-time/long-session
 acceptance remain open. This pass does not claim whole-town native art parity.
+
+
+Round305 accepted Abbey native oak: local-art/ui-overhaul/hamlet-abbey-portal-v60/CONTINUE.md.
+Fifteen existing portal planks/backing/eave members use original DD2 Assistance2048
+paint and the same muted oak factor as the Nomad. Finite, aspect-fitted samples
+follow each member; quieter board samples avoid the first study's broken ends.
+Two old wood materials become one;255 renderers, one fewer. All759 meshes/geometry,
+stone/slate/iron/native architecture, other UVs and nine raw/baked services retained.
+Abbey30272 triangles and exact bounds/normalization. Contact/matching field rebaked.
+Four views/geometry/paint/finite-UV/placement/package audits, native full unsaved
+fixture/fresh1920 overview and0 buffer reallocations/5.037sec PASS.
+Runtime298 unchanged, DD2 CLOSED, no pending restore. No generation or raster edits.
+Raw art/models-reviewed/, baked art/HamletModels-reviewed/ plus matched field.
+Fresh usage/baseline next306; retain interactive colour harmony. Bulky output D:.
+
+The connected native city_tower_02 front was inspected for a carved portal. Its
+142-face main island contains the whole paired-window facade. It cannot fit the
+existing entrance without repainting or distorting the source, so no graft was
+made. Native belfry/pinnacles and the dressed-stone arch remain unchanged.
+The accepted pass reuses caravan_joinery's finite sampler and original Assistance
+atlas on six fitted door planks, their backing and eight eave fascias. The first
+study's brighter upright/broken-end samples read as holes. The final uses quieter
+cart-board samples for the doorway and a continuous sill for eaves. Source pixels
+are exact and the material factor is.45/.38/.28 with.45 emission, matching Nomad
+oak. Existing iron hinges/pulls remain. All other paintings and factors are exact.
+All759 geometries and744 other UV sets retained; fifteen UV maps intentionally
+change. Core source bounds/normalization are exact; world float positions differ by at most4.27um. The
+contact bake preserves the raw buffer prefix; matching1024 guarded field rebaked.
+Native full fixture covers ten services, camera/reset/release/reload, return,
+Embark-cache, resize, keyboard and still camera/smoke. Fresh1920 town inspected.
+No C# change or test-suite rerun; latest1294 Core PASS remains from298. Native
+profiles/configs/estate2/other private assets and foreign tracked work retained.
+No estate selected/saved; protected estates untouched. Roof paint repeats its
+chipped tile motif and deserves another native-reference review. Wider architecture,
+facade/alpha/tree/background lighting, terrain dressing, saved/controller/full
+frame-time/long-session acceptance and whole-town native art parity remain open.

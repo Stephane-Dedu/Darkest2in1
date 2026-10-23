@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round305 accepted Abbey native oak: local-art/ui-overhaul/hamlet-abbey-portal-v60/CONTINUE.md.
+Fifteen existing portal planks/backing/eave members use original DD2 Assistance2048
+paint and the same muted oak factor as the Nomad. Finite, aspect-fitted samples
+follow each member; quieter board samples avoid the first study's broken ends.
+Two old wood materials become one;255 renderers, one fewer. All759 meshes/geometry,
+stone/slate/iron/native architecture, other UVs and nine raw/baked services retained.
+Abbey30272 triangles and exact bounds/normalization. Contact/matching field rebaked.
+Four views/geometry/paint/finite-UV/placement/package audits, native full unsaved
+fixture/fresh1920 overview and0 buffer reallocations/5.037sec PASS.
+Runtime298 unchanged, DD2 CLOSED, no pending restore. No generation or raster edits.
+Raw art/models-reviewed/, baked art/HamletModels-reviewed/ plus matched field.
+Fresh usage/baseline next306; retain interactive colour harmony. Bulky output D:.
+
 Round304 accepted native Nomad crest: local-art/ui-overhaul/hamlet-nomad-sign-v59/CONTINUE.md.
 The native DD2 Nomad Wagon crest replaces the last DD1 eye sprite on this service.
 Original427x464 RGBA pixels, alpha/full UVs/aspect retained on a rigid hanging sign.

@@ -618,3 +618,12 @@ a rigid hanging quad. Keep the existing crossbar/posts and other174 meshes.
 The source is private sprites2d/inn_crests/inn_crest_nomadwagon.png. Review all
 four views and in-game placement, retain exact bounds, bake contact and refresh
 the guarded shadow field. Evidence hamlet-nomad-sign-v59/art/models-reviewed/.
+
+
+`abbey_native_oak.py --source <verified raw library> --out <new private library>
+--kit <native kit>` maps original DD2 Assistance2048 paint to the15 retained
+portal/eave wood members. It imports caravan_joinery's finite sampler and uses
+the Nomad oak factor. Quieter boards suit fitted doors; continuous sill paint
+suits eaves. Retain all759 geometries and other744 UVs/materials. Audit finite
+UVs and all four views before native checking. Contact/field must match. Evidence
+hamlet-abbey-portal-v60/art/models-reviewed; initial study is superseded.

@@ -469,3 +469,14 @@ that aspect, with a rigid board on the existing suspension, rather than stretchi
 the painting over the previous cloth grid. Use shared timber grading with the
 source's ochre/red wood. Check the lower edge against the canopy and entrance,
 preserve the model envelope and inspect the sign at actual town scale.
+
+
+## Shared oak, different architectural roles, v60
+
+Use the same native oak family and muted factor across interactive services.
+Choose samples for the job: broken ends can suit a wagon but read as holes in
+a fitted church door. Quieter cart boards retain broad DD2 facets and ink grain;
+continuous sill paint suits long eaves. Preserve the portal fit, ironwork and
+dressed-stone arch. Keep pixels intact, map at face aspect and check the actual
+town. A connected native facade is not a ready-made portal. Avoid distorting
+its paired windows or repainting it just to add more ornament.
