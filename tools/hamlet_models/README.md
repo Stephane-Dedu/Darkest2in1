@@ -715,3 +715,13 @@ services. Audit decoded pixels/factors/bindings, finite fields, native cap sourc
 coverage, wheel wrap, source envelope/Core placement, contact and matching field.
 Four model views and actual native town review are required. Evidence is in
 hamlet-smithy-workprops-v70; the striped-stump study was never installed.
+
+
+`abbey_native_shingles.py --source <accepted raw library> --out <new private
+library> --kit <native kit>` replaces the Abbey's coarse inn-clay roof field with
+original coast_buildings_03 grey shingles. Three finite fields fit the two curved
+decks and 31 retained physical ridge caps. Share the Sanitarium's explicit slate
+factor, preserve 757 meshes / 18704 triangles, 753 other UVs/materials and nine
+services. Audit original RGBA/factors/bindings, all finite UV triangles, source
+envelope/Core placement, contact/matched field; review all four views and actual
+native town capture. Evidence: hamlet-abbey-shingles-v71/art/models-reviewed/.

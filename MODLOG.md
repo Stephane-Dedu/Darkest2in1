@@ -9408,3 +9408,53 @@ substitute for suitable firebrick. Preserve the shared muted service palette.
 ## Status round313
 
 Accepted313 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next314.
+
+
+## Round314 - denser native Abbey shingles (2026-10-23)
+
+Round314 accepted denser Abbey shingles: local-art/ui-overhaul/hamlet-abbey-shingles-v71/CONTINUE.md.
+Original DD2 Shroud2048 grey shingle paint replaces the Abbey's tinted inn-clay
+roof field. One finite denser panel fits each curved slope; 31 physical ridge
+caps use a finite shingle face. Shared .65/.69/.76 slate factor matches the
+Sanitarium family. All 757 meshes / 18704 triangles, 753 other UVs/materials and
+nine raw/baked services retained; source envelope/normalization exact.
+Four views, pixel/geometry/UV/placement/package/contact/matched 1024 field audits,
+full unsaved 1920 fixture, fresh town view and zero buffer reallocations over
+5.025 seconds PASS. 255 renderers unchanged, runtime298 unchanged.
+DD2 CLOSED, no pending restore. No generation or edited native pixels.
+Accepted raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next315; heavy data D:.
+
+The fresh native town view after313 showed large, broad black rectangular marks
+on the Abbey's roof. The previous source was red clay with a slate factor, and
+its limited course density stayed visible at town scale. The replacement uses
+the original coast_buildings_03 atlas, also used by the Sanitarium. A 670x560
+field supplies the nave, a 290x470 field supplies the porch, and a 55x50 face
+supplies 31 existing folded caps. The native weathering and irregular shingle
+courses remain. Physical roof geometry, arc-length uphill mapping, pinnacle /
+bell tower / stonework / porch shape / windows and the Abbey's DD1 identity stay.
+
+Four mesh UV maps / 952 triangles change. Every triangle stays inside its one
+recorded native field, without UV repeat or adjacent-island bleed. Both native
+face/edge material factors and base/emission RGBA pixels are independently proved;
+two materials replace two, with no extra renderer. All 757 geometries and the
+753 other UVs remain within .477um; source bounds/normalization are exact. Core
+world coordinates stay within 4.265um (float32 placement). Nine other raw/baked
+services are byte-identical; contact preserves the raw buffer prefix. The guarded
+1024 sunlight field matches all ten model hashes.
+
+Full unsaved native fixture: ten services/Escape, camera pan/zoom/reset, full
+release/reload/re-entry, Embark park/cache/resume, live resize/restore, keyboard
+focus/Enter/back and still camera/smoke PASS. A fresh 1920 town view and five-second
+buffer probe follow in the same owned process. Zero live input events, no estate
+selected or saved. Plugin/config/profiles/estate2 and foreign work preserved.
+No C# change/test-suite rerun; last 1294 Core PASS remains298. This improves roof
+readability; whole-town native production-art parity remains open. Review the
+Guild's broad roof marks separately, then masonry finish and broader lighting /
+terrain / facade / alpha / trees / background. Saved/controller/full performance
+acceptance remains separate. Keep shared muted service colours; do not replace
+every service with the same painting merely to achieve colour harmony.
+
+## Status round314
+
+Accepted314 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next315.

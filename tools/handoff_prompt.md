@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round314 accepted denser Abbey shingles: local-art/ui-overhaul/hamlet-abbey-shingles-v71/CONTINUE.md.
+Original DD2 Shroud2048 grey shingle paint replaces the Abbey's tinted inn-clay
+roof field. One finite denser panel fits each curved slope; 31 physical ridge
+caps use a finite shingle face. Shared .65/.69/.76 slate factor matches the
+Sanitarium family. All 757 meshes / 18704 triangles, 753 other UVs/materials and
+nine raw/baked services retained; source envelope/normalization exact.
+Four views, pixel/geometry/UV/placement/package/contact/matched 1024 field audits,
+full unsaved 1920 fixture, fresh town view and zero buffer reallocations over
+5.025 seconds PASS. 255 renderers unchanged, runtime298 unchanged.
+DD2 CLOSED, no pending restore. No generation or edited native pixels.
+Accepted raw art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next315; heavy data D:.
+
 Round313 accepted Blacksmith work props: local-art/ui-overhaul/hamlet-smithy-workprops-v70/CONTINUE.md.
 Twelve retained props use original DD2 Shroud cut wood and Assistance oak.
 The anvil stump has an intact cut end and vertical bark panels; the wheel rim

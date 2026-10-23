@@ -577,3 +577,15 @@ where the source supports it, and compensate a different source explicitly.
 Source provenance matters: a DD1 silhouette reference does not mean later
 generated replacement pixels are raw DD1 art. Verify the currently embedded image
 before scheduling another repaint. Native source alone does not prove quality.
+
+
+## Roof course density at town scale, v71
+
+An authentic source atlas can still look crude when too few painted courses cover
+a large roof. Judge the roof in the actual town camera, then choose an intact
+field with enough courses and a suitable material identity. Grey native shingles
+work better for the Abbey than red inn tiles recoloured as slate. A shared finish
+can connect Abbey and Sanitarium without forcing identical architecture. Preserve
+one finite painting per slope and its native weathering; do not hide the problem
+under a dense grid of repeated overlay meshes. Keep physical ridge caps and fit
+their faces separately so they do not stretch the whole roof painting.
