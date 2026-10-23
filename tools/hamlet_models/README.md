@@ -725,3 +725,16 @@ factor, preserve 757 meshes / 18704 triangles, 753 other UVs/materials and nine
 services. Audit original RGBA/factors/bindings, all finite UV triangles, source
 envelope/Core placement, contact/matched field; review all four views and actual
 native town capture. Evidence: hamlet-abbey-shingles-v71/art/models-reviewed/.
+
+
+`guild_roof_panels.py --source <accepted raw library> --out <new private library>
+--kit <native kit> --paint <reviewed clay PNG>` fits the hall/dormers/caps to one
+new generated DD2-reference clay painting and the armory/caps to original native
+Shroud2048 shingles. Distinct dormer fractions keep comparable tile scale; explicit
+clay/slate factors fit the town family. All 624 geometries / 12373 triangles, 616
+other UVs/materials, 47 physical caps and nine services retained. Audit original
+generated/native RGBA, factors/eight bindings/finite UVs, bounds/Core placement,
+contact and matched field. Four views/native town review required. Evidence:
+hamlet-guild-clay-v72/art/models-reviewed; art/guild-clay-painted-v72.png and
+generation.json contain the private image/full prompt/provenance. The native
+upper-tavern panel study was rejected before installation. No game art in Git.

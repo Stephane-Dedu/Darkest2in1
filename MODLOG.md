@@ -9458,3 +9458,57 @@ every service with the same painting merely to achieve colour harmony.
 ## Status round314
 
 Accepted314 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next315.
+
+
+## Round315 - Guild roof paint density and shared slate (2026-10-23)
+
+Round315 accepted Guild roof panels: local-art/ui-overhaul/hamlet-guild-clay-v72/CONTINUE.md.
+A new painted clay field replaces coarse native marks on the hall/dormers;
+original Shroud grey shingles replace the pink-tinted armory roof. Warm clay and
+shared muted slate retain the Guild's identity within the service-building family.
+All 624 meshes / 12373 triangles, 616 other UVs/materials, 47 physical ridge caps,
+standards/crest/native frontage/wood/door/iron and nine raw/baked services retained.
+Four views, paint/geometry/UV/placement/package/contact/matching 1024 field audits,
+full unsaved 1920 fixture, fresh town and zero buffer reallocations over
+5.017 seconds PASS. 255 renderers unchanged, runtime298 unchanged.
+DD2 CLOSED, no pending restore. Accepted raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next316; heavy data D:.
+
+Native city/inn reconnaissance compared sixteen unique building atlases. An
+isolated native upper-tavern roof was fitted and rendered in four views, but
+its large black courses became broad ribbons on the Guild. It was rejected
+before installation. The final clay image is a new 1448x1086 built-in ImageGen
+painting guided by the native tavern/inn atlases: finer chipped edges, firing
+mottling, tapered cracks, restrained wear and smaller dark gaps. No native pixels
+were edited. The generated image is retained unedited in
+art/guild-clay-painted-v72.png; generation.json preserves the complete prompt,
+tool, original output path and native reference paths. It is generated art,
+not extracted DD2 paint. The original Shroud2048 armory atlas stays pixel-exact.
+
+The hall samples one full painting per arc-length slope. Dormers sample distinct
+fractions to keep comparable tile size; caps use a finite painted face. The
+armory samples one native shingle field and a separate cap face, sharing the
+Abbey/Sanitarium .65/.69/.76 factor. Clay keeps .70/.65/.59; cut sides keep .217
+of the face finish. Four materials replace four, with no extra renderer. Both
+decoded RGBA sources, base/emission factors and all eight bindings are proved.
+All geometry and the 616 other UVs stay within .477um; source envelope and
+normalization exact. Placement-audit.json records float32 Core world tolerance.
+Every modified UV triangle stays in its one recorded paint field, without repeat.
+Nine raw/baked services remain byte-identical. Contact preserves the raw buffer
+prefix; the guarded sunlight field matches all ten model hashes.
+
+Full unsaved native fixture covers ten services/Escape, pan/zoom/reset, full
+release/reload/re-entry, Embark park/cache/resume, live resize/restore, keyboard
+focus/Enter/back and still camera/smoke. Fresh 1920 town capture and buffer probe
+follow in the same owned process. Zero live input events, no estate selected or
+saved. Plugin/config/profiles/estate2 and foreign work preserved. No C# change
+or test-suite rerun; last 1294 Core PASS remains298. Whole-town native production
+art parity remains open: masonry density/finish, broader building/terrain/facade/
+alpha/tree/background lighting and saved/controller/full performance acceptance.
+Native provenance is not enough to accept an unsuitable texture. Keep colour
+harmony through shared material families and preserve distinct building identities.
+
+## Status round315
+
+Accepted315 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next316.

@@ -589,3 +589,17 @@ can connect Abbey and Sanitarium without forcing identical architecture. Preserv
 one finite painting per slope and its native weathering; do not hide the problem
 under a dense grid of repeated overlay meshes. Keep physical ridge caps and fit
 their faces separately so they do not stretch the whole roof painting.
+
+
+## When native paint fails at a different scale, v72
+
+Compare source candidates on the actual retained building. A perfectly authentic
+small roof field can still produce broad black ribbons when enlarged. Reject it
+before installation. When a painting is needed, specify physical tile density,
+smaller tapered crevice shadows, chipped faces and native brush language; keep
+the complete prompt and generated source distinct from extracted material.
+Use the whole finite painting once on a large slope and smaller distinct fractions
+on dormers so tile size stays comparable. Shared warm clay and cool slate can
+unify interactive buildings while preserving their different roles. Judge them
+together in the town camera; source resolution and Blender beauty alone do not
+establish native production-art parity.

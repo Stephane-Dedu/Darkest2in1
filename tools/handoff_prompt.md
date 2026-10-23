@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round315 accepted Guild roof panels: local-art/ui-overhaul/hamlet-guild-clay-v72/CONTINUE.md.
+A new painted clay field replaces coarse native marks on the hall/dormers;
+original Shroud grey shingles replace the pink-tinted armory roof. Warm clay and
+shared muted slate retain the Guild's identity within the service-building family.
+All 624 meshes / 12373 triangles, 616 other UVs/materials, 47 physical ridge caps,
+standards/crest/native frontage/wood/door/iron and nine raw/baked services retained.
+Four views, paint/geometry/UV/placement/package/contact/matching 1024 field audits,
+full unsaved 1920 fixture, fresh town and zero buffer reallocations over
+5.017 seconds PASS. 255 renderers unchanged, runtime298 unchanged.
+DD2 CLOSED, no pending restore. Accepted raw art/models-reviewed/, baked
+art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next316; heavy data D:.
+
 Round314 accepted denser Abbey shingles: local-art/ui-overhaul/hamlet-abbey-shingles-v71/CONTINUE.md.
 Original DD2 Shroud2048 grey shingle paint replaces the Abbey's tinted inn-clay
 roof field. One finite denser panel fits each curved slope; 31 physical ridge
