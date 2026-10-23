@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round311 accepted native Sanitarium timber: local-art/ui-overhaul/hamlet-sanitarium-joinery-v67/CONTINUE.md.
+Original DD2 Assistance2048 paint fits36 cornice/eave/bracket/post members;
+native inn boarded-door paint fits the entrance. Shared oak factors retain town
+colour harmony. Five finite aspect-fitted source fields, no edited/upscaled pixels.
+All444 geometries/15469tri,407 other UVs/paint, native house/plinth/slate/plaster/
+green panes/iron and nine raw/baked services retained; bounds/scale/Core placement
+exact. Four model views/audits/contact/matching1024 field and full unsaved native
+1920 fixture/fresh town view PASS;0 buffer reallocations/5.032sec.
+253 renderers, one more for the separate door source. Runtime298 unchanged;
+DD2 CLOSED, no pending restore. No generation. Accepted raw art/models-reviewed/,
+baked art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next312; retain shared muted colours. Heavy data D:.
+
 Round310 accepted native Guild standards: local-art/ui-overhaul/hamlet-guild-standards-v66/CONTINUE.md.
 Two complete native DD2 Olde Guild Hall banners replace the DD1 cloth crops.
 Original347x572 RGBA, full UVs/alpha/aspect; ivory cloth with muted teal accents

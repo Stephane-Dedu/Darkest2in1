@@ -9265,3 +9265,47 @@ acceptance and whole-town native production-art parity remain open.
 ## Status round310
 
 Accepted310 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next311.
+
+
+## Round311 - native Sanitarium framing and doorway (2026-10-23)
+
+Round311 accepted native Sanitarium timber: local-art/ui-overhaul/hamlet-sanitarium-joinery-v67/CONTINUE.md.
+Original DD2 Assistance2048 paint fits36 cornice/eave/bracket/post members;
+native inn boarded-door paint fits the entrance. Shared oak factors retain town
+colour harmony. Five finite aspect-fitted source fields, no edited/upscaled pixels.
+All444 geometries/15469tri,407 other UVs/paint, native house/plinth/slate/plaster/
+green panes/iron and nine raw/baked services retained; bounds/scale/Core placement
+exact. Four model views/audits/contact/matching1024 field and full unsaved native
+1920 fixture/fresh town view PASS;0 buffer reallocations/5.032sec.
+253 renderers, one more for the separate door source. Runtime298 unchanged;
+DD2 CLOSED, no pending restore. No generation. Accepted raw art/models-reviewed/,
+baked art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next312; retain shared muted colours. Heavy data D:.
+
+The shared oak family uses the Nomad/Abbey/Guild Assistance factor.45/.38/.28.
+Quiet native cart boards suit broad faces; a continuous sill suits long beams.
+Face UVs follow grain and fit actual member aspect within original source fields.
+The door uses a92x152 field of the original inn2048 atlas with the source-compensating
+Guild door factor.90/.80/.65. Its full atlas remains intact; the selected field
+does not become2048px of new door detail. Original plank joints/straps/rings stay.
+A native Academic-house boarded-opening study was rejected in four-view review:
+the black broken centre hid the closed doorway and its hardware. It was never
+installed. The final inn body field keeps visible warm boards and native brushwork.
+Two native source SHA/decoded RGBA/base/emission factors and all37 bindings are
+proved. One old wood material becomes two native ones. All444 geometries/other407
+UVs remain within.239um; Core source bounds/normalization and placed coordinates
+exact. Nine other raw/baked services remain byte-exact. Contact preserves the raw
+buffer prefix and the guarded ground field matches the complete source hashes.
+Full fixture ran once at1920x1080, then a fresh post-fixture town capture and
+buffer probe used the same owned preview. Ten services/Escape, pan/zoom/reset,
+full release/reload/re-entry, Embark park/cache/resume, live resize/restore,
+keyboard and still camera/smoke pass;0 live input events, no estate selected/saved.
+Native profiles/config, estate2, plugin/private assets and foreign tracked work
+retained. No C# change or test-suite rerun; last1294 Core PASS remains298.
+Other service timber/sign details, terrain/facade/alpha/tree/background lighting,
+saved/controller/full frame-time/long-session acceptance and whole-town native
+production-art parity remain open.
+
+## Status round311
+
+Accepted311 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next312.

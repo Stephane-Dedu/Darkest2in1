@@ -542,3 +542,14 @@ around the service's physical identity crest. Compare actual native town size an
 colour. Ivory cloth with a small muted accent can sit beside warm clay/cool slate
 without another dominant colour. Do not mistake opaque grey atlas surroundings
 for transparency; isolate native faces/UVs before reusing combined props artwork.
+
+
+## Shared oak, distinct source roles, v67
+
+Use the same muted oak finish for related framing across interactive buildings.
+Fit quiet intact boards to broad faces and continuous grain to long members.
+Doors need their own legible closed-board field; a native broken opening can
+erase a service entrance even when its source pixels are authentic. Compare it
+with real hardware and shadow depth before reuse. Report selected field detail,
+not merely atlas size. Separate source factors may compensate for darker native
+paint while preserving the shared town colour family. Preserve the native atlas.

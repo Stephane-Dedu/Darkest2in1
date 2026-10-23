@@ -681,3 +681,14 @@ geometries/UVs/paints, envelope/scale and nine services. Prove decoded pixels/al
 factor/emission/both bindings, all material primitives, contact and matching field.
 Review four model views and native town colours. Evidence hamlet-guild-standards-v66/
 art/models-reviewed; paired framed Crossed Swords study is superseded.
+
+
+`sanitarium_native_oak.py --source <verified raw library> --out <new private library>
+--kit <native kit>` maps native Assistance oak onto36 cornice/eave/bracket/post
+members and a92x152 native inn door field onto the retained doorway. Shared frame
+and source-compensating door factors match the existing oak family. Keep all444
+geometries/15469tri,407 other UVs/paint, native architecture and nine services.
+Audit both original2048 sources, factors/emission/bindings, member-specific finite
+UVs, source envelope/placed geometry, contact and matching field; inspect four views
+and native town. Evidence hamlet-sanitarium-joinery-v67/art/models-reviewed.
+The dark Academic-door study is rejected and was never installed.
