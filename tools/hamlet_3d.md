@@ -1677,3 +1677,47 @@ art parity remains open: masonry density/finish, broader building/terrain/facade
 alpha/tree/background lighting and saved/controller/full performance acceptance.
 Native provenance is not enough to accept an unsuitable texture. Keep colour
 harmony through shared material families and preserve distinct building identities.
+
+
+Round316 accepted Abbey masonry detail: local-art/ui-overhaul/hamlet-abbey-masonry-v73/CONTINUE.md.
+A new detail repaint enriches the existing limestone faces with chipped edges,
+fractured layers, fine tooling and restrained deposits. The same muted grey
+family and all five material factors remain. 566 wall/buttress/arch/moulding pieces
+receive the painting. All 757 meshes / 18704 triangles and every UV remain,
+including native architecture, openings and the accepted roof. Nine raw/baked
+services retained. Four views, pixel/material/geometry/UV/placement/layout/package/
+contact/matched 1024 field proof, full unsaved 1920 fixture, fresh town and zero
+buffer reallocations over 5.028 seconds PASS. 255 renderers unchanged.
+Runtime298 unchanged, DD2 CLOSED, no pending restore. Accepted raw
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next317; heavy data D:.
+
+Current paint audit established that the five stone materials all used the same
+earlier generated v40 painting, with v42/v43 cutout mappings. They were not raw
+DD1 textures. The new 1254x1254 built-in ImageGen edit preserves its major course
+layout while adding designed surface wear. A native city_buildings_01 atlas guided
+the stone language. This is generated repaint art, not extracted DD2 paint.
+art/abbey-stone-painted-v73.png stores the unedited output; generation.json stores
+the full prompt, source path, edit target and native reference.
+
+Independent dark joint/crack comparison gives 90.65% mask intersection-over-union;
+99.80% of new dark pixels lie within three pixels of old dark pixels, and 99.997%
+of old dark pixels lie within three pixels of the new mask. This supports cutout
+compatibility, not pixel-identical seams. RGB medians move from81/80/81 to80/79/77,
+keeping the grey family. All geometry/UVs retain within .477um; source bounds and
+normalization exact, Core world placement within4.265um. The five renamed material
+definitions retain every factor/emission/alpha/sampler setting; their original
+palette families remain unchanged. Every other material and all757 bindings are
+proved. No new material count, renderer, geometry or UV remapping. Contact keeps
+the raw buffer prefix; the guarded field matches all ten source hashes.
+
+Full unsaved native fixture covers ten services/Escape, pan/zoom/reset, full
+release/reload/re-entry, Embark park/cache/resume, live resize/restore, keyboard
+focus/Enter/back and still camera/smoke. Fresh1920 town view and buffer probe follow
+in the same owned process. Zero live input events, no estate selected/saved.
+Plugin/config/profiles/estate2 and foreign work preserved. No C# change or suite
+rerun; last1294 Core PASS remains298. This pass improves surface detail, not stone
+course density or architecture. Other service masonry/brick identity, broader
+lighting/terrain/facade/alpha/tree/background quality and saved/controller/full
+performance acceptance remain open. Whole-town native production-art parity is
+not claimed. Compare actual camera evidence before propagating a shared paint.

@@ -603,3 +603,14 @@ on dormers so tile size stays comparable. Shared warm clay and cool slate can
 unify interactive buildings while preserving their different roles. Judge them
 together in the town camera; source resolution and Blender beauty alone do not
 establish native production-art parity.
+
+
+## Detailed repaint over fitted masonry, v73
+
+Trace the currently embedded painting before replacing a wall or trim source.
+When many fitted arches/buttresses sample individual faces from one painting,
+preserve that layout while adding wear inside its faces. Check dark joint layout
+and model views; a prompt requesting exact alignment is not proof. Keep the broad
+facets readable under finer chips and tooling. Retaining material factors and
+palette classification keeps the stone family stable, though source colours still
+need actual camera review. Surface detail does not solve incorrect course scale.

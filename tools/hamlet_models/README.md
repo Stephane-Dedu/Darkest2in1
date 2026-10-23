@@ -738,3 +738,15 @@ contact and matched field. Four views/native town review required. Evidence:
 hamlet-guild-clay-v72/art/models-reviewed; art/guild-clay-painted-v72.png and
 generation.json contain the private image/full prompt/provenance. The native
 upper-tavern panel study was rejected before installation. No game art in Git.
+
+
+`abbey_masonry_paint.py --source <accepted raw library> --out <new private
+library> --kit <native kit> --paint <reviewed stone PNG>` replaces the images in
+five Abbey stone materials, retaining all factor/emission/sampler settings and
+every UV. The reviewed edit keeps the prior course layout and adds surface wear.
+Preserve757 meshes/18704 triangles, all566 painted members, native architecture /
+accepted roof and nine services. Audit generated RGBA, all material definitions /
+bindings, all geometry/UVs, major joint layout, bounds/Core placement, contact and
+matched field. Four views/native town review required. Evidence:
+hamlet-abbey-masonry-v73/art/models-reviewed; art/abbey-stone-painted-v73.png and
+generation.json preserve the private generated edit/full prompt/provenance.

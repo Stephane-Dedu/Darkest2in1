@@ -1,5 +1,18 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round316 accepted Abbey masonry detail: local-art/ui-overhaul/hamlet-abbey-masonry-v73/CONTINUE.md.
+A new detail repaint enriches the existing limestone faces with chipped edges,
+fractured layers, fine tooling and restrained deposits. The same muted grey
+family and all five material factors remain. 566 wall/buttress/arch/moulding pieces
+receive the painting. All 757 meshes / 18704 triangles and every UV remain,
+including native architecture, openings and the accepted roof. Nine raw/baked
+services retained. Four views, pixel/material/geometry/UV/placement/layout/package/
+contact/matched 1024 field proof, full unsaved 1920 fixture, fresh town and zero
+buffer reallocations over 5.028 seconds PASS. 255 renderers unchanged.
+Runtime298 unchanged, DD2 CLOSED, no pending restore. Accepted raw
+art/models-reviewed/, baked art/HamletModels-reviewed/ and matched
+art/HamletShadows-reviewed/ installed. Fresh usage/baseline next317; heavy data D:.
+
 Round315 accepted Guild roof panels: local-art/ui-overhaul/hamlet-guild-clay-v72/CONTINUE.md.
 A new painted clay field replaces coarse native marks on the hall/dormers;
 original Shroud grey shingles replace the pink-tinted armory roof. Warm clay and
