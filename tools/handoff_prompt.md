@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round313 accepted Blacksmith work props: local-art/ui-overhaul/hamlet-smithy-workprops-v70/CONTINUE.md.
+Twelve retained props use original DD2 Shroud cut wood and Assistance oak.
+The anvil stump has an intact cut end and vertical bark panels; the wheel rim
+unwraps once, while the hammer, hub and spokes use aspect-fitted grain.
+Muted factors keep the workshop in the shared service-building colour family.
+All 199 meshes / 17590 triangles, 187 other UVs/material bindings/paintings and
+nine raw/baked services retained. Four views, pixel/geometry/UV/placement audits,
+contact and matching 1024 field, full unsaved 1920 fixture, fresh town capture
+and zero buffer reallocations over 5.021 seconds PASS.
+255 renderers (+1), runtime298 unchanged, DD2 CLOSED, no pending restore.
+No generated art or edited source pixels. Accepted raw art/models-reviewed/,
+baked art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next314; heavy data on D:.
+
 Round312 accepted native Blacksmith timber: local-art/ui-overhaul/hamlet-smithy-joinery-v68/CONTINUE.md.
 Original Assistance2048 oak paint fits108 framing/window/roof-binding members;
 six fitted door boards share one continuous native inn paint field. Shared oak

@@ -564,3 +564,16 @@ before packaging; prove shared affine UV/world mapping independently. Structural
 oak can share the town family while doors use a source-compensating finish.
 Workshop props need grain that fits their role, especially stump end grain and
 wheel rims; do not force them through the structural member recipe.
+
+
+## Small workshop props, v70
+
+Use distinct cut-end and bark paint on a stump. A narrow strip around an entire
+circumference can turn native cracks into broad black stripes; fit vertical bark
+panels to the physical side faces and check their apparent scale at town zoom.
+Wheel rims need one finite angular wrap, with the seam away from the main view;
+spokes and handles need grain along their length. Share the structural oak finish
+where the source supports it, and compensate a different source explicitly.
+Source provenance matters: a DD1 silhouette reference does not mean later
+generated replacement pixels are raw DD1 art. Verify the currently embedded image
+before scheduling another repaint. Native source alone does not prove quality.

@@ -9354,3 +9354,57 @@ acceptance and whole-town native production-art parity remain open.
 ## Status round312
 
 Accepted312 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next313.
+
+
+## Round313 - native Blacksmith work props (2026-10-23)
+
+Round313 accepted Blacksmith work props: local-art/ui-overhaul/hamlet-smithy-workprops-v70/CONTINUE.md.
+Twelve retained props use original DD2 Shroud cut wood and Assistance oak.
+The anvil stump has an intact cut end and vertical bark panels; the wheel rim
+unwraps once, while the hammer, hub and spokes use aspect-fitted grain.
+Muted factors keep the workshop in the shared service-building colour family.
+All 199 meshes / 17590 triangles, 187 other UVs/material bindings/paintings and
+nine raw/baked services retained. Four views, pixel/geometry/UV/placement audits,
+contact and matching 1024 field, full unsaved 1920 fixture, fresh town capture
+and zero buffer reallocations over 5.021 seconds PASS.
+255 renderers (+1), runtime298 unchanged, DD2 CLOSED, no pending restore.
+No generated art or edited source pixels. Accepted raw art/models-reviewed/,
+baked art/HamletModels-reviewed/ and matched art/HamletShadows-reviewed/ installed.
+Fresh usage/baseline next314; heavy data on D:.
+
+The 2048 Shroud stump atlas supplies the intact cut disc and finite bark panels.
+The disc fits inside the original native cut-face UV area. Bark is fitted from
+a painted interior rectangle; original native bark UV topology is not claimed.
+A narrow whole-circumference strip produced oversized black stripes and a yellow
+finish; that private study was rejected before installation. The final panels
+fit the physical side-face aspect with a muted .50/.43/.33 factor. Tundra stump
+paint was excluded because it contains snow. Eleven props use Assistance2048
+oak with the town's .45/.38/.28 factor. The wheel's major-angle wrap never spans
+more than 1/14 of the circumference in a triangle. Six finite fields, 276 fitted
+triangles, all 12 material bindings, both original RGBA images and base/emission
+factors are proved. All geometry and the 187 other UVs remain within .239um;
+source envelope/scale exact, Core world placement within .954um. Contact keeps
+the raw buffer prefix, and the guarded field matches all ten model hashes.
+
+Provenance correction: the present anvil sign is already a generated DD2-reference
+repaint from v22 (1448x1086, SHA d0ccf0e6a55aa8e606bcbf0f1bf439c9fe3175779cfe707c60e83bcc1633823b).
+Earlier handoffs called it DD1-derived because its original v01/v02 silhouette
+used a DD1 reference. Its current pixels are not the raw DD1 crop. It is retained
+unchanged; no new generation was needed. Existing brick_v21 is also an earlier
+generated painting, not extracted native firebrick. The private v69 checkpoint
+contains source reconnaissance only, not an accepted art round or installed study.
+
+The full native fixture covers ten services/Escape, camera pan/zoom/reset, full
+release/reload/re-entry, Embark park/cache/resume, live resize/restore, keyboard
+focus/Enter/back and still camera/smoke. A fresh 1920 town capture and buffer
+probe follow in the same owned process. Zero live input events; no estate was
+selected or saved. Plugin/config/profiles/estate2 and foreign tracked work are
+preserved. No C# changes or test-suite rerun; last 1294 Core PASS remains298.
+Whole-town native production-art parity is still open: masonry finish, broader
+building/terrain/facade/alpha/tree/background lighting, saved/controller and full
+performance acceptance need further review. Native Sprawl roof paint is not a
+substitute for suitable firebrick. Preserve the shared muted service palette.
+
+## Status round313
+
+Accepted313 art/field, runtime298; DD2 CLOSED. Fresh usage/baseline next314.

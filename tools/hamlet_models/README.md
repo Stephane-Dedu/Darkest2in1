@@ -703,3 +703,15 @@ original2048 sources/factors/emission/114 bindings, member-specific finite UVs
 and continuous six-board projection, source envelope/placed geometry, contact
 and matching field. Four model views/native town review required. Evidence
 hamlet-smithy-joinery-v68/art/models-reviewed; per-board stripe study rejected.
+
+
+`smithy_workprops.py --source <accepted raw library> --out <new private library>
+--kit <native kit>` fits twelve retained Blacksmith props. Shroud2048 supplies
+the intact cut end and vertical bark panels; Assistance2048 supplies the wheel,
+hammer, hub and eight spokes. The wheel rim unwraps once. Native pixels remain
+unchanged; explicit muted factors fit the town family. Retain all 199 geometries /
+17590 triangles, 187 other UVs/materials, architecture/iron/fire/sign and nine
+services. Audit decoded pixels/factors/bindings, finite fields, native cap source
+coverage, wheel wrap, source envelope/Core placement, contact and matching field.
+Four model views and actual native town review are required. Evidence is in
+hamlet-smithy-workprops-v70; the striped-stump study was never installed.
