@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round319 accepted Guild facade visibility: local-art/ui-overhaul/hamlet-guild-facade-light-v76/CONTINUE.md.
+The Guild's existing light bands now include directional self-shadow visibility,
+giving eaves, dormers and fitted frames more separation. Its muted ivory/clay/oak
+family and all paintings remain. All624 mesh members/637 primitives/12373 triangles,
+positions/normals/UVs/materials/bindings/bounds/scale and original buffer bytes
+retain exactly. Core review moves1057triangles on252members to a darker band;381light/
+alpha triangles retain their bands. Nine other baked models and ground field318
+remain byte-exact. Four matched Core-band views, geometry/material/paint/export/
+band audits, reproduction/path guards, roof/clear-side/unlit/planar tests, full
+unsaved1920fixture, fresh town and0buffer reallocations/5.029sec PASS.
+255renderers/runtime298 unchanged; DD2 CLOSED, no pending restore. Accepted
+art/HamletModels-reviewed/ installed. Raw authoring library remains accepted317;
+field remains318. Fresh usage/baseline next320; heavy data D:.
+
 Round318 accepted shared sunlight direction: local-art/ui-overhaul/hamlet-sun-direction-v75/CONTINUE.md.
 The 1024px ground-shadow field now follows the existing service light key
 (-.35,.75,-.55), replacing the opposite (.60,.45,.55) bake. Building highlights

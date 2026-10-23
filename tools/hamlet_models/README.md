@@ -769,3 +769,15 @@ compare it with the facade key before installing. The procedural self-test cover
 the negativeX/Z service quadrant as well as positiveX and vertical light. A new
 field must survive source/geometry/parameter checks and actual DD2 review. The
 direction correction does not add facade shadow receivers or change paint pixels.
+
+
+`bake_facade_light.py` augments a fresh contact-baked private package using matching
+Core layout/model review, now including world normals. Pass `--layout`, `--review`,
+`--source`, a new private `--out` and `--models guild`. It uses the shared service
+key, seven area samples/four sun rays and connected-plane averaging, preserving
+all original bytes and paint while appending scalar visibility. Existing lights
+and alpha parts retain their values. Regenerate Core review afterwards and compare
+actual band renders/native views. Acceptance currently covers Guild only. The
+three-band result is stylised self-shadowing; it does not create sharp moving
+boundaries or include unselected neighbor/terrain/tree casters. Source-output
+nesting is rejected. Keep the ground field if geometry/model identities retain.

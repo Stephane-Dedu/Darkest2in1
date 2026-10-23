@@ -96,7 +96,10 @@ foreach (var site in HamletLayout.Sites)
             var n=Vector3.Transform(Vector3.Normalize(normals[indices[i]]+normals[indices[i+1]]+normals[indices[i+2]]),rotation);
             bands[i/3]=HamletPalette.BuildingLightBand(Vector3.Dot(n,new(-.35f,.75f,-.55f)),p.ContactShade?[i/3]??1,light);
         }
-        primitives.Add(new {Name=model.Nodes[p.Node].Name,Positions=positions.SelectMany(v=>new[]{v.X,v.Y,v.Z}).ToArray(),Uv=p.Uv??new float[p.VertexCount*2],Indices=indices,Bands=bands,p.Material});
+        var worldNormals=normals.Select(n=>Vector3.Transform(n,rotation));
+        primitives.Add(new {Name=model.Nodes[p.Node].Name,Positions=positions.SelectMany(v=>new[]{v.X,v.Y,v.Z}).ToArray(),
+            Normals=worldNormals.SelectMany(v=>new[]{v.X,v.Y,v.Z}).ToArray(),
+            Uv=p.Uv??new float[p.VertexCount*2],Indices=indices,Bands=bands,p.Material});
     }
     models.Add(site.Id,new { Materials=materials,Primitives=primitives,SourceGlbHash=(string)gltf["asset"]?["extras"]?["source_glb_sha256"],model.TriangleCount,
         LocalBounds=new[]{new[]{lo.X,lo.Y,lo.Z},new[]{hi.X,hi.Y,hi.Z}},Scale=scale });

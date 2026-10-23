@@ -638,3 +638,15 @@ source geometry fixed, then judge the actual town camera. Shorter, correctly
 placed shadows can preserve readable entrances without brightening every building.
 Keep the shared muted palette. This alignment does not establish facade occlusion,
 tree/alpha casting or a complete physically lit scene.
+
+
+## Directional depth with retained paintings, v76
+
+Use actual Core world geometry and normals when baking facade visibility. Sample
+areas rather than a single triangle centre, and share exposure across connected
+flat faces so triangulation does not draw diagonal shadows. Combine the result
+conservatively with existing recess shade and preserve lamps/windows/alpha parts.
+Compare matched views with Core's real palette and light bands before native QA.
+The three-band result can give eaves and frames depth while retaining the town's
+colour family. It has limited spatial precision; inspect a bounded building before
+applying it elsewhere. Geometry and paint retention alone do not prove beauty.

@@ -9659,3 +9659,42 @@ parity for the whole Hamlet is not claimed.
 ## Status round318
 
 Accepted318 field, accepted317 models/runtime298; DD2 CLOSED. Fresh usage/baseline next319.
+
+
+## Round319 - Guild facade visibility (2026-10-23)
+
+Round319 accepted Guild facade visibility: local-art/ui-overhaul/hamlet-guild-facade-light-v76/CONTINUE.md.
+The Guild's existing light bands now include directional self-shadow visibility,
+giving eaves, dormers and fitted frames more separation. Its muted ivory/clay/oak
+family and all paintings remain. All624 mesh members/637 primitives/12373 triangles,
+positions/normals/UVs/materials/bindings/bounds/scale and original buffer bytes
+retain exactly. Core review moves1057triangles on252members to a darker band;381light/
+alpha triangles retain their bands. Nine other baked models and ground field318
+remain byte-exact. Four matched Core-band views, geometry/material/paint/export/
+band audits, reproduction/path guards, roof/clear-side/unlit/planar tests, full
+unsaved1920fixture, fresh town and0buffer reallocations/5.029sec PASS.
+255renderers/runtime298 unchanged; DD2 CLOSED, no pending restore. Accepted
+art/HamletModels-reviewed/ installed. Raw authoring library remains accepted317;
+field remains318. Fresh usage/baseline next320; heavy data D:.
+
+The tool reads Core world positions/normals and the existing(-.35,.75,-.55) key.
+Seven points per triangle/four sun rays sample selected-service self-occlusion.
+Connected flat surfaces share area-weighted exposure to avoid diagonal patches;
+the result only lowers retained contact visibility. No added runtime path,
+material batch, generated art or edited paint. ModelReviewExport now also emits
+world normals for offline work; all previous geometry, UVs and bands are proved
+unchanged. The whole candidate reproduces byte-exact with the final recipe.
+
+Native fixture covers ten service selections/Escape, pan/zoom/reset, full release/
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard focus/Enter/back
+and still camera/smoke, followed by a fresh town view and5sec buffer probe. Zero
+live OS input events; no estate selected/saved. Plugin/config/native profiles/
+estate2 and foreign tracked work preserved. Tool Release export passed; no runtime
+build or new Core-suite run. Last1294 Core PASS remains298. Planar averaging and
+three bands do not produce sharp moving wall-shadow boundaries. Neighbor/terrain/
+tree/alpha casting, other service facades and broader architecture/material/native
+production-art/performance parity remain open. This pass is bounded to Guild.
+
+## Status round319
+
+Accepted319 Guild visibility, field318/runtime298; DD2 CLOSED. Fresh usage/baseline next320.
