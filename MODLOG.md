@@ -9741,3 +9741,47 @@ acceptance remain open. Return to native architecture/material comparison next.
 ## Status round320
 
 Accepted320 Abbey/Guild319 visibility, field318/runtime298; DD2 CLOSED. Fresh usage/baseline next321.
+
+
+## Round321 - Smithy roof edge paint mapping (2026-10-23)
+
+Round321 accepted smithy roof-edge mapping: local-art/ui-overhaul/hamlet-smithy-reed-v78/CONTINUE.md.
+Collapsed UVs on140 triangles of the main/dormer roof underlays now sample finite
+painted areas, removing the stretched stripes along the reed edge. The detailed
+existing painting, physical reed bundles, warm brown palette, brick317, native
+oak/work props, and all199 mesh members/17590 triangles remain. The other17450
+triangle UVs and all24 material definitions/factors/emission/alpha/samplers and
+decoded paints retain. Nine raw and baked services remain byte-exact, including
+Guild319 and Abbey320 visibility. All199 contact-band histograms, source bounds/
+normalization retain; Core placement maximum error is under1 micrometre. The
+matching ground field is rebuilt for the new source identity with unchanged
+parameters and byte-identical pixels. Four matched Core-band views and raw
+geometry/UV/material/paint/Core/contact/field audits pass. Full unsaved1920 fixture,
+fresh town and zero buffer reallocations over 5.037 seconds pass with
+255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore. Accepted raw
+art/models-reviewed/ and complete baked art/HamletModels-reviewed/ installed;
+matching field art/HamletShadows-reviewed/. Fresh usage/baseline next322.
+
+Source inspection found128 flattened UV triangles on the main solidified deck
+and12 on the dormer. The previous v27 fix covered separate physical course edges,
+leaving these underlays untreated. Finite whole-member projection along the
+dominant world normal gives each nondegenerate physical face painted area while
+sharing phase across adjacent triangles. All unaffected UVs stay unchanged.
+Native farm_cottage supplied the short painted reed-edge reference; its small
+atlas was not stretched over the entire roof. No new art or source-pixel edits
+were needed. The earlier bulky-course hypothesis remains a separate design
+question; no course geometry was removed or changed by this correction.
+
+Native check covers ten service selections/Escape, pan/zoom/reset, release/
+reload/re-entry, Embark park/cache/resume, resize/restore, keyboard focus/Enter/
+back and still camera/smoke, followed by a fresh town and buffer probe. Zero live
+OS input events; no estate selected/saved. Plugin, config, native profiles,
+estate2 and foreign tracked work preserved. Frozen HEAD317cffd Core tools ran in
+Release. No gameplay build or new Core-suite run; last1294 Core PASS remains298.
+This removes a specific mapping artifact. Wider service architecture/materials,
+native production-art parity and saved/controller/long-session performance remain
+open. Keep interactive colours related while retaining their service identities.
+
+## Status round321
+
+Accepted321 smithy UVs/matched field, runtime298; DD2 CLOSED. Fresh usage/baseline next322.

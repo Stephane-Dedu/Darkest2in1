@@ -1,5 +1,22 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round321 accepted smithy roof-edge mapping: local-art/ui-overhaul/hamlet-smithy-reed-v78/CONTINUE.md.
+Collapsed UVs on140 triangles of the main/dormer roof underlays now sample finite
+painted areas, removing the stretched stripes along the reed edge. The detailed
+existing painting, physical reed bundles, warm brown palette, brick317, native
+oak/work props, and all199 mesh members/17590 triangles remain. The other17450
+triangle UVs and all24 material definitions/factors/emission/alpha/samplers and
+decoded paints retain. Nine raw and baked services remain byte-exact, including
+Guild319 and Abbey320 visibility. All199 contact-band histograms, source bounds/
+normalization retain; Core placement maximum error is under1 micrometre. The
+matching ground field is rebuilt for the new source identity with unchanged
+parameters and byte-identical pixels. Four matched Core-band views and raw
+geometry/UV/material/paint/Core/contact/field audits pass. Full unsaved1920 fixture,
+fresh town and zero buffer reallocations over 5.037 seconds pass with
+255 renderers/runtime298 unchanged. DD2 CLOSED, no pending restore. Accepted raw
+art/models-reviewed/ and complete baked art/HamletModels-reviewed/ installed;
+matching field art/HamletShadows-reviewed/. Fresh usage/baseline next322.
+
 Round320 accepted Abbey facade visibility: local-art/ui-overhaul/hamlet-abbey-facade-light-v77/CONTINUE.md.
 The Abbey uses the same directional visibility treatment as the Guild, giving
 its recessed lancets, buttresses and eaves more separation through the existing

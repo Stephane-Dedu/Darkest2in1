@@ -792,3 +792,15 @@ hamlet-smithy-firebrick-v74/art/models-reviewed. Rebuilding Abbey or Guild from
 raw art requires its local contact bake followed by its directional bake. Do
 not silently discard either accepted visibility layer or repeatedly append a
 bake onto the same service. No new material or runtime API is needed.
+
+
+`smithy_underlay_uvs.py --source <accepted raw library> --out <new private library>
+--kit <native kit>` repairs flattened UVs on140 main/dormer roof underlay triangles.
+It uses finite whole-member projection along each face's dominant world normal.
+Keep199 meshes/17590 triangles,17450 other triangle UVs, all physical reed courses,
+24 materials/paint/bindings and nine raw services. Audit mapped area/retention,
+package and contact-bake only Blacksmith, then merge into the current complete
+baked library so Guild/Abbey facade visibility stays byte-exact. Rebuild the
+source-matched ground field; four Core-band views and native review precede
+acceptance. Evidence hamlet-smithy-reed-v78/art/models-reviewed. This corrects
+underlay edges missed by v27; no painting or geometry replacement is required.

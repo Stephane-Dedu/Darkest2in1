@@ -661,3 +661,13 @@ palette's three bands on the actual town camera as well as isolated model views.
 Accept local recess separation without claiming a new painting or physically
 precise shadow map. Stop shade tuning after a useful bounded pass, then review
 the remaining architecture and material scale against native DD2 references.
+
+
+## Inspect hidden edge mappings before replacing paint, v78
+
+A detailed roof painting can still produce coarse stripes when solidified edge
+triangles have zero UV area. Audit the underlay as well as the separate physical
+courses. Repair the collapsed faces with finite area and a shared member phase;
+retain good upper-face mappings and the accepted palette. Compare front and back
+at the actual Core bands, then the native town camera. A small native atlas can
+guide edge construction without being enlarged over a whole service roof.
