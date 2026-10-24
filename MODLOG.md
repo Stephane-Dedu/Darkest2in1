@@ -10482,3 +10482,56 @@ heavy scripts/renders on D:/CodexArtifacts/DarkestDungeon3/expedition-terrain-re
 Accepted335 and its final native QA remain in expedition-visibility-v01.
 
 Status round336: offline studies rejected; accepted335 runtime/art retained, DD2 CLOSED/no pending restore. Next337.
+
+
+## Round337 - Native terrain inspection and connected-slope studies, 2026-10-24
+
+Round337 completed bounded native terrain inspection and offline comparisons.
+Accepted335 runtime/4K selector remains installed and hash-exact. Hamlet stays
+parked333. DD2 CLOSED, no game launch/save access or restoration in this round.
+
+Farm, Coast and ValleyCommon container metadata was inspected one bundle per
+process. Ten raw FBX assets were exported with original geometry/UV/material
+references: two eroded hills, supporting ground, four embark curbs and three
+coastal rocks. Five initially unresolved exports were repaired by identifying
+and verifying CAB161ad... in biome_common_assets_all.bundle. Final exports have
+zero skipped objects. The source bundle/extractor hashes and both attempt logs
+are retained privately. Raw FBX material defaults are not proof of the materials
+used by placed native prefabs.
+
+The curbs use road planks; several raw hills/rocks use farm_ground_dark or
+untextured env_black. The textured hill02 is the same303-triangle pedestal type
+already rejected for broad slopes. Six native landscape surfaces were also
+extracted with the existing helper. Material serialization confirms bilinear
+filtering, WrapU/V/W=0, HasVertexPainting=0 and native lighting/fog keywords on
+farm_eroded_hill. This is serialized evidence, not observed shader execution.
+
+Five whole-map studies are private and NOT accepted. An irregular32m connected
+height field avoids separate pedestal blocks, but the first study changed the
+free scenery scatter. The isolated geometry prototype replays all269 accepted
+world placements and protects foreground, bay, roads and settlements. Numeric
+checks establish finite heights, complete facet coverage, zero road-height
+change inside12m and settlement-height error below0.00001. Native building
+source geometry/UV/paint and logical map layout remain unchanged.
+
+Three native-paint treatments on those slopes are REJECTED: the rough-ground
+blend reads as gravel, height-projected eroded paint stretches into bands, and
+27 original UV triangle fields produce visible macro-triangle patterns. Source
+UV numbers alone do not preserve native appearance when fitted at a different
+physical scale. Do not repeat these mappings or install their PNGs. Geometry-
+only faceted2 remains a useful prototype, not a demonstrated native art upgrade.
+
+The paint studies initially inherited a stale geometry-only 'ground pixels
+exact' metadata label. It was corrected after rendering, with invoked scripts
+preserved. Their cached335 inputs are exact; far-slope output pixels are changed.
+No image calculations changed during that metadata correction.
+
+Next338 should inspect complete native Valley/Farm background landform groups
+already in the kit, retaining their artist geometry/UV relationship, or actual
+placed prefab material overrides. Avoid further atlas projection/scatter tweaks.
+The missing bar is coherent large landforms and material scale, not more pixel
+count or fog. No AI texture generation is justified by these mapping failures.
+Evidence:local-art/ui-overhaul/expedition-native-terrain-v03/CONTINUE.md; all
+heavy assets, scripts, native sources and comparison sheets remain on D:.
+
+Status round337: offline studies unaccepted;335 runtime/art retained, DD2 CLOSED/no pending restore. Next338.

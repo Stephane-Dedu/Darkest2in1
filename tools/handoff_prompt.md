@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round337 completed native terrain inspection and five offline map studies:
+local-art/ui-overhaul/expedition-native-terrain-v03/CONTINUE.md.
+Ten raw native FBX assets/0 final skips,6 native surface textures and material/
+sampler settings were inspected. Complete source manifests and references on D:.
+Connected faceted geometry can retain269 accepted scenery placements and protect
+road/hub/bay heights. It remains an unaccepted prototype. Rough-ground, projected
+rock and27-field UV treatments are REJECTED for visible patterns; do not repeat
+or install them. Next338: inspect complete native Valley/Farm background landform
+groups or real prefab material overrides, keeping artist geometry/UV/material
+scale together. No new texture generation justified yet. Accepted335 map/runtime
+and parked Hamlet333 retain exact hashes. No game launch/save access this round;
+DD2 CLOSED, no pending restore. Check usage, preserve foreign/protected estates,
+heavy outputs on D:, keep7-8%reserve. NEVER run the already-used335 restore.
+
 Round336 completed the offline native terrain review:
 local-art/ui-overhaul/expedition-terrain-review-v02/CONTINUE.md.
 Both full-map eroded-pedestal placement studies are REJECTED. Their original
