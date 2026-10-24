@@ -77,7 +77,7 @@ def fit(spec_path, output):
     width = math.ceil(half_width + padding) * 2
     top = math.ceil(-min_y) + padding
     canvas_height = top + height + padding
-    if width > 4096 or canvas_height > 2304:
+    if width > 4096 or canvas_height > 2304 or width * canvas_height > 4194304:
         raise ValueError('Fitted canvas exceeds native preloader bounds')
     anchor = (width / 2, top + height)
     logical_width = min(400.0, display_width if display_width is not None else display * width / canvas_height,

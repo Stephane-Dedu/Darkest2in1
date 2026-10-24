@@ -16,13 +16,16 @@ public class NativeCurioArtTests
         public readonly string Root=Path.Combine(Path.GetTempPath(),"dd3-curio-"+Guid.NewGuid());
         private readonly string _previous=Plugin.NativeRoomSceneryPath.Value;
         public readonly byte[] Png=new byte[24];
-        public Pack(int count=1)
+        public Pack(int count=1,int width=64,int height=64)
         {
             Directory.CreateDirectory(Path.Combine(Root,"curios/art"));
-            Png[0]=137;Png[1]=80;Png[2]=78;Png[3]=71;Png[19]=64;Png[23]=64;
+            Png[0]=137;Png[1]=80;Png[2]=78;Png[3]=71;
+            void Dimension(int at,int value){for(int b=0;b<4;b++)Png[at+b]=(byte)(value>>(24-b*8));}
+            Dimension(16,width);Dimension(20,height);
             string hash=Convert.ToHexString(SHA256.HashData(Png)).ToLowerInvariant();
-            var artifacts=Enumerable.Range(0,count).Select(i=>new {Id="curio"+i,Width=200,PixelWidth=64,PixelHeight=64,
-                Padding=16,MaskCellSize=1,MaskWidth=64,MaskHeight=64,Mask=Enumerable.Repeat((byte)255,512).ToArray(),
+            int cell=(Math.Max(width,height)+255)/256,mw=(width+cell-1)/cell,mh=(height+cell-1)/cell;
+            var artifacts=Enumerable.Range(0,count).Select(i=>new {Id="curio"+i,Width=200,PixelWidth=width,PixelHeight=height,
+                Padding=16,MaskCellSize=cell,MaskWidth=mw,MaskHeight=mh,Mask=Enumerable.Repeat((byte)255,(mw*mh+7)/8).ToArray(),
                 ClosedSha256=hash,UsedSha256=hash}).ToArray();
             var entries=Enumerable.Range(0,count).Select(i=>new {Id="curio"+i,ArtId="curio"+i})
                 .Concat(new[]{new{Id="alias",ArtId="curio0"}}).ToArray();
@@ -61,7 +64,8 @@ public class NativeCurioArtTests
             Assert.InRange(Texture2D.RoomDecodeCount-before,0,1);
             Thread.Sleep(1);
         }
-        Assert.True(complete(),"Curio warmup did not finish");
+        Assert.True(complete(),"Curio warmup did not finish. Loaded: "+string.Join(",",NativeCurioArt.Definitions
+            .Where(d=>NativeCurioArt.TryGet(d.Id,false,out _,out _)).Select(d=>d.Id))+". Warnings: "+string.Join("; ",Plugin.Log.Warnings.TakeLast(5)));
     }
 
     [Fact]
@@ -120,5 +124,24 @@ public class NativeCurioArtTests
         var state=State();NativeCurioArt.Prepare(state);Pump(state,()=>NativeCurioArt.Ready);
         Assert.False(NativeCurioArt.TryGet("curio0",false,out _,out _));
         Assert.Equal(0,NativeCurioArt.ResidentPairs);Assert.Equal(0,Texture2D.RoomDecodeCount);
+    }
+
+    [Fact]
+    public void LargeNearbyPaintingsCannotStarveTheNewCurrentTileOfItsPixelBudget()
+    {
+        using var pack=new Pack(8,2048,1792);var state=State(8);
+        state.RoomId=-1;state.CorridorId=0;state.TileIndex=0;
+        NativeCurioArt.Prepare(state);
+        Pump(state,()=>NativeCurioArt.Ready&&NativeCurioArt.TryGet("curio0",false,out _,out _));
+        Assert.Equal(3,NativeCurioArt.ResidentPairs);
+        state.TileIndex=3;
+        NativeCurioArt.Prepare(state);
+        Assert.False(NativeCurioArt.TryGet("curio0",false,out _,out _));
+        Pump(state,()=>NativeCurioArt.Ready&&NativeCurioArt.TryGet("curio3",false,out _,out _));
+        Assert.InRange(NativeCurioArt.ResidentPixels,1,NativeCurioArt.MaxResidentPixels);
+        Assert.True(NativeCurioArt.TryGet("curio4",false,out _,out _));
+        Assert.True(NativeCurioArt.TryGet("curio2",false,out _,out _));
+        Assert.False(NativeCurioArt.TryGet("curio0",false,out _,out _));
+        Assert.Equal(17,state.RandomCounter);
     }
 }

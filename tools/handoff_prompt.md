@@ -1,3 +1,15 @@
+Round343 installed29 exact IDs/21 pairs and fixed large-painting cache starvation.
+Latest local-art/ui-overhaul/curio-native-quality-v03/CONTINUE.md.58 final native
+state/input captures pass;289 UI+5 artifact/Release pass; Core unchanged1307.
+Fountains keep DD1 identities; Court egg art adds no encounters.74 designs+1
+FadedMemory exception remain. All44 foreign WIP preserved; compile only isolated
+curio changes. Runtime343/private pack-v01 installed, config/map339 exact,
+Hamlet333/dossier340 parked, DD2 CLOSED/no estate/host/save/no pending restore.
+Continue344 from existing pairs and inspected altar/fish/figurehead/relief refs.
+Hidden RGB halo has zero alpha; inspect RGBA before unnecessary repainting.
+Keep7-8%reserve, newer launch/input restrictions and protected estates. Never
+rerun335/339 restores or completed342/343 checkpoint/install helpers.
+
 Round342 installed the exact-ID curio renderer and26 base-runtime identities,
 18 pairs/36 PNGs, after52 real native closed/used captures and actual click/drop
 checks. Latest local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md.

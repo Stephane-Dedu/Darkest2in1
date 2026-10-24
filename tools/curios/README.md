@@ -1,5 +1,20 @@
 # Curio rework: design catalog v01
 
+## Native art and cache follow-up, round343
+
+The installed pack now covers 29 identities with 21 pairs: 28 base-runtime
+identities and one Court egg design. The egg artwork does not add DLC encounters.
+Holy Fountain keeps its original identical body states; Pristine Fountain loses
+its growth after use. Court eggs retain native shape/paint references with a
+repaired root cutout and opened shells. All 58 native state/input checks pass.
+Nearby paintings now reserve memory in distance order, so large old neighbours
+cannot prevent the current tile from loading. The regression fails on the old
+loader and passes with the fix; all 289 UI and five artifact tests pass. Source
+Core logic is unchanged from round 342's 1,307 passing tests. Fitting/catalog
+guards now enforce the same four-million-pixel decoder bound as the runtime.
+Latest checkpoint: `local-art/ui-overhaul/curio-native-quality-v03/CONTINUE.md`.
+There are 74 pending designs and the retained Faded Memory exception.
+
 ## Runtime integration, round342
 
 The exact-ID renderer accepts an optional private `curios/manifest.json` under

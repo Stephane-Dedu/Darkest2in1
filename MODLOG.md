@@ -10673,3 +10673,28 @@ Four relevant curio WIP files adopted after backup; other44 foreign files kept
 before these owned journal additions. Checkpoint and receipts:
 local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md. Continue343 with
 remaining bodies, retaining7-8% reserve and never applying stale restores.
+
+
+## Round343: fountains, Court eggs and current-tile cache priority
+
+Three new pairs bring coverage to29 IDs/21 pairs:28 base plus1 Court design,
+with74 pending and the retained Faded Memory exception. Faithful DD1 fountains
+use DD2 material references; Pristine clears growth, Holy keeps its static body.
+Native Court egg reference gets a root cutout repair and split-shell used state.
+Six built-in generations retained with prompts. Apparent Holy glow was hidden
+RGB at alpha zero; original muted art selected, unnecessary lighter edit parked.
+
+Fixed large nearby paintings blocking a new current tile: reserve the pixel
+budget in distance order before protecting cache entries. Regression fails the
+old loader, passes the correction; full289 UI/Release pass. Source Core remains
+unchanged from342's1307 passing tests. Five artifact tests and29-pair audit pass;
+fitter/catalog now enforce the runtime4Mpixels/state decoder bound.
+
+Both native29-ID passes succeed; final343 runtime has58 real state captures and
+actual alpha click/drop/urn-supply checks. Three new pairs inspected at native
+camera scale. Installed343 runtime/private pack; config/map339 exact, Hamlet
+parked. No native host/actors/estate/save file; all owned QA closed/no restore.
+Ordinary campaign/actor/controller/long-session acceptance remains pending.
+All44 foreign WIP retained before journals. Checkpoint:
+local-art/ui-overhaul/curio-native-quality-v03/CONTINUE.md. Continue344 with
+remaining distinct bodies, preserving7-8% reserve and avoiding stale restores.

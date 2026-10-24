@@ -33,6 +33,8 @@ def catalog(inventory, selection, output):
             raise ValueError('Unknown, duplicate or protected candidate identity')
         width = metadata['proposed_runtime_width']
         size = metadata['size']
+        if len(size) != 2 or not all(isinstance(v, int) and v >= 16 for v in size) or size[0] > 4096 or size[1] > 2304 or size[0] * size[1] > 4194304:
+            raise ValueError('Candidate exceeds native decoder pixel bounds')
         if not 100 <= width <= 400 or width * size[1] / size[0] > 430.001:
             raise ValueError('Candidate exceeds native display bounds')
         if metadata['padding'] != 16 or metadata['foot_anchor'] != [size[0] / 2, size[1] - 16]:

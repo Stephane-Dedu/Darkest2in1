@@ -61,8 +61,18 @@ internal static class NativeCurioArt
         }
         if (_catalog == null) return;
         _stamp++;
-        var desired = Nearby(expedition).Select(id => _catalog.Get(id)?.Art).Where(art => art != null)
-            .GroupBy(art => art.Id).Select(group => group.First()).Take(MaxResidentPairs).ToArray();
+        // Reserve the pixel budget in distance order before marking bodies as
+        // wanted. Otherwise three large old neighbours can all stay protected
+        // and prevent the new current tile from ever entering the cache.
+        var desired = new List<NativeCurioPainting>();
+        long desiredPixels = 0;
+        foreach (var art in Nearby(expedition).Select(id => _catalog.Get(id)?.Art).Where(art => art != null)
+                     .GroupBy(art => art.Id).Select(group => group.First()))
+        {
+            if (desired.Count >= MaxResidentPairs) break;
+            if (desiredPixels + art.PairPixels > MaxResidentPixels) continue;
+            desired.Add(art); desiredPixels += art.PairPixels;
+        }
         Wanted.Clear();
         foreach (var art in desired) Wanted.Add(art.Id);
         foreach (var art in desired) Ensure(art);

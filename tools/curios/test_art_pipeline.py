@@ -83,6 +83,20 @@ class PairRegistrationTests(unittest.TestCase):
                 fit(self.write_pair(root), output)
             self.assertEqual(sentinel.read_text(), 'existing art')
 
+    def test_wide_pair_cannot_exceed_the_runtime_decoder_pixel_budget(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            Image.new('RGBA', (1280, 800), (120, 90, 60, 255)).save(root / 'source.png')
+            spec = {'id': 'wide_fixture', 'pixel_height': 1600, 'display_height': 400, 'states': {
+                state: {'file': 'source.png', 'foot': [640, 799], 'body_landmark_y': 0}
+                for state in ('closed', 'used')}}
+            path = root / 'spec.json'
+            path.write_text(json.dumps(spec))
+            # Each side fits the decoder bounds, but their product exceeds4M.
+            with self.assertRaisesRegex(ValueError, 'native preloader bounds'):
+                fit(path, root / 'fitted')
+            self.assertFalse((root / 'fitted').exists())
+
 
 if __name__ == '__main__':
     unittest.main()
