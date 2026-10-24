@@ -873,3 +873,24 @@ Accepted raw/baked/matched-field libraries and four Core-band views are in
 256 renderers, one more than325, and zero buffer reallocations during the short
 probe. See its CONTINUE.md and audits. The rejected first bright/cap-hole study
 is retained under `art/rejected-first` and must not be installed.
+
+
+### Abbey roof silhouette, round328
+
+`abbey_roof_silhouette.py` adds a continuous nave-ridge dip to the accepted327 raw
+library. Run it in Blender with `--source`, a new private `--out`, `--kit` and
+optional `--sag 0.6`. It expects the original104-triangle broad roof and552 cap
+triangles. Use the327 library as input, not its already-deformed output.
+
+The broad roof receives explicit barycentric samples before deformation.
+Original UV fields interpolate linearly, and normals use the deformation's
+inverse transpose. Eaves and verges retain their original positions. Only two
+members deform; the other755 and all23 materials/native paintings remain.
+The Abbey now has20264 triangles,1560 more than327, with no material-batch change.
+Rebuild contact and directional façade visibility for the Abbey alone, preserve
+nine other accepted bakes, and refresh the matching ground-field identity.
+
+Accepted raw/baked/field packages, four Core-band views, independent geometry/UV
+audits and native1920 evidence are in `hamlet-abbey-architecture-v85`. Its
+`art/models-reviewed` junction names the accepted explicit-sampling study.
+The earlier modifier study is retained separately and was never installed.

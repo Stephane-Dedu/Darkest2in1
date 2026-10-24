@@ -1,5 +1,14 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round328 accepted the Abbey roof silhouette: local-art/ui-overhaul/hamlet-abbey-architecture-v85/CONTINUE.md.
+A continuous 0.6m extra dip breaks the nave's rectangular ridge while keeping
+the eaves, verges, left portal, rose, lancets, native belfry and pinnacles in place.
+The original DD2 slate and all 23 materials retain their paint and colour factors.
+Four matched Core-band views and native1920 unsaved town QA pass. Complete raw
+art/models-reviewed, baked art/HamletModels-reviewed and matching field are
+installed. Runtime298 and256 renderers remain. DD2 CLOSED, no pending restore.
+Fresh usage/baseline next329; keep7–8% reserve.
+
 Round327 accepted native Graveyard post stone: local-art/ui-overhaul/hamlet-graveyard-stone-v84/CONTINUE.md.
 Four existing posts and their pointed caps now use chipped, uninscribed stone
 from the original 2048px DD2 common_gravestones atlas. Intact cap paint and local

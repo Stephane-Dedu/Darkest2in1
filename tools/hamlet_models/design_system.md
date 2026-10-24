@@ -746,3 +746,23 @@ all geometry, nine services and field318 pixels. Its extra static material batch
 is explicit: 256 native renderers, previously255. The first bright study was
 rejected offline and retained for comparison; its geometry audits did not make
 it visually acceptable.
+
+
+### Roof silhouette before more paint, round328
+
+Native DD2 church and shrine references use pronounced peaks and irregular
+architectural lines. DD1 recognition still depends on the Abbey's left entrance,
+rose window, three lancets and rear belfry. The nave's broad rectangular roof
+needed shape variation while those features and the service palette stayed put.
+
+A continuous0.6m extra ridge dip gives the existing native slate a less rigid
+silhouette. Its offset and derivative vanish at the roof boundaries, preserving
+the fixed eaves and verges. Keep the native pixels and existing slate factor;
+this change does not require another painting or a blanket contrast increase.
+
+Sample geometry with explicit barycentric interpolation when UV continuity must
+be demonstrated. Use double-precision plane checks on thin triangles: float32
+nearest-surface distances can report misleading small errors. Round328 keeps
+all23 materials and adds1560 triangles without another renderer. Four actual
+Core-band angles and the placed native town support the change. Façade depth
+and broader native art parity remain separate work.

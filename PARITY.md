@@ -852,3 +852,21 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Continue broader service architecture/material review against native DD2
   references from accepted327. Start with fresh usage and closed-game baseline;
   retain accepted medical322–325 detail and the shared muted palette.
+
+
+## Round328 — Abbey roof silhouette, 2026-10-24
+
+- [x] Continuous nave-roof dip accepted in four actual Core-band views and the
+  native1920 town. DD1 entrance/rose/lancets and native belfry/pinnacles retain.
+  Native slate and shared service colours remain exact; no generated paint.
+- [x] Only two roof members deform. All757 members remain; other755 geometries/
+  UVs,23 materials/native RGBA/bindings, source bounds and normalization retain.
+  Explicit UV interpolation and reverse deformation pass independent float64
+  checks. Abbey20264 triangles, up1560;256 town renderers/23 Abbey batches retain.
+- [x] Abbey contact/facade and matching field rebuilt. Nine raw/baked/Core
+  services, medical322–325, Graveyard327 and field318 pixels remain exact.
+- [x] Full unsaved native fixture and fresh town pass. Short buffer probe has
+  zero reallocations. Runtime298 retained, DD2 closed, no pending restore.
+- [ ] Continue broader architecture and façade-depth comparison from accepted328.
+  Keep the service palette and accepted medical/stone work; do not treat this
+  roof change as whole-town native art parity.

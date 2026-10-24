@@ -2137,3 +2137,55 @@ config, profiles and estate2 verified/restored before final closed-game install.
 Protected estates were not accessed. Foreign tracked work and journal hunks
 remain intact. New heavy artifacts stay on D:; no additional cache cleanup or
 historical migration was performed.
+
+
+Round328 accepted the Abbey roof silhouette: local-art/ui-overhaul/hamlet-abbey-architecture-v85/CONTINUE.md.
+A continuous 0.6m extra dip breaks the nave's rectangular ridge while keeping
+the eaves, verges, left portal, rose, lancets, native belfry and pinnacles in place.
+The original DD2 slate and all 23 materials retain their paint and colour factors.
+Four matched Core-band views and native1920 unsaved town QA pass. Complete raw
+art/models-reviewed, baked art/HamletModels-reviewed and matching field are
+installed. Runtime298 and256 renderers remain. DD2 CLOSED, no pending restore.
+Fresh usage/baseline next329; keep7–8% reserve.
+
+Source inspection compared the actual Abbey with the DD1 identity reference,
+native Sprawl church towers and the Shrine of Reflection. The Cathedral prefab
+export is empty, and305 already ruled out a direct paired-window façade graft.
+No new extraction or generated painting was justified. The study therefore
+changes the authored nave roof's shape, preserving the established palette and
+recognition features. Broader façade depth and whole-town native art parity
+remain open; this is one bounded silhouette improvement.
+
+Only the broad roof underlay and folded ridge caps deform. Explicit barycentric
+triangle samples preserve the underlay's original surfaces and UV fields before
+the dip; analytic inverse-transpose normals follow the deformation. The roof
+underlay grows from104 to1664 triangles;552 cap triangles retain their topology.
+All757 members remain. The other755 geometries and UV sets retain within
+0.477 micrometres. Independent float64 checks put reverse-warp surface error
+under0.466 micrometres and UV interpolation error under7.3e-8. Outer bounds and
+Core normalization remain exact. Total Abbey triangles grow from18704 to20264.
+All23 material definitions, native RGBA, factors, flags, samplers and757 bindings
+remain exact. No new material batch or image is added.
+
+Abbey contact and directional visibility are rebuilt for the new geometry.
+Nine other raw, baked and Core services remain exact, including medical322–325
+and Graveyard327. Matching ground field parameters and pixels remain318, while
+the source identity records the new Abbey. The public recipe's functions match
+the private authoring script by AST; only its import bootstrap differs.
+
+The first SIMPLE modifier study remains under art/study-simple-first. An initial
+float32 BVH audit was inconclusive on thin edges. Independent float64 checks pass
+both studies; the initial61-micrometre report was an audit precision limit, not
+established source motion. Explicit sampling is retained for direct UV control
+and1560 extra triangles rather than2392. The archived initial recipe is labelled
+as a reconstruction, and relocated review paths and moved file hashes were
+verified. That first study was never installed.
+
+Native QA confirms20264 Abbey triangles,23 material batches and256 town renderers.
+The full synthetic fixture, fresh town capture and zero buffer reallocations
+over 5.029 seconds pass. The short probe does not establish frame-time or
+long-session performance. No gameplay build was made; frozen runtime298 remains.
+The exact owned preview was closed, normal profiles/config/estate2 verified and
+restored once, then accepted art installed with DD2 closed. Protected estates
+were not accessed. Concurrent tracked work and shared journal hunks remain
+intact. New heavy files remain on D:; no additional cleanup or migration occurred.
