@@ -1,5 +1,15 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round330 accepted the Guild's projecting hall: local-art/ui-overhaul/hamlet-guild-frame-depth-v87/CONTINUE.md.
+The upper floor now projects over the stone base with deeper sole plates,
+supporting corbels and short oak knees in its window bays. Lower side rails and
+their braces clear the casement glass. The original DD2 cloth standards move
+rigidly with the wall. Native oak, oxblood roof, stone/plaster paint and all27
+material definitions retain their colours. Four matched Core-band views and
+native1920 town QA pass. Complete raw/baked/field libraries in v87 are installed;
+runtime298 and256 renderers remain. DD2 CLOSED, no pending restore. Fresh usage/
+baseline next331.
+
 Round329 accepted the Abbey's stepped portal: local-art/ui-overhaul/hamlet-abbey-portal-depth-v86/CONTINUE.md.
 Two projecting stone orders and a three-stone threshold give the left entrance
 more depth. The outer stones use different approved fields from their inner

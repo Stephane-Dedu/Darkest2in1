@@ -10176,3 +10176,60 @@ New heavy artifacts remain on D:; no additional cleanup or migration occurred.
 Broader service architecture and whole-town native art parity remain open.
 
 Status round329: accepted329 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next330.
+
+
+## Round330 - Guild hall construction, 2026-10-24
+
+Round330 accepted the Guild's projecting hall: local-art/ui-overhaul/hamlet-guild-frame-depth-v87/CONTINUE.md.
+The upper floor now projects over the stone base with deeper sole plates,
+supporting corbels and short oak knees in its window bays. Lower side rails and
+their braces clear the casement glass. The original DD2 cloth standards move
+rigidly with the wall. Native oak, oxblood roof, stone/plaster paint and all27
+material definitions retain their colours. Four matched Core-band views and
+native1920 town QA pass. Complete raw/baked/field libraries in v87 are installed;
+runtime298 and256 renderers remain. DD2 CLOSED, no pending restore. Fresh usage/
+baseline next331.
+
+Source inspection compared the current Guild with intact Academic-house and inn
+references. The Guild's almost flush upper box and obstructed side casements
+were structural weaknesses; this pass changes their depth and framing. It
+does not replace the accepted paint or claim complete native architectural parity.
+No extraction or generation was needed. Existing2048 native Assistance oak
+fields fit the new supporting members without new images or material batches.
+
+The hall's horizontal source footprint expands by7.5% beneath the retained roof.
+Nominal front projection increases by0.216375 source units before service-width
+normalization. Its cut openings, stone surrounds, backing and mounted crest move
+together. Both native standards receive rigid translations, preserving folds,
+proportions and UVs. The side rails lower0.55 source units; their braces match.
+The lowest glass is0.295 source units above the lowered framing. Twelve window
+knees and eleven rear/flank corbels add23 members/276 triangles. The original
+five front corbels extend to the sole plate. All624 original members/bindings
+and UV fields retain;199 change geometry,425 retain within9.54e-7 source units.
+Total647 members/12649 triangles, previously624/12373. Source bounds and Core
+normalization retain, as do the roof, stone base, armory and entrance weapon stand.
+
+All27 material definitions, factors, flags, samplers and decoded paintings remain
+exact. New bindings reuse existing native oak. Nine other raw/baked/Core services
+stay exact, including medical322–325, Graveyard327 and Abbey328–329. Guild contact
+and directional visibility and the matching ground field are rebuilt. Field
+parameters retain; field-difference.json records the changed pixels and bounds.
+
+Three earlier offline studies were rejected before installation. Their exact
+recipes and moved-file hashes remain under art/first-support-study,
+art/second-selection-study and art/third-standard-study. They record a swapped
+rear-support coordinate, an overly broad armory-rail selection and unmoved native
+cloth, respectively. Geometry and close-view checks resolved these in the final
+study. The public recipe's function ASTs match the final authoring functions.
+
+Native QA confirms12649 Guild triangles,27 material batches and256 town renderers.
+The full unsaved fixture, fresh town capture and zero buffer reallocations over
+5.032 seconds pass. This short probe does not establish frame-time or
+long-session performance. Runtime298 remains; no gameplay build was made. The
+exact owned preview was closed and normal config/profiles/estate2 verified and
+restored once before final closed-game installation. Protected estates were not
+accessed. Concurrent work and historical UTF8 remain. New heavy artifacts stay
+on D:. No further cleanup or migration occurred. Broader service architecture,
+plaster detail and whole-town native art parity remain open.
+
+Status round330: accepted330 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next331.

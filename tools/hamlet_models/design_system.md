@@ -786,3 +786,16 @@ Inspect intact native components before grafting them. The selected Shrine ring
 is circular and the Sprawl gable is closed; their source renders did not support
 a direct fit to this pointed doorway. Round329 preserves all other architecture,
 including the328 roof, and passes close/full Core views plus native town QA.
+
+
+### Supported upper floors and clear openings, round330
+
+The Guild comparison with the intact native Academic house and inn favours
+structural depth before another contrast pass. Its upper hall now projects over
+the masonry on deeper sole plates and corbels. Short knees occupy window-bay
+corners. Rails and diagonals must clear the complete glazing, including side
+openings; check this in geometry and from the side camera. Move a wall's cut
+openings, surrounds and mounted objects together. Translate native hanging
+cloth rigidly to preserve its proportions and folds. Keep the service roof,
+native oak and muted wall colours unchanged when the deficiency is construction.
+The broader plaster composition still needs a separate native comparison.

@@ -915,3 +915,20 @@ Accepted raw `art/models-reviewed` aliases the explicit final study; complete
 baked/field packages, four Core-band views, matched close views and native1920
 evidence are in `hamlet-abbey-portal-depth-v86`. The first depth study is retained
 under `art/first-depth-study` and was never installed.
+
+
+### Guild projecting hall, round330
+
+`guild_frame_depth.py` expects the accepted329 raw library as `--source`, a new
+private `--out`, and `--kit`. Run in Blender. Do not use its own output as input.
+It projects the main upper hall by7.5% in source X/Z, retains the roof and stone
+base, adds23 native-oak supports and clears the two side casements. Native cloth
+standards translate rigidly. The armory's shorter rails stay in place.
+
+All624 original UV fields and27 materials/paintings retain. Total647 members/
+12649 triangles,276 added. Rebuild Guild contact/directional visibility alone,
+preserve nine other bakes and refresh the matched ground field. Accepted raw
+`art/models-reviewed`, complete baked/field packages, four actual Core-band
+comparisons and native1920 evidence are in `hamlet-guild-frame-depth-v87`.
+Three rejected offline studies have separately archived exact recipes; none was
+installed. Preserve accepted Abbey328–329 and medical322–325.

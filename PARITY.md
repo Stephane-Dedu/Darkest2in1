@@ -890,3 +890,12 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Continue broader service architecture/material review from accepted329.
   Preserve shared colours and accepted medical/stone/roof work; native parity
   for the full town remains open.
+
+
+- Round330 Guild construction: supported projecting upper hall, short native-oak
+  knees and side rails clear of the glass.647 retained/added members,12649tri;
+  all624 original UVs,27 materials/paintings, bounds/normalization and nine other
+  services retain. Four Core-band views and unsaved1920 fixture/fresh town pass;
+ 256 renderers/runtime298, zero reallocations in the short probe. Complete v87
+  raw/baked/matched field installed; DD2 closed/no pending restore. Native art
+  parity and broader wall composition remain open. Fresh usage/baseline next331.
