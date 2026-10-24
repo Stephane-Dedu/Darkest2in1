@@ -833,3 +833,19 @@ explaining construction. Compare both gables in actual Core-band views and the
 whole town. Reuse the existing BuildingNative timber finish instead of creating
 another service colour. A source preview's emission strength is not evidence of
 actual Core tint; inspect the exported runtime material and graded image.
+
+
+### Material names are part of the colour contract, round333
+
+The shared finish selector reads semantic material names. 'Grey shingles' does
+not contain 'slate', so the Abbey and Guild armory were graded as generic building
+surfaces while the same Shroud painting on the medical roof used BuildingSlate.
+Correct routing before repainting a surface to compensate for the wrong finish.
+Verify actual Core image keys and graded pixels against the related service.
+
+Four local label corrections now reuse the established medical slate grade.
+Geometry, original RGBA, UV fields, local colour factors and light bands retain.
+Related materials keep their identities; Guild clay, medical lime, native oak and
+Smithy reed are unaffected. The native slate course-density concern remains a
+separate comparison. A generated field that reads as wood cannot replace pointed
+slate merely because its pixels are larger. Preserve rejected art and provenance.

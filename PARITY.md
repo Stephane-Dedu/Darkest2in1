@@ -920,3 +920,14 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   fresh town pass;257 renderers/runtime298, zero reallocations in the short probe.
   Complete v89 libraries installed, DD2 closed/no pending restore. Whole-town
   native art parity remains open. Fresh usage/baseline next333.
+
+
+- Round333 shared slate: four local Abbey/Guild armory material labels now select
+  the existing medical slate grade. Original native pixels,1438 members/33417tri,
+  all UVs/local factors/light bands/bounds retain;23/28 batches and257 town
+  renderers/runtime298 remain. Eight other services and ground pixels exact.
+  Eight Core comparison views and native1920 unsaved fixture/fresh town pass,
+  zero short-probe reallocations.50 active grades match existing native pixels;
+  one generic coast grade no longer active. Generated study rejected before
+  authoring. Complete v90 libraries installed, DD2 closed/no pending restore.
+  Density/architecture/native-art parity remain open. Fresh usage/baseline next334.

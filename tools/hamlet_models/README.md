@@ -975,3 +975,27 @@ Accepted raw `art/models-reviewed`, complete baked/field libraries, original
 native component renders, independent source/UV audits, four matched Core views
 and native1920 QA are in `hamlet-guild-gable-frame-v89`. The first offline layout
 is archived and is not an accepted input. Heavy artifacts remain on D:.
+
+
+### Shared native slate finish, round333
+
+`roof_slate_finish.py` runs in Blender with accepted332 raw `--source`, a fresh
+private `--out` and `--kit`. Four Abbey/Guild armory material names gain 'slate'
+to select the existing HamletPalette.BuildingSlate finish already used by the
+Sanitarium. All source pixels, local factors, geometry and UVs remain. No C# or
+runtime build changes. Do not run against its own output.
+
+Abbey783/20640tri/23batches and Guild655/12777tri/28batches retain. Eight other
+services stay byte-exact. Rebuild contact on both and their self-only directional
+bakes separately. Export a matching Core review between sequential package bakes;
+the bake guard rejects a review describing another source folder. Refresh the
+source-matched ground field. All member bands and ground pixels retain. Four
+corrected materials now share the medical slate grade;50 active graded images
+match existing native grades. The removed active generic grade needs no deletion
+from retained source files.
+
+v90 holds complete accepted raw/baked/field libraries, eight common-scale service
+references, eight matched before/after views, independent audits and native1920
+QA. The unprocessed generated slate study is rejected and is not an accepted
+input; its actual built-in prompt is slate-prompt-invoked.txt. No generated art
+from333 is used in the game.

@@ -10350,3 +10350,61 @@ stays on D:. No cleanup or migration occurred. Whole-town native art parity and
 further architecture remain open.
 
 Status round332: accepted332 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next333.
+
+
+## Round333 - Shared slate finish, 2026-10-24
+
+Round333 accepted the shared slate finish: local-art/ui-overhaul/hamlet-service-material-review-v90/CONTINUE.md.
+The Abbey and Guild armory now use the same existing slate grade as the
+Sanitarium. Four material names previously omitted 'slate', selecting the generic
+building finish. Original DD2 pixels, geometry, UVs and local factors retain.
+Eight matched Core views and native1920 unsaved town QA pass. Complete raw/baked/
+field libraries in v90 are installed; runtime298 and257 renderers remain.
+DD2 CLOSED, no pending restore. Fresh usage/baseline next334.
+
+Source inspection began with eight unchanged common-physical-scale views of
+Abbey/Guild/Smithy/native Tavern. The Abbey's broad native pointed slate remains
+a separate course-density concern; this correction addresses a verified colour
+classification mismatch, not that geometry or texture-density question.
+HamletPalette.BuildingSurface selects BuildingSlate only for material names
+containing 'slate'. Abbey native grey shingles v71 and Guild armory native grey
+shingles v72, plus their cut-edge partners, missed that selector. The same
+original coast_buildings_03 atlas on the Sanitarium already used BuildingSlate.
+
+Four local material names now include 'slate'. No runtime or palette code changes
+are needed. All51 material definitions across the Abbey and Guild preserve local
+factors, decoded original RGBA, emission, alpha, flags and samplers apart from the
+four routing labels. All1438 members/33417 triangles, UVs, source bounds and Core
+normalization retain within4.77e-7 source units. Material batches remain23/28.
+Core proves all four corrected materials share the existing medical slate image
+key317f1480890de8234a32490c6ccf8b995a0403b827ba5c7052a9c802fa0d7dd9.
+The50 active graded images all match existing grades byte-for-byte; one unused
+generic coast grade drops from the active review. Existing source files remain.
+Native Shroud pixels are unedited. Eight other raw/baked/Core services stay exact.
+
+Both services' contact and separate self-only directional bakes are rebuilt.
+Every original member-band histogram retains. Ground-field parameters and pixels
+stay exact332, with refreshed source identity. The public recipe's functions
+match the final authoring script. Native QA reports20640/23 Abbey and12777/28
+Guild triangles/batches,257 town renderers, full unsaved fixture/fresh town and
+zero buffer reallocations over 5.019 seconds. The probe does not establish
+frame-time or long-session performance. Runtime298 remains; no gameplay build.
+
+One supplementary slate painting was generated with the built-in ImageGen tool
+from native coast/inn atlas references. It was rejected before model authoring
+because its rectangular, vertically streaked shapes read as wooden shingles.
+The original1774x887 PNG is preserved unprocessed in art/rejected-slate-study;
+generation.json, slate-prompt.txt and slate-prompt-invoked.txt record provenance.
+Generated art is not installed. A partial offline export stopped on an incorrect
+Guild member-count guard; its exact recipe/hashes remain in art/partial-member-guard.
+The second facade pass initially had a review/source package mismatch; the guard
+stopped before output. A fresh intermediate Core review resolves it. Both original
+and repaired pipeline scripts/logs are retained. No failed pass reached the game.
+
+The exact owned preview was closed, baseline restored once and normal profiles,
+config and estate2 verified before final closed-game acceptance. Protected estates
+were not accessed. Concurrent work, foreign journals and historical UTF8 retain.
+All new heavy data is on D:, no cleanup/migration. Whole-town native art parity
+and broader architecture/material density remain open.
+
+Status round333: accepted333 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next334.
