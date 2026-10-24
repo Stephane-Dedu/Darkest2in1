@@ -10589,3 +10589,35 @@ Later human instruction: no game launch before2026-10-24 18:25:40 UTC /
 
 Status round339: terrain map accepted/installed; runtime335, Hamlet333 parked.
 Next340: fresh usage/repo check; respect no-launch deadline, avoid rejected studies.
+
+
+## Round340: native dossier sources and offline thumbnail review
+
+The left dossier still uses older generated views that differ from the native
+town map. Its actual draw rect is360x120 with ScaleAndCrop; installed512x256
+previews lose vertical content. Map crops and tighter bands were reviewed at
+menu scale, then four dedicated native3D cluster views. These are REJECTED for
+crowding or miniature cutout framing. Exposure/fire fitting does not fix that.
+
+Six small native biome UI bundles contain26 complete Sprite/Texture exports.
+biome_bg paintings are upright opaque657x1148 portraits, unlike584x958 choice
+portal frames. Native city/farm/forest/coast/cave paintings provide five657x219
+RGB candidate bands that fit360x120 exactly. No generation, resize, repaint,
+new fog or source-pixel changes. Bundle/Sprite IDs, hashes and original full
+paintings remain private. Public native_dossier.py performs bounded extraction
+and refuses repository/game output or overwriting existing evidence.
+
+All five RGB arrays equal their source crops; dimensions/PNG bounds, Python
+compile and three output guards pass. Native paintings retain identity, but
+portrait composition is truncated. Candidates remain NOT installed/accepted or
+natively verified. A labelled saved339 screenshot patch checks artwork bounds
+only and is not a new game capture. No C# changes/build/tests or estate access.
+
+Complete comparison/source/recipe evidence on D:, checkpoint at
+local-art/ui-overhaul/expedition-dossier-v06/CONTINUE.md. Installed339 map/whole
+selector/runtime335 exact; Hamlet333 parked, DD2 CLOSED/no pending restore.
+Human pause respected: no launch before2026-10-24 18:25:40 UTC /20:25:40 Paris.
+Next341: fresh usage/repo and bounded native dossier review after the pause;
+do not repeat rejected thumbnail studies or arm QA before the deadline.
+
+Status round340: five native-paint preview candidates ready offline,339 retained.

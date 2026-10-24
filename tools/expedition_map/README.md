@@ -25,8 +25,10 @@ Use the currently installed logical layout as input. Its bytes are copied
 unchanged, so quest anchors, hit areas and camera destinations remain stable.
 `provenance.json` records the rendered passes, logical layout and recipe hashes.
 The source kit, its own extraction provenance and all derived art stay private.
-No AI-generated textures are used. The native roots and stubble in `roads/_tex/`
-provide local ground detail. Native model paint and UVs are never repainted.
+The base render/composer use no AI-generated textures. Accepted339 adds two
+private terrain paintings through the separate protected compositor below.
+The native roots and stubble in `roads/_tex/` provide local ground detail.
+Native model paint and UVs are never repainted.
 
 Compare the pack with the previous overview and native asset references,
 including the pale Foetor farmhouse. Inspect it at the actual menu scale and at
@@ -76,3 +78,20 @@ Antialiased edges approximate the final compositing; baked procedural motes can
 follow the paint. Native live VFX remain separate. Compare native UI captures
 before acceptance. Round339's two private paintings improve the connected
 slopes while retaining the original scenery and the lower335 atmosphere.
+
+## Native dossier paintings
+
+`native_dossier.py --game C:/private/DD2 --out D:/private/dossier-study`
+reads five small `biome_<region>_ui_assets_all.bundle` files. It extracts the
+native `biome_bg_*` sprites and writes five candidate `preview-dd2_*.png` files.
+Original657x1148 portrait references remain beside the provenance. The outputs
+are657x219 RGB bands of those same pixels, with no resize, repaint or new fog.
+The dossier draws them at360x120 with `ScaleAndCrop`; these3:1 bands fit exactly.
+No art is installed by this tool. Existing output evidence is never overwritten.
+
+Round340 compared ordinary map crops, dedicated native3D cluster views and
+the original biome paintings at menu scale. The crops were crowded; isolated
+clusters read as miniatures against a blank background. Those studies remain
+rejected. The biome paintings are pending native UI review after the owner's
+launch pause. Their narrow bands preserve native brushwork, but omit much of
+the original portrait composition. Mountain and DD1 thumbnails retain.

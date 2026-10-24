@@ -1,5 +1,18 @@
 HUMAN RESTRICTION (2026-10-24): Do not launch DD2 before 18:25:40 UTC / 20:25:40 Europe/Paris on 2026-10-24. Offline review only until then. See local-art/ui-overhaul/expedition-scenery-mask-v05/no-launch.json.
 
+Round340 prepared native dossier art OFFLINE; installed339/runtime335 unchanged.
+local-art/ui-overhaul/expedition-dossier-v06/CONTINUE.md is the latest checkpoint.
+Map crops and dedicated native3D cluster thumbnails are REJECTED at menu scale.
+Six native biome UI bundles yield26 complete Sprite/Texture exports. Native
+biome_bg paintings now supply five pixel-exact657x219 candidate preview bands;
+not installed/accepted/natively verified. Original657x1148 art and exact360x120
+comparison on D:. Public native_dossier.py extracts safely outside repo/game.
+Next341: fresh usage/repo; native dossier UI review only AFTER the human launch
+pause above. No need to rerun full control/combat QA for these image-only files.
+No340 game launch/input/save/installation; no QA armed, DD2 CLOSED/no restore.
+Keep Hamlet333 parked, foreign WIP/protected estates, D: heavy files,7-8%reserve.
+NEVER rerun335/339 restores. Do not repeat rejected miniature/map-crop studies.
+
 Round339 accepted terrain-only crop painting; runtime remains335.
 local-art/ui-overhaul/expedition-scenery-mask-v05/CONTINUE.md is the checkpoint.
 Two real-resolution cropped paintings replace far-slope soil without scenery
