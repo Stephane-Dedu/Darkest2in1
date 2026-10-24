@@ -10535,3 +10535,29 @@ Evidence:local-art/ui-overhaul/expedition-native-terrain-v03/CONTINUE.md; all
 heavy assets, scripts, native sources and comparison sheets remain on D:.
 
 Status round337: offline studies unaccepted;335 runtime/art retained, DD2 CLOSED/no pending restore. Next338.
+
+
+## Round338: native landform review and targeted slope painting study
+
+Six complete native Valley/Farm/Forest background groups were compared. Four
+main-menu mountain variants exported completely; one Common hill remains
+incomplete and excluded. Foreground inverted outline shells explain black
+double-sided previews. Exported Cull2 back-face transparency reveals their
+original paint without changing geometry/UVs. This is offline evidence only.
+Three native map placement studies fail scale/terrain joins and are REJECTED.
+
+One built-in imagegen edit tests connected paint on the custom valley slopes.
+Its1672x941 output is an unaccepted draft and changes native scenery pixels.
+Two masked4K composites retain protected native scenery/road pixels, fixed
+layout and all outside-mask pixels; about17% changes. Overview detail improves,
+but real camera crops expose retained-soil blocks. Feathering is insufficient.
+No new art is accepted or installed. Do not install the raw generated edit.
+
+Next339: inspect material/ground-card coverage in the holdout before refining
+terrain joins. Compare all five camera crops; native QA only after offline
+quality passes. Keep native identities, low fog, fixed quests and smooth zoom.
+Evidence:local-art/ui-overhaul/expedition-native-landforms-v04/CONTINUE.md and
+tools/expedition_map/terrain_review.md. Heavy source/art/prompt evidence on D:.
+Accepted335 plugin/map exact; Hamlet333 parked, DD2 CLOSED/no pending restore.
+
+Status round338: paint direction remains a draft;335 installed. Next339.
