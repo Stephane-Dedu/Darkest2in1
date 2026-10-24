@@ -1,5 +1,13 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round331 accepted the Guild's detailed lime infill: local-art/ui-overhaul/hamlet-guild-native-infill-v88/CONTINUE.md.
+Weathered grey-taupe plaster now fills the upper hall, armory, dormer cheeks and
+gables. Finite fields replace the repeated broad masonry pattern and wrapped
+gable paint. The stone foundation, native oak, oxblood roof, standards and330
+architecture retain. Four matched Core-band views and native1920 town QA pass.
+Complete raw/baked/field libraries in v88 are installed; runtime298 and256
+renderers remain. DD2 CLOSED, no pending restore. Fresh usage/baseline next332.
+
 Round330 accepted the Guild's projecting hall: local-art/ui-overhaul/hamlet-guild-frame-depth-v87/CONTINUE.md.
 The upper floor now projects over the stone base with deeper sole plates,
 supporting corbels and short oak knees in its window bays. Lower side rails and

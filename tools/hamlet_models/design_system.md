@@ -799,3 +799,21 @@ openings, surrounds and mounted objects together. Translate native hanging
 cloth rigidly to preserve its proportions and folds. Keep the service roof,
 native oak and muted wall colours unchanged when the deficiency is construction.
 The broader plaster composition still needs a separate native comparison.
+
+
+### Continuous infill and honest source allocation, round331
+
+The Guild's old half-atlas crop repeated large masonry motifs through its upper
+floor, while the gables wrapped. A texture's full dimensions do not describe its
+useful wall detail. Inspect actual fields and show native samples at equal scale
+before reuse. The selected Academic-house free fields were too small to fill this
+continuous wall without enlargement or repeated cracks. A reviewed supplementary
+lime painting now gives the infill its own surface, using native material paint
+as reference. It is generated art and must stay labelled that way.
+
+Finite world-scale fields keep flakes and cracks at a consistent frequency.
+Preserve gravity direction, original dark recess faces and mixed material slots.
+The new local grey-taupe paint keeps the shared Core finish and existing material
+factors; no global palette adjustment is required. Confirm the grouping beside
+native oak/roof and neighbouring services in the actual town. More detail is not
+an instruction to add a bright uniform grid or random noise to every surface.

@@ -2296,3 +2296,59 @@ restored once before final closed-game installation. Protected estates were not
 accessed. Concurrent work and historical UTF8 remain. New heavy artifacts stay
 on D:. No further cleanup or migration occurred. Broader service architecture,
 plaster detail and whole-town native art parity remain open.
+
+
+Round331 accepted the Guild's detailed lime infill: local-art/ui-overhaul/hamlet-guild-native-infill-v88/CONTINUE.md.
+Weathered grey-taupe plaster now fills the upper hall, armory, dormer cheeks and
+gables. Finite fields replace the repeated broad masonry pattern and wrapped
+gable paint. The stone foundation, native oak, oxblood roof, standards and330
+architecture retain. Four matched Core-band views and native1920 town QA pass.
+Complete raw/baked/field libraries in v88 are installed; runtime298 and256
+renderers remain. DD2 CLOSED, no pending restore. Fresh usage/baseline next332.
+
+Source inspection compared the existing1254px wall painting with intact native
+Academic-house and inn atlases. Two selected unobstructed native plaster fields
+are132x88 and118x82 pixels. They carry native brush character but would enlarge
+or repeat their cracks over the complete current wall. This demonstrates the
+gap for this field; it does not rule out every other native architectural asset.
+The accepted supplementary1774x887 painting was generated from the two native
+atlases, with no post-generation pixel edits. It is authored art, not an extracted
+native texture. Generation metadata, references, specifications and original
+tool outputs are retained privately. The first beige masonry-like painting was
+rejected before any model authoring or installation.
+
+The new paint separates lime infill from the retained coursed foundation. Source
+medianRGB is100/92/82, previously154/138/121. Existing material factors, Core
+stone finish, emission, alpha and samplers retain. The main wall receives about
+1469x743 useful source pixels, previously627x589. Shared7.4x3.7 source-unit paint
+periods keep detail frequency consistent across twelve members. Lime UVs remain
+inside0.02–0.98, with different member/face offsets. No atlas wrapping or forced
+mirroring is used. The source geometry is unchanged within4.77e-7 source units.
+
+All647 members/12649 triangles, source bounds and Core normalization retain.
+Only474 UV triangles on12 members change;12175 others retain. The156 original
+Ink-edge recess faces on the two mixed wall members retain their bindings and
+UVs. Twenty-six other material definitions/paintings and635 other member bindings
+stay exact. One existing lime material receives the new painting and its name;
+the eight gables join that finish. Total27 material batches remain, with one
+additional painting. All50 existing Core-graded paintings reproduce exactly;
+the new surface is the51st. Nine other raw/baked/Core services remain exact,
+including medical322–325, Graveyard327, Abbey328–329 and Guild330 structure.
+
+Guild contact and directional visibility are rebuilt. Every Core member's
+aggregated band histogram retains. Ground-field parameters and pixels remain330
+byte-for-byte, with refreshed source identity. The first mesh fit had collapsed
+the two mixed members' Ink slots; material inspection caught this before native
+QA. Its exact recipe, moved-file hashes and relocated review paths remain under
+art/first-infill-study. The final fit preserves those recesses. The public
+recipe's function ASTs match the final authoring functions.
+
+Native QA confirms12649 Guild triangles,27 material batches and256 renderers.
+The full unsaved fixture, fresh town capture and zero buffer reallocations over
+5.020 seconds pass. This short probe does not establish frame-time or
+long-session performance. No gameplay build or fresh Core suite was needed;
+runtime298 remains. The exact owned preview was closed, and normal profiles,
+config and estate2 verified/restored once before final closed-game installation.
+Protected estates were not accessed. Concurrent work and historical UTF8 retain.
+Heavy artifacts remain on D:. No further cleanup or migration occurred. Broader
+architecture and whole-town native art parity remain open.

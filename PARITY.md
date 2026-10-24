@@ -899,3 +899,13 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
  256 renderers/runtime298, zero reallocations in the short probe. Complete v87
   raw/baked/matched field installed; DD2 closed/no pending restore. Native art
   parity and broader wall composition remain open. Fresh usage/baseline next331.
+
+
+- Round331 Guild infill: detailed supplementary lime replaces broad repeated
+  masonry on twelve retained upper/wing/dormer/gable members.474 UVtri change,
+ 12175 retain;647 members/12649tri,156 original recess faces,27 material batches,
+ 26 other materials/paintings and nine services retain. Four Core-band views and
+  native1920 fixture/fresh town pass;256 renderers/runtime298, zero reallocations
+  in the short probe. Original50 graded paintings and ground pixels stay exact,
+  one painting added. Complete v88 libraries installed, DD2 closed/no pending
+  restore. Native art parity remains open. Fresh usage/baseline next332.

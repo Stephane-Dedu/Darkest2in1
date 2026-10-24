@@ -932,3 +932,25 @@ preserve nine other bakes and refresh the matched ground field. Accepted raw
 comparisons and native1920 evidence are in `hamlet-guild-frame-depth-v87`.
 Three rejected offline studies have separately archived exact recipes; none was
 installed. Preserve accepted Abbey328–329 and medical322–325.
+
+
+### Guild lime infill, round331
+
+`guild_infill_paint.py` runs in Blender with accepted330 raw `--source`, a new
+private `--out`, `--kit` and a reviewed2:1 `--paint`. The accepted supplementary
+painting is1774x887, generated with native DD2 material references and retained
+unprocessed outside Git. Do not use the recipe's own output as its source.
+
+Twelve infill members use finite fields at7.4x3.7 source-unit periods. Only474
+UV triangles change;12175 retain, including156 original Ink recess faces. All647
+members/12649 triangles and27 material batches remain. Keep the two mixed wall
+members' Ink slots and per-face bindings. One lime material changes its image;
+all26 other definitions/paintings stay exact. Native oak/roof/glass/standards and
+the accepted330 construction retain. Rebuild Guild contact/directional visibility
+alone, preserve nine other bakes, re-grade through Core and refresh the matching
+ground-field identity. Existing50 graded paintings and ground pixels retain.
+
+Accepted raw `art/models-reviewed`, complete baked/field libraries, four matched
+Core-band views, generation/reference evidence and native1920 QA are in
+`hamlet-guild-native-infill-v88`. The first paint and first mesh fit were rejected
+offline. Their private archives are not accepted inputs.
