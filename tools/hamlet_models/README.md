@@ -954,3 +954,24 @@ Accepted raw `art/models-reviewed`, complete baked/field libraries, four matched
 Core-band views, generation/reference evidence and native1920 QA are in
 `hamlet-guild-native-infill-v88`. The first paint and first mesh fit were rejected
 offline. Their private archives are not accepted inputs.
+
+
+### Native Guild gable frame, round332
+
+`guild_gable_frame.py` runs in Blender with accepted331 raw `--source`, a new
+private `--out`, `--kit` and source-matched private `--components` descriptor
+from v89/native-components.json. Never use the recipe's own output as its input.
+
+Eight whole inn03-left components form kingposts, collars and braces, reusing
+the original2048px atlas and UVs. Proper rotation, translation and uniform scale
+only preserve native paint direction and proportions. The647 old members and
+their12649 triangles/UVs/bindings retain;128 new triangles give655 members and
+12777 triangles. All27 old materials remain, with one BuildingNative batch added.
+Core's actual native timber finish matches the Tavern, and all51 graded images
+remain exact. Rebuild Guild contact/facade visibility and the matching ground
+field while preserving nine other services. Keep source bounds and service fit.
+
+Accepted raw `art/models-reviewed`, complete baked/field libraries, original
+native component renders, independent source/UV audits, four matched Core views
+and native1920 QA are in `hamlet-guild-gable-frame-v89`. The first offline layout
+is archived and is not an accepted input. Heavy artifacts remain on D:.

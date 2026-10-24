@@ -817,3 +817,19 @@ The new local grey-taupe paint keeps the shared Core finish and existing materia
 factors; no global palette adjustment is required. Confirm the grouping beside
 native oak/roof and neighbouring services in the actual town. More detail is not
 an instruction to add a bright uniform grid or random noise to every surface.
+
+
+### Native construction in a coherent palette, round332
+
+The Guild's broad lime gables lacked framing. Two whole DD2 inn timbers supplied
+shaped edges and painted grain without another texture. Standalone source
+renders established that the components were usable before reuse. Rotation,
+translation and uniform scaling keep source proportions and original UVs.
+
+Fit members to a credible joint: collar and inward braces meet the kingpost,
+the existing eave remains the bottom tie, and the roof keeps its original verges.
+The rejected first layout shows why duplicate outer rafters add clutter without
+explaining construction. Compare both gables in actual Core-band views and the
+whole town. Reuse the existing BuildingNative timber finish instead of creating
+another service colour. A source preview's emission strength is not evidence of
+actual Core tint; inspect the exported runtime material and graded image.

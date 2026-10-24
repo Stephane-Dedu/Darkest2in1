@@ -2352,3 +2352,56 @@ config and estate2 verified/restored once before final closed-game installation.
 Protected estates were not accessed. Concurrent work and historical UTF8 retain.
 Heavy artifacts remain on D:. No further cleanup or migration occurred. Broader
 architecture and whole-town native art parity remain open.
+
+
+Round332 accepted the Guild's native gable frame: local-art/ui-overhaul/hamlet-guild-gable-frame-v89/CONTINUE.md.
+Eight complete DD2 inn timbers form kingposts, collars and inward braces on the
+two large gables. The accepted331 lime,330 construction, native oak/roof/standards
+and all27 original material definitions retain. Four matched Core-band views and
+native1920 unsaved town QA pass. Complete raw/baked/field libraries in v89 are
+installed; runtime298 remains and257 renderers are present. DD2 CLOSED, no
+pending restore. Fresh usage/baseline next333.
+
+Source inspection isolated308 connected components from the native Academic
+house and503 from inn03. Inn03-left components81 and83 are complete weathered
+timber members,16 triangles each. Their standalone renders show usable native
+paint and shaped edges. Proper rotations, translations and uniform scale fit
+eight copies into the existing gables. Original complete triangle sets and UVs
+retain; no source pixels were edited, generated or mirrored. The original2048px
+inn03-left atlas SHA is4cb3531006303b6215a875466df8203b5fa223cdbaa4b64ee1679901471184a8.
+Its existing town image is reused. No new extracted or generated texture is needed.
+
+The existing eave rail is the bottom tie. Each new kingpost meets a collar and
+two inward braces. Both gables use the same muted native material already used
+by the Tavern through the actual Core BuildingNative finish. This retains colour
+harmony without recolouring the accepted Guild. Raw native emission strength1
+differs from the Tavern's older Blender-preview1.5 export; actual Core material,
+image and all three band tints are identical. All51 graded images reproduce exactly.
+
+All647 original members/12649 triangles retain positions, UVs and material
+bindings. Eight new members add128 triangles, giving655 members/12777 triangles
+and28 Guild material batches. Outer bounds and runtime normalization retain.
+Independent source reconstruction proves proper rotations, uniform scale and
+original native UVs within4.8e-7 source units. All27 existing materials preserve
+decoded paint, factors, flags and samplers. Nine other raw/baked/Core services
+remain exact. Guild contact/directional visibility and the matching ground field
+are rebuilt; local band changes and texel differences are recorded in core-audit
+and field-difference. The field's parameters and receiver geometry retain.
+
+The first offline arrangement duplicated roof verges and stopped the kingpost
+short. It was rejected before deployment and preserved in art/first-gable-study
+with the exact recipe, moved-file checks, original and relocated review documents
+and hashes. An archive Source-path relocation initially confused C:/D: junction
+aliases; finish_archive.py repaired only archived references. A receiver-only
+shadow-audit assumption was also too narrow: added framing can shade adjoining
+verges. The final audit restricts changes to gables/verges and requires darkening.
+
+Native QA confirms12777 Guild triangles,28 material batches and257 renderers.
+The full unsaved fixture, fresh town capture and zero buffer reallocations over
+5.035 seconds pass. The probe does not establish frame-time or long-session
+performance. Runtime298 remains; no gameplay build was needed. The exact owned
+preview was closed and normal profiles/config/estate2 verified and restored once
+before final closed-game acceptance. Protected estates were not accessed.
+Concurrent changes, foreign journals and historical UTF8 retain. New heavy data
+stays on D:. No cleanup or migration occurred. Whole-town native art parity and
+further architecture remain open.

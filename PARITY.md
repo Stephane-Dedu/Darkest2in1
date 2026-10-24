@@ -909,3 +909,14 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   in the short probe. Original50 graded paintings and ground pixels stay exact,
   one painting added. Complete v88 libraries installed, DD2 closed/no pending
   restore. Native art parity remains open. Fresh usage/baseline next332.
+
+
+- Round332 Guild gables: eight complete native DD2 inn timbers form two matched
+  kingpost/collar/brace frames. All647 original members/12649 triangles, their
+  UVs/bindings and27 materials retain;128 triangles give655 members/12777tri and
+ 28 Guild batches. Original2048px paint/UVs, proper rotations and uniform scales
+  verified. Actual Core native timber finish matches the Tavern;51 graded images
+  and nine services stay exact. Four matched views and native1920 unsaved fixture/
+  fresh town pass;257 renderers/runtime298, zero reallocations in the short probe.
+  Complete v89 libraries installed, DD2 closed/no pending restore. Whole-town
+  native art parity remains open. Fresh usage/baseline next333.
