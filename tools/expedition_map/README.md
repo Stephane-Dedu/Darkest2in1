@@ -47,3 +47,32 @@ parallax or particle depth occlusion. Native HDR, distortion and fog shaders are
 approximated. The four live smoke plumes, regional low mist and twelve embers
 are bounded by the expedition UI; dungeon atmosphere shares the source atlases
 but retains its own density and behaviour.
+
+## Terrain painting without scenery halos
+
+Add `--terrain-plates` to the full-resolution renderer to produce
+`overview/terrain-only.png`, `terrain-depth.png`, `native-scenery-holdout.png`
+and `roads-mask.png`. The normal beauty/depth passes retain the original scene.
+The holdout uses the same camera, meshes, UVs, materials and samples, with only
+the ground temporarily replaced by a holdout shader. No scenery padding is used.
+
+Compose a second map with the terrain-only beauty/depth passes and the original
+range/mountain passes. Use that empty plate as the paint target. Native scenery
+is a supporting style reference, never part of the image being repainted.
+Regional crops retain more real painting detail than enlarging a full-map edit.
+Check their actual dimensions and compare every camera destination.
+
+`terrain_paint.py --spec D:/private/paint.json --out D:/private/paint-pack`
+fits the crops and applies their background delta through the native coverage.
+It preserves opaque native scenery, the road mask and every outside-scope pixel.
+It copies the logical layout unchanged and enforces the runtime PNG limit.
+The spec has paths `base`, `old_terrain`, `coverage`, `terrain_alpha`,
+`roads_mask`, `layout`, and a `paintings` list. Each painting has `side`
+(`left` or `right`), `path`, and `rect` as source-pixel `[x0,y0,x1,y1]`.
+Paths may be absolute or relative to the spec. Crops must not overlap.
+
+This is display-space reconstruction of the background, not new3D geometry.
+Antialiased edges approximate the final compositing; baked procedural motes can
+follow the paint. Native live VFX remain separate. Compare native UI captures
+before acceptance. Round339's two private paintings improve the connected
+slopes while retaining the original scenery and the lower335 atmosphere.

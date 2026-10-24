@@ -1,3 +1,19 @@
+HUMAN RESTRICTION (2026-10-24): Do not launch DD2 before 18:25:40 UTC / 20:25:40 Europe/Paris on 2026-10-24. Offline review only until then. See local-art/ui-overhaul/expedition-scenery-mask-v05/no-launch.json.
+
+Round339 accepted terrain-only crop painting; runtime remains335.
+local-art/ui-overhaul/expedition-scenery-mask-v05/CONTINUE.md is the checkpoint.
+Two real-resolution cropped paintings replace far-slope soil without scenery
+halos. Same269 placements/native geometry/UV/paint; opaque scenery/roads/layout
+exact,19.66% map pixels changed. All5 destination crops and unsaved native map
+fixture/overview/city passed before the human launch pause. A later native
+uninstall callback raised IMainInstaller KeyNotFoundException; cause unresolved.
+Public recipes reproduce raw pixels exactly and final PNG byte-for-byte.
+Map339 installed, other selector/runtime335/config/native profiles exact;
+Hamlet333 parked, DD2 CLOSED, no pending restore. NEVER rerun335/339 restores.
+Next340: fresh usage/repo check; prefer owner finishing notes over revisiting
+rejected studies. Preserve foreign WIP/protected estates, heavy files on D:,
+keep7-8% reserve. No game launch before the human deadline above.
+
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
 

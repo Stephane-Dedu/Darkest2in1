@@ -18,8 +18,10 @@ parser.add_argument('--scale', type=float, choices=(1.0, 2.0), default=2.0)
 parser.add_argument('--samples', type=int, default=16)
 parser.add_argument('--vendor', type=Path, help='Optional Blender-Python-compatible Pillow install')
 parser.add_argument('--quick', action='store_true')
+parser.add_argument('--terrain-plates', action='store_true', help='Also render terrain, visible scenery coverage and road protection for painting')
 args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:] if '--' in sys.argv else [])
 if not 1 <= args.samples <= 64: parser.error('--samples must be between1 and64')
+if args.quick and args.terrain_plates: parser.error('--terrain-plates requires a full-resolution reference')
 KIT = args.kit.resolve(); R = args.out.resolve()
 if R.is_relative_to(Path(__file__).resolve().parents[2]):
     raise ValueError('Extracted game art must remain outside the repository')
@@ -27,7 +29,7 @@ R.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(KIT / 'tools'))
 if args.vendor: sys.path.insert(0, str(args.vendor))
 import bl_lib as L
-from PIL import Image, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter
 QUICK = args.quick; DRY = False; ONLY = ['overview']
 W, H = 1920, 1080; FOV = 40.0; K = (H / 2) / math.tan(math.radians(FOV / 2)); BASE = 56.0; DMAX = 2000.0
 def sstep(a, b, x): t = np.clip((np.asarray(x, float) - a) / (b - a), 0, 1); return t * t * (3 - 2 * t)
@@ -137,7 +139,7 @@ for tz in range(NTZ):
         me = bpy.data.meshes.new(f'terrain_{tx}_{tz}'); me.from_pydata(verts.tolist(), [], faces.tolist()); me.update()
         u_ = (verts[:, 0] - px_[0, 0]) / (px_[0, -1] - px_[0, 0]); v_ = (verts[:, 1] - pz_[0, 0]) / (pz_[-1, 0] - pz_[0, 0]); e = .5 / TP
         uvv = np.c_[e + u_ * (1 - 2 * e), e + v_ * (1 - 2 * e)]; uv = me.uv_layers.new(name='UVMap'); uv.data.foreach_set('uv', uvv[faces.reshape(-1)].reshape(-1).astype(np.float32))
-        to = bpy.data.objects.new(me.name, me); bpy.context.collection.objects.link(to); to['tag'] = 'world'
+        to = bpy.data.objects.new(me.name, me); bpy.context.collection.objects.link(to); to['tag'] = 'terrain' if args.terrain_plates else 'world'
         tm = bpy.data.materials.new(me.name); tm.use_nodes = True; nt = tm.node_tree; nt.nodes.clear(); o = nt.nodes.new('ShaderNodeOutputMaterial'); em = nt.nodes.new('ShaderNodeBsdfDiffuse')   # lit by the sun below
         ti = nt.nodes.new('ShaderNodeTexImage'); ti.image = bpy.data.images.load(str(R / f'terrain_{tx}_{tz}.png')); ti.extension = 'EXTEND'
         nt.links.new(ti.outputs['Color'], em.inputs['Color']); nt.links.new(em.outputs[0], o.inputs[0]); me.materials.append(tm)
@@ -287,6 +289,38 @@ nt.links.new(cd.outputs['View Distance'], dv.inputs[0]); nt.links.new(dv.outputs
 def show(tags):
     for ob in bpy.data.objects:
         if ob.type == 'MESH': ob.hide_render = ob.get('tag') not in tags
+
+def terrain_plates(directory, regions, loc, pitch):
+    """Keep artist scenery intact while exposing the connected ground beneath it."""
+    show(['terrain'])
+    L.render(directory / 'terrain-only.png', samples=args.samples, transparent=True, bg=AMBIENT)
+    bpy.context.view_layer.material_override = dm
+    sc.view_settings.view_transform = 'Raw'; sc.render.image_settings.color_mode = 'BW'; sc.render.image_settings.color_depth = '16'
+    sc.cycles.samples = 1; sc.render.filepath = str(directory / 'terrain-depth.png'); bpy.ops.render.render(write_still=True)
+    bpy.context.view_layer.material_override = None; sc.render.image_settings.color_depth = '8'
+    hold = bpy.data.materials.new('terrain-holdout'); hold.use_nodes = True
+    nt = hold.node_tree; nt.nodes.clear(); output = nt.nodes.new('ShaderNodeOutputMaterial'); node = nt.nodes.new('ShaderNodeHoldout')
+    nt.links.new(node.outputs[0], output.inputs[0])
+    saved = []
+    try:
+        for ob in bpy.data.objects:
+            if ob.type == 'MESH' and ob.get('tag') == 'terrain':
+                saved.append((ob.data, list(ob.data.materials))); ob.data.materials.clear(); ob.data.materials.append(hold)
+        show(['terrain', 'world'] + regions)
+        L.render(directory / 'native-scenery-holdout.png', samples=args.samples, transparent=True, bg=AMBIENT)
+    finally:
+        for mesh, materials in saved:
+            mesh.materials.clear()
+            for material in materials: mesh.materials.append(material)
+    scale = sc.render.resolution_x / W
+    roads = Image.new('L', (sc.render.resolution_x, sc.render.resolution_y)); draw = ImageDraw.Draw(roads)
+    for line in ROADS:
+        for x, z in line:
+            px, py, depth = project((x, z, hgt(x, z)), loc, pitch)
+            if depth <= 1: continue
+            radius = max(2, K * 8 / depth) * scale; cx, cy = px * scale, py * scale
+            draw.ellipse((cx - radius, cy - radius, cx + radius, cy + radius), fill=255)
+    roads.save(directory / 'roads-mask.png')
 meta = {'screen': [W, H], 'fov': FOV, 'dmax': DMAX, 'hubs': {k: list(v) for k, v in HUBS.items()}, 'views': {}}
 if ONLY and (R / 'map.json').exists(): meta['views'] = json.loads((R / 'map.json').read_text())['views']
 sc = bpy.context.scene
@@ -297,10 +331,11 @@ for vname, (loc, pitch) in views.items():
     d = R / vname; d.mkdir(exist_ok=True); regs = ['city', 'farm', 'coast', 'forest'] if vname == 'overview' else [vname] if vname != 'mountain' else []
     show(['range']); L.render(d / 'range.png', samples=4, transparent=True)
     show(['mountain']); L.render(d / 'mountain.png', samples=4, transparent=True)
-    show(['world'] + regs); L.render(d / 'beauty.png', samples=4 if QUICK else args.samples, transparent=True, bg=AMBIENT)
+    show(['terrain', 'world'] + regs); L.render(d / 'beauty.png', samples=4 if QUICK else args.samples, transparent=True, bg=AMBIENT)
     bpy.context.view_layer.material_override = dm; sc.view_settings.view_transform = 'Raw'; sc.render.image_settings.color_mode = 'BW'; sc.render.image_settings.color_depth = '16'
     sc.cycles.samples = 1; sc.render.image_settings.color_mode = 'BW'; sc.render.filepath = str(d / 'depth.png'); bpy.ops.render.render(write_still=True)
     bpy.context.view_layer.material_override = None; sc.render.image_settings.color_depth = '8'
+    if args.terrain_plates: terrain_plates(d, regs, loc, pitch)
     info = {}
     for k, (hx, hz, hh, s) in HUBS.items():
         fx, fy, z = project((hx, hz, hh), loc, pitch); info[k] = dict(hub=[round(fx, 1), round(fy, 1)], pix=round(K / z * s, 4) if z > 0 else None, depth=round(z, 1))

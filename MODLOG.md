@@ -10561,3 +10561,31 @@ tools/expedition_map/terrain_review.md. Heavy source/art/prompt evidence on D:.
 Accepted335 plugin/map exact; Hamlet333 parked, DD2 CLOSED/no pending restore.
 
 Status round338: paint direction remains a draft;335 installed. Next339.
+
+
+## Round339: accepted terrain crop detail without scenery halos
+
+Two terrain-only built-in imagegen crops (actual1403x1121/1473x1068) improve
+connected rock/earth slopes. The4K delta compositor preserves opaque native
+scenery, roads, outside-scope pixels and logical layout; no padded coverage.
+Same269 native placements/meshes/UVs/paint,19.6587% map pixels changed. Initial
+baked-mote ring guards rejected. Final keeps live VFX and lower335 atmosphere.
+
+Five destination crops and native city/overview reviewed. Unsaved native map
+fixture passes fixed controls, retarget/close/overview/paired views and effect/
+provisioner cleanup. No estate selected/saved. Video mainly stationary city and
+late overview; logs establish fixture transitions. A subsequent native uninstall
+callback raised KeyNotFoundException: IMainInstaller; cause unresolved. No runtime
+code changed. Normal plugin/config/native profiles restored exactly once before
+accepting only map339. DD2 CLOSED, no pending restore; never rerun335/339 restores.
+
+Public terrain renderer reproduces all raw reference pixels; PNG metadata differs
+by timestamp/timing. Public compositor reproduces accepted map byte-for-byte.
+Python compile and output/input collision guards pass. No C# build with foreign
+WIP. Runtime335, all other selector files and parked Hamlet333 retain. Full
+evidence/prompts on D:, checkpoint local-art/ui-overhaul/expedition-scenery-mask-v05.
+Later human instruction: no game launch before2026-10-24 18:25:40 UTC /
+20:25:40 Europe/Paris. Remaining review/checkpoint performed offline.
+
+Status round339: terrain map accepted/installed; runtime335, Hamlet333 parked.
+Next340: fresh usage/repo check; respect no-launch deadline, avoid rejected studies.
