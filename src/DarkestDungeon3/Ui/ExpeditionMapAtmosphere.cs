@@ -7,6 +7,7 @@ namespace DarkestDungeon3.Ui;
 /// <summary>Native masks and simulation sheets, animated locally beneath the quest controls without gameplay RNG.</summary>
 internal static class ExpeditionMapAtmosphere
 {
+    internal const int OverviewDrawCount = 32;
     internal static int LastDrawCount { get; private set; }
     public static void Draw(ExpeditionMap3D layout, ExpeditionMap3D.MapRect camera, float seconds)
     {
@@ -23,9 +24,9 @@ internal static class ExpeditionMapAtmosphere
                 switch (spot.Location)
                 {
                     case "crypts": BurningCity(spot, camera, clip.position, seconds); break;
-                    case "warrens": Clouds("gas", spot, camera, clip.position, seconds, new Color(0.462745f, 0.25881f, 0.192157f), 0.26f, 8, 290, 22); break;
-                    case "cove": Clouds("mist", spot, camera, clip.position, seconds, new Color(0.48f, 0.62f, 0.7f), 0.09f, 5, 430, 20); break;
-                    case "weald": Clouds("forest", spot, camera, clip.position, seconds, new Color(0.183295f, 0.413723f, 0.453f), 0.09f, 7, 380, 25); break;
+                    case "warrens": Clouds("gas", spot, camera, clip.position, seconds, new Color(0.462745f, 0.25881f, 0.192157f), 0.09f, 4, 250, 34); break;
+                    case "cove": Clouds("mist", spot, camera, clip.position, seconds, new Color(0.48f, 0.62f, 0.7f), 0.065f, 4, 360, 48); break;
+                    case "weald": Clouds("forest", spot, camera, clip.position, seconds, new Color(0.183295f, 0.413723f, 0.453f), 0.045f, 4, 330, 36); break;
                 }
             }
         }
@@ -42,25 +43,25 @@ internal static class ExpeditionMapAtmosphere
             float x = spot.HubX - span / 2 + span * seed + (phase - 0.5f) * 45;
             float y = spot.HubY + below - phase * 30 + Mathf.Sin(time * 0.22f + i) * 5;
             float alpha = Mathf.Sin(phase * Mathf.PI) * opacity;
-            Sprite(effect, camera, offset, x, y, 120 + seed * 75, 42 + seed * 28,
+            Sprite(effect, camera, offset, x, y, 105 + seed * 55, 24 + seed * 16,
                 time, seed, new Color(tint.r, tint.g, tint.b, alpha));
         }
     }
 
     private static void BurningCity(ExpeditionMap3D.Spot spot, ExpeditionMap3D.MapRect camera, Vector2 offset, float time)
     {
-        for (int i = 0; i < 6; i++)
+        for (int i = 0; i < 4; i++)
         {
             float seed = Fraction(i * 0.61803399f + 0.2f);
-            float x = spot.HubX - 175 + i * 64, y = spot.HubY - 24 - seed * 15;
+            float x = spot.HubX - 145 + i * 95, y = spot.HubY - 24 - seed * 15;
             float phase = Fraction(time / 5.5f + seed);
             Sprite("smoke", camera, offset, x + phase * 18, y - 38 - phase * 65,
-                65 + phase * 55, 70 + phase * 65, time, seed,
-                new Color(0.26f, 0.24f, 0.25f, Mathf.Sin(phase * Mathf.PI) * 0.35f));
-            Sprite("fire", camera, offset, x, y - 12, 25 + seed * 13, 40 + seed * 20,
+                45 + phase * 30, 55 + phase * 45, time, seed,
+                new Color(0.26f, 0.24f, 0.25f, Mathf.Sin(phase * Mathf.PI) * 0.14f));
+            Sprite("fire", camera, offset, x, y - 12, 19 + seed * 9, 28 + seed * 16,
                 time, seed, new Color(1, 0.396745f, 0.127358f, 0.588235f));
         }
-        for (int i = 0; i < 20; i++)
+        for (int i = 0; i < 12; i++)
         {
             float seed = Fraction(i * 0.61803399f + 0.32f), phase = Fraction(time / (3 + seed * 2) + seed);
             float x = spot.HubX - 210 + seed * 420 + Mathf.Sin(time * 0.7f + i) * 9 + phase * 16;
@@ -78,6 +79,9 @@ internal static class ExpeditionMapAtmosphere
         var world = new ExpeditionMap3D.MapRect(x - width / 2, y - height / 2, width, height);
         var r = ExpeditionMapCamera.Transform(world, camera);
         var uv = animation.Uv(time, phase);
+        // The scenery doubles in size on approach. Keep the same native masks
+        // registered to it, but reduce their opacity as their screen area grows.
+        colour.a *= Mathf.Min(1, ExpeditionMap3D.Width / camera.Width);
         GUI.color = colour;
         GUI.DrawTextureWithTexCoords(new Rect(r.X - offset.x, r.Y - offset.y, r.Width, r.Height), texture,
             new Rect(uv.X, uv.Y, uv.Width, uv.Height), true);

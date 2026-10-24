@@ -931,3 +931,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
   one generic coast grade no longer active. Generated study rejected before
   authoring. Complete v90 libraries installed, DD2 closed/no pending restore.
   Density/architecture/native-art parity remain open. Fresh usage/baseline next334.
+
+
+- [x] Round335 expedition visibility/detail:3840x2160 native render, unchanged logical layout/quest controls, lower baked haze/glow/motes, native root/stubble ground detail and corrected Foetor thatch brightness.32 restrained zoom-aware live quads; shared VFX/dungeon behaviour unchanged. Frozen Release+53 focused Core/5 UI pass, final unsaved native retarget/reverse/paired regions/resource lifecycle/provisioning fixture and fresh1920 overview pass. Baseline restored once; accepted runtime/map installed, normal config/native profiles/estate2 and Hamlet retained, game CLOSED/no pending restore. Evidence:local-art/ui-overhaul/expedition-visibility-v01.
+- [ ] Expedition remaining: broad constructed hills, terrain parallax/depth occlusion/native HDR, ordinary saved play/controller/arbitrary UI scales and long-session performance. No new generated art or extraction is currently necessary; inspect native cliff sources before adding detail. Owner parked Hamlet333 for later human notes.

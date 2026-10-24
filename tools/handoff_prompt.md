@@ -1,5 +1,19 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round335 accepted the expedition visibility/detail pass:
+local-art/ui-overhaul/expedition-visibility-v01/CONTINUE.md.
+OWNER PARKED HAMLET at accepted333/v90; do not resume Hamlet without newer human
+instructions. Current task is expedition selection. Native map3840x2160, exact
+logical layout/camera/quest controls, reduced baked/live haze and32 VFX quads.
+Local native root/stubble detail and Foetor thatch brightness reviewed. Release,
+53 Core/5 UI and final unsaved native map fixture + fresh overview pass. New
+runtime335 and private refined map are installed; Hamlet untouched. DD2 CLOSED,
+no pending restore. NEVER run this checkpoint's one-use restore after acceptance.
+Next336: fresh usage/baseline, inspect current code/checkpoint. Prioritise native
+terrain/cliff detail and better visual depth without new fog/clutter or moving
+quest controls. All heavy outputs on D:; C:~240MiB free. Preserve foreign WIP and
+protected estates. The earlier cathedral trace334 stays parked with Hamlet.
+
 Round333 accepted the shared slate finish: local-art/ui-overhaul/hamlet-service-material-review-v90/CONTINUE.md.
 The Abbey and Guild armory now use the same existing slate grade as the
 Sanitarium. Four material names previously omitted 'slate', selecting the generic

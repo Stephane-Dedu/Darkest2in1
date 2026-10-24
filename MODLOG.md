@@ -10408,3 +10408,44 @@ All new heavy data is on D:, no cleanup/migration. Whole-town native art parity
 and broader architecture/material density remain open.
 
 Status round333: accepted333 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next334.
+
+
+## Round335 - Expedition visibility and native detail, 2026-10-24
+
+Round335 accepted the expedition visibility/detail pass. The owner parked Hamlet
+at333/v90; this round changes no Hamlet art or code. The single native valley
+render is now3840x2160 on the exact previous1920x1080 logical layout. All five
+hubs, quest anchors, click regions and camera destinations keep their bytes.
+
+Baked harbour fog, valley haze, Sprawl smoke/bloom and floating motes are lower.
+Terrain uses quieter relief strokes and local native Tangle roots/Foetor stubble.
+The Foetor's brightness and farmhouse thatch were corrected after comparison
+with its native extracted sprite. Native building geometry, UVs and source paint
+remain intact. No AI-generated art or new extraction was needed. Public rebuild
+recipes are in tools/expedition_map; heavy private artifacts are on D:.
+
+Live atmosphere uses32 smaller quads instead of52, with lower opacity during
+zoom. Shared native atlases and dungeon atmosphere retain their bytes/behaviour.
+The four city fires, smoke, twelve embers and regional low mist remain animated.
+Fixed quest controls and persistent camera behaviour retain.
+
+Frozen HEAD3afef6a plus only the two owned UI files passes Release Deploy=false,
+53 focused Core cases and5 loader UI cases. The final pack passes the native
+unsaved fixture for fixed quest controls, mid-flight retarget/reverse, paired
+areas, effect release/reload and provisioning return. Final1920 overview was
+captured and reviewed separately. The final-check video failed to find its
+window after an early start; its fixture log and subsequent stationary capture
+are valid. Earlier candidate transition video remains evidence for unchanged
+runtime/camera behaviour. Do not describe the failed recording as successful.
+
+Only the four owned runtime DLL/PDBs and private map3d.png were installed after
+one exact baseline restoration. map3d.json, VFX files, other selector art, plugin
+data, config, native profiles, estate2 and Hamlet models/shadows remain exact.
+Protected estates1/3 were never accessed. DD2 CLOSED, no pending restore.
+
+Remaining visual limits: broad hills still use constructed terrain; no true
+parallax, depth occlusion or native HDR VFX. Ordinary saved gameplay, controller
+navigation, arbitrary UI scales and long-session memory/frame times were not
+exercised. Evidence:local-art/ui-overhaul/expedition-visibility-v01/CONTINUE.md.
+
+Status round335: accepted335 runtime/map; Hamlet333 retained. DD2 CLOSED/no pending restore. Next336.

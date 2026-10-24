@@ -87,9 +87,9 @@ internal static class ExpeditionMapCheck
         }
         if (_step == 0)
         {
-            Require(Quests.Count >= 4 && ExpeditionMapAtmosphere.LastDrawCount == 52, "Missing native effects or regional quest rows.");
+            Require(Quests.Count >= 4 && ExpeditionMapAtmosphere.LastDrawCount == ExpeditionMapAtmosphere.OverviewDrawCount, "Missing native effects or regional quest rows.");
             _anchors = new Dictionary<QuestOffer, Rect>(Quests);
-            Checkpoint("overview: all six native effect IDs ready; 52 quads under fixed quest controls");
+            Checkpoint($"overview: all six native effect IDs ready; {ExpeditionMapAtmosphere.OverviewDrawCount} restrained quads under fixed quest controls");
             _next = Time.unscaledTime + 2;
         }
         else if (_step == 2) { Selected("crypts"); _next = Time.unscaledTime + 0.18f; }

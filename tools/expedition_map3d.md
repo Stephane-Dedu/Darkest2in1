@@ -1,19 +1,34 @@
 # Expedition map camera and native atmosphere
 
+The round335 visibility recipe is in `tools/expedition_map/`. It renders the
+accepted valley at3840x2160 for the existing single-image camera, preserves the
+logical1920x1080 layout, and uses native root/stubble fields to vary the Tangle
+and Foetor ground. Relief strokes are quieter. The compositor reduces baked
+valley haze, harbour fog, smoke columns, bloom and motes. Native model geometry,
+UVs and source paint remain intact; the Foetor brightness is lower so its pale
+thatch retains brush detail. No generated texture is required.
+
+Live map effects now use32 smaller quads instead of52. Shroud mist sits below
+the buildings, and every effect becomes less opaque as its screen size grows
+during an approach. The shared native atlas files and dungeon atmosphere are
+unchanged. All quest rows, click regions, paired-area controls and camera rules
+retain their accepted layout. Private inputs, render evidence and restoration
+status are recorded in `local-art/ui-overhaul/expedition-visibility-v01`.
+
 The privately rendered DD2 valley is the standard embark view from round238. The owner retired the2D/3D
 switch and `Look.ExpeditionMap3D`; startup removes the old config entry. Missing overview/layout files retain
 an automatic painted recovery map. Missing effects retain a usable map and camera. No view preference is
 stored in the estate.
 
 Earlier round acceptance below describes the former selectable mode. Round238 replaces that fixture's mode
-switches with explicit effect release/automatic reload, without forcing a view override. Its final native
-acceptance is pending the owner's October13 launch pause.
+switches with explicit effect release/automatic reload, without forcing a view override. Round335 ran this
+updated fixture successfully in the authorized unsaved preview.
 
 Round238 removes the config binding, preview override and mode button. The native map fixture now starts with
 the ordinary default view, explicitly releases effect textures and checks their automatic reload, then checks
 provisioning cleanup/return. Synthetic checks consume live pointer/key events only while running. Release and
-188 UI tests pass, but this updated native fixture has not run. No game launch before 2026-10-13 19:26:19 UTC /
-21:26:19 Europe/Paris. See `local-art/ui-overhaul/hamlet-embark-default-v11` and the latest handoff before testing.
+188 UI tests passed at that checkpoint. See `local-art/ui-overhaul/hamlet-embark-default-v11` for its historical
+launch pause, and the latest handoff for current launch constraints.
 
 Selecting a quest or clicking scenery now approaches the region through one persistent image. The old
 overview-enlargement followed by a separate closer-frame fade is removed. No image is loaded, decoded or
@@ -32,7 +47,7 @@ Files live in `Paths.ExpeditionArtFolder`, outside Git and releases:
 
 | File | Purpose |
 | --- | --- |
-| `map3d.png` | Widescreen overview, no interface; currently 1920x1080 |
+| `map3d.png` | Widescreen overview, no interface; round335 uses3840x2160 on the same1920x1080 logical canvas |
 | `map3d.json` | Per legacy location: `hub`, `label`, `click`, `zoomScale`, `zoomHub`, `zoomLabel` |
 | `vfx/vfx-manifest.json` | Bounded native atlas metadata and source provenance |
 | `vfx/mist.png`, `fire.png`, `smoke.png`, `ember.png`, `gas.png` | Five private RGBA textures shared by six effect IDs |
@@ -62,7 +77,7 @@ and selector pack and checking DD2 is stopped.
 
 | Region | Source and map use |
 | --- | --- |
-| Sprawl | City `VFX_Fire_Smoke_Small_01.prefab`: 64-frame 8x8 fire at 30FPS, smoke at 20FPS, four spark variants; six localized fires/smoke plumes and twenty rising embers |
+| Sprawl | City `VFX_Fire_Smoke_Small_01.prefab`: 64-frame 8x8 fire at 30FPS, smoke at 20FPS, four spark variants; four localized fires/smoke plumes and twelve rising embers |
 | Foetor | Farm `vfx_Steam_Smoke_Sphere_01_Prefab.prefab`: four static soft-wash cloud variants drifting/fading in native warm brown/pink |
 | Shroud | Coast `vfx_coast_fog_plane_01.mat`: native fractal fog masked with the native half-oval gradient, drifting softly around the harbour |
 | Tangle | Forest `vfx_particles_forest_color_smoke.prefab`: the Farm cloud sheet with native blue-green forest tint and restrained drifting particles |
@@ -82,13 +97,13 @@ made that REA observed shader execution or that the native particle playback has
 `ExpeditionMapVfx` validates atlas metadata and selects frame UVs. `Runtime/ExpeditionMapEffects` reads files
 off-thread, uploads at most one unique texture per frame on Unity's thread, and makes textures non-readable.
 The six installed effect IDs share five images, approximately 13.25MiB decoded without mipmaps. Leaving the
-map for provisioning, painted mode or another screen releases all five after three unused frames. Re-entry
+map for provisioning or another screen releases all five after three unused frames. Re-entry
 reloads asynchronously. A discarded file-read task owns no Unity objects and cannot repopulate a later pack.
 
-`Ui/ExpeditionMapAtmosphere` draws 52 deterministic quads under the quest controls, clipped to the scenery
+`Ui/ExpeditionMapAtmosphere` draws32 deterministic quads under the quest controls, clipped to the scenery
 viewport. It neither handles input nor consumes gameplay RNG. Native fire/smoke frames and native masks are
 reused; particle trajectories, density, scaling, mist/smoke/ember tints and fading are adapted for the small map.
-The overview already has baked haze/glow/motes, so added effects are deliberately restrained.
+The overview retains a small amount of baked haze/glow/motes, so added effects are deliberately restrained.
 
 This remains a camera over a render, not a live perspective scene: close views can look softer, there is no
 terrain parallax or particle depth occlusion, and IMGUI omits native HDR/bloom/distortion/depth fade. Removing
@@ -110,5 +125,5 @@ and return. It never selects a save path; Persist is guarded and real embark is 
 and restore a normal launch without preview/check flags after recording the result. Native visual acceptance
 must be recorded separately from offline tests.
 
-Rollback: switch **Painted map**, set `Look.ExpeditionMap3D=false`, or restore the pre-change plugin/private
-pack backup with DD2 stopped. No save migration or estate edit is involved.
+Rollback: restore the matching pre-change plugin/private pack backup with DD2 stopped. The old view switch
+and config entry no longer exist. No save migration or estate edit is involved.
