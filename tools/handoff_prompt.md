@@ -1,3 +1,14 @@
+Round344 installed32 exact curio IDs/24 pairs/48 PNGs after64 real native
+state/input captures. Latest local-art/ui-overhaul/curio-native-quality-v04/
+CONTINUE.md. Runtime343 unchanged, config/map339 exact, Hamlet333/dossier340
+parked, DD2 CLOSED/no estate/host/save file/no pending restore.71 designs plus
+retained FadedMemory remain. Bas-relief prompt/reference ONLY, no new art yet.
+Resume345 after ordinary usage permits; latest before QA13%/13% remaining,
+save and STOP before7-8%reserve. Existing heartbeat already continues this task.
+Preserve44 foreign WIP files; do not compile shared dirty C# or rerun335/339
+restores/completed342-344 helpers. Never redo accepted pairs or misread alpha0
+RGB as a visible halo. Normal saved campaign/actors/controller/perf QA remains.
+
 Round343 installed29 exact IDs/21 pairs and fixed large-painting cache starvation.
 Latest local-art/ui-overhaul/curio-native-quality-v03/CONTINUE.md.58 final native
 state/input captures pass;289 UI+5 artifact/Release pass; Core unchanged1307.

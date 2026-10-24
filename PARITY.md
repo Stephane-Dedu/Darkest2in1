@@ -967,3 +967,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round343 adds Holy/Pristine fountains and Court egg design,29 IDs/21 pairs with58 final native state/input captures. Correct searched growth/shell states, native references and coherent stone paint. Fixed large-painting current-tile starvation; old regression fails/new passes,289 UI+5 artifact/Release pass, Core unchanged1307. Runtime/private pack installed, config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore. Evidence:local-art/ui-overhaul/curio-native-quality-v03.
 - [ ] Curio continuation:32 base+10 quest+26 DLC design+6 legacy, plus retained Faded Memory; ordinary saved campaign/host/actor/controller/long-session acceptance. Court art does not add encounters. Check RGBA before treating hidden RGB as glow.
+
+
+- [x] Round344 adds Altar of Light, Fish Idol and Ship's Figurehead,32 IDs/24 pairs with64 real native state/input checks. Correct fallen sword/head anatomy, coherent DD2 stone/timber paint, stable fit, full32-ID artifact audit. Runtime343 unchanged; private pack installed, config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore. Evidence:local-art/ui-overhaul/curio-native-quality-v04.
+- [ ] Curio continuation:29 base+10 quest+26 DLC design+6 legacy bodies, plus retained Faded Memory. Bas-relief has references/prompt only. Normal campaign/actors/controller/long-session acceptance remains pending. Resume after usage permits and retain7-8% reserve.

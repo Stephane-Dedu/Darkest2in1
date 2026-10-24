@@ -1,5 +1,15 @@
 # Curio rework: design catalog v01
 
+## Current coverage, round344
+
+32 exact identities now use 24 installed pairs. The Altar of Light, Fish Idol
+and Ship's Figurehead keep their DD1 silhouettes with the existing DD2 stone
+and timber palette. Fallen sword/head states stay distinct. All 64 native
+state/input checks pass; runtime 343 is unchanged. There are 71 pending designs
+and the retained Faded Memory exception. The bas-relief has references and a
+prompt only. Latest checkpoint:
+`local-art/ui-overhaul/curio-native-quality-v04/CONTINUE.md`.
+
 ## Native art and cache follow-up, round343
 
 The installed pack now covers 29 identities with 21 pairs: 28 base-runtime

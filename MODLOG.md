@@ -10698,3 +10698,25 @@ Ordinary campaign/actor/controller/long-session acceptance remains pending.
 All44 foreign WIP retained before journals. Checkpoint:
 local-art/ui-overhaul/curio-native-quality-v03/CONTINUE.md. Continue344 with
 remaining distinct bodies, preserving7-8% reserve and avoiding stale restores.
+
+
+## Round344: altar, fish idol and ship figurehead state paintings
+
+Three additional faithful DD1 identities with coherent DD2 stone/wood paint:
+Altar of Light's sword falls, Fish Idol's head falls, Ship's Figurehead keeps
+its physical carving without persistent light beams. Five transparent built-in
+generations, source/fit prompts and originals retained privately on D:. Fixed
+body landmarks preserve scale/ground; full32-ID/48-PNG catalog audit passes.
+
+Runtime343 unchanged. Native32-ID fixture passes64 closed/used state captures,
+alpha click/padding rejection and real supply drag/drop through the ordinary
+urn outcome. All three new pairs inspected at native camera scale. Pack now
+installed:31 base IDs+1 Court design,24 pairs.71 pending plus Faded Memory;
+bas-relief prompt/reference only, not generated. No DLC encounter added.
+
+Config/map339 exact, Hamlet/dossier parked,44 foreign WIP retained before these
+journals. Owned QA closed, DD2 CLOSED/no estate/native host/save file/no restore.
+Existing343 software tests remain authoritative; normal campaign/actor/input/
+long-session acceptance remains pending. Checkpoint:
+local-art/ui-overhaul/curio-native-quality-v04/CONTINUE.md. Resume345 after usage
+permits, retaining7-8% reserve; never rerun completed checkpoint/install helpers.
