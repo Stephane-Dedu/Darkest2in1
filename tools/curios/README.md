@@ -1,5 +1,49 @@
 # Curio rework: design catalog v01
 
+## Production art, round341
+
+The owner moved the active art task to all curios on2026-10-24. Hamlet333 and
+expedition339/dossier340 are parked. The private checkpoint is
+`local-art/ui-overhaul/curio-native-quality-v01/CONTINUE.md`; heavy art is on D:.
+This remains an offline production pass. No curio pack or runtime was installed.
+
+The104-identity inventory currently has11 fitted closed/used candidates, four
+more complete native bodies awaiting used states,88 pending identities and the
+retained Faded Memory exception. A registry entry or source assembly is not
+finished art. The existing70-entry native registry/renderer/runtime files are
+separate unfinished work and must not be deployed as a complete pack.
+
+Eight distinctive objects use DD1 identity/state references repainted against
+actual DD2 props: iron maiden, armor, urn, oyster, coral, sarcophagus,
+confessional and display cabinet. Sack, crate and books retain native DD2
+geometry/UV/paint for closed states and use generated edits for used states.
+Urn and coral deliberately retain one static body painting across both states;
+the coral's large halo is absent. Other pairs preserve opening/collapse cues.
+These are recognizable adaptations, not pixel-identical copies of DD1.
+
+New tools read private sources and write private outputs outside Git:
+
+- `extract_reference_states.py` exports196 direct atlas state references,
+  restoring clockwise-packed rotation and trim offsets. Complex NPC/partial
+  states remain reported gaps. They are not full Spine animation renders.
+- `render_native_sources.py` renders seven complete native bodies with original
+  mesh/UV/material transforms, tint and per-material alpha cutoff. It records
+  every texture dependency. Lighting is an unlit preview approximation.
+- `fit_state_pair.py` registers shared RGBA canvases with a16px foot padding.
+  Use fixed body landmarks or horizontal spans, never a moving lid/top.
+- `preview_state_pairs.py` applies the actual1920x720 crawl width/height/padding
+  formula to offline sheets. Those sheets are not native game captures.
+- `catalog_quality.py` verifies selected PNG hashes, alpha, anchors, dimensions
+  and native dependencies against the full inventory, then makes a private
+  coverage report. It never upgrades offline evidence to native acceptance.
+
+Four artifact tests cover rotated packing, transparent state registration,
+invalid scale spans and overwrite protection. No shared dirty C# build was run.
+Before integration, review alpha-aware closed-state picking, bounds of open
+doors, exact identity coverage beyond four regions and bounded loading. Isolate
+the curio seam from concurrent combat/hero changes. An incomplete full native
+switch would hide the remaining objects; do not install one.
+
 This is an art proposal for every curio identity found in the installed DD1 data, plus the mod's Faded Memory.
 It does not install new art or change curio behavior. The private visual catalog is
 `local-art/ui-overhaul/curio-design-v01/index.html`, beside this repository's parent directory.

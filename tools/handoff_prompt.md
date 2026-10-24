@@ -1,3 +1,14 @@
+Round341 changes ACTIVE TASK to all curio art. Hamlet333 and expedition339/
+dossier340 are PARKED. Latest local-art/ui-overhaul/curio-native-quality-v01/
+CONTINUE.md; heavy sources/prompts/art on D:.11 fitted offline pair candidates,
+4 native bodies needing used states,88 pending,1 retained exception. Nothing
+installed/natively verified.4 artifact tests and22-PNG/7-source audits pass.
+Installed335/339 exact; no game/save/estate access, no pending restore. Preserve
+foreign C# and original native curio WIP. Never install incomplete full-region
+coverage, compile dirty shared C# wholesale or rerun335/339 restores. The older
+launch deadline below has EXPIRED; obey newer human restrictions. Check usage
+first, keep7-8%reserve; continue342 from selected pairs without regenerating.
+
 HUMAN RESTRICTION (2026-10-24): Do not launch DD2 before 18:25:40 UTC / 20:25:40 Europe/Paris on 2026-10-24. Offline review only until then. See local-art/ui-overhaul/expedition-scenery-mask-v05/no-launch.json.
 
 Round340 prepared native dossier art OFFLINE; installed339/runtime335 unchanged.

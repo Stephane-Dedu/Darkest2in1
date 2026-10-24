@@ -10621,3 +10621,24 @@ Next341: fresh usage/repo and bounded native dossier review after the pause;
 do not repeat rejected thumbnail studies or arm QA before the deadline.
 
 Status round340: five native-paint preview candidates ready offline,339 retained.
+
+
+## Round341: curio identity and native paint production, offline
+
+Owner moved scope from expedition to all104 curios. Audited existing70-entry
+native WIP as unfinished/uninstalled; private renderer repair exposed incorrect
+UV-wrapped distinct bodies and a mismatched used coffer. Exported196 upright
+DD1 direct-state references. Produced11 fitted pairs: eight distinctive faithful
+DD2-painted bodies plus native sack/crate/books with edited used states. Four
+more complete native bodies await used states;88 identities remain pending and
+Faded Memory retains its exception.17 transparent built-in generations saved
+with prompts on D:. Three actual-scale corridor sheets reviewed offline.
+
+New extraction, complete-native rendering, pair calibration, crawl-scale review
+and full-inventory quality tools;4 artifact tests pass. Selected22 PNGs pass
+hash/RGBA/anchor/display bounds checks. No native QA/install/game/save access.
+Installed335 runtime and339 map exact; Hamlet/dossier parked. All48 foreign WIP
+files preserved before these owned journal additions. Checkpoint:
+local-art/ui-overhaul/curio-native-quality-v01/CONTINUE.md. Continue342 with four
+native used states and ordinary containers, keeping7-8% usage reserve. Never
+install incomplete full-region coverage or compile unrelated dirty C# work.
