@@ -766,3 +766,23 @@ nearest-surface distances can report misleading small errors. Round328 keeps
 all23 materials and adds1560 triangles without another renderer. Four actual
 Core-band angles and the placed native town support the change. Façade depth
 and broader native art parity remain separate work.
+
+
+### Portal projection and stone variation, round329
+
+The Abbey's entrance needs physical shadow breaks at the town camera. Two stone
+orders give the pointed opening a recessed inner frame and a projecting outer
+shoulder. Keep the door opening and rose clear, fit the hood to the outer curve,
+and ground the wider frame on a threshold with visible stone joints.
+
+Cloning geometry must not clone adjacent painted defects. The first close view
+showed identical chips on paired orders. The accepted version selects different
+approved stone fields for each pair, preserving source pixels and material
+factors. Three distinct threshold fields replace the blank appearance of one
+expanded slab. These changes use existing detailed316 paint and maintain the
+service palette without another image or renderer.
+
+Inspect intact native components before grafting them. The selected Shrine ring
+is circular and the Sprawl gable is closed; their source renders did not support
+a direct fit to this pointed doorway. Round329 preserves all other architecture,
+including the328 roof, and passes close/full Core views plus native town QA.

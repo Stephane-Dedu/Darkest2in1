@@ -870,3 +870,23 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [ ] Continue broader architecture and façade-depth comparison from accepted328.
   Keep the service palette and accepted medical/stone work; do not treat this
   roof change as whole-town native art parity.
+
+
+## Round329 — Abbey entrance depth, 2026-10-24
+
+- [x] Stepped two-order portal and three-stone threshold accepted in four actual
+  Core-band building views, matched front/oblique close views and native1920 town.
+  Door opening, rose, DD1 recognition, native tower and328 roof retain.
+- [x] All757 originals/bindings and23 materials/paintings retain;724 geometries
+  and756 UV fields stay exact within audited float tolerance. Added26 members/
+  376 triangles give783 members/20640 triangles. Varied approved fields remove
+  paired repeats and the blank slab; no new painting, image or material batch.
+- [x] Contact/facade and matching field rebuilt. Nine raw/baked/Core services
+  remain exact. Field parameters retain with257 entrance texels updated and
+  refreshed source identity.256 town renderers and23 Abbey batches remain.
+- [x] Full unsaved native fixture/fresh town/short zero-reallocation probe pass.
+  Runtime298 retained, DD2 closed, normal config/profiles/estate2 verified and
+  no pending restore. First study retained offline and never installed.
+- [ ] Continue broader service architecture/material review from accepted329.
+  Preserve shared colours and accepted medical/stone/roof work; native parity
+  for the full town remains open.

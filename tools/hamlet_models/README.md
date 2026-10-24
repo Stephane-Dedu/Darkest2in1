@@ -894,3 +894,24 @@ Accepted raw/baked/field packages, four Core-band views, independent geometry/UV
 audits and native1920 evidence are in `hamlet-abbey-architecture-v85`. Its
 `art/models-reviewed` junction names the accepted explicit-sampling study.
 The earlier modifier study is retained separately and was never installed.
+
+
+### Abbey portal depth, round329
+
+`abbey_portal_depth.py` builds two stepped stone orders and a fitted three-slab
+threshold around the retained pointed entrance. Run in Blender with accepted328
+raw `--source`, a new private `--out`, and `--kit`. It expects the original24
+portal courses and seven hood segments; do not use its own output as input.
+
+All23 materials and paintings retain. Original756 UV fields stay exact; the
+original threshold and26 added members receive selected existing fields. Each
+outer stone differs from its inner counterpart, and the three threshold fields
+are distinct. All757 original bindings stay. Total783 members/20640 triangles,
+376 more than328, with no extra material batch. Rebuild contact and directional
+visibility for the Abbey alone and refresh the matching ground field. Preserve
+the other nine accepted bakes.
+
+Accepted raw `art/models-reviewed` aliases the explicit final study; complete
+baked/field packages, four Core-band views, matched close views and native1920
+evidence are in `hamlet-abbey-portal-depth-v86`. The first depth study is retained
+under `art/first-depth-study` and was never installed.

@@ -10118,3 +10118,61 @@ were not accessed. Concurrent tracked work and shared journal hunks remain
 intact. New heavy files remain on D:; no additional cleanup or migration occurred.
 
 Status round328: accepted328 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next329.
+
+
+## Round329 - Abbey entrance depth, 2026-10-24
+
+Round329 accepted the Abbey's stepped portal: local-art/ui-overhaul/hamlet-abbey-portal-depth-v86/CONTINUE.md.
+Two projecting stone orders and a three-stone threshold give the left entrance
+more depth. The outer stones use different approved fields from their inner
+counterparts; the threshold stones have separate fields and narrow joints.
+The DD1 opening, door, rose, lancets, native tower and accepted328 roof retain.
+All23 materials, decoded paintings and colour factors remain unchanged. Four
+Core-band building views, matched portal close views and native1920 town QA pass.
+Complete raw/baked/matched-field libraries in v86 are installed; runtime298 and
+256 renderers remain. DD2 CLOSED, no pending restore. Fresh usage/baseline next330.
+
+Source inspection found real courses on the existing entrance but a shallow
+single surround. Intact native components were inspected and rendered with
+their original UV/paint: the selected Shrine component is a circular ring and
+the Sprawl component is a closed gable panel. Neither was grafted or distorted
+to fit the pointed doorway. No new extraction or generated painting was needed.
+The new geometry reuses accepted316 stone detail and the existing palette.
+
+All757 original members and their bindings remain. Thirty-three original members
+change geometry:24 inner courses, seven hood segments and two threshold/drip
+members. Their724 neighbours retain geometry/UVs within0.477 micrometres. The
+original756 other UV fields remain exact; only the original threshold receives
+a new field. Twenty-four outer stones and two additional threshold slabs add
+26 members/376 triangles. Total783 members/20640 triangles, previously757/20264.
+Added bindings reuse existing stone materials, with no new batch or image.
+
+The stone orders are separated by0.26 source units before Hamlet normalization.
+Rose clearance is0.166 source units. Three threshold slabs have0.012-source-unit
+joints. Added outer fields differ from their paired inner fields, and all three
+slabs use distinct approved fields. Source bounds and Core normalization retain,
+so the service position and click bounds remain. The public recipe's functions
+match the authoring script by AST; only the import bootstrap differs.
+
+Abbey contact/directional visibility and matching ground field are rebuilt.
+Field parameters retain;257 of1048576 texels change near the entrance, maximum
+byte delta102. Source identity matches the new geometry. Nine other raw/baked/
+Core services, medical322–325, Graveyard327, slate314 and roof328 remain intact.
+
+The first depth study was rejected offline after close views showed duplicated
+paired paint and a blank expanded threshold. It remains under art/first-depth-study
+with its exact recipe and verified moved-file hashes. Review source paths were
+relocated and checked. That study was never installed. The accepted revision
+uses varied fields and fitted slabs, without changing the source rasters.
+
+Native QA confirms20640 Abbey triangles,23 material batches and256 town renderers.
+The full unsaved fixture, fresh town capture and zero buffer reallocations over
+5.029 seconds pass. This short check does not establish frame-time or
+long-session performance. Frozen runtime298 remains; no gameplay build was made.
+The exact owned preview was closed and normal config/profiles/estate2 verified
+and restored once before final closed-game installation. Protected estates were
+not accessed. Concurrent tracked work and shared journal hunks remain intact.
+New heavy artifacts remain on D:; no additional cleanup or migration occurred.
+Broader service architecture and whole-town native art parity remain open.
+
+Status round329: accepted329 art/runtime298, DD2 CLOSED/no pending restore. Fresh usage/baseline next330.
