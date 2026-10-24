@@ -302,11 +302,18 @@ internal sealed partial class CrawlUi
     }
 
     /// <summary>
-    /// What stands in front of the party: DD1's own prop art (curios closed, highlighted under the mouse, open
-    /// once used; obstacles; spotted traps), drawn from its Spine skeletons. Falls back to the map icon.
+    /// Exact native paintings where the private pack is ready; other identities retain their original art.
     /// </summary>
     /// <summary>Debug (F6): show this curio in front of the party instead of what's really there.</summary>
     public static string PreviewCurio;
+
+    // The opt-in unsaved preview exercises these same draw/input paths without
+    // starting a native run or selecting an estate.
+    internal void DrawCurioPreview(Crawl crawl, ExpeditionState expedition)
+    {
+        DrawProps(crawl, expedition, 0);
+        DrawPrompt(crawl, expedition);
+    }
 
     /// <summary>The props along the hallway (the party's square and the seen squares next to it), scrolling with
     /// it; in a room, the room's curio.</summary>
@@ -360,6 +367,22 @@ internal sealed partial class CrawlUi
             return;
         }
         var feet = new Vector2(x, Feet + 10);
+        if (kind == "curios" && NativeCurioArt.TryGet(id, used, out var nativeTexture, out var painting))
+        {
+            var placement = painting.At(feet.x, feet.y);
+            var area = new Rect(placement.Left, placement.Top, placement.Width, placement.Height);
+            bool hover = hoverable && !used && placement.Hit(Event.current.mousePosition.x, Event.current.mousePosition.y);
+            if (hover)
+            {
+                if (Gui.Hotspot(area)) CurioClicked = true;
+                if (Drag.Drop<PackStack>(area, out var dropped)) CurioDrop = dropped.Key;
+            }
+            var colour = GUI.color;
+            if (hover) GUI.color = colour * new Color(1.15f, 1.11f, 1.03f, 1f);
+            GUI.DrawTexture(area, nativeTexture, ScaleMode.StretchToFill);
+            GUI.color = colour;
+            return;
+        }
         string spriteId = kind == "curios" ? S.Content.Curios.SpriteOf(id) : id;
         string folder = S.Dd1.PathOf("props", "shared", kind, spriteId ?? "");
         SpineArt.Picture pic;
@@ -372,7 +395,7 @@ internal sealed partial class CrawlUi
             {
                 var area = closed.RectAt(feet);
                 if (hover && Gui.Hotspot(area)) CurioClicked = true;
-                if (Drag.Drop<PackStack>(area, out var dropped)) CurioDrop = dropped.Key;
+                if (hover && Drag.Drop<PackStack>(area, out var dropped)) CurioDrop = dropped.Key;
             }
             pic = used ? SpineArt.Curio(folder, true) : closed;
             highlight = hover;
@@ -401,7 +424,7 @@ internal sealed partial class CrawlUi
             GUI.color = colour;
             return;
         }
-        if (used) return;
+        if (used || kind == "curios") return; // A pending painting is never a blue minimap icon in the world.
         string icon = kind switch { "curios" => "marker_curio", "obstacles" => "marker_obstacle", _ => "marker_trap" };
         var tex = Art.MapIcon(icon);
         if (tex == null) return;

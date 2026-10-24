@@ -10642,3 +10642,34 @@ files preserved before these owned journal additions. Checkpoint:
 local-art/ui-overhaul/curio-native-quality-v01/CONTINUE.md. Continue342 with four
 native used states and ordinary containers, keeping7-8% usage reserve. Never
 install incomplete full-region coverage or compile unrelated dirty C# work.
+
+
+## Round342: exact native curio pairs, bounded loader and native input acceptance
+
+Completed seven additional pairs: five native DD2 bodies with searched edits,
+plus faithful heirloom chest/backpack identities with DD2 materials. Audited
+eight original-sprite aliases now provide26 base-runtime IDs from18 pairs.
+77 identities remain pending, plus Faded Memory's retained DD1 exception.
+Nine transparent built-in generations and all source/fit/prompt evidence on D:.
+
+Reworked the curio seam into optional private schema2 exact-ID lookup, shared
+body anchors, closed-alpha click/drop, verified two-state loading and bounded
+nearby preload/eviction. Unity uploads one PNG/frame. Missing/bad/pending pairs
+retain correct original art; pending curios no longer show blue map markers.
+Normal host-ready warmup has a2sec bound. Existing IDs/outcomes/RNG/supplies and
+save format remain unchanged. Foreign70-entry family renderer stays excluded.
+
+Isolated Release passes0errors/3 existing warnings;1307 Core+288 UI+4 artifact
+tests pass. Unsaved native main-menu fixture passes26 IDs/52 states, actual
+alpha click/padding rejection and actual drag/drop through ordinary Holy Water
+urn resolution. All18 canonical pairs inspected at native camera scale. Fixture
+uses a Core stand-in, no native host/actors/estate/save file. v02 closed capture
+timing was corrected; v03 is authoritative. Ordinary campaign departure/reload,
+return travel, actor overlap/controller and long-session checks remain pending.
+
+Runtime342 and private26-ID pack installed. Config/map339 exact; Hamlet333 and
+dossier340 parked. All owned QA processes closed, DD2 CLOSED/no pending restore.
+Four relevant curio WIP files adopted after backup; other44 foreign files kept
+before these owned journal additions. Checkpoint and receipts:
+local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md. Continue343 with
+remaining bodies, retaining7-8% reserve and never applying stale restores.

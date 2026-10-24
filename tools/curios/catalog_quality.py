@@ -48,15 +48,28 @@ def catalog(inventory, selection, output):
             if any(abs(a - b) > .51 for a, b in zip(metadata['foot_anchor'], metadata['states'][state]['registered_foot'])):
                 raise ValueError('Candidate floor registration drifted')
             images[state] = {'file': str(path), 'sha256': sha(path)}
-        pairs[key] = {'pair_folder': str(folder), 'width': width, 'size': size, 'states': images,
+        pairs[key] = {'art_id': key, 'pair_folder': str(folder), 'width': width, 'size': size, 'states': images,
                       'state_note': metadata.get('state_note'), 'native_verified': False, 'installed': False}
-    native_path = (selection.parent / selected['native_study']).resolve()
-    native_doc = json.loads(native_path.read_text())
-    native = {e['id']: e for e in native_doc['entries']}
+    aliases = selected.get('aliases', {})
+    for key, canonical in aliases.items():
+        if key not in known or key in pairs or canonical not in pairs or known[key]['scope'] == 'owner-exception':
+            raise ValueError('Invalid shared-art alias')
+        if known[key].get('sprite', key) != known[canonical].get('sprite', canonical):
+            raise ValueError('Shared art must retain the audited original sprite identity')
+    native = {}
+    studies = selected.get('native_studies') or [selected['native_study']]
+    for relative in studies:
+        native_path = (selection.parent / relative).resolve()
+        native_doc = json.loads(native_path.read_text())
+        for entry in native_doc['entries']:
+            entry = dict(entry, file=str(native_path.parent / entry['file']))
+            if entry['id'] in native:
+                raise ValueError('Duplicate native source identity')
+            native[entry['id']] = entry
     if set(native) - known.keys():
         raise ValueError('Unknown native source identity')
     for entry in native.values():
-        if sha(native_path.parent / entry['file']) != entry['output_sha256']:
+        if sha(Path(entry['file'])) != entry['output_sha256']:
             raise ValueError('Native render changed after source audit')
         for record in entry['files']:
             if sha(Path(record['path'])) != record['sha256']:
@@ -64,13 +77,15 @@ def catalog(inventory, selection, output):
     records = []
     for key, source in known.items():
         status = ('owner_exception_retained' if source['scope'] == 'owner-exception' else
-                  'offline_pair_candidate' if key in pairs else
+                  'offline_pair_candidate' if key in pairs or key in aliases else
                   'native_body_needs_used_state' if key in native else 'pending')
         record = {'id': key, 'name': source['name'], 'scope': source['scope'], 'region': source['region'], 'status': status}
-        if key in pairs:
-            record.update(pairs[key])
+        if key in pairs or key in aliases:
+            record.update(pairs[aliases.get(key, key)])
+            if key in aliases:
+                record['shared_original_sprite_alias'] = True
         elif key in native:
-            record['native_closed_file'] = str(native_path.parent / native[key]['file'])
+            record['native_closed_file'] = native[key]['file']
         records.append(record)
     document = {'status': 'Offline candidates only. No installation, native QA or gameplay change.',
                 'inventory_sha256': sha(inventory), 'selection_sha256': sha(selection),
@@ -81,7 +96,7 @@ def catalog(inventory, selection, output):
     cards = []
     for record in sorted(records, key=lambda r: (r['status'] != 'offline_pair_candidate', r['status'], r['id'])):
         images = ''
-        if record['id'] in pairs:
+        if 'states' in record:
             for state, image in record['states'].items():
                 images += '<figure><img loading="lazy" src="' + Path(image['file']).as_uri() + '"><figcaption>' + state + '</figcaption></figure>'
         elif 'native_closed_file' in record:
@@ -91,6 +106,7 @@ def catalog(inventory, selection, output):
     page = '<!doctype html><meta charset="utf-8"><title>Curio art coverage</title><style>body{background:#161719;color:#e0d8ca;font:16px system-ui;margin:32px}main{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:20px}article{background:#242529;padding:18px;border:1px solid #50483b}h2{font-size:20px}article div{display:flex;align-items:end;gap:10px}figure{margin:0;flex:1;min-width:0}img{width:100%;height:260px;object-fit:contain}figcaption{color:#aaa}</style><h1>Curio art coverage</h1><p>' + html.escape(document['status']) + '</p><p>' + html.escape(str(document['counts'])) + '</p><main>' + ''.join(cards) + '</main>'
     (output / 'index.html').write_text(page, encoding='utf-8')
     print(json.dumps(document['counts']))
+    return document
 
 
 if __name__ == '__main__':

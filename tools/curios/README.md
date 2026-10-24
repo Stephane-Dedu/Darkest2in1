@@ -1,5 +1,43 @@
 # Curio rework: design catalog v01
 
+## Runtime integration, round342
+
+The exact-ID renderer accepts an optional private `curios/manifest.json` under
+`NativeRoomSceneryFolder`. `build_pack.py` produces schema 2 packs from reviewed
+state pairs and explicitly audited original-sprite aliases. Display alpha stays
+unchanged; only picking uses a conservatively pooled closed-state alpha mask.
+Both states share dimensions, scale and a 16px ground anchor. Missing, damaged
+or pending pairs retain the correct original curio art. No generic family or
+region-wide substitution is used. Pending curios never display blue map icons.
+Faded Memory retains its owner-requested DD1 spectral presentation.
+
+Workers read/hash the private PNGs; Unity uploads at most one image per frame.
+Nearby tiles and adjoining rooms are preloaded, with an eight-pair/24-million
+pixel cache and explicit GPU cleanup. Initial warmup is bounded to two seconds
+after the native host is ready, and begins alongside departure. Curio IDs,
+outcomes, RNG, supplies, used state and save format remain authoritative.
+
+Round 342 has 26 exact base-runtime IDs represented by 18 fitted pairs,
+including eight explicit aliases. Five additional native-body used states and
+two DD1-identity/DD2-material remakes complete this batch. The remaining 77
+designs and the retained Faded Memory exception are tracked separately. DLC and
+legacy designs do not create encounters. The old 70-entry prototype registry
+and its primitive renderer are unfinished foreign work and are not this schema.
+
+The opt-in `-dd3-curio-check` fixture exercises the real draw, alpha click and
+supply-drop paths in DD2's main menu using an unsaved Core stand-in party. It
+requires DebugKeys, refuses an already selected estate and suppresses persistence
+only for its own transient session. It does not start the native expedition
+host or native actors. `-dd3-curio-shots=ABSOLUTE_FOLDER` captures both states
+at 1920x1080; `review_native_captures.py` indexes and crops these real captures.
+All 26 IDs passed; 52 captures and all 18 canonical pairs were inspected. Saved
+reload, ordinary controller input, actor overlap, a normal departure and long
+session frame time still require campaign QA.
+
+Latest checkpoint: `local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md`.
+Heavy sources, exact built-in ImageGen prompts, originals and evidence stay on
+D:. No extracted/generated game art or per-pixel masks belong in Git.
+
 ## Production art, round341
 
 The owner moved the active art task to all curios on2026-10-24. Hamlet333 and

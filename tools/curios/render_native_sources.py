@@ -30,7 +30,8 @@ sys.path.insert(0, str(args.kit / 'tools'))
 import bl_lib as L
 
 SOURCES = {'stack_of_books': 'books', 'pile_of_bones': 'bones', 'sack': 'sack', 'crate': 'crate',
-           'travellers_tent': 'tent', 'bookshelf': 'bookcase', 'giant_fish_carcass': 'fish'}
+           'travellers_tent': 'tent', 'bookshelf': 'bookcase', 'giant_fish_carcass': 'fish',
+           'unlocked_strongbox': 'camp_chest'}
 if args.ids and set(args.ids) - SOURCES.keys():
     raise ValueError('Unknown reviewed source identity')
 args.out.mkdir(parents=True)

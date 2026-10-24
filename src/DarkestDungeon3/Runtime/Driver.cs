@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Assets.Code.Game;
@@ -58,6 +59,7 @@ internal sealed partial class Driver : MonoBehaviour
     {
         Dd2Combat.Finished -= OnFightFinished;
         RegionSceneryArt.Clear();
+        NativeCurioArt.Clear();
     }
 
     public void Say(string line)
@@ -88,6 +90,7 @@ internal sealed partial class Driver : MonoBehaviour
         Ui.CinematicCache.Update();
         ItemText.Prime();
         RegionSceneryArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition?.Quest?.Dungeon : null);
+        NativeCurioArt.Prepare(Phase is Phase.Embarking or Phase.Crawling or Phase.Fighting ? Expedition : null);
         Dd1Audio.Update(Phase, Core.Dungeon.ZoneBase.Of(Expedition?.Quest?.Dungeon), Expedition?.Camp != null,
                         Expedition?.Light ?? 100f, Expedition != null && !Expedition.InRoom);
         if (Phase == Phase.Fighting && Dd2Combat.InFight) { Dd1Backdrop.Update(); Dd2Combat.Tick(); }
@@ -181,6 +184,7 @@ internal sealed partial class Driver : MonoBehaviour
         ExpeditionFight.RestoreParty(Expedition);
         Phase = Phase.Embarking;
         RegionSceneryArt.Prepare(Expedition.Quest.Dungeon);
+        NativeCurioArt.Prepare(Expedition);
         Say("Returning to the saved expedition.");
         if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Retry when the game is ready.")))
             RecoveryFailed("The game is still changing scenes. Your expedition is saved; try again in a moment.");
@@ -241,6 +245,7 @@ internal sealed partial class Driver : MonoBehaviour
 
         Phase = Phase.Embarking;
         RegionSceneryArt.Prepare(quest.Dungeon);
+        NativeCurioArt.Prepare(exp);
         Say($"The party sets out: {quest}.");
         if (!Dd2Run.Start(OnRoadReady, () => RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.")))
             RecoveryFailed("The dungeon could not open. Re-open the estate to cancel this departure.");
@@ -265,7 +270,30 @@ internal sealed partial class Driver : MonoBehaviour
         if (why != null) { Plugin.Log.LogWarning("[opening] " + why); S.Save.Estate.OpeningRaidPending = false; S.Persist(); }
     }
 
+    private int _roadArtCallback;
     private void OnRoadReady()
+    {
+        int callback = ++_roadArtCallback;
+        StartCoroutine(WaitForCurioArt(Expedition, callback));
+    }
+
+    private IEnumerator WaitForCurioArt(ExpeditionState expedition, int callback)
+    {
+        // Starts alongside the host's departure. A bad/missing private pack
+        // cannot trap the player on the torch screen or change expedition RNG.
+        float deadline = Time.realtimeSinceStartup + 2f;
+        while (ReferenceEquals(expedition, Expedition) && callback == _roadArtCallback && Phase == Phase.Embarking)
+        {
+            NativeCurioArt.Prepare(expedition);
+            if (NativeCurioArt.Ready || Time.realtimeSinceStartup >= deadline) break;
+            yield return null;
+        }
+        if (expedition == null || !ReferenceEquals(expedition, Expedition) || callback != _roadArtCallback || Phase != Phase.Embarking)
+            yield break;
+        EnterRoadAfterCurioWarmup();
+    }
+
+    private void EnterRoadAfterCurioWarmup()
     {
         bool resuming = Expedition.Started;
         var heroes = Expedition.Party.Select(id => S.Save.Estate.Hero(id)).Where(h => h != null).ToList();

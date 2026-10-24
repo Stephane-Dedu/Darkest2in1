@@ -1,3 +1,16 @@
+Round342 installed the exact-ID curio renderer and26 base-runtime identities,
+18 pairs/36 PNGs, after52 real native closed/used captures and actual click/drop
+checks. Latest local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md.
+All1307 Core+288 UI+4 artifact tests/Release pass. Private pack-v02 on D:;
+curios junction installed, config/map339 exact, Hamlet333 parked, DD2 CLOSED.
+No estate/native host/save file access; no pending restore.77 designs+1 retained
+Faded Memory exception remain. Missing pairs retain exact original art; no
+generic family/four-region switch. Old70-entry foreign prototype remains out.
+Continue343 from selected pairs, do not regenerate. Native v02 closed captures
+are INVALID; v03 is authoritative. Build only isolated reviewed curio changes,
+preserve foreign WIP, never rerun335/339 restores or checkpoint342.py.
+Check ordinary usage first, keep7-8%reserve and all newer launch/input limits.
+
 Round341 changes ACTIVE TASK to all curio art. Hamlet333 and expedition339/
 dossier340 are PARKED. Latest local-art/ui-overhaul/curio-native-quality-v01/
 CONTINUE.md; heavy sources/prompts/art on D:.11 fitted offline pair candidates,
