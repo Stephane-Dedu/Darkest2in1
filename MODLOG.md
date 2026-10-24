@@ -10449,3 +10449,36 @@ navigation, arbitrary UI scales and long-session memory/frame times were not
 exercised. Evidence:local-art/ui-overhaul/expedition-visibility-v01/CONTINUE.md.
 
 Status round335: accepted335 runtime/map; Hamlet333 retained. DD2 CLOSED/no pending restore. Next336.
+
+
+## Round336 - Native expedition terrain review, 2026-10-24
+
+Round336 completed an offline native terrain review; no candidate was accepted
+or installed. Accepted335 runtime/4K map remains exact and DD2 is CLOSED, with
+no pending restoration. Hamlet stays parked333. No game launch or save access
+occurred in this round.
+
+Six original cliff/skirt assets were rendered from the front. Foetor skirt cards
+were also checked at90 degrees, since they face along the road. Their8-triangle
+silhouettes and the Shroud's18-triangle cliff cards cannot replace broad terrain.
+The cave wall is enclosed cave scenery and does not fit this valley.
+
+Five native eroded-hill road/node tiles were then compared. Filtering only the
+farm_eroded_hill submesh from four tiles yields303 original triangles each,
+with native UVs/paint retained. Two full-map studies placed four such pieces
+with rigid rotations and uniform scale. Study1 used35-50% burial and brightness3;
+study2 used82% burial and brightness0.75 with shifted positions. Both use exact
+accepted335 ground pixels, buildings, regional layout and atmosphere.
+
+Both studies are REJECTED. The pedestal silhouettes, dark top rims and isolated
+face pattern remain visibly attached blocks; they compete with the city and
+Shroud outlines. Native source paint is adequate. More generated textures would
+not fix this geometry/blending problem. Next investigate contiguous faceted
+hillside geometry or larger native cliff meshes through bounded container
+inspection. Do not repeat these pedestal/card placements or install either PNG.
+
+Private evidence:local-art/ui-overhaul/expedition-terrain-review-v02/CONTINUE.md;
+heavy scripts/renders on D:/CodexArtifacts/DarkestDungeon3/expedition-terrain-review-v02.
+Accepted335 and its final native QA remain in expedition-visibility-v01.
+
+Status round336: offline studies rejected; accepted335 runtime/art retained, DD2 CLOSED/no pending restore. Next337.

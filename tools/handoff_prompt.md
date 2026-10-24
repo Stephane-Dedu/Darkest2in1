@@ -1,5 +1,17 @@
 You are continuing Darkest2in1: Darkest Dungeon 1's full game loop played inside Darkest Dungeon II, with DD2's heroes and DD2's combat. It is a BepInEx 5 / HarmonyX mod in C:\Users\Piral\DarkestDungeon3\mod (GitHub Stephane-Dedu/Darkest2in1, branch main). The owner instructed merging the former working branch and continuing directly on main on 2026-10-10. Continue from the latest Status and next round number in MODLOG.md.
 
+Round336 completed the offline native terrain review:
+local-art/ui-overhaul/expedition-terrain-review-v02/CONTINUE.md.
+Both full-map eroded-pedestal placement studies are REJECTED. Their original
+303-triangle bases, dark top rims and disconnected silhouettes do not blend
+with slopes, even at82% burial/0.75 brightness. Skirt/cliff cards and cave wall
+also fail this role. No game launch/deployment/save access; accepted335 runtime
+and4K visibility map retain exact hashes. Hamlet remains parked333. DD2 CLOSED,
+no pending restore. Next337: inspect genuine larger native cliff meshes with a
+bounded container read, or join contiguous faceted slopes before mapping native
+paint. No new texture generation justified yet. Do not repeat/install rejected
+studies. Check usage first, heavy artifacts on D:, C:~300MiB free, keep7-8%reserve.
+
 Round335 accepted the expedition visibility/detail pass:
 local-art/ui-overhaul/expedition-visibility-v01/CONTINUE.md.
 OWNER PARKED HAMLET at accepted333/v90; do not resume Hamlet without newer human
