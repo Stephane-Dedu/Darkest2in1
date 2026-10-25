@@ -18,13 +18,13 @@ public class Plugin : BaseUnityPlugin
     public const string Version = "0.2.0";
 
     internal static ManualLogSource Log;
-    internal static ConfigEntry<string> Dd1Path;
-    internal static ConfigEntry<string> NativeRoomSceneryPath;
-    internal static ConfigEntry<string> ExpeditionArtPath;
-    internal static ConfigEntry<string> HamletArtPath;
+    internal static GamePathSetting Dd1Path;
+    internal static GamePathSetting NativeRoomSceneryPath;
+    internal static GamePathSetting ExpeditionArtPath;
+    internal static GamePathSetting HamletArtPath;
     internal static ConfigEntry<bool> HamletCameraMotion;
     internal static ConfigEntry<bool> DebugKeysEnabled;
-    internal static ConfigEntry<string> ExportedBossModel;
+    internal static GamePathSetting ExportedBossModel;
     internal static ConfigEntry<Runtime.Art.LargeArt> HeroArt;
     internal static ConfigEntry<bool> HeroModels;
     internal static ConfigEntry<float> HeroModelScale;
@@ -39,30 +39,31 @@ public class Plugin : BaseUnityPlugin
     internal static ConfigEntry<string> HeroModelPose;
     internal static ConfigEntry<float> Dd1MonsterScale;
     internal static ConfigEntry<bool> Shieldbreaker3D;
-    internal static ConfigEntry<string> HeroModelPath;
+    internal static GamePathSetting HeroModelPath;
     internal static ConfigEntry<bool> VilhelmHero;
 
     private void Awake()
     {
         Log = Logger;
-        Dd1Path = Config.Bind("Paths", "DarkestDungeon1Folder", "",
-            "Your Darkest Dungeon 1 install folder. Leave empty to find it in your Steam libraries.");
-        NativeRoomSceneryPath = Config.Bind("Paths", "NativeRoomSceneryFolder", Path.Combine(Paths.GameRootPath, "PrivateScenery"),
-            "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery.");
-        ExpeditionArtPath = Config.Bind("Paths", "ExpeditionArtFolder", Path.Combine(Paths.GameRootPath, "PrivateExpeditionArt"),
-            "Private expedition selector artwork. The standard3D view uses map3d.png, map3d.json and optional vfx/. Missing or invalid3D inputs use the painted recovery map.");
-        HamletArtPath = Config.Bind("Paths", "HamletArtFolder", Path.Combine(Paths.GameRootPath, "PrivateHamletArt"),
-            "Optional painted recovery scene and building masks, prepared with tools/prepare_hamlet_art.py. The standard Hamlet uses installed DD2 scenery and NativeRoomSceneryFolder/HamletModels.");
+        // Every Paths setting may be relative to the game folder, so a zipped copy runs wherever it is unpacked.
+        Dd1Path = new GamePathSetting(Config.Bind("Paths", "DarkestDungeon1Folder", "",
+            "Your Darkest Dungeon 1 install folder (\".\" when DD1's files sit in the game folder). Leave empty to find it in your Steam libraries."));
+        NativeRoomSceneryPath = new GamePathSetting(Config.Bind("Paths", "NativeRoomSceneryFolder", "PrivateScenery",
+            "Optional private DD2 scenery pack: dd2_city-arena-01.png for rooms, dd2_city-corridor-01.png for halls; up to 12 of each per region. Empty disables it. Missing/invalid art retains existing scenery."));
+        ExpeditionArtPath = new GamePathSetting(Config.Bind("Paths", "ExpeditionArtFolder", "PrivateExpeditionArt",
+            "Private expedition selector artwork. The standard3D view uses map3d.png, map3d.json and optional vfx/. Missing or invalid3D inputs use the painted recovery map."));
+        HamletArtPath = new GamePathSetting(Config.Bind("Paths", "HamletArtFolder", "PrivateHamletArt",
+            "Optional painted recovery scene and building masks, prepared with tools/prepare_hamlet_art.py. The standard Hamlet uses installed DD2 scenery and NativeRoomSceneryFolder/HamletModels."));
         HamletCameraMotion = Config.Bind("Look", "HamletCameraMotion", true,
             "Allow gentle camera focus after selecting a Hamlet service and chimney smoke. Off keeps a still overview; explicit pan/zoom/reset remain available. Change with the town's Camera motion control.");
-        HeroModelPath = Config.Bind("Paths", "HeroModelFolder", Path.Combine(Paths.GameRootPath, "PrivateHeroModels"),
-            "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets.");
+        HeroModelPath = new GamePathSetting(Config.Bind("Paths", "HeroModelFolder", "PrivateHeroModels",
+            "Private locally converted hero models. Build Shieldbreaker with tools/shieldbreaker/build_model.py; never distribute the derived game assets."));
         VilhelmHero = Config.Bind("Experimental", "VilhelmHero", false,
             "Allow inviting Sir Vilhelm at the Stagecoach when the owner's private animated model is installed. Local test content; no Souls zone is enabled.");
         Shieldbreaker3D = Config.Bind("Look", "Shieldbreaker3D", true,
             "Use the experimental rigged Shieldbreaker model in corridors and fights. Missing or incompatible files retain her DD1 art. Off restores DD1 combat sprites.");
-        ExportedBossModel = Config.Bind("Paths", "ExportedBossModel", Path.Combine(Paths.GameRootPath, "PrivateBossModels", "soul_of_cinder", "soul_of_cinder.gltf"),
-            "Testing: a private glTF export (with its .bin and textures beside it) that stands in for a Lost Battalion knight in the F1 test fight. Never shipped.");
+        ExportedBossModel = new GamePathSetting(Config.Bind("Paths", "ExportedBossModel", Path.Combine("PrivateBossModels", "soul_of_cinder", "soul_of_cinder.gltf"),
+            "Testing: a private glTF export (with its .bin and textures beside it) that stands in for a Lost Battalion knight in the F1 test fight. Never shipped."));
         DebugKeysEnabled = Config.Bind("Debug", "DebugKeys", true, "F8 dumps state, F9 test fight from the road, F10 wins a fight, F11 starts a fight in the dungeon.");
         HeroModels = Config.Bind("Look", "Dd2HeroModelsInDungeon", true, "DD2's animated hero models in the DD1 dungeon (falls back to DD2's flat hero art by itself if they render black).");
         Dd1AudioOn = Config.Bind("Sound", "Dd1MusicAndSounds", true, "DD1's own music, ambience and sounds (from your DD1 install) on our screens; DD2's music is turned down while they play.");
@@ -116,5 +117,23 @@ public class Plugin : BaseUnityPlugin
 
         Session.BeginLoad(Dd1Path.Value, Path.GetDirectoryName(Info.Location), Application.streamingAssetsPath, HamletArtPath.Value);
         Log.LogInfo($"{Name} {Version} loaded");
+    }
+}
+
+/// <summary>A folder or file setting. A relative value is read inside the game folder, never the working directory.</summary>
+internal sealed class GamePathSetting
+{
+    private readonly ConfigEntry<string> _entry;
+
+    internal GamePathSetting(ConfigEntry<string> entry) => _entry = entry;
+
+    internal string Value
+    {
+        get
+        {
+            string value = _entry.Value?.Trim();
+            if (string.IsNullOrEmpty(value) || Path.IsPathRooted(value)) return value;
+            return Path.GetFullPath(Path.Combine(Paths.GameRootPath, value));
+        }
     }
 }

@@ -67,7 +67,7 @@ independent. Do not move contracts into a separate strip below the map.
 | What | Where |
 |---|---|
 | DD2 (active modded game) | `C:\Users\Piral\darkestwithdlc\game`; local build override and playtest helpers target this folder. The previous `DarkestDungeon3\game` is retained. |
-| DD1 data read at runtime | `C:\Users\Piral\darkestwithdlc\game`, explicitly set in the active BepInEx config. Steam DD1 remains the native-code baseline and default test source. |
+| DD1 data read at runtime | `C:\Users\Piral\darkestwithdlc\game`, set as `.` in the active BepInEx config (every `[Paths]` setting is relative to the game folder since 2026-10-25, so the folder runs wherever it is copied; `tools/package_portable.ps1` zips it for the owner's other PCs). Steam DD1 remains the native-code baseline and default test source. |
 | DD2 decomp / data / compile refs | `C:\Users\Piral\dd2-decomp` (`IronCrown/`, `data/Excel/`, `refs/`) |
 | DD1 code map (Ghidra, private) | `D:\dd1-decomp` (`decomp/`, `map/`, `ghidra/DD1.gpr`); query with `tools/dd1re/dd1q.py` |
 | Unity port of DD1 | `C:\Users\Piral\csharpdd\Darkest-Dungeon-Unity` |
