@@ -1,3 +1,14 @@
+OWNER PRIORITY2026-10-25: curios must fit DD2 region/outdoor surroundings.
+Read tools/curios/regional_context.md. Literal DD1 furniture replicas are no
+longer the blanket target. Next348: context-aware art/name selection, cabinet
+first -> weathered locked outdoor cache/coffer, retain IDs/outcomes/RNG/supplies.
+Latest local-art/ui-overhaul/curio-native-quality-v07/CONTINUE.md parks four
+offline candidates. Native QA ended40/76 with IMainInstaller callback exception;
+NO acceptance. Previous346/v06 remains installed34 IDs/runtime343, DD2 CLOSED,
+no pending restore. Python path repair+6 artifact tests verified,44 foreign WIP
+retained. Hamlet/dossier parked; protected estates/newer limits and7-8% reserve
+retain. Do not run disabled accept347 or stale installers/restores.
+
 Round 346 accepted the Eldritch Altar spiral-column and bloody used state.
 Latest local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md. Installed34
 exact IDs/26 pairs/52 PNGs,68 actual native state/input checks. Runtime343,

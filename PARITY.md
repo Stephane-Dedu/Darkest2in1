@@ -982,3 +982,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round346 accepts Eldritch Altar spiral-column/bloody used-state art:34 IDs/26 pairs/52 PNGs,68 actual unsaved native state/input captures, real camera review and full artifact audit. Runtime343/config/map339 exact, DD2 CLOSED/no estate/host/save/no restore. Evidence:local-art/ui-overhaul/curio-native-quality-v06. Earlier346 preflight is historical.
 - [ ] Remaining69 designs:27 base+10 quest+26 DLC+6 legacy, plus retained FadedMemory. Normal campaign/actors/controller/long-session acceptance remains pending. Continue347 after usage permits, retaining7-8% reserve.
+
+
+- [x] Round347 source-audit working-directory repair: legacy dependency resolution, absolute new exports, native Dinner Cart source mapping. Six artifact tests pass, regression fails old code, candidate pack builds outside repo. No deployed C# change.
+- [?] Four v07 curio pairs are offline-reviewed candidates only. Native QA ended40/76 captures with IMainInstaller callback exception; previous accepted346/v06 restored, game closed/no pending restore. Accepted coverage remains34 IDs,69 designs plus FadedMemory pending.
+- [ ] Owner region-coherence priority: context-aware art/names, cabinet -> plausible outdoor cache first, then audit other interior furniture. Keep original gameplay IDs/outcomes/RNG/supplies. Read tools/curios/regional_context.md.

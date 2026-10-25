@@ -21,6 +21,8 @@ parser.add_argument('--sources', type=Path, required=True)
 parser.add_argument('--out', type=Path, required=True)
 parser.add_argument('--ids', nargs='*')
 args = parser.parse_args(sys.argv[sys.argv.index('--') + 1:])
+args.kit = args.kit.resolve()
+args.sources = args.sources.resolve()
 args.out = args.out.resolve()
 if args.out.is_relative_to(Path(__file__).resolve().parents[2]):
     raise ValueError('Private source art must stay outside the repository')
@@ -31,7 +33,7 @@ import bl_lib as L
 
 SOURCES = {'stack_of_books': 'books', 'pile_of_bones': 'bones', 'sack': 'sack', 'crate': 'crate',
            'travellers_tent': 'tent', 'bookshelf': 'bookcase', 'giant_fish_carcass': 'fish',
-           'unlocked_strongbox': 'camp_chest', 'cc_egg_cluster': 'eggs'}
+           'unlocked_strongbox': 'camp_chest', 'cc_egg_cluster': 'eggs', 'dinner_cart': 'meat_cart'}
 if args.ids and set(args.ids) - SOURCES.keys():
     raise ValueError('Unknown reviewed source identity')
 args.out.mkdir(parents=True)

@@ -10774,3 +10774,26 @@ Runtime343/config/map339 exact, no software rebuild; previous tests remain
 prior evidence. DD2 closed/no estate/host/save/no pending restore,44 foreign
 WIP retained. Normal campaign/actors/controller/perf QA pending. Checkpoint:
 local-art/ui-overhaul/curio-native-quality-v06. Preflight above is historical.
+
+
+## Round347: verified source-audit repair; four art candidates parked
+
+Old Tree, Moonshine Barrel, Knife Rack and native-body Dinner Cart fitted and
+reviewed offline. Eight built-in generations, one Dinner used state rejected
+for wheel/camera drift.38-ID candidate pack audit passes; native run ended after
+40/76 frames with IMainInstaller uninstall callback exception, no final PASS.
+Restored accepted346/v06 pack by exact junction/hash guard; game closed, runtime
+343/config/map339 exact, no pending restore. Four pairs remain unaccepted.
+
+Historical source dependencies were repo-relative and broke parent-CWD helper
+builds. Catalog now anchors that legacy convention; new native exports use
+absolute paths. Regression fails before fix, all6 artifact tests pass after;
+full candidate build outside repo passes. Whole native Dinner source mapping
+added. Exact pre-change renderer recipe preserved privately. No C# rebuild.
+
+Owner changes priority: actual DD2 zone/outdoor coherence outranks literal DD1
+object silhouettes. Freestanding cabinet is the first repair. New design seam:
+region art/name selection, original gameplay IDs/outcomes/RNG/supplies retained.
+See tools/curios/regional_context.md; next348. Accepted coverage remains34 IDs,
+69 designs plus FadedMemory pending.44 foreign WIP retained, Hamlet/dossier
+parked, protected estates untouched by fixture. Checkpoint:v07/CONTINUE.md.

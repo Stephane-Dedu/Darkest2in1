@@ -1,7 +1,9 @@
 """Small artifact-level checks for orientation, alpha and state registration."""
 import contextlib
+import hashlib
 import io
 import json
+import os
 from pathlib import Path
 import tempfile
 import unittest
@@ -10,6 +12,7 @@ from PIL import Image, ImageDraw
 
 from extract_reference_states import state_image
 from fit_state_pair import fit
+from catalog_quality import catalog
 
 
 class AtlasOrientationTests(unittest.TestCase):
@@ -28,6 +31,33 @@ class AtlasOrientationTests(unittest.TestCase):
             self.assertEqual(restored.size, (5, 7))
             self.assertEqual(restored.crop((1, 2, 3, 5)).tobytes(), bytes(c for pixel in colors for c in pixel))
             self.assertEqual(restored.getpixel((0, 0)), (0, 0, 0, 0))
+
+
+class NativeDependencyTests(unittest.TestCase):
+    def test_legacy_source_hashes_are_checked_outside_repository_cwd(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            Image.new('RGBA', (16, 16), (90, 70, 50, 255)).save(root / 'body.png')
+            dependency = root / 'mesh.bin'
+            dependency.write_bytes(b'private source fixture')
+            repo = Path(__file__).resolve().parents[2]
+            digest = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+            (root / 'native.json').write_text(json.dumps({'entries': [{
+                'id': 'fixture', 'file': 'body.png', 'output_sha256': digest(root / 'body.png'),
+                'files': [{'path': os.path.relpath(dependency, repo), 'sha256': digest(dependency)}]}]}))
+            (root / 'inventory.json').write_text(json.dumps([
+                {'id': 'fixture', 'name': 'Fixture', 'scope': 'base-runtime', 'region': 'ALL'}]))
+            (root / 'selection.json').write_text(json.dumps({'pairs': [], 'native_studies': [str(root / 'native.json')]}))
+            previous = Path.cwd()
+            (root / 'other-cwd').mkdir()
+            try:
+                os.chdir(root / 'other-cwd')
+                with contextlib.redirect_stdout(io.StringIO()):
+                    result = catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+            finally:
+                os.chdir(previous)
+            self.assertEqual(result['counts'], {'native_body_needs_used_state': 1})
+            self.assertTrue((root / 'review/coverage.json').is_file())
 
 
 class PairRegistrationTests(unittest.TestCase):

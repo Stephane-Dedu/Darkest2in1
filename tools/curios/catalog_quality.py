@@ -74,7 +74,12 @@ def catalog(inventory, selection, output):
         if sha(Path(entry['file'])) != entry['output_sha256']:
             raise ValueError('Native render changed after source audit')
         for record in entry['files']:
-            if sha(Path(record['path'])) != record['sha256']:
+            dependency = Path(record['path'])
+            # Early source studies stored repository-relative dependencies.
+            # Their audit must not depend on the caller's working directory.
+            if not dependency.is_absolute():
+                dependency = Path(__file__).resolve().parents[2] / dependency
+            if sha(dependency) != record['sha256']:
                 raise ValueError('Native source dependency changed')
     records = []
     for key, source in known.items():
