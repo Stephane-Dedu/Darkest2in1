@@ -1,3 +1,17 @@
+LATEST349 OFFLINE checkpoint:
+local-art/ui-overhaul/curio-regional-coherence-v02/CONTINUE.md. KEEP DD2 CLOSED
+until explicit newer human permission. Runtime348/private pack-v01 unchanged;
+regional native QA pending. New tools accept separate regional painting IDs
+without new gameplay identities;9 artifact tests and byte-identical348 pack
+rebuild pass.104-ID context ledger on D: distinguishes70runtime/27DLC/6legacy/
+owner exception. Existing bookshelf already uses native ruined DD2 frame342;
+349 archive duplicate REJECTED. Never install349 pack-v01, DO_NOT_INSTALL marker.
+Native Hope altar is only a prayer study, no used state; confessional remains
+next clear indoor mismatch. Review actual pair provenance before generating.
+44 foreign WIP retained, no C# rebuild/install/launch349/no pending restore.
+Read tools/curios/regional_context.md; preserve gameplay/classic defaults and
+result wording context. Hamlet/dossier parked,7-8% reserve/protected estates.
+
 OWNER LIMIT2026-10-25: KEEP DD2 CLOSED; work offline until explicit newer
 permission. No game launch/input. Owner priority is regional/outdoor coherence,
 not blanket DD1 furniture replicas. Read tools/curios/regional_context.md.

@@ -10822,3 +10822,34 @@ Four347 drafts stay unaccepted/uninstalled. Next audit interior furniture and
 develop distinct regional fittings, retaining gameplay and classic defaults.
 Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v01/CONTINUE.md.
 Read tools/curios/regional_context.md. Hamlet333/dossier340 remain parked.
+
+
+## Round349: separate regional paintings and offline context audit
+
+Tool selections now accept regional_pairs with a distinct art ID and explicit
+parent curio_id, bound through region_art_overrides. Classic defaults remain
+separate. Auditor rejects unsafe IDs, orphaned variants, tampered pixels and
+cross-identity bindings. Variants do not inflate gameplay coverage. Nine
+artifact tests pass; new valid variant/orphan tests fail old code. Rebuilding
+the installed348 selection reproduces its manifest byte-for-byte. No C#
+change/build/deploy349; runtime348/private pack/config/map hashes unchanged.
+
+An archive used-state generation was rejected after comparison revealed the
+installed342 bookshelf ALREADY uses the same complete native ruined DD2 frame.
+Keep its accepted pair and scale. Duplicate experiment pack has DO_NOT_INSTALL
+marker and remains private. One built-in generation, exact prompt/original/
+fit/evidence on D:. No art acceptance or coverage increase349.
+
+Complete native Altar of Hope rendered as a prayer-shrine body study for the
+confessional; geometry/UV/paint retained, no used state. Floating emblem/wide
+offering bowl need review; not an accepted replacement. Context ledger records
+all104 design IDs and70 runtime identities without inventing spawns. Fourteen
+priorities reviewed; bookshelf should stay, indoor confessional/field alchemy
+need context, sentinel statue can suit city gates. Result strings can still
+mention cabinet/booth after a heading changes; retain this presentation gap.
+
+Owner requires DD2 CLOSED until newer explicit permission. No launch/input/
+native QA349, protected estates untouched,44 foreign WIP preserved/no restore.
+Installed coverage remains34 IDs/26 pairs;69 designs plus FadedMemory pending.
+Four347 drafts still unaccepted/uninstalled. Newest checkpoint:
+local-art/ui-overhaul/curio-regional-coherence-v02/CONTINUE.md.

@@ -48,3 +48,30 @@ street cache, Locked field stores, Locked farm coffer and Sealed dock cargo.
 All four use the previously accepted locked-strongbox painting. Isolated
 software tests and offline composites pass; in-game acceptance is pending.
 The owner currently requires DD2 remain closed until explicit newer permission.
+
+## Context audit, round349
+
+Check the installed pack before preparing new art. The installed bookshelf
+already uses the complete native ruined Sprawl bookcase, with its searched
+state from round342. The proposed archive remake duplicated it and was parked.
+Native source studies and DD1 reference sheets are not the installed registry.
+
+| Curio | Current finding | Next action |
+|---|---|---|
+| Cabinet | Outdoor coffer interim installed348, with four region names | Distinct regional fittings; check original result text for indoor wording |
+| Bookshelf | Installed native splintered Sprawl frame already fits street debris | Keep pair and scale; contextual name can change separately |
+| Confession booth | Intact double-bay timber furniture and curtain still read as an indoor booth | Develop a small wayside prayer/votive place; preserve holy-water and reflection affordances |
+| Suit of armor | Armored sentinel on a weathered plinth can plausibly stand beside ruined city gates | Review guard-post surroundings and native armor paint before replacing the body |
+| Alchemy table | Laboratory identity needs an outdoor explanation | Adapt field-chemist supplies; keep herb/torch interactions readable |
+| Loose books and scrolls | Existing native piles suit fallen Sprawl archives; other regions need a reason for records | Field journals or spoiled farm ledgers where appropriate; no blanket bookshelf swap |
+| Iron maiden and torture devices | Plausible in occupied Sprawl streets, weaker in ordinary countryside | Preserve distinct dangerous affordances and review actual backdrop |
+| Fountains and tombs | Outdoor civic or graveyard masonry can fit | Check backdrop, scale and materials before declaring them indoor-only |
+| Dinner cart | The parked347 whole native butcher cart fits Foetor well | Keep its provenance and wait for native QA; do not regenerate it |
+| DLC and legacy designs | Design scope does not establish a live encounter location | Keep inactive designs separate; do not invent spawns |
+
+The native Altar of Hope prayer study keeps its geometry, UVs and paint. Its
+floating emblem and broad offering bowl are not yet a convincing finished
+confessional substitute. It needs a searched-state design and comparison with
+other prayer/roadside assets. No installation349 and no game launch. Contextual
+result text also needs review: a matching heading alone cannot fix a result
+that still describes a cabinet or booth.

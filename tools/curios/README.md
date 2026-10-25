@@ -1,5 +1,23 @@
 # Curio rework: design catalog v01
 
+## Distinct regional paintings, round349
+
+`regional_pairs` now accepts reviewed variant pairs with their own painting IDs
+and an explicit `curio_id`. `region_art_overrides` binds them to that identity.
+The classic default stays in `pairs`. A new regional painting increases the
+artifact count without adding a gameplay identity or inflating coverage.
+The auditor rejects unsafe IDs, unreferenced variants, changed PNGs and
+cross-identity bindings. Nine artifact tests pass. Runtime348 already supports
+these manifest bindings; this tool change does not replace the installed pack.
+
+The Sprawl archive experiment was parked after comparison showed the installed
+bookshelf already uses the same complete native ruined frame. Do not install
+the duplicate experiment or regenerate that bookshelf. A native Altar of Hope
+body was rendered as a prayer-shrine study for the confessional, but its
+floating emblem and offering-bowl silhouette need review. It has no used state
+and is not a finished replacement. Latest checkpoint:
+`local-art/ui-overhaul/curio-regional-coherence-v02/CONTINUE.md`.
+
 ## Regional presentation, round348
 
 The owner now prioritises plausible regional surroundings over literal DD1

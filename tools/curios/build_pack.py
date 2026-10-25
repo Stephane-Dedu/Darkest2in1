@@ -29,7 +29,7 @@ def build(inventory, selection, output):
     artifacts = {}
     folder = output / 'art'
     folder.mkdir()
-    for entry in ready:
+    for entry in ready + coverage['regional_artifacts']:
         key = entry['art_id']
         if key in artifacts:
             continue

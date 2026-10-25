@@ -147,6 +147,67 @@ class PairRegistrationTests(unittest.TestCase):
             self.assertEqual([e['Id'] for e in document['Entries']], ['fixture'])
             self.assertEqual(document['Entries'][0]['Regions']['dd2_forest']['DisplayName'], 'Locked field cache')
 
+    def regional_selection(self, root):
+        spec_path = self.write_pair(root)
+        with contextlib.redirect_stdout(io.StringIO()):
+            fit(spec_path, root / 'default')
+            spec = json.loads(spec_path.read_text())
+            spec['id'] = 'fixture_sprawl'
+            spec_path.write_text(json.dumps(spec))
+            fit(spec_path, root / 'variant')
+        (root / 'inventory.json').write_text(json.dumps([
+            {'id': 'fixture', 'name': 'Bookshelf', 'scope': 'base-runtime', 'region': 'Ruins'}]))
+        (root / 'native.json').write_text(json.dumps({'entries': []}))
+        return {'pairs': [str(root / 'default')], 'native_studies': [str(root / 'native.json')],
+                'regional_pairs': [{'curio_id': 'fixture', 'folder': str(root / 'variant')}],
+                'region_art_overrides': {'fixture': {'dd2_city': {'ArtId': 'fixture_sprawl', 'DisplayName': 'Ruined archive'}}}}
+
+    def test_distinct_region_body_keeps_the_classic_default_and_single_coverage_identity(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selection = self.regional_selection(root)
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            document = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(document['Entries'], [{'Id': 'fixture', 'ArtId': 'fixture',
+                'Regions': {'dd2_city': {'ArtId': 'fixture_sprawl', 'DisplayName': 'Ruined archive'}}}])
+            self.assertEqual({a['Id'] for a in document['Artifacts']}, {'fixture', 'fixture_sprawl'})
+            coverage = json.loads((root / 'pack/review/coverage.json').read_text())
+            self.assertEqual(coverage['counts'], {'offline_pair_candidate': 1})
+            self.assertEqual(len(coverage['regional_artifacts']), 1)
+            self.assertEqual(coverage['regional_artifacts'][0]['curio_id'], 'fixture')
+
+    def test_regional_art_cannot_escape_its_identity_or_bypass_pair_validation(self):
+        for problem in ('protected_owner', 'orphan', 'unsafe_art_id', 'changed_pixels', 'wrong_default'):
+            with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.regional_selection(root)
+                if problem == 'protected_owner':
+                    selection['regional_pairs'][0]['curio_id'] = 'faded_memory'
+                elif problem == 'orphan':
+                    selection['region_art_overrides'] = {}
+                elif problem == 'unsafe_art_id':
+                    path = root / 'variant/provenance.json'
+                    metadata = json.loads(path.read_text()); metadata['id'] = '../escape'
+                    path.write_text(json.dumps(metadata))
+                elif problem == 'changed_pixels':
+                    path = root / 'variant/fixture_sprawl-used.png'
+                    with Image.open(path) as image:
+                        image.putpixel((0, 0), (255, 0, 0, 255)); image.save(path)
+                else:
+                    inventory_path = root / 'inventory.json'
+                    inventory = json.loads(inventory_path.read_text())
+                    inventory[0]['sprite'] = 'fixture'
+                    inventory.append(dict(inventory[0], id='other'))
+                    inventory_path.write_text(json.dumps(inventory))
+                    selection['aliases'] = {'other': 'fixture'}
+                    selection['region_art_overrides']['other'] = selection['region_art_overrides'].pop('fixture')
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
+
 
 if __name__ == '__main__':
     unittest.main()

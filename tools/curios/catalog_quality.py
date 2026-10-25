@@ -14,6 +14,33 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def audit_pair(folder):
+    metadata = json.loads((folder / 'provenance.json').read_text())
+    key = metadata['id']
+    if not isinstance(key, str) or not key or len(key) > 80 or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in key):
+        raise ValueError('Unsafe curio painting identity')
+    width, size = metadata['proposed_runtime_width'], metadata['size']
+    if len(size) != 2 or not all(isinstance(v, int) and v >= 16 for v in size) or size[0] > 4096 or size[1] > 2304 or size[0] * size[1] > 4194304:
+        raise ValueError('Candidate exceeds native decoder pixel bounds')
+    if not 100 <= width <= 400 or width * size[1] / size[0] > 430.001:
+        raise ValueError('Candidate exceeds native display bounds')
+    if metadata['padding'] != 16 or metadata['foot_anchor'] != [size[0] / 2, size[1] - 16]:
+        raise ValueError('Candidate does not match the crawl foot contract')
+    images = {}
+    for state in ('closed', 'used'):
+        path = folder / (key + '-' + state + '.png')
+        with Image.open(path) as image:
+            if image.mode != 'RGBA' or list(image.size) != size or image.getchannel('A').getextrema()[0] != 0:
+                raise ValueError('Missing consistent RGBA state pair')
+        if sha(path) != metadata['states'][state]['output_sha256']:
+            raise ValueError('Candidate PNG changed after fitting')
+        if any(abs(a - b) > .51 for a, b in zip(metadata['foot_anchor'], metadata['states'][state]['registered_foot'])):
+            raise ValueError('Candidate floor registration drifted')
+        images[state] = {'file': str(path), 'sha256': sha(path)}
+    return {'art_id': key, 'pair_folder': str(folder), 'width': width, 'size': size, 'states': images,
+            'state_note': metadata.get('state_note'), 'native_verified': False, 'installed': False}
+
+
 def catalog(inventory, selection, output):
     inventory, selection, output = inventory.resolve(), selection.resolve(), output.resolve()
     if output.is_relative_to(Path(__file__).resolve().parents[2]):
@@ -28,45 +55,45 @@ def catalog(inventory, selection, output):
     pairs = {}
     for relative in selected['pairs']:
         folder = (selection.parent / relative).resolve()
-        metadata = json.loads((folder / 'provenance.json').read_text())
-        key = metadata['id']
+        pair = audit_pair(folder)
+        key = pair['art_id']
         if key not in known or key in pairs or known[key]['scope'] == 'owner-exception':
             raise ValueError('Unknown, duplicate or protected candidate identity')
-        width = metadata['proposed_runtime_width']
-        size = metadata['size']
-        if len(size) != 2 or not all(isinstance(v, int) and v >= 16 for v in size) or size[0] > 4096 or size[1] > 2304 or size[0] * size[1] > 4194304:
-            raise ValueError('Candidate exceeds native decoder pixel bounds')
-        if not 100 <= width <= 400 or width * size[1] / size[0] > 430.001:
-            raise ValueError('Candidate exceeds native display bounds')
-        if metadata['padding'] != 16 or metadata['foot_anchor'] != [size[0] / 2, size[1] - 16]:
-            raise ValueError('Candidate does not match the crawl foot contract')
-        images = {}
-        for state in ('closed', 'used'):
-            path = folder / (key + '-' + state + '.png')
-            with Image.open(path) as image:
-                if image.mode != 'RGBA' or list(image.size) != size or image.getchannel('A').getextrema()[0] != 0:
-                    raise ValueError('Missing consistent RGBA state pair')
-            if sha(path) != metadata['states'][state]['output_sha256']:
-                raise ValueError('Candidate PNG changed after fitting')
-            if any(abs(a - b) > .51 for a, b in zip(metadata['foot_anchor'], metadata['states'][state]['registered_foot'])):
-                raise ValueError('Candidate floor registration drifted')
-            images[state] = {'file': str(path), 'sha256': sha(path)}
-        pairs[key] = {'art_id': key, 'pair_folder': str(folder), 'width': width, 'size': size, 'states': images,
-                      'state_note': metadata.get('state_note'), 'native_verified': False, 'installed': False}
+        pairs[key] = pair
     aliases = selected.get('aliases', {})
     for key, canonical in aliases.items():
         if key not in known or key in pairs or canonical not in pairs or known[key]['scope'] == 'owner-exception':
             raise ValueError('Invalid shared-art alias')
         if known[key].get('sprite', key) != known[canonical].get('sprite', canonical):
             raise ValueError('Shared art must retain the audited original sprite identity')
+    regional_pairs = {}
+    for variant in selected.get('regional_pairs', []):
+        identity = variant['curio_id']
+        if identity not in pairs and identity not in aliases:
+            raise ValueError('Regional pair requires a reviewed default identity')
+        pair = audit_pair((selection.parent / variant['folder']).resolve())
+        art_id = pair['art_id']
+        if art_id in known or art_id in regional_pairs:
+            raise ValueError('Regional painting must have its own unique art ID')
+        regional_pairs[art_id] = dict(pair, curio_id=identity)
     regions = selected.get('region_art_overrides', {})
+    referenced = set()
     for key, bindings in regions.items():
         if key not in pairs and key not in aliases or not isinstance(bindings, dict) or len(bindings) > 4:
             raise ValueError('Regional art requires a reviewed default identity')
         for region, binding in bindings.items():
             name = binding.get('DisplayName') if isinstance(binding, dict) else None
-            if region not in ('dd2_city', 'dd2_forest', 'dd2_farm', 'dd2_coast') or not isinstance(name, str) or not name.strip() or len(name) > 80 or any(unicodedata.category(c) == 'Cc' for c in name) or binding.get('ArtId') not in pairs:
+            if region not in ('dd2_city', 'dd2_forest', 'dd2_farm', 'dd2_coast') or not isinstance(name, str) or not name.strip() or len(name) > 80 or any(unicodedata.category(c) == 'Cc' for c in name):
                 raise ValueError('Invalid explicit regional art binding')
+            art_id = binding.get('ArtId')
+            if art_id in regional_pairs:
+                if regional_pairs[art_id]['curio_id'] != key:
+                    raise ValueError('Regional painting belongs to a different curio')
+                referenced.add(art_id)
+            elif art_id not in pairs:
+                raise ValueError('Regional binding has no reviewed painting')
+    if referenced != regional_pairs.keys():
+        raise ValueError('Unreferenced regional painting')
     native = {}
     studies = selected.get('native_studies') or [selected['native_study']]
     for relative in studies:
@@ -108,11 +135,14 @@ def catalog(inventory, selection, output):
     document = {'status': 'Offline candidates only. No installation, native QA or gameplay change.',
                 'inventory_sha256': sha(inventory), 'selection_sha256': sha(selection),
                 'recipe_sha256': sha(Path(__file__)), 'counts': dict(Counter(r['status'] for r in records)),
-                'scopes': dict(Counter(r['scope'] for r in records)), 'entries': records}
+                'scopes': dict(Counter(r['scope'] for r in records)), 'entries': records,
+                'regional_artifacts': list(regional_pairs.values())}
     output.mkdir(parents=True)
     (output / 'coverage.json').write_text(json.dumps(document, indent=2), encoding='utf-8')
     cards = []
-    for record in sorted(records, key=lambda r: (r['status'] != 'offline_pair_candidate', r['status'], r['id'])):
+    variant_cards = [dict(pair, id=pair['art_id'], name=pair['art_id'], region=pair['curio_id'],
+                          status='offline_regional_pair_candidate') for pair in regional_pairs.values()]
+    for record in sorted(records + variant_cards, key=lambda r: (r['status'] != 'offline_pair_candidate', r['status'], r['id'])):
         images = ''
         if 'states' in record:
             for state, image in record['states'].items():
