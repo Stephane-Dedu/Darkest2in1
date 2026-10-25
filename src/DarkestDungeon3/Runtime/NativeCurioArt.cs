@@ -66,7 +66,7 @@ internal static class NativeCurioArt
         // and prevent the new current tile from ever entering the cache.
         var desired = new List<NativeCurioPainting>();
         long desiredPixels = 0;
-        foreach (var art in Nearby(expedition).Select(id => _catalog.Get(id)?.Art).Where(art => art != null)
+        foreach (var art in Nearby(expedition).Select(id => _catalog.Get(id, expedition.Quest?.Dungeon)?.Art).Where(art => art != null)
                      .GroupBy(art => art.Id).Select(group => group.First()))
         {
             if (desired.Count >= MaxResidentPairs) break;
@@ -81,12 +81,14 @@ internal static class NativeCurioArt
 
     public static bool TryGet(string id, bool used, out Texture2D texture, out NativeCurioPainting art)
     {
-        texture = null; art = _catalog?.Get(id)?.Art;
+        texture = null; art = _catalog?.Get(id, _expedition?.Quest?.Dungeon)?.Art;
         if (art == null || !Pairs.TryGetValue(art.Id, out var pair) || !pair.Finished || pair.Failed) return false;
         pair.Stamp = _stamp;
         texture = used ? pair.Used : pair.Closed;
         return texture != null;
     }
+
+    public static string DisplayName(string id) => _catalog?.Get(id, _expedition?.Quest?.Dungeon)?.DisplayName;
 
     private static void Ensure(NativeCurioPainting art)
     {

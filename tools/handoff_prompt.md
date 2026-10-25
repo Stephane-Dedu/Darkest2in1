@@ -1,13 +1,17 @@
-OWNER PRIORITY2026-10-25: curios must fit DD2 region/outdoor surroundings.
-Read tools/curios/regional_context.md. Literal DD1 furniture replicas are no
-longer the blanket target. Next348: context-aware art/name selection, cabinet
-first -> weathered locked outdoor cache/coffer, retain IDs/outcomes/RNG/supplies.
-Latest local-art/ui-overhaul/curio-native-quality-v07/CONTINUE.md parks four
-offline candidates. Native QA ended40/76 with IMainInstaller callback exception;
-NO acceptance. Previous346/v06 remains installed34 IDs/runtime343, DD2 CLOSED,
-no pending restore. Python path repair+6 artifact tests verified,44 foreign WIP
-retained. Hamlet/dossier parked; protected estates/newer limits and7-8% reserve
-retain. Do not run disabled accept347 or stale installers/restores.
+OWNER LIMIT2026-10-25: KEEP DD2 CLOSED; work offline until explicit newer
+permission. No game launch/input. Owner priority is regional/outdoor coherence,
+not blanket DD1 furniture replicas. Read tools/curios/regional_context.md.
+Latest local-art/ui-overhaul/curio-regional-coherence-v01/CONTINUE.md. Runtime348
+and schema3 pack installed OFFLINE; cabinet -> existing locked coffer plus four
+regional names. Same canonical IDs/outcomes/RNG/supplies/used/save data. One
+shared body, NOT four new paintings. Release/1316 Core/290 UI/7 artifact pass;
+native regional QA UNVERIFIED. Accepted art remains34 IDs/26 pairs,69 pending
+designs plus FadedMemory. Four v07/347 candidates remain unaccepted/uninstalled
+after40/76 native captures with IMainInstaller callback exception. No pending
+restore; config/map339 exact,44 foreign WIP retained. Next audit bookshelves,
+confessionals/armor for outdoor regional context; distinct native fittings later.
+Hamlet333/dossier340 parked; protected estates and7-8% reserve remain. Never
+run disabled accept347, stale installers/restores or shared dirty C# build.
 
 Round 346 accepted the Eldritch Altar spiral-column and bloody used state.
 Latest local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md. Installed34

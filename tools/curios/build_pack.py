@@ -55,8 +55,8 @@ def build(inventory, selection, output):
                           'Mask': base64.b64encode(bits).decode('ascii'),
                           'ClosedSha256': entry['states']['closed']['sha256'],
                           'UsedSha256': entry['states']['used']['sha256']}
-    document = {'Version': 2, 'Artifacts': list(artifacts.values()),
-                'Entries': [{'Id': e['id'], 'ArtId': e['art_id']} for e in ready]}
+    document = {'Version': 3 if any(e.get('regions') for e in ready) else 2, 'Artifacts': list(artifacts.values()),
+                'Entries': [dict({'Id': e['id'], 'ArtId': e['art_id']}, **({'Regions': e['regions']} if e.get('regions') else {})) for e in ready]}
     (output / 'manifest.json').write_text(json.dumps(document, separators=(',', ':')), encoding='utf-8')
     (output / 'provenance.json').write_text(json.dumps({
         'selection_sha256': hashlib.sha256(selection.read_bytes()).hexdigest(),

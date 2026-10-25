@@ -45,6 +45,43 @@ public class NativeCurioCatalogTests
         Assert.False(art.Hit(float.NaN,.5f));
     }
 
+    [Theory]
+    [InlineData("dd2_city")]
+    [InlineData("dd2_forest")]
+    [InlineData("dd2_farm")]
+    [InlineData("dd2_coast")]
+    public void RegionalPresentationKeepsTheCurioIdentityAndClassicDefault(string region)
+    {
+        var document = Manifest(); document["Version"] = 3;
+        var cabinet = document["Artifacts"]![0]!.DeepClone(); cabinet["Id"] = "cabinet";
+        ((JArray)document["Artifacts"]!).Add(cabinet);
+        var entry = document["Entries"]![0]!;
+        entry["Id"] = "locked_display_cabinet"; entry["ArtId"] = "cabinet";
+        entry["Regions"] = new JObject { [region] = new JObject { ["ArtId"] = "coffer", ["DisplayName"] = "Locked field cache" } };
+        var catalog = NativeCurioCatalog.Parse(document.ToString());
+        var regional = catalog.Get("locked_display_cabinet", region);
+        Assert.Equal("locked_display_cabinet", regional.Id);
+        Assert.Equal("coffer", regional.Art.Id);
+        Assert.Equal("Locked field cache", regional.DisplayName);
+        Assert.Equal("cabinet", catalog.Get("locked_display_cabinet", "ruins").Art.Id);
+        Assert.Null(catalog.Get("locked_display_cabinet", "ruins").DisplayName);
+        Assert.Equal(2, catalog.Entries.Count);
+        Assert.Null(catalog.Get("faded_memory", region));
+    }
+
+    [Theory]
+    [InlineData("dd2_city", "missing", "Locked cache", 3)]
+    [InlineData("ruins", "coffer", "Locked cache", 3)]
+    [InlineData("dd2_city", "coffer", " ", 3)]
+    [InlineData("dd2_city", "coffer", "Locked\ncache", 3)]
+    [InlineData("dd2_city", "coffer", "Locked cache", 2)]
+    public void InvalidRegionalBindingsCannotOverrideClassicOrOwnerArt(string region, string art, string name, int version)
+    {
+        var document = Manifest(); document["Version"] = version;
+        document["Entries"]![0]!["Regions"] = new JObject { [region] = new JObject { ["ArtId"] = art, ["DisplayName"] = name } };
+        Assert.Throws<InvalidDataException>(() => NativeCurioCatalog.Parse(document.ToString()));
+    }
+
     [Fact]
     public void PlacementKeepsTheRegisteredFootlineForBothStatesAtAnyViewportPosition()
     {

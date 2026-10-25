@@ -17,6 +17,8 @@ namespace DarkestDungeon3.Ui;
 internal static class CurioPreview
 {
     private static readonly bool Checking = Environment.GetCommandLineArgs().Contains("-dd3-curio-check");
+    private static readonly bool Regional = Environment.GetCommandLineArgs().Contains("-dd3-curio-regions");
+    private static readonly string[] Regions = { "dd2_city", "dd2_forest", "dd2_farm", "dd2_coast" };
     private static readonly bool Requested = Checking;
     private static readonly string Shots = Environment.GetCommandLineArgs().FirstOrDefault(a=>a.StartsWith("-dd3-curio-shots=",StringComparison.Ordinal))?.Substring("-dd3-curio-shots=".Length);
     private static readonly CrawlUi Ui = new();
@@ -89,7 +91,8 @@ internal static class CurioPreview
             Drag.Overlay();
             if(injected!=null)VerifyInput();
             Event.current=original;
-            ExpeditionSkin.Text(new Rect(60,40,1150,55),"Curio preview / "+(_save.Expedition.Map.Rooms[0].CurioId??"Preparing pack"),30,ExpeditionSkin.Ivory);
+            string currentId = _save.Expedition.Map.Rooms[0].CurioId;
+            ExpeditionSkin.Text(new Rect(60,40,1750,55),"Curio preview / "+(NativeCurioArt.DisplayName(currentId)??currentId??"Preparing pack")+" / "+Expedition.Quest.Dungeon,30,ExpeditionSkin.Ivory);
             ExpeditionSkin.Text(new Rect(60,780,1750,55),"Unsaved native rendering and input / Core stand-in party / no host run",23,ExpeditionSkin.Muted);
             ExpeditionSkin.Text(new Rect(60,845,1500,45),_done ? "Check finished. See log for PASS or FAIL." : "Checking exact art, alpha picking, states and supply drops",22,ExpeditionSkin.Muted);
             if(ExpeditionSkin.Button(new Rect(1530,945,310,65),"Close preview",size:25))Close();
@@ -107,6 +110,7 @@ internal static class CurioPreview
         {
             if(!NativeCurioArt.Ready)return;
             _definitions=NativeCurioArt.Definitions.OrderBy(d=>d.Id).ToArray();
+            if (Regional) _definitions = _definitions.Where(d=>d.Id=="locked_display_cabinet").SelectMany(d=>Regions.Select(_=>d)).ToArray();
             Require(_definitions.Length>0,"No exact curio paintings loaded");
         }
         var exp=Expedition;var room=exp.Map.Rooms[0];
@@ -135,7 +139,7 @@ internal static class CurioPreview
         if(_step==16 && Time.unscaledTime>=_until)
         {
             _done=true;
-            Plugin.Log.LogInfo("[curio check] PASS: "+_definitions.Length+" exact IDs closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and ordinary urn supply resolution; no estate/native host/save access");
+            Plugin.Log.LogInfo("[curio check] PASS: "+(Regional ? "4 regional cabinet cases" : _definitions.Length+" exact IDs")+" closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and ordinary urn supply resolution; no estate/native host/save access");
         }
     }
     private static void Set(string id)
@@ -143,6 +147,7 @@ internal static class CurioPreview
         var exp=Expedition;exp.Map.Rooms[0].CurioId=id;exp.Map.Rooms[0].CurioTaken=false;exp.PendingCurio=null;
         exp.Quest.Dungeon=id.Contains("oyster")||id.Contains("coral")||id.Contains("fish") ? "dd2_coast" :
             id.Contains("tent") ? "dd2_forest" : id.Contains("bones") ? "dd2_farm" : "dd2_city";
+        if (Regional && id=="locked_display_cabinet") exp.Quest.Dungeon=Regions[_index];
         Panel.SetValue(Ui,null);_counter=exp.RandomCounter;_until=Time.unscaledTime+1.6f;_usedCaptured=false;
         NativeCurioArt.Clear();NativeCurioArt.Prepare(exp);
     }
@@ -187,6 +192,7 @@ internal static class CurioPreview
     private static void Require(bool valid,string message){if(!valid)throw new InvalidOperationException(message);}
     private static void Capture(string id,string state)
     {
+        if (Regional && id=="locked_display_cabinet") id += "-"+Expedition.Quest.Dungeon;
         if(string.IsNullOrWhiteSpace(Shots))return;
         _captureFrame=Time.frameCount;
         if(!System.IO.Path.IsPathRooted(Shots))throw new InvalidOperationException("Curio screenshot directory must be absolute");

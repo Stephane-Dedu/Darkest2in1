@@ -40,3 +40,11 @@ unaccepted and uninstalled; it is not a reason to continue literal replicas.
 Acceptance must include actual region selection, both used states, matching
 presentation names, correct masks/grounding and stable supplies/outcomes. A
 registry entry, offline sheet or correct isolated texture is insufficient.
+
+Round348 installs only the interim cabinet binding and the regional lookup
+support. Schema 3 selects art and names by canonical curio ID plus region;
+schema 2 and classic defaults remain supported. The four DD2 labels are Locked
+street cache, Locked field stores, Locked farm coffer and Sealed dock cargo.
+All four use the previously accepted locked-strongbox painting. Isolated
+software tests and offline composites pass; in-game acceptance is pending.
+The owner currently requires DD2 remain closed until explicit newer permission.

@@ -10797,3 +10797,28 @@ region art/name selection, original gameplay IDs/outcomes/RNG/supplies retained.
 See tools/curios/regional_context.md; next348. Accepted coverage remains34 IDs,
 69 designs plus FadedMemory pending.44 foreign WIP retained, Hamlet/dossier
 parked, protected estates untouched by fixture. Checkpoint:v07/CONTINUE.md.
+
+
+## Round348: region-aware cabinet art and names, offline installation
+
+Owner now prioritises actual DD2 outdoor context over literal DD1 furniture.
+Schema 3 adds explicit canonical-ID/region ArtId and DisplayName bindings;
+schema 2 and classic defaults remain supported. Preload/cache and prompt/result
+headings select the same regional presentation. The cabinet uses the accepted
+locked coffer in Sprawl, Tangle, Foetor and Shroud, named street cache, field
+stores, farm coffer and dock cargo. One shared interim body, not four paintings.
+Gameplay IDs/outcomes/RNG/supplies/used state/save data retain original rules.
+
+Isolated HEAD29d5dcf plus nine owned inputs: Release passes, 1,316 Core tests,
+290 UI tests and seven artifact tests pass. Four-region closed/used offline
+composite reviewed at corridor scale. Runtime348 and schema3 private pack
+installed with prior343 hashes/backup and exact pack/config/map guards. All52
+accepted PNGs unchanged, config/map339 exact,44 foreign WIP preserved. Native
+regional QA NOT RUN: owner explicitly requires game CLOSED until new permission.
+No estate/native host/actor/save access, no game launch348/no pending restore.
+
+Accepted art remains34 IDs/26 pairs;69 designs plus retained FadedMemory remain.
+Four347 drafts stay unaccepted/uninstalled. Next audit interior furniture and
+develop distinct regional fittings, retaining gameplay and classic defaults.
+Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v01/CONTINUE.md.
+Read tools/curios/regional_context.md. Hamlet333/dossier340 remain parked.

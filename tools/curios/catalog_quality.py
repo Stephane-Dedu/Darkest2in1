@@ -4,6 +4,7 @@ from collections import Counter
 import hashlib
 import html
 import json
+import unicodedata
 from pathlib import Path
 
 from PIL import Image
@@ -58,6 +59,14 @@ def catalog(inventory, selection, output):
             raise ValueError('Invalid shared-art alias')
         if known[key].get('sprite', key) != known[canonical].get('sprite', canonical):
             raise ValueError('Shared art must retain the audited original sprite identity')
+    regions = selected.get('region_art_overrides', {})
+    for key, bindings in regions.items():
+        if key not in pairs and key not in aliases or not isinstance(bindings, dict) or len(bindings) > 4:
+            raise ValueError('Regional art requires a reviewed default identity')
+        for region, binding in bindings.items():
+            name = binding.get('DisplayName') if isinstance(binding, dict) else None
+            if region not in ('dd2_city', 'dd2_forest', 'dd2_farm', 'dd2_coast') or not isinstance(name, str) or not name.strip() or len(name) > 80 or any(unicodedata.category(c) == 'Cc' for c in name) or binding.get('ArtId') not in pairs:
+                raise ValueError('Invalid explicit regional art binding')
     native = {}
     studies = selected.get('native_studies') or [selected['native_study']]
     for relative in studies:
@@ -89,6 +98,8 @@ def catalog(inventory, selection, output):
         record = {'id': key, 'name': source['name'], 'scope': source['scope'], 'region': source['region'], 'status': status}
         if key in pairs or key in aliases:
             record.update(pairs[aliases.get(key, key)])
+            if key in regions:
+                record['regions'] = regions[key]
             if key in aliases:
                 record['shared_original_sprite_alias'] = True
         elif key in native:

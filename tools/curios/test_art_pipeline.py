@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw
 from extract_reference_states import state_image
 from fit_state_pair import fit
 from catalog_quality import catalog
+from build_pack import build
 
 
 class AtlasOrientationTests(unittest.TestCase):
@@ -126,6 +127,25 @@ class PairRegistrationTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'native preloader bounds'):
                 fit(path, root / 'fitted')
             self.assertFalse((root / 'fitted').exists())
+
+    def test_region_names_and_shared_art_do_not_invent_new_curio_identities(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with contextlib.redirect_stdout(io.StringIO()):
+                fit(self.write_pair(root), root / 'fitted')
+            (root / 'inventory.json').write_text(json.dumps([
+                {'id': 'fixture', 'name': 'Cabinet', 'scope': 'base-runtime', 'region': 'ALL'}]))
+            (root / 'native.json').write_text(json.dumps({'entries': []}))
+            selection = {'pairs': [str(root / 'fitted')], 'native_studies': [str(root / 'native.json')],
+                         'region_art_overrides': {'fixture': {'dd2_forest': {'ArtId': 'fixture', 'DisplayName': 'Locked field cache'}}}}
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            document = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(document['Version'], 3)
+            self.assertEqual(len(document['Artifacts']), 1)
+            self.assertEqual([e['Id'] for e in document['Entries']], ['fixture'])
+            self.assertEqual(document['Entries'][0]['Regions']['dd2_forest']['DisplayName'], 'Locked field cache')
 
 
 if __name__ == '__main__':

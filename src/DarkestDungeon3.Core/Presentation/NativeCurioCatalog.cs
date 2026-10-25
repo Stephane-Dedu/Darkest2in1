@@ -15,15 +15,22 @@ public sealed class NativeCurioCatalog
         public NativeCurioPainting[] Artifacts;
         public Entry[] Entries;
     }
-    private sealed class Entry { public string Id { get; set; } public string ArtId { get; set; } }
+    private sealed class RegionArt { public string ArtId { get; set; } public string DisplayName { get; set; } }
+    private sealed class Entry
+    {
+        public string Id { get; set; }
+        public string ArtId { get; set; }
+        public Dictionary<string, RegionArt> Regions { get; set; }
+    }
     private readonly Dictionary<string, NativeCurioDefinition> _entries = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, Dictionary<string, NativeCurioDefinition>> _regions = new(StringComparer.Ordinal);
     public IReadOnlyCollection<NativeCurioDefinition> Entries => _entries.Values;
     public static NativeCurioCatalog Empty { get; } = new(new Document
         { Version = 2, Artifacts = Array.Empty<NativeCurioPainting>(), Entries = Array.Empty<Entry>() });
 
     private NativeCurioCatalog(Document document)
     {
-        if (document?.Version != 2 || document.Artifacts == null || document.Entries == null ||
+        if (document == null || (document.Version != 2 && document.Version != 3) || document.Artifacts == null || document.Entries == null ||
             document.Artifacts.Length > 256 || document.Entries.Length > 256)
             throw new InvalidDataException("Unsupported curio painting manifest.");
         var paintings = new Dictionary<string, NativeCurioPainting>(StringComparer.Ordinal);
@@ -52,11 +59,30 @@ public sealed class NativeCurioCatalog
             if (entry.Id == "faded_memory" || _entries.ContainsKey(entry.Id) || !paintings.TryGetValue(entry.ArtId, out var art))
                 throw new InvalidDataException("Invalid curio identity: " + entry.Id);
             _entries.Add(entry.Id, new NativeCurioDefinition(entry.Id, art));
+            if (entry.Regions == null) continue;
+            if (document.Version != 3 || entry.Regions.Count > 4)
+                throw new InvalidDataException("Unsupported regional curio presentation.");
+            var variants = new Dictionary<string, NativeCurioDefinition>(StringComparer.Ordinal);
+            foreach (var region in entry.Regions)
+            {
+                var binding = region.Value;
+                if (!(region.Key is "dd2_city" or "dd2_forest" or "dd2_farm" or "dd2_coast") || binding == null ||
+                    string.IsNullOrWhiteSpace(binding.DisplayName) || binding.DisplayName.Length > 80 ||
+                    binding.DisplayName.Any(char.IsControl) || binding.ArtId == null || !paintings.TryGetValue(binding.ArtId, out var regionalArt))
+                    throw new InvalidDataException("Invalid regional curio presentation: " + entry.Id);
+                variants.Add(region.Key, new NativeCurioDefinition(entry.Id, regionalArt, binding.DisplayName));
+            }
+            _regions.Add(entry.Id, variants);
         }
     }
 
     public static NativeCurioCatalog Parse(string json) => new(JsonConvert.DeserializeObject<Document>(json));
-    public NativeCurioDefinition Get(string id) => id != null && _entries.TryGetValue(id, out var entry) ? entry : null;
+    public NativeCurioDefinition Get(string id, string region = null)
+    {
+        if (id == null || !_entries.TryGetValue(id, out var entry)) return null;
+        return region != null && _regions.TryGetValue(id, out var variants) && variants.TryGetValue(region, out var regional)
+            ? regional : entry;
+    }
     private static bool ValidHash(string hash) => hash?.Length == 64 && hash.All(c => c >= '0' && c <= '9' || c >= 'a' && c <= 'f');
     private static void RequireKey(string key)
     {
@@ -69,7 +95,9 @@ public sealed class NativeCurioDefinition
 {
     public string Id { get; }
     public NativeCurioPainting Art { get; }
-    internal NativeCurioDefinition(string id, NativeCurioPainting art) { Id = id; Art = art; }
+    public string DisplayName { get; }
+    internal NativeCurioDefinition(string id, NativeCurioPainting art, string displayName = null)
+        { Id = id; Art = art; DisplayName = displayName; }
 }
 
 public sealed class NativeCurioPainting

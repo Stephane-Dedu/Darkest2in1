@@ -1,5 +1,29 @@
 # Curio rework: design catalog v01
 
+## Regional presentation, round348
+
+The owner now prioritises plausible regional surroundings over literal DD1
+furniture. Read [regional_context.md](regional_context.md). The cabinet uses
+an existing locked coffer in the four DD2 regions, with matching street-cache,
+field-store, farm-coffer and dock-cargo names. This is one shared interim body.
+Its canonical ID, outcomes, supplies, RNG and used state remain unchanged.
+Classic destinations and Faded Memory keep their existing defaults.
+
+Schema 3 adds explicit per-ID `Regions` bindings with `ArtId` and `DisplayName`.
+Schema 2 remains supported. The loader preloads and caches the selected art;
+prompt and result titles use the same regional name. Bindings add neither
+encounters nor coverage identities. `region_art_overrides` in the private
+selection file builds these bindings from reviewed art pairs.
+
+Runtime348 and its private pack are installed while DD2 remains closed. The
+isolated Release build, 1,316 Core tests, 290 UI tests and seven artifact tests
+pass. Four-region closed/used composites were reviewed offline. Native QA is
+pending because the owner explicitly requires the game remain closed until
+new permission. Do not run the new optional `-dd3-curio-regions` preview yet.
+Accepted painting coverage stays 34 IDs / 26 pairs. The four round347 drafts
+remain unaccepted and uninstalled. Latest checkpoint:
+`local-art/ui-overhaul/curio-regional-coherence-v01/CONTINUE.md`.
+
 ## Current coverage, round346
 
 34 exact identities use26 installed pairs. Eldritch Altar retains DD1's narrow

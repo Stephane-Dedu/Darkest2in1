@@ -856,7 +856,7 @@ internal sealed partial class CrawlUi
         else Gui.Fill(new Rect(left, top, 456, height), new Color(0.05f, 0.04f, 0.03f, 0.93f));
 
         string who = S.Save.Estate.Hero(report.HeroId)?.Name ?? "";
-        Gui.Text(new Rect(left + 40, top + 26, 376, 48), HamletUi.Pretty(report.CurioId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+        Gui.Text(new Rect(left + 40, top + 26, 376, 48), NativeCurioArt.DisplayName(report.CurioId) ?? HamletUi.Pretty(report.CurioId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         var lines = new System.Collections.Generic.List<string>();
         lines.Add($"{who}: {report.Text ?? HamletUi.Pretty(report.OutcomeType)}");
         if (report.ItemUsed != null) lines.Add($"Used {HamletUi.Pretty(report.ItemUsed)}.");
@@ -988,7 +988,7 @@ internal sealed partial class CrawlUi
         string who = S.Save.Estate.Hero(D.SelectedHeroId)?.Name ?? "";
         if (curio != null)
         {
-            Gui.Text(header, HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
+            Gui.Text(header, NativeCurioArt.DisplayName(curio) ?? HamletUi.Pretty(curio), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
             if (curio == FadedMemory.CurioId)
             {
                 Gui.Text(body, "A remnant of another age. Its horrors have not forgotten you. Enter the memory and face the horror within.", 19, Gui.Dd1Text, TextAnchor.UpperCenter);
