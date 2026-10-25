@@ -1,3 +1,27 @@
+LATEST356 TANGLE FIELD STORES OFFLINE CANDIDATE:
+local-art/ui-overhaul/curio-regional-coherence-v06/CONTINUE.md. Distinct cabinet
+fitting uses complete native camp_chest, verified against actual install:
+368verts/256tri/UVs and2048paint exact. Whole190vertex/144tri lid assembly hinges
+100degrees,178body vertices fixed. Six underside triangles reuse native plank
+UVs; shared damp-wood/grey-iron tint. No generation or raster repaint. Final
+native-pair-v03/fitted-v01; corridor/room composites reviewed at320canvas width.
+Upper rim occlusion changes naturally; lower body below sourcey700 exact.
+render_field_coffer.py reproduces it with common camera/feet/body scale.
+Pack-tangle-CANDIDATE-v01 changes only locked_display_cabinet/dd2_forest; names,
+12result bindings/classic/other regions retain. Actual INSTALLED Core354 parser
+accepts full34ID/27painting candidate;12artifact tests pass356. No C# build356;
+355Release1330Core297UI results are prior. Current354/runtime/Hamlet/config/
+accepted34ID26pair52PNG pack/44foreign files unchanged. No game launch/input/
+estate/save/deploy/restore356. Candidate UNINSTALLED/UNACCEPTED with QA marker.
+Native contrast/actor/picking/key-shovel/region acceptance awaits new explicit
+permission. Keep DD2 CLOSED. Do not regenerate Tangle or completed355trolley.
+Other3cabinet regions still share interim ornate chest; continue their native
+regional fittings offline after provenance review.355apothecary remains a
+separate candidate requiring355runtime; never blindly combine/copy packs.
+Memorial350/four347drafts uninstalled, bookshelf342 keep, Hamlet354visualQAonly,
+expedition340parked. Heavy D:, preserve foreign/journal bytes/protected estates,
+no stale installer/shared dirty C# build, save before7-8%reserve.
+
 LATEST355 REGIONAL CURIO OFFLINE CANDIDATE:
 local-art/ui-overhaul/curio-regional-coherence-v05/CONTINUE.md. Native Sprawl
 alchemy trolley now has a fitted closed/used pair with stable body/camera/feet.

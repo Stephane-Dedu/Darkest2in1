@@ -11017,3 +11017,31 @@ it. Owner still forbids launch/input. All67 pinned installed targets/config/
 protected estate/host/save355. Checkpoint:local-art/ui-overhaul/curio-regional-
 coherence-v05/CONTINUE.md; heavy art/recipe/prompt/audits D:. Native QA awaits
 permission. Next offline art is distinct regional caches after provenance review.
+
+
+## Round356: native Tangle field coffer candidate
+
+Replaced the shared ornate cabinet cache only in an OFFLINE Tangle candidate.
+Complete native camp_chest source matches the actual installed game:368verts,
+256triangles, UVs and2048paint exact. All21lid islands/190verts/144tri move
+together, including bands and underside;178body vertices remain fixed. The
+original flat-black underside was rejected for final appearance. Six underside
+triangles reuse native lid planks with a darker tint; shared damp-wood/grey-iron
+grade suits the forest. All other UVs retain. No generated or repainted raster.
+
+Public render_field_coffer.py retains triangle order/winding through the normal
+coordinate conversion, uses one union camera and records fixed-body calibration.
+Fitted closed/open states share body span/feet and320px canvas width. Corridor/
+room composites reviewed offline. Upper rim occlusion changes physically; lower
+body below source row700 is pixel-identical. The stricter660probe was false and
+is recorded, not hidden. Native contrast/actor/input/hover QA remains pending.
+
+Full34-ID/27painting candidate parsed by the ACTUAL installed Core354 offline.
+Only cabinet/dd2_forest art changes; other3regions/classic/4names/12results
+retain. Twelve artifact tests pass356; all52accepted PNGs remain exact in
+candidate. No C# build356: previous355Release/1330Core/297UI remain prior results.
+Current354runtime/Hamlet/config/67installed targets/44foreign files untouched.
+No launch/input/deploy/estate/save/host/restore356. Candidate uninstalled and
+unaccepted with QA marker; it is separate from355apothecary/350memorial drafts.
+Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v06/CONTINUE.md; heavy
+source/render/fit/native audits D:. Continue other regional caches offline.

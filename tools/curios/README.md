@@ -1,5 +1,28 @@
 # Curio rework: design catalog v01
 
+## Tangle field stores candidate, round356
+
+The first distinct regional cabinet fitting is a plain native camp coffer for
+Tangle field stores. Its complete 368-vertex/256-triangle source matches the
+installed game, including UVs and the exact 2048px paint. All 190 lid vertices
+move together, including the bands and underside. The 178 body vertices stay
+fixed. Only six underside triangles receive native plank UVs instead of their
+original flat-black sample; a shared damp-wood/grey-iron tint suits the Tangle.
+`render_field_coffer.py` records the adaptation and uses a common camera, body
+scale and foot anchor. No generated art or raster repainting is involved.
+
+The private candidate changes only `locked_display_cabinet` in `dd2_forest`.
+Other regional paintings/names, result bindings and the classic default retain.
+It has 34 candidate identities and 27 paintings, not new identity coverage.
+The actual installed Core354 parser validates the full pack; 12 artifact tests
+pass. No C# build, deployment or game launch was needed this round. Prior
+round355 Release/Core/UI results remain prior results, not new356 runs.
+
+Runtime354 and the accepted 34-ID/26-pair pack remain exact. This coffer and the
+separate round355 apothecary candidate are uninstalled and unaccepted. Native
+contrast, actor overlap, masks, key/shovel input and region-switch QA await
+permission. Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v06/CONTINUE.md`.
+
 ## Sprawl-only apothecary candidate, round355
 
 The native medical trolley now has an offline closed/searched pair. Both

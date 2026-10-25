@@ -149,3 +149,26 @@ runtime354 and its Hamlet assets remain exact; the installed 34-ID/26-pair pack
 and all52 accepted PNGs stay unchanged. Never restore runtime350 from the
 historical paragraphs above. Owner's no-launch/input restriction remains.
 Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v05/CONTINUE.md`.
+
+## Round356: distinct Tangle field coffer
+
+The installed four-region cabinet still shares an ornate generated strongbox.
+For Tangle field stores, the complete native camp coffer provides a plainer oak
+and iron silhouette. Its native source matches the actual installed geometry,
+UVs and paint. All lid islands move together; the lower box stays fixed. The
+open lid's originally flat-black underside reuses native lid planks, with a
+shared damp-wood grade. No generated surface is needed for this fitting.
+
+Closed/open corridor and room composites are reviewed at the actual proposed
+320px canvas width, with a common horizontal body span and foot anchor. The
+opened lid naturally changes occlusion around the upper rim. Lower body pixels
+below row700 in the1024px source renders are identical; all178body vertices
+remain fixed. Do not claim the whole rendered body is pixel-identical at its
+rim, or that every original UV is retained: six underside triangles adapt.
+
+The candidate replaces only cabinet art for `dd2_forest`; Locked field stores
+and its existing result wording retain. Classic cabinet and other regions keep
+their installed paintings. Candidate identity coverage stays34;27paintings is
+an artifact count. Pack/native input acceptance remains pending under the
+owner's no-launch restriction. No runtime or art installation356.
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v06/CONTINUE.md`.
