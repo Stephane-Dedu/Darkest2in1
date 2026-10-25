@@ -121,7 +121,7 @@ def world_ground(soil,stone,grass,palette,stains,cover,contact,wear,entrance=Non
 
 
 def captured_ground(folder, sources):
-    """Use exact native baked pixels instead of the historical offline approximation."""
+    """Load reviewed baked pixels; retain their native-capture or offline-Core provenance."""
     folder=folder.resolve()
     manifest=json.loads((folder/'manifest.json').read_text())
     if manifest.get('encoding')!='RGBA8_sRGB' or manifest.get('origin')!='bottom-left' or manifest.get('size')!=4096:
@@ -140,7 +140,8 @@ def captured_ground(folder, sources):
         image.colorspace_settings.name='sRGB'
         # Paint already includes world stains, contact, wear and native input grade.
         # Applying the preview's vertex shade or extra emission tint would grade it twice.
-        materials[name]=painted_ground('Captured native '+name,image,neutral)
+        label='Offline Core ' if manifest.get('producer')=='offline-core-bake' else 'Captured native '
+        materials[name]=painted_ground(label+name,image,neutral)
         texture=next(n for n in materials[name].node_tree.nodes if n.type=='TEX_IMAGE')
         texture.extension='EXTEND'
     return materials
@@ -271,7 +272,9 @@ def main(args):
     grass=bpy.data.images.load(str(resources/'grass_dry.png'))
     tufts=bpy.data.images.load(str(resources/'farm_gate_node_assets_grass.png'))
     palette=data['Palette']
-    native=captured_ground(args.native_ground,data.get('PaintSources')) if args.native_ground else None
+    if args.native_ground and args.core_ground:raise ValueError('Select one reviewed ground source.')
+    ground_folder=args.native_ground or args.core_ground
+    native=captured_ground(ground_folder,data.get('PaintSources')) if ground_folder else None
     if native:earth,paving=native['ground'],native['lanes']
     else:earth,paving=world_ground(soil,texture,grass,palette,data['GroundStains'],data['GrassCover'],data['ContactShade'],data['EdgeWear'],data.get('EntranceLight'),data.get('LaneCover'))
     rock=painted_ground('Hamlet cliff paint',cliff,data['CliffPaint'] if private_cliff.exists() else palette['Rock'],True)
@@ -344,6 +347,7 @@ def main(args):
         elif piece.get('Background') or piece['Id']=='mainmenu_mountain_mdl' or piece['Id'].startswith(('barricade_military_decor_rocks','coast_skirt_cliffs')):
             paint=palette['Woodland' if piece.get('Background') else 'Mountain' if piece['Id']=='mainmenu_mountain_mdl' else 'Rubble']
             if piece.get('Background') and piece['Z']>110: paint=palette['DistantWoodland']
+            if piece['Id']=='mainmenu_mountain_mdl': paint=palette['Mountain']
             if piece['Id'].startswith('forest_tile_'): paint=palette['Wildwood']
             if piece['Id'].startswith('city_'): paint={'Tint':{'X':.42,'Y':.46,'Z':.54},'Brightness':.002,'Saturation':.35,'UvScale':{'X':1,'Y':1},'UvOffset':{'X':0,'Y':0}}
             if piece.get('Architecture'): paint=palette['Building']
@@ -365,6 +369,18 @@ def main(args):
     position=aim+Vector((offset['X'],offset['Z'],offset['Y']))
     camera=L.camera(position,aim,fov=data['FieldOfView'],res=(args.width,round(args.width*9/16)))
     sc=bpy.context.scene
+    # Keep the world ground at its reviewed resolution. Individual building
+    # atlases are much larger than their town-scale screen footprint; a bounded
+    # preview copy avoids exhausting memory alongside the owner's running game.
+    ground_images={n.image for material in ([earth,paving,native['valley']] if native else [earth,paving])
+                   for n in material.node_tree.nodes if n.type=='TEX_IMAGE' and n.image}
+    preview_resampling=[]
+    for image in bpy.data.images:
+        if image in ground_images or max(image.size)<=args.texture_limit:continue
+        original=tuple(image.size);factor=args.texture_limit/max(original)
+        target=tuple(max(1,round(v*factor)) for v in original)
+        image.scale(*target)
+        preview_resampling.append({'image':image.name,'source':original,'preview':target})
     # The same warm/cool authoring light used by the verified building gallery.
     sys.path.insert(0,str(Path(__file__).resolve().parent))
     from render import light
@@ -373,7 +389,8 @@ def main(args):
     sc.world=bpy.data.worlds.new('Charcoal sky'); sc.world.use_nodes=True
     sc.world.node_tree.nodes['Background'].inputs['Color'].default_value=(.065,.075,.105,1)
     sc.world.node_tree.nodes['Background'].inputs['Strength'].default_value=.4
-    sc.render.engine='CYCLES'; sc.cycles.samples=args.samples; sc.cycles.use_denoising=True
+    sc.render.engine='CYCLES'; sc.cycles.samples=args.samples; sc.cycles.use_denoising=not bool(args.native_models)
+    sc.render.threads_mode='FIXED'; sc.render.threads=args.threads
     sc.cycles.max_bounces=4; sc.cycles.transparent_max_bounces=32
     sc.view_settings.view_transform='Standard'; sc.view_settings.look='None'
     sc.render.image_settings.file_format='PNG'; sc.render.image_settings.color_mode='RGB'
@@ -384,8 +401,11 @@ def main(args):
         projected=[world_to_camera_view(sc,camera,obj.matrix_world@Vector(corner)) for obj in objects for corner in obj.bound_box]
         screen[key]={'x':[min(p.x for p in projected),max(p.x for p in projected)],
                      'y':[min(1-p.y for p in projected),max(1-p.y for p in projected)]}
-    (out/'composition.json').write_text(json.dumps({'notice':__doc__,'projected_bounds':screen,'missing_offline_scenery':missing},indent=2))
-    bpy.ops.render.render(write_still=True)
+    (out/'composition.json').write_text(json.dumps({'notice':__doc__,'projected_bounds':screen,'missing_offline_scenery':missing,
+        'preview_only_texture_resampling':preview_resampling,'reviewed_ground_resolution_retained':True},indent=2))
+    result=bpy.ops.render.render(write_still=True)
+    if 'FINISHED' not in result or not Path(sc.render.filepath).is_file():
+        raise RuntimeError('Preview render did not produce an image; do not accept this output.')
     if args.blend:
         bpy.ops.file.pack_all(); bpy.ops.wm.save_as_mainfile(filepath=str(out/(args.name+'.blend')))
     print('TOWN PREVIEW COMPLETE',sc.render.filepath,flush=True)
@@ -397,11 +417,14 @@ if __name__=='__main__':
     parser.add_argument('--kit',type=Path,required=True)
     parser.add_argument('--layout',type=Path,required=True)
     parser.add_argument('--native-ground',type=Path,help='Converted private native_paint_capture output; exact ground, lane and valley pixels.')
+    parser.add_argument('--core-ground',type=Path,help='Private offline Core bake; supplied pixels are exact, GPU input sampling and native appearance remain unverified.')
     parser.add_argument('--native-models',type=Path,help='Private ModelReviewExport output with Core geometry, palette, tints and contact bands.')
     parser.add_argument('--resources',type=Path,help='Read existing landscape source images/exp cache without overwriting an earlier preview directory.')
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--width',type=int,default=1920)
     parser.add_argument('--samples',type=int,default=16)
+    parser.add_argument('--threads',type=int,default=2)
+    parser.add_argument('--texture-limit',type=int,default=1024,choices=(512,1024,2048,4096))
     parser.add_argument('--name',default='hamlet-landscape-v04')
     parser.add_argument('--blend',action='store_true')
     main(parser.parse_args(sys.argv[sys.argv.index('--')+1:]))

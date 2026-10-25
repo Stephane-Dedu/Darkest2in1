@@ -9,6 +9,7 @@ public static class HamletPaintBaker
 {
     public const int TileSize = 512;
     public const int PaintSize = 4096;
+    public const float TurfPeriod = 7.8f;
 
     public sealed class Result
     {
@@ -35,7 +36,7 @@ public static class HamletPaintBaker
         cancellation.ThrowIfCancellationRequested();
         var result = new Result(size);
         Ground(result, soil, stone, grass, fieldSize, cancellation, sun);
-        Valley(result, soil, stone, grass ?? soil, rock, fieldSize, cancellation);
+        Valley(result, soil, stone, grass ?? soil, rock, fieldSize, cancellation, grass != null);
         return result;
     }
 
@@ -67,7 +68,7 @@ public static class HamletPaintBaker
         });
         var earthSamples = new TileSamples(earth, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 5, 5);
         var gravelSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.8f, 4.8f, .37f, .19f, repeat: true);
-        var turfSamples = turf != null ? new TileSamples(turf, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.2f, 4.2f) : null;
+        var turfSamples = turf != null ? new TileSamples(turf, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, TurfPeriod, TurfPeriod, repeat: true) : null;
         var laneSamples = new TileSamples(gravel, size, HamletLayout.MinX, HamletLayout.MaxX, HamletLayout.MinZ, HamletLayout.MaxZ, 4.8f, 4.8f, repeat: true);
         Rows(size, cancellation, y =>
         {
@@ -101,7 +102,7 @@ public static class HamletPaintBaker
         output.Ground = pixels; output.Lanes = lanePixels;
     }
 
-    private static void Valley(Result output, byte[] earth, byte[] gravel, byte[] turf, byte[] bedrock, int fieldSize, CancellationToken cancellation)
+    private static void Valley(Result output, byte[] earth, byte[] gravel, byte[] turf, byte[] bedrock, int fieldSize, CancellationToken cancellation, bool grassAvailable)
     {
         int size = output.Size;
         var cover = new float[fieldSize * fieldSize]; var pixels = new byte[size * size * 4];
@@ -115,7 +116,8 @@ public static class HamletPaintBaker
         });
         var earthSamples = new TileSamples(earth, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 5, 5);
         var gravelSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.8f, 4.8f, .37f, .19f, repeat: true);
-        var turfSamples = new TileSamples(turf, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.2f, 4.2f);
+        float period = grassAvailable ? TurfPeriod : 4.2f;
+        var turfSamples = new TileSamples(turf, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, period, period, repeat: grassAvailable);
         var laneSamples = new TileSamples(gravel, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 4.8f, 4.8f, repeat: true);
         var rockSamples = new TileSamples(bedrock, size, HamletLandscape.MinX, HamletLandscape.MaxX, HamletLandscape.MinZ, HamletLandscape.MaxZ, 28, 18);
         Rows(size, cancellation, y =>

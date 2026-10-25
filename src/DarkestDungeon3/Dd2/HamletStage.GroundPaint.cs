@@ -20,6 +20,7 @@ internal sealed partial class HamletStage
         if (_cliffPaintPath!=null && !Art.ImageFinished(_cliffPaintPath)) return;
         if (_earthPaintPath!=null && !Art.ImageFinished(_earthPaintPath)) return;
         if (_pavingPaintPath!=null && !Art.ImageFinished(_pavingPaintPath)) return;
+        if (_turfPaintPath!=null && !Art.ImageFinished(_turfPaintPath)) return;
         if (_groundMaterial == null) PrepareGround();
         if (_groundPaintTask != null) return;
         var inputs = new[] { BaseTexture(_groundMaterial), BaseTexture(_groundPaving), _groundGrass, BaseTexture(_groundRock) };

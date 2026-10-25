@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Dd2;
 internal sealed partial class HamletStage
 {
     private bool _estateSkyBuilt;
-    private string _estateSkyPath,_cliffPaintPath,_earthPaintPath,_pavingPaintPath;
+    private string _estateSkyPath,_cliffPaintPath,_earthPaintPath,_pavingPaintPath,_turfPaintPath;
     private void PrepareTownArt()
     {
         string folder=Path.Combine(Plugin.NativeRoomSceneryPath.Value,"HamletMaterials");
@@ -16,14 +16,17 @@ internal sealed partial class HamletStage
         _cliffPaintPath=Path.Combine(folder,"hamlet-cliff-v17.png");
         _earthPaintPath=Path.Combine(folder,"hamlet-earth-v23.png");
         _pavingPaintPath=Path.Combine(folder,"hamlet-cobbles-v23.png");
+        _turfPaintPath=Path.Combine(folder,"hamlet-turf-v92.png");
         if (!File.Exists(_estateSkyPath)) _estateSkyPath=null;
         if (!File.Exists(_cliffPaintPath)) _cliffPaintPath=null;
         if (!File.Exists(_earthPaintPath)) _earthPaintPath=null;
         if (!File.Exists(_pavingPaintPath)) _pavingPaintPath=null;
+        if (!File.Exists(_turfPaintPath)) _turfPaintPath=null;
         if (_estateSkyPath!=null) Art.PrepareImage(_estateSkyPath);
         if (_cliffPaintPath!=null) Art.PrepareImage(_cliffPaintPath);
         if (_earthPaintPath!=null) Art.PrepareImage(_earthPaintPath);
         if (_pavingPaintPath!=null) Art.PrepareImage(_pavingPaintPath);
+        if (_turfPaintPath!=null) Art.PrepareImage(_turfPaintPath);
         if (Session.Current?.Dd1 is { } dd1) Art.PrepareImage(dd1.PathOf("campaign","town","town_bg.png"));
     }
     private bool BuildEstateSky(int layer)

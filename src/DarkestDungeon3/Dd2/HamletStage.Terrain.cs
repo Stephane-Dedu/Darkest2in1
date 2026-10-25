@@ -133,7 +133,10 @@ internal sealed partial class HamletStage
         }
         else SetPaintTexture(_groundSteps,BaseTexture(stone));
         Texture grass=null;
-        if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
+        var privateTurf=_turfPaintPath!=null?Art.Png(_turfPaintPath):null;
+        if (privateTurf!=null)
+            grass=PaintCopy(privateTurf,HamletPalette.TurfDetail,false,1024);
+        else if (_grassAsset.Status==AsyncOperationStatus.Succeeded && BaseTexture(_grassAsset.Result) is { } grassTexture)
             grass=PaintCopy(grassTexture,HamletPalette.Grass,false,512);
         if (Environment.GetCommandLineArgs().Contains("-dd3-hamlet3d-preview"))
             Plugin.Log.LogInfo($"[hamlet 3d paint] {_groundMaterial.shader.name}; color space {QualitySettings.activeColorSpace}; grass {_grassAsset.Status}/{_grassAsset.Result?.name}/{(_grassAsset.Result!=null?BaseTexture(_grassAsset.Result)?.name:null)}; rock {_rockAsset.Status}; earth {_earthAsset.Status}");

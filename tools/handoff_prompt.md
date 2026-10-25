@@ -1,3 +1,26 @@
+LATEST354 HAMLET FINISHES INSTALLED OFFLINE:
+local-art/ui-overhaul/hamlet-mountain-ground-guild-v92/CONTINUE.md. New human
+screenshot reopened three Hamlet finishes: native Mountain replaces castle,
+detailed flattened turf/moss/soil and matching Guild clay roofs. Runtime354,
+Guild package/shadow bindings and selected turf-v02 installed while DD2 CLOSED
+with exact predecessor guards/backups. No launch/input/native QA354. Release0
+errors/3old warnings,1322Core/296UI pass. Native Mountain1050verts/1272tri/UVs
+match install; preview paint is exact2048thumbnail of native4096source. Pose
+X42 Y-45 Z190 width155/depth.25 keeps summit visible/skirt buried. Only2Guild
+members change UV/material;655members/12777tri and primitive picking bounds
+retain, batches28->26. Nine other raw/baked/Core models and50graded images exact.
+Ground shadow gray exact, bindings refreshed; one fascia band rounds differently.
+Selected generated turf paint is paint/hamlet-turf-v92-v02.png on D:, installed
+as hamlet-turf-v92.png. First upright-clump paint and stale incremental study
+REJECTED. Actual final layout/review/ground/preview are *final-v03. Do not repeat
+the finished passes or run any earlier restore/installer. Installer354 consumed,
+no pending restore;44foreign files/config/curio manifest preserved. Keep DD2
+closed until explicit newer human permission to launch/drive; only native
+visual/zoom/hover/return QA is pending for these three finishes. Curio351 work
+can continue offline if no newer Hamlet feedback; its installed/candidate
+distinctions remain, with runtime354 now the current baseline. Never restore
+runtime350. Heavy D:, protected estates, no shared dirty build,7-8% reserve.
+
 LATEST351 OFFLINE checkpoint:
 local-art/ui-overhaul/curio-regional-coherence-v04/CONTINUE.md. No launch/input
 permission. Existing external DD2 PID86036 observed351; agent did not launch,

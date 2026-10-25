@@ -363,7 +363,7 @@ internal sealed partial class HamletStage : MonoBehaviour
                 renderer.sharedMaterials=renderer.sharedMaterials.Select(m=>
                 {
                     var painted=new Material(m) { name="Hamlet distant woodland "+m.name }; _details.Add(painted);
-                    Grade(painted,piece.Path.Contains("/City/")?new HamletPalette.Paint(.42f,.46f,.54f,.002f,.35f):piece.Path.Contains("/Forest/")?HamletPalette.Wildwood:
+                    Grade(painted,piece.Path==HamletVista.MountainPath?HamletPalette.Mountain:piece.Path.Contains("/City/")?new HamletPalette.Paint(.42f,.46f,.54f,.002f,.35f):piece.Path.Contains("/Forest/")?HamletPalette.Wildwood:
                         piece.Position.z>110?HamletPalette.DistantWoodland:HamletPalette.Woodland,false); return painted;
                 }).ToArray();
             }

@@ -12,15 +12,13 @@ public static class HamletVista
             float heightScale=1,float depthScale=1,bool distant=false)
         { Asset=asset;Path=path;X=x;Y=y;Z=z;Width=width;Yaw=yaw;HeightScale=heightScale;DepthScale=depthScale;Distant=distant; }
     }
-    private const string City="Assets/Art/Models/Environments/City/Models/DecorTiles/";
-    private const string Valley="Assets/Art/Models/Environments/Valley/Models/Buildings/";
+    public const string MountainAsset="mainmenu_mountain_mdl";
+    public const string MountainPath="Assets/Art/Models/Environments/Common/Models/MainMenu/mainmenu_mountain_mdl.fbx";
     public static readonly Piece[] Pieces =
     {
-        // A small estate silhouette on the rear ridge, clear of the Abbey's roof and the HUD.
-        new("city_bigwall_main",City+"city_bigwall_main.fbx",52,7,154,18,depthScale:.55f,distant:true),
-        new("city_tower_01",City+"city_tower_01.fbx",43.5f,18,156,5.5f,heightScale:1.1f,distant:true),
-        new("city_tower_03",City+"city_tower_03.fbx",61,15.8f,156,5.5f,heightScale:1.1f,distant:true),
-        new("city_tower_02",City+"city_tower_02.fbx",52,21,157,4.4f,heightScale:1.7f,distant:true),
+        // The native Mountain rises behind the whole settlement. Its buried foot
+        // lets the existing distant hills occlude the model's broad basal skirt.
+        new(MountainAsset,MountainPath,42,-45,190,155,depthScale:.25f,distant:true),
     };
     public const float SkyDepth=230,SkyWidth=600,SkyBottom=-120,SkyTop=220;
 }

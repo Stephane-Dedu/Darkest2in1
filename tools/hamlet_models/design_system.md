@@ -849,3 +849,23 @@ Related materials keep their identities; Guild clay, medical lime, native oak an
 Smithy reed are unaffected. The native slate course-density concern remains a
 separate comparison. A generated field that reads as wood cannot replace pointed
 slate merely because its pixels are larger. Preserve rejected art and provenance.
+
+## Owner finishing notes, round354
+
+The Guild armory's earlier slate finish is superseded by the owner's request
+for one coherent roof colour. Reuse the accepted hall clay paint on the armory
+deck/ridge at matching physical course scale. Keep distinct stone, lime, timber,
+glass and standards; do not flatten all building materials to one colour.
+
+The native DD2 Mountain replaces the estate castle. Keep the whole native mesh,
+UVs and paint, compose its skirt behind the rear hills and keep the summit in
+frame. A large model that exposes only two tips or a rectangular skirt fails
+the composition check. Grade this native dark source separately from woodland.
+
+Broad ground needs readable painted material groupings at town scale. Review
+native opaque turf separately from alpha cutouts; a cutout atlas is not an opaque
+soil tile. Inspect a3x3 repeat and the actual1920town view before reuse. Prefer
+flattened grass/moss and earthy gaps over rows of large repeated upright tufts.
+Supplementary paint is generated, labelled as such and compared to native
+references. Source resolution alone is not acceptance. Preserve native fallback,
+walkway blending, source alpha and the existing terrain memory budgets.

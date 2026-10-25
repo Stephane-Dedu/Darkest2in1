@@ -2459,3 +2459,46 @@ config and estate2 verified before final closed-game acceptance. Protected estat
 were not accessed. Concurrent work, foreign journals and historical UTF8 retain.
 All new heavy data is on D:, no cleanup/migration. Whole-town native art parity
 and broader architecture/material density remain open.
+
+
+## Round354: Mountain, turf and Guild roof harmony
+
+The owner's newer screenshot requested these three finishes. The complete native
+main-menu Mountain replaces the four castle pieces behind the town. Native
+1050 vertices/1272 triangles and UVs match the installed game. Its existing
+4096px paint is unedited; the kit's2048px copy matches the original export
+thumbnail. The distant instance uses X42,Y-45,Z190,width155,depth scale.25.
+The buried skirt and framed summit were checked in the full town; the initial
+tips-only pose and a clipped-summit probe were rejected. Mountain-specific grade
+precedes the woodland grade. This changes only the Hamlet vista.
+
+The Guild armory now shares the hall/dormer clay painting and physical course
+scale. This deliberately supersedes333's armory slate choice. Only the armory
+deck and ridge change UVs/material bindings;655 members/12777 triangles, winding,
+geometry and primitive picking bounds retain. Two existing materials are reused,
+reducing Guild batches28 to26. Nine other raw/baked/Core service models and all
+50 graded model paintings are byte-identical. One eave fascia's light band
+rounds differently after the bake; the audit records it. Ground-shadow gray
+bytes remain exact, with refreshed source bindings.
+
+Optional HamletMaterials/hamlet-turf-v92.png adds detailed flattened grass,
+moss and soil. It is supplementary generated art from inspected native DD2
+references and the accepted earth painting, not an extracted native texture.
+The first upright-clump study was rejected by the3x3 repeat check. Selected
+v02 is installed under the canonical filename. Runtime waits for its upload,
+retains native grass fallback and the512px readback/4096px map budgets, and uses
+a7.8m forward-repeat period for readable marks. No-grass fallback bytes retain.
+
+GroundReviewExport exports actual Core grading/baking from private512RGBA input
+bytes. Input downsampling approximates GPU readback; it is not native capture.
+town_preview accepts --core-ground, defaults to two CPU threads, limits only
+non-ground preview atlas copies to1024 and retains4096ground maps. Its metadata
+records resampling. Native shader/GUI/zoom/hover/return acceptance is still open.
+
+Clean HEAD26d6751 plus explicit owned sources: Release0errors/3existing warnings,
+1322 Core/296 UI checks pass. Exact guarded predecessor/backups permit an offline
+11-file installation after the external game closed. No launch/input/save or
+estate access354. Runtime354/Guild library/field bindings/turf are installed;
+config/curio manifest and44 foreign files retain. No pending restore. Do not run
+old333/350 restoration helpers. Checkpoint and native/rendered provenance:
+local-art/ui-overhaul/hamlet-mountain-ground-guild-v92/CONTINUE.md; heavy files D:.

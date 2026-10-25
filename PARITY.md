@@ -1008,3 +1008,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [?] Round353 Hoarder-derived wagon: shipped store-frame/glow/portrait sprites, reclaimed keeper space, six columns/18 visible positions and overflow pages. Existing stock generation/prices/purchases retained. Private extraction metadata inspected; Release/12 focused UI checks pass. Guarded offline runtime353 install, config/map/curio manifest unchanged. DD2 not launched/no saves; native visual/page/controller/scaling acceptance pending.
+
+
+- [?] Round354 owner Hamlet finishes installed OFFLINE: complete native DD2 Mountain replaces castle, more detailed flattened turf/moss/soil, and matching Guild clay roofs. Final actual Core/Blender frame reviewed at 1920x1080; native shader/overview/zoom/hover/return QA awaits explicit permission. Native Mountain topology/UV/source paint audited; Guild topology and primitive picking bounds retained, nine other models/50 graded images and paved pixels exact. Release/1322 Core/296 UI pass from clean HEAD plus13 owned inputs. Guarded11-file install after external DD2 closed, backups verified; runtime354/config/curios preserve concurrent352/353 work and44 foreign WIP. No launch/input/estate/save access/no pending restore. Checkpoint:local-art/ui-overhaul/hamlet-mountain-ground-guild-v92.

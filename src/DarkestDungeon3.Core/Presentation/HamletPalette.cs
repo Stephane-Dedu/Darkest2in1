@@ -29,7 +29,7 @@ public static class HamletPalette
     // Use the intact courses of foundation_panel_06, excluding its loose black rubble and cap strip.
     public static readonly Paint Masonry = new(1.12f,1.2045f,1.178f,.003f,.45f,
         uScale:502f/512,vScale:205f/512,uOffset:5f/512,vOffset:219f/512);
-    public static readonly Paint Mountain = new(.075f,.105f,.16f,.002f,.46f);
+    public static readonly Paint Mountain = new(.78f,.91f,1.12f,.010f,.52f);
     public static readonly Paint Woodland = new(.54f,.70f,.86f,.004f,.38f);
     public static readonly Paint DistantWoodland = new(.40f,.60f,.82f,.009f,.24f);
     public static readonly Paint Wildwood = new(.62f,.66f,.60f,.003f,.24f);
@@ -41,6 +41,7 @@ public static class HamletPalette
     private static readonly Paint BuildingCloth = new(.98f,.94f,.90f,.001f,.60f);
     private static readonly Paint BuildingNative = new(1.01f,.98f,.92f,.001f,.66f);
     public static readonly Paint Grass = new(.48f,.64f,.38f,.002f,.72f);
+    public static readonly Paint TurfDetail = new(.82f,.85f,.74f,.001f,.70f);
     public static readonly Paint GrassTuft = new(.55f,.63f,.46f,0,.7f);
 
     /// <summary>Shared finishes across service buildings, retaining their painted local accents.</summary>

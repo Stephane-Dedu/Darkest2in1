@@ -10949,3 +10949,35 @@ sprites; no game art committed. Clean HEAD352 plus five owned inputs builds;
 backup, config/map/curio manifest unchanged. No game launch/input/save access.
 Native rendering, focus/controller/page input and smaller-window QA pending.
 Evidence:local-art/trinket-hoarder-v02 and D:/CodexArtifacts/DarkestDungeon3/trinket-hoarder-v02.
+
+
+## Round354: Mountain, ground detail and Guild roof harmony
+
+The owner's new screenshot reopens three Hamlet finishes. The complete native
+main-menu Mountain replaces the four castle pieces, with a larger silhouette
+behind the settlement. Its 1050 vertices, 1272 triangles and UVs match the
+installed native source; kit paint is the exact 2048 thumbnail of native 4096.
+Final pose hides the broad skirt and keeps the summit inside the offline frame.
+
+New generated turf uses inspected DD2 grass references and the accepted earth
+paint: flattened grass, moss, exposed soil and small debris. The first upright
+clump pattern was rejected. The selected second paint uses a 7.8m forward repeat;
+fully paved pixels are byte-identical. Native fallback and map budgets remain.
+Guild armory roof/ridge reuse the hall's clay paint with matching tile frequency.
+All 655 members/12777 triangles, primitive picking bounds, nine other models and
+50 graded paintings retain; one fascia light-band rounding difference is logged.
+Ground shadow pixels are unchanged. No extracted/generated art enters Git.
+
+Built from clean HEAD26d6751 plus 13 pinned owned inputs. Release passes with
+0 errors/3 existing warnings; 1322 Core and 296 UI tests pass. Corrected a stale
+incremental preview through explicit rebuild and compiled-fixture audits.
+Actual Core exports, source hashes and final offline 1920x1080 evidence are in
+local-art/ui-overhaul/hamlet-mountain-ground-guild-v92/CONTINUE.md, with heavy
+art and reproducible before/after packages on D:.
+
+Guarded installer354 applied 11 files only after the external DD2 process had
+closed. Four DLL/PDBs, Guild package/shadow bindings and selected turf installed
+with exact predecessor guards and backups. Config/curio manifest and 44 foreign
+WIP files retain. No launch/input/save/estate access or pending restore. Native
+shader/overview/zoom/hover/return acceptance remains pending human permission.
+Runtime354 retains concurrent352/353 work; never restore older runtimes.
