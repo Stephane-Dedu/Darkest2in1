@@ -25,3 +25,9 @@ instruction. Native rasterization, large-tooltip appearance, mouse/controller
 interaction, purchase feedback and smaller-window acceptance remain unverified.
 Private receipt/checkpoint: `local-art/trinket-ui-v01/` and
 `D:/CodexArtifacts/DarkestDungeon3/trinket-ui-v01/`. No save access or art changes.
+
+Round353 replaces the four-column grid with six columns and18 positions per
+page, reclaims keeper space and uses the extracted native Hoarder store frame,
+selection glow and portrait. Overflow pages expose all existing stock. Stock
+quantities/generation and economy are unchanged. Release and12 focused UI tests
+pass; installed offline, native appearance/input/scaling acceptance pending.

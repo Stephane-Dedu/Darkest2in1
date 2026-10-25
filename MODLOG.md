@@ -10930,3 +10930,22 @@ throughout, no launch/input/save access/no pending restore. Native rendering,
 large-tooltip appearance, purchase/hover/mouse/controller/small-window QA remain
 UNVERIFIED. No new art/extraction needed; no generated or extracted assets in Git.
 See tools/trinket_ui.md and local-art/trinket-ui-v01/CONTINUE.md.
+
+
+## Round353: Hoarder-derived Nomad Wagon
+
+Extracted/inspected shipped ui_container_store512square, white selection glow
+500square, inventory backing121x122 and npc_hoarder1284x2036. Original RGBA
+sprites and bundle hashes/metadata retained privately at trinket-hoarder-v02.
+StoreUiBhv and StoreInventoryItemBhv confirm separate inventory/price labels and
+affordability feedback; no prefab geometry or exact native layout parity claimed.
+
+Wagon now reclaims keeper space for six columns/18 visible stock positions,
+108px maximum native store frames, native Hoarder portrait and overflow paging.
+Fixed detail panel/purchase action retained. Actual stock quantities/prices/
+weekly generation/economy remain unchanged. Native Addressables load source
+sprites; no game art committed. Clean HEAD352 plus five owned inputs builds;
+12 focused UI tests pass. Runtime353 installed offline with exact352 guards and
+backup, config/map/curio manifest unchanged. No game launch/input/save access.
+Native rendering, focus/controller/page input and smaller-window QA pending.
+Evidence:local-art/trinket-hoarder-v02 and D:/CodexArtifacts/DarkestDungeon3/trinket-hoarder-v02.

@@ -10,17 +10,25 @@ internal sealed partial class HamletUi
     private Vector2 _wagonEffectScroll;
     private string _wagonDescriptionKey;
     private Estate _wagonEstate;
+    private int _wagonPage;
 
     private void DrawWagon(Rect area, Hamlet hamlet)
     {
+        area = new Rect(Window.x + 244, Window.y + 92, Window.width - 278, Window.height - 116);
+        ExpeditionSkin.Sprite(new Rect(Window.x + 12, Window.y + 170, 218, 480), "npc_hoarder", fit: true);
+        Gui.Text(new Rect(Window.x + 24, Window.y + 104, 190, 56), "Nomad Wagon", 30,
+            CampaignPanelSkin.Brass, TextAnchor.MiddleCenter, heading: true);
         if (_wagonEstate != E)
         {
             _wagonEstate = E;
             _wagonSelection.Clear();
             _wagonDescriptionKey = null;
+            _wagonPage = 0;
         }
         _wagonSelection.Reconcile(E.WagonStock);
         var layout = new TrinketShopLayout(area);
+        int pages = Mathf.Max(1, (E.WagonStock.Count + TrinketShopLayout.Capacity - 1) / TrinketShopLayout.Capacity);
+        _wagonPage = Mathf.Clamp(_wagonPage, 0, pages - 1);
         Gui.Text(layout.Header, "This week's finds", 30, CampaignPanelSkin.Ivory, heading: true);
         Gui.Text(new Rect(area.xMax - 220, area.y + 4, 220, 32), Gui.Num(E.Get(Currency.Gold), "#,0") + " gold", 24,
             CampaignPanelSkin.Brass, TextAnchor.MiddleRight);
@@ -28,13 +36,13 @@ internal sealed partial class HamletUi
         for (int i = 0; i < TrinketShopLayout.Capacity; i++)
         {
             var cell = layout.Cell(i);
-            bool stocked = i < E.WagonStock.Count;
-            string id = stocked ? E.WagonStock[i] : null;
+            int index = _wagonPage * TrinketShopLayout.Capacity + i;
+            bool stocked = index < E.WagonStock.Count;
+            string id = stocked ? E.WagonStock[index] : null;
             bool selected = stocked && id == _wagonSelection.Id;
             bool hover = stocked && cell.Contains(Event.current.mousePosition) && GUI.enabled;
-            ExpeditionSkin.Slot(cell, selected);
+            ExpeditionSkin.StoreSlot(cell, selected, hover);
             if (!stocked) continue;
-            if (hover && !selected) ExpeditionSkin.Sprite(cell, "ui_frame_ability_selected", ExpeditionSkin.Muted);
             var icon = new Rect(cell.x + 7, cell.y + 6, cell.width - 14, cell.height - 12);
             HeroSheet.TrinketIcon(icon, id);
             int price = hamlet.WagonPrice(id);
@@ -42,7 +50,14 @@ internal sealed partial class HamletUi
                 E.Get(Currency.Gold) >= price ? CampaignPanelSkin.Brass : CampaignPanelSkin.Red, TextAnchor.MiddleCenter);
             if (Gui.Hotspot(cell)) _wagonSelection.Select(id, E.WagonStock);
         }
-        Gui.Text(new Rect(layout.Stock.x, area.yMax - 54, layout.Stock.width, 44),
+        if (pages > 1)
+        {
+            var footer = new Rect(layout.Stock.x, area.yMax - 54, layout.Stock.width, 44);
+            if (Gui.DdButton(new Rect(footer.x, footer.y, 120, 42), "Previous", _wagonPage > 0, 22)) _wagonPage--;
+            Gui.Text(footer, $"{_wagonPage + 1} / {pages}", 22, CampaignPanelSkin.Muted, TextAnchor.MiddleCenter);
+            if (Gui.DdButton(new Rect(footer.xMax - 120, footer.y, 120, 42), "Next", _wagonPage < pages - 1, 22)) _wagonPage++;
+        }
+        else Gui.Text(new Rect(layout.Stock.x, area.yMax - 54, layout.Stock.width, 44),
             E.WagonStock.Count == 0 ? "New stock arrives next week." : "Select a trinket to inspect its effects.",
             22, CampaignPanelSkin.Muted, TextAnchor.MiddleCenter);
         ExpeditionSkin.TooltipFrame(layout.Details);

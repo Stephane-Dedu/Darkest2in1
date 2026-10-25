@@ -43,7 +43,7 @@ public class TrinketShopTests
     [Fact]
     public void StockPricesReadingAreaAndPurchaseDoNotOverlap()
     {
-        var area = new Rect(740, 202, 759, 676);
+        var area = new Rect(388, 224, 1117, 660);
         var layout = new TrinketShopLayout(area);
         Assert.True(layout.Description.yMax < layout.Status.y);
         Assert.True(layout.Status.yMax < layout.Purchase.y);

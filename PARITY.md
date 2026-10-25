@@ -1005,3 +1005,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [?] Round352 Nomad Wagon: native DD2 stock slots/selection art and fixed scrollable effect panel, select then Purchase, affordability feedback and stable item-ID selection. Shared trinket tooltips separate trigger labels/effects and anchor beside equipment/inventory slots. Existing price/purchase/save rules retained. Release/296 UI checks pass; guarded runtime352 installed OFFLINE, config/map339/curios unchanged,44 foreign WIP retained. DD2 kept CLOSED/no save access/no pending restore. Native visual/input/controller/smaller-window QA remains pending. Evidence:local-art/trinket-ui-v01.
+
+
+- [?] Round353 Hoarder-derived wagon: shipped store-frame/glow/portrait sprites, reclaimed keeper space, six columns/18 visible positions and overflow pages. Existing stock generation/prices/purchases retained. Private extraction metadata inspected; Release/12 focused UI checks pass. Guarded offline runtime353 install, config/map/curio manifest unchanged. DD2 not launched/no saves; native visual/page/controller/scaling acceptance pending.

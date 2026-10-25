@@ -400,10 +400,11 @@ internal sealed partial class HamletUi
         string building = _panel == Panel.Hero || _panel == Panel.Log ? null : _building;
         var bg = building != null ? Art.BuildingBackground(building)
             : _panel == Panel.Log ? Art.Dd1("campaign", "town", "activity_log", "activitylog_bg.png") : null;
-        CampaignPanelSkin.ServiceWindow(Window, bg);
+        if (_panel == Panel.Wagon) CampaignPanelSkin.Frame(Window);
+        else CampaignPanelSkin.ServiceWindow(Window, bg);
 
         // Left: the building's keeper (or the hero), as DD1 frames it.
-        if (building != null)
+        if (building != null && _panel != Panel.Wagon)
         {
             var keeper = Art.Dd1("campaign", "town", "buildings", building, building + ".character.png");
             if (keeper != null)

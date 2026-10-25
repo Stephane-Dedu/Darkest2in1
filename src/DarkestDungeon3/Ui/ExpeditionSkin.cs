@@ -47,8 +47,10 @@ internal static class ExpeditionSkin
         if (_started || !HasCatalog()) return;
         _started = true;
         foreach (string name in new[] { "ui_button_banner", "ui_labelbg", "ui_divider_long", "ui_arrow",
-                     "ui_frame_ability", "ui_frame_ability_selected", "ui_selection_indicator", "ui_routetype_bg", "ui_trinket_slot", "ui_tooltip" })
+                     "ui_frame_ability", "ui_frame_ability_selected", "ui_selection_indicator", "ui_routetype_bg", "ui_trinket_slot", "ui_tooltip",
+                     "ui_container_store", "ui_container_store_frame_glow", "ui_inventory_slot" })
             Sprites[name] = Load<Sprite>("Assets/Art/UI/HUD/" + name + ".png");
+        Sprites["npc_hoarder"] = Load<Sprite>("Assets/Art/UI/Portraits/npc_hoarder.png");
         foreach (string name in new[] { "watch_tower", "story_resist", "dungeon", "cache", "story_hero" })
             Nodes[name] = Load<ResourceNodeType>("Assets/Data/Node/" + name + ".asset");
     }
@@ -177,6 +179,12 @@ internal static class ExpeditionSkin
     {
         Sprite(r, "ui_trinket_slot");
         Sprite(r, selected ? "ui_frame_ability_selected" : "ui_frame_ability", selected ? Brass : Muted);
+    }
+
+    internal static void StoreSlot(Rect r, bool selected, bool hover)
+    {
+        if (!Sprite(r, "ui_container_store")) Slot(r, selected);
+        if (selected || hover) Sprite(r, "ui_container_store_frame_glow", selected ? Brass : Muted);
     }
 
     public static void QuestIcon(Rect r, string type, Color colour)
