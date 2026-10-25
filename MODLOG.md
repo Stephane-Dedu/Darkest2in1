@@ -10744,3 +10744,15 @@ and dossier parked. DD2 closed/no estate/host/actor/save/no pending restore;
 software tests remain prior evidence; normal campaign/actors/controller/perf
 acceptance still pending. Checkpoint:local-art/ui-overhaul/curio-native-quality-v05.
 Next346 check usage, preserve7-8% reserve; Eldritch Altar references only.
+
+
+## Round346 preflight: reserve checkpoint and original altar identity
+
+Weekly usage reached9% remaining after345 acceptance, so the next two-state
+generation/native-QA cycle is checkpointed before starting. Eldritch Altar
+original DD1 references show a spiral sculpture on a fluted column and red
+blood in used state. Native cultist altar is a wide table, a material reference
+only. Earlier proposal text is not the original identity. Exact closed prompt
+saved privately, no generation/fitting/pack/installation/launch this preflight.
+Installed33-ID state remains345; all44 foreign WIP preserved. Resume346 from
+local-art/ui-overhaul/curio-native-quality-v06 after usage permits.

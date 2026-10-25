@@ -975,3 +975,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round345 adds the bas-relief,33 exact IDs/25 pairs/50 PNGs, with66 actual native closed/used state/input checks. DD1 octopus/split anatomy, DD2 Shroud stone, stable rubble registration and full private artifact audit. Runtime343/config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore. Evidence:local-art/ui-overhaul/curio-native-quality-v05.
 - [ ] Remaining curio designs:28 base+10 quest+26 DLC+6 legacy, plus retained FadedMemory. Normal saved campaign/actors/controller/long-session acceptance remains pending. Eldritch Altar is references only; original spiral column differs from native cultist table. Continue346 after usage permits, retaining7-8% reserve.
+
+
+- [ ] Round346 Eldritch Altar remains reference/prompt only, no generated art or installation. Original spiral-column/bloody used-state identity differs from native table proposal. Installed345 remains33 exact IDs;70 designs plus retained FadedMemory still require work. Reserve checkpoint:local-art/ui-overhaul/curio-native-quality-v06.

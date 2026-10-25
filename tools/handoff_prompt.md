@@ -1,3 +1,14 @@
+Round346 is a RESERVE PREFLIGHT ONLY. Latest checkpoint:
+local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md. Installed accepted
+state remains345/v05:33 IDs/25 pairs/50 PNGs,66 real native state/input checks,
+runtime343/config/map339 exact, DD2 CLOSED/no estate/host/save/no restore.
+No new generation/pack/launch346. Eldritch Altar prompt/reference ONLY; actual
+DD1 is a spiral column with bloody used state, native cultist table is only
+material reference. Resume346 after usage permits. Last88% five-hour/9% weekly;
+check fresh and retain7-8% reserve.70 designs + FadedMemory remain. Parked
+Hamlet333/dossier340,44 foreign WIP, protected estates and newer human limits
+retain. Never rerun completed342-345 helpers or335/339 restores.
+
 Round345 installed33 exact curio IDs/25 pairs/50 PNGs after66 real native
 state/input captures. Latest local-art/ui-overhaul/curio-native-quality-v05/
 CONTINUE.md. New bas-relief preserves DD1 octopus carving/split state and
