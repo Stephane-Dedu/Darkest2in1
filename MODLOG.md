@@ -10720,3 +10720,27 @@ Existing343 software tests remain authoritative; normal campaign/actor/input/
 long-session acceptance remains pending. Checkpoint:
 local-art/ui-overhaul/curio-native-quality-v04/CONTINUE.md. Resume345 after usage
 permits, retaining7-8% reserve; never rerun completed checkpoint/install helpers.
+
+
+## Round345: bas-relief state painting and native acceptance
+
+DD1's circular octopus bas-relief now has DD2 Shroud stone paint and a deeply
+split used state. Two built-in transparent generations use original DD1 state
+anatomy and complete native shrine material reference. Untouched sources,
+prompts, dependencies and fit provenance remain private on D:. Fixed rubble
+spans register both states at350px width and foot690; no alpha thresholding
+or gameplay/ID/outcome/RNG/supply changes. All33-ID/50-PNG pack checks pass.
+
+Final unsaved native fixture passes66 actual1920x1080 captures, alpha clicks,
+padding rejection and real supply drag/drop/ordinary urn resolution. New pair
+reviewed at native scale. Initial another-instance startup dialogs were caused
+by an orphan crash handler attached to an exited run; exact handler cleanup
+allowed the final check. No native art/runtime regression was identified.
+
+Installed33 exact IDs/25 pairs,32 base +1 DLC design only.70 designs + retained
+FadedMemory remain. Runtime343 unchanged, configuration/map339 exact, Hamlet
+and dossier parked. DD2 closed/no estate/host/actor/save/no pending restore;
+44 foreign WIP hashes retained before owned journal additions. Previous343
+software tests remain prior evidence; normal campaign/actors/controller/perf
+acceptance still pending. Checkpoint:local-art/ui-overhaul/curio-native-quality-v05.
+Next346 check usage, preserve7-8% reserve; Eldritch Altar references only.

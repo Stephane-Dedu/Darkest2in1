@@ -1,3 +1,15 @@
+Round345 installed33 exact curio IDs/25 pairs/50 PNGs after66 real native
+state/input captures. Latest local-art/ui-overhaul/curio-native-quality-v05/
+CONTINUE.md. New bas-relief preserves DD1 octopus carving/split state and
+DD2 Shroud materials. Runtime343/config/map339 exact; Hamlet333/dossier340
+parked; DD2 CLOSED/no estate/host/save/no pending restore.70 designs plus
+retained FadedMemory remain. Next346 refresh usage, retain7-8% reserve.
+Eldritch Altar references only, NO generated pair; its original spiral column
+differs from the native cultist table. Preserve44 foreign WIP, never compile
+shared dirty C# or rerun335/339 restores/completed342-345 helpers. Startup
+another-instance dialog was an orphan crash handler, final run passed after
+exact orphan cleanup. Normal campaign/actors/controller/perf QA still pending.
+
 Round344 installed32 exact curio IDs/24 pairs/48 PNGs after64 real native
 state/input captures. Latest local-art/ui-overhaul/curio-native-quality-v04/
 CONTINUE.md. Runtime343 unchanged, config/map339 exact, Hamlet333/dossier340

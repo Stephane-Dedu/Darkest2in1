@@ -1,5 +1,15 @@
 # Curio rework: design catalog v01
 
+## Current coverage, round345
+
+33 exact identities now use 25 installed pairs. The bas-relief keeps its round
+octopus carving and split used state with DD2 Shroud stone paint. Fixed rubble
+landmarks preserve scale and ground contact. All 66 native state/input checks
+pass; runtime343 is unchanged. There are70 pending designs and the retained
+Faded Memory exception. Normal saved campaign/actor/controller/performance QA
+remains separate. Latest checkpoint:
+`local-art/ui-overhaul/curio-native-quality-v05/CONTINUE.md`.
+
 ## Current coverage, round344
 
 32 exact identities now use 24 installed pairs. The Altar of Light, Fish Idol

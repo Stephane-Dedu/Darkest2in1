@@ -971,3 +971,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round344 adds Altar of Light, Fish Idol and Ship's Figurehead,32 IDs/24 pairs with64 real native state/input checks. Correct fallen sword/head anatomy, coherent DD2 stone/timber paint, stable fit, full32-ID artifact audit. Runtime343 unchanged; private pack installed, config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore. Evidence:local-art/ui-overhaul/curio-native-quality-v04.
 - [ ] Curio continuation:29 base+10 quest+26 DLC design+6 legacy bodies, plus retained Faded Memory. Bas-relief has references/prompt only. Normal campaign/actors/controller/long-session acceptance remains pending. Resume after usage permits and retain7-8% reserve.
+
+
+- [x] Round345 adds the bas-relief,33 exact IDs/25 pairs/50 PNGs, with66 actual native closed/used state/input checks. DD1 octopus/split anatomy, DD2 Shroud stone, stable rubble registration and full private artifact audit. Runtime343/config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore. Evidence:local-art/ui-overhaul/curio-native-quality-v05.
+- [ ] Remaining curio designs:28 base+10 quest+26 DLC+6 legacy, plus retained FadedMemory. Normal saved campaign/actors/controller/long-session acceptance remains pending. Eldritch Altar is references only; original spiral column differs from native cultist table. Continue346 after usage permits, retaining7-8% reserve.
