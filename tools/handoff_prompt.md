@@ -1,3 +1,35 @@
+LATEST362 TANGLE FIELD GRAVE OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v12/CONTINUE.md first.
+Keep DD2 closed; no launch/input until explicit newer human permission.
+Public render_field_grave.py assembles complete native hospital marker03 and
+Tangle earth/remains02/03. Marker640v/416faces and low layer134v/162faces fixed;
+whole upper mound283v/414faces hides after use.1057v/992faces closed,774v/578faces
+used. Original geometry/UV/paint/tint retain, no generation/repaint/upscale/grade.
+Marker2048paint and earth1024paint are full native originals. Marker yaw180 is
+selected for readable bracing, not changed geometry. Final native-grave-pair-
+v02/fitted-v02. Used pixels match untouched placed fixed reference exactly;
+both states above source row400 match. Upper mound occlusion changes naturally.
+Fit834x832, foot417/816, width340/fullcanvasheight339.1847 preferred over300width
+in actual Tangle corridor/skull-field room composites. Separate pack-grave-
+CANDIDATE-v02 adds only regional-only shallow_grave/dd2_forest, Shallow field
+grave. No new result mappings: original grave messages retain. Shovel/loot/
+blight/disease/RNG/states/saves/spawns/classic/other regions retain. Frozen clean
+Core355 parses35IDs/27paintings;12artifact tests pass362. Current354 cannot parse
+omitted defaults. UNINSTALLED/UNACCEPTED, no installer/restore armed; native
+context/actors/shader/hover/shovel/return QA awaits permission. No C# build,
+launch/input/host/estate/save/deploy362. Runtime354/Hamlet/config/67targets/
+44foreign files/accepted34IDs26pairs52PNGs remain exact. Earlier355/356/358/359/
+360/361 and350memorial candidates remain separate; do not redo/combine blindly.
+This is an adapted battlefield burial, not a shipped native encounter or actual
+dug-hole model. Grave markers alone remain incomplete. Other dirt pile/marker
+studies unselected. Native common_cobweb01/02 are thin black webs without frame
+or used state; not complete Cosmic Spiderweb art. Shambler dependency resolved
+in farm bundle361, but full source is building/woodland, reference only.
+Preserve all canonical gameplay,104/70/27/6/FadedMemory scope separation and
+foreign/journal bytes. Hamlet visual QA only; expedition340 parked. Heavy D:,
+protected estates1/3, no abandoned checkout/shared dirty build/stale restores.
+Check ordinary usage first; checkpoint before7-8% reserve/context exhaustion.
+
 LATEST361 FOETOR OFFERING STONE OFFLINE CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v11/CONTINUE.md first.
 Keep DD2 closed: no launch/input until explicit newer human permission.

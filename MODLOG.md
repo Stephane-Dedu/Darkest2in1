@@ -11207,3 +11207,41 @@ Runtime354/Hamlet/config/67 installed targets/44 foreign files remain exact.
 No launch, input, host, estate, save, deployment or restore361. All prior
 candidates remain separate; no completed pair repeated. Checkpoint:
 local-art/ui-overhaul/curio-regional-coherence-v11/CONTINUE.md; heavy evidence D:.
+
+
+## Round362: native shallow field grave for the Tangle
+
+A complete native wooden hospital marker and two complete Tangle earth/remains
+layers form an offline Shallow Grave candidate. The marker640v/416faces and
+low layer134v/162faces stay fixed; only upper mound283v/414faces hides after
+use. Totals1057v/992faces closed and774v/578faces used. Native geometry, UVs,
+paint and tint retain, with uniform placement scale and opposite-facing marker
+for readable bracing. No generation, repaint, enlargement, grade or new mesh.
+Actual source audit proves native2048marker/1024earth paint exact. This is an
+adapted battlefield burial, not a shipped encounter or actual dug-hole model.
+
+Public render_field_grave.py produces final native-grave-pair-v02/fitted-v02.
+Used pixels match untouched placed fixed-reference exactly; both states above
+source row400 match. Mound occlusion near the low layer/marker foot changes
+naturally. Common camera/foot, fit834x832, foot417/816, width340/full canvas
+height339.1847.340px width preferred over300px in actual Tangle corridor and
+skull-field room background composites; native actors/shader/input QA pending.
+
+Separate pack-grave-CANDIDATE-v02 adds only regional-only shallow_grave/
+dd2_forest, Shallow field grave. Original result text, shovel, loot, blight,
+disease, RNG, states, saves and spawns retain. Classic and other regions keep
+original art/name. Frozen clean Core355 parses full35-ID/27-painting candidate
+and all fallbacks;12artifact tests pass. Closed alpha mask covers visible art.
+All34old entries/26artifact records/52PNGs exact. No C# build362;355Release
+1330Core/297UI results remain prior. Current354 cannot parse omitted defaults.
+UNINSTALLED/UNACCEPTED; no installer/restore armed. Native context, actors,
+shader, hover, shovel and return/fallback QA await explicit new permission.
+
+Runtime354/Hamlet/config/67installed targets/44foreign files retain. No launch,
+input, host, estate, save or deployment362. Earlier candidates stay separate.
+Other marker/dirt studies remain unselected. Native common_cobweb01/02 are
+thin black webs without a freestanding frame or reviewed used state; do not
+promote them as finished Cosmic Spiderweb art. Shambler dependency remains
+resolved361, but its complete building/woodland is an unsuitable compact altar.
+Checkpoint: local-art/ui-overhaul/curio-regional-coherence-v12/CONTINUE.md;
+heavy evidence D:. All canonical gameplay and design/runtime scopes preserve.

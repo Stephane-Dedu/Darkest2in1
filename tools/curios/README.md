@@ -511,3 +511,31 @@ Final native-offering-pair-v02/fitted-v02 uses full native paint; the2048offerin
 thumbnail in v01 is an intermediate. The pack remains uninstalled/unaccepted
 and requires355regional-only support. Native actors, shader, hover, food input
 and return/fallback QA still await explicit new permission to launch the game.
+
+## Shallow field grave for the Tangle
+
+`render_field_grave.py` assembles three complete native components: the third
+field-hospital wooden grave marker and Tangle barricade earth/remains layers02
+and03. The low layer and marker stay fixed; only the upper mound hides after
+use. All selected faces, UVs, original tint and full native paint retain. The
+marker uses its opposite facing, preserving the original geometry and bracing.
+
+```powershell
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_field_grave.py -- `
+  --kit $curioKit --source "$fieldGraveRoot/exp" --out "$fieldGraveRoot/native-pair"
+```
+
+The source folder must contain complete `field_hospital_grave_single_03.fbx`,
+`forest_faction_barricade_dirt_pile_02.fbx` and `_03.fbx` exports from installed
+common/forest asset and high-model bundles. Native marker paint is2048px and
+earth paint1024px; neither is enlarged or repainted. `fixed-reference.png`
+renders the untouched placed marker and low layer through the common camera.
+The used image matches it exactly. Occlusion near the marker foot and low
+layer changes naturally while the upper mound is present.
+
+Round362's final native-grave-pair-v02/fitted-v02 is a separate regional-only
+`shallow_grave/dd2_forest` candidate named Shallow field grave. The assembly is
+an adapted battlefield burial, not a shipped native encounter or dug-hole
+model. Original shovel, loot, blight, disease, results and spawn rules retain.
+Classic and other regions keep original art/name. The pack is uninstalled,
+requires355regional-only support and still needs authorised native QA.

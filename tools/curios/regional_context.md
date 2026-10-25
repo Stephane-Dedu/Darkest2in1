@@ -324,3 +324,42 @@ building and woodland scenery. It is not a compact Shambler altar replacement.
 The MPB and main scenery belong together in that full source study. Neither is
 a selected curio. Grave boards, the academic depot, military cache and other
 meat piles remain source studies; their names do not establish encounter spawns.
+
+## Round362: shallow battlefield burial in the Tangle
+
+The common grave markers are incomplete burial bodies on their own. A complete
+native marker and two complete Tangle earth/remains layers now form a shallow
+field-grave candidate. The third hospital marker uses its opposite facing for
+visible wooden bracing. Its640vertices/416faces and the low134vertex/162face
+layer stay fixed. The complete upper283vertex/414face mound hides after use.
+All1057closed vertices/992faces and774used vertices/578faces retain native
+geometry, UVs, tint and paint. Native marker paint is2048px, earth paint1024px;
+both match the full originals. No generation, repaint, enlargement or grade.
+
+This is an adapted assembly for the existing Shallow Grave, not a new encounter,
+shipped native animation or actual dug-hole geometry. The used image matches
+the untouched placed marker/low-layer reference exactly. Both states above
+source row400 match. The mound naturally occludes the marker foot and low
+remains before use; do not claim every fixed-part image pixel is unchanged.
+
+Final native-grave-pair-v02/fitted-v02 uses one camera and foot,834x832canvas,
+foot417/816 and340px width/339.1847px full canvas height.340width was preferred
+over300 in actual Tangle corridor/skull-field room background composites.
+The native dark earth and weathered timber fit the battlefield palette in
+those offline views. Native lighting, actor contrast and input acceptance
+remain pending. Source-facing marker v01 is an intermediate, not final art.
+
+Separate pack-grave-CANDIDATE-v02 adds only regional-only shallow_grave/
+dd2_forest, Shallow field grave. Original result text already describes a grave
+and remains exact. Shovel consumption, loot, blight, disease, RNG, used flags,
+saves and spawn probabilities retain. Classic and other DD2 regions use their
+original art/name. Frozen Core355 parses35IDs/27paintings;12artifact tests pass.
+Existing34entries/26artifact records/52PNGs retain. No C# build or installation.
+Current354 cannot parse omitted defaults. Candidate UNINSTALLED/UNACCEPTED;
+native context/actor/shader/hover/shovel/return QA awaits new launch permission.
+
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v12/CONTINUE.md`.
+All earlier candidates stay separate. The first dirt pile and fourth grave
+marker remain unselected studies. Complete native common_cobweb01/02 sources
+are thin black webs without a freestanding frame or used state. They are not
+finished Cosmic Spiderweb art; do not promote a floating unsupported web.
