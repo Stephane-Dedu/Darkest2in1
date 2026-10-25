@@ -1,3 +1,31 @@
+LATEST359 FOETOR FOOD-CURIO OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v09/CONTINUE.md first.
+The owner renewed the no-launch limit. No game launch/input until explicit
+newer human permission. Native meat_trough fits makeshift_dining_table in
+dd2_farm: complete689-vertex/466-face timber and1285-vertex/1473-face meat match
+actual installed geometry/UVs/transforms/1024paint exactly. Used hides only the
+separate meat assembly; original timber/residual flesh stay fixed. No generation.
+Public render_farm_trough.py -> native-trough-pair-v02/fitted-v01. Opposite-facing
+v01 failed foot fitting and was rejected. Final source facing grounds both states
+without geometry edits or weaker guards. Closed pixels match the untouched
+native study exactly; both states below source row810 match.360px width preferred
+over300px in offline farm corridor/room composites. Fit836x832, fullheight358.2775.
+Pack-trough-CANDIDATE-v01 adds only a regional-only makeshift_dining_table entry,
+Fouled feeding trough name and one exact feeding-scraps result message. Gameplay,
+herbs/diseases/RNG/states/spawns retain; classic/other regions keep original art.
+Frozen clean Core355 parses full35IDs/27paintings;12artifact tests pass359.
+UNINSTALLED/UNACCEPTED, requires355regional-only support; never copy into354.
+No C# build359. Runtime354/Hamlet/config/67targets/44foreign WIP/accepted34IDs,
+26pairs,52PNGs remain exact. No installer, restore, game input, host or save access.
+Complete355apothecary/356Tangle/358Shroud/350memorial candidates stay separate.
+Do not redo them. Academic-cache four-facing study is an unselected multi-container
+depot; no isolated coffer/used pair. barn_box_03 is a building, road_meat_boxes a
+mixed food study. Sprawl/Foetor cabinet fittings remain open; do not force source
+names or invent spawns. Continue regional/outdoor curio quality offline from
+actual provenance. Heavy D:, preserve foreign work/journal bytes/protected estates,
+no shared dirty C# builds or stale restores. Ordinary usage first; checkpoint
+before7-8% reserve/context exhaustion. Native QA still needs new permission.
+
 LATEST358 SHROUD DOCK-CACHE OFFLINE CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v08/CONTINUE.md first.
 Complete native coast_chest now has a closed/searched regional pair. Actual

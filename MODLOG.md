@@ -11083,3 +11083,44 @@ installed targets and44foreign WIP files retain. No launch/input/deploy/host/
 estate/save/restore. No installer armed. Checkpoint local-art/ui-overhaul/
 curio-regional-coherence-v08/CONTINUE.md, heavy source/render/audits D:. Next
 offline bodies are distinct Sprawl/Foetor caches after provenance inspection.
+
+
+## Round359: native Foetor feeding-trough candidate
+
+The owner renewed the closed-game limit. Native farm source review found a
+complete meat_trough that suits makeshift_dining_table's food/herb/disease
+identity outdoors. Barn_box_03 is a building, road_meat_boxes a mixed food
+source, and academic_cache a whole multi-container depot. None was forced
+into a locked coffer. No new source spawn or gameplay identity was invented.
+
+Fresh native source audit proves689vertices/466triangles for timber and1285/
+1473for separate meat, plus UVs, relative transforms and1024paint exact. The
+FBX has subasset container entries; audit AssetBundle.m_Container's named
+GameObject root rather than env.container's last subasset value. Both full
+meshes retain native geometry/UV/paint/tint. Used hides only the separate meat;
+small draped remains belong to the timber and stay. No generated art/repaint.
+
+Public render_farm_trough.py produces final native-trough-pair-v02. Opposite
+facing v01 failed the foot allowance and was rejected. Source-facing v02
+grounds both states without changing geometry or weakening fitting guards.
+Closed pixels match the untouched native source study exactly; state delta
+bounds112/219/906/807, all pixels below source row810 identical. Timber is
+naturally occluded by food, so only geometry is wholly fixed. Fit836x832,
+foot418/816,360px canvas width/358.2775px height.360preferred over300in actual
+installed farm corridor/room background composites, reviewed offline only.
+
+Separate35-ID/27-painting candidate=34defaults+1regional-only. Only
+makeshift_dining_table/dd2_farm gains Fouled feeding trough and one exact
+feeding-scraps result message. Other messages/outcomes/herbs/diseases/RNG/
+used state/saves/spawns retain. Classic and other DD2 regions keep original
+art/name. Frozen clean Core355 parses full pack and confirms all fallbacks;
+12artifact tests pass. Existing34entries/26artifact records/52PNGs exact.
+No C# build359;355Release/1330Core/297UI results are prior.
+
+Pack-trough-CANDIDATE-v01 is UNINSTALLED/UNACCEPTED and requires355regional-only
+support. Never copy it into installed354 or deploy old binaries over foreign
+work. No installer armed. Native shader/actor/hover/herb/return QA awaits new
+explicit permission. Runtime354/Hamlet/config/67targets/44foreign files exact.
+No launch/input/deploy/host/estate/save/restore359. Checkpoint local-art/
+ui-overhaul/curio-regional-coherence-v09/CONTINUE.md, heavy evidence D:.
+Completed355apothecary/356Tangle/358Shroud and other candidates remain separate.

@@ -205,3 +205,42 @@ Keep this candidate separate from completed356 Tangle and355 apothecary drafts.
 Next investigate distinct Sprawl/Foetor cache bodies without inventing spawns
 or treating recolours as new paintings. The357 military pile remains reference
 only. Owner permission is still required before launching or driving DD2.
+
+## Round359: a Foetor feeding trough for the dining-table identity
+
+The complete native `meat_trough` provides a more plausible Foetor food curio
+than an indoor dining setup. Both native meshes, their UVs, transforms and
+1024 paint match the installed source. The 689-vertex/466-face timber body
+stays fixed. Its separate1285-vertex/1473-face meat assembly is hidden only
+when searched. Small draped remains belong to the original timber assembly
+and remain deliberately. No generated art or repaint.
+
+The opposite-facing trial projected hanging food below the fitting allowance
+and was rejected. Final source-facing native-trough-pair-v02 grounds both
+states without altering geometry or weakening the fitting guard. Closed pixels
+match the untouched native source study exactly; pixels below source row810
+match between states. Front timber is naturally occluded while food is present.
+Do not describe all body image pixels as identical.
+
+The360px fit was preferred over300px in installed farm corridor and quiet-room
+background composites. Only `makeshift_dining_table/dd2_farm` gains this art
+and the name Fouled feeding trough. One exact result changes dinner-table
+wording to feeding scraps; other messages retain. The canonical identity,
+outcomes, medicinal-herb supply handling, diseases and spawn rules retain.
+Classic and other DD2 regions use the original presentation through the355
+regional-only fallback. Frozen Core355 parses the full35-ID/27-painting pack;
+12 artifact tests pass. No C# build or installation359. Current354 cannot parse
+the omitted-default entry. Accepted installed coverage remains34IDs/26pairs.
+
+The separate pack-trough-CANDIDATE-v01 is UNINSTALLED/UNACCEPTED. Source hashes,
+pixel checks, regional/classic/FadedMemory checks and offline evidence are in
+local-art/ui-overhaul/curio-regional-coherence-v09/CONTINUE.md, with heavy art D:.
+Native actors, shader contrast, hover, herb input and return travel await
+explicit newer launch permission. Keep all prior candidates separate.
+
+The academic-cache source was inspected in four facings. It is a complete
+multi-container depot with seals, weapons and loose supplies, not a selected
+single street coffer. No chest was isolated or state pair produced. The farm
+barn_box_03 is a building; road_meat_boxes is a mixed produce/meat source study.
+Neither is a locked-cabinet candidate. Continue other regional curios from
+actual provenance rather than forcing unsuitable source names into cabinets.

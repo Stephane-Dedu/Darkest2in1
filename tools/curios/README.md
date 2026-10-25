@@ -418,3 +418,31 @@ It keeps the installed Sealed dock cargo name, result text and classic fallback.
 It is uninstalled and unaccepted. Do not combine it with the Tangle, apothecary
 or memorial candidates without rebuilding deliberately. Native shader, actor,
 hover, supplies and regional fallback checks require new launch permission.
+
+## Regional Foetor feeding trough
+
+`render_farm_trough.py` adapts the complete native `meat_trough.fbx` assembly
+for the existing `makeshift_dining_table` identity in `dd2_farm`. The searched
+state hides its separate meat assembly. The timber, residual draped flesh,
+geometry, UVs, paint and relative transforms remain native.
+
+```powershell
+$foodCurioRoot = 'D:\CodexArtifacts\DarkestDungeon3\food-curio'
+& $curioPython "$curioKit/tools/export_prefab.py" --game $curioGame "$foodCurioRoot/exp" `
+  biome_common_assets_all.bundle,biome_common_models_platform_high_assets_all.bundle,biome_farm_assets_all.bundle,biome_farm_models_platform_high_assets_all.bundle `
+  meat_trough.fbx
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_farm_trough.py -- `
+  --kit $curioKit --source "$foodCurioRoot/exp/meat_trough" --out "$foodCurioRoot/native-pair"
+```
+
+Use a new output directory. The source guard expects the complete native
+689-vertex/466-face body and 1285-vertex/1473-face food assembly. The source
+facing keeps the draped food and feet grounded through a common camera.
+The opposite-facing study failed the fitting guard and was rejected.
+
+Round359's offline candidate uses a regional-only entry named Fouled feeding
+trough. One exact result message refers to feeding scraps instead of a dinner
+table. Classic and other regions retain original art and text. Outcomes,
+medicinal-herb handling and disease rules remain unchanged. This candidate
+needs the355 regional-only parser support and must never be copied into the
+installed354 runtime. It remains uninstalled and awaits authorised native QA.
