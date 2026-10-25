@@ -41,4 +41,17 @@ public class TooltipLayoutTests
         Assert.Equal(640, TooltipLayout.Width(_ => 2000, 1080));
         Assert.Equal(460, TooltipLayout.Width(_ => 200, 1080));
     }
+
+    [Theory]
+    [InlineData(500, 592)]
+    [InlineData(1400, 920)]
+    public void SlotAnchoredTipUsesTheAvailableSideWithoutCoveringTheSlot(float x, float expected)
+    {
+        var slot = new Rect(x, 300, 72, 144);
+        var tip = new TooltipLayout(slot, 460, 420, 1920, 1080);
+        Assert.Equal(expected, tip.Frame.x);
+        Assert.Equal(300, tip.Frame.y);
+        Assert.True(tip.Frame.xMax <= slot.x || tip.Frame.x >= slot.xMax);
+        Assert.Equal(tip.Frame.x + 20, tip.Viewport.x);
+    }
 }

@@ -998,33 +998,6 @@ internal sealed partial class HamletUi
         if (Gui.DdButton(new Rect(960 - 90, r.yMax - 60, 180, 46), "Cancel", true, 22)) _treatHero = null;
     }
 
-    private void DrawWagon(Rect area, Hamlet hamlet)
-    {
-        // DD1's wagon grid (nomad_wagon.layout.darkest): background at body + (230,150), 6 columns 100 x 180 apart.
-        var origin = new Vector2(596 + 230, 102 + 150);
-        if (BuildingArt(Buildings.NomadWagon, "inventory_grid_background.png") is { } grid) GUI.DrawTexture(new Rect(origin.x, origin.y, 684, 360), grid);
-        for (int i = 0; i < E.WagonStock.Count && i < 12; i++)
-        {
-            string t = E.WagonStock[i];
-            int price = hamlet.WagonPrice(t);
-            var r = new Rect(origin.x + 55 + (i % 6) * 100, origin.y - 10 + (i / 6) * 180 + 20, 72, 144);
-            bool afford = E.Get(Currency.Gold) >= price;
-            var old = GUI.color;
-            if (!afford) GUI.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-            HeroSheet.TrinketIcon(r, t);
-            GUI.color = old;
-            Gui.Text(new Rect(r.x - 14, r.yMax + 2, r.width + 28, 22), Gui.Num(price, "#,0"), 17, afford ? Gui.Gold : Gui.Dim, TextAnchor.MiddleCenter);
-            if (r.Contains(Event.current.mousePosition)) HeroSheet.TrinketTip(t);
-            if (afford && Gui.Hotspot(r))
-            {
-                hamlet.BuyTrinket(t);
-                S.Persist();
-                break;
-            }
-        }
-        if (E.WagonStock.Count == 0) Gui.Text(new Rect(origin.x, origin.y + 150, 684, 40), "Sold out until next week.", 22, Gui.Dd1Class, TextAnchor.MiddleCenter);
-    }
-
     private Memorial _memorial;
     private Vector2 _memorialScroll;
     private bool _epiloguePrepared;

@@ -22,6 +22,18 @@ internal readonly struct TooltipLayout
         MaxScroll = Math.Max(0, contentHeight - Viewport.height);
     }
 
+    internal TooltipLayout(Rect anchor, float width, float contentHeight, float screenWidth, float screenHeight)
+        : this(new Vector2(anchor.xMax, anchor.y - 20), width, contentHeight, screenWidth, screenHeight)
+    {
+        // Keep the hovered slot visible. Its edges, rather than the moving mouse,
+        // determine placement for the whole hover and while reading a long tip.
+        float right = anchor.xMax + 20;
+        float x = right + width + Margin <= screenWidth ? right : anchor.x - width - 20;
+        x = Math.Max(Margin, Math.Min(x, screenWidth - width - Margin));
+        Frame = new Rect(x, Frame.y, Frame.width, Frame.height);
+        Viewport = new Rect(x + Padding, Viewport.y, Viewport.width, Viewport.height);
+    }
+
     internal static float Width(Func<float, float> contentHeight, float screenHeight)
     {
         float width = DefaultWidth;

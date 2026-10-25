@@ -190,7 +190,7 @@ internal static class HeroSheet
             }
             Drag.Source(r, new TrinketDrag(tid, h.Id, i), rect => TrinketIcon(rect, tid));
             if (!(Drag.Payload is TrinketDrag c && c.FromHero == h.Id && c.TrinketId == tid && c.FromSlot == i)) TrinketIcon(r, tid);
-            if (r.Contains(Event.current.mousePosition) && !Drag.Active) TrinketTip(tid, "Click, or drag it to the Trinket Inventory, to unequip.");
+            if (r.Contains(Event.current.mousePosition) && !Drag.Active) TrinketTip(tid, "Click, or drag it to the Trinket Inventory, to unequip.", r);
             if (Gui.Hotspot(r) && !Drag.JustDropped)
             {
                 if (!Core.Campaign.Town.TrinketEquipment.Unequip(E, h, i)) return;
@@ -311,18 +311,31 @@ internal static class HeroSheet
     }
 
     /// <summary>DD2's type hierarchy around the campaign's native or DD1 trinket effects.</summary>
-    public static void TrinketTip(string id, string hint = null)
+    internal sealed class TrinketDescription
+    {
+        internal string Name, Rarity, Requirement, Effects;
+        internal Color RarityColour;
+    }
+
+    internal static TrinketDescription DescribeTrinket(string id)
     {
         if (Dd2.Dd1TrinketData.Get(id) is { } memory)
         {
-            Gui.EquipmentTip(TrinketName(id), HamletUi.Pretty(memory.Rarity), Dd1Palette.Get(memory.Rarity, Gui.Dd1Class),
-                memory.HeroClasses.Count == 0 ? null : string.Join(", ", memory.HeroClasses.Select(HamletUi.Pretty)) + " only",
-                Dd2.Dd1TrinketData.Description(id), hint);
-            return;
+            return new TrinketDescription { Name = TrinketName(id), Rarity = HamletUi.Pretty(memory.Rarity),
+                RarityColour = Dd1Palette.Get(memory.Rarity, Gui.Dd1Class),
+                Requirement = memory.HeroClasses.Count == 0 ? null : string.Join(", ", memory.HeroClasses.Select(HamletUi.Pretty)) + " only",
+                Effects = Dd2.Dd1TrinketData.Description(id) };
         }
         var t = Dd2.Dd2Catalog.Tables.Trinkets.TryGetValue(id, out var tr) ? tr : null;
-        Gui.EquipmentTip(TrinketName(id), t == null ? "Trinket" : HamletUi.Pretty(t.Rarity), RarityColour(id),
-            t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only", Dd2.ItemText.Effects(id), hint);
+        return new TrinketDescription { Name = TrinketName(id), Rarity = t == null ? "Trinket" : HamletUi.Pretty(t.Rarity),
+            RarityColour = RarityColour(id), Requirement = t?.HeroClass == null ? null : $"{HamletUi.Pretty(t.HeroClass)} only",
+            Effects = Dd2.ItemText.Effects(id) };
+    }
+
+    public static void TrinketTip(string id, string hint = null, Rect? anchor = null)
+    {
+        var item = DescribeTrinket(id);
+        Gui.EquipmentTip(item.Name, item.Rarity, item.RarityColour, item.Requirement, item.Effects, hint, anchor);
     }
 
     /// <summary>DD2 rarity labels retain the installed palette; DD1 memories retain their own rarity tiers.</summary>

@@ -25,6 +25,8 @@
     <Compile Include="../../src/DarkestDungeon3/Ui/CorridorPanoramaUi.cs" Link="CorridorPanoramaUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/RoomPanoramaUi.cs" Link="RoomPanoramaUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/TooltipLayout.cs" Link="TooltipLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/TrinketShopLayout.cs" Link="TrinketShopLayout.cs" />
+    <Compile Include="../../src/DarkestDungeon3/Ui/ItemEffectText.cs" Link="ItemEffectText.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/SlicedSpriteUi.cs" Link="SlicedSpriteUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/LootGridUi.cs" Link="LootGridUi.cs" />
     <Compile Include="../../src/DarkestDungeon3/Ui/ActivityLogLayout.cs" Link="ActivityLogLayout.cs" />

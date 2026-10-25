@@ -13,7 +13,7 @@ internal static partial class Gui
     {
         internal string Text;
         internal Color Colour;
-        internal float Size, Height;
+        internal float Size, Height, Indent, Gap;
         internal bool Heading;
     }
 
@@ -23,28 +23,31 @@ internal static partial class Gui
     private static int _tipDrawFrame = -1;
     private static Vector2 _tipPointer;
     private static TooltipLayout _tipLayout;
+    private static Rect? _tipAnchor;
     private static float TooltipBodySize => SingletonMonoBehaviour<CommonUiBhv>.Instance?.UseLargeTooltips == true ? 30 : 24;
 
     /// <summary>DD2 item hierarchy: Dunkel title at120%, Alegreya text, an80% interaction hint.</summary>
-    public static void EquipmentTip(string name, string rarity, Color rarityColour, string requirement, string effects, string hint = null)
+    public static void EquipmentTip(string name, string rarity, Color rarityColour, string requirement, string effects, string hint = null, Rect? anchor = null)
     {
         if (Event.current.type != EventType.Repaint) return;
         float size = TooltipBodySize;
-        var neutral = Dd2Palette.Get("item_effectline", new Color(.733f, .725f, .682f));
+        _tipAnchor = anchor;
         _tip = new List<TipLine>
         {
             new() { Text = name, Size = size * 1.2f, Heading = true, Colour = Dd2Palette.Get("item_nameline", Gold) },
         };
         AddTipLines(rarity, size, rarityColour);
         AddTipLines(requirement, size, Dd2Palette.Get("item_typeline", Dim));
-        AddTipLines(effects, size, neutral);
+        AddEffectLines(_tip, effects, size);
         AddTipLines(hint, size * .8f, Dd2Palette.Get("item_discardline", Dim));
+        if (!string.IsNullOrEmpty(hint)) _tip[_tip.Count - 1].Gap = 10;
     }
 
     public static void Tip(string text, Color? title = null)
     {
         if (Event.current.type != EventType.Repaint || string.IsNullOrEmpty(text)) return;
         float size = TooltipBodySize;
+        _tipAnchor = null;
         _tip = text.Split('\n').Select((line, i) => new TipLine
         {
             Text = line.TrimEnd('\r'), Size = i == 0 ? size * 1.2f : size, Heading = i == 0,
@@ -56,6 +59,66 @@ internal static partial class Gui
     {
         if (string.IsNullOrEmpty(text)) return;
         _tip.AddRange(text.Split('\n').Select(line => new TipLine { Text = line.TrimEnd('\r'), Size = size, Colour = colour }));
+    }
+
+    private static void AddEffectLines(List<TipLine> lines, string effects, float size)
+    {
+        foreach (var line in ItemEffectText.Lines(effects))
+            lines.Add(new TipLine { Text = line.Text, Size = size, Indent = line.Indent ? 14 : 0,
+                Gap = line.Condition ? 10 : 4,
+                Colour = Dd2Palette.Get(line.Condition ? "item_typeline" : "item_effectline", Parchment) });
+    }
+
+    private static float MeasureLines(List<TipLine> lines, float width)
+    {
+        float height = 0;
+        foreach (var line in lines)
+        {
+            line.Height = Mathf.Max(line.Size, ExpeditionSkin.PanelTextStyle(line.Size, TextAnchor.UpperLeft, line.Heading)
+                .CalcHeight(new GUIContent(line.Text ?? ""), width - line.Indent)) + 3;
+            height += line.Gap + line.Height;
+        }
+        return height;
+    }
+
+    private static void DrawLines(List<TipLine> lines, float width, float scroll)
+    {
+        float y = -scroll;
+        foreach (var line in lines)
+        {
+            y += line.Gap;
+            var style = ExpeditionSkin.PanelTextStyle(line.Size, TextAnchor.UpperLeft, line.Heading);
+            style.normal.textColor = line.Colour;
+            GUI.Label(new Rect(line.Indent, y, width - line.Indent, line.Height), line.Text ?? "", style);
+            y += line.Height;
+        }
+    }
+
+    /// <summary>A fixed reading area using the same text and trigger hierarchy as item hover tips.</summary>
+    internal static void EffectDescription(Rect area, string requirement, string effects, ref Vector2 scroll)
+    {
+        var lines = new List<TipLine>();
+        if (!string.IsNullOrEmpty(requirement))
+            lines.Add(new TipLine { Text = requirement, Size = TooltipBodySize, Colour = Dd2Palette.Get("item_typeline", Dim), Gap = 4 });
+        AddEffectLines(lines, string.IsNullOrWhiteSpace(effects) ? "Description loading…" : effects, TooltipBodySize);
+        float height = MeasureLines(lines, area.width - 12);
+        bool overflow = height > area.height;
+        var viewport = new Rect(area.x, area.y, area.width - 12, area.height - (overflow ? 26 : 0));
+        float max = Mathf.Max(0, height - viewport.height);
+        scroll.y = Mathf.Clamp(scroll.y, 0, max);
+        if (GUI.enabled && Event.current.type == EventType.ScrollWheel && area.Contains(Event.current.mousePosition) && overflow)
+        {
+            scroll.y = Mathf.Clamp(scroll.y + Event.current.delta.y * TooltipBodySize * 2, 0, max);
+            Event.current.Use();
+        }
+        GUI.BeginGroup(viewport);
+        try { if (Event.current.type == EventType.Repaint) DrawLines(lines, viewport.width, scroll.y); }
+        finally { GUI.EndGroup(); }
+        if (!overflow) return;
+        float thumbHeight = Mathf.Max(24, viewport.height * viewport.height / height);
+        Fill(new Rect(area.xMax - 4, area.y, 2, viewport.height), new Color(.22f, .21f, .18f));
+        Fill(new Rect(area.xMax - 5, area.y + (viewport.height - thumbHeight) * scroll.y / max, 4, thumbHeight), CampaignPanelSkin.Brass);
+        ExpeditionSkin.Text(new Rect(area.x, area.yMax - 24, area.width, 24), "Scroll to read more", 19, ExpeditionSkin.Muted, TextAnchor.MiddleRight);
     }
 
     // Capture before underlying scroll views consume the wheel. A tooltip follows
@@ -80,15 +143,11 @@ internal static partial class Gui
         }
         string key = string.Join("\n", _tip.Select(line => line.Text));
         if (key != _tipKey) { _tipScroll = 0; _tipKey = key; }
-        float Measure(float width)
-        {
-            foreach (var line in _tip)
-                line.Height = Mathf.Max(line.Size, ExpeditionSkin.PanelTextStyle(line.Size, TextAnchor.UpperLeft, line.Heading)
-                    .CalcHeight(new GUIContent(line.Text ?? ""), width)) + 3;
-            return _tip.Sum(line => line.Height);
-        }
+        float Measure(float width) => MeasureLines(_tip, width);
         float width = TooltipLayout.Width(Measure, H);
-        _tipLayout = new TooltipLayout(Event.current.mousePosition, width, Measure(width - TooltipLayout.Padding * 2), W, H);
+        float height = Measure(width - TooltipLayout.Padding * 2);
+        _tipLayout = _tipAnchor.HasValue ? new TooltipLayout(_tipAnchor.Value, width, height, W, H)
+            : new TooltipLayout(Event.current.mousePosition, width, height, W, H);
         _tipScroll = _tipLayout.Scroll(_tipScroll, 0, TooltipBodySize);
         _tipBodySize = TooltipBodySize; _tipPointer = Event.current.mousePosition; _tipShownAt = Time.unscaledTime;
         _tipDrawFrame = Time.frameCount;
@@ -96,16 +155,7 @@ internal static partial class Gui
         GUI.BeginGroup(_tipLayout.Viewport);
         try
         {
-            float y = -_tipScroll;
-            foreach (var line in _tip)
-            {
-                var style = ExpeditionSkin.PanelTextStyle(line.Size, TextAnchor.UpperLeft, line.Heading);
-                style.normal.textColor = line.Colour;
-                // This rectangle was measured at this exact font size. It grows
-                // and scrolls; fixed-row fitting must never shrink tooltip text.
-                GUI.Label(new Rect(0, y, _tipLayout.Viewport.width, line.Height), line.Text ?? "", style);
-                y += line.Height;
-            }
+            DrawLines(_tip, _tipLayout.Viewport.width, _tipScroll);
         }
         finally { GUI.EndGroup(); }
         if (_tipLayout.MaxScroll > 0)

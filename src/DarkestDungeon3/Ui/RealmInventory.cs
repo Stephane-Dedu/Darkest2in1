@@ -51,6 +51,7 @@ internal static class RealmInventory
 
         bool shift = Event.current.shift;
         string hovered = null;
+        Rect? hoveredRect = null;
 
         // Unequip all, then the three sorts (sort_button_pos 567,22, 42 apart leftwards), then close (610,22).
         if (IconButton(At(441, 22, 32, 32), Ri("realm_inventory_unequip_trinkets.png"), "Unequip all trinkets"))
@@ -114,6 +115,7 @@ internal static class RealmInventory
             GUI.color = old;
             if (!insideGrid || !r.Contains(Event.current.mousePosition) || Drag.Active) continue;
             hovered = id;
+            hoveredRect = new Rect(gridArea.x + r.x, gridArea.y + r.y - _scroll.y, r.width, r.height);
             if (shift && Gui.Hotspot(r))
             {
                 if (_sellAlways) Sell(id);
@@ -142,7 +144,7 @@ internal static class RealmInventory
         }
         else Gui.Text(At(150, 92, 430, 32), Str("realm_inventory_trinket_sell_instruction", "Hold [SHIFT] to Sell Trinkets"), 19, Gui.Dd1Class, TextAnchor.MiddleLeft);
 
-        if (hovered != null && _sellAsk == null) HeroSheet.TrinketTip(hovered);
+        if (hovered != null && _sellAsk == null) HeroSheet.TrinketTip(hovered, anchor: hoveredRect);
         if (_sellAsk != null) AskToSell();
     }
 

@@ -10909,3 +10909,24 @@ launch/input/estate/host/save/restore351. Existing external DD2 PID86036 was
 observed before work; agent did not launch/drive/close it. Owner's no-launch/
 input restriction persists. Latest checkpoint:local-art/ui-overhaul/
 curio-regional-coherence-v04/CONTINUE.md; heavy native evidence/recipes on D:.
+
+
+## Round352: fixed Nomad Wagon selection and DD2 effect descriptions
+
+Wagon stock now selects before Purchase, using native square slots/selection
+frames, nine-sliced tooltip, divider/button art and installed Dunkel/Alegreya.
+Fixed detail panel keeps title/rarity/price/purchase visible; effects scroll at
+24/30px. Unaffordable items remain inspectable with exact missing gold. Item-ID
+selection survives other removals/duplicate copies and clears across estates.
+Shared equipment descriptions separate native trigger labels from indented
+effects without changing wording, order or assigning benefit by numeric sign.
+Equipped/inventory trinket tooltips anchor beside slots rather than the pointer.
+Existing prices, discounts, purchasing, saves and classic trinket rules retain.
+
+Isolated clean HEAD2d865af plus11 owned inputs: Release/296 UI checks pass.
+Runtime352 installed OFFLINE with exact runtime350 hashes and four-file backup.
+Config/map339/curio manifest unchanged, all44 foreign WIP retained. DD2 CLOSED
+throughout, no launch/input/save access/no pending restore. Native rendering,
+large-tooltip appearance, purchase/hover/mouse/controller/small-window QA remain
+UNVERIFIED. No new art/extraction needed; no generated or extracted assets in Git.
+See tools/trinket_ui.md and local-art/trinket-ui-v01/CONTINUE.md.

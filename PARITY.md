@@ -1002,3 +1002,6 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [?] Round351 native Sprawl alchemy trolley body studied at300/340px in offline room/corridor composites;300px preferred. Complete native Plague Doctor painted-card geometry/UV/paint retained, six corrected-facing source renders pass alpha/hash audits. Used generation rejected for body/wheel drift; no valid pair/fit/pack/acceptance. Region-only presentation with classic fallback still pending. Ten artifact tests pass; runtime350/pack/config/map and44 foreign files unchanged, accepted34 IDs/26 pairs. No C# build/deploy/launch/input/save351. Existing external DD2 process grants no QA permission. Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v04.
+
+
+- [?] Round352 Nomad Wagon: native DD2 stock slots/selection art and fixed scrollable effect panel, select then Purchase, affordability feedback and stable item-ID selection. Shared trinket tooltips separate trigger labels/effects and anchor beside equipment/inventory slots. Existing price/purchase/save rules retained. Release/296 UI checks pass; guarded runtime352 installed OFFLINE, config/map339/curios unchanged,44 foreign WIP retained. DD2 kept CLOSED/no save access/no pending restore. Native visual/input/controller/smaller-window QA remains pending. Evidence:local-art/trinket-ui-v01.
