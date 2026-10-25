@@ -1,5 +1,38 @@
 # Curio rework: design catalog v01
 
+## Sprawl-only apothecary candidate, round355
+
+The native medical trolley now has an offline closed/searched pair. Both
+states subdivide its painted plane identically and retain native UVs, body,
+frame, cloth, wheels and supplies. Only the large specimen-jar region binds
+generated empty-glass paint after use. This avoids the fixed-body drift in the
+rejected whole-image edit. The original two-triangle source and all paint files
+remain untouched. `render_apothecary_pair.py` reproduces the pair from private
+source exports and the edited atlas, using the native cutoff and fixed camera.
+Its source reference, partitioned closed image and used image are separate.
+Both partitioned states have byte-identical lower bodies. Subdivision changes
+141 raster-edge pixels against the unsplit source reference, recorded privately.
+
+`regional_only` explicitly lists canonical IDs that have reviewed regional art
+and keep original exact-ID sprites elsewhere. These IDs must be known, unique,
+unprotected and absent from `pairs`/`aliases`; they need nonempty valid bindings.
+Schema 3 omits their default `ArtId`. Core returns null outside those regions,
+so the normal renderer retains its existing sprite and name. Schema 2 still
+requires default paintings. Existing defaults and the Faded Memory guard retain.
+Coverage counts regional-only candidates separately from default coverage.
+
+The private candidate binds `alchemy_table_sprawl` only to `alchemy_table` in
+`dd2_city`, named Abandoned apothecary trolley. It has 35 candidate identities,
+including 34 with defaults and one regional-only identity, across 27 pairs.
+Installed accepted coverage stays 34 IDs / 26 pairs / 52 PNGs. The existing
+manifest and those 52 paintings rebuild byte-identically. Release, 1,330 Core,
+297 UI and 12 artifact tests pass; actual Core parses both full private packs.
+
+Neither the round355 runtime nor this pack is installed. Runtime354 and the
+owner's three Hamlet finishes remain exact. Keep DD2 closed until explicit new
+permission. Native contrast, alpha picking, supply drops and party overlap are
+pending. Latest checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v05/CONTINUE.md`.
+
 ## Regional result wording and native memorial, round350
 
 Regional bindings can include an optional `ResultTexts` dictionary of exact

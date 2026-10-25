@@ -10981,3 +10981,39 @@ with exact predecessor guards and backups. Config/curio manifest and 44 foreign
 WIP files retain. No launch/input/save/estate access or pending restore. Native
 shader/overview/zoom/hover/return acceptance remains pending human permission.
 Runtime354 retains concurrent352/353 work; never restore older runtimes.
+
+
+## Round355: registered Sprawl apothecary pair and regional-only art
+
+Resolved the trolley's offline used state without repainting its fixed body.
+Both states subdivide the complete native painted plane into six UV pieces.
+Only the large specimen jar binds generated empty/open-glass paint when used;
+frame, wheels, cloth, rack, small jar and supplies retain original native paint.
+The public render_apothecary_pair.py reproduces the reviewed private prototype.
+Lower-body pixels are identical between states; 141 raster-edge differences
+against the unsplit native reference are recorded. Source files remain exact.
+Final fitted pair786x939, width261.1629/fullheight312, common16px foot anchor.
+Sprawl corridor/room composites reviewed at about300px body height; no native
+shader/actor/input acceptance claimed. Full generated body is unused.
+
+Explicit regional_only selection and schema3 entries without default ArtId
+now allow Sprawl-only alchemy art while retaining original exact-ID sprites
+and names in classic and other DD2 regions. Inventory, parent binding, duplicate,
+FadedMemory, alpha/hash/size/grounding guards retain. Coverage distinguishes
+regional-only candidates from default coverage. No canonical ID/outcome/RNG/
+supply/used flag/save or spawn change. Existing alchemy result wording already
+fits experiments/research/oil, so no wording change was needed.
+
+Clean HEAD8252296 plus7 owned source/test/tool inputs: Release0errors/3old
+warnings,1330Core/297UI/12artifact checks pass. Actual Core parses the full
+34-ID baseline and35-ID candidate and verifies regional-only classic fallback.
+Existing manifest/52painting PNGs rebuild byte-identically. Candidate has
+34default+1regional-only identities/27pairs; installed accepted remains34/26.
+
+Runtime355 and pack-apothecary-CANDIDATE-v01 remain UNINSTALLED/UNACCEPTED.
+Current354 cannot parse the omitted-default entry; do not copy this pack into
+it. Owner still forbids launch/input. All67 pinned installed targets/config/
+44foreign WIP and native sources hash-match. No deploy/restore/launch/input/
+protected estate/host/save355. Checkpoint:local-art/ui-overhaul/curio-regional-
+coherence-v05/CONTINUE.md; heavy art/recipe/prompt/audits D:. Native QA awaits
+permission. Next offline art is distinct regional caches after provenance review.

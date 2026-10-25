@@ -193,6 +193,48 @@ class PairRegistrationTests(unittest.TestCase):
             self.assertEqual(len(coverage['regional_artifacts']), 1)
             self.assertEqual(coverage['regional_artifacts'][0]['curio_id'], 'fixture')
 
+    def test_region_only_pair_has_no_global_replacement_or_inflated_default_coverage(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selection = self.regional_selection(root)
+            selection['pairs'] = []
+            selection['regional_only'] = ['fixture']
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            document = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(document['Entries'], [{'Id': 'fixture', 'Regions': {
+                'dd2_city': {'ArtId': 'fixture_sprawl', 'DisplayName': 'Ruined archive'}}}])
+            self.assertEqual(document['Version'], 3)
+            self.assertEqual([a['Id'] for a in document['Artifacts']], ['fixture_sprawl'])
+            coverage = json.loads((root / 'pack/review/coverage.json').read_text())
+            self.assertEqual(coverage['counts'], {'offline_regional_only_candidate': 1})
+            self.assertTrue(coverage['entries'][0]['original_default_retained'])
+            provenance = json.loads((root / 'pack/provenance.json').read_text())
+            self.assertEqual(provenance['identity_count'], 1)
+            self.assertEqual(provenance['default_identity_count'], 0)
+            self.assertEqual(provenance['regional_only_identity_count'], 1)
+
+    def test_region_only_identity_must_be_explicit_unique_unprotected_and_bound(self):
+        for problem in ('implicit', 'duplicate', 'unknown', 'protected', 'also_default', 'unbound'):
+            with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.regional_selection(root)
+                selection['pairs'] = []
+                selection['regional_only'] = ['fixture']
+                if problem == 'implicit': selection.pop('regional_only')
+                elif problem == 'duplicate': selection['regional_only'] *= 2
+                elif problem == 'unknown': selection['regional_only'] = ['missing']
+                elif problem == 'protected':
+                    (root / 'inventory.json').write_text(json.dumps([
+                        {'id': 'fixture', 'name': 'Faded memory', 'scope': 'owner-exception', 'region': 'ALL'}]))
+                elif problem == 'also_default': selection['pairs'] = [str(root / 'default')]
+                else: selection['region_art_overrides'] = {}
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
+
     def test_regional_art_cannot_escape_its_identity_or_bypass_pair_validation(self):
         for problem in ('protected_owner', 'orphan', 'unsafe_art_id', 'changed_pixels', 'wrong_default'):
             with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:

@@ -26,6 +26,7 @@ def build(inventory, selection, output):
         raise ValueError('Private art and derived masks must stay outside Git')
     coverage = catalog(inventory, selection, output / 'review')
     ready = [e for e in coverage['entries'] if e['status'] == 'offline_pair_candidate']
+    region_only = [e for e in coverage['entries'] if e['status'] == 'offline_regional_only_candidate']
     artifacts = {}
     folder = output / 'art'
     folder.mkdir()
@@ -55,17 +56,19 @@ def build(inventory, selection, output):
                           'Mask': base64.b64encode(bits).decode('ascii'),
                           'ClosedSha256': entry['states']['closed']['sha256'],
                           'UsedSha256': entry['states']['used']['sha256']}
-    document = {'Version': 3 if any(e.get('regions') for e in ready) else 2, 'Artifacts': list(artifacts.values()),
-                'Entries': [dict({'Id': e['id'], 'ArtId': e['art_id']}, **({'Regions': e['regions']} if e.get('regions') else {})) for e in ready]}
+    document = {'Version': 3 if any(e.get('regions') for e in ready + region_only) else 2, 'Artifacts': list(artifacts.values()),
+                'Entries': [dict({'Id': e['id']}, **({'ArtId': e['art_id']} if 'art_id' in e else {}),
+                    **({'Regions': e['regions']} if e.get('regions') else {})) for e in ready + region_only]}
     (output / 'manifest.json').write_text(json.dumps(document, separators=(',', ':')), encoding='utf-8')
     (output / 'provenance.json').write_text(json.dumps({
         'selection_sha256': hashlib.sha256(selection.read_bytes()).hexdigest(),
         'recipe_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         'purpose': 'Private curio pack candidate; native verification recorded separately',
-        'identity_count': len(ready), 'unique_pairs': len(artifacts), 'pixel_states': len(artifacts) * 2,
+        'identity_count': len(ready) + len(region_only), 'default_identity_count': len(ready),
+        'regional_only_identity_count': len(region_only), 'unique_pairs': len(artifacts), 'pixel_states': len(artifacts) * 2,
         'picking': 'Closed-state alpha>40, conservative pooled bits; original display alpha unchanged',
         'installed': False, 'native_verified': False}, indent=2), encoding='utf-8')
-    print(json.dumps({'identities': len(ready), 'pairs': len(artifacts), 'out': str(output)}))
+    print(json.dumps({'identities': len(ready) + len(region_only), 'regional_only': len(region_only), 'pairs': len(artifacts), 'out': str(output)}))
 
 
 if __name__ == '__main__':

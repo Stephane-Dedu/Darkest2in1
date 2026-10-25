@@ -29,7 +29,9 @@ public sealed class NativeCurioCatalog
     }
     private readonly Dictionary<string, NativeCurioDefinition> _entries = new(StringComparer.Ordinal);
     private readonly Dictionary<string, Dictionary<string, NativeCurioDefinition>> _regions = new(StringComparer.Ordinal);
-    public IReadOnlyCollection<NativeCurioDefinition> Entries => _entries.Values;
+    /// <summary>One representative painting per identity; Get still requires its regional context.</summary>
+    public IReadOnlyCollection<NativeCurioDefinition> Entries => _entries.Select(pair =>
+        pair.Value ?? _regions[pair.Key].Values.First()).ToArray();
     public static NativeCurioCatalog Empty { get; } = new(new Document
         { Version = 2, Artifacts = Array.Empty<NativeCurioPainting>(), Entries = Array.Empty<Entry>() });
 
@@ -60,10 +62,22 @@ public sealed class NativeCurioCatalog
         foreach (var entry in document.Entries)
         {
             if (entry == null) throw new InvalidDataException("Missing curio identity.");
-            RequireKey(entry.Id); RequireKey(entry.ArtId);
-            if (entry.Id == "faded_memory" || _entries.ContainsKey(entry.Id) || !paintings.TryGetValue(entry.ArtId, out var art))
+            RequireKey(entry.Id);
+            if (entry.Id == "faded_memory" || _entries.ContainsKey(entry.Id))
                 throw new InvalidDataException("Invalid curio identity: " + entry.Id);
-            _entries.Add(entry.Id, new NativeCurioDefinition(entry.Id, art));
+            NativeCurioDefinition fallback = null;
+            if (entry.ArtId != null)
+            {
+                RequireKey(entry.ArtId);
+                if (!paintings.TryGetValue(entry.ArtId, out var art))
+                    throw new InvalidDataException("Missing default curio painting: " + entry.Id);
+                fallback = new NativeCurioDefinition(entry.Id, art);
+            }
+            else if (document.Version != 3 || entry.Regions == null || entry.Regions.Count == 0)
+                throw new InvalidDataException("A curio without default paint requires explicit regional art: " + entry.Id);
+            // Null means the renderer keeps its original exact-ID sprite outside
+            // the listed DD2 regions. It does not create a generic default.
+            _entries.Add(entry.Id, fallback);
             if (entry.Regions == null) continue;
             if (document.Version != 3 || entry.Regions.Count > 4)
                 throw new InvalidDataException("Unsupported regional curio presentation.");

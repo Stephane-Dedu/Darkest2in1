@@ -125,6 +125,38 @@ public class NativeCurioArtTests
     }
 
     [Fact]
+    public void RegionOnlyPairLoadsInSprawlAndReturnsToOriginalArtWithoutStaleNamesOrGameplayChanges()
+    {
+        using var pack = new Pack(); var state = State();
+        string path = Path.Combine(pack.Root, "curios/manifest.json");
+        var document = JObject.Parse(File.ReadAllText(path)); document["Version"] = 3;
+        var entry = (JObject)document["Entries"]![0]!.DeepClone(); entry.Remove("ArtId");
+        entry["Regions"] = JObject.FromObject(new { dd2_city = new { ArtId = "curio0", DisplayName = "Abandoned apothecary trolley" } });
+        document["Entries"] = new JArray(entry); File.WriteAllText(path, document.ToString());
+        state.Quest = new() { Dungeon = "ruins" };
+        NativeCurioArt.Prepare(state); Pump(state, () => NativeCurioArt.Ready);
+        Assert.False(NativeCurioArt.TryGet("curio0", false, out _, out _));
+        Assert.Equal(0, Texture2D.RoomDecodeCount); Assert.Null(NativeCurioArt.DisplayName("curio0"));
+        state.Quest.Dungeon = "dd2_city";
+        Pump(state, () => NativeCurioArt.TryGet("curio0", true, out _, out _));
+        Assert.True(NativeCurioArt.TryGet("curio0", false, out var closed, out var art));
+        Assert.True(NativeCurioArt.TryGet("curio0", true, out var used, out var usedArt));
+        Assert.NotSame(closed, used); Assert.Same(art, usedArt);
+        Assert.Equal("Abandoned apothecary trolley", NativeCurioArt.DisplayName("curio0"));
+        state.Map.Rooms[0].CurioTaken = true;
+        foreach (string region in new[] { "ruins", "dd2_forest", "dd2_farm", "dd2_coast" })
+        {
+            state.Quest.Dungeon = region; NativeCurioArt.Prepare(state);
+            Assert.True(NativeCurioArt.Ready);
+            Assert.False(NativeCurioArt.TryGet("curio0", false, out _, out _));
+            Assert.Null(NativeCurioArt.DisplayName("curio0"));
+            Assert.Equal("Original result", NativeCurioArt.ResultText("curio0", "Original result"));
+        }
+        Assert.Equal(2, Texture2D.RoomDecodeCount); Assert.Equal(17, state.RandomCounter);
+        Assert.Equal("curio0", state.Map.Rooms[0].CurioId); Assert.True(state.Map.Rooms[0].CurioTaken);
+    }
+
+    [Fact]
     public void NearbyPreloadEvictsOldPairsAndReleasesTexturesWhenLeavingTheExpedition()
     {
         using var pack=new Pack(16);var state=State(16);

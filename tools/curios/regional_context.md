@@ -121,3 +121,31 @@ Owner still forbids game launch/input. An existing external DD2 process was
 observed351; this agent did not launch, control, close or install into it.
 That observation grants no permission. Runtime350/wording pack/config/map
 remain exact,52 accepted PNGs unchanged. Native art/UI QA is still pending.
+
+## Round355: registered native body and regional-only fallback
+
+The unresolved trolley now has an offline fitted pair. Its large specimen jar
+becomes empty and open. A built-in generated edit supplies only that jar's
+surface; six planar UV pieces keep the native frame, wheels, cloth, rack,
+foreground jar and other supplies on their original texture. Both states use
+the same subdivision and camera. Pixel checks prove the lower body identical
+between states; source geometry/paint files remain untouched. It is a native
+body with a generated searched surface, not a wholly native searched asset.
+
+The 300px body trial is registered in both states, with 16px foot padding.
+Sprawl corridor and room composites are reviewed offline. Contrast against
+native actors, masks, hover and actual herb/torch interaction still need QA.
+Do not promote it on the strength of the offline comparison alone.
+
+The regional-only seam is now implemented and tested in source. Explicit
+`regional_only` selection and schema3 entries without default `ArtId` retain
+the original fallback outside their listed DD2 regions. The alchemy candidate
+binds only `dd2_city`, with name Abandoned apothecary trolley. Core and the real
+loader tests cover both states, return to classic/other regions and unchanged
+RNG, canonical ID and used flag. No default painting was added to alchemy.
+
+Runtime355 and pack-apothecary-CANDIDATE-v01 are UNINSTALLED/UNACCEPTED. Current
+runtime354 and its Hamlet assets remain exact; the installed 34-ID/26-pair pack
+and all52 accepted PNGs stay unchanged. Never restore runtime350 from the
+historical paragraphs above. Owner's no-launch/input restriction remains.
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v05/CONTINUE.md`.

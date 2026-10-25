@@ -69,6 +69,47 @@ public class NativeCurioCatalogTests
         Assert.Null(catalog.Get("faded_memory", region));
     }
 
+    [Fact]
+    public void RegionOnlyPaintingLeavesClassicOtherRegionsAndUnknownContextsToOriginalArt()
+    {
+        var document = Manifest(); document["Version"] = 3;
+        var entry = (JObject)document["Entries"]![0]!;
+        entry["Id"] = "alchemy_table"; entry.Remove("ArtId");
+        entry["Regions"] = new JObject { ["dd2_city"] = new JObject {
+            ["ArtId"] = "coffer", ["DisplayName"] = "Abandoned apothecary trolley" } };
+        var catalog = NativeCurioCatalog.Parse(document.ToString());
+        Assert.Equal("alchemy_table", catalog.Get("alchemy_table", "dd2_city").Id);
+        Assert.Equal("Abandoned apothecary trolley", catalog.Get("alchemy_table", "dd2_city").DisplayName);
+        foreach (string region in new[] { null, "ruins", "warrens", "weald", "cove", "darkest", "dd2_forest", "dd2_farm", "dd2_coast", "unknown" })
+            Assert.Null(catalog.Get("alchemy_table", region));
+        Assert.Equal(2, catalog.Entries.Count);
+        Assert.Contains(catalog.Entries, definition => definition.Id == "alchemy_table" && definition.Art != null);
+        Assert.Equal("coffer", catalog.Get("thanks_chest", "ruins").Art.Id);
+    }
+
+    [Theory]
+    [InlineData("old_schema")]
+    [InlineData("no_regions")]
+    [InlineData("empty_regions")]
+    [InlineData("empty_default")]
+    [InlineData("missing_default")]
+    [InlineData("duplicate_identity")]
+    [InlineData("protected_owner")]
+    public void RegionOnlyEntriesStillRequireValidBindingsAndUniqueUnprotectedIdentities(string problem)
+    {
+        var document = Manifest(); document["Version"] = 3;
+        var entry = (JObject)document["Entries"]![0]!; entry.Remove("ArtId");
+        entry["Regions"] = new JObject { ["dd2_city"] = new JObject { ["ArtId"] = "coffer", ["DisplayName"] = "Street apparatus" } };
+        if (problem == "old_schema") document["Version"] = 2;
+        else if (problem == "no_regions") entry.Remove("Regions");
+        else if (problem == "empty_regions") entry["Regions"] = new JObject();
+        else if (problem == "empty_default") entry["ArtId"] = "";
+        else if (problem == "missing_default") entry["ArtId"] = "missing";
+        else if (problem == "duplicate_identity") entry["Id"] = "thanks_chest";
+        else entry["Id"] = "faded_memory";
+        Assert.Throws<InvalidDataException>(() => NativeCurioCatalog.Parse(document.ToString()));
+    }
+
     [Theory]
     [InlineData("dd2_city", "missing", "Locked cache", 3)]
     [InlineData("ruins", "coffer", "Locked cache", 3)]

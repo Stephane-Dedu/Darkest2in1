@@ -1,3 +1,27 @@
+LATEST355 REGIONAL CURIO OFFLINE CANDIDATE:
+local-art/ui-overhaul/curio-regional-coherence-v05/CONTINUE.md. Native Sprawl
+alchemy trolley now has a fitted closed/used pair with stable body/camera/feet.
+Only large specimen-jar UV pieces bind generated empty/open glass paint; frame,
+wheels, cloth, rack, foreground jar and supplies retain original native paint.
+Both states share6card pieces/12tri; lower bodies pixel-identical. Original
+2tri source unchanged;141raster-edge differences against unsplit reference
+recorded. Canonical public renderer reproduces reviewed prototype pixels.
+Selected final native-card-pair-v02/fitted-v02, 786x939/width261.1629/height312.
+Offline Sprawl corridor/room comparison reviewed at300px body; native QA pending.
+Source now supports explicit regional_only IDs/schema3 omitted defaultArtId;
+unknown/classic/other regions return original art/name. No global alchemy pair.
+Release0errors/3old warnings,1330Core/297UI/12artifact checks pass. Actual Core
+parses both full packs; old manifest/52paintings rebuild exact. Candidate35IDs
+=34default+1regional-only,27pairs. Installed accepted34IDs/26pairs/52PNGs retain.
+Runtime355 and pack-apothecary-CANDIDATE-v01 UNINSTALLED/UNACCEPTED; marker says
+DO_NOT_INSTALL_WITHOUT_QA and current354 cannot parse the new region-only entry.
+Current354/Hamlet/config/curios/44foreign files unchanged. No launch/input/save/
+host/estate/install/restore355. Keep DD2 CLOSED until newer explicit permission.
+Do not redo finished Hamlet or trolley. Memorial350/four347 drafts remain
+uninstalled; bookshelf342 keep. Next offline art is distinct regional cache
+fittings after actual installed provenance review. Heavy D:, no shared dirty
+build/old restore, protect estates1/3/abandoned checkout, reserve7-8%.
+
 LATEST354 HAMLET FINISHES INSTALLED OFFLINE:
 local-art/ui-overhaul/hamlet-mountain-ground-guild-v92/CONTINUE.md. New human
 screenshot reopened three Hamlet finishes: native Mountain replaces castle,

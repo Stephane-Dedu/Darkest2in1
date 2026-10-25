@@ -66,11 +66,17 @@ def catalog(inventory, selection, output):
             raise ValueError('Invalid shared-art alias')
         if known[key].get('sprite', key) != known[canonical].get('sprite', canonical):
             raise ValueError('Shared art must retain the audited original sprite identity')
+    region_only = selected.get('regional_only', [])
+    if not isinstance(region_only, list) or any(not isinstance(key, str) for key in region_only) or len(set(region_only)) != len(region_only):
+        raise ValueError('Invalid regional-only identity list')
+    region_only = set(region_only)
+    if any(key not in known or key in pairs or key in aliases or known[key]['scope'] == 'owner-exception' for key in region_only):
+        raise ValueError('Invalid regional-only identity')
     regional_pairs = {}
     for variant in selected.get('regional_pairs', []):
         identity = variant['curio_id']
-        if identity not in pairs and identity not in aliases:
-            raise ValueError('Regional pair requires a reviewed default identity')
+        if identity not in pairs and identity not in aliases and identity not in region_only:
+            raise ValueError('Regional pair requires a reviewed default or explicit regional-only identity')
         pair = audit_pair((selection.parent / variant['folder']).resolve())
         art_id = pair['art_id']
         if art_id in known or art_id in regional_pairs:
@@ -79,8 +85,8 @@ def catalog(inventory, selection, output):
     regions = selected.get('region_art_overrides', {})
     referenced = set()
     for key, bindings in regions.items():
-        if key not in pairs and key not in aliases or not isinstance(bindings, dict) or len(bindings) > 4:
-            raise ValueError('Regional art requires a reviewed default identity')
+        if key not in pairs and key not in aliases and key not in region_only or not isinstance(bindings, dict) or not bindings or len(bindings) > 4:
+            raise ValueError('Regional art requires a reviewed default or explicit regional-only identity')
         for region, binding in bindings.items():
             name = binding.get('DisplayName') if isinstance(binding, dict) else None
             if region not in ('dd2_city', 'dd2_forest', 'dd2_farm', 'dd2_coast') or not isinstance(name, str) or not name.strip() or len(name) > 80 or any(unicodedata.category(c) == 'Cc' for c in name):
@@ -100,6 +106,8 @@ def catalog(inventory, selection, output):
                 raise ValueError('Regional binding has no reviewed painting')
     if referenced != regional_pairs.keys():
         raise ValueError('Unreferenced regional painting')
+    if any(key not in regions for key in region_only):
+        raise ValueError('Regional-only identity requires explicit regional bindings')
     native = {}
     studies = selected.get('native_studies') or [selected['native_study']]
     for relative in studies:
@@ -127,6 +135,7 @@ def catalog(inventory, selection, output):
     for key, source in known.items():
         status = ('owner_exception_retained' if source['scope'] == 'owner-exception' else
                   'offline_pair_candidate' if key in pairs or key in aliases else
+                  'offline_regional_only_candidate' if key in region_only else
                   'native_body_needs_used_state' if key in native else 'pending')
         record = {'id': key, 'name': source['name'], 'scope': source['scope'], 'region': source['region'], 'status': status}
         if key in pairs or key in aliases:
@@ -135,6 +144,9 @@ def catalog(inventory, selection, output):
                 record['regions'] = regions[key]
             if key in aliases:
                 record['shared_original_sprite_alias'] = True
+        elif key in region_only:
+            record['regions'] = regions[key]
+            record['original_default_retained'] = True
         elif key in native:
             record['native_closed_file'] = native[key]['file']
         records.append(record)
