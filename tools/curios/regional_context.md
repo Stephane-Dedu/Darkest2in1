@@ -98,3 +98,26 @@ is fitted and reviewed offline in a corridor and room. It remains uninstalled,
 with contrast, hover, masks and actual interaction still awaiting native QA.
 Do not count it as accepted new coverage or install it during this no-launch
 period. The latest candidate is `pack-memorial-CANDIDATE-v02` on D:.
+
+## Round351: native field chemistry source
+
+The Plague Doctor story bundles contain a complete native medical trolley with
+glass vessels, test tubes, stained cloth and timber/iron fittings. It is a
+plausible abandoned apothecary trolley in the Sprawl. The sink and restraint
+apparatus from those bundles are references, not alchemy replacements. These
+native props are painted two-triangle cards; preserve their UVs and paint.
+They lie in Unity's Y/Z plane and need yaw90 for the corridor-facing study.
+Yaw0/180 studies were empty and rejected. Native source/alpha checks pass.
+
+The 300px body-height trial fits the street better than340px in offline room
+and corridor composites. A generated used-state edit altered the body/wheels
+and was rejected. No valid pair, fitting, pack or installation exists351.
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v04/CONTINUE.md`.
+The alchemy identity lacks an accepted default pair: do not install this as a
+global default merely to satisfy the current regional builder. Region-only
+presentation with original classic fallback remains a future tested seam.
+
+Owner still forbids game launch/input. An existing external DD2 process was
+observed351; this agent did not launch, control, close or install into it.
+That observation grants no permission. Runtime350/wording pack/config/map
+remain exact,52 accepted PNGs unchanged. Native art/UI QA is still pending.

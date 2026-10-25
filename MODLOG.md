@@ -10888,3 +10888,24 @@ is intentional native art, not a missing support. Keep native bookshelf342;
 do not repeat349 duplicate. Four347 drafts remain unaccepted/uninstalled.
 Accepted coverage34 IDs/26 pairs,69 designs plus FadedMemory still pending.
 Latest checkpoint:local-art/ui-overhaul/curio-regional-coherence-v03/CONTINUE.md.
+
+
+## Round351: native Sprawl chemistry body study, no installed change
+
+Extracted complete Plague Doctor lab apparatus/sink/trolley from story bundles.
+Each is a native painted two-triangle card, not volumetric geometry. UV/paint/
+tint/cutoff0.5 retained. Y/Z-plane bodies need yaw90/270; edge-on0/180 studies
+are empty/rejected. Six corrected native source renders pass alpha/hash audits.
+Trolley300px body height preferred over340px in actual Sprawl room/corridor
+offline composites. Glass/test tubes/timber suit abandoned apothecary equipment.
+No native scene lighting or in-game QA claimed. Generated used edit rejected
+for body/wheel drift and incomplete requested glass change; prompt/original saved.
+No usable pair/fit/pack351. Alchemy has no accepted default; future region-only
+presentation must preserve classic fallback rather than forcing a global body.
+
+Ten artifact tests pass. Runtime350/56 installed pack files/config/map exact,
+44 foreign files preserved, accepted34IDs/26pairs unchanged. No C# build/deploy,
+launch/input/estate/host/save/restore351. Existing external DD2 PID86036 was
+observed before work; agent did not launch/drive/close it. Owner's no-launch/
+input restriction persists. Latest checkpoint:local-art/ui-overhaul/
+curio-regional-coherence-v04/CONTINUE.md; heavy native evidence/recipes on D:.

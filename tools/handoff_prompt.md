@@ -1,3 +1,20 @@
+LATEST351 OFFLINE checkpoint:
+local-art/ui-overhaul/curio-regional-coherence-v04/CONTINUE.md. No launch/input
+permission. Existing external DD2 PID86036 observed351; agent did not launch,
+drive, close or install into it. Do not claim game closed or infer permission.
+Runtime350/wording pack/config/map unchanged,44 foreign files preserved,
+10 artifact tests pass; no C# build/pack/deploy351. Native Plague Doctor story
+bundles yield apparatus/sink/trolley: complete painted two-triangle cards,
+UV/paint/cutoff0.5 retained. Correct yaw90/270 gives six studies; yaw0/180 is
+empty/rejected. Sprawl alchemy trolley300px preferred offline over340px. Used
+generation REJECTED for paint/wheel drift; no valid pair/fit/pack/acceptance.
+Native trolley used state and regional-only/classic-fallback seam still needed;
+do not force a global default to bypass builder. Source exports/provenance/
+offline comparison on D:. Memorial350 remains uninstalled, bookshelf342 keep,
+four347 drafts unaccepted. Accepted34IDs/26pairs unchanged;69 designs plus
+FadedMemory pending. Heavy D:, protected estates, no stale restores/shared
+dirty build, reserve7-8%. Hamlet/dossier parked. Read regional_context.md.
+
 LATEST350 OFFLINE checkpoint:
 local-art/ui-overhaul/curio-regional-coherence-v03/CONTINUE.md. KEEP DD2 CLOSED
 until newer explicit human permission. Runtime350 + pack-wording-v01 installed
