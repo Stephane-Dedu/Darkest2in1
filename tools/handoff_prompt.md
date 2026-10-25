@@ -1,3 +1,34 @@
+LATEST361 FOETOR OFFERING STONE OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v11/CONTINUE.md first.
+Keep DD2 closed: no launch/input until explicit newer human permission.
+Public render_offering_stone.py assembles complete native Chirurgeon table
+76verts/46faces and whole native Beastmen offering1098verts/1549faces. Large
+architectural stairs excluded deliberately. All selected geometry/UV/paint/
+tint retain; only heap visibility changes after use. Final native-offering-
+pair-v02/fitted-v02 restores original4096offering atlas, not the2048export
+thumbnail used in v01. Native stone paint2048exact. No generation/repaint or
+upscale. Used pixels match untouched stone reference; both states below source
+y500 match. Fit836x832, foot418/816, width340/fullheight338.3732 preferred over
+300width in actual Foetor background composites. Separate pack-offering-
+CANDIDATE-v02 adds only regional-only sacrificial_stone/dd2_farm, Bloodied
+offering stone and2exact contextual messages. Food/quirks/stress/purge/RNG/
+states/saves/spawns retain; classic/other regions keep original presentation.
+Frozen clean Core355 parses full35IDs/27paintings;12artifact tests pass361.
+Current354 cannot parse omitted-default entries. UNINSTALLED/UNACCEPTED; no
+installer/restore armed. Native context/actor/shader/hover/food/return QA awaits
+permission. No C# build/install/game launch/input/host/estate/save361. Runtime354/
+Hamlet/config/67targets/44foreign files/accepted34IDs26pairs52PNGs retain.
+All completed355/356/358/359/360 and350memorial candidates stay separate; do not
+redo them or blindly merge packs. Four347drafts remain unaccepted; bookshelf342
+keep,349duplicate rejected, Hope glyph intentionally floats. Hamlet visual QA
+only; expedition340 parked. Continue suitable regional/outdoor curios.
+Shambler dependency NOW RESOLVED: metadata-only index finds missingCAB-c977...
+in biome_farm_assets_all.bundle. Fresh common/forest/farm export0skipped. Full
+source is Academic Study-style building plus woodland, NOT a compact altar
+curio. Reference only, no pair/fit/pack. Grave markers likewise not dug graves.
+Heavy D:, preserve concurrent/journal bytes, protected estates1/3, no abandoned
+checkout/shared dirty build/stale restore. Ordinary usage first and7-8%reserve.
+
 LATEST360 TANGLE WARNING OFFLINE CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v10/CONTINUE.md first.
 Native Foetor skull warning is adapted as a plausible existing Tangle Troubling

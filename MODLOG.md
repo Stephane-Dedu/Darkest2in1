@@ -11165,3 +11165,45 @@ models reference missingCAB-c977de7328e2096d177c47584f364a82. Forest-scenes and
 shared-Shambler faction bundles do not contain it. Remaining MPB renderer is
 not a complete altar. Marked DO_NOT_USE_INCOMPLETE; no pair/fit/pack for those
 references. Resolve source suitability/dependencies before adaptation.
+
+
+## Round361: native offering stone for the Foetor
+
+The Sacrificial Stone gains a separate offline Foetor art candidate assembled
+from the complete native Chirurgeon slab and a complete native offering heap.
+The slab retains 76 vertices/46 faces; the heap retains 1098 vertices/1549 faces.
+The large architectural stairs are deliberately excluded. Native UVs, paint
+and tint retain; only the heap hides after use. Placement is an adaptation,
+not a claim of a shipped encounter or native used animation. No generation.
+
+Public render_offering_stone.py produces final native-offering-pair-v02. The
+standard export's 2048 offering thumbnail was replaced by its exact original
+4096 native atlas; stone paint is exact native 2048. No enlargement or repaint.
+Used pixels match the untouched stone reference exactly; both states below
+source row500 match. The offering naturally occludes part of the tabletop
+before use. Fit836x832, foot418/816, width340/full canvas height338.3732. The
+340px width was preferred over300px in actual Foetor corridor/room composites.
+These are offline comparisons, not native actor, shader or input acceptance.
+
+The separate35-ID/27-painting pack-offering-CANDIDATE-v02 adds only regional-only
+sacrificial_stone/dd2_farm, Bloodied offering stone and two exact contextual
+messages. Food, quirks, stress, purge, outcomes, RNG, states, saves and spawns
+retain. Classic and other regions keep original art/text. Frozen clean Core355
+parses the full pack and fallbacks;12 artifact tests pass. All34 old entries,
+26 artifact records and52 accepted PNGs retain. No C# build361;355Release
+1330Core/297UI results remain prior. Current354 cannot parse omitted defaults.
+UNINSTALLED/UNACCEPTED; no installer or restore armed. Native context, actors,
+shader, hover, food and return/fallback QA await explicit new launch permission.
+
+The Shambler source dependency is resolved by reading UnityFS directories:
+324 installed bundles,348732 compressed metadata bytes, no payload blocks
+decompressed during indexing. Missing CAB-c977de7328e2096d177c47584f364a82 is
+in biome_farm_assets_all.bundle. A fresh common/forest/farm export resolves
+all renderers. The full node is an Academic Study-style building with woodland
+scenery, not a compact altar curio; it remains a source study. No pair or pack
+for it. Grave markers and other meat piles remain unselected references.
+
+Runtime354/Hamlet/config/67 installed targets/44 foreign files remain exact.
+No launch, input, host, estate, save, deployment or restore361. All prior
+candidates remain separate; no completed pair repeated. Checkpoint:
+local-art/ui-overhaul/curio-regional-coherence-v11/CONTINUE.md; heavy evidence D:.

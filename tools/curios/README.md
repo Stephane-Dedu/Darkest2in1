@@ -472,5 +472,42 @@ Round360's regional-only `troubling_effigy/dd2_forest` candidate uses the name
 Skull-bound warning and four exact contextual result messages. Classic art
 and all gameplay rules retain. The pack needs355 regional-only support and
 remains uninstalled. Native Tangle context, actors, hover, holy-water handling
-and return travel still need authorised QA. The incomplete Shambler-prefab
-study and wooden grave markers are source references, not ready replacements.
+and return travel still need authorised QA. The wooden grave markers are source
+references, not complete shallow-grave replacements. Round361 resolves the
+Shambler node dependency, but the complete node is a building and surrounding
+woodland, not a compact altar curio. It remains reference only.
+
+## Foetor offering stone
+
+`render_offering_stone.py` assembles the complete `table` component from native
+`chirurgeon_node_altar.fbx` and the complete `beastmen_node_meat_02.fbx` heap.
+The large architectural stairs are deliberately excluded. The slab's76vertices/
+46faces and the offering's1098vertices/1549faces retain original UVs and paint.
+The heap uses uniform placement scale; only its visibility changes after use.
+The fixed stone, camera and ground anchor remain identical between states.
+
+The standard exporter reduces atlases above2048px. Before final rendering, bind
+the offering's original4096px native texture, retaining its material tint,
+cutoff and UVs. Round361's private `restore-native-paint361.py` records that
+direct extraction. The stone paint is already native2048px. Neither surface
+is generated, repainted or enlarged from a smaller image.
+
+```powershell
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_offering_stone.py -- `
+  --kit $curioKit --altar "$offeringRoot/exp/chirurgeon_node_altar" `
+  --offering "$offeringRoot/parts/offering-fullpaint-v02" --out "$offeringRoot/native-pair"
+```
+
+`stone-reference.png` supplies the untouched native slab through the same
+camera. The used state must match it exactly; the offering naturally occludes
+part of the tabletop before use. The recipe retains the native0.5alpha cutoff.
+Source hashes, placement matrices and fixed-body fitting landmarks are recorded.
+
+Round361's separate candidate selects only `sacrificial_stone/dd2_farm`, named
+Bloodied offering stone. Two exact result mappings refer to this stone rather
+than an unnamed shrine or indoor warrens. Original food, quirks, stress, purge,
+RNG, saves and spawns retain. Classic and other regions use original art/text.
+Final native-offering-pair-v02/fitted-v02 uses full native paint; the2048offering
+thumbnail in v01 is an intermediate. The pack remains uninstalled/unaccepted
+and requires355regional-only support. Native actors, shader, hover, food input
+and return/fallback QA still await explicit new permission to launch the game.

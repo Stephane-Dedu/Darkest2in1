@@ -280,3 +280,47 @@ Shambler-faction bundles do not contain that serialized file. Do not treat the
 remaining MPB renderer as a complete altar. The two hospital grave sources are
 wooden markers, with no dug earth or searched state. Neither source has a pair,
 fit or candidate pack. Resolve source suitability before further adaptation.
+
+## Round361: a compact Foetor offering stone
+
+The existing Sacrificial Stone belongs to Warrens/Foetor encounters and accepts
+a food offering. A bloodstained stone slab with prior offerings fits that
+outdoor setting. The native Chirurgeon table component supplies the whole
+stone,76vertices/46faces; its large architectural stairs are excluded. A complete
+native Beastmen offering heap supplies1098vertices/1549faces. All selected
+native geometry, UVs and tint retain. The heap is uniformly positioned on the
+slab and hides after use; the native stone stays fixed. This is an adapted
+assembly and used state, not a claim of a shipped native encounter or animation.
+
+The initial offering paint was the standard exporter's2048thumbnail. Final
+native-offering-pair-v02 restores its exact4096native atlas; stone paint is
+exact2048native. No generation, repaint or enlargement. The used image matches
+the untouched stone reference exactly, and both states below source row500
+match. The offering naturally occludes the tabletop before use. Do not claim
+every stone image pixel is unchanged while that heap is present.
+
+The340px-wide fit was preferred over300px in installed Foetor corridor and
+quiet-room background composites. Its836x832canvas uses a common foot418/816,
+16pxpadding and338.3732px full canvas height. The separate35-ID/27-painting
+candidate adds only regional-only `sacrificial_stone/dd2_farm`, Bloodied offering
+stone and two exact contextual result messages. Original food consumption,
+quirks, stress, purge, outcomes, RNG, used flags, saves and spawns retain.
+Classic and other regions keep their original presentation. Frozen Core355
+parses the full pack and all fallbacks;12artifact tests pass. Current354 cannot
+parse omitted-default entries. No installation or C# build361. Native context,
+actors, shader, hover, food and return-travel QA await new launch permission.
+
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v11/CONTINUE.md`.
+Native sources, final pair/fitting, pack and evidence stay on D:. All prior
+candidates remain separate and unaccepted; installed coverage stays34IDs/
+26pairs/52PNGs. Do not redo completed pairs or combine their manifests blindly.
+
+The Shambler dependency is resolved: a metadata-only index of all324installed
+UnityFS bundle directories located missingCAB-c977de7328e2096d177c47584f364a82
+in biome_farm_assets_all.bundle. It read348732compressed-directory bytes rather
+than decompressing all asset payloads. Adding farm bundles to the forest/common
+export resolves every renderer. The complete node is an Academic's Study-style
+building and woodland scenery. It is not a compact Shambler altar replacement.
+The MPB and main scenery belong together in that full source study. Neither is
+a selected curio. Grave boards, the academic depot, military cache and other
+meat piles remain source studies; their names do not establish encounter spawns.
