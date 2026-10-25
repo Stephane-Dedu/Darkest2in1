@@ -83,6 +83,43 @@ public class NativeCurioCatalogTests
     }
 
     [Fact]
+    public void RegionalResultWordingOnlyReplacesExplicitExactMessages()
+    {
+        var document = Manifest(); document["Version"] = 3;
+        document["Entries"]![0]!["Regions"] = new JObject { ["dd2_city"] = new JObject {
+            ["ArtId"] = "coffer", ["DisplayName"] = "Locked street cache",
+            ["ResultTexts"] = new JObject { ["The cabinet is a trap!"] = "The cache is trapped!" } } };
+        var catalog = NativeCurioCatalog.Parse(document.ToString());
+        var regional = catalog.Get("unlocked_strongbox", "dd2_city");
+        Assert.Equal("The cache is trapped!", regional.PresentResult("The cabinet is a trap!"));
+        Assert.Equal("The cabinet is a trap!", catalog.Get("unlocked_strongbox", "ruins").PresentResult("The cabinet is a trap!"));
+        Assert.Equal("the cabinet is a trap!", regional.PresentResult("the cabinet is a trap!"));
+        Assert.Equal("A different outcome.", regional.PresentResult("A different outcome."));
+        Assert.Null(regional.PresentResult(null));
+        Assert.Equal("unlocked_strongbox", regional.Id);
+    }
+
+    [Theory]
+    [InlineData("blank_key")]
+    [InlineData("blank_value")]
+    [InlineData("line_break")]
+    [InlineData("oversized")]
+    [InlineData("too_many")]
+    public void RegionalResultWordingIsBoundedAndCannotInjectControlCharacters(string problem)
+    {
+        var texts = new JObject { ["Original result"] = "Regional result" };
+        if (problem == "blank_key") texts = new JObject { [" "] = "Regional result" };
+        else if (problem == "blank_value") texts["Original result"] = " ";
+        else if (problem == "line_break") texts["Original result"] = "First\nsecond";
+        else if (problem == "oversized") texts["Original result"] = new string('x', 513);
+        else for (int i = 0; i < 16; i++) texts["Other " + i] = "Regional result";
+        var document = Manifest(); document["Version"] = 3;
+        document["Entries"]![0]!["Regions"] = new JObject { ["dd2_city"] = new JObject {
+            ["ArtId"] = "coffer", ["DisplayName"] = "Locked street cache", ["ResultTexts"] = texts } };
+        Assert.Throws<InvalidDataException>(() => NativeCurioCatalog.Parse(document.ToString()));
+    }
+
+    [Fact]
     public void PlacementKeepsTheRegisteredFootlineForBothStatesAtAnyViewportPosition()
     {
         var art = NativeCurioCatalog.Parse(Manifest().ToString()).Get("thanks_chest").Art;

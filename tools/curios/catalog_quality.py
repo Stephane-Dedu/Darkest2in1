@@ -85,6 +85,12 @@ def catalog(inventory, selection, output):
             name = binding.get('DisplayName') if isinstance(binding, dict) else None
             if region not in ('dd2_city', 'dd2_forest', 'dd2_farm', 'dd2_coast') or not isinstance(name, str) or not name.strip() or len(name) > 80 or any(unicodedata.category(c) == 'Cc' for c in name):
                 raise ValueError('Invalid explicit regional art binding')
+            texts = binding.get('ResultTexts')
+            if texts is not None and (not isinstance(texts, dict) or len(texts) > 16 or any(
+                    not isinstance(text, str) or not text.strip() or len(text) > 512 or
+                    any(unicodedata.category(c) == 'Cc' for c in text)
+                    for pair in texts.items() for text in pair)):
+                raise ValueError('Invalid regional result wording')
             art_id = binding.get('ArtId')
             if art_id in regional_pairs:
                 if regional_pairs[art_id]['curio_id'] != key:

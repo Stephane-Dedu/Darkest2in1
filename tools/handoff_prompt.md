@@ -1,3 +1,20 @@
+LATEST350 OFFLINE checkpoint:
+local-art/ui-overhaul/curio-regional-coherence-v03/CONTINUE.md. KEEP DD2 CLOSED
+until newer explicit human permission. Runtime350 + pack-wording-v01 installed
+offline with exact348 predecessor guards/backup;12 cabinet result messages now
+match regional cache/stores/coffer/cargo.52 accepted PNGs unchanged,34 IDs/26
+pairs. Release/1322Core/290UI/10artifact and actual Core full-pack parse pass;
+native QA pending. New Sprawl memorial for confession_booth is ONLY an offline
+candidate: pack-memorial-CANDIDATE-v02, native-pair-v03. All1219 native triangles/
+UVs preserved; complete book assembly5/6/10/12 moves, stone/camera fixed. Generated
+paint-drift and orphan-page versions rejected. Do not install candidate until
+authorised native QA. Hope altar hovering glyph is native/intentional; no support
+repair. Existing bookshelf already native342, keep it.44 foreign WIP retained,
+config/map339 exact, no game launch/estate/save/no pending restore. Remaining
+69 designs plus FadedMemory and region coherence still unfinished. Continue
+offline from actual installed provenance; field chemistry/regional fittings next.
+Hamlet/dossier parked; protected estates and7-8% reserve remain.
+
 LATEST349 OFFLINE checkpoint:
 local-art/ui-overhaul/curio-regional-coherence-v02/CONTINUE.md. KEEP DD2 CLOSED
 until explicit newer human permission. Runtime348/private pack-v01 unchanged;

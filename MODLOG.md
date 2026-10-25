@@ -10853,3 +10853,38 @@ native QA349, protected estates untouched,44 foreign WIP preserved/no restore.
 Installed coverage remains34 IDs/26 pairs;69 designs plus FadedMemory pending.
 Four347 drafts still unaccepted/uninstalled. Newest checkpoint:
 local-art/ui-overhaul/curio-regional-coherence-v02/CONTINUE.md.
+
+
+## Round350: contextual result wording and native memorial candidate
+
+Schema3 regional ResultTexts adds exact presentation-only message replacements,
+bounded16 nonblank single-line pairs/512chars. Unknown/null/classic text passes
+through. CrawlUi renders mapped text without modifying report/outcome/rules.
+12 cabinet messages match cache/stores/coffer/cargo in four DD2 regions. Clean
+HEAD0c22f31 plus7 owned inputs: Release passes0errors/3old warnings,1322 Core,
+290 UI and10 artifact tests pass. Text-validation regression fails old audit.
+Actual built Core validates both full packs,12 installed/16 candidate bindings.
+
+Runtime350 and pack-wording-v01 installed OFFLINE with exact348 predecessor
+hashes/backup. Accepted52 PNGs unchanged,34 IDs/26 pairs, config/map339 exact.
+Owner requires game CLOSED until explicit new permission. No launch/input/
+native QA350, no estate/host/actor/save access/no pending restore. All44 foreign
+WIP preserved. Source-tested wording remains unverified in native UI.
+
+Confessional alternative uses complete native story_node_city_statue(Clone)
+from Sprawl dungeon exterior. Selected raw native-pair-v03 keeps all1219tri and
+original UVs/materials/paint. Used state translates complete open-book assembly
+5/6/10/12, stone/plinth/camera fixed. UV checks pass, upper640pixel rows exactly
+match between states. Gain2.0 compensates combat tint0.518; native lighting not
+reproduced. Fitted-v02 and pack-memorial-CANDIDATE-v02 reviewed offline in room
+and corridor. Defaced memorial title/four result lines retain reflection/holy
+water affordances. Candidate34 IDs/27 pairs NOT INSTALLED/ACCEPTED, marked for
+future authorised native QA; contrast/hover/masks/party overlap still pending.
+
+One generated used edit rejected for paint drift. Native pair-v01 rejected:
+moving only cover12 left page pieces behind; v02 fixed grouping but was dark/
+occluded. v03 is current. Hope altar facing studies confirm its hovering glyph
+is intentional native art, not a missing support. Keep native bookshelf342;
+do not repeat349 duplicate. Four347 drafts remain unaccepted/uninstalled.
+Accepted coverage34 IDs/26 pairs,69 designs plus FadedMemory still pending.
+Latest checkpoint:local-art/ui-overhaul/curio-regional-coherence-v03/CONTINUE.md.

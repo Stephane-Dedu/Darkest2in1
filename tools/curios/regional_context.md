@@ -75,3 +75,26 @@ confessional substitute. It needs a searched-state design and comparison with
 other prayer/roadside assets. No installation349 and no game launch. Contextual
 result text also needs review: a matching heading alone cannot fix a result
 that still describes a cabinet or booth.
+
+## Round350 follow-up
+
+Cabinet result wording now follows the region through explicit `ResultTexts`
+bindings. The result renderer performs an exact lookup without changing the
+original report or outcome. The wording-only pack and runtime350 are installed
+offline; all existing painting files are unchanged. Classic text and unknown
+messages pass through. Native QA is still pending under the closed-game limit.
+
+The native Hope altar's hovering emblem is intentional. Front-facing studies
+confirmed it; do not paint a support into that model. A better contextual body
+candidate is the complete `story_node_city_statue(Clone)` renderer from the
+native Sprawl dungeon exterior. It reads as a defaced memorial surrounded by
+books, with reflection and holy-water cleansing affordances.
+
+The memorial candidate retains every native triangle and UV. Its searched
+state moves a complete open-book assembly, including its separate page pieces.
+A first geometry edit left pages behind and was rejected; a generated edit
+drifted from the native paint and was also rejected. The selected native pair
+is fitted and reviewed offline in a corridor and room. It remains uninstalled,
+with contrast, hover, masks and actual interaction still awaiting native QA.
+Do not count it as accepted new coverage or install it during this no-launch
+period. The latest candidate is `pack-memorial-CANDIDATE-v02` on D:.

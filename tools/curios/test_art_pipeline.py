@@ -137,7 +137,8 @@ class PairRegistrationTests(unittest.TestCase):
                 {'id': 'fixture', 'name': 'Cabinet', 'scope': 'base-runtime', 'region': 'ALL'}]))
             (root / 'native.json').write_text(json.dumps({'entries': []}))
             selection = {'pairs': [str(root / 'fitted')], 'native_studies': [str(root / 'native.json')],
-                         'region_art_overrides': {'fixture': {'dd2_forest': {'ArtId': 'fixture', 'DisplayName': 'Locked field cache'}}}}
+                         'region_art_overrides': {'fixture': {'dd2_forest': {'ArtId': 'fixture', 'DisplayName': 'Locked field cache',
+                             'ResultTexts': {'The cabinet is a trap!': 'The cache is trapped!'}}}}}
             (root / 'selection.json').write_text(json.dumps(selection))
             with contextlib.redirect_stdout(io.StringIO()):
                 build(root / 'inventory.json', root / 'selection.json', root / 'pack')
@@ -146,6 +147,20 @@ class PairRegistrationTests(unittest.TestCase):
             self.assertEqual(len(document['Artifacts']), 1)
             self.assertEqual([e['Id'] for e in document['Entries']], ['fixture'])
             self.assertEqual(document['Entries'][0]['Regions']['dd2_forest']['DisplayName'], 'Locked field cache')
+            self.assertEqual(document['Entries'][0]['Regions']['dd2_forest']['ResultTexts'], {'The cabinet is a trap!': 'The cache is trapped!'})
+
+    def test_regional_result_wording_rejects_invalid_or_unbounded_text(self):
+        invalid = [{' ': 'Text'}, {'Original': ' '}, {'Original': 'First\nsecond'},
+                   {'Original': 'x' * 513}, {str(i): 'Result' for i in range(17)}, ['not a mapping']]
+        for texts in invalid:
+            with self.subTest(texts=str(texts)[:40]), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.regional_selection(root)
+                selection['region_art_overrides']['fixture']['dd2_city']['ResultTexts'] = texts
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
 
     def regional_selection(self, root):
         spec_path = self.write_pair(root)

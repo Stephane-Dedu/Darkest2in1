@@ -1,5 +1,28 @@
 # Curio rework: design catalog v01
 
+## Regional result wording and native memorial, round350
+
+Regional bindings can include an optional `ResultTexts` dictionary of exact
+original/result-message replacements. Only the result panel uses it. Unknown
+messages and classic destinations keep their original text; outcome objects,
+supplies, RNG and save data remain unchanged. Core and the art auditor bound
+the dictionary to 16 nonblank single-line pairs of at most 512 characters each.
+
+Runtime350 and its wording-only private pack are installed offline. Twelve
+cabinet messages now refer to the selected cache, stores, coffer or cargo.
+All 52 painting PNGs are unchanged. Isolated Release, 1,322 Core tests, 290 UI
+tests and 10 artifact tests pass. The actual Core parser also validates both
+full private packs. DD2 remains closed and native QA is pending.
+
+The confessional replacement is an uninstalled Sprawl memorial candidate from
+DD2's city dungeon exterior. Both states retain all 1,219 native triangles and
+their UVs; a complete loose book moves to the foreground after use. A generated
+state was rejected for paint drift. The native pair's stone body and camera
+stay fixed. Its preview compensates for the combat material's dark tint; native
+lighting and in-game contrast still need checking. Candidate coverage remains
+34 identities with 27 paintings, while installed accepted art remains 34 / 26.
+Latest checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v03/CONTINUE.md`.
+
 ## Distinct regional paintings, round349
 
 `regional_pairs` now accepts reviewed variant pairs with their own painting IDs

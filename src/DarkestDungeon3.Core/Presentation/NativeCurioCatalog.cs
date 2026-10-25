@@ -15,7 +15,12 @@ public sealed class NativeCurioCatalog
         public NativeCurioPainting[] Artifacts;
         public Entry[] Entries;
     }
-    private sealed class RegionArt { public string ArtId { get; set; } public string DisplayName { get; set; } }
+    private sealed class RegionArt
+    {
+        public string ArtId { get; set; }
+        public string DisplayName { get; set; }
+        public Dictionary<string, string> ResultTexts { get; set; }
+    }
     private sealed class Entry
     {
         public string Id { get; set; }
@@ -68,9 +73,10 @@ public sealed class NativeCurioCatalog
                 var binding = region.Value;
                 if (!(region.Key is "dd2_city" or "dd2_forest" or "dd2_farm" or "dd2_coast") || binding == null ||
                     string.IsNullOrWhiteSpace(binding.DisplayName) || binding.DisplayName.Length > 80 ||
-                    binding.DisplayName.Any(char.IsControl) || binding.ArtId == null || !paintings.TryGetValue(binding.ArtId, out var regionalArt))
+                    binding.DisplayName.Any(char.IsControl) || !ValidResultTexts(binding.ResultTexts) ||
+                    binding.ArtId == null || !paintings.TryGetValue(binding.ArtId, out var regionalArt))
                     throw new InvalidDataException("Invalid regional curio presentation: " + entry.Id);
-                variants.Add(region.Key, new NativeCurioDefinition(entry.Id, regionalArt, binding.DisplayName));
+                variants.Add(region.Key, new NativeCurioDefinition(entry.Id, regionalArt, binding.DisplayName, binding.ResultTexts));
             }
             _regions.Add(entry.Id, variants);
         }
@@ -84,6 +90,10 @@ public sealed class NativeCurioCatalog
             ? regional : entry;
     }
     private static bool ValidHash(string hash) => hash?.Length == 64 && hash.All(c => c >= '0' && c <= '9' || c >= 'a' && c <= 'f');
+    private static bool ValidResultTexts(Dictionary<string, string> texts) => texts == null ||
+        texts.Count <= 16 && texts.All(pair => ValidResultText(pair.Key) && ValidResultText(pair.Value));
+    private static bool ValidResultText(string text) => !string.IsNullOrWhiteSpace(text) &&
+        text.Length <= 512 && !text.Any(char.IsControl);
     private static void RequireKey(string key)
     {
         if (string.IsNullOrEmpty(key) || key.Length > 80 || key.Any(c => !(c >= 'a' && c <= 'z') && !(c >= '0' && c <= '9') && c != '_'))
@@ -93,11 +103,18 @@ public sealed class NativeCurioCatalog
 
 public sealed class NativeCurioDefinition
 {
+    private readonly Dictionary<string, string> _resultTexts;
     public string Id { get; }
     public NativeCurioPainting Art { get; }
     public string DisplayName { get; }
-    internal NativeCurioDefinition(string id, NativeCurioPainting art, string displayName = null)
-        { Id = id; Art = art; DisplayName = displayName; }
+    internal NativeCurioDefinition(string id, NativeCurioPainting art, string displayName = null,
+        Dictionary<string, string> resultTexts = null)
+    {
+        Id = id; Art = art; DisplayName = displayName;
+        if (resultTexts != null) _resultTexts = new Dictionary<string, string>(resultTexts, StringComparer.Ordinal);
+    }
+    public string PresentResult(string text) => text != null && _resultTexts != null &&
+        _resultTexts.TryGetValue(text, out var presented) ? presented : text;
 }
 
 public sealed class NativeCurioPainting

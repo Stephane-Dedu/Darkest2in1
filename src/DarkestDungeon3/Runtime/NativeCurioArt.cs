@@ -89,6 +89,8 @@ internal static class NativeCurioArt
     }
 
     public static string DisplayName(string id) => _catalog?.Get(id, _expedition?.Quest?.Dungeon)?.DisplayName;
+    public static string ResultText(string id, string text) =>
+        _catalog?.Get(id, _expedition?.Quest?.Dungeon)?.PresentResult(text) ?? text;
 
     private static void Ensure(NativeCurioPainting art)
     {

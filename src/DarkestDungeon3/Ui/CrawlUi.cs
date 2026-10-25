@@ -858,7 +858,7 @@ internal sealed partial class CrawlUi
         string who = S.Save.Estate.Hero(report.HeroId)?.Name ?? "";
         Gui.Text(new Rect(left + 40, top + 26, 376, 48), NativeCurioArt.DisplayName(report.CurioId) ?? HamletUi.Pretty(report.CurioId), 32, Gui.Dd1Name, TextAnchor.MiddleCenter, heading: true);
         var lines = new System.Collections.Generic.List<string>();
-        lines.Add($"{who}: {report.Text ?? HamletUi.Pretty(report.OutcomeType)}");
+        lines.Add($"{who}: {NativeCurioArt.ResultText(report.CurioId, report.Text ?? HamletUi.Pretty(report.OutcomeType))}");
         if (report.ItemUsed != null) lines.Add($"Used {HamletUi.Pretty(report.ItemUsed)}.");
         lines.AddRange(report.Effects);
         if (report.QuirkGained != null) lines.Add($"Gained the quirk {HamletUi.QuirkName(report.QuirkGained)}.");
