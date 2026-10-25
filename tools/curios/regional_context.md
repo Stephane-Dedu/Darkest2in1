@@ -177,3 +177,31 @@ Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v06/CONTINUE.md`.
 ## Round357: recovered cache source is not a farm fitting
 
 Round357 recovered a complete native swine-cache body after the cached supply-depot export omitted three renderers. Adding farm bundles did NOT resolve cab-532a166fba3ea6051de280e3ff4c28ee; adding biome_cave assets/models did. The fresh actual-game export now retains swine_cache 1, swine_cache_front and swine_cache_plank, 4525 triangles with original UV/paint/transforms. The remaining missing fire renderers are outside this three-part body. All three source renderers are inactive in the generic prefab; no active encounter/default state or Foetor spawn is inferred. Source-study-v01 renders both facings; body-0 was inspected. It reads as a military trophy/loot pile with weapons, skulls and scattered supplies, not an ordinary farm coffer. It is source/reference only, not a selected cabinet replacement. No used state, fitting, pack or acceptance357. Do not regenerate this discovery or promote it based only on the filename. Next inspect actual corridor scale and choose a suitable existing identity/context, or seek a better cabinet body. Complete356Tangle and355apothecary candidates remain separate/uninstalled. Current354/Hamlet/config/accepted34IDs26pairs52PNGs/67installed targets/44foreign files remain exact. No C# build/tests/deploy/launch/input/host/estate/save/restore357. Protected estates1/3 and abandoned Documents checkout remain forbidden. No subagents. Heavy outputs D:, ordinary usage first and7-8%reserve. Latest checkpoint local-art/ui-overhaul/curio-regional-coherence-v07/CONTINUE.md.
+
+## Round358: native Shroud dock cargo
+
+The installed coast bundle contains a complete barnacled timber chest with
+native ironwork, shell geometry and 2048 paint. It is a better Shroud cabinet
+fitting than the shared ornate strongbox. The native cargo crate and common inn
+crates were also inspected. The common pickup chest is a two-triangle icon,
+so it is not a complete articulated body.
+
+The new dock-cache pair retains all 282 native faces and UVs. Nine rim vertices
+split at the hinge boundary; all 169 lid faces and their attached shells move
+together. The 113 body faces stay fixed. Two new underside faces reuse original
+plank paint where the closed native shell has no interior. No generated art.
+Closed pixels match the untouched native reference exactly. Open and closed
+pixels below source row650 are identical; upper-rim visibility changes naturally.
+
+The separate 34-ID/27-painting candidate changes only `dd2_coast` cabinet art.
+The Sealed dock cargo name, all regional result messages, other region bindings,
+classic defaults and accepted 52 PNGs retain. Actual installed Core354 parses
+the full candidate offline; 12 artifact tests pass. Corridor and room composites
+were reviewed at 320px canvas width. These are offline observations, not native
+shader, actor, hover or supply acceptance. No installation or game input358.
+
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v08/CONTINUE.md`.
+Keep this candidate separate from completed356 Tangle and355 apothecary drafts.
+Next investigate distinct Sprawl/Foetor cache bodies without inventing spawns
+or treating recolours as new paintings. The357 military pile remains reference
+only. Owner permission is still required before launching or driving DD2.

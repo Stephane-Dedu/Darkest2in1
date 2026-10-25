@@ -11050,3 +11050,36 @@ source/render/fit/native audits D:. Continue other regional caches offline.
 ## Round357: missing native cache parts recovered
 
 Round357 recovered a complete native swine-cache body after the cached supply-depot export omitted three renderers. Adding farm bundles did NOT resolve cab-532a166fba3ea6051de280e3ff4c28ee; adding biome_cave assets/models did. The fresh actual-game export now retains swine_cache 1, swine_cache_front and swine_cache_plank, 4525 triangles with original UV/paint/transforms. The remaining missing fire renderers are outside this three-part body. All three source renderers are inactive in the generic prefab; no active encounter/default state or Foetor spawn is inferred. Source-study-v01 renders both facings; body-0 was inspected. It reads as a military trophy/loot pile with weapons, skulls and scattered supplies, not an ordinary farm coffer. It is source/reference only, not a selected cabinet replacement. No used state, fitting, pack or acceptance357. Do not regenerate this discovery or promote it based only on the filename. Next inspect actual corridor scale and choose a suitable existing identity/context, or seek a better cabinet body. Complete356Tangle and355apothecary candidates remain separate/uninstalled. Current354/Hamlet/config/accepted34IDs26pairs52PNGs/67installed targets/44foreign files remain exact. No C# build/tests/deploy/launch/input/host/estate/save/restore357. Protected estates1/3 and abandoned Documents checkout remain forbidden. No subagents. Heavy outputs D:, ordinary usage first and7-8%reserve. Latest checkpoint local-art/ui-overhaul/curio-regional-coherence-v07/CONTINUE.md.
+
+
+## Round358: native Shroud dock-cache candidate
+
+The complete coast_chest is a regional dock-cargo body with native barnacles,
+timber and ironwork. Fresh actual common/coast exports have no missing parts.
+The source audit proves484vertices/282triangles/UVs/2048paint exact. Six native
+cache/crate bodies were inspected. The pickup chest remains a two-triangle icon;
+the357military pile remains reference only, without an inferred Foetor spawn.
+
+Public render_shroud_coffer.py retains every source triangle and UV, splits
+nine shared rim vertices and moves the whole169-face lid with attached shells
+and ironwork. The113body faces stay fixed. Two used-only underside faces reuse
+a clean native plank patch; original exterior paint/tint retain. No generation
+or raster repaint. Native closed reference and final closed render match every
+pixel. Both state images below source row650 match exactly; upper rim occlusion
+changes naturally. Public v04 differs16closed/46used raster pixels from the v03
+prototype; the selected v04 sheet and native-reference comparison are final.
+
+Final fit1000x932, foot500/916,320px canvas width/298.24px height. Actual installed
+Shroud corridor and quiet-room background composites inspected offline. Full
+34-ID/27-painting candidate changes only cabinet/dd2_coast ArtId. Sealed dock
+cargo name, all12regional messages, classic/other3regions,26accepted artifact
+records and52accepted PNGs retain. Actual installed Core354 parses full pack
+offline. Twelve artifact tests pass; no C# build358. Prior355Release1330Core/
+297UI results remain prior. No native shader/actor/hover/key-shovel acceptance.
+
+Pack-shroud-CANDIDATE-v01 is UNINSTALLED/UNACCEPTED with a QA marker, separate
+from356Tangle/355apothecary/350memorial drafts. Runtime354/Hamlet/config/67pinned
+installed targets and44foreign WIP files retain. No launch/input/deploy/host/
+estate/save/restore. No installer armed. Checkpoint local-art/ui-overhaul/
+curio-regional-coherence-v08/CONTINUE.md, heavy source/render/audits D:. Next
+offline bodies are distinct Sprawl/Foetor caches after provenance inspection.

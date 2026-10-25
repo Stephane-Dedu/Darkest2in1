@@ -387,3 +387,34 @@ $curioBlender = 'C:\Program Files\Blender Foundation\Blender 5.2\blender.exe'
 `render_parts.py --refresh key1 key2` refreshes selected images after source changes. `review.py` checks all 104
 cards, local image targets, native chest/table/knife geometry and nonempty transparent renders. It creates
 `source-sheet.jpg`, `assembly-studies.jpg` and `artifact-check.json` for the private review.
+
+## Regional dock-cache pair
+
+`render_shroud_coffer.py` uses the complete native `coast_chest.fbx` export,
+not the two-triangle `pickup_chest` icon. Export it from the installed common
+and coast asset/model bundles with `export_prefab.py`. Keep the export and
+renders on D:, outside Git.
+
+```powershell
+$dockCacheRoot = 'D:\CodexArtifacts\DarkestDungeon3\dock-cache'
+& $curioPython "$curioKit/tools/export_prefab.py" --game $curioGame "$dockCacheRoot/exp" `
+  biome_common_assets_all.bundle,biome_common_models_platform_high_assets_all.bundle,biome_coast_assets_all.bundle,biome_coast_models_platform_high_assets_all.bundle `
+  coast_chest.fbx
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_shroud_coffer.py -- `
+  --kit $curioKit --source "$dockCacheRoot/exp/coast_chest" --out "$dockCacheRoot/native-pair"
+```
+
+Use a new output directory. The renderer checks the reviewed native topology,
+retains all 282 original faces and UVs, and splits nine shared rim vertices.
+The entire 169-face lid assembly, including attached shells and ironwork,
+hinges while 113 body faces stay fixed. Two searched-state underside faces
+reuse the original plank paint. Original exterior paint and tint stay exact.
+One camera and fixed body landmarks register both states. `reference.png`
+renders the untouched mesh through that same camera for a pixel comparison.
+The output records source hashes, geometry changes and fit landmarks.
+
+Round358's separate Shroud candidate changes only cabinet art in `dd2_coast`.
+It keeps the installed Sealed dock cargo name, result text and classic fallback.
+It is uninstalled and unaccepted. Do not combine it with the Tangle, apothecary
+or memorial candidates without rebuilding deliberately. Native shader, actor,
+hover, supplies and regional fallback checks require new launch permission.

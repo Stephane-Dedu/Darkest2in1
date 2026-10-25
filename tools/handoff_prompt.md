@@ -1,3 +1,27 @@
+LATEST358 SHROUD DOCK-CACHE OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v08/CONTINUE.md first.
+Complete native coast_chest now has a closed/searched regional pair. Actual
+installed source matches 484 vertices, 282 triangles, UVs and 2048 paint exactly.
+Nine shared rim vertices split, giving 493 partition vertices. All 169 lid faces,
+ironwork and attached shells hinge together; 113 body faces stay fixed. The used
+state adds two underside faces using original plank paint. No generated art.
+Final public render_shroud_coffer.py -> native-pair-v04/fitted-v01. Closed pixels
+match the untouched reference exactly; both states below source row650 match.
+Corridor/room composites reviewed at 320px canvas width, 298.24px full height.
+Actual installed Core354 parses full 34-ID/27-painting candidate; 12 artifact
+tests pass. Only cabinet/dd2_coast art changes. Sealed dock cargo name, all
+regional wording, other three regions, classic defaults and 52 accepted PNGs
+retain. Pack-shroud-CANDIDATE-v01 is UNINSTALLED/UNACCEPTED, no installer armed.
+Keep separate from completed356 Tangle/355 apothecary/350 memorial candidates.
+Current354/Hamlet/config/67 installed targets/44 foreign WIP remain exact.
+No C# build, deployment, launch, input, host, estate or save access358. DD2 must
+stay closed until explicit newer human permission; process observations grant
+none. No old restores or consumed installers. Heavy evidence on D:. Native
+shader/actor/hover/key-shovel/regional QA remains pending. Next offline work is
+distinct Sprawl/Foetor cabinet fittings after provenance review. Native357
+military pile is reference only; do not infer Foetor spawns. Ordinary usage
+first, no work if either window <=8%; checkpoint before reserve/context end.
+
 LATEST357 OFFLINE SOURCE STUDY, NO NEW CANDIDATE:
 Round357 recovered a complete native swine-cache body after the cached supply-depot export omitted three renderers. Adding farm bundles did NOT resolve cab-532a166fba3ea6051de280e3ff4c28ee; adding biome_cave assets/models did. The fresh actual-game export now retains swine_cache 1, swine_cache_front and swine_cache_plank, 4525 triangles with original UV/paint/transforms. The remaining missing fire renderers are outside this three-part body. All three source renderers are inactive in the generic prefab; no active encounter/default state or Foetor spawn is inferred. Source-study-v01 renders both facings; body-0 was inspected. It reads as a military trophy/loot pile with weapons, skulls and scattered supplies, not an ordinary farm coffer. It is source/reference only, not a selected cabinet replacement. No used state, fitting, pack or acceptance357. Do not regenerate this discovery or promote it based only on the filename. Next inspect actual corridor scale and choose a suitable existing identity/context, or seek a better cabinet body. Complete356Tangle and355apothecary candidates remain separate/uninstalled. Current354/Hamlet/config/accepted34IDs26pairs52PNGs/67installed targets/44foreign files remain exact. No C# build/tests/deploy/launch/input/host/estate/save/restore357. Protected estates1/3 and abandoned Documents checkout remain forbidden. No subagents. Heavy outputs D:, ordinary usage first and7-8%reserve. Latest checkpoint local-art/ui-overhaul/curio-regional-coherence-v07/CONTINUE.md.
 
