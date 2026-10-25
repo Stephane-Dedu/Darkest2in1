@@ -10756,3 +10756,21 @@ only. Earlier proposal text is not the original identity. Exact closed prompt
 saved privately, no generation/fitting/pack/installation/launch this preflight.
 Installed33-ID state remains345; all44 foreign WIP preserved. Resume346 from
 local-art/ui-overhaul/curio-native-quality-v06 after usage permits.
+
+
+## Round346 completed: Eldritch Altar identity and native state acceptance
+
+The original spiral sculpture, fluted column and scroll capital now use DD2
+stone paint. Upper blood staining and drips preserve DD1's used-state cue and
+retain carving detail. The native cultist table is material reference only.
+Two built-in RGBA generations, exact prompts/originals and complete source
+hashes remain private on D:. Shared502x1436 registration,146.8245px width and
+420px height preserve ground/body scale. Full34-ID/52-PNG audit passes.
+
+All68 unsaved native state/input captures pass, including silhouette picking
+and actual supply drops/ordinary urn outcome. New pair inspected in real
+camera pixels. Installed34 IDs/26 pairs;69 designs plus FadedMemory remain.
+Runtime343/config/map339 exact, no software rebuild; previous tests remain
+prior evidence. DD2 closed/no estate/host/save/no pending restore,44 foreign
+WIP retained. Normal campaign/actors/controller/perf QA pending. Checkpoint:
+local-art/ui-overhaul/curio-native-quality-v06. Preflight above is historical.

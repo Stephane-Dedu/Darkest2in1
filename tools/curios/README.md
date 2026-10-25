@@ -1,5 +1,14 @@
 # Curio rework: design catalog v01
 
+## Current coverage, round346
+
+34 exact identities use26 installed pairs. Eldritch Altar retains DD1's narrow
+spiral sculpture, fluted column and blood-stained used state with DD2 stone
+paint. All68 unsaved native state/input checks pass. Runtime343 is unchanged;
+69 designs plus the retained Faded Memory exception remain. Normal saved
+campaign/actor/controller/performance QA is pending. Latest checkpoint:
+`local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md`.
+
 ## Current coverage, round345
 
 33 exact identities now use 25 installed pairs. The bas-relief keeps its round

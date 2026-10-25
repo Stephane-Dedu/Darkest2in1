@@ -1,3 +1,13 @@
+Round 346 accepted the Eldritch Altar spiral-column and bloody used state.
+Latest local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md. Installed34
+exact IDs/26 pairs/52 PNGs,68 actual native state/input checks. Runtime343,
+config/map339 exact, DD2 CLOSED/no estate/host/save/no pending restore.69 designs
+plus Faded Memory remain. Resume347 only after ordinary usage permits; last
+pre-QA83% five-hour/9% weekly, retain7-8% reserve. Hamlet333/dossier340 parked,
+44 foreign WIP retained. No shared dirty build or old335/339 restore. Eldritch
+Altar native table is material reference only; actual DD1 shape retained.
+Normal saved campaign/actors/controller/performance QA still pending.
+
 Round346 is a RESERVE PREFLIGHT ONLY. Latest checkpoint:
 local-art/ui-overhaul/curio-native-quality-v06/CONTINUE.md. Installed accepted
 state remains345/v05:33 IDs/25 pairs/50 PNGs,66 real native state/input checks,

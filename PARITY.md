@@ -978,3 +978,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 
 - [ ] Round346 Eldritch Altar remains reference/prompt only, no generated art or installation. Original spiral-column/bloody used-state identity differs from native table proposal. Installed345 remains33 exact IDs;70 designs plus retained FadedMemory still require work. Reserve checkpoint:local-art/ui-overhaul/curio-native-quality-v06.
+
+
+- [x] Round346 accepts Eldritch Altar spiral-column/bloody used-state art:34 IDs/26 pairs/52 PNGs,68 actual unsaved native state/input captures, real camera review and full artifact audit. Runtime343/config/map339 exact, DD2 CLOSED/no estate/host/save/no restore. Evidence:local-art/ui-overhaul/curio-native-quality-v06. Earlier346 preflight is historical.
+- [ ] Remaining69 designs:27 base+10 quest+26 DLC+6 legacy, plus retained FadedMemory. Normal campaign/actors/controller/long-session acceptance remains pending. Continue347 after usage permits, retaining7-8% reserve.
