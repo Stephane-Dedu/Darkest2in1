@@ -11124,3 +11124,44 @@ explicit permission. Runtime354/Hamlet/config/67targets/44foreign files exact.
 No launch/input/deploy/host/estate/save/restore359. Checkpoint local-art/
 ui-overhaul/curio-regional-coherence-v09/CONTINUE.md, heavy evidence D:.
 Completed355apothecary/356Tangle/358Shroud and other candidates remain separate.
+
+
+## Round360: complete native crown for a Tangle warning
+
+The native Foetor skull warning is adapted as the existing Tangle Troubling
+Effigy after offline corridor/skull-field comparisons. Source origin remains
+explicit: no shipped Tangle spawn, new encounter or native used animation
+inferred. Actual source audit proves all1,827vertices/2,518faces/UVs/transform
+and512x1024paint exact. No generation/repaint/recolour or geometry loss.
+
+Public render_bound_effigy.py identifies four complete geometric components
+without welding actual UV seams. The64-vertex/78-face post stays fixed. All
+three crown/cloth/crossbar components,1,763vertices/2,440faces, tilt together
+twelve degrees after use. No skull, crossbar or cloth fragment stays behind.
+Closed pixels match untouched native reference exactly. State delta bounds
+283/117/741/396; all pixels below source row650 exact. Common camera/ground,
+fit534x933, foot267/917,400px fullheight/228.9389width.400height preferred over
+360in actual installed Tangle corridor and quiet-room background composites.
+
+Separate35-ID/27-painting candidate adds only regional-only troubling_effigy/
+dd2_forest, Skull-bound warning and four exact contextual result messages.
+The quirk message says lasting mark rather than promising a combat virtue or
+positive outcome. Outcomes/holy water/quirks/RNG/used flags/saves/spawns retain;
+classic/other regions keep original presentation. Frozen clean Core355 parses
+full pack and all fallbacks;12artifact tests pass. Existing34entries/26artifact
+records/52PNGs exact. No C# build360;355Release1330Core/297UI results are prior.
+
+UNINSTALLED/UNACCEPTED; current354 cannot parse omitted-default entries. Never
+copy candidate into354 or deploy stale binaries. No installer or restore armed.
+Native context/actor/shader/hover/holy-water/return QA awaits explicit newer
+permission. Runtime354/Hamlet/config/67targets/44foreign files exact. No game
+launch/input/deploy/host/estate/save360. Checkpoint local-art/ui-overhaul/
+curio-regional-coherence-v10/CONTINUE.md; heavy evidence D:. Prior candidates
+remain separate, no completed pair repeated.
+
+Other sources: hospital grave_single01/02 are marker boards without dug earth
+or searched state. Shambler prefab export is incomplete: main/VFX combined
+models reference missingCAB-c977de7328e2096d177c47584f364a82. Forest-scenes and
+shared-Shambler faction bundles do not contain it. Remaining MPB renderer is
+not a complete altar. Marked DO_NOT_USE_INCOMPLETE; no pair/fit/pack for those
+references. Resolve source suitability/dependencies before adaptation.

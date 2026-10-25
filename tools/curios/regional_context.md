@@ -244,3 +244,39 @@ single street coffer. No chest was isolated or state pair produced. The farm
 barn_box_03 is a building; road_meat_boxes is a mixed produce/meat source study.
 Neither is a locked-cabinet candidate. Continue other regional curios from
 actual provenance rather than forcing unsuitable source names into cabinets.
+
+## Round360: a skull-bound battlefield warning
+
+The native Foetor scarecrow is a complete grisly skull-and-cloth warning on a
+timber post. Offline Tangle corridor and skull-field room comparisons support
+using it as the existing Troubling Effigy. Its source origin remains Foetor;
+no shipped Tangle spawn, encounter location or original used animation is
+inferred. It is an adapted regional art candidate, not accepted context yet.
+
+All 1,827 native vertices, 2,518 faces, UVs and512x1024paint are retained. Three
+complete crown/cloth/crossbar components,1,763vertices/2,440faces, tilt together
+by twelve degrees. The full64-vertex/78-face post stays fixed. No fragments
+are dropped, no new geometry or raster paint is needed. Closed pixels match
+the untouched native reference exactly. Both states below source row650 match.
+
+The400px-high fit was preferred over360px for readable skulls and cloth in both
+Tangle backgrounds. The separate35-ID/27-painting candidate adds only
+`troubling_effigy/dd2_forest`, named Skull-bound warning. Four exact result
+messages refer to the effigy instead of an altar. The quirk result describes
+a lasting mark without promising a combat virtue or a positive result. Holy
+water, outcomes, RNG, used flags, saves and spawn rules remain authoritative.
+Classic and other regions keep original presentation through the355fallback.
+
+Frozen clean Core355 parses the full candidate;12 artifact tests pass. All
+existing34entries,26artifact records and52accepted PNGs retain. No C# build or
+installation360. The candidate is UNINSTALLED/UNACCEPTED and current354 cannot
+parse its omitted-default entry. Native context, shader, actor, hover, holy-water
+and return-travel checks await explicit permission. Keep prior packs separate.
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v10/CONTINUE.md`.
+
+The Shambler prefab export is incomplete: its main combined geometry and VFX
+reference missingCAB-c977de7328e2096d177c47584f364a82. Forest scenes and shared
+Shambler-faction bundles do not contain that serialized file. Do not treat the
+remaining MPB renderer as a complete altar. The two hospital grave sources are
+wooden markers, with no dug earth or searched state. Neither source has a pair,
+fit or candidate pack. Resolve source suitability before further adaptation.

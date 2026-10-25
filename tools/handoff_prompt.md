@@ -1,3 +1,32 @@
+LATEST360 TANGLE WARNING OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v10/CONTINUE.md first.
+Native Foetor skull warning is adapted as a plausible existing Tangle Troubling
+Effigy. Source origin stays explicit; no new/shipped Tangle spawn inferred.
+Actual source proves 1,827 vertices/2,518 faces/UVs/512x1024 paint exact. The
+whole three-part crown, cloth and crossbar,1,763 vertices/2,440 faces, tilt twelve
+degrees together; the complete64-vertex/78-face post stays fixed. No generation,
+repaint or geometry loss. Public render_bound_effigy.py produces native-effigy-
+pair-v01/fitted-v01. Closed pixels match untouched native reference exactly;
+both states below source row650 match.400px height preferred over360px in
+actual Tangle background composites. Fit534x933, width228.9389/fullheight400.
+Separate pack-effigy-CANDIDATE-v01 adds only regional-only troubling_effigy/
+dd2_forest, Skull-bound warning and four exact contextual messages. Classic/
+other regions keep original art; holy water/outcomes/quirks/RNG/states/spawns
+retain. Frozen clean Core355 parses35IDs/27paintings;12artifact tests pass360.
+Current354 cannot parse omitted-default entries: UNINSTALLED/UNACCEPTED, no
+installer/restore armed. Runtime354/Hamlet/config/67targets/44foreign files/
+accepted34IDs26pairs52PNGs retain. No C# build, launch, input, host, estate,
+save or deployment360. Native context/actor/shader/hover/holy-water/return QA
+still needs explicit newer human permission. Keep DD2 closed. Complete355/
+356/358/359 and350memorial candidates remain separate; do not redo them.
+Shambler export is INCOMPLETE: missing main/VFX CAB-c977de7328e2096d177c47584f364a82.
+Forest-scenes/shared-Shambler bundle checks did not locate it. Do not use its
+remaining MPB as an altar body. Hospital grave sources are marker boards, no
+dug mound/pair/pack. Continue suitable native regional curios from provenance,
+not forced source names. Heavy D:, preserve foreign/journal bytes, protected
+estates1/3, no abandoned checkout/shared dirty build/stale restore. Ordinary
+usage first; checkpoint before7-8% reserve/context exhaustion.
+
 LATEST359 FOETOR FOOD-CURIO OFFLINE CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v09/CONTINUE.md first.
 The owner renewed the no-launch limit. No game launch/input until explicit

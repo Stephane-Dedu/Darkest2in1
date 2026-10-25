@@ -446,3 +446,31 @@ table. Classic and other regions retain original art and text. Outcomes,
 medicinal-herb handling and disease rules remain unchanged. This candidate
 needs the355 regional-only parser support and must never be copied into the
 installed354 runtime. It remains uninstalled and awaits authorised native QA.
+
+## Bound warning for the Tangle
+
+`render_bound_effigy.py` uses the complete native Foetor skull warning as a
+plausible corrupted battlefield effigy for existing Tangle locations. Its
+source region stays explicit. This does not establish a shipped Tangle spawn.
+
+```powershell
+$effigyRoot = 'D:\CodexArtifacts\DarkestDungeon3\bound-effigy'
+& $curioPython "$curioKit/tools/export_prefab.py" --game $curioGame "$effigyRoot/exp" `
+  biome_common_assets_all.bundle,biome_common_models_platform_high_assets_all.bundle,biome_farm_assets_all.bundle,biome_farm_models_platform_high_assets_all.bundle `
+  farm_scarecrow_01.fbx
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_bound_effigy.py -- `
+  --kit $curioKit --source "$effigyRoot/exp/farm_scarecrow_01" --out "$effigyRoot/native-pair"
+```
+
+The tool classifies the four complete geometric components without welding
+the actual mesh or its UV seams. All 1,827 vertices and 2,518 faces remain.
+The 64-vertex post stays fixed. The complete skull crown, cloth and crossbar
+tilt together by twelve degrees, retaining every painted part. No generation
+or repaint. `reference.png` uses the untouched source through the same camera.
+
+Round360's regional-only `troubling_effigy/dd2_forest` candidate uses the name
+Skull-bound warning and four exact contextual result messages. Classic art
+and all gameplay rules retain. The pack needs355 regional-only support and
+remains uninstalled. Native Tangle context, actors, hover, holy-water handling
+and return travel still need authorised QA. The incomplete Shambler-prefab
+study and wooden grave markers are source references, not ready replacements.
