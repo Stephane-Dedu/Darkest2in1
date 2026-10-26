@@ -199,6 +199,31 @@ All 26 IDs passed; 52 captures and all 18 canonical pairs were inspected. Saved
 reload, ordinary controller input, actor overlap, a normal departure and long
 session frame time still require campaign QA.
 
+For regional candidates, repeat `-dd3-curio-case=ID@REGION` alongside
+`-dd3-curio-check`. The main-menu fixture visits those exact regional bindings.
+`-dd3-curio-supply=ID@REGION@SUPPLY` replaces its final urn supply test, for
+example `cosmic_spiderweb@dd2_forest@bandage`. These checks still use a Core
+stand-in party. They do not prove native actor scale or overlap.
+
+The separate `-dd3-curio-actors-check` mode extends the unsaved native crawl
+fixture. Repeat `-dd3-curio-actor-case=ID@REGION@SUPPLY` with `none` when no
+specific item applies. It embarks a transient four-hero party, captures the
+ordinary closed/result/used/revisit views, and checks actual item consumption,
+canonical outcome/loot RNG steps and retained used painting. It never opens an
+estate slot or persists its synthetic campaign. Its fixed map and seed are QA
+inputs, not additions to encounters or probability changes. Captures use the
+same optional absolute `-dd3-curio-shots` folder. Acceptance remains a separate
+visual review; a fixture log alone does not accept art.
+
+Round365 accepted nine regional pairs after12native PNG cases,9real-party
+cases and5final result cases. Accepted coverage is40design identities,39base
+runtime plus1DLC,35pairs/70PNGs. The80valid captures include repeated cases.
+No new art generation was needed in this acceptance pass. Report descriptions
+now clear the scroll border, and effect lines can use the existing exact
+regional text bindings. Outside those bindings the original strings retain.
+See local-art/ui-overhaul/curio-regional-coherence-v15/CONTINUE.md. Runtime365
+and combined packv03 are current; old individual candidate manifests are stale.
+
 Latest checkpoint: `local-art/ui-overhaul/curio-native-quality-v02/CONTINUE.md`.
 Heavy sources, exact built-in ImageGen prompts, originals and evidence stay on
 D:. No extracted/generated game art or per-pixel masks belong in Git.

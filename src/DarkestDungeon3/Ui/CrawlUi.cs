@@ -860,11 +860,11 @@ internal sealed partial class CrawlUi
         var lines = new System.Collections.Generic.List<string>();
         lines.Add($"{who}: {NativeCurioArt.ResultText(report.CurioId, report.Text ?? HamletUi.Pretty(report.OutcomeType))}");
         if (report.ItemUsed != null) lines.Add($"Used {HamletUi.Pretty(report.ItemUsed)}.");
-        lines.AddRange(report.Effects);
+        lines.AddRange(report.Effects.Select(effect => NativeCurioArt.ResultText(report.CurioId, effect)));
         if (report.QuirkGained != null) lines.Add($"Gained the quirk {HamletUi.QuirkName(report.QuirkGained)}.");
         if (report.Purged != null) lines.Add($"Rid of {HamletUi.QuirkName(report.Purged)}.");
         if (report.Scouted) lines.Add("The way ahead is revealed.");
-        Gui.Text(new Rect(left + 50, top + 104, 356, 130), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
+        Gui.Text(new Rect(left + 50, top + 124, 356, loot ? 110 : 160), string.Join("\n", lines), 19, Gui.Dd1Text, TextAnchor.UpperCenter);
 
         int clicked = _curioGrid.DrawCurio(report, new Rect(left, top + 236, 456, 144), S.Content.Items);
         if (clicked >= 0) TakeLeftBehind(D.Crawl, report.LeftBehind, clicked);

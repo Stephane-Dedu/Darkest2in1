@@ -18,8 +18,15 @@ internal static class CrawlSceneryCheck
 {
     private static readonly bool MotionChecking = Environment.GetCommandLineArgs().Contains("-dd3-crawl-motion-check");
     private static readonly bool VilhelmChecking = Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-check");
-    private static readonly bool Requested = MotionChecking || VilhelmChecking || Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
-    private static readonly string[] Regions = { "dd2_city", "dd2_farm", "dd2_forest", "dd2_coast" };
+    private static readonly bool CurioChecking = Environment.GetCommandLineArgs().Contains("-dd3-curio-actors-check");
+    private static readonly string[][] CurioCases = Environment.GetCommandLineArgs()
+        .Where(a=>a.StartsWith("-dd3-curio-actor-case=",StringComparison.Ordinal))
+        .Select(a=>a.Substring("-dd3-curio-actor-case=".Length).Split('@')).ToArray();
+    private static readonly string CurioShots = Environment.GetCommandLineArgs()
+        .FirstOrDefault(a=>a.StartsWith("-dd3-curio-shots=",StringComparison.Ordinal))?.Substring("-dd3-curio-shots=".Length);
+    private static readonly bool Requested = CurioChecking || MotionChecking || VilhelmChecking || Environment.GetCommandLineArgs().Contains("-dd3-crawl-scenery-check");
+    private static readonly string[] Regions = CurioChecking ? CurioCases.Select(c=>c.Length>1?c[1]:"").ToArray()
+        : new[]{ "dd2_city", "dd2_farm", "dd2_forest", "dd2_coast" };
     private static SaveFile _save;
     private static int _step, _region;
     private static float _next, _wait;
@@ -28,6 +35,8 @@ internal static class CrawlSceneryCheck
     private static float _motionCamera, _motionTime, _motionMaximum;
     private static int _motionFrames;
     private static bool _motionSampled;
+    private static int _curioSupplyBefore, _curioCounter;
+    private static Texture _curioUsed;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save,_save) && Session.Current.SavePath == null;
 
     private static void Postfix()
@@ -46,6 +55,11 @@ internal static class CrawlSceneryCheck
             {
                 if (d.Phase != Phase.Off || GameModeMgr.CurrentMode != GameModeType.MAIN_MENU || Dd2Api.Modes.IsChangingState()) return;
                 if (s.Save != null || s.SavePath != null) { _done = true; return; }
+                if(CurioChecking)Require(CurioCases.Length>0 && CurioCases.Length<=32 && CurioCases.All(c=>c.Length==3 &&
+                    new[]{"dd2_city","dd2_forest","dd2_farm","dd2_coast"}.Contains(c[1]) &&
+                    c[0].All(ch=>char.IsLower(ch)||char.IsDigit(ch)||ch=='_') &&
+                    new[]{"none",Supply.HolyWater,Supply.Bandage,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(c[2])),
+                    "Invalid native curio QA cases");
                 var estate = new Estate { Name = "Unsaved crawl scenery check", Seed = 73232, Week = 12,
                     OpeningRaidPending = false, RegionLayoutVersion = CampaignRegions.LayoutVersion };
                 estate.Add(Currency.Gold,50000);
@@ -92,6 +106,12 @@ internal static class CrawlSceneryCheck
                     if (VilhelmChecking && !UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Any(m => m.Ready && HeroStage.Owns(m.Actor))) return;
                     if (VilhelmChecking) VilhelmCombatCheck.CheckRegistration();
                     if (VilhelmChecking && MotionChecking) Require(UnityEngine.Object.FindObjectsOfType<ExportedHeroModel>().Any(m => m.Ready && HeroStage.Owns(m.Actor) && m.NativeWalkReady),"Original Vilhelm walk calibration missing");
+                    if(CurioChecking)
+                    {
+                        if(!NativeCurioArt.Ready)return;
+                        Require(NativeCurioArt.TryGet(CurioCases[_region][0],false,out _,out _),"Regional candidate art missing");
+                        d.Travel(1);Advance("curio-corridor-entry",d,210);break;
+                    }
                     if (MotionChecking)
                     {
                         foreach (var tile in exp.Map.Corridors[0].Tiles) { tile.Content = HallContent.Empty; tile.Resolved = true; }
@@ -101,6 +121,53 @@ internal static class CrawlSceneryCheck
                         _step = 98; _next = Time.unscaledTime+CorridorSceneMotion.StepSeconds+.1f; _wait = Time.unscaledTime; break;
                     }
                     Advance("entrance-native-actors",d,2,VilhelmChecking ? 15 : 1.5f); break;
+                case 210:
+                    d.Step(true);Require(d.Crawl.CurioHere==CurioCases[_region][0],"Native QA curio tile missing");
+                    Advance("curio-actors-closed",d,211,Mathf.Max(3,d.StepAnimationSeconds+.3f));break;
+                case 211:
+                    Require(HeroStage.Lit && HeroStage.Instance?.Texture!=null,"Native party missing beside curio");
+                    CurioCapture("closed");
+                    _curioCounter=exp.RandomCounter;
+                    _curioSupplyBefore=exp.Pack.Count(CurioCases[_region][2]);
+                    Advance("curio-closed-captured",d,212,1);break;
+                case 212:
+                    string supply=CurioCases[_region][2];
+                    d.Investigate(exp.Party[0],supply=="none"?null:supply);
+                    Require(d.Crawl.LastCurio!=null && d.Crawl.CurrentTile.Resolved,"Ordinary native-party curio did not resolve");
+                    if(supply!="none")Require(exp.Pack.Count(supply)==_curioSupplyBefore-1,"Curio supply was not consumed exactly once");
+                    Require(exp.RandomCounter==_curioCounter+2,"Curio resolution did not preserve the ordinary outcome and loot-selection RNG steps");
+                    Plugin.Log.LogInfo("[regional curio actors] RESULT "+CurioCases[_region][0]+"/"+Regions[_region]+"/"+supply+"; "+d.Crawl.LastCurio.Text);
+                    Advance("curio-result",d,213,2);break;
+                case 213:
+                    CurioCapture("result");
+                    // Unity captures at end of frame. Keep the report and map
+                    // unchanged until that frame has actually been presented.
+                    Advance("curio-result-captured",d,218,1);break;
+                case 218:
+                    var report=d.Crawl.LastCurio;
+                    // Loot overflow is discarded only inside this unsaved fixture.
+                    report.LeftBehind.Clear();d.DismissCurio(report);
+                    Require(NativeCurioArt.TryGet(CurioCases[_region][0],true,out var searched,out _),"Searched native painting missing");
+                    _curioUsed=searched;Advance("curio-actors-used",d,214,3);break;
+                case 214:
+                    CurioCapture("used");Advance("curio-used-captured",d,219,1);break;
+                case 219:
+                    d.Step(false);
+                    Require(exp.TileIndex==0,"Curio return step was rejected");
+                    Advance("curio-revisit-back",d,215,Mathf.Max(1.5f,d.StepAnimationSeconds+.3f));break;
+                case 215:
+                    d.Step(true);Require(exp.TileIndex==1,"Curio revisit step was rejected");
+                    Advance("curio-revisit-forward",d,216,Mathf.Max(2,d.StepAnimationSeconds+.3f));break;
+                case 216:
+                    Require(d.Crawl.CurrentTile.Resolved && d.Crawl.LastCurio==null,"Curio revisit resolved or reopened the result");
+                    Require(NativeCurioArt.TryGet(CurioCases[_region][0],true,out var revisited,out _) && ReferenceEquals(revisited,_curioUsed),"Revisit replaced the used painting");
+                    CurioCapture("return");
+                    Plugin.Log.LogInfo("[regional curio actors] PASS "+CurioCases[_region][0]+"/"+Regions[_region]+"; native party, ordinary supply/outcome, used state and revisit; unsaved fixture");
+                    Advance("curio-return-captured",d,217,1);break;
+                case 217:
+                    if(++_region<Regions.Length){SetMap(d,s);Advance("regional-curio-reload",d,1,2);}
+                    else{_done=true;Plugin.Log.LogInfo("[regional curio actors] PASS ALL "+CurioCases.Length+" cases; no estate selected or persisted");}
+                    break;
                 case 98:
                     d.Step(true);
                     Require(exp.TileIndex == 1,"First ordinary button step was rejected");
@@ -267,6 +334,10 @@ internal static class CrawlSceneryCheck
     {
         var exp = d.Expedition;
         exp.Quest.Dungeon = Regions[_region]; exp.Seed = 73232+_region;
+        // Each curio case is an independent deterministic synthetic map. This
+        // seed keeps ordinary return-content rolls clear; no rules/probabilities
+        // or persisted expedition state are changed for the fixture.
+        if(CurioChecking){exp.Seed=73281;exp.RandomCounter=0;}
         var props = s.Campaign.Props(exp.Quest.Dungeon);
         var rng = new Rng(73232);
         var map = new DungeonMap { Dungeon = exp.Quest.Dungeon, EntranceRoomId = 0, Seed = exp.Seed };
@@ -280,12 +351,29 @@ internal static class CrawlSceneryCheck
         corridor.Tiles[2].ContentId = props.Pick(ZoneProps.Traps,rng);
         corridor.Tiles[3].Content = HallContent.Obstacle;
         corridor.Tiles[3].ContentId = props.Pick(ZoneProps.Obstacles,rng);
+        if(CurioChecking)
+        {
+            foreach(var tile in corridor.Tiles){tile.Content=HallContent.Empty;tile.ContentId=null;}
+            corridor.Tiles[1].Content=HallContent.Curio;corridor.Tiles[1].ContentId=CurioCases[_region][0];
+            map.Rooms[1].Content=RoomContent.Empty;
+        }
         map.Corridors.Add(corridor);
         exp.Map = map; exp.RoomId = 0; exp.CorridorId = -1; exp.TileIndex = -1;
         exp.HeadingRoomId = -1; exp.PendingEncounter = null; exp.FightCheckpoint = null;
         exp.PendingCurio = null; exp.PendingSpoils = null; exp.QuestComplete = false; exp.Light = 100;
         exp.Pack.Items.Clear();
         exp.Pack.Add(Supply.Food,MotionChecking ? 32 : 8); exp.Pack.Add(Supply.Torch,2); exp.Pack.Add(Supply.Shovel,1);
+        if(CurioChecking && CurioCases[_region][2]!="none")exp.Pack.Add(CurioCases[_region][2],2);
+    }
+
+    private static void CurioCapture(string state)
+    {
+        if(string.IsNullOrWhiteSpace(CurioShots))return;
+        Require(System.IO.Path.IsPathRooted(CurioShots),"Curio screenshot directory must be absolute");
+        System.IO.Directory.CreateDirectory(CurioShots);
+        var type=Type.GetType("UnityEngine.ScreenCapture, UnityEngine.ScreenCaptureModule",throwOnError:true);
+        AccessTools.Method(type,"CaptureScreenshot",new[]{typeof(string),typeof(int)}).Invoke(null,new object[]{
+            System.IO.Path.Combine(CurioShots,CurioCases[_region][0]+"-"+Regions[_region]+"-actors-"+state+".png"),1});
     }
 
     private static void Advance(string label, Driver d, int next, float hold = 1.5f)

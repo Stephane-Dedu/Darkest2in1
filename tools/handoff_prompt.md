@@ -1,3 +1,36 @@
+LATEST365 NATIVE REGIONAL CURIOS ACCEPTED AND INSTALLED:
+Read local-art/ui-overhaul/curio-regional-coherence-v15/CONTINUE.md first.
+Nine regional pairs from350/355/356/358/359/360/361/362/364 are now accepted
+and installed through a deliberately rebuilt combined packv03. Current runtime
+is fresh365, not354 or stale355. Accepted40design IDs/35pairs/70PNGs:39base-runtime
+IDs plus1DLC design. Do not claim40of70runtime. Six newly painted identities,
+nine new regional pairs; eight canonical IDs. All old26records/52PNGs retain.
+Twelve native PNG/input cases pass,24captures. Nine four-native-hero cases pass,
+36captures; actual ordinary supplies/outcomes, used state and revisit. Four final
+report cases pass,16captures; final offering-label case passes,4captures. The80
+valid captures are indexed; art boards and result views reviewed. Fixturev01
+step timing andv02end-of-frame screenshots were rejected; usev03art/v04reports.
+New report text clears its scroll border. Region effect aliases show Stress
+relieved./Torchlight increased./Stress increased. instead of technical IDs. Canonical reports,
+outcomes, RNG, saves, supplies, classic/other-region fallbacks and spawns retain.
+Release0errors3oldwarnings,1330Core/297UI/12artifact tests pass. Core first needed
+its exact native catalog fixture in the frozen private test directory.
+Fresh HEAD2103d25 plus4explicit owned C#inputs only; no shared dirty build.
+One-shot deployment andruntime refreshes are consumed. Current hashes in final-
+checks.json/acceptance.json; do not restore old354/config or run old installers.
+All44foreign files/config/Hamlet assets retain. No protected estates1/3 or mod
+saves accessed. Native QA uses synthetic unsaved maps, not proof of natural
+spawns; saved campaign reload/controller/long-session QA remains separate.
+Sprawl/Foetor cabinet bodies remain interim. Four347drafts still unaccepted;
+bookshelf342 stays,349duplicate rejected, Hope glyph intentionally floats.
+Hamlet354 Mountain/ground/Guild finishes now pass native overview/zoom and full
+10-service/input/camera/cache/resize QA. No Hamlet art changes365. All owned QA
+processes closed. Expedition340 remains parked.
+Preserve104design/70runtime/27DLC/6legacy/FadedMemory scopes and foreign journal
+bytes. Heavy D:, ordinary usage first,7-8%reserve. New human launch permission
+below is ACTIVE after the elapsed deadline; older no-launch/status lines below
+are historical. Never deploy while game runs.
+
 NEW HUMAN PERMISSION 2026-10-26:
 Launch and repeated game QA authorised after 20 minutes from the05:56:52UTC
 clock read, so not before06:16:52UTC /07:16:52CET Paris. Until then work

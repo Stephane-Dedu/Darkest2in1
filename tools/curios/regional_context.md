@@ -1,5 +1,27 @@
 # Curios must belong to their surroundings
 
+Current round365 status: nine regional pairs are accepted and installed after
+unsaved native rendering, input and four-hero checks. Read the v15 checkpoint
+and acceptance.json before older candidate notes below. Runtime365 and combined
+packv03 replace the earlier runtime354 baseline. Accepted coverage is40design
+identities,39base-runtime and1DLC, with35distinct pairs and70PNGs. This is not a
+claim of40runtime spawns. Regional bindings do not alter encounter placement.
+
+The new bodies are Defaced memorial and Abandoned apothecary trolley in the
+Sprawl, separate field stores in the Tangle and dock cargo in the Shroud,
+Fouled feeding trough and Bloodied offering stone in the Foetor, and Skull-bound
+warning, Shallow field grave and Webbed deadwood in the Tangle. Materials,
+grounding, silhouette/detail and state continuity were inspected beside real
+native heroes. All old26artifact records/52PNGs remain exact. Three regional effect
+labels replace internal IDs in result text; outcome data remains unchanged.
+
+Twelve PNG/mask/input cases and nine ordinary native-party cases pass. Four
+final report cases check the effect labels and text below the scroll border.
+The80valid captures include repeated checks, not80identities. Saved campaign
+reload, ordinary controller travel and long-session performance were not newly
+tested. Synthetic cases do not establish native encounter locations. The four
+347drafts remain unaccepted; Sprawl/Foetor cabinet still use the interim body.
+
 Owner direction, 2026-10-25: region and setting take priority over copying the
 DD1 object's literal silhouette. A freestanding display cabinet in an outdoor
 DD2 area breaks immersion even when its painting is detailed. This supersedes

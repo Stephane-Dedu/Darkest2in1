@@ -105,7 +105,8 @@ public class NativeCurioArtTests
         string path = Path.Combine(pack.Root, "curios/manifest.json");
         var document = JObject.Parse(File.ReadAllText(path)); document["Version"] = 3;
         document["Entries"]![0]!["Regions"] = JObject.FromObject(new { dd2_city = new { ArtId = "curio1", DisplayName = "Locked street cache",
-            ResultTexts = new Dictionary<string, string> { ["The cabinet is a trap!"] = "The cache is trapped!" } } });
+            ResultTexts = new Dictionary<string, string> { ["The cabinet is a trap!"] = "The cache is trapped!",
+                ["ConfessionBoothHealStress2"] = "Stress relieved." } } });
         File.WriteAllText(path, document.ToString());
         state.Quest = new() { Dungeon = "dd2_city" };
         Pump(state, () => NativeCurioArt.Ready && NativeCurioArt.TryGet("curio0", false, out _, out _));
@@ -113,12 +114,15 @@ public class NativeCurioArtTests
         Assert.Equal("curio1", art.Id);
         Assert.Equal("Locked street cache", NativeCurioArt.DisplayName("curio0"));
         Assert.Equal("The cache is trapped!", NativeCurioArt.ResultText("curio0", "The cabinet is a trap!"));
+        Assert.Equal("Stress relieved.", NativeCurioArt.ResultText("curio0", "ConfessionBoothHealStress2"));
+        Assert.Equal("Unmapped effect", NativeCurioArt.ResultText("curio0", "Unmapped effect"));
         Assert.True(NativeCurioArt.TryGet("curio0", true, out var used, out var usedArt));
         Assert.NotSame(closed, used); Assert.Same(art, usedArt);
         state.Quest.Dungeon = "ruins";
         Pump(state, () => NativeCurioArt.Ready && NativeCurioArt.TryGet("curio0", false, out _, out var current) && current.Id == "curio0");
         Assert.Null(NativeCurioArt.DisplayName("curio0"));
         Assert.Equal("The cabinet is a trap!", NativeCurioArt.ResultText("curio0", "The cabinet is a trap!"));
+        Assert.Equal("ConfessionBoothHealStress2", NativeCurioArt.ResultText("curio0", "ConfessionBoothHealStress2"));
         Assert.Equal(17, state.RandomCounter);
         Assert.Equal("curio0", state.Map.Rooms[0].CurioId);
         Assert.False(state.Map.Rooms[0].CurioTaken);

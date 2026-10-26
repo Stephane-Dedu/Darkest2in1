@@ -19,6 +19,15 @@ internal static class CurioPreview
     private static readonly bool Checking = Environment.GetCommandLineArgs().Contains("-dd3-curio-check");
     private static readonly bool Regional = Environment.GetCommandLineArgs().Contains("-dd3-curio-regions");
     private static readonly string[] Regions = { "dd2_city", "dd2_forest", "dd2_farm", "dd2_coast" };
+    // Explicit opt-in cases let regional-only candidates use their real scenery.
+    // They exercise the transient fixture, never a saved expedition or spawn table.
+    private static readonly string[][] Cases = Environment.GetCommandLineArgs()
+        .Where(a=>a.StartsWith("-dd3-curio-case=",StringComparison.Ordinal))
+        .Select(a=>a.Substring("-dd3-curio-case=".Length).Split('@')).ToArray();
+    private static readonly string[] SupplyCase = Environment.GetCommandLineArgs()
+        .FirstOrDefault(a=>a.StartsWith("-dd3-curio-supply=",StringComparison.Ordinal))?
+        .Substring("-dd3-curio-supply=".Length).Split('@');
+    private static string SupplyItem => SupplyCase==null ? Supply.HolyWater : SupplyCase[2];
     private static readonly bool Requested = Checking;
     private static readonly string Shots = Environment.GetCommandLineArgs().FirstOrDefault(a=>a.StartsWith("-dd3-curio-shots=",StringComparison.Ordinal))?.Substring("-dd3-curio-shots=".Length);
     private static readonly CrawlUi Ui = new();
@@ -86,7 +95,7 @@ internal static class CurioPreview
             if(injected!=null){Event.current=injected;_inputFrame=Time.frameCount;}
             Drag.Begin();
             if(injected!=null && (_step==12 || _step==14))
-                Drag.Source(new Rect(650,810,100,100),new PackStack(Expedition.Pack,0,Supply.HolyWater),_=>{});
+                Drag.Source(new Rect(650,810,100,100),new PackStack(Expedition.Pack,0,SupplyItem),_=>{});
             Ui.DrawCurioPreview(Driver.Instance.Crawl,Expedition);
             Drag.Overlay();
             if(injected!=null)VerifyInput();
@@ -110,19 +119,33 @@ internal static class CurioPreview
         {
             if(!NativeCurioArt.Ready)return;
             _definitions=NativeCurioArt.Definitions.OrderBy(d=>d.Id).ToArray();
-            if (Regional) _definitions = _definitions.Where(d=>d.Id=="locked_display_cabinet").SelectMany(d=>Regions.Select(_=>d)).ToArray();
+            if(Cases.Length>0)
+            {
+                var available=_definitions.ToDictionary(d=>d.Id);
+                Require(Cases.All(c=>c.Length==2 && available.ContainsKey(c[0]) && Regions.Contains(c[1])),"Invalid explicit curio QA case");
+                _definitions=Cases.Select(c=>available[c[0]]).ToArray();
+            }
+            else if (Regional) _definitions = _definitions.Where(d=>d.Id=="locked_display_cabinet").SelectMany(d=>Regions.Select(_=>d)).ToArray();
             Require(_definitions.Length>0,"No exact curio paintings loaded");
+            Require(SupplyCase==null || SupplyCase.Length==3 && Regions.Contains(SupplyCase[1]) &&
+                NativeCurioArt.Definitions.Any(d=>d.Id==SupplyCase[0]) &&
+                new[]{Supply.HolyWater,Supply.Bandage,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(SupplyCase[2]),
+                "Invalid explicit curio supply QA case");
         }
         var exp=Expedition;var room=exp.Map.Rooms[0];
         if(_step==0)
         {
-            if(_index>=_definitions.Length){Set("decorative_urn");exp.Pack.Add(Supply.HolyWater,2);_holy=exp.Pack.Count(Supply.HolyWater);_step=11;return;}
-            Set(_definitions[_index].Id);_step=1;return;
+            if(_index>=_definitions.Length)
+            {
+                Set(SupplyCase==null ? "decorative_urn" : SupplyCase[0],SupplyCase==null ? null : SupplyCase[1]);
+                exp.Pack.Add(SupplyItem,2);_holy=exp.Pack.Count(SupplyItem);_step=11;return;
+            }
+            Set(_definitions[_index].Id,Cases.Length>0 ? Cases[_index][1] : null);_step=1;return;
         }
         bool sceneryReady=RegionSceneryArt.RoomAlpha(RegionSceneryArt.CorridorChoice(RegionalScenery.For(exp.Quest.Dungeon),7342,0)?.FileName)>=.999f;
         if(_step==1 && sceneryReady && Time.unscaledTime>=_until && NativeCurioArt.Ready && NativeCurioArt.TryGet(room.CurioId,false,out _closedTexture,out _painting))
         {
-            Plugin.Log.LogInfo("[curio check] FRAME "+room.CurioId+" closed; region="+exp.Quest.Dungeon+"; pairs="+NativeCurioArt.ResidentPairs);
+            Plugin.Log.LogInfo("[curio check] FRAME "+room.CurioId+" closed; region="+exp.Quest.Dungeon+"; art="+_painting.Id+"; name="+(NativeCurioArt.DisplayName(room.CurioId)??room.CurioId)+"; pairs="+NativeCurioArt.ResidentPairs);
             Capture(room.CurioId,"closed");
             _step=2;
         }
@@ -132,22 +155,23 @@ internal static class CurioPreview
             Require(NativeCurioArt.TryGet(room.CurioId,true,out var used,out var same),"Used painting missing");
             Require(!ReferenceEquals(used,_closedTexture) && ReferenceEquals(same,_painting),"Used state replaced the identity or body registration");
             Require(exp.RandomCounter==_counter,"Rendering or clicks consumed expedition RNG");
-            Plugin.Log.LogInfo("[curio check] FRAME "+room.CurioId+" used; opaque click/padding miss PASS; foot=690");
+            Plugin.Log.LogInfo("[curio check] FRAME "+room.CurioId+" used; region="+exp.Quest.Dungeon+"; opaque click/padding miss PASS; foot=690");
             _index++;_step=0;
         }
         if(_step==11 && sceneryReady && Time.unscaledTime>=_until && NativeCurioArt.Ready && NativeCurioArt.TryGet(room.CurioId,false,out _closedTexture,out _painting))_step=12;
         if(_step==16 && Time.unscaledTime>=_until)
         {
             _done=true;
-            Plugin.Log.LogInfo("[curio check] PASS: "+(Regional ? "4 regional cabinet cases" : _definitions.Length+" exact IDs")+" closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and ordinary urn supply resolution; no estate/native host/save access");
+            Plugin.Log.LogInfo("[curio check] PASS: "+(Cases.Length>0 ? Cases.Length+" explicit regional cases" : Regional ? "4 regional cabinet cases" : _definitions.Length+" exact IDs")+" closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and ordinary "+room.CurioId+"/"+SupplyItem+" supply resolution; no estate/native host/save access");
         }
     }
-    private static void Set(string id)
+    private static void Set(string id,string region=null)
     {
         var exp=Expedition;exp.Map.Rooms[0].CurioId=id;exp.Map.Rooms[0].CurioTaken=false;exp.PendingCurio=null;
         exp.Quest.Dungeon=id.Contains("oyster")||id.Contains("coral")||id.Contains("fish") ? "dd2_coast" :
             id.Contains("tent") ? "dd2_forest" : id.Contains("bones") ? "dd2_farm" : "dd2_city";
-        if (Regional && id=="locked_display_cabinet") exp.Quest.Dungeon=Regions[_index];
+        if(region!=null)exp.Quest.Dungeon=region;
+        else if (Regional && id=="locked_display_cabinet") exp.Quest.Dungeon=Regions[_index];
         Panel.SetValue(Ui,null);_counter=exp.RandomCounter;_until=Time.unscaledTime+1.6f;_usedCaptured=false;
         NativeCurioArt.Clear();NativeCurioArt.Prepare(exp);
     }
@@ -181,10 +205,11 @@ internal static class CurioPreview
             Require(Panel.GetValue(Ui)!=null,"Opaque paint did not open the curio");
             Panel.SetValue(Ui,null);exp.Map.Rooms[0].CurioTaken=true;_until=Time.unscaledTime+1.6f;
         }
-        if(_step==13)Require(exp.Pack.Count(Supply.HolyWater)==_holy&&!exp.Map.Rooms[0].CurioTaken&&exp.RandomCounter==_counter,"A padding drop consumed a supply or resolved the curio");
+        if(_step==13)Require(exp.Pack.Count(SupplyItem)==_holy&&!exp.Map.Rooms[0].CurioTaken&&exp.RandomCounter==_counter,"A padding drop consumed a supply or resolved the curio");
         if(_step==15)
         {
-            Require(exp.Pack.Count(Supply.HolyWater)==_holy-1&&exp.Map.Rooms[0].CurioTaken&&Driver.Instance.Crawl.LastCurio!=null,"Opaque supply drop did not run ordinary curio resolution exactly once");
+            Require(exp.Pack.Count(SupplyItem)==_holy-1&&exp.Map.Rooms[0].CurioTaken&&Driver.Instance.Crawl.LastCurio!=null,"Opaque supply drop did not run ordinary curio resolution exactly once");
+            Plugin.Log.LogInfo("[curio check] SUPPLY "+exp.Map.Rooms[0].CurioId+"/"+SupplyItem+"; region="+exp.Quest.Dungeon+"; result="+Driver.Instance.Crawl.LastCurio.Text);
             _until=Time.unscaledTime+1.6f;
         }
         _step++;
@@ -192,7 +217,7 @@ internal static class CurioPreview
     private static void Require(bool valid,string message){if(!valid)throw new InvalidOperationException(message);}
     private static void Capture(string id,string state)
     {
-        if (Regional && id=="locked_display_cabinet") id += "-"+Expedition.Quest.Dungeon;
+        if (Regional || Cases.Length>0) id += "-"+Expedition.Quest.Dungeon;
         if(string.IsNullOrWhiteSpace(Shots))return;
         _captureFrame=Time.frameCount;
         if(!System.IO.Path.IsPathRooted(Shots))throw new InvalidOperationException("Curio screenshot directory must be absolute");

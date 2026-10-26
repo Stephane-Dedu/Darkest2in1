@@ -11300,3 +11300,45 @@ Owner now permits repeated game QA after06:16:52UTC on2026-10-26, following
 the20minute wait from05:56:52UTC. Preparation remains offline until then.
 Checkpoint local-art/ui-overhaul/curio-regional-coherence-v14/CONTINUE.md;
 heavy evidence D:. Fresh current-HEAD QA build still needed.
+
+
+## Round365: accept regional native curios after actual DD2 QA
+
+Outdoor regions still used indoor furniture and one shared cabinet body. Nine
+reviewed regional pairs are now accepted and installed: Sprawl memorial and
+apothecary trolley, Tangle field stores, Shroud dock cargo, Foetor feeding trough
+and offering stone, Tangle warning effigy, field grave and supported web. The
+combined pack is rebuilt deliberately from the reviewed350/355/356/358/359/360/
+361/362/364 sources. All old26artifact records/52PNGs retain. No new generation
+or raster edits365. Coverage40design identities,39base-runtime plus1DLC,
+35distinct pairs/70PNGs. Six new identities and nine new regional pairs across
+eight canonical IDs. These counts do not establish new natural spawns.
+
+The owner authorised repeated QA after06:16:52UTC; every launch followed the
+deadline. Twelve unsaved native PNG/input cases pass, including opaque clicks,
+padding rejection and an actual bandage drop. Nine full four-native-hero cases
+pass ordinary supplies/outcomes, outcome+loot-selection RNG, used paint and
+revisit. Five final report cases pass.80valid native frames indexed and art/
+result boards inspected. QA fixture stepping now respects movement duration;
+captures keep state until end of frame. Earlier timing/capture drafts rejected.
+
+Result descriptions clear the scroll border. Effect lines use the existing
+regional exact-string lookup; three aliases replace internal memorial/light/
+stress effect labels with readable descriptions. Canonical IDs, reports,
+effects, outcomes, RNG, supplies, used flags, saves, probabilities, classic
+fallbacks and FadedMemory remain. Release0errors/3oldwarnings,1330Core/297UI/
+12artifact tests and fresh Core365 full-pack/fallback checks pass. Initial Core
+fixture was missing its native catalog; supplying the exact private catalog
+fixed the environment without weakening tests.
+
+Hamlet354 Mountain/turf/Guild fixes also pass actual overview/zoom and complete
+10service/camera/input/cache/reload/resize checks, without new Hamlet changes.
+Runtime365 comes from clean frozen HEAD2103d25 plus4owned C#inputs. No shared
+dirty build.85installed targets/config and44foreign files checked. All owned
+QA processes closed. No protected estate or mod save access; no stale restore
+or armed installer. Current combined packv03 is authoritative; old individual
+candidate manifests are stale. Four347drafts remain unaccepted. Sprawl/Foetor
+cabinet fittings and remaining104-ID ledger continue. Saved campaign reload,
+ordinary controller travel and long-session performance were not newly tested.
+Checkpoint local-art/ui-overhaul/curio-regional-coherence-v15/CONTINUE.md;
+heavy evidence D:.
