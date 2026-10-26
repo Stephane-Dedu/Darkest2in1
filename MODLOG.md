@@ -11714,3 +11714,57 @@ and journal bytes; only frozen currentHEAD plus owned inputs if C#build needed.
 No stale runtime/config restores or consumed helpers. HeavyD:limited space,
 avoid redundant exports/unrelated deletion. Ordinary usage first,no work at
 <=8%;full checkpoint before7-8%reserve/context exhaustion.
+
+
+## Round374: weathered Tangle coffin and fixed searched state
+
+Round374 accepts Tangle-only Weathered field coffin for ancient_coffin.
+Read local-art/ui-overhaul/curio-regional-coherence-v24/CONTINUE.md and
+acceptance.json first. Runtime367 unchanged; deliberate pack-coffin-CANDIDATE-
+v01 installed.48design IDs47base-runtime+1DLC,44pairs88PNGs. Old47entries/
+43records86PNGs exact. Canonical Weald/no supply interactions verified from
+installed CSV, hashes unchanged. Regional-only omitted default keeps original
+classic/other-region art/name/text. Existing outcome wording also retains.
+
+Existing362 common/forest/cave container index has no coffin body. Native grave
+markers/earth and whole Guardian/Shambler architecture are unsuitable coffins.
+Four built-in image_gen calls reference native Tangle coffer, field grave and
+actual corridor. Generated raster art, no native geometry/UV/paint/shader claim.
+Original closed and restrained ajar edit selected. Cutout trial rejected as
+unnecessary transparent-RGB halo cleanup plus repaint; fully raised lid draft
+rejected body/rim drift/broad change. All prompts/originals/hashes privateD:.
+Full ajar edit1429628RGBA pixel drift includes transparent RGB;326307lower
+visible pixels also change. It is never used as whole body. Existing public
+compose_state_patch.py applies reviewed lid/cavity domain only:290129mask/
+288277changed,bounds110/420/1501/652. Outside original RGBA and raw rows652+
+exact; fitted lower body rows747+ exact. Lower front wall, handles, moss and
+ground fixed. Existing20%mask/registration guards retain; two actual wrong-
+canvas/excessive-domain probes reject. Final raw-pair-v01/fitted-v01,1534x1032,
+foot767/1016,width360/fullheight242.1904 including transparent upper space.
+
+Native paint comparison and actual Tangle corridor/room320/360 review prefer
+360. Native PNG coffin DrawProp clicks/padding pass; its default old decorative
+urn/holy-water probe is separate, not a coffin supply. Real-four-hero ordinary
+no-item outcome/RNG/used/revisit pass,6captures. Loot observed; nothing/quirk
+branches not forced. No natural-spawn/saved/controller/long-session claim.15artifact/two
+negative guards/actualCore367 full48ID44pair/all-old/classic/other-region/owner
+checks pass. No C#build374;367Release1330Core297UI remain prior. Both owned QA
+processes closed.103targets/config44foreign/journal/public source/CSV hashes
+verified. Installer374 consumed,before374 evidence only,no pending restore.
+
+Continue refreshed104-ID ledger:v24/context-audit-104.json. Pending13base/
+10quest/26DLC/6legacy plus FadedMemory owner exception separate scopes. Counts
+do not establish encounters or every-region review. Native suitable complete
+geometry/UV/full paint first, generated only for demonstrated gaps, require
+native comparison/acceptance. Do not redo accepted art or infer spawns. Keep
+prior365-373 pairs, all cabinet regions/travel case/slab/barnacle chest. Old347
+global pack/helper/generated DinnerCart used variant and349duplicate forbidden.
+Bookshelf342 stays,Hope glyph floats,full Shambler building unsuitable compact
+altar. Tutorial bandits chest remains unselected,Weald/key/no-item guaranteed
+Blight1, not normal random chest or shovel target. Hamlet354QA365/expedition340
+parked. Repeated unsaved QA permission active; never deploy while game runs.
+Protected estates1/3,mod saves and abandoned checkout forbidden. Preserve
+concurrent/journal bytes; frozen clean currentHEAD plus owned inputs only if
+C#build needed. No stale runtime/config restores or consumed helpers. HeavyD:
+limited space,avoid redundant exports/unrelated deletion. Ordinary usage first,
+no work at<=8%,full checkpoint before7-8%reserve/context exhaustion.

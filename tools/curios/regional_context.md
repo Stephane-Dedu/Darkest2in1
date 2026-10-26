@@ -1,5 +1,22 @@
 # Curios must belong to their surroundings
 
+Current round374 status: Weathered field coffin is accepted for
+ancient_coffin/dd2_forest. Canonical installed CSV verifies Weald/no supply
+interactions. Native source index has markers/earth but no suitable coffin body.
+Generated missing funerary box references native Tangle coffer, field grave
+and corridor. Local ajar lid/cavity changes only; original lower body/handles/
+moss/ground fixed. No native geometry/paint/shader claim. All original RGBA
+outside bounded mask and raw rows652+ exact, fitted rows747+ exact. Existing
+guards retain. Read v24/CONTINUE and acceptance first. Native paint/scenery/
+party/ground/states/results and PNG click/padding plus ordinary no-item outcome/
+RNG/used/revisit pass,6captures. PNG old-urn supply probe is not a coffin supply.
+Runtime367 unchanged;48IDs47base+1DLC,44pairs88PNGs. Old47entries43records86PNGs,
+classic/other regions/outcome text retain.15artifact/two actual negative guards/
+Core367 full catalog/fallback checks pass; no C#build374,1330Core297UI prior.
+103targets/config44foreign/journal/source/CSV hashes preserved,DD2closed,
+installer consumed/no restore. Pending13base/10quest/26DLC/6legacy plus owner
+exception in refreshed104-ID ledger. Art counts do not prove encounters.
+
 Current round373 status: Tangle-only Abandoned treatment slab is accepted
 for canonical mummified_remains. Installed CSV verifies Weald/bandage. Complete
 native forest corpse/table keep original relative pose, geometry/UV/full paint/

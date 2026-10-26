@@ -1,5 +1,31 @@
 # Curio rework: design catalog v01
 
+## Field coffin, round374
+
+The Tangle presentation of Ancient Coffin is Weathered field coffin. A long,
+tapered funerary box uses the native coffer and field grave as material/style
+references. The native common/forest/cave source index has no suitable coffin
+body. This is generated raster art, with no native geometry or shader claim.
+
+Four built-in imagegen calls are recorded privately. The selected closed body
+and local ajar-lid edit use the existing `compose_state_patch.py` guard. All
+original RGBA outside the reviewed lid/cavity mask remain exact. Front lower
+wall, handles, moss and feet stay fixed. The drifting full used image, raised
+lid trial and unnecessary cutout/repaint trial are rejected. The 20%domain cap
+and same-canvas registration guards retain; both actual negative probes reject.
+Final raw-pair-v01/fitted-v01 uses1534x1032/foot767,1016/width360. Full source
+prompts, native comparisons and original hashes stay in private checkpointv24.
+
+Canonical Weald/no supply interactions and all outcome text retain. Regional-
+only omitted default preserves classic/other-region presentation. Native coffin
+PNG clicks/padding and ordinary no-item four-hero outcome/used/revisit checks
+pass,6captures. PNG fixture additionally runs its old decorative-urn/holy-water
+health probe, which is not a coffin supply interaction.15artifact tests, two
+negative composition guards and actualCore367 full48ID44pair/fallback pass.
+No C#build374;1330Core297UI are prior367 results. Runtime367 unchanged,
+48identities/44pairs88PNGs, all previous47entries43records86PNGs exact.
+Read v24/CONTINUE.md and acceptance.json; protected saves remain untouched.
+
 ## Native treatment remains, round373
 
 The Tangle presentation of Mummified Remains is now Abandoned treatment slab.
