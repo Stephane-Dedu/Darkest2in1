@@ -1,5 +1,53 @@
 # Curio rework: design catalog v01
 
+## Accepted native Foetor meat cart, round366
+
+`render_meat_cart.py` renders the complete native cart selected by its static
+batch, retaining 5,748 vertices, 7,232 triangles, original UVs, full 1024px paint
+and native tint. The combined scene mesh contains other renderers; rendering
+all of it would include unrelated surfaces. The private source audit verifies
+the selected renderer against the installed bundles before adaptation.
+
+The searched state hides four complete draped offal strips, including their
+reverse surfaces: 1,172 vertices and 1,832 triangles. Both states keep all mesh
+data; only those components' material visibility changes. The main carcass,
+timber, spikes, legs and loose scraps stay fixed. No generated paint, raster
+repainting or deformation is used. This replaces the unaccepted round347
+whole-image used-state edit, without installing that old draft pack.
+
+```powershell
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_meat_cart.py -- `
+  --kit $curioKit --source $nativeCartExport --selection $privateCartComponents `
+  --out "$privateCartRoot/native-pair"
+```
+
+Keep the source export, component selection, coordinates and output outside
+Git. The native material uses backface culling and has cutout disabled; its
+saved cutoff is inactive. The renderer models culling and fixed native paint,
+not the full outline, lighting or fog shader. Closed pixels match its untouched
+native reference exactly. Public and prototype renders match pixel for pixel;
+the state change is confined to the selected strips.
+
+The accepted binding is only `dinner_cart/dd2_farm`, named Abandoned meat cart.
+Its 380px width was compared with 330px in actual Foetor backgrounds, then
+verified beside the real party. A regional result alias replaces the generic
+"Loot" fallback with contextual wording. Classic and other regions keep their
+original art and name; canonical outcomes, herbs, RNG, states and saves retain.
+
+One native PNG/input/herb-drop case and two four-hero runs pass, including
+searched state, result wording and revisit. Ten captures include repeated
+checks, not ten identities. Twelve artifact tests and actual installed Core365
+full-pack/fallback checks pass. No C# build occurred in round366; round365's
+1,330 Core and 297 UI results remain prior results.
+
+Current accepted coverage is 41 design identities (40 base-runtime and one DLC
+design), 36 pairs and 72 PNGs. Runtime365 is unchanged; the deliberately rebuilt
+`pack-cart-CANDIDATE-v02` is now accepted and installed. All previous 40 entries,
+35 artifact records and 70 PNGs remain exact. Read the v16 checkpoint and its
+acceptance record before historical candidate notes below. The other three
+round347 drafts remain unaccepted; natural spawns, saved campaign reload,
+controller travel and long-session performance were not newly established.
+
 ## Tangle field stores candidate, round356
 
 The first distinct regional cabinet fitting is a plain native camp coffer for

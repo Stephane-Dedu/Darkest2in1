@@ -1,5 +1,27 @@
 # Curios must belong to their surroundings
 
+Current round366 status: the Foetor-only Abandoned meat cart is accepted and
+installed after native context, click/padding, herb drag/drop, real-party
+outcome, searched-state and revisit checks. Read the v16 checkpoint and
+acceptance.json first. Runtime365 is unchanged. Accepted coverage is now 41
+design identities: 40 base-runtime and one DLC design, across 36 pairs/72 PNGs.
+The final rebuilt pack-cart-CANDIDATE-v02 retains all previous 40 entries,
+35 artifact records and 70 PNGs. Capture counts do not establish natural spawns.
+
+The cart retains complete native geometry, UVs, full paint and tint. Its used
+state hides four whole draped offal strips with their reverse surfaces, while
+the carcass, timber and fittings stay fixed. No generation or repainting. Only
+dinner_cart/dd2_farm receives this art/name and contextual Loot result alias;
+classic and other regions keep their original presentation. Gameplay retains.
+
+The old round347 generated Dinner Cart used image remains rejected. Its old
+global pack and disabled acceptance helper must not run. The newly accepted
+regional pair has its own audited native state. Old Tree, Moonshine Barrel
+and Knife Rack remain unaccepted drafts. Sprawl/Foetor cabinet bodies remain
+interim; continue suitable native outdoor fittings and the 104-ID ledger.
+
+The following round365 and older notes describe the preceding accepted batch.
+
 Current round365 status: nine regional pairs are accepted and installed after
 unsaved native rendering, input and four-hero checks. Read the v15 checkpoint
 and acceptance.json before older candidate notes below. Runtime365 and combined

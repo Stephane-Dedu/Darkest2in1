@@ -11342,3 +11342,53 @@ cabinet fittings and remaining104-ID ledger continue. Saved campaign reload,
 ordinary controller travel and long-session performance were not newly tested.
 Checkpoint local-art/ui-overhaul/curio-regional-coherence-v15/CONTINUE.md;
 heavy evidence D:.
+
+
+## Round366: native Foetor meat cart with a fixed-body searched state
+
+The Dinner Cart347 draft retained native closed art but used a generated whole
+image after searching. Its fixed body/scale were not proven. The accepted new
+regional pair keeps the complete native static-batch cart:5,748vertices and
+7,232triangles, original UVs, full1024paint and tint. Actual installed bundles
+match those arrays/paint and the renderer's submesh mapping. The combined scene
+mesh contains unrelated surfaces and is not the selected cart body.
+
+Public render_meat_cart.py hides only four complete draped offal strips, with
+their reverse surfaces:1,172vertices/1,832triangles. Both states retain all mesh
+data; only component material visibility changes. Main carcass/timber/spikes/
+legs/scraps stay fixed. No generation, repaint or deformation. Native Cull2 is
+modeled; cutout is disabled, declared0.5 clip inactive. Full outline/lighting/
+fog shader is not reconstructed. Closed/native reference and public/prototype
+pixels match exactly. State changes only within the selected lower strips.
+
+Final fit1064x933/foot532,917/width380/height333.2143 was compared with330px in
+actual Foetor backgrounds and verified beside the native party. Only canonical
+dinner_cart/dd2_farm receives Abandoned meat cart and one contextual Loot label
+alias. Classic/other-region art/name, unknown strings and FadedMemory retain.
+IDs/outcomes/RNG/herbs/loot/used/saves/spawn rules are unchanged.
+
+One native PNG/input/padding/herb-drag/drop case and two full real-four-hero
+ordinary outcome/state/revisit runs pass. Final result wording clears the
+border and reads naturally.10valid captures include repeats, not10identities.
+12artifact tests and actual installedCore365 full41ID/36pair/fallback checks
+pass. No C# build366;365Release/1330Core/297UI results remain prior results.
+
+Accepted installed coverage41design IDs:40base-runtime plus1DLC,36pairs/72PNGs.
+All old40entries/35records/70PNGs exact. Deliberately rebuilt combined
+pack-cart-CANDIDATE-v02 is authoritative. Runtime365/config/Hamlet and all44
+foreign WIP files/journal bytes retain;87installed targets verified. No shared
+dirty build, stale runtime/config restore, protected estate or mod save access.
+Every owned QA process is closed. Installer/refresh helpers consumed; backups
+are evidence, not armed restores. Original347generated cart used art remains
+rejected; Old Tree/Moonshine/Knife Rack drafts remain unaccepted.
+
+## Status 2026-10-26 after round366
+
+Current runtime365 plus accepted41-ID/36-pair cart packv02. Game closed. Timed
+human launch permission is active for repeated QA; never deploy while running.
+Continue suitable distinct Sprawl/Foetor cabinet fittings and remaining104-ID
+regional ledger from a fresh baseline. No repeated accepted extraction or
+inferred natural spawns. Hamlet354 nativeQA passed365 and stays parked for owner
+notes; expedition340 parked. Saved campaign/controller/long-session checks were
+not newly performed. Checkpoint local-art/ui-overhaul/curio-regional-coherence-v16;
+heavy evidence D:. Preserve concurrent work, ordinary usage first,8%stop gate.

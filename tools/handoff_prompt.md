@@ -1,3 +1,31 @@
+LATEST366 NATIVE FOETOR MEAT CART ACCEPTED AND INSTALLED:
+Read local-art/ui-overhaul/curio-regional-coherence-v16/CONTINUE.md first.
+Current runtime365 is unchanged. Final rebuilt pack-cart-CANDIDATE-v02 adds
+only dinner_cart/dd2_farm, Abandoned meat cart, and one contextual Loot result
+alias. Accepted41 design IDs:40base-runtime plus1DLC;36pairs/72PNGs. All old
+40entries/35records/70PNGs retain. No gameplay/spawn/classic/FadedMemory changes.
+Complete native cart5748v/7232tri/UVs/full1024paint/tint verified against actual
+installed bundles. Used hides four whole draped offal strips with their reverse
+surfaces,1172v/1832tri; carcass/timber/fittings fixed. No generation or repaint.
+Public render_meat_cart.py reproduces prototype/reference pixels exactly.
+NativeCull2/cutout disabled; full outline/lighting/fog shader not reconstructed.
+Native PNG/input/padding/herb-drop case passes; two real-four-hero runs pass
+ordinary outcome, used state, final result wording and revisit.10valid captures
+include repeats, not10identities.12artifact tests and actual installedCore365
+full41ID/36pair/fallback checks pass. No C#build366;365Core1330/UI297 remain prior.
+87installed targets/config and44foreign files verified. All owned QA processes
+closed. Install/wording helpers consumed, backups are evidence not armed restores.
+No protected estates or mod saves accessed. Latest timed human launch permission
+is active; repeated QA permitted, never deploy while game runs. No need to ask
+again. Old347full generated cart used image/global pack stay rejected; three
+other347drafts unaccepted. Continue fresh baseline with suitable Sprawl/Foetor
+cabinet fittings and remaining104-ID ledger. Do not redo accepted art or infer
+encounter locations from forced fixtures. Hamlet354 visualQA passed365 and stays
+parked for owner notes; expedition340 parked. Saved campaign/controller/long-
+session QA not newly tested. Heavy D:, preserve concurrent/journal bytes, no
+shared dirty C# builds/stale runtimes/config restores. Ordinary usage first,
+stop at8%remaining and checkpoint before7-8%reserve/context exhaustion.
+
 LATEST365 NATIVE REGIONAL CURIOS ACCEPTED AND INSTALLED:
 Read local-art/ui-overhaul/curio-regional-coherence-v15/CONTINUE.md first.
 Nine regional pairs from350/355/356/358/359/360/361/362/364 are now accepted
