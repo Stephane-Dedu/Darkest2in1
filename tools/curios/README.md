@@ -1,5 +1,36 @@
 # Curio rework: design catalog v01
 
+## Accepted Tangle stump and antivenom QA, round367
+
+The existing round347 generated Old Tree pair is now accepted only for
+`old_tree/dd2_forest`, named Rotting stump. It was compared in actual Tangle
+corridor/room scenery and beside the native party. Its roots, mushroom palette,
+searched hollow and common foot registration fit the outdoor context. This is
+generated art, not extracted geometry. Both PNGs retain their reviewed pixels;
+no new generation, repainting or fitting occurred in round367. Classic and
+other regions keep their original art/name, and the existing result text fits.
+
+The first PNG check rejected antivenom at its QA argument whitelist before
+rendering. Both opt-in QA modes now allow that existing supply. Only these two
+allowlists changed; gameplay, resolver rules and supply handling retain. A new
+frozen HEAD81186bf build plus those two owned inputs is runtime367. Native
+opaque clicks, transparent padding and actual antivenom drag/drop pass. The
+real four-hero antivenom outcome, searched state and revisit pass separately.
+Six valid captures are indexed; the rejected first fixture is excluded.
+
+Release, 1,330 Core, 297 UI and 12 artifact tests pass. The actual installed
+Core367 parser validates the full pack and regional/classic/owner fallbacks.
+Accepted coverage is 42 design IDs (41 base-runtime and one DLC), 37 pairs and
+74 PNGs. The rebuilt pack-tree-CANDIDATE-v01 retains every previous 41 entry,
+36 artifact record and 72 PNG. This accepts one regional pair, not the old347
+global pack. Moonshine Barrel and Knife Rack remain unaccepted drafts.
+
+New cache-source searches found monochrome pickup-icon cards and an open
+luggage/crate spill. These remain unsuitable cabinet references. The existing
+academic depot stays a complete, unselected multi-container study. No new
+cabinet pair or encounter location is claimed. Read the v17 checkpoint before
+older status notes below; runtime365 is now historical.
+
 ## Accepted native Foetor meat cart, round366
 
 `render_meat_cart.py` renders the complete native cart selected by its static

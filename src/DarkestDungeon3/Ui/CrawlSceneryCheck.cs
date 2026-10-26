@@ -58,7 +58,7 @@ internal static class CrawlSceneryCheck
                 if(CurioChecking)Require(CurioCases.Length>0 && CurioCases.Length<=32 && CurioCases.All(c=>c.Length==3 &&
                     new[]{"dd2_city","dd2_forest","dd2_farm","dd2_coast"}.Contains(c[1]) &&
                     c[0].All(ch=>char.IsLower(ch)||char.IsDigit(ch)||ch=='_') &&
-                    new[]{"none",Supply.HolyWater,Supply.Bandage,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(c[2])),
+                    new[]{"none",Supply.HolyWater,Supply.Bandage,Supply.Antivenom,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(c[2])),
                     "Invalid native curio QA cases");
                 var estate = new Estate { Name = "Unsaved crawl scenery check", Seed = 73232, Week = 12,
                     OpeningRaidPending = false, RegionLayoutVersion = CampaignRegions.LayoutVersion };

@@ -129,7 +129,7 @@ internal static class CurioPreview
             Require(_definitions.Length>0,"No exact curio paintings loaded");
             Require(SupplyCase==null || SupplyCase.Length==3 && Regions.Contains(SupplyCase[1]) &&
                 NativeCurioArt.Definitions.Any(d=>d.Id==SupplyCase[0]) &&
-                new[]{Supply.HolyWater,Supply.Bandage,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(SupplyCase[2]),
+                new[]{Supply.HolyWater,Supply.Bandage,Supply.Antivenom,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(SupplyCase[2]),
                 "Invalid explicit curio supply QA case");
         }
         var exp=Expedition;var room=exp.Map.Rooms[0];

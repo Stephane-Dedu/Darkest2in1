@@ -1,5 +1,21 @@
 # Curios must belong to their surroundings
 
+Current round367 status: Tangle-only Rotting stump is accepted for old_tree.
+Existing347 generated PNGs retain exactly; no new generation/repaint/refit.
+Actual native art/context, click/padding, antivenom drag/drop and real-party
+ordinary outcome/searched/revisit checks pass. Classic and other regions keep
+original art/name/text. Current runtime367 adds only antivenom to two opt-in QA
+allowlists. The first rejected fixture exposed that missing test option, not
+a gameplay failure. Release/1330 Core/297 UI/12 artifact tests pass.
+
+Read v17/CONTINUE.md and acceptance.json first. Accepted42 design IDs are41
+base-runtime plus1DLC,37pairs/74PNGs. Rebuilt pack-tree-CANDIDATE-v01 retains
+all previous41entries/36records/72PNGs. Old347global pack remains uninstalled;
+Moonshine/KnifeRack stay unaccepted and fullgenerated DinnerCart used art stays
+rejected. Sprawl/Foetor cabinet fittings remain open: monochrome pickup icons,
+open luggage spill and indoor liquor cabinet do not satisfy that context.
+Existing academic depot is reference only; no arbitrary coffer was isolated.
+
 Current round366 status: the Foetor-only Abandoned meat cart is accepted and
 installed after native context, click/padding, herb drag/drop, real-party
 outcome, searched-state and revisit checks. Read the v16 checkpoint and

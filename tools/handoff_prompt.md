@@ -1,3 +1,33 @@
+LATEST367 TANGLE STUMP ACCEPTED; CURRENT RUNTIME367:
+Read local-art/ui-overhaul/curio-regional-coherence-v17/CONTINUE.md first.
+Only old_tree/dd2_forest adds Rotting stump using existing347generated pair;
+no new generation/repaint/refit, no native-geometry claim. Original PNG pixels
+retain. Actual Tangle corridor/room/native-hero context, opaque click/padding,
+antivenom drag/drop, ordinary outcome/used/revisit pass.6valid captures indexed.
+First PNG fixture rejected valid antivenom at QA whitelist before captures;
+only two opt-in QA allowlists now include it. Gameplay unchanged. Fresh frozen
+HEAD81186bf plus CurioPreview.cs/CrawlSceneryCheck.cs inputs only, runtime367;
+never restore stale365/354/355 binaries or config. Release0errors3oldwarnings,
+1330Core/297UI/12artifact tests and actualCore367 full-pack/fallback checks pass.
+Accepted42design IDs=41base-runtime+1DLC,37pairs/74PNGs, not42natural spawns.
+Current deliberate pack-tree-CANDIDATE-v01 retains all old41entries36records
+72PNGs and classic/other-region/FadedMemory fallback. No rules/RNG/supplies/
+states/save/spawn changes.89targets/config/44foreign/journal bytes verified;
+all owned QA processes closed, installers consumed, no armed restore.
+New common/city/farm/camp/inn/story container search yields monochrome pickup
+icons, open luggage spill and indoor cabinet, not selected outdoor locked
+coffers. Academic depot stays unselected complete reference. Do not repeat
+those studies or infer encounters from names. Continue fresh baseline with
+suitable distinct Sprawl/Foetor caches/remaining104-ID ledger. Moonshine and
+KnifeRack347drafts unaccepted; old347global pack/helper must not run. Accepted
+native366cart stays, oldgenerated cart used image stays rejected. Bookshelf342
+stays, Hope glyph floats, Shambler whole node unsuitable compact altar.
+Repeated unsaved launch/QA permission active; never deploy while running.
+Protected estates1/3/abandoned checkout forbidden. Hamlet354 nativeQA passed365
+and stays parked; expedition340 parked. Heavy D:, monitor limited space. Build
+only frozen currentHEAD+owned inputs; preserve foreign changes and journal
+bytes. Ordinary usage first; stop at<=8%, checkpoint before7-8%reserve/context.
+
 LATEST366 NATIVE FOETOR MEAT CART ACCEPTED AND INSTALLED:
 Read local-art/ui-overhaul/curio-regional-coherence-v16/CONTINUE.md first.
 Current runtime365 is unchanged. Final rebuilt pack-cart-CANDIDATE-v02 adds

@@ -11392,3 +11392,44 @@ inferred natural spawns. Hamlet354 nativeQA passed365 and stays parked for owner
 notes; expedition340 parked. Saved campaign/controller/long-session checks were
 not newly performed. Checkpoint local-art/ui-overhaul/curio-regional-coherence-v16;
 heavy evidence D:. Preserve concurrent work, ordinary usage first,8%stop gate.
+
+
+## Round367: Tangle stump acceptance and antivenom QA option
+
+Accepted existing347generated Old Tree pair only as old_tree/dd2_forest,
+Rotting stump. No new generation/repaint/refit or native-geometry claim. Both
+source PNGs remain exact; common foot1194x1032/597,1016,width350,height302.5126.
+Actual Tangle corridor/room/native-party art, grounding and searched hollow
+reviewed. PNG opaque click/padding and actual antivenom drag/drop pass; real
+four-hero ordinary antivenom outcome/RNG/used/revisit passes.6valid frames.
+Original result wording already fits. Classic/other-region/name/text retain.
+
+First PNG fixture rejected antivenom at its opt-in QA whitelist before capture.
+Two allowlists now include that existing supply. No gameplay rule changed.
+Fresh frozen HEAD81186bf plus two owned inputs only; current runtime367,
+not stale365. Release0errors3oldwarnings,1330Core/297UI/12artifact tests and
+actualCore367 full42ID/37pair/fallback checks pass. Core uses exact prior
+native catalog fixture, no weakened tests. Failed first QA evidence excluded.
+
+New source search across9bundles found pickup icons on a monochrome512atlas,
+open luggage/crate spill and indoor liquor cabinet, unsuitable locked outdoor
+cache bodies. New exports have zero skipped renderers. Gaunt four facings
+rendered,0/180 inspected. Existing academic depot remains unselected complete
+reference; no isolated fragments/forced candidate/spawn inferred. Cabinets
+remain open. All source assets/coordinates/indexes stay private D:.
+
+## Status 2026-10-26 after round367
+
+Current runtime367 and deliberate pack-tree-CANDIDATE-v01 accepted/installed:
+42design IDs=41base-runtime+1DLC,37pairs/74PNGs. Old41entries36records72PNGs
+retain. Canonical rules/RNG/supplies/states/saves/spawns/classic/FadedMemory
+retain.89targets/config/44foreign files and journal bytes verified. All owned
+QA processes closed; no protected estate/mod save access, armed restore or
+pending installer. Old347global pack not installed; Moonshine/KnifeRack drafts
+unaccepted, oldgenerated DinnerCart used image stays rejected. Native366cart
+accepted. Continue fresh baseline, suitable Sprawl/Foetor cabinet fittings and
+remaining104-ID ledger. Human repeated unsaved QA permission active; never
+deploy while running. Hamlet354 nativeQA passed365 and stays parked for notes;
+expedition340 parked. Saved campaign/controller/long-session QA not newly done.
+Checkpoint local-art/ui-overhaul/curio-regional-coherence-v17; heavyD: limited
+space. Ordinary usage first, stop at8%, checkpoint before7-8%reserve/context.
