@@ -1,5 +1,31 @@
 # Curios must belong to their surroundings
 
+Current round370 status: all four cabinet regions now have distinct accepted
+paintings. The Foetor uses a flat-lidded farm coffer with vertical boards,
+diagonal timber brace, worn iron and short skids. Its existing name and text
+retain. Two built-in generation calls filled a demonstrated native body gap,
+using native coffer/cart/region references. This is generated raster art with
+no native geometry, UV, paint or shader claim. Only a reviewed released-padlock
+domain changes after searching; all original body RGBA outside it remain exact.
+
+Read v20/CONTINUE.md and acceptance.json first. Runtime367 is unchanged;
+pack-foetor-CANDIDATE-v01 is accepted and installed. Actual key/shovel clicks,
+padding, supply drag/drop, ordinary four-native-hero outcomes, RNG, used state
+and revisit pass. Twelve artifact tests and actualCore367 full44ID41pair and
+all-entry/fallback checks pass. Old40records/80PNGs, other3cabinet regions,
+classic art, four names/twelve messages are exact. Current44design IDs are
+43base-runtime plus1DLC,41pairs/82PNGs. DD2 is closed,97targets/config/44foreign
+files and journal bytes preserved. No C#build370; prior367results remain prior.
+
+The refreshed private v20/context-audit-104.json retains all104 scope identities
+and current bindings. Seventeen base-runtime, ten quest-runtime, twenty-six DLC
+and six legacy designs still lack accepted catalog art; FadedMemory remains
+the separate owner exception. Counts do not establish natural encounters or
+every-region review. The complete gaunt luggage/open spill was unsuitable for
+a locked cabinet but may warrant inspection for an appropriate existing luggage
+identity after checking canonical region, supplies and state. It remains an
+unselected source study. Do not infer encounters or isolate arbitrary fragments.
+
 Current round369 status: distinct Sprawl Locked street cache is accepted for
 locked_display_cabinet/dd2_city. Generated missing body uses native coffer and
 City palette references, with no native geometry/UV/shader claim. A reviewed

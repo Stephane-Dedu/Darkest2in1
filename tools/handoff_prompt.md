@@ -1,3 +1,45 @@
+LATEST370: FOUR DISTINCT REGIONAL CABINET FITTINGS ACCEPTED
+Read local-art/ui-overhaul/curio-regional-coherence-v20/CONTINUE.md first.
+Round370 adds only locked_display_cabinet/dd2_farm art, Locked farm coffer.
+Current deliberate pack-foetor-CANDIDATE-v01 is accepted and installed with
+44 design IDs:43 base-runtime plus1 DLC,41 pairs/82 PNGs. Runtime367 unchanged.
+The farm fitting has a flat plank lid, vertical boards, diagonal timber brace,
+dull iron and short skids. Two built-in image_gen calls fill the demonstrated
+native source gap using native coffer/cart/region references. This is generated
+raster art, not native geometry/UV/paint or shader work. Final raw-pair-v01,
+lock-domain-v01 and fitted-v01 keep every original RGBA outside the reviewed
+local released-padlock domain exact. Full used edit is not a valid whole-body
+replacement. Lid stays closed after search. Fit1862x933,foot931/917,width340,
+fullheight170.3652, reviewed against native art and actual farm party/scenery.
+Actual key/shovel PNG clicks/padding/drag-drop and two full four-native-hero
+outcome/RNG/used/revisit cases pass,12 captures.12 artifact tests and actual
+Core367 full44ID41pair/all-entry/classic/other-region/name/message/owner checks
+pass. No C# build370;367 Release/1330Core/297UI remain prior. All old40records/
+80PNGs, other3cabinet regions, classic, four names/twelve messages exact.
+97 installed targets/config,44 foreign WIP/journal bytes and prior367/public
+helper source hashes verified. DD2 closed, installer consumed, no armed restore.
+
+All four cabinet regions now have distinct accepted paintings. Continue the
+remaining104-ID context ledger, refreshed in v20/context-audit-104.json.
+Accepted43 of60base-runtime and1of27DLC; pending17base-runtime,10quest-runtime,
+26DLC,6legacy and the FadedMemory owner exception are distinct scopes. Counts
+do not prove natural encounters or every-region acceptance. Inspect complete
+native sources and actual canonical region/interaction first. Earlier whole
+gaunt luggage/open spill was unsuitable as a locked cabinet; it is only a
+possible study for an appropriate existing luggage identity, not selected art.
+Keep all prior accepted pairs. Old347global pack/helper and generated Dinner
+Cart used variant remain forbidden; bookshelves342 stay,349duplicate rejected,
+Hope glyph floats; full Shambler building/woodland node is not a compact altar.
+Preserve IDs/outcomes/RNG/supplies/states/picking/grounding/saves/spawns/classic/
+FadedMemory. Repeated unsaved launch/QA permission remains active; never deploy
+while DD2 runs. Protected estates1/3,mod saves and abandoned Documents checkout
+forbidden. Never restore stale runtime/config or run consumed installers.
+Build only clean frozen currentHEAD plus owned inputs if needed, never shared
+dirty C#. Hamlet354 QA passed365 and stays parked for owner notes; expedition340
+parked. Saved/controller/long-session QA not newly done. Heavy outputs D:,about
+1.3GiB free; avoid redundant exports/unrelated deletion. Ordinary usage first,
+no project work at<=8%remaining; checkpoint before7-8%reserve/context exhaustion.
+
 LATEST369 DISTINCT SPRAWL CACHE ACCEPTED; RUNTIME367 UNCHANGED:
 Read local-art/ui-overhaul/curio-regional-coherence-v19/CONTINUE.md first.
 Final deliberate pack-sprawl-CANDIDATE-v01 changes only cabinet/dd2_city art,

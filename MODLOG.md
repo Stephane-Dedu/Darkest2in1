@@ -11528,3 +11528,47 @@ notes; expedition340 parked. Saved/controller/long-session QA not newly done.
 HeavyD: about1.3GiB free; checkpoint local-art/ui-overhaul/curio-regional-
 coherence-v19 includes art and selected prompts. Ordinary usage first and full
 checkpoint before7-8%reserve/context exhaustion. No shared dirty C# builds.
+
+
+## Round370: distinct Foetor farm coffer accepted
+
+All four cabinet regions now have distinct accepted paintings. Only
+locked_display_cabinet/dd2_farm changes to locked_display_cabinet_foetor;
+Locked farm coffer, four names/twelve messages, other3regions/classic retain.
+Flat plank lid, vertical boards, diagonal brace, dull iron and skids give a
+different farm fitting. Native searches357/359/367 left this body gap and were
+not repeated. Two built-in image_gen calls use native coffer/cart/scenery
+references. Generated raster art, not native geometry/UV/paint/shader work.
+Full used edit changes670716pixels and is not a whole-body replacement.
+Existing public compose_state_patch.py applies only the reviewed mechanism
+domain. Final raw-pair-v01/maskv01 keeps all RGBA outside exact:35107changed
+pixels/41982mask pixels, bounds699/489/897/735. Rows above480/below750 exact.
+Lid stays closed; released hanging padlock is searched cue. Original alpha
+retains. Final fitted-v01:1862x933 foot931/917 width340 height170.3652.
+Width340 preferred over380 in farm corridor/quiet-room studies and actual
+native-party review. Native paint comparison, grain/iron/ground/state/result
+panels reviewed. Two PNG cases pass actual clicks/padding/key/shovel drag/drop;
+two four-hero cases pass ordinary supplies/outcomes/RNG/used/revisit,12captures.
+12artifact tests and actualCore367 full44ID41pair/all-entry/fallback checks
+pass370. No C#build370;367Release/1330Core/297UI remain prior. Canonical IDs,
+outcomes/RNG/supplies/states/picking/ground/saves/spawns/classic/FadedMemory retain.
+
+## Status 2026-10-26 after round370
+
+Runtime367 unchanged; deliberate pack-foetor-CANDIDATE-v01 accepted/installed.
+Accepted44design IDs43base-runtime+1DLC,41pairs/82PNGs; old40records80PNGs exact.
+All four owned QA processes closed.97targets/config,44foreign WIP/journal bytes
+and prior367/public recipe hashes verified. Installer370 consumed; before370
+is evidence, not armed restore. No pending installer, protected estate/mod save
+or abandoned checkout access. Art copies/source hashes/prompts privateD:.
+104-ID context ledger refreshed. Pending17base/10quest/26DLC/6legacy plus owner
+FadedMemory exception; counts do not establish encounters or every-region QA.
+Complete gaunt luggage/open spill remains only a possible study for a suitable
+existing luggage identity after canonical context/interaction/state inspection.
+Keep all prior accepted art, reject old347global pack/helper/cart used variant
+and349duplicate; bookshelf342 stays, Hope glyph floats. Full Shambler body
+unsuitable compact altar. Repeated unsaved QA permission active, never deploy
+while running. No stale runtime/config restores. Saved/controller/long-session
+checks separate. Hamlet354QA365/expedition340 parked. HeavyD:about1.3GiB free.
+Checkpointv20; ordinary usage first, no work at<=8%, full checkpoint before
+7-8%reserve/context exhaustion. Preserve all concurrent/journal bytes.

@@ -1,5 +1,39 @@
 # Curio rework: design catalog v01
 
+## Accepted Foetor coffer, round370
+
+The cabinet now has a distinct accepted painting in each DD2 region. The new
+`locked_display_cabinet/dd2_farm` fitting keeps the existing name Locked farm
+coffer and its result wording. Its flat plank lid, vertical boards, diagonal
+timber brace, dull iron shoes and skids belong with farm stores. Native searches
+left this specific body gap. Two built-in `image_gen` calls used the native
+Tangle coffer, Foetor cart timber and farm corridor as references. This is
+generated raster art, not extracted geometry, UVs, paint or shader work.
+
+The searched state keeps the lid closed and releases the padlock. The complete
+generated edit changes body pixels, so `compose_state_patch.py` applies only
+the reviewed mechanism domain. Every RGBA pixel outside it stays exact.
+Selected raw-pair-v01/lock-domain-v01/fitted-v01 uses a common1862x933 canvas,
+foot931/917 and340px width,170.3652px full height. Native comparisons and actual
+corridor/room and four-hero views confirm its materials, grounding and state.
+
+Actual key/shovel drag/drop, opaque clicks and padding rejection pass. Two
+four-hero cases pass ordinary outcomes, RNG, supplies, used state and revisit.
+Twelve captures and twelve artifact tests are recorded. Actual installedCore367
+validates the full44-ID/41-pair pack and every entry's classic/other-region,
+name/message and owner fallback. No C# build370;367Release/1330Core/297UI remain
+prior. All old40records/80PNGs, the other three cabinet regions, classic art,
+four names and twelve messages retain exactly.
+
+Accepted coverage remains44design IDs:43base-runtime plus1DLC, now41pairs/82PNGs.
+Runtime367 is unchanged. Read v20/CONTINUE.md and acceptance.json first. The
+refreshed private104-ID ledger separates art coverage from encounter evidence.
+Seventeen base-runtime, ten quest-runtime, twenty-six DLC and six legacy designs
+remain without accepted catalog art; FadedMemory remains an owner exception.
+No spawn or gameplay rule changed. DD2 is closed and all prior accepted art
+remains installed. Continue the remaining context ledger, not the completed
+four cabinet paintings.
+
 ## Accepted distinct Sprawl street cache, round369
 
 `locked_display_cabinet/dd2_city` now uses a distinct iron-bound street cache.
