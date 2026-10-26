@@ -1,5 +1,15 @@
 # Curios must belong to their surroundings
 
+Current378: locked_sarcophagus/dd2_city accepted as Locked stone sarcophagus.
+Canonical Ruins/key/shovel/trap and classic fallbacks retained. Generated
+stone body follows native City masonry; local released-padlock used state
+keeps fixed lid/effigy/feet. Native key/shovel input and ordinary four-hero
+key/shovel/no-item outcome/RNG/state/revisit pass.50IDs46pairs92PNGs accepted.
+Runtime367 unchanged,107targets/config44foreign/source/CSV preserved,DD2closed.
+Read v28/CONTINUE and acceptance; all378installer/QA stages consumed.
+Same job continues through47unfinished primary designs, no spawn claims.
+
+
 Current round376 status: Foetor Bone offering stake for skull_altar is
 ACCEPTED after deferred native-party ordinary effect/RNG/used/revisit QA.
 Native context/materials/party/ground/states/result reviewed. Actual result

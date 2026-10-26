@@ -1,3 +1,33 @@
+LATEST378: SPRAWL STONE SARCOPHAGUS ACCEPTED
+Round378 accepts Sprawl-only Locked stone sarcophagus for locked_sarcophagus.
+Read local-art/ui-overhaul/curio-regional-coherence-v28/CONTINUE.md first.
+Runtime367 unchanged; current deliberate pack-sarcophagus-CANDIDATE-v01 has
+50accepted IDs49base-runtime+1DLC,46distinct pairs92PNGs. Old49entries45records
+90PNGs exact. Canonical Ruins/key/shovel/Blight1-Bleed1 trap rules unchanged;
+classic/other-region original art/name/text and FadedMemory preserve.
+
+Generated closed377 body reused, one local used-lock edit378. Native City
+memorial/slab/corridor references, no native geometry/UV/paint/shader claim.
+Full drifting used image rejected as a whole body. Reviewed released-lock
+domain25828pixels/22357changes,bounds715/471/868/654,all outside RGBA exact.
+Lid/effigy/panels/feet fixed; raw before469/from656 exact. Fit2242x833,
+foot1121/817,width360/fullheight133.7556.360preferred offline320/360.
+Native key/shovel PNG actual click/padding/drop and three four-native-hero
+ordinary key/shovel/no-item outcomes,RNG,used/revisit pass,16captures for one
+identity. Actual scenery/materials/party/ground/states/result panels reviewed.
+15artifact/two actual negative compositor guards/Core367 full50ID46pair and
+all-old/classic/other-region/owner checks pass. No C#build;1330Core297UI prior367.
+All five owned QA processes closed;107targets/config44foreign/raw journals/
+source/CSV hashes verified. Installer378/all QA stages consumed,no restore.
+No natural-spawn/saved/controller/long-session or gameplay-change claim.
+
+Remaining primary47 identities11base/10quest/26DLC;6legacy and FadedMemory
+separate. Continue same job to genuine completion; usage gate8%,checkpoint
+before7-8%reserve. Human21:30Paris26October launch limit expired, repeated
+unsaved QA authorised unless newer human limits. Never deploy while DD2runs;
+protected estates1/3,all mod saves and abandoned Documents checkout forbidden.
+Preserve concurrent/raw journal bytes, no dirty shared C#build/stale runtime/
+config/pack restores. HeavyD:,limited space. Hamlet354QA365/expedition340 parked.
 LATEST376: NATIVE FOETOR BONE VOTIVE ACCEPTED
 Round376 accepts Foetor-only Bone offering stake for skull_altar after
 deferred native-party QA. Read local-art/ui-overhaul/curio-regional-coherence-
