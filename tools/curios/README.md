@@ -1,5 +1,26 @@
 # Curio rework: design catalog v01
 
+## Bone offering stake accepted, round376
+
+The deferred375 Foetor Skull Altar pair is accepted after the ordinary native-
+party effect, used-state and revisit checks. Its result panel reads The bone
+offering fills the hero with fervour. / Battle fervour applied. Canonical
+Warrens/no-item mechanics and original report retain; classic/other regions
+keep original presentation. Existing375 native geometry/UV/full2048paint and
+closed/used PNGs remain exact. No new art, generation, fitting, build or deploy.
+
+Four actor captures plus two prior PNG/input captures cover this identity.
+Actual materials, native party contrast, ground and stable lower-body states
+reviewed. Owned actor process closed after retained PASS. Runtime367 unchanged;
+current accepted pack-votive-CANDIDATE-v01 has49identities45pairs90PNGs.
+All previous48entries44records88PNGs exact. ActualCore367 full catalog/fallback
+checks pass376.15artifact tests are prior375;1330Core297UI are prior367.
+105targets/config44foreign/journal/source/CSV hashes preserved,DD2closed.
+375installer and both QA stages consumed; no pending installer/restore.
+Read v26/CONTINUE and acceptance. Continue the same job through the remaining
+48active DD1 designs, keeping runtime/design readiness separate. The human
+21:30Paris restriction has elapsed; respect any newer limits.
+
 ## Native bone votive candidate, round375
 
 The owner prohibits game launch/input until2026-10-26 21:30Europe/Paris,

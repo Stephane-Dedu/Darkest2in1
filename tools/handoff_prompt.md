@@ -1,3 +1,60 @@
+LATEST376: NATIVE FOETOR BONE VOTIVE ACCEPTED
+Round376 accepts Foetor-only Bone offering stake for skull_altar after
+deferred native-party QA. Read local-art/ui-overhaul/curio-regional-coherence-
+v26/CONTINUE.md and acceptance.json first. Runtime367 and exact375 deliberate
+pack-votive-CANDIDATE-v01 unchanged; no generation/extraction/refit/build/pack
+rewrite/deploy376.49accepted identities48base+1DLC,45distinct pairs90PNGs.
+All old48entries44records88PNGs exact. Canonical Warrens/no supply/Skull Altar
+Adrenaline retain,3farm-only aliases and classic/other-region fallback retain.
+
+The owner's21:30Paris/20:30UTC restriction elapsed before this launch. Earlier
+repeated unsaved-QA permission resumes unless superseded by newer human limits.
+Native four-hero ordinary no-item outcome, exact RNG steps, effect/result UI,
+used state and revisit pass. Actual panel reads The bone offering fills the
+hero with fervour. / Battle fervour applied. Original canonical report remains
+unchanged. Four actor frames plus two375PNGframes =6captures for one identity.
+Actual materials/scenery/party/ground/lower-body stability reviewed. Owned
+actor PID39048 closed after retained PASS. DD2CLOSED. No saved/controller/
+long-session or natural-spawn claim.
+
+Source/render/fitting evidence remains in v25. Complete native caves renderer259
+887v992tri/UV/full2048paint/tint1 retains. Public render_bone_votive.py hides
+11whole upper-bundle geometric groups362v416tri, leaving525v576tri fixed;
+analysis joins source position seams only, no geometry welding/deformation.
+Closed native reference matches;40462source pixels change in330/79/653/315,
+source319+/fitted299+ exact. No generation/repaint. NativeCull2/opaque surfaces
+modeled, not full lighting/fog/dither shader. Fit470x1021foot235/1005height380.
+Sconce stays pending; this native stake is not an unburned-torch pickup.
+
+Actual installedCore367 full49ID45pair/all-old48/classic/other-region/owner/
+name/result checks pass376.15artifact tests are prior375results;367Release/
+1330Core297UI are prior.105targets/config44foreign/journal/public source/CSV
+hashes verified. No pending installer/armed restore. Installer375 and both
+qa375 stages consumed; never rerun stale helpers or older pack/runtime/config.
+No protected estates1/3,mod saves or abandoned checkout access. Preserve all
+concurrent/journal bytes; frozen clean currentHEAD+owned inputs only if needed.
+Never deploy while game runs or build shared dirty C#.
+
+Keep iterating using the same job until the97identity DD1-comparable visual set
+is finished and verified.49accepted leaves48unfinished:12base/10quest/26DLC.
+Six legacy and FadedMemory owner exception separate in104ledger; no inflated
+counts or invented spawns. Keep art readiness/runtime integration/natural
+availability/gameplay QA separate. Ordinary usage first,no work at<=8%,save
+checkpoint before7-8%reserve/context exhaustion; resume after reset. Delete
+job only after real completion, not temporary waits or one finished identity.
+Next source lead:v25/locked-sarcophagus-source-audit-v01.json already scans
+common/city metadata; no directly named coffin/sarcophagus/casket/reliquary
+body. Markers/hero shrine are non-body references, burning/turn false matches.
+Not global absence proof; no body/pair selected. Ruins/key/shovel/trap mechanics
+verified; don't repeat query or force whole architecture. Prefer native full
+geometry/UV/paint, generate only gaps, native comparison/QA before acceptance.
+Keep all previous accepted art, no347global/helper/generated DinnerCart used
+variant or349duplicate. Bookshelf342 stays,Hope glyph floats,full Shambler
+building unsuitable compact altar. Tutorial bandits chest unselected.
+Hamlet354QA365/expedition340 parked. HeavyD:limited space,no redundant exports
+or unrelated deletion. Quiet routine progress; notify meaningful milestones,
+failures, completion or actual required user action.
+
 LATEST375: NO LAUNCH BEFORE21:30PARIS; NATIVE VOTIVE CANDIDATE
 OWNER LIMIT: no DD2 launch/input before2026-10-26 21:30Europe/Paris,
 20:30UTC. Earlier repeated unsaved-QA permission resumes after that deadline.

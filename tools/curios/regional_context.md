@@ -1,5 +1,21 @@
 # Curios must belong to their surroundings
 
+Current round376 status: Foetor Bone offering stake for skull_altar is
+ACCEPTED after deferred native-party ordinary effect/RNG/used/revisit QA.
+Native context/materials/party/ground/states/result reviewed. Actual result
+reads The bone offering fills the hero with fervour. / Battle fervour applied.
+Canonical report and mechanics retain. Four actor plus two375PNGcaptures,
+one identity. Existing native887v992tri/full2048paint/UV/tint and used525v576tri
+pair exact; no generation/refit/pack rewrite/deploy/build376. Runtime367 same,
+49accepted IDs48base+1DLC,45pairs90PNGs,old48entries44records88PNGs exact.
+ActualCore367 full catalog/fallback checks pass; artifact15prior375 and
+Core1330UI297prior367.105targets/config44foreign/journal/source/CSV hashes
+preserved,DD2closed. Installer375/both QA stages consumed,no restore. Human
+21:30Paris limit elapsed before launch; repeated QA allowed unless changed.
+Read v26/CONTINUE first. Pending12base10quest26DLC plus6legacy/owner separately.
+Same job continues to full visual completion with usage reserves/checkpoints.
+No natural-spawn/saved/controller/long-session claim; Sconce remains pending.
+
 Current round375 candidate: native Bone offering stake for
 skull_altar/dd2_farm, UNACCEPTED pending native party/effect/state/revisit QA.
 Owner: no game launch/input before2026-10-26 21:30Paris/20:30UTC; work offline.
