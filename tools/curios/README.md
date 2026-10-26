@@ -539,3 +539,30 @@ an adapted battlefield burial, not a shipped native encounter or dug-hole
 model. Original shovel, loot, blight, disease, results and spawn rules retain.
 Classic and other regions keep original art/name. The pack is uninstalled,
 requires355regional-only support and still needs authorised native QA.
+
+## Check shader properties before adapting native paint
+
+`inspect_native_material.py` reads a native material and resolves its actual
+shader through a private UnityFS directory index. It reports shader-declared
+saved properties, other saved values and valid keywords without changing art.
+Keep the report and native sources outside Git.
+
+```powershell
+& $curioPython tools/curios/inspect_native_material.py --game $curioGame `
+  --bundle biome_common_assets_all.bundle --bundle biome_common_models_platform_high_assets_all.bundle `
+  --material creature_den_node_cobwebs --bundle-index "$privateBundleIndex" `
+  --out "$privateWebRoot/material-report.json"
+```
+
+The cobweb shader is `Red Hook/Lit/Environment`, resolved from the installed
+shader bundle. Its declared Cutoff is `_AlphaClip_Override`, saved as0.247,
+with `_____ISALPHACUTOUT_ON` enabled. Saved `_Cutoff=0` is absent from the shader
+property list. Do not use that zero as the web's native cutoff. A value outside
+the property list may be stale; this alone does not prove that every compiled
+uniform or branch is absent. The opaque grave-marker comparison has the same
+declared cutoff property0.5 with its cutout keyword disabled.
+
+Round363's six diagnostic renders compare0.4,0.247 and0.0 on unchanged native
+web geometry/UVs/paint/tint. They isolate alpha differences; lighting, wind,
+dithering and compiled branches are not recreated. These source studies are
+not a curio pair, supporting frame, used state or accepted shader reproduction.

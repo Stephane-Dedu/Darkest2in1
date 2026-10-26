@@ -1,3 +1,32 @@
+LATEST363 NATIVE WEB ALPHA SOURCE AUDIT, NO NEW CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md first.
+Keep DD2 closed; no launch/input until explicit newer human permission.
+Public inspect_native_material.py resolves actual shader properties using the
+private UnityFS index. Native cobweb material uses Red Hook/Lit/Environment,
+shader dependency in shaders_assets_all.bundle. Declared Cutoff is
+_AlphaClip_Override=0.24699999 and _____ISALPHACUTOUT_ON is enabled. Saved
+_Cutoff=0 is absent from shader property list. Earlier native-cutoff0 advice
+is corrected; do NOT use that zero. Property-list absence alone is not proof
+about every compiled uniform/branch. Opaque grave-marker comparison has
+declared0.5 but cutout keyword disabled. Original web geometry/UV/full1024paint
+match actual source:93v/92faces and111v/92faces. Six diagnostic renders compare
+0.4/0.247/0.0 with unchanged native inputs and black tint. Declared-property
+study has29401/31660nonzero-alpha pixels vs26212/28172generic and40072/42863zero.
+These are isolated alpha studies, not full lighting/wind/dither/compiled-shader
+recreation or native QA. No new pair/frame/used state/fit/pack/C# build/tests/
+installation363. Prior362twelve artifact tests/355Core tests remain prior.
+Runtime354/Hamlet/config/67targets/44foreign files/accepted34IDs26pairs52PNGs
+retain. No installer/restore armed; no game launch/input/host/estate/save/deploy.
+Completed362Tangle grave and earlier candidates remain separate/uninstalled/
+unaccepted; do not redo them or combine manifests blindly. Current354 cannot
+parse regional-only omitted defaults; never copy those packs into354 or deploy
+stale355 binaries. Next evaluate a supported native web structure and used
+state at actual Tangle scale with corrected alpha evidence; do not promote a
+floating unsupported web or force unrelated architecture. Preserve all game
+rules and104/70/27/6/FadedMemory scopes. Hamlet visual QA only; expedition340
+parked. Heavy D:, protected estates1/3, no abandoned checkout/shared dirty build
+or stale restores. Ordinary usage first; checkpoint before7-8% reserve/context.
+
 LATEST362 TANGLE FIELD GRAVE OFFLINE CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v12/CONTINUE.md first.
 Keep DD2 closed; no launch/input until explicit newer human permission.

@@ -11245,3 +11245,32 @@ promote them as finished Cosmic Spiderweb art. Shambler dependency remains
 resolved361, but its complete building/woodland is an unsuitable compact altar.
 Checkpoint: local-art/ui-overhaul/curio-regional-coherence-v12/CONTINUE.md;
 heavy evidence D:. All canonical gameplay and design/runtime scopes preserve.
+
+
+## Round363: audit native shader properties before judging cobweb detail
+
+The native cobweb material resolves to Red Hook/Lit/Environment through the
+shader bundle. Its declared Cutoff property is _AlphaClip_Override=0.247 and
+alpha-cutout keyword is enabled. Saved _Cutoff=0 is absent from that shader's
+property list; earlier cutoff-zero advice is corrected. Property-list omission
+alone does not prove absence from every compiled uniform/branch. The new
+read-only inspect_native_material.py reports declared and other saved values,
+keywords and shader dependencies without changing art or applying fixes.
+Actual opaque grave-marker comparison declares0.5 but cutout is disabled.
+
+Native web geometry/UVs and full1024paint match actual installed sources:
+93v/92faces and111v/92faces. Six diagnostic renders preserve those inputs and
+black tint, comparing0.4/0.247/0.0. Declared-property studies contain29401/31660
+nonzero-alpha pixels, versus26212/28172generic and40072/42863zero. These isolate
+alpha; lighting, wind, dithering and compiled shader paths are not recreated.
+No new supporting frame, used state, pair, fitting, pack or native acceptance.
+
+Inspector execution against two actual materials, native source arrays/paint
+and all six render hashes verified. Runtime354/Hamlet/config/67targets/44foreign
+files/accepted34IDs26pairs52PNGs retain. No C# build/test, artifact-test rerun,
+installation, launch/input/host/estate/save/deploy/restore363. Prior362twelve
+artifact tests and355Core/UI results remain prior. All existing candidates stay
+separate and uninstalled. Continue supported web structure/used-state work with
+corrected alpha evidence; native QA still awaits explicit newer permission.
+Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md;
+heavy source/diagnostic evidence D:.

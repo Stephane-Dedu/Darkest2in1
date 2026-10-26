@@ -363,3 +363,30 @@ All earlier candidates stay separate. The first dirt pile and fourth grave
 marker remain unselected studies. Complete native common_cobweb01/02 sources
 are thin black webs without a freestanding frame or used state. They are not
 finished Cosmic Spiderweb art; do not promote a floating unsupported web.
+
+## Round363: cobweb cutoff evidence corrects the earlier zero assumption
+
+The native material resolves to Red Hook/Lit/Environment through
+shaders_assets_all.bundle. Its shader property list declares Cutoff as
+`_AlphaClip_Override`, saved0.24699999, with alpha-cutout keyword enabled.
+Saved `_Cutoff=0` is not in that list. The earlier suggestion to treat zero as
+the native cutoff was incomplete; do not follow it. Public
+`inspect_native_material.py` separates declared saved properties from other
+saved values and records the shader dependency and keywords. A property-list
+omission alone does not prove absence from every compiled uniform or branch.
+
+Actual native geometry/UVs and full1024paint match the two cached cobweb sources:
+93vertices/92faces and111vertices/92faces. Six diagnostic renders preserve those
+inputs and original black tint, comparing0.4,0.247 and0.0. At1024px, the declared
+property study has29401/31660nonzero-alpha pixels; generic0.4 has26212/28172 and
+zero has40072/42863. Geometry and art are unchanged. This is an alpha comparison,
+not a full native lighting/wind/dither/compiled-shader recreation or live QA.
+The opaque marker comparison reports declared cutoff0.5 with cutout disabled.
+
+No new curio pair, frame, used state, fitting, pack, C# build/test or installation
+363. Twelve artifact checks and Core355 results remain prior362/355 results,
+not newly rerun. Installed runtime354/accepted34IDs26pairs52PNGs,67targets/config
+and44foreign files retain. All candidates stay separate/uninstalled/unaccepted.
+Next evaluate a supported web structure and used state at actual Tangle scale
+using this corrected alpha evidence. Native QA still awaits permission.
+Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md`.
