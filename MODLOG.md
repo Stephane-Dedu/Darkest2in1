@@ -11572,3 +11572,50 @@ while running. No stale runtime/config restores. Saved/controller/long-session
 checks separate. Hamlet354QA365/expedition340 parked. HeavyD:about1.3GiB free.
 Checkpointv20; ordinary usage first, no work at<=8%, full checkpoint before
 7-8%reserve/context exhaustion. Preserve all concurrent/journal bytes.
+
+
+## Round371: Tangle travel case accepted
+
+Only existing lost_luggage/dd2_forest gains Abandoned travel case art and four
+regional result aliases. Actual installed canonical CSV confirms Weald, key
+and antivenom. Original classic/other-region art/name/text retain through
+schema3 regional_only omitted-default fallback. No new encounter/gameplay ID.
+The complete native gaunt luggage is already open and cannot satisfy key
+affordance; remains unselected. Existing source studies reused, no re-export.
+Two built-in image_gen calls create missing closed canvas/leather travel body
+from native luggage/coffer/forest references. Generated raster, not native
+geometry/UV/paint/shader. Full used edit repaints635409pixels and is rejected
+as whole body. Existing public composer applies complete lock-domain-v01;
+42532changed/47735mask pixels,bounds718/593/949/840,all RGBA outside exact and
+raw rows above580/below850 exact. Lid/straps/handle/fabric fixed; released
+padlock is used cue. Final raw-pair-v01/fitted-v01,1880x933foot940/917,width320,
+fullheight158.8085.320preferred over360. Native paint and actual Tangle scenery/
+party/ground/states/result views reviewed. Key/antivenom PNG cases pass actual
+clicks/padding/drag-drop. Three four-hero key/antivenom/no-item ordinary outcome,
+RNG/used/revisit cases pass. Initial no-item4frames exposed Blight1; exact
+Tangle-only alias now Blight applied. and native no-item recheck passes.
+20total frames,16final valid. All84PNGs/42records exact across wording revision.
+12artifact and actualCore367 full45ID42pair/all-old-entry/classic/other-region/
+owner checks pass. Use pwsh for net8 Newtonsoft parser fixture; Windows
+PowerShell5 loader failed before deployment, then pwsh passed. No C#build371;
+prior367Release/1330Core/297UI remain prior. Rules/RNG/supplies/states/saves/
+spawn probabilities unchanged; both canonical CSVs hash-verified.
+
+## Status 2026-10-26 after round371
+
+Runtime367 unchanged, pack-luggage-CANDIDATE-v02 accepted and installed.
+Accepted45design IDs44base-runtime+1DLC,42pairs/84PNGs; old44entries41records/
+82PNGs exact.99targets/config,44foreign WIP/journal bytes,prior367/public
+recipe and canonical hashes verified. All six owned QA processes closed.
+Both installers consumed, backups evidence only; no pending installer/armed
+restore. No protected estate/mod save/abandoned checkout accessed. Original
+generated files retained; project art/source hashes/prompts privateD:.
+104-ID context ledger refreshed. Pending16base/10quest/26DLC/6legacy plus owner
+exception are separate scopes; no natural spawn or every-region claim. Keep
+all four cabinet paintings and prior365/366/367/368art. Reject old347global
+pack/helper/generated DinnerCart used variant and349duplicate. Bookshelf342
+stays, Hope glyph floats; full Shambler node unsuitable compact altar. Repeated
+unsaved QA permission active, never deploy while running. No stale runtime/
+config restores/shared dirty C#builds. Saved/controller/long-session QA separate.
+Hamlet354QA365/expedition340 parked. Heavy outputsD:,limited space. Checkpoint
+v21;ordinary usage first,no work at<=8%,full checkpoint before7-8%reserve/context.

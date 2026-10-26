@@ -1,3 +1,50 @@
+LATEST371: TANGLE TRAVEL CASE ACCEPTED
+Round371 adds Tangle-only lost_luggage/dd2_forest, Abandoned travel case.
+Read local-art/ui-overhaul/curio-regional-coherence-v21/CONTINUE.md and acceptance.
+Current deliberate pack-luggage-CANDIDATE-v02 is accepted and installed;
+runtime367 unchanged.45design IDs:44base-runtime+1DLC,42pairs/84PNGs. All old
+44entries41records82PNGs retain. Regional-only omitted default preserves classic
+and other regions' original art/name/text. No gameplay identity or spawn added.
+
+Canonical installed CSV confirms Weald/key/antivenom. Native gaunt luggage is
+already open and cannot satisfy that key affordance; it remains an unselected
+reference, not forced into service. Two built-in image_gen calls fill the closed
+portable canvas/leather case gap using native luggage/coffer/Tangle references.
+Generated raster art, no native geometry/UV/paint/shader claim. Full used edit
+repaints635409pixels and is not used as whole body. Public local-state composer
+applies reviewed lock-domain-v01:all RGBA outside exact,42532changed pixels,
+bounds718/593/949/840,raw rows above580/below850 exact. Lid/straps/handle fixed,
+released padlock searched cue. Final raw-pair-v01/fitted-v01,1880x933foot940/917,
+width320/fullheight158.8085. Native references, actual forest corridor/room/party,
+ground/state and three result panels reviewed. Four regional text aliases only;
+the no-item case exposed internal Blight1, now Blight applied.
+
+Actual key/antivenom clicks/padding/drag-drop and three real-four-hero key,
+antivenom/no-item ordinary outcome/RNG/used/revisit cases pass,16captures.
+12artifact and actualCore367 full45ID42pair/all-old-entry/classic/other-region/
+owner fallback checks pass. No C#build371;367Release1330Core297UI remain prior.
+99targets/config,44foreign/journal bytes,source/canonical CSV hashes verified.
+All six owned QA processes closed, both installers consumed, no pending restore.
+Initial no-item4frames superseded by final label recheck;20total/16final valid.
+
+Continue refreshed104-ID context ledger:v21/context-audit-104.json.
+Pending16base-runtime,10quest-runtime,26DLC,6legacy and FadedMemory owner exception
+are distinct scopes. Counts do not prove natural encounters or every-region QA.
+Keep all four regional cabinet paintings and prior accepted art. Do not repeat
+accepted generation/extraction, force unsuitable bodies or infer spawns from
+names/fixtures. Prefer suitable complete native geometry/UV/full paint; generate
+only demonstrated gaps and require actual-scale native acceptance. Canonical
+IDs/outcomes/RNG/supplies/states/picking/ground/saves/spawns/classic/owner retain.
+Bookshelf342 stays,349duplicate rejected,Hope glyph floats;old347global pack/
+helper and generated DinnerCart used variant forbidden. Full Shambler node
+unsuitable compact altar. Hamlet354QA365 and expedition340 parked. Repeated
+unsaved QA permission active, never deploy while game runs. No protected
+estates1/3/mod saves/abandoned checkout. Preserve concurrent edits/journal bytes;
+only frozen clean HEAD+owned inputs for builds. No stale runtime/config restore
+or consumed helper runs. Heavy outputsD:,limited space; avoid redundant exports
+and unrelated deletion. Ordinary usage first,stop at<=8%;full checkpoint before
+7-8%reserve/context exhaustion. Saved/controller/long-session QA remains separate.
+
 LATEST370: FOUR DISTINCT REGIONAL CABINET FITTINGS ACCEPTED
 Read local-art/ui-overhaul/curio-regional-coherence-v20/CONTINUE.md first.
 Round370 adds only locked_display_cabinet/dd2_farm art, Locked farm coffer.

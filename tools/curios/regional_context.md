@@ -1,5 +1,21 @@
 # Curios must belong to their surroundings
 
+Current round371 status: portable Abandoned travel case replaces only the
+Tangle presentation of lost_luggage. Canonical Weald pairing, key and antivenom
+interactions are verified from installed CSV. The already-open native luggage
+was unsuitable for the key affordance; a closed canvas/leather case was generated
+from native references. All fixed body RGBA outside its released-lock domain
+remain exact. This is generated raster art, not native geometry/paint/shader.
+Actual Tangle scenery/party/ground/states and key/antivenom/no-item outcomes and
+revisits reviewed.16native captures,12artifact/fullCore367 checks pass.
+Read v21/CONTINUE and acceptance first. Runtime367 unchanged,45design IDs
+44base-runtime+1DLC,42pairs84PNGs. Old44entries41records82PNGs/classic/other regions
+retain. Only four regional wording aliases accompany the new entry.99targets/
+config44foreign/journal/source/CSV hashes preserve. DD2closed, installer consumed.
+Remaining104-ID ledger refreshed:v21/context-audit-104.json.16base/10quest/26DLC/
+6legacy plus owner exception remain distinct. Art counts do not establish spawns
+or every-region review. All four cabinet paintings are complete; retain them.
+
 Current round370 status: all four cabinet regions now have distinct accepted
 paintings. The Foetor uses a flat-lidded farm coffer with vertical boards,
 diagonal timber brace, worn iron and short skids. Its existing name and text

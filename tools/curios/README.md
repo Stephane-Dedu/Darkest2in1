@@ -1,5 +1,40 @@
 # Curio rework: design catalog v01
 
+## Accepted Tangle travel case, round371
+
+Round371 adds Tangle-only lost_luggage/dd2_forest, Abandoned travel case.
+Read local-art/ui-overhaul/curio-regional-coherence-v21/CONTINUE.md and acceptance.
+Current deliberate pack-luggage-CANDIDATE-v02 is accepted and installed;
+runtime367 unchanged.45design IDs:44base-runtime+1DLC,42pairs/84PNGs. All old
+44entries41records82PNGs retain. Regional-only omitted default preserves classic
+and other regions' original art/name/text. No gameplay identity or spawn added.
+
+Canonical installed CSV confirms Weald/key/antivenom. Native gaunt luggage is
+already open and cannot satisfy that key affordance; it remains an unselected
+reference, not forced into service. Two built-in image_gen calls fill the closed
+portable canvas/leather case gap using native luggage/coffer/Tangle references.
+Generated raster art, no native geometry/UV/paint/shader claim. Full used edit
+repaints635409pixels and is not used as whole body. Public local-state composer
+applies reviewed lock-domain-v01:all RGBA outside exact,42532changed pixels,
+bounds718/593/949/840,raw rows above580/below850 exact. Lid/straps/handle fixed,
+released padlock searched cue. Final raw-pair-v01/fitted-v01,1880x933foot940/917,
+width320/fullheight158.8085. Native references, actual forest corridor/room/party,
+ground/state and three result panels reviewed. Four regional text aliases only;
+the no-item case exposed internal Blight1, now Blight applied.
+
+Actual key/antivenom clicks/padding/drag-drop and three real-four-hero key,
+antivenom/no-item ordinary outcome/RNG/used/revisit cases pass,16captures.
+12artifact and actualCore367 full45ID42pair/all-old-entry/classic/other-region/
+owner fallback checks pass. No C#build371;367Release1330Core297UI remain prior.
+99targets/config,44foreign/journal bytes,source/canonical CSV hashes verified.
+All six owned QA processes closed, both installers consumed, no pending restore.
+Initial no-item4frames superseded by final label recheck;20total/16final valid.
+
+The refreshed private104-ID ledger separates accepted art from natural encounter
+evidence. Sixteen base-runtime, ten quest-runtime, twenty-six DLC and six legacy
+designs remain without catalog art, plus the FadedMemory owner exception.
+Continue those gaps while retaining all four completed cabinet paintings.
+
 ## Accepted Foetor coffer, round370
 
 The cabinet now has a distinct accepted painting in each DD2 region. The new
