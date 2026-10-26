@@ -1,3 +1,41 @@
+LATEST379: NATIVE TANGLE TUTORIAL COFFER ACCEPTED
+Round379 accepts bandits_trapped_chest/dd2_forest as Trapped field coffer.
+Read local-art/ui-overhaul/curio-regional-coherence-v29/CONTINUE.md first.
+Runtime367 unchanged; deliberate pack-trapped-CANDIDATE-v02 installed.
+51accepted IDs50base-runtime+1DLC,STILL46distinct pairs92PNGs. No new painting,
+generation,extraction,repaint,refit or PNG. Explicit direct same-region native
+coffer reuse from accepted356/365 cabinet/Tangle; all old50entries46records
+92PNGs exact. Canonical Weald TUTORIAL/key/T2loot/guaranteed no-itemBlight1
+unchanged. No shovel interaction or ordinary-spawn/encounter claim. Classic/
+other-region art/name/text and FadedMemory retain. Three presentation aliases
+replace generic Loot/Effect and effect code with readable key/poison wording.
+
+Native key PNG actual click/padding/drop, mixed four-hero recipient/key then
+original owner/key cache/outcome/RNG/states/revisit, and final key/no-item
+wording replays pass. Actual Tangle materials/party/ground/result reviewed.
+22total captures:8generic recipient frames superseded;14final valid include
+4old-source repeats,one new accepted identity. Final panels read The key reveals
+valuables hidden inside. / The coffer's trap poisons the hero. / Blight applied.
+Canonical raw reports/outcomes unchanged. ActualCore367 full51ID46pair/shared-
+art-object/all-old/classic/other-region/owner checks pass379.15artifact tests
+prior378,1330Core297UI prior367; no C#build379.107targets/config44foreign/raw
+journals/source/CSV preserved,DD2closed. Both379installers/all five QA stages
+consumed,backups evidence only,no pending installer/armed restore.
+
+46primary designs remain10base/10quest/26DLC,6legacy and FadedMemory separately.
+Continue same job until true full completion. Separate art readiness/runtime
+integration/natural availability/gameplay QA;never invent spawns/probabilities.
+Check ordinary usage first,no work at<=8%,save before7-8%reserve/context limit.
+Repeated unsaved QA authorised after expired26October21:30Paris limit unless
+newer human instruction. Protected estates1/3,all mod saves and abandoned
+Documents checkout forbidden. Preserve concurrent/raw journal bytes; no shared
+dirty C#build,stale runtime/config/individual-pack restores or consumed helpers.
+All accepted365-378art retains. Bookshelf342stays,Hope glyph floats. No349
+duplicate/347global/helper/generated DinnerCart used variant. Sconce pending,
+not native bone votive. Full Shambler building unsuitable compact altar.
+Hamlet354QA365/expedition340 parked. HeavyD:,limited space,no redundant exports
+or unrelated deletion. No saved/controller/long-session/natural-spawn claim.
+
 LATEST378: SPRAWL STONE SARCOPHAGUS ACCEPTED
 Round378 accepts Sprawl-only Locked stone sarcophagus for locked_sarcophagus.
 Read local-art/ui-overhaul/curio-regional-coherence-v28/CONTINUE.md first.

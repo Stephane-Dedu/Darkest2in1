@@ -1,5 +1,16 @@
 # Curios must belong to their surroundings
 
+Current379: Tangle-only bandits_trapped_chest accepted as Trapped field coffer.
+Explicit direct same-region native cabinet/coffer reuse,no new painting/PNG.
+Weald tutorial/key/guaranteed no-itemBlight1 retain; classic/other regions original.
+Final key/trap wording and native recipient/owner state/cache checks pass.
+51IDs50base+1DLC,still46pairs92PNGs,old50entries/all92PNGs exact.22total/14final
+captures include4old source repeats;8generic recipient frames superseded.
+Runtime367 unchanged,DD2closed,107targets/config44foreign/source/CSV preserved.
+Read v29/CONTINUE; both installers/all five QA stages consumed,no restore.
+46primary designs remain; art acceptance is not natural encounter proof.
+
+
 Current378: locked_sarcophagus/dd2_city accepted as Locked stone sarcophagus.
 Canonical Ruins/key/shovel/trap and classic fallbacks retained. Generated
 stone body follows native City masonry; local released-padlock used state
