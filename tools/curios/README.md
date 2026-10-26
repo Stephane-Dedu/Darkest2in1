@@ -1,5 +1,31 @@
 # Curio rework: design catalog v01
 
+## Native bone votive candidate, round375
+
+The owner prohibits game launch/input until2026-10-26 21:30Europe/Paris,
+20:30UTC. The earlier unsaved-QA permission resumes afterwards. Current native
+Foetor Bone offering stake candidate is installed for QA but UNACCEPTED. Native
+party/effect/state/revisit checks remain pending; no actors stage has launched.
+Accepted coverage stays48identities44pairs88PNGs. Installed candidate coverage
+is49identities45pairs90PNGs. Runtime367 unchanged, no C#build375.
+
+`render_bone_votive.py` takes private `--kit`, `--source` and new `--out` inputs
+inside Blender. It retains complete native caves skull stake887v992tri/UV/full
+2048paint/tint. Analysis joins UV/normal seam positions to identify17groups
+without welding geometry. Used hides11 complete upper-bundle groups362v416tri,
+leaving525v576tri fixed. No raster repaint or generation. Context/state is an
+adaptation for canonical Warrens skull_altar/Foetor, not a native encounter.
+The source is unsuitable as an unburned torch pickup; sconce stays pending.
+
+Actual installed-source audit,15artifact/fullCore367/fallback checks and native
+PNG clicks/padding/context pass. Closed pixels equal native reference; source
+rows319+ and fitted rows299+ exact. Final470x1021foot235,1005height380. Native
+Cull2/opaque surfaces modeled, not full fog/lighting/dither shader. Read v25/
+CONTINUE.md and candidate-review.json for actor QA after the human deadline.
+qa375.ps1 enforces it.105targets/config44foreign/journal/source/CSV hashes
+preserve,DD2closed,installer375consumed,no restore. Default old urn PNG supply
+probe is not a skull-altar supply. Protected saves remain untouched.
+
 ## Field coffin, round374
 
 The Tangle presentation of Ancient Coffin is Weathered field coffin. A long,

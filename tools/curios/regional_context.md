@@ -1,5 +1,23 @@
 # Curios must belong to their surroundings
 
+Current round375 candidate: native Bone offering stake for
+skull_altar/dd2_farm, UNACCEPTED pending native party/effect/state/revisit QA.
+Owner: no game launch/input before2026-10-26 21:30Paris/20:30UTC; work offline.
+Candidate was installed for QA before this limit. Runtime367 unchanged;
+48IDs44pairs88PNGs remain accepted,49IDs45pairs90PNGs are candidate coverage.
+Canonical Warrens/no item/Skull Altar Adrenaline verified. Native complete caves
+skull stake887v992tri/full2048paint/UV/tint exact,11upper bone groups362v416tri
+hide after use,525v576tri lower stake/skull/hide/bindings fixed. Context/state
+adapted, no native encounter claim. Sconce remains pending; this is not an
+unburned torch pickup. Closed native reference/source319+/fitted299+ pixel
+checks pass. Actual farm340/380 comparison prefers380.15artifact/Core367 full
+candidate/fallback and native PNG click/padding/context checks pass,2frames.
+Actor stage never launched.105targets/config44foreign/journal/source/CSV hashes
+preserved,DD2closed,consumed installer/no restore. Read v25/CONTINUE.md first;
+after deadline verify usage/hashes, then unused qa375 actors stage. Do not
+promote counts or redo completed art before acceptance. No gameplay/spawn/save
+changes; classic/other-region fallback and FadedMemory retain.
+
 Current round374 status: Weathered field coffin is accepted for
 ancient_coffin/dd2_forest. Canonical installed CSV verifies Weald/no supply
 interactions. Native source index has markers/earth but no suitable coffin body.

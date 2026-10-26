@@ -1,3 +1,63 @@
+LATEST375: NO LAUNCH BEFORE21:30PARIS; NATIVE VOTIVE CANDIDATE
+OWNER LIMIT: no DD2 launch/input before2026-10-26 21:30Europe/Paris,
+20:30UTC. Earlier repeated unsaved-QA permission resumes after that deadline.
+DD2CLOSED. qa375.ps1 has a hard UTC launch guard. Work offline until then.
+
+Round375 prepares a native Foetor Bone offering stake for skull_altar.
+Read local-art/ui-overhaul/curio-regional-coherence-v25/CONTINUE.md first.
+Runtime367 unchanged. Accepted baseline remains374:48IDs47base+1DLC,
+44pairs88PNGs. Current pack-votive-CANDIDATE-v01 was installed for QA BEFORE
+the new human limit:49candidate IDs45pairs90PNGs, NOT ACCEPTED. Native party/
+ordinary effect/result/used/revisit QA has never launched and remains pending.
+All old48entries44records88PNGs exact. Canonical Warrens/no supply interactions/
+Skull Altar Adrenaline verified. Regional-only farm binding and3text aliases
+retain original classic/other-region art/name/text and all rules/data hashes.
+
+Complete native caves_skull_torch_01 renderer259, mesh5/first3/count1, keeps
+887vertices992triangles/UV/full2048paint/tint1 exact against actual installed
+caves_cultist/common/cave bundles. It is unsuitable as an unburned-torch pickup;
+sconce remains pending. As an outdoor bone votive it fits Foetor unholy context.
+Adapted context/state, no shipped encounter/spawn claim. Public
+render_bone_votive.py groups17 disconnected geometry assemblies by source
+position seam analysis only, without welding/deforming geometry. Used hides
+11whole upper-bundle groups0,3,5,7,8,9,11,12,13,14,15:362v416tri. Remaining
+525v576tri lower stake/skull/hide/bindings fixed. Groups are not authored
+GameObjects. Closed pixels match native reference;40462source pixels change
+inside330/79/653/315. Source rows319+ and fitted rows299+ exact. No generation/
+repaint. NativeCull2/cutout-disabled modeled, not full lighting/fog/dither/
+neardark shader. Eight old background dependency skips outside selection,
+none on selected renderer. Initial pre-output guard caught mistaken hand-added
+totals; source-derived362/416 verified before first pair. Final
+native-votive-pair-v01/fitted-v01:470x1021/foot235,1005,width174.9265,height380.
+380preferred over340 in actual farm corridor/room comparisons.
+
+15artifact and actualCore367 full49ID45pair/all-old/classic/other-region/owner/
+alias checks pass. No C#build375;367Release1330Core297UI remain prior. Native
+PNG opaque DrawProp clicks/padding/context/ground/states pass,2frames. Default
+old decorative_urn/holy_water probe is separate, not a skull-altar supply.
+PNG process already exited after PASS; retained log, no process killed.
+No launch-actors.json exists. After20:30UTC verify fresh usage/current105target/
+source hashes/game closed, then launch the unused qa375 actors stage. Inspect
+actual effect label, party contrast, ground, used state and revisit; retain
+PASS and close exact validated owned PID. Do not accept/promote counts before
+that native check. If wording needs revision, deliberately rebuild preserving
+all old art/entries and deploy only while DD2closed, never stale helpers.
+
+105current installed targets/config44foreign/journal/public source/CSV hashes
+verified. Installer375 consumed,before375 evidence only,no pending installer/
+armed restore. Do not overwrite this QA candidate with an older pack or stale
+runtime/config.104-ID ledger retains48accepted counts and skull-altar candidate
+separately; pending13base/10quest/26DLC/6legacy/owner exception remain. Preserve
+canonical IDs/outcomes/RNG/supplies/states/picking/ground/saves/spawn/classic/
+FadedMemory. No protected estates1/3,mod saves or abandoned checkout access.
+Preserve concurrent/journal bytes; frozen clean currentHEAD+owned inputs only
+if C#build needed. Keep prior accepted art; old347global/helper/generated
+DinnerCart used variant and349duplicate forbidden. Bookshelf342 stays,Hope
+glyph floats,full Shambler building unsuitable compact altar. Tutorial bandits
+chest unselected. Hamlet354QA365/expedition340 parked. HeavyD:limited space,
+avoid redundant exports/unrelated deletion. Ordinary usage first,no work at
+<=8%,full checkpoint before7-8%reserve/context exhaustion.
+
 LATEST374: TANGLE FIELD COFFIN ACCEPTED
 Round374 accepts Tangle-only Weathered field coffin for ancient_coffin.
 Read local-art/ui-overhaul/curio-regional-coherence-v24/CONTINUE.md and
