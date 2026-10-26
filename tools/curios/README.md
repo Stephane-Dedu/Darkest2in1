@@ -1,5 +1,36 @@
 # Curio rework: design catalog v01
 
+## Accepted Foetor cask and butcher's rack, round368
+
+The remaining Moonshine Barrel and Knife Rack drafts from347 are accepted only
+in `dd2_farm`, named Fermenting farm cask and Abandoned butcher's rack. These
+are existing generated pairs, not native geometry. Original PNG pixels and
+source provenance retain; no generation, repainting or refitting occurred368.
+The cask displays at340px width. The rack displays at350px rather than382.9412,
+keeping its original canvas and foot anchor while fitting beside the heroes.
+Their timber, iron, cloth, searched states and grounding were compared in
+actual Foetor corridor/room scenery and with the real four-hero party.
+
+Three PNG/input cases pass opaque clicks and transparent padding, with actual
+bandage and medicinal-herb drag/drop checks. Two native-party cases pass the
+ordinary supply outcomes, RNG steps, used state and revisit. A final moonshine
+case confirms readable result wording. Eighteen captures include repeated
+stages, not eighteen identities; the initial moonshine text is superseded.
+
+The canonical moonshine data consumes herbs but names antivenom in its result.
+Two exact Foetor-only presentation aliases correct that sentence and replace
+the internal damage-effect ID with "Damage increased." Canonical CSV/report/
+effect data, supplies, RNG, saves, spawns and classic presentation are unchanged.
+Twelve artifact tests and actual Core367 full-pack/fallback/wording checks pass.
+No C# build368; round367's Release/1,330 Core/297 UI results remain prior.
+
+Accepted coverage is44 design IDs (43 base-runtime and one DLC),39pairs/78PNGs.
+Runtime367 remains exact. Rebuilt pack-farm-CANDIDATE-v02 retains all previous
+42entries/37records/74PNGs. Read v18/CONTINUE and acceptance.json first. This
+finishes regional review of that old draft batch, without accepting its global
+pack or the rejected generated Dinner Cart used image. Remaining104-ID work
+and suitable distinct Sprawl/Foetor cabinet fittings continue.
+
 ## Accepted Tangle stump and antivenom QA, round367
 
 The existing round347 generated Old Tree pair is now accepted only for

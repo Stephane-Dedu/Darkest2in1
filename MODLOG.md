@@ -11433,3 +11433,45 @@ deploy while running. Hamlet354 nativeQA passed365 and stays parked for notes;
 expedition340 parked. Saved campaign/controller/long-session QA not newly done.
 Checkpoint local-art/ui-overhaul/curio-regional-coherence-v17; heavyD: limited
 space. Ordinary usage first, stop at8%, checkpoint before7-8%reserve/context.
+
+
+## Round368: regional Foetor cask and butcher rack accepted
+
+Accepted existing347generated moonshine_barrel and knife_rack pairs only in
+dd2_farm as Fermenting farm cask and Abandoned butcher's rack. Original PNGs
+and source provenance exact; no native-geometry claim, new generation, repaint
+or refit. Caskwidth340/height328.6152; rack runtimewidth350/height383.871 rather
+than382.9412/420, retaining canvas/foot. Actual farm corridor/room and native
+party views reviewed for material harmony, context, grounded states and scale.
+
+Three PNG/input cases pass opaque clicks/padding and actual bandage/herb
+drag/drop. Two real-four-hero ordinary supply/outcome/RNG/used/revisit cases
+pass, plus a final moonshine wording case.18captures include repeats, not new
+identity counts. Initial moonshine result text is superseded by finalv02.
+Canonical CSV consumes medicinal_herbs but says Antivenom; two exact regional
+presentation aliases correct this sentence and internal damage-effect label.
+Native final panel shows herbs and Damage increased. Canonical CSV/reports/
+effects/rules/supplies/RNG/states/saves/spawns/classic/FadedMemory unchanged.
+
+12artifact tests and actualCore367 full44ID/39pair/fallback/wording checks pass.
+No C# build368;367Release/1330Core/297UI remain prior results. Current runtime367
+unchanged, deliberate combined pack-farm-CANDIDATE-v02 authoritative. All old
+42entries/37records/74PNGs retain. Accepted44design IDs=43base-runtime+1DLC,
+39distinct pairs/78PNGs. These are art counts, not new natural encounters.
+
+## Status 2026-10-26 after round368
+
+Runtime367/44ID39pair packv02 installed, all owned QA processes closed.93targets/
+config/44foreign WIP/journal bytes and prior367source hashes verified. No shared
+dirty build, protected estate/mod save/abandoned checkout access, armed restore
+or pending installer. Old347draft identities now have regional acceptance;
+old global pack/helper and rejected generated DinnerCart used image still must
+not install. Native366cart and stump367 retain. Continue fresh baseline with
+remaining104-ID regional ledger and suitable distinct Sprawl/Foetor caches;
+prior icons/open luggage/indoor cabinet/depot remain unselected references.
+Do not repeat accepted art or infer spawns from names/fixtures. Latest repeated
+unsaved QA permission active, never deploy while running. Hamlet354 nativeQA
+passed365 and stays parked for notes; expedition340 parked. Saved/controller/
+long-session acceptance not newly tested. HeavyD: about1.4GiB free, no redundant
+exports/unrelated deletion. Checkpoint local-art/ui-overhaul/curio-regional-
+coherence-v18; ordinary usage first and stop before7-8%reserve/context exhaustion.

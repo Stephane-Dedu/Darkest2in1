@@ -1,3 +1,35 @@
+LATEST368 FOETOR CASK/RACK ACCEPTED; RUNTIME367 UNCHANGED:
+Read local-art/ui-overhaul/curio-regional-coherence-v18/CONTINUE.md first.
+Final deliberate pack-farm-CANDIDATE-v02 adds only moonshine_barrel/dd2_farm
+Fermenting farm cask and knife_rack/dd2_farm Abandoned butcher's rack. Existing
+347generated PNG pairs exact, not native geometry; no new generation/repaint/
+refit. Caskwidth340/height328.6152; rack displaywidth350/height383.871 instead
+of382.9412/420, same canvas/foot. Actual farm corridor/room/native-party art,
+state and grounding reviewed. PNG clicks/padding plus actual bandage/herbs
+drag/drop pass; two full four-hero outcomes/RNG/used/revisit cases and one final
+cask wording case pass.18captures include repeats; initial cask text superseded.
+Two exact Foetor-only aliases fix canonical herbs result incorrectly naming
+antivenom and show Damage increased. instead of internal effect ID. Canonical
+CSV/reports/effects/supplies/RNG/states/saves/spawns/classic/FadedMemory retain.
+Accepted44design IDs=43base-runtime+1DLC,39pairs/78PNGs; old42entries37records
+74PNGs exact.12artifact and actualCore367 full44ID39pair/fallback/wording checks
+pass368. No C#build368;367Release1330Core297UI remain prior.93installed targets/
+config/44foreign/journal bytes verified. All owned QA processes closed, helpers
+consumed, no pending installer or armed restore. No347draft identity remains
+pending that batch, but old global pack/helper and rejected generated Dinner
+Cart used image must never install; native366cart and stump367 stay accepted.
+Continue fresh baseline with remaining104-ID ledger and suitable distinct
+Sprawl/Foetor cabinet fittings. Prior icons/open luggage/indoor cabinet/depot
+studies remain unselected; do not repeat or infer encounters from source names.
+Prefer complete native geometry/UV/full paint; generate only demonstrated gaps.
+Bookshelf342 stays, Hope glyph floats, full Shambler node unsuitable compact
+altar. Repeated unsaved launch/QA permission active; never deploy while running.
+Protected estates1/3/mod saves/abandoned checkout forbidden. Hamlet354 finishes
+passed QA365 and stay parked; expedition340 parked. Saved/controller/long-session
+QA not newly performed. HeavyD: about1.4GiB free; preserve foreign/concurrent
+bytes, use frozen currentHEAD+owned inputs only for builds. Ordinary usage first;
+stop at<=8%, full checkpoint before7-8%reserve or context exhaustion.
+
 LATEST367 TANGLE STUMP ACCEPTED; CURRENT RUNTIME367:
 Read local-art/ui-overhaul/curio-regional-coherence-v17/CONTINUE.md first.
 Only old_tree/dd2_forest adds Rotting stump using existing347generated pair;

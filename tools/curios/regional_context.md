@@ -1,5 +1,22 @@
 # Curios must belong to their surroundings
 
+Current round368 status: Foetor-only Fermenting farm cask and Abandoned
+butcher's rack are accepted for moonshine_barrel and knife_rack. Existing347
+generated PNGs retain exactly; no native-geometry claim or new art generation.
+Cask width340 and rack width350 fit actual farm scenery and real-hero context.
+Native clicks/padding, bandage/herb drag/drop and ordinary party outcomes,
+searched state and revisit pass. Final cask text now names the consumed herbs
+and uses a readable damage-effect label through two regional aliases. Canonical
+reports/rules, classic/other-region presentation and FadedMemory retain.
+
+Read v18/CONTINUE.md and acceptance.json first. Runtime367 unchanged; final
+rebuilt pack-farm-CANDIDATE-v02 is installed. Accepted44 design IDs are43
+base-runtime+1DLC,39pairs/78PNGs; all old42entries/37records/74PNGs exact.
+No347draft identity remains awaiting that batch's review, but its old global
+pack/helper must not run and its generated DinnerCart used variant stays
+rejected. Sprawl/Foetor cabinet fittings and remaining104-ID context work
+remain open. These art counts do not establish natural encounter locations.
+
 Current round367 status: Tangle-only Rotting stump is accepted for old_tree.
 Existing347 generated PNGs retain exactly; no new generation/repaint/refit.
 Actual native art/context, click/padding, antivenom drag/drop and real-party
