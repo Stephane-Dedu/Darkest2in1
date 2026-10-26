@@ -1,3 +1,37 @@
+LATEST369 DISTINCT SPRAWL CACHE ACCEPTED; RUNTIME367 UNCHANGED:
+Read local-art/ui-overhaul/curio-regional-coherence-v19/CONTINUE.md first.
+Final deliberate pack-sprawl-CANDIDATE-v01 changes only cabinet/dd2_city art,
+same Locked street cache name/wording. Generated missing coffer body uses
+native Tangle/Shroud and Sprawl references; no native geometry/UV/shader claim.
+Public compose_state_patch.py applies only reviewed released-padlock paint;
+all original RGBA outside private mask exact. Lid stays closed after search.
+Three built-in imagegen calls; full-open draft wrong canvas/body drift and
+first incomplete shackle mask rejected. Selected raw-pair-v04/maskv02/fitted-v01,
+1488x934 foot744/918 width340 height213.414. Native comparisons and actual City
+scenery/party/ground/state/released-lock readability reviewed. Actual key/shovel
+drag/drop, clicks/padding and two full four-hero outcome/RNG/used/revisit cases
+pass,12captures.12artifact tests, two actual negative composition guards and
+actualCore367 full44ID40pair/otherregion/classic/name/message/owner checks pass.
+No C#build369;367Release1330Core297UI remain prior. Accepted44design IDs=
+43base-runtime+1DLC stay44, now40pairs/80PNGs. All old39records78PNGs, other
+three cabinet regions, classic, four names and twelve messages exact.95targets/
+config/44foreign/journal bytes/prior367source and new recipe hashes verified.
+All owned QA processes closed, installer consumed, no armed restore. Prompts,
+native refs/masks/coordinates and generated copies privateD:, originals retained.
+Next suitable distinct Foetor cabinet fitting remains open: current farm body
+is interim locked_strongbox. Continue fresh104-ID context baseline; do not redo
+accepted art or force prior icons/open luggage/indoor cabinet/depot studies.
+368cask/rack,367stump,366nativecart and365batch accepted; old347global pack/helper
+and generated DinnerCart used variant stay forbidden. Bookshelf342 stays, Hope
+glyph floats; full Shambler node unsuitable compact altar. Canonical IDs/rules/
+RNG/supplies/states/picking/ground/saves/spawns/classic/FadedMemory retain.
+Human repeated unsaved launch permission active; never deploy while running.
+Protected estates1/3/mod saves/abandoned checkout forbidden. Hamlet354 finishes
+passed QA365 and stay parked; expedition340 parked. Saved/controller/long-session
+QA not newly done. HeavyD: about1.3GiB free; preserve concurrent bytes, build only
+frozen currentHEAD+owned inputs if needed. Ordinary usage first, stop at<=8%,
+complete checkpoint before7-8%reserve or context exhaustion. No stale restores.
+
 LATEST368 FOETOR CASK/RACK ACCEPTED; RUNTIME367 UNCHANGED:
 Read local-art/ui-overhaul/curio-regional-coherence-v18/CONTINUE.md first.
 Final deliberate pack-farm-CANDIDATE-v02 adds only moonshine_barrel/dd2_farm

@@ -1,5 +1,21 @@
 # Curios must belong to their surroundings
 
+Current round369 status: distinct Sprawl Locked street cache is accepted for
+locked_display_cabinet/dd2_city. Generated missing body uses native coffer and
+City palette references, with no native geometry/UV/shader claim. A reviewed
+local released-padlock patch changes state; all original RGBA outside the
+private mask remains exact. Lid stays closed after searching. Actual-scale
+native comparisons, City scenery, ground/state/lock readability and four-hero
+key/shovel outcome/revisit checks pass, as do both actual supply drag/drop cases.
+
+Read v19/CONTINUE.md and acceptance.json first. Runtime367 unchanged; final
+rebuilt pack-sprawl-CANDIDATE-v01 installed. Identity coverage remains44design
+IDs43base-runtime+1DLC, now40pairs/80PNGs. All previous39records/78PNGs, other
+three cabinet regions, classic art, names and twelve messages retain exactly.
+The Foetor still uses the interim locked_strongbox body; its distinct fitting
+and remaining104-ID context work remain open. Prior unsuitable source studies
+stay references. Art counts and forced QA fixtures do not establish encounters.
+
 Current round368 status: Foetor-only Fermenting farm cask and Abandoned
 butcher's rack are accepted for moonshine_barrel and knife_rack. Existing347
 generated PNGs retain exactly; no native-geometry claim or new art generation.

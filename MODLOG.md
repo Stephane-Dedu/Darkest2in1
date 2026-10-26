@@ -11475,3 +11475,56 @@ passed365 and stays parked for notes; expedition340 parked. Saved/controller/
 long-session acceptance not newly tested. HeavyD: about1.4GiB free, no redundant
 exports/unrelated deletion. Checkpoint local-art/ui-overhaul/curio-regional-
 coherence-v18; ordinary usage first and stop before7-8%reserve/context exhaustion.
+
+
+## Round369: distinct Sprawl street cache with stable state paint
+
+The remaining shared Sprawl cabinet fitting is replaced by a distinct cache
+body generated from accepted native Tangle/Shroud and City scene references.
+Native searches357/359/367 left this specific gap; unsuitable pickup icons,
+open luggage, indoor cabinet and whole depot remain references. New low angular
+lid, iron corner shoes, runners, handle, padlock/front structure are a different
+fitting, not a recolour. This is generated raster art, not native geometry/UV/
+paint or shader reconstruction. Native comparisons and actual City corridor/
+room/four-hero views reviewed for texture detail, palette, ground and scale.
+
+Three built-in imagegen calls recorded with full prompts/source hashes on D:.
+Full-open draft rejected for wrong requested canvas, body drift and duplicate
+plate. Local released-lock edit still repaints body, so new public
+compose_state_patch.py applies only a reviewed interior mechanism mask and
+copies all other RGBA exactly. Same canvas required, editable domain capped
+at20%; two real-input guards reject wrong canvas/unrestricted mask. Fixed
+pixels verified. Incomplete first mask rejected; final raw-pair-v04/maskv02
+keeps lid closed after searching and shows released hanging padlock. All
+body/lid/foot pixels outside mechanism domain exact. No implicit registration.
+Final1488x934/foot744,918/width340/height213.414 preferred over380 and verified
+at native party scale. Images/masks/coordinates/prompts remain outsideGit.
+
+Native PNG clicks/padding and actual key/shovel drag/drop pass separately;
+two full four-native-hero key/shovel outcome/RNG/used/revisit cases pass.
+12frames indexed; state cue and both human-readable result panels reviewed.
+12artifact tests, two actual negative helper checks and actualCore367 full
+44ID40pair/other-region/classic/name/message/owner checks pass. No C# build369;
+367Release/1330Core/297UI remain prior. Canonical IDs/outcomes/RNG/supplies/
+states/picking/ground/saves/spawns/classic/FadedMemory unchanged.
+
+## Status 2026-10-26 after round369
+
+Runtime367 unchanged, deliberate pack-sprawl-CANDIDATE-v01 accepted/installed.
+Only locked_display_cabinet/dd2_city art changes; four names/twelve messages,
+other3cabinet regions/classic and old39records78PNGs exact. Identity coverage
+stays44design IDs43base-runtime+1DLC, now40pairs80PNGs; no encounter added.
+95targets/config/44foreign WIP/journal bytes/prior367source and new helper hash
+verified. All four owned QA processes closed; installer consumed, no pending
+installer/armed restore. No protected estate/mod save/abandoned checkout access.
+Generated copies are on D:, originals retained under Codex generated_images.
+Next distinct Foetor coffer remains open, still using interim locked_strongbox;
+continue remaining104-ID context ledger from fresh baseline. Do not repeat
+accepted extraction/generation or force rejected references. Earlier368/367/
+366/365accepted batches remain, old347global helper/pack and generated cart
+used variant stay forbidden. Repeated unsaved QA permission active, never
+deploy while running. Hamlet354 nativeQA passed365 and stays parked for owner
+notes; expedition340 parked. Saved/controller/long-session QA not newly done.
+HeavyD: about1.3GiB free; checkpoint local-art/ui-overhaul/curio-regional-
+coherence-v19 includes art and selected prompts. Ordinary usage first and full
+checkpoint before7-8%reserve/context exhaustion. No shared dirty C# builds.

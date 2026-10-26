@@ -1,5 +1,45 @@
 # Curio rework: design catalog v01
 
+## Accepted distinct Sprawl street cache, round369
+
+`locked_display_cabinet/dd2_city` now uses a distinct iron-bound street cache.
+Its low angular lid, corner shoes, timber runners, handle and padlock differ
+from the field and dock coffers. The native source search left a demonstrated
+gap, so this body is generated raster art with native coffer and Sprawl scene
+references. It is not extracted geometry, UVs, native paint or a shader rebuild.
+Its ink, surface detail and palette passed comparison with the native Tangle
+and Shroud coffers, then actual City corridor/room and four-hero checks.
+
+The searched image keeps the lid closed and releases the hanging padlock.
+`compose_state_patch.py` applies only the reviewed local mechanism paint from
+the generated edit. Every RGBA pixel outside the private mask is copied exactly
+from the closed source. A mask may cover at most20% of the canvas; identical
+canvases are required. Inspect the local mechanism before choosing its mask.
+
+```powershell
+& $curioPython tools/curios/compose_state_patch.py --original $closedSprite `
+  --edited $localStateEdit --mask $privateEditMask --out "$privateRoot/raw-pair"
+```
+
+Keep images, masks and coordinates private. The selected pair uses a common
+1488x934 canvas/foot744,918 and340px width,213.414px full height. Two actual-input
+negative checks reject a wrong canvas and an unrestricted body mask. Exact
+fixed-pixel checks pass. The full-open draft and first incomplete mechanism
+mask were rejected; the selected recipe and prompts are in the v19 checkpoint.
+Three built-in image_gen calls produced the new body and local state paint.
+
+Actual key and shovel drag/drop, opaque clicks and padding rejection pass.
+Separate four-native-hero cases pass ordinary outcomes, RNG, used state and
+revisit;12captures are indexed. Twelve artifact tests and actual Core367
+full44ID/40pair/fallback checks pass. No C# build369;367Release/1330Core/297UI
+remain prior. All old39records/78PNGs, other three cabinet regions, classic
+art, four names and twelve result messages retain exactly.
+
+Accepted coverage stays44design IDs (43base-runtime+1DLC), now40pairs/80PNGs.
+Current runtime367 is unchanged; rebuilt pack-sprawl-CANDIDATE-v01 is accepted
+and installed. Read v19/CONTINUE and acceptance.json first. The distinct Foetor
+cabinet fitting and remaining104-ID context work continue.
+
 ## Accepted Foetor cask and butcher's rack, round368
 
 The remaining Moonshine Barrel and Knife Rack drafts from347 are accepted only
