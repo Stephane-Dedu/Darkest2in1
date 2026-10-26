@@ -1,3 +1,42 @@
+NEW HUMAN PERMISSION 2026-10-26:
+Launch and repeated game QA authorised after 20 minutes from the05:56:52UTC
+clock read, so not before06:16:52UTC /07:16:52CET Paris. Until then work
+offline. Never deploy while the game runs. Protected estates1/3 remain forbidden.
+See v14/launch-permission.json. This supersedes the older no-launch lines below
+only after that deadline. Prepare fresh frozen current-HEAD QA binaries; never
+deploy stale355 binaries or build shared dirty C#. No game launch/input yet.
+
+LATEST364 SUPPORTED TANGLE WEB OFFLINE CANDIDATE:
+Read local-art/ui-overhaul/curio-regional-coherence-v14/CONTINUE.md first.
+Keep DD2 closed; no launch/input until explicit newer human permission.
+Public render_supported_web.py keeps complete native Coven frame2809v/2554faces,
+both cords/wood members/all fittings/UVs/native2048paint/tint/pose. Complete
+native111v/92face web keeps faces/UVs/native1024bitmap, but positions retargeted
+through four painted attachments. Do not claim unchanged native web geometry.
+Painted barycentric anchors avoid transparent geometry tips; max error1.01e-7,
+0.025depth embed, no face folds. Shared UV support-domain mask hides unsupported
+outer fragments; used-only UV mask opens centre. Frame fixed, no bitmap edits
+or generation. Render-only ground holdout at nativeY1.0 buries skirts without
+deleting geometry. Web tint adapted from nativeblack to mutedbone[.38,.46,.40],
+compared with native-tint reference. Correct cutoff0.247web/0.5frame; full
+lighting/wind/dither not recreated. Final native-web-pair-v01/fitted-v01, fit
+888x933, foot444/917, width361.672/fullheight380 preferred over330 in actual
+Tangle corridor/room composites. Frame/native-tint refs match prototype pixels;
+no opaque frame pixels lost. State delta275/546/387/645; above300/below700 exact.
+Separate pack-web-CANDIDATE-v01 adds only regional-only cosmic_spiderweb/
+dd2_forest, Webbed deadwood. Original web text/bandages/loot/quirks/RNG/states/
+saves/spawns/classic/other regions retain. Frozen clean Core355 full35ID/27pair
+checks and12artifact tests pass364. No C# build/install/launch/input/host/estate/
+save/deploy. UNINSTALLED/UNACCEPTED; current354 cannot parse omitted defaults.
+No installer/restore armed. Native context/actors/shader/hover/bandage/return
+QA awaits permission. Runtime354/Hamlet/config/67targets/44foreign files/
+accepted34IDs26pairs52PNGs retain. Prior candidates350/355/356/358/359/360/361/362
+stay separate; do not redo/combine blindly. Initial prototypes rejected for
+geometric-tip anchors, floating strips or exposed skirts; do not promote them.
+Preserve all canonical rules and104/70/27/6/FadedMemory scopes. Hamlet QA only,
+expedition340 parked. Heavy D:, protected estates1/3, no abandoned checkout,
+shared dirty build or stale restores. Ordinary usage first;7-8%reserve.
+
 LATEST363 NATIVE WEB ALPHA SOURCE AUDIT, NO NEW CANDIDATE:
 Read local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md first.
 Keep DD2 closed; no launch/input until explicit newer human permission.

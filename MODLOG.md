@@ -11274,3 +11274,29 @@ separate and uninstalled. Continue supported web structure/used-state work with
 corrected alpha evidence; native QA still awaits explicit newer permission.
 Checkpoint:local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md;
 heavy source/diagnostic evidence D:.
+
+
+## Round364: supported Tangle web candidate
+
+The complete native Coven deadwood frame uses original geometry, UVs, tint and
+2048 paint. All native web faces/UVs/1024 bitmap retain; web positions are
+retargeted through four painted attachments. Shared UV support masking removes
+unattached strips, a used-only centre mask opens the web, and a render ground
+holdout buries native skirts. Muted bone tint replaces native black for menu
+visibility. Correct shader cutoffs0.247/0.5, no bitmap repaint or generation.
+Public render_supported_web.py reproduces this adaptation. Original frame and
+native-tint reference pixels match the reviewed prototype; no opaque frame
+pixels lost. Used delta stays within the web centre. Fit888x933/foot444,917,
+width361.672/height380 selected against actual Tangle backgrounds offline.
+
+Separate pack-web-CANDIDATE-v01 adds only cosmic_spiderweb/dd2_forest,
+Webbed deadwood. Original text, supplies, outcomes, RNG, states, saves, spawns,
+classic/other regions retain. Frozen Core355 full35ID/27painting check and
+12artifact tests pass. Current354 cannot parse omitted defaults. Uninstalled,
+unaccepted; no new C# build, launch/input/host/estate/save/deploy/restore364.
+Installed34IDs/26pairs/52PNGs,67targets/config and44foreign files exact.
+
+Owner now permits repeated game QA after06:16:52UTC on2026-10-26, following
+the20minute wait from05:56:52UTC. Preparation remains offline until then.
+Checkpoint local-art/ui-overhaul/curio-regional-coherence-v14/CONTINUE.md;
+heavy evidence D:. Fresh current-HEAD QA build still needed.

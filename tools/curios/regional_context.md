@@ -390,3 +390,43 @@ and44foreign files retain. All candidates stay separate/uninstalled/unaccepted.
 Next evaluate a supported web structure and used state at actual Tangle scale
 using this corrected alpha evidence. Native QA still awaits permission.
 Checkpoint: `local-art/ui-overhaul/curio-regional-coherence-v13/CONTINUE.md`.
+
+## Round364: supported silk on native deadwood
+
+Complete native Coven deadwood provides a plausible outdoor structure for the
+existing Tangle Cosmic Spiderweb. Both native members retain2809vertices/
+2554faces, UVs, full2048paint, tint and relative pose. This includes all cords,
+branches and fittings. The complete native111vertex/92face web retains every
+source face, UV and full1024paint, while its positions are retargeted to four
+painted frame attachments. Do not describe the final web geometry as unchanged.
+
+The first prototype anchored geometric bounds and left floating silk tips.
+Painted surface samples, source barycentric coordinates and a small constrained
+correction now place four attachments within1.01e-7native units of their targets,
+embedded0.025behind the surface. No face folds. A shared UV support-domain mask
+hides unsupported edge fragments. A used-only centre mask makes the web visibly
+searched. Source bitmap pixels remain unedited. Native skirts are buried with
+render-only ground occlusion at nativeY1.0; no frame geometry is deleted.
+
+The source black web tint nearly vanishes in actual Tangle backgrounds. The
+candidate uses muted bone RGB[0.38,0.46,0.40] in both states, compared directly
+with the same adapted geometry in original black tint. Native frame paint and
+tint retain. Correct shader cutoffs0.247/0.5 are used; native lighting, wind and
+dithering are not reconstructed. This is an adapted curio, not a shipped native
+encounter or used animation. Actual region/actor/shader/input QA is pending.
+
+Public render_supported_web.py produces native-web-pair-v01/fitted-v01. Both
+states share camera, pose and foot. Fit888x933, foot444/917, width361.672 and
+380px full height, preferred over330px for silk detail. Public frame and
+native-tint reference pixels match the reviewed prototype exactly. No opaque
+frame pixels disappear under either state. State delta is confined to source
+bounds[275,546,387,645]; pixels above300/below700 match.
+
+Separate pack-web-CANDIDATE-v01 adds only regional-only cosmic_spiderweb/
+dd2_forest, Webbed deadwood. Existing result text already fits. Bandages, loot,
+quirks, RNG, used flags, saves, probabilities, classic and other regions retain.
+Frozen Core355 parses35IDs/27paintings;12artifact tests pass364. Original34entries/
+26artifact records/52PNGs retain. No C# build or installation. Current354 cannot
+parse omitted defaults. Candidate stays UNINSTALLED/UNACCEPTED; no installer or
+restore armed. Keep all earlier candidates separate. Native QA awaits explicit
+newer launch permission. Checkpoint:curio-regional-coherence-v14/CONTINUE.md.

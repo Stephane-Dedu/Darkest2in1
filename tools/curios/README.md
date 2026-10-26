@@ -566,3 +566,37 @@ Round363's six diagnostic renders compare0.4,0.247 and0.0 on unchanged native
 web geometry/UVs/paint/tint. They isolate alpha differences; lighting, wind,
 dithering and compiled branches are not recreated. These source studies are
 not a curio pair, supporting frame, used state or accepted shader reproduction.
+
+## Supported web for the Tangle
+
+`render_supported_web.py` keeps both complete native Coven deadwood members,
+including their cords and fittings. It retargets the complete native cobweb
+through four painted surface attachments; private anchor records retain the
+original face IDs, barycentric weights and UVs. Geometry bounds alone are
+insufficient because their tips can lie in transparent paint.
+
+```powershell
+& $curioBlender -b --python-exit-code 1 --python tools/curios/render_supported_web.py -- `
+  --kit $curioKit --frame "$webRoot/parts/frame-fullpaint-v01" `
+  --web "$nativeWebExport" --anchors "$webRoot/painted-anchors-v03.json" `
+  --out "$webRoot/native-web-pair"
+```
+
+Inputs are the complete `barricade_coven_trees_02.fbx` frame and
+`common_cobweb_02.fbx`. The frame retains2809vertices/2554faces and native2048
+paint. The111vertex/92face web keeps all source faces, UVs and native1024paint,
+with documented position retargeting and a muted bone tint for visibility.
+This is an art adaptation, not unchanged native web geometry or material tint.
+
+A shared support-domain mask hides unattached outer fragments. The used-only
+UV mask opens the centre without editing the bitmap or frame. A render-only
+ground holdout buries native skirts while preserving the source geometry.
+Native web/frame cutoffs are0.247/0.5. Lighting, wind and dithering remain
+outside this offline reconstruction and require native QA.
+
+Round364's separate `cosmic_spiderweb/dd2_forest` candidate is named Webbed
+deadwood. Original web text, bandages, loot, quirks, RNG, states, saves and
+spawns retain; classic and other regions keep original art/name. The380px fit
+was compared with330px and native black-tint references in actual Tangle
+backgrounds. It remains uninstalled/unaccepted and needs355regional-only
+support. Keep all earlier candidate manifests separate until deliberate QA.
