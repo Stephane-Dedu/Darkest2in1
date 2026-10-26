@@ -1,5 +1,31 @@
 # Curio rework: design catalog v01
 
+## Native treatment remains, round373
+
+The Tangle presentation of Mummified Remains is now Abandoned treatment slab.
+It uses the complete native forest Chirurgeon corpse and stone table in their
+original relative pose. A complete native belongings sack beside the slab
+disappears after searching; the body and table stay fixed. Canonical Weald/
+bandage rules and classic/other-region presentation retain.
+
+Run `render_field_remains.py` inside Blender with `--kit`, `--source`, `--sack`
+and a new private `--out` directory. The audited source subset contains both
+complete forest table/corpse renderers and their original transforms. The sack
+is also a complete renderer. Geometry, UVs, full native paint and tint retain;
+only uniform sack placement and state visibility are adapted. The script
+checks expected topology, Cull2/cutout-disabled properties and common feet.
+Camera dependency state is updated before projecting fitting landmarks.
+
+This is adapted native art, with no generation or bitmap repaint. It models
+native culling and opaque surfaces, without recreating outline/lighting/fog.
+Used pixels match the unchanged fixed reference. Final v02/fitted-v01 uses
+1680x834/foot840,818/width360. Actual corridor/room/party comparison, bandage
+click/padding/drop and bandage/no-item outcome/state/revisit checks pass.
+15artifact tests and actualCore367 full47ID43pair/fallback checks pass.
+No C#build373;1330Core/297UI are prior367 results. Read v23/CONTINUE and
+acceptance.json. Runtime367 unchanged,47 identities/43 pairs/86 PNGs;
+all prior46entries42records84PNGs exact. Protected saves remain untouched.
+
 ## Explicit regional painting reuse, round372
 
 Barnacle Crusted Chest now uses the accepted native Shroud chest under its own

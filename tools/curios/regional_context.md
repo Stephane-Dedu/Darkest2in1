@@ -1,5 +1,22 @@
 # Curios must belong to their surroundings
 
+Current round373 status: Tangle-only Abandoned treatment slab is accepted
+for canonical mummified_remains. Installed CSV verifies Weald/bandage. Complete
+native forest corpse/table keep original relative pose, geometry/UV/full paint/
+tints. Complete native sack is placed beside slab and hides after searching;
+body and stone remain fixed. Adapted outdoor treatment/belongings scene, no
+new encounter claim. No generation/repaint/deformation. Used pixels equal
+untouched fixed reference, differences only inside sack projection. Final
+native-remains-pair-v02/fitted-v01, width360, actual Tangle scenery/party/ground/
+states/result reviewed. Native bandage click/padding/drop and two bandage/
+no-item four-hero ordinary outcome/RNG/state/revisit cases pass,10 captures.
+Read v23/CONTINUE and acceptance first. Runtime367 unchanged;47design IDs,
+46base plus1DLC,43pairs86PNGs. All old46entries42records84PNGs and classic/other
+regions retain.15artifact/fullCore367 checks pass; no C#build373,1330Core297UI
+prior367.101targets/config44foreign/journal/source/CSV hashes preserve,DD2closed,
+installer consumed/no restore. Pending14base/10quest/26DLC/6legacy plus owner
+exception in refreshed104-ID ledger. Counts do not establish encounters.
+
 Current round372 status: Barnacled sea chest is accepted for canonical
 barnacle_crusted_chest/dd2_coast. Cove/shovel verified from installed CSV.
 It explicitly shares the complete accepted native Shroud chest painting with

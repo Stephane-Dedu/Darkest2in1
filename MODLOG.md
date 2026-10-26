@@ -11662,3 +11662,55 @@ clean HEAD+owned inputs only for C#builds. No stale runtime/config/helper runs.
 HeavyD:limited space,avoid redundant exports/unrelated deletion. Ordinary usage
 first,no work at<=8%,full checkpoint before7-8%reserve/context exhaustion.
 Saved/controller/long-session QA remains separate.
+
+
+## Round373: native treatment remains belong in the Tangle
+
+Round373 accepts the Tangle-only Abandoned treatment slab for canonical
+mummified_remains. Read local-art/ui-overhaul/curio-regional-coherence-v23/
+CONTINUE.md and acceptance.json first. Runtime367 unchanged; deliberate
+pack-remains-CANDIDATE-v01 installed.47 design IDs,46 base-runtime plus1 DLC,
+43 distinct pairs/86 PNGs. All old46entries42records84PNGs exact. Canonical
+Weald/bandage verified; original classic/other-region art/name/text retain
+through regional_only omitted default. Four regional result aliases only.
+
+Public render_field_remains.py keeps complete native forest Chirurgeon table
+76v46tri and corpse4746v6813tri in their original relative pose. Geometry/UV/
+full2048 table paint/full1024 corpse paint/tints match actual installed source.
+Complete native sack475v640tri/full2048paint is uniformly .9scaled and placed
+beside slab, depth aligned to common foot. Used hides only whole sack. Native
+table/body fixed,5297v7499tri closed/4822v6859tri used. Adapted regional scene
+and searched cue, not a shipped encounter. No generation/repaint/deformation.
+Cull2/cutout-disabled modeled, not full native outline/lighting/fog shader.
+Used pixels match untouched fixed reference exactly;14691source pixels change
+inside sack bounds41/575/181/744. Final native-remains-pair-v02/fitted-v01,
+1680x834,foot840/818,width360/fullheight178.7143. v01 rejected stale-camera
+projection landmarks; final public recipe updates dependency graph first.
+
+Actual native scenery/party/ground/states/result reviewed. Bandage PNG actual
+click/padding/drop and two four-hero bandage/no-item ordinary outcome/RNG/used/
+revisit cases pass,10 final valid captures. First bandage party4frames are
+superseded after process exit/native IMainInstaller teardown error before full
+log retention; final bandage-final-actors replay passes.14total frames, no
+inflated identity count. No natural encounter, saved campaign/controller/
+long-session claim; no-item loot observed, other branches not forced.15artifact and
+actualCore367 full47ID43pair/all-old/classic/other-region/owner checks pass.
+No C#build373;367Release1330Core297UI remain prior. All four owned processes
+closed.101installed targets/config44foreign/journal/public-source/CSV hashes
+verified. Installer373 consumed,before373 evidence only,no armed restore.
+
+Continue refreshed104-ID ledger:v23/context-audit-104.json. Pending14base/
+10quest/26DLC/6legacy plus FadedMemory owner exception remain separate. Counts
+do not prove natural encounters or every-region review. Inspect actual current
+binding/canonical region/supply before choosing suitable complete native art.
+Generate only demonstrated gaps and require native acceptance at corridor
+scale. Keep accepted four cabinet paintings, travel case and all prior pairs.
+Old347global pack/helper/generated DinnerCart used variant and349duplicate
+forbidden. Bookshelf342 stays,Hope glyph floats,full Shambler building/woodland
+unsuitable compact altar. Hamlet354QA365 and expedition340 parked. Repeated
+unsaved QA permission active,never deploy while game runs. Protected estates
+1/3,mod saves and abandoned Documents checkout forbidden. Preserve concurrent
+and journal bytes; only frozen currentHEAD plus owned inputs if C#build needed.
+No stale runtime/config restores or consumed helpers. HeavyD:limited space,
+avoid redundant exports/unrelated deletion. Ordinary usage first,no work at
+<=8%;full checkpoint before7-8%reserve/context exhaustion.
