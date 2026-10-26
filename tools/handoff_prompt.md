@@ -1,3 +1,44 @@
+LATEST372: NATIVE SHROUD CHEST REUSED EXPLICITLY
+Round372: Barnacled sea chest accepted for barnacle_crusted_chest/dd2_coast.
+Read local-art/ui-overhaul/curio-regional-coherence-v22/CONTINUE.md first.
+Runtime367 unchanged; deliberate pack-barnacle-CANDIDATE-v01 installed.
+46design IDs45base-runtime+1DLC, still42distinct paintings/84PNGs. Zero new
+painting/generation/extraction/PNG. Explicitly reuses accepted358/365 complete
+native Shroud chest from cabinet/coast. All old45entries42records84PNGs exact.
+Canonical Cove/shovel verified; original classic/other-region art/name/text
+retain through regional_only omitted default. Four coastal result aliases only.
+
+New selection regional_aliases maps recipient to direct painting owner. Source
+must own and bind the SAME reviewed painting in the SAME region. Explicit,
+one-hop, unprotected/reviewed sharing only. Implicit/chained/protected/unknown/
+different-region/unused aliases and changed pair pixels rejected. Global
+original-sprite alias rules retain. No duplicate artifact count.15artifact tests
+pass including three new ownership/integrity/dedup tests. Prior371 manifest/
+84PNG rebuild byte-identical. ActualCore367 full46ID42pair/shared-object and
+old/classic/other-region/owner checks pass. No C#build372;367Core1330/UI297 prior.
+Native shovel PNG clicks/padding/drop, mixed four-hero recipient/shovel then
+source/key shared-cache closed/used/outcome/RNG/revisit and separate no-item
+case pass.14captures include4source repeats, not14identities. Native context,
+ground, states and result panels reviewed. No-item observed loot branch; bleed/
+nothing not separately forced. All three owned processes closed.99targets/
+config44foreign/journal/source/CSV hashes verified; installer consumed,no restore.
+
+Continue refreshed104-ID ledger:v22/context-audit-104.json. Pending15base-runtime/
+10quest/26DLC/6legacy plus FadedMemory owner exception remain distinct scopes.
+No new IDs/encounters/rules/RNG/supplies/states/saves/spawn/classic/owner changes.
+Counts do not prove natural encounters or every-region review. Prefer complete
+native geometry/UV/full paint; generate only demonstrated gaps and verify at
+actual corridor scale. Keep four cabinet paintings,371travel case and prior
+accepted art. Old347global pack/helper/generated DinnerCart used variant and
+349duplicate forbidden. Bookshelf342 stays,Hope glyph floats,full Shambler node
+unsuitable compact altar. Hamlet354QA365/expedition340 parked. Repeated unsaved
+QA permission active,never deploy while game runs. No protected estates1/3,
+mod saves or abandoned checkout. Preserve concurrent/journal bytes; frozen
+clean HEAD+owned inputs only for C#builds. No stale runtime/config/helper runs.
+HeavyD:limited space,avoid redundant exports/unrelated deletion. Ordinary usage
+first,no work at<=8%,full checkpoint before7-8%reserve/context exhaustion.
+Saved/controller/long-session QA remains separate.
+
 LATEST371: TANGLE TRAVEL CASE ACCEPTED
 Round371 adds Tangle-only lost_luggage/dd2_forest, Abandoned travel case.
 Read local-art/ui-overhaul/curio-regional-coherence-v21/CONTINUE.md and acceptance.

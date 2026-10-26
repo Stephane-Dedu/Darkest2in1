@@ -266,5 +266,73 @@ class PairRegistrationTests(unittest.TestCase):
                 self.assertFalse((root / 'review').exists())
 
 
+    def shared_regional_selection(self, root):
+        selection = self.regional_selection(root)
+        path = root / 'inventory.json'
+        inventory = json.loads(path.read_text())
+        inventory.extend([
+            {'id': 'recipient', 'name': 'Sea chest', 'scope': 'base-runtime', 'region': 'Cove', 'sprite': 'different_original'},
+            {'id': 'protected', 'name': 'Owner exception', 'scope': 'owner-exception', 'region': 'ALL'}])
+        path.write_text(json.dumps(inventory))
+        selection['regional_only'] = ['recipient']
+        selection['region_art_overrides']['recipient'] = {'dd2_city': {
+            'ArtId': 'fixture_sprawl', 'DisplayName': 'Shared regional chest'}}
+        selection['regional_aliases'] = {'recipient': 'fixture'}
+        return selection
+
+    def test_explicit_same_region_reuse_adds_identity_without_duplicate_painting(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selection = self.shared_regional_selection(root)
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            doc = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(len(doc['Entries']), 2)
+            self.assertEqual(len(doc['Artifacts']), 2)
+            recipient = next(e for e in doc['Entries'] if e['Id'] == 'recipient')
+            self.assertNotIn('ArtId', recipient)
+            self.assertEqual(list(recipient['Regions']), ['dd2_city'])
+            self.assertEqual(recipient['Regions']['dd2_city']['ArtId'], 'fixture_sprawl')
+            self.assertEqual(len(list((root / 'pack/art').glob('*.png'))), 4)
+            review = json.loads((root / 'pack/review/coverage.json').read_text())
+            self.assertEqual(review['regional_shared_art_aliases'], {'recipient': 'fixture'})
+            self.assertEqual(len(review['regional_artifacts']), 1)
+            self.assertEqual(next(e for e in review['entries'] if e['id'] == 'recipient')['shared_regional_art_source'], 'fixture')
+
+    def test_regional_shared_aliases_reject_invalid_protected_or_chained_sources(self):
+        for aliases in (None, [], {'recipient': []}, {'recipient': 'recipient'},
+                        {'unknown': 'fixture'}, {'recipient': 'protected'},
+                        {'recipient': 'missing'}, {'recipient': 'fixture', 'fixture': 'recipient'}):
+            with self.subTest(aliases=aliases), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.shared_regional_selection(root)
+                selection['regional_aliases'] = aliases
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
+
+    def test_shared_alias_cannot_bypass_owner_region_or_pair_integrity(self):
+        for problem in ('implicit', 'wrong_source', 'wrong_region', 'missing_source_binding', 'unused', 'changed_pixels'):
+            with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.shared_regional_selection(root)
+                if problem == 'implicit': selection.pop('regional_aliases')
+                elif problem == 'wrong_source': selection['regional_aliases']['recipient'] = 'protected'
+                elif problem == 'wrong_region':
+                    selection['region_art_overrides']['recipient']['dd2_forest'] = selection['region_art_overrides']['recipient'].pop('dd2_city')
+                elif problem == 'missing_source_binding': selection['region_art_overrides'].pop('fixture')
+                elif problem == 'unused': selection['region_art_overrides']['recipient']['dd2_city']['ArtId'] = 'fixture'
+                else:
+                    path = root / 'variant/fixture_sprawl-used.png'
+                    with Image.open(path) as image:
+                        image.putpixel((0, 0), (255, 0, 0, 255)); image.save(path)
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,5 +1,20 @@
 # Curios must belong to their surroundings
 
+Current round372 status: Barnacled sea chest is accepted for canonical
+barnacle_crusted_chest/dd2_coast. Cove/shovel verified from installed CSV.
+It explicitly shares the complete accepted native Shroud chest painting with
+cabinet/coast. Zero new painting or generation;46design IDs45base+1DLC,still
+42pairs84PNGs. Source ownership and same-region binding are required through
+regional_aliases; original classic/other-region fallback retains.
+Read v22/CONTINUE and acceptance first. Runtime367 unchanged,pack-barnacle-v01
+installed.15artifact/actualCore367/full old-pack rebuild checks and native
+shovel/drop/party/outcome/state/revisit/mixed-cache checks pass.14captures
+include4old-source repeats. All prior45entries42records84PNGs exact.99targets/
+config44foreign/journal/source/CSV hashes preserved,DD2closed,installer consumed.
+No-item loot branch observed; other branches not forced. Remaining104-ID ledger
+now has15base/10quest/26DLC/6legacy plus owner exception pending. Counts do not
+prove encounters. Keep all prior accepted art and canonical gameplay.
+
 Current round371 status: portable Abandoned travel case replaces only the
 Tangle presentation of lost_luggage. Canonical Weald pairing, key and antivenom
 interactions are verified from installed CSV. The already-open native luggage

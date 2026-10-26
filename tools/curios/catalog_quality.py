@@ -83,7 +83,15 @@ def catalog(inventory, selection, output):
             raise ValueError('Regional painting must have its own unique art ID')
         regional_pairs[art_id] = dict(pair, curio_id=identity)
     regions = selected.get('region_art_overrides', {})
+    regional_aliases = selected.get('regional_aliases', {})
+    reviewed = pairs.keys() | aliases.keys() | region_only
+    if not isinstance(regional_aliases, dict) or any(
+            not isinstance(source, str) or target not in reviewed or source not in reviewed or
+            target == source or source in regional_aliases
+            for target, source in regional_aliases.items()):
+        raise ValueError('Invalid explicit regional shared-art alias')
     referenced = set()
+    shared_referenced = set()
     for key, bindings in regions.items():
         if key not in pairs and key not in aliases and key not in region_only or not isinstance(bindings, dict) or not bindings or len(bindings) > 4:
             raise ValueError('Regional art requires a reviewed default or explicit regional-only identity')
@@ -99,13 +107,20 @@ def catalog(inventory, selection, output):
                 raise ValueError('Invalid regional result wording')
             art_id = binding.get('ArtId')
             if art_id in regional_pairs:
-                if regional_pairs[art_id]['curio_id'] != key:
-                    raise ValueError('Regional painting belongs to a different curio')
+                owner = regional_pairs[art_id]['curio_id']
+                if owner != key:
+                    source_binding = regions.get(owner, {})
+                    source_binding = source_binding.get(region, {}) if isinstance(source_binding, dict) else {}
+                    if regional_aliases.get(key) != owner or not isinstance(source_binding, dict) or source_binding.get('ArtId') != art_id:
+                        raise ValueError('Regional painting belongs to a different curio without a same-region shared-art alias')
+                    shared_referenced.add(key)
                 referenced.add(art_id)
             elif art_id not in pairs:
                 raise ValueError('Regional binding has no reviewed painting')
     if referenced != regional_pairs.keys():
         raise ValueError('Unreferenced regional painting')
+    if shared_referenced != regional_aliases.keys():
+        raise ValueError('Unreferenced regional shared-art alias')
     if any(key not in regions for key in region_only):
         raise ValueError('Regional-only identity requires explicit regional bindings')
     native = {}
@@ -149,12 +164,15 @@ def catalog(inventory, selection, output):
             record['original_default_retained'] = True
         elif key in native:
             record['native_closed_file'] = native[key]['file']
+        if key in regional_aliases:
+            record['shared_regional_art_source'] = regional_aliases[key]
         records.append(record)
     document = {'status': 'Offline candidates only. No installation, native QA or gameplay change.',
                 'inventory_sha256': sha(inventory), 'selection_sha256': sha(selection),
                 'recipe_sha256': sha(Path(__file__)), 'counts': dict(Counter(r['status'] for r in records)),
                 'scopes': dict(Counter(r['scope'] for r in records)), 'entries': records,
-                'regional_artifacts': list(regional_pairs.values())}
+                'regional_artifacts': list(regional_pairs.values()),
+                'regional_shared_art_aliases': regional_aliases}
     output.mkdir(parents=True)
     (output / 'coverage.json').write_text(json.dumps(document, indent=2), encoding='utf-8')
     cards = []

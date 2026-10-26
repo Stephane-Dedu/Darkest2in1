@@ -1,5 +1,29 @@
 # Curio rework: design catalog v01
 
+## Explicit regional painting reuse, round372
+
+Barnacle Crusted Chest now uses the accepted native Shroud chest under its own
+coastal identity, Barnacled sea chest. Its shovel interaction and original
+classic/other-region presentation retain. Identity coverage is46, while the
+painting count stays42 and PNG count84. No new extraction or generated art.
+
+Set `regional_aliases` to `{"barnacle_crusted_chest":"locked_display_cabinet"}`
+and bind the recipient to the existing `locked_display_cabinet_shroud` ArtId
+only in `dd2_coast`. The source owner must already bind that exact reviewed
+painting in the same region. Aliases are explicit and one hop. Unused, chained,
+protected, unknown, mismatched-region or invalid-pair sharing is rejected.
+Global original-sprite aliases keep their earlier contract. Review coverage
+records `shared_regional_art_source`; no duplicate artifact is created.
+
+15artifact tests, exact prior371manifest/84PNG rebuild, actualCore367 shared
+painting/fallback checks and native shovel/input/party/outcome/state/revisit
+checks pass. Mixed source/recipient session verifies correct closed/used cache
+selection.14captures include4source repeats. No C#build372;1330Core/297UI prior.
+Read v22/CONTINUE and acceptance.json. Runtime367 unchanged; current deliberate
+pack-barnacle-CANDIDATE-v01 accepted/installed. All old45entries42records84PNGs
+retain,99targets/config44foreign/journal/source/CSV hashes preserved,DD2closed.
+Continue remaining104-ID context ledger; no natural-spawn/every-region claim.
+
 ## Accepted Tangle travel case, round371
 
 Round371 adds Tangle-only lost_luggage/dd2_forest, Abandoned travel case.
