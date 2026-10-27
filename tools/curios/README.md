@@ -1,5 +1,16 @@
 # Curio rework: design catalog v01
 
+## DLC percentage and party healing, source-only round399
+
+Round399 adds canonical percentage healing and living-party healing targets only for opt-in DLC curio resolution. Base curios and the public effect/trap path retain their previous behavior. Seven new cases and full1350Core tests pass. Actual canonical four COM healing definitions verify amounts/targets/report/RNG with a synthetic party;424base samples remain exact against installedCore367. SOURCE ONLY, NOTdeployed. Accepted391 remains59ID53pairs106PNG/121targets/host387Core367.38primary designs remain.
+
+Opt-in DLC curio healing now reads heal_percent as a fraction of maximum HP. Performer effects apply to the selected hero; performer_group effects apply once to each living hero. Each recipient retains the existing resolve-permission check. The result report names the effect once, and targeting adds no random draws. The change is limited to explicitly owned DLC curio healing. Base resolution, the public ApplyEffect API and trap callers retain their previous behavior.
+
+Seven new cases cover full self healing,70%party healing,100/60DD1-unit self/party stress relief,dead-hero exclusion,recipient resolve permissions,single effect reporting,unchanged random draws and the base/public-API compatibility boundary. All1,350Core tests pass on the first complete run from a fresh clean frozen currentHEAD plus exactly two owned C# inputs,Deploy=false and cached NuGet packages.424ordinary samples across60base IDs/46supply interactions/four seeds remain exact against actualCore367 in both default and opt-in mode. Actual installed COM definitions and effect data confirm all four canonical heal cases in a synthetic party. FakeParty deliberately does not clamp negative stress;native adapters still own clamping. This is source behavior proof,not native gameplay QA.
+
+No runtime deployment,launch,new art or acceptance occurs. Production Session/PlotMap still use base-only APIs. Other canonical gaps remain:combat buffs,endless/firewood routing,CrimsonCurse/disease behavior and four Summon routes. Proper context activation and native QA remain required. No spawn,weight,probability,save,classic fallback or protected FadedMemory behavior changes. The392Shambler art candidate remains uninstalled/unaccepted.1343Core was the prior398result;297UI/hostRelease remain prior387 and21artifact prior391.
+
+
 ## Curio ownership and scoped loot, source-only round398
 
 Round398 connects explicit curio ownership to independent loot views. The original resolver constructor and default CrawlContent.Load remain base-only; an opt-in overload preloads each required scope before interactions. Full1343Core tests pass.424samples across all60base IDs and46supply rows match actualCore367 reports,state,party and next RNG in both default/opt-in content.184samples across27DLC IDs match independently selected canonical source views. SOURCE ONLY, NOT deployed. Accepted391art remains59IDs/53pairs/106PNGs,host387/Core367/121targets exact. No new art acceptance;38primary designs remain.

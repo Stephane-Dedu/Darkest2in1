@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current399 source integration preparation; accepted art/runtime remains391.
+Round399 adds canonical percentage healing and living-party healing targets only for opt-in DLC curio resolution. Base curios and the public effect/trap path retain their previous behavior. Seven new cases and full1350Core tests pass. Actual canonical four COM healing definitions verify amounts/targets/report/RNG with a synthetic party;424base samples remain exact against installedCore367. SOURCE ONLY, NOTdeployed. Accepted391 remains59ID53pairs106PNG/121targets/host387Core367.38primary designs remain.
+Keep runtime integration, natural availability and art acceptance separate. The explicit loader is not called by production Session.
+
+
 Current398 source integration preparation; accepted art/runtime remains391.
 Round398 connects explicit curio ownership to independent loot views. The original resolver constructor and default CrawlContent.Load remain base-only; an opt-in overload preloads each required scope before interactions. Full1343Core tests pass.424samples across all60base IDs and46supply rows match actualCore367 reports,state,party and next RNG in both default/opt-in content.184samples across27DLC IDs match independently selected canonical source views. SOURCE ONLY, NOT deployed. Accepted391art remains59IDs/53pairs/106PNGs,host387/Core367/121targets exact. No new art acceptance;38primary designs remain.
 Keep runtime integration, natural availability and art acceptance separate. The explicit loader is not called by production Session.

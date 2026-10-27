@@ -125,7 +125,7 @@ public sealed class CurioResolver
                 break;
             case "Effect":
                 var effect = PickWeighted(outcome.Results, r => r.Weight, rng);
-                if (effect != null) ApplyEffect(effect.Name, heroId, party, rng, report, state);
+                if (effect != null) ApplyCurioEffect(curioId, effect.Name, heroId, party, rng, report, state);
                 break;
             case "Quirk":
             case "Disease":
@@ -149,12 +149,34 @@ public sealed class CurioResolver
         return report;
     }
 
+    private void ApplyCurioEffect(string curioId, string effectName, string heroId, IParty party,
+                                  Rng rng, CurioReport report, ExpeditionState state)
+    {
+        var e = _effects.Get(effectName);
+        string target = e?.Str("target");
+        bool contentHealing = _contentLoot != null && _curios.ContentSourceOf(curioId) != "base"
+            && (target == "performer" || target == "performer_group")
+            && (e.Float("heal_percent") > 0 || e.Float("healstress") > 0);
+        if (!contentHealing) { ApplyEffect(effectName, heroId, party, rng, report, state); return; }
+
+        report?.Effects.Add(effectName);
+        var targets = target == "performer_group" ? party.Alive.ToArray() : new[] { heroId };
+        foreach (string recipient in targets)
+            ApplyEffectToHero(e, effectName, recipient, party, rng, report, state, percentageHealing: true);
+    }
+
     /// <summary>Apply a DD1 effect out of combat: stress, stress relief, healing, and damage over time.</summary>
     public void ApplyEffect(string effectName, string heroId, IParty party, Rng rng, CurioReport report = null, ExpeditionState state = null)
     {
         var e = _effects.Get(effectName);
         report?.Effects.Add(effectName);
         if (e == null) return;
+        ApplyEffectToHero(e, effectName, heroId, party, rng, report, state, percentageHealing: false);
+    }
+
+    private static void ApplyEffectToHero(DarkestRecord e, string effectName, string heroId, IParty party,
+                                          Rng rng, CurioReport report, ExpeditionState state, bool percentageHealing)
+    {
         if ((party as IResolveParty)?.Allows(heroId,"effect:"+effectName)==false) return;
 
         float stress = e.Float("stress");
@@ -164,6 +186,8 @@ public sealed class CurioResolver
 
         float heal = e.Float("heal");
         if (heal > 0) party.Heal(heroId, heal / TypicalDd1Hp);
+        float percent = percentageHealing ? e.Float("heal_percent") : 0;
+        if (percent > 0) party.Heal(heroId, percent);
 
         // Keep the treatment window. Effects tick on later movement, never on resolution or resume.
         foreach (var (field, kind) in new[] { ("dotPoison", "blight"), ("dotBleed", "bleed") })
