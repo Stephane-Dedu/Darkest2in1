@@ -19,6 +19,7 @@ internal static class CrawlSceneryCheck
     private static readonly bool MotionChecking = Environment.GetCommandLineArgs().Contains("-dd3-crawl-motion-check");
     private static readonly bool VilhelmChecking = Environment.GetCommandLineArgs().Contains("-dd3-vilhelm-check");
     private static readonly bool CurioChecking = Environment.GetCommandLineArgs().Contains("-dd3-curio-actors-check");
+    private static readonly bool QuestCurioChecking = Environment.GetCommandLineArgs().Contains("-dd3-curio-quest-check");
     private static readonly string[][] CurioCases = Environment.GetCommandLineArgs()
         .Where(a=>a.StartsWith("-dd3-curio-actor-case=",StringComparison.Ordinal))
         .Select(a=>a.Substring("-dd3-curio-actor-case=".Length).Split('@')).ToArray();
@@ -36,6 +37,7 @@ internal static class CrawlSceneryCheck
     private static int _motionFrames;
     private static bool _motionSampled;
     private static int _curioSupplyBefore, _curioCounter;
+    private static int _curioQuestBefore;
     private static string[] _curioResolveBefore;
     private static Texture _curioUsed;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save,_save) && Session.Current.SavePath == null;
@@ -61,6 +63,7 @@ internal static class CrawlSceneryCheck
                     c[0].All(ch=>char.IsLower(ch)||char.IsDigit(ch)||ch=='_') &&
                     new[]{"none",Supply.HolyWater,Supply.Bandage,Supply.Antivenom,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(c[2])),
                     "Invalid native curio QA cases");
+                if(QuestCurioChecking)Require(CurioChecking && CurioCases.All(c=>c[2]=="none"),"Quest gather QA requires actor cases without supplies");
                 var estate = new Estate { Name = "Unsaved crawl scenery check", Seed = 73232, Week = 12,
                     OpeningRaidPending = false, RegionLayoutVersion = CampaignRegions.LayoutVersion };
                 estate.Add(Currency.Gold,50000);
@@ -131,11 +134,17 @@ internal static class CrawlSceneryCheck
                     _curioCounter=exp.RandomCounter;
                     _curioResolveBefore=exp.Party.Select(id=>Dd1Stress.Trait(Dd2Api.Actor(d.Party.Guid(id)))).ToArray();
                     _curioSupplyBefore=exp.Pack.Count(CurioCases[_region][2]);
+                    if(QuestCurioChecking)_curioQuestBefore=exp.Pack.Count(ItemCatalog.QuestKey(exp.Goal.QuestItem));
                     Advance("curio-closed-captured",d,212,1);break;
                 case 212:
                     string supply=CurioCases[_region][2];
                     d.Investigate(exp.Party[0],supply=="none"?null:supply);
                     Require(d.Crawl.LastCurio!=null && d.Crawl.CurrentTile.Resolved,"Ordinary native-party curio did not resolve");
+                    if(QuestCurioChecking)
+                    {
+                        CheckQuestResult(d,1);
+                        Advance("quest-curio-result",d,213,2);break;
+                    }
                     if(supply!="none")Require(exp.Pack.Count(supply)==_curioSupplyBefore-1,"Curio supply was not consumed exactly once");
                     // A first resolve break uses Dd1Stress.NextRng once in addition
                     // to Crawl's outcome and loot-selection streams. Keep an exact
@@ -170,8 +179,29 @@ internal static class CrawlSceneryCheck
                     Require(d.Crawl.CurrentTile.Resolved && d.Crawl.LastCurio==null,"Curio revisit resolved or reopened the result");
                     Require(NativeCurioArt.TryGet(CurioCases[_region][0],true,out var revisited,out _) && ReferenceEquals(revisited,_curioUsed),"Revisit replaced the used painting");
                     CurioCapture("return");
-                    Plugin.Log.LogInfo("[regional curio actors] PASS "+CurioCases[_region][0]+"/"+Regions[_region]+"; native party, ordinary supply/outcome, used state and revisit; unsaved fixture");
-                    Advance("curio-return-captured",d,217,1);break;
+                    if(QuestCurioChecking)Require(exp.Pack.Count(ItemCatalog.QuestKey(exp.Goal.QuestItem))==_curioQuestBefore+1
+                        && exp.GoalProgress==1 && !exp.QuestComplete,"Quest revisit duplicated progress or medicine");
+                    Plugin.Log.LogInfo("[regional curio actors] PASS "+CurioCases[_region][0]+"/"+Regions[_region]+"; native party, "+
+                        (QuestCurioChecking?"canonical quest collection":"ordinary supply/outcome")+", used state and revisit; unsaved fixture");
+                    Advance("curio-return-captured",d,QuestCurioChecking?220:217,1);break;
+                case 220:
+                    d.Step(true);Require(exp.TileIndex==2,"Second quest objective step rejected");
+                    Advance("quest-curio-second",d,221,Mathf.Max(2,d.StepAnimationSeconds+.3f));break;
+                case 221:
+                    _curioCounter=exp.RandomCounter;d.Investigate(exp.Party[0],null);CheckQuestResult(d,2);
+                    CurioCapture("second-result");Advance("quest-curio-second-result",d,222,2);break;
+                case 222:
+                    d.DismissCurio(d.Crawl.LastCurio);d.Step(true);Require(exp.TileIndex==3,"Final quest objective step rejected");
+                    Advance("quest-curio-third",d,223,Mathf.Max(2,d.StepAnimationSeconds+.3f));break;
+                case 223:
+                    _curioCounter=exp.RandomCounter;d.Investigate(exp.Party[0],null);CheckQuestResult(d,3);
+                    CurioCapture("complete-result");Advance("quest-curio-completed",d,224,2);break;
+                case 224:
+                    d.DismissCurio(d.Crawl.LastCurio);Require(d.Crawl.LastCurio==null,"Completed quest result did not dismiss");
+                    CurioCapture("complete-used");
+                    Plugin.Log.LogInfo("[regional quest curio actors] PASS "+CurioCases[_region][0]+"/"+Regions[_region]+
+                        "; canonical goal "+exp.Goal.Id+"; three quest items, progress3/3, completion, no duplicate revisit; unsaved fixture");
+                    Advance("quest-curio-final-capture",d,217,1);break;
                 case 217:
                     if(++_region<Regions.Length){SetMap(d,s);Advance("regional-curio-reload",d,1,2);}
                     else{_done=true;Plugin.Log.LogInfo("[regional curio actors] PASS ALL "+CurioCases.Length+" cases; no estate selected or persisted");}
@@ -364,6 +394,17 @@ internal static class CrawlSceneryCheck
             foreach(var tile in corridor.Tiles){tile.Content=HallContent.Empty;tile.ContentId=null;}
             corridor.Tiles[1].Content=HallContent.Curio;corridor.Tiles[1].ContentId=CurioCases[_region][0];
             map.Rooms[1].Content=RoomContent.Empty;
+            if(QuestCurioChecking)
+            {
+                var goal=s.Campaign.Goals.For("gather",exp.Quest.Dungeon);
+                Require(goal!=null && goal.Type=="gather" && goal.CurioName==CurioCases[_region][0]
+                    && goal.Amount==3 && !goal.NeedsItem && !string.IsNullOrEmpty(goal.QuestItem),"No matching canonical three-item gather goal for this curio/context");
+                exp.Quest.Type="gather";exp.Quest.GoalId=goal.Id;exp.Goal=goal;exp.GoalProgress=0;
+                for(int i=1;i<=goal.Amount;i++)
+                {
+                    corridor.Tiles[i].Content=HallContent.Curio;corridor.Tiles[i].ContentId=goal.CurioName;corridor.Tiles[i].IsQuestGoal=true;
+                }
+            }
         }
         map.Corridors.Add(corridor);
         exp.Map = map; exp.RoomId = 0; exp.CorridorId = -1; exp.TileIndex = -1;
@@ -372,6 +413,22 @@ internal static class CrawlSceneryCheck
         exp.Pack.Items.Clear();
         exp.Pack.Add(Supply.Food,MotionChecking ? 32 : 8); exp.Pack.Add(Supply.Torch,2); exp.Pack.Add(Supply.Shovel,1);
         if(CurioChecking && CurioCases[_region][2]!="none")exp.Pack.Add(CurioCases[_region][2],2);
+    }
+
+    private static void CheckQuestResult(Driver d,int count)
+    {
+        var exp=d.Expedition;var report=d.Crawl.LastCurio;
+        Require(report!=null && report.OutcomeType=="Quest" && report.ItemUsed==null
+            && report.CurioId==exp.Goal.CurioName && report.Loot.Count==1 && report.Loot[0].Type=="quest_item"
+            && report.Loot[0].Id==exp.Goal.QuestItem && report.Loot[0].Amount==1 && report.LeftBehind.Count==0,
+            "Native quest result was not the canonical quest item");
+        Require(d.Crawl.CurrentTile.Resolved && exp.GoalProgress==count
+            && exp.Pack.Count(ItemCatalog.QuestKey(exp.Goal.QuestItem))==_curioQuestBefore+count
+            && exp.QuestComplete==(count==exp.Goal.Amount),"Quest item/progress/completion mismatch");
+        Require(exp.RandomCounter==_curioCounter,"Gather quest resolution unexpectedly consumed RNG");
+        Plugin.Log.LogInfo("[regional quest curio actors] RESULT "+exp.Goal.CurioName+"/"+exp.Quest.Dungeon+
+            "; goal="+exp.Goal.Id+"; item="+exp.Goal.QuestItem+"; progress="+count+"/"+exp.Goal.Amount+
+            "; RNG="+_curioCounter+"->"+exp.RandomCounter+"; "+report.Text);
     }
 
     private static void CurioCapture(string state)

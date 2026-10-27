@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current400 accepted quest context and native QA.
+Round400 accepts chirurgeons_satchel/dd2_forest as Field medicine sack. It directly reuses accepted388 native traveller-sack art in the same region, with no new painting or pixels. Native canonical gather_medicines collected1/3,2/3,3/3 and completed;revisit did not duplicate an item,each quest resolution spent no RNG. Old source ordinary outcome/RNG/used/revisit also passes. Full accepted pack has60IDs=58base+1quest+1DLCdesign,53pairs106PNGs. Host400 contains only an opt-in unsaved quest QA addition;Core367 remains installed. Release/1350Core/297UI/21artifact/fullCore367catalog checks pass400.37required designs remain2base9quest26DLC.
+Reuse is recorded through direct same-region regional_aliases;no duplicate painting count.
+
+
 Current399 source integration preparation; accepted art/runtime remains391.
 Round399 adds canonical percentage healing and living-party healing targets only for opt-in DLC curio resolution. Base curios and the public effect/trap path retain their previous behavior. Seven new cases and full1350Core tests pass. Actual canonical four COM healing definitions verify amounts/targets/report/RNG with a synthetic party;424base samples remain exact against installedCore367. SOURCE ONLY, NOTdeployed. Accepted391 remains59ID53pairs106PNG/121targets/host387Core367.38primary designs remain.
 Keep runtime integration, natural availability and art acceptance separate. The explicit loader is not called by production Session.
