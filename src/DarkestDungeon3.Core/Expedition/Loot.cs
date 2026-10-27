@@ -57,6 +57,32 @@ public sealed class LootTables
         // loot.json first, then the override files, which replace same-keyed tables.
         var files = Directory.GetFiles(dd1.PathOf("loot"), "*.json")
                              .OrderBy(f => Path.GetFileName(f) == "loot.json" ? 0 : 1);
+        loot.ReadFiles(files);
+        return loot;
+    }
+
+    /// <summary>A separate canonical content view; never replaces the base library's pools.</summary>
+    public static LootTables LoadForContent(Dd1Install dd1, string contentSource)
+    {
+        if (contentSource == null || contentSource == "base") return Load(dd1);
+        string folder = contentSource switch
+        {
+            "580100_crimson_court" => dd1.PathOf("dlc", contentSource, "features", "crimson_court", "loot"),
+            "735730_color_of_madness" => dd1.PathOf("dlc", contentSource, "loot"),
+            _ => throw new ArgumentException("Unknown canonical loot content source", nameof(contentSource)),
+        };
+        if (!Directory.Exists(folder)) throw new DirectoryNotFoundException(folder);
+        var files = Directory.GetFiles(folder, "*.json")
+            .OrderBy(f => Path.GetFileName(f).IndexOf("override", StringComparison.OrdinalIgnoreCase) >= 0 ? 1 : 0)
+            .ThenBy(f => f, StringComparer.Ordinal).ToArray();
+        if (files.Length == 0) throw new InvalidDataException("Canonical content loot files are missing");
+        var loot = Load(dd1);
+        loot.ReadFiles(files);
+        return loot;
+    }
+
+    private void ReadFiles(IEnumerable<string> files)
+    {
         foreach (var file in files)
             foreach (var t in JToken.Parse(File.ReadAllText(file))["loot_tables"] ?? new JArray())
             {
@@ -67,10 +93,9 @@ public sealed class LootTables
                     Dungeon = (string)t["dungeon"] ?? "",
                     Entries = t["entries"].Select(e => ((float?)e["chances"] ?? 0f, (JObject)e)).ToList(),
                 };
-                loot._tables.RemoveAll(x => x.Id == table.Id && x.Difficulty == table.Difficulty && x.Dungeon == table.Dungeon);
-                loot._tables.Add(table);
+                _tables.RemoveAll(x => x.Id == table.Id && x.Difficulty == table.Difficulty && x.Dungeon == table.Dungeon);
+                _tables.Add(table);
             }
-        return loot;
     }
 
     public bool Has(string id) => _tables.Any(t => t.Id == id);

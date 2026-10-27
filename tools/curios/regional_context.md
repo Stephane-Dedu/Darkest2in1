@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current396 source-only integration preparation;accepted art/runtime remains391.
+Source396 adds independent canonical DLC loot views through LoadForContent; default base tables/weights/order equal actualCore367. Nested positive-weight dependencies resolve in both scopes, CC A/S overrides stay local, districts excluded. Three fixtures and full1338Coretests pass from frozen currentHEAD+2ownedinputs. SOURCE ONLY, NOTdeployed. Source395 opt-in87definitions/ownership remains;productionresolver/context/Summon/nativegameplayQA pending. Installedaccepted39159ID53pair106PNG/host387Core367/121targets unchanged.44foreign/rawjournals andownedUNCOMMITTED392assembler preserved.38primarydesigns remain2base10quest26DLC. Readv46CONTINUE and v44audit.
+Independent loot scopes prepare resolver integration; default live APIs remain base-only. Do not globally enable overrides or claim gameplay availability.
+
+
 Current395 source-only integration preparation;accepted art/runtime remains391.
 Source395 adds explicit opt-in CurioLibrary.Load(dd1,true)/LoadPropSprites(dd1,true) and ContentSourceOf ownership metadata. Default one-argument APIs remain base-only/binary-compatible;no production caller opts in. Fresh frozen currentHEAD+2owned inputs passes1335Coretests;default60base definitions/basealiases equal actualCore367,expanded87=60base+27DLC exact with27correct ownership/spritealiases. Stable precedence andarena exclusion verified. NOTdeployed;scopedloot/importactivation/Summon/context/gameplayQA pending. Installedaccepted39159ID53pair106PNG/host387Core367/121targets unchanged.44foreign/rawjournals andownedUNCOMMITTED392assembler preserved;Shamblerart-onlycandidateuninstalled/unaccepted.38primarydesigns remain2base10quest26DLC. Readv45CONTINUE/priorv44audit.
 Explicit data ownership prepares scoped loot integration;default live APIs and all old base aliases remain base-only. Do not globally enable DLC table overrides or claim gameplay availability.
