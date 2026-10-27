@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current388: incursion_knapsack accepted as a native traveller sack in four regions.
+Accepted388 incursion_knapsack uses the complete native sack in all4DD2 regions;only missing opened-mouth/collar state paint generated. Current pack-sack-CANDIDATE-v01,host387/Core367 exact.57accepted IDs56base+1DLC,51pairs102PNGs;old56entries50records100PNGs exact. Public native/state RGBA reproduction,19artifact and actualCore367 full57ID51pair/fallback checks pass. Native four-region PNG/party/loot/RNG/used/revisit pass24captures for ONEidentity/pair.117targets/config/source/CSV44foreign raw journals verified,owned processes closed,installer/QA consumed,no restore.40primary designs remain4base10quest26DLC;legacy/owner separate. Read v38/CONTINUE.
+Canonical ALL/no-supply/T_INCURSIONSACK1+CH3 and original classic sprite alias retain. Synthetic fixtures do not prove natural encounter availability.
+
+
 Current387: open_grave accepted as Violated field grave in the Tangle.
 Accepted387 open_grave/dd2_forest is Violated field grave. Current full pack-open-grave-CANDIDATE-v01,host387/Core367.56accepted IDs55base+1DLC,50pairs100PNGs;all old55entries49records98PNGs exact. Native marker fixed,only missing pit generated/local cloth state patch. Native input/party/stress100 resolve/RNG/used/revisit pass. Ten final valid captures include4old glyph repeats;one initial failed frame superseded. Fresh frozen QA-only host fix retains exact +2 normal/+3 observed resolve-break counters,not gameplay changes. Release0errors3priorwarnings/1330Core/297UI/19artifact/fullCorecatalog pass.115targets/config/source/CSV44foreign/raw journals verified,all3owned processes closed,install/runtime/replay consumed,no restore.41primary designs remain5base10quest26DLC;legacy/owner separate. Read v37/CONTINUE.
 Canonical ALL/no-supply/Stress5 retained. Actual stress100 resolve test remains active; the QA counter now accounts for its additional stream. Classic/other-region/owner presentation stays.
