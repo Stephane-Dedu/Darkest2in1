@@ -1,5 +1,12 @@
 # Curios must belong to their surroundings
 
+Current382: occult_scrawlings/dd2_farm accepted as Forbidden ritual mark.
+Accepted382 after native PNG holy_water input and two four-hero holy_water/no-item ordinary outcome/RNG/used/revisit cases,10captures for ONEidentity.53accepted IDs52base+1DLC,48pairs96PNGs,all old52entries47records94PNGs exact. Runtime367 unchanged;111targets/config44foreign/raw journals/public source/canonical CSV verified. DD2closed,installer382/all3QA stages consumed,no restore. Remaining44primary designs8base10quest26DLC,legacy/owner separately scoped. Checkpointv32.
+Native frame stays exact; complete native glyph card vanishes after use.
+Explicit RGBx0.3 material adaptation is not Unity brightness reconstruction.
+Native City books/papers/brazier and rounded glyph studies stay unselected.
+
+
 Current381: sconce accepted as Roadside spare torch in all4DD2 outdoor regions.
 Complete native post551v485tri/UV/full2048paint/tint retained; only missing
 portable unlit torch/rope generated. Used RGBA equals native post exactly.

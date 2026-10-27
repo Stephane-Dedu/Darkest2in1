@@ -1,5 +1,12 @@
 # Curio rework: design catalog v01
 
+## Native outdoor ritual mark, round382
+
+Accepted382 after native PNG holy_water input and two four-hero holy_water/no-item ordinary outcome/RNG/used/revisit cases,10captures for ONEidentity.53accepted IDs52base+1DLC,48pairs96PNGs,all old52entries47records94PNGs exact. Runtime367 unchanged;111targets/config44foreign/raw journals/public source/canonical CSV verified. DD2closed,installer382/all3QA stages consumed,no restore. Remaining44primary designs8base10quest26DLC,legacy/owner separately scoped. Checkpointv32.
+
+Complete native frame/glyph retain source geometry/UV/full-resolution paint; the glyph has an explicit muted cyan grade. Only the glyph disappears. render_ritual_glyph.py takes private --source/--native-tools/--out through Blender and models smooth alpha/Cull2, not the full Unity shader.
+
+
 ## Outdoor torch pickup accepted, round381
 
 Round381 accepts sconce as Roadside spare torch in all four DD2 outdoor regions.
