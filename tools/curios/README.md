@@ -1,5 +1,18 @@
 # Curio rework: design catalog v01
 
+## Curio ownership and scoped loot, source-only round398
+
+Round398 connects explicit curio ownership to independent loot views. The original resolver constructor and default CrawlContent.Load remain base-only; an opt-in overload preloads each required scope before interactions. Full1343Core tests pass.424samples across all60base IDs and46supply rows match actualCore367 reports,state,party and next RNG in both default/opt-in content.184samples across27DLC IDs match independently selected canonical source views. SOURCE ONLY, NOT deployed. Accepted391art remains59IDs/53pairs/106PNGs,host387/Core367/121targets exact. No new art acceptance;38primary designs remain.
+
+The opt-in resolver selects loot using CurioLibrary.ContentSourceOf. It never infers ownership from a curio's ID, sprite or region. Required loot registrations are copied and validated at construction, before an interaction can spend supplies or use RNG. Standalone parsed definitions without ownership metadata are rejected by this explicit path. The original three-argument constructor retains its previous behavior. CrawlContent.Load(dd1,true) constructs the expanded library and its separate loot views; CrawlContent.Loot remains the original base library for other callers. Session and PlotMap still call the default APIs.
+
+Five new test cases alternate base, Crimson Court, Color of Madness and base again in the same resolver/party. They check nested draws, full reports, supply counts, state, equal next random values, registration-map isolation, missing/null scope rejection and unannotated definitions. All1,343Core tests pass from clean frozen current HEAD plus exactly three owned C# inputs, with Deploy=false and cached NuGet packages. An initial missing System import was corrected. Three initial assertions incorrectly expected separate loot-result rows to merge; the final tests preserve both result rows and compare complete reports to the original resolver. No runtime behavior was changed to satisfy those assertions.
+
+Separate processes compare the actual installedCore367 to the private new Core. All424ordinary samples across60base IDs,46supply interactions and four seeds match complete reports,state,party and next RNG in both default and opt-in content. All184DLC samples across27IDs match an independent source-selected resolver. These use a synthetic party, not native gameplay acceptance. Initial PowerShell probe attempts had assembly-reference/serialization and list-indexer issues; only the final warning-free complete-object samples count as evidence. No game data is added to Git.
+
+No runtime was deployed. Percentage healing, party effect targets, buffs, firewood/endless routing and canonical Summon handlers remain separate work. This opt-in data route does not create encounters, change maps, probabilities, classic art, saves or FadedMemory. The Shambler art candidate remains uninstalled/unaccepted. Prior297UI/hostRelease results are from387;21artifact tests are prior391 results.
+
+
 ## Canonical DLC loot scopes, source-only round396
 
 Source396 adds independent canonical DLC loot views through LoadForContent; default base tables/weights/order equal actualCore367. Nested positive-weight dependencies resolve in both scopes, CC A/S overrides stay local, districts excluded. Three fixtures and full1338Coretests pass from frozen currentHEAD+2ownedinputs. SOURCE ONLY, NOTdeployed. Source395 opt-in87definitions/ownership remains;productionresolver/context/Summon/nativegameplayQA pending. Installedaccepted39159ID53pair106PNG/host387Core367/121targets unchanged.44foreign/rawjournals andownedUNCOMMITTED392assembler preserved.38primarydesigns remain2base10quest26DLC. Readv46CONTINUE and v44audit.

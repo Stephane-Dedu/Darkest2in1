@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -78,10 +79,23 @@ public sealed class CrawlContent
     public BattleLoot Battles;
     public Dd1Buffs Buffs;
 
-    public static CrawlContent Load(Dd1Install dd1)
+    public static CrawlContent Load(Dd1Install dd1) => Load(dd1, includeDlcCurios: false);
+
+    /// <summary>Opt-in data and scoped curio loot; does not create encounters or implement special outcomes.</summary>
+    public static CrawlContent Load(Dd1Install dd1, bool includeDlcCurios)
     {
         var effects = EffectLibrary.Load(dd1);
         var loot = LootTables.Load(dd1);
+        var library = CurioLibrary.Load(dd1, includeDlcCurios);
+        CurioResolver curios;
+        if (includeDlcCurios)
+        {
+            var scopes = new Dictionary<string, LootTables>(StringComparer.Ordinal);
+            foreach (string source in library.Curios.Keys.Select(library.ContentSourceOf).Distinct())
+                if (source != "base") scopes.Add(source, LootTables.LoadForContent(dd1, source));
+            curios = new CurioResolver(library, effects, loot, scopes);
+        }
+        else curios = new CurioResolver(library, effects, loot);
         return new CrawlContent
         {
             Effects = effects,
@@ -92,7 +106,7 @@ public sealed class CrawlContent
             Camping = CampingSkills.Load(dd1),
             Battles = BattleLoot.Load(dd1),
             Buffs = Dd1Buffs.Load(dd1),
-            Curios = new CurioResolver(CurioLibrary.Load(dd1), effects, loot),
+            Curios = curios,
         };
     }
 }

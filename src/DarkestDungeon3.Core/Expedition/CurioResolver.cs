@@ -45,12 +45,39 @@ public sealed class CurioResolver
     private readonly CurioLibrary _curios;
     private readonly EffectLibrary _effects;
     private readonly LootTables _loot;
+    private readonly Dictionary<string, LootTables> _contentLoot;
 
     public CurioResolver(CurioLibrary curios, EffectLibrary effects, LootTables loot)
     {
         _curios = curios;
         _effects = effects;
         _loot = loot;
+    }
+
+    /// <summary>Explicit content views, validated before an interaction can consume supplies or RNG.</summary>
+    public CurioResolver(CurioLibrary curios, EffectLibrary effects, LootTables loot,
+                         IReadOnlyDictionary<string, LootTables> contentLoot) : this(curios, effects, loot)
+    {
+        if (contentLoot == null) throw new ArgumentNullException(nameof(contentLoot));
+        _contentLoot = new Dictionary<string, LootTables>(StringComparer.Ordinal);
+        foreach (string id in curios.Curios.Keys)
+        {
+            string source = curios.ContentSourceOf(id);
+            if (source == null) throw new InvalidOperationException($"Curio {id} has no content ownership metadata");
+            if (source == "base" || _contentLoot.ContainsKey(source)) continue;
+            if (!contentLoot.TryGetValue(source, out var scoped) || scoped == null)
+                throw new InvalidOperationException($"Curio loot content is unavailable: {source}");
+            _contentLoot.Add(source, scoped);
+        }
+    }
+
+    private LootTables LootFor(string curioId)
+    {
+        if (_contentLoot == null) return _loot;
+        string source = _curios.ContentSourceOf(curioId);
+        if (source == "base") return _loot;
+        if (source != null && _contentLoot.TryGetValue(source, out var scoped)) return scoped;
+        throw new InvalidOperationException($"Curio {curioId} has no validated loot content");
     }
 
     public CurioDef Def(string curioId) => _curios.Get(curioId);
@@ -70,6 +97,7 @@ public sealed class CurioResolver
             return report;
         }
 
+        var loot = LootFor(curioId);
         CurioOutcome outcome;
         var interaction = itemId == null ? null : def.Items.FirstOrDefault(i => i.Item == itemId);
         if (interaction != null && state.Pack.TryUse(itemId))
@@ -93,7 +121,7 @@ public sealed class CurioResolver
             case "Loot":
                 // Every listed table is drawn; the weight column is the number of draws.
                 foreach (var r in outcome.Results)
-                    report.Loot.AddRange(_loot.Roll(r.Name, Math.Max(1, (int)r.Weight), difficulty, zone, rng));
+                    report.Loot.AddRange(loot.Roll(r.Name, Math.Max(1, (int)r.Weight), difficulty, zone, rng));
                 break;
             case "Effect":
                 var effect = PickWeighted(outcome.Results, r => r.Weight, rng);

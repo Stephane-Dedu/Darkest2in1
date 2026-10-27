@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current398 source integration preparation; accepted art/runtime remains391.
+Round398 connects explicit curio ownership to independent loot views. The original resolver constructor and default CrawlContent.Load remain base-only; an opt-in overload preloads each required scope before interactions. Full1343Core tests pass.424samples across all60base IDs and46supply rows match actualCore367 reports,state,party and next RNG in both default/opt-in content.184samples across27DLC IDs match independently selected canonical source views. SOURCE ONLY, NOT deployed. Accepted391art remains59IDs/53pairs/106PNGs,host387/Core367/121targets exact. No new art acceptance;38primary designs remain.
+Keep runtime integration, natural availability and art acceptance separate. The explicit loader is not called by production Session.
+
+
 Current396 source-only integration preparation;accepted art/runtime remains391.
 Source396 adds independent canonical DLC loot views through LoadForContent; default base tables/weights/order equal actualCore367. Nested positive-weight dependencies resolve in both scopes, CC A/S overrides stay local, districts excluded. Three fixtures and full1338Coretests pass from frozen currentHEAD+2ownedinputs. SOURCE ONLY, NOTdeployed. Source395 opt-in87definitions/ownership remains;productionresolver/context/Summon/nativegameplayQA pending. Installedaccepted39159ID53pair106PNG/host387Core367/121targets unchanged.44foreign/rawjournals andownedUNCOMMITTED392assembler preserved.38primarydesigns remain2base10quest26DLC. Readv46CONTINUE and v44audit.
 Independent loot scopes prepare resolver integration; default live APIs remain base-only. Do not globally enable overrides or claim gameplay availability.
