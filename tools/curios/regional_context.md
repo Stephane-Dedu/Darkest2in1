@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current385: native Condemned scriptures are accepted for pile_of_scrolls/Foetor.
+Accepted round385: pile_of_scrolls/dd2_farm is Condemned scriptures. Current full pack-books-CANDIDATE-v02, runtime367 unchanged.54accepted identities53base+1DLC,49pairs98PNGs;old53entries48records96PNGs exact. Native torch input, real negative-quirk purge, final no-item stress wording, RNG, used state and revisit pass.18total captures/14final valid include4old glyph repeats.113targets/config44foreign/raw journals/source/CSV verified. DD2closed,both installers/all4QA stages consumed,no restore.43primary designs remain7base10quest26DLC;legacy/owner separate. Read v35/CONTINUE.
+Complete native242v136tri/UV/full1024paint/tint retained;whole top book56v30tri hides,186v106tri fixed. Original texture files unchanged. No generation or new natural encounter. The six regional aliases keep writings/stress/purge wording coherent;canonical mechanics and classic defaults retain.
+
+
 Current382: occult_scrawlings/dd2_farm accepted as Forbidden ritual mark.
 Accepted382 after native PNG holy_water input and two four-hero holy_water/no-item ordinary outcome/RNG/used/revisit cases,10captures for ONEidentity.53accepted IDs52base+1DLC,48pairs96PNGs,all old52entries47records94PNGs exact. Runtime367 unchanged;111targets/config44foreign/raw journals/public source/canonical CSV verified. DD2closed,installer382/all3QA stages consumed,no restore. Remaining44primary designs8base10quest26DLC,legacy/owner separately scoped. Checkpointv32.
 Native frame stays exact; complete native glyph card vanishes after use.

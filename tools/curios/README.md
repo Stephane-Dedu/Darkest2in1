@@ -1,5 +1,12 @@
 # Curio rework: design catalog v01
 
+## Condemned scriptures accepted, round385
+
+Accepted round385: pile_of_scrolls/dd2_farm is Condemned scriptures. Current full pack-books-CANDIDATE-v02, runtime367 unchanged.54accepted identities53base+1DLC,49pairs98PNGs;old53entries48records96PNGs exact. Native torch input, real negative-quirk purge, final no-item stress wording, RNG, used state and revisit pass.18total captures/14final valid include4old glyph repeats.113targets/config44foreign/raw journals/source/CSV verified. DD2closed,both installers/all4QA stages consumed,no restore.43primary designs remain7base10quest26DLC;legacy/owner separate. Read v35/CONTINUE.
+
+Public render_condemned_books.py takes private --source, --components, --native-tools and --out through Blender. It verifies the complete native mesh and full face partition, buries the original skirt with a common ground holdout and hides only the whole top book. Both raw states match reviewed pixels exactly.
+
+
 ## Native outdoor ritual mark, round382
 
 Accepted382 after native PNG holy_water input and two four-hero holy_water/no-item ordinary outcome/RNG/used/revisit cases,10captures for ONEidentity.53accepted IDs52base+1DLC,48pairs96PNGs,all old52entries47records94PNGs exact. Runtime367 unchanged;111targets/config44foreign/raw journals/public source/canonical CSV verified. DD2closed,installer382/all3QA stages consumed,no restore. Remaining44primary designs8base10quest26DLC,legacy/owner separately scoped. Checkpointv32.
