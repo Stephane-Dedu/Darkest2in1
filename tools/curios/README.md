@@ -1,5 +1,12 @@
 # Curio rework: design catalog v01
 
+## Native tub and static brine adaptation, round391
+
+Accepted391 brackish_tidepool/Shroud is Stagnant brine tub. Full pack-brine-CANDIDATE-v01,host387/Core367 exact.59accepted IDs58base+1DLC-design,53pairs106PNGs;all old58entries52records104PNGs exact. Native timber/iron body1275v1404tri/full2048paint retains;whole846v1199flesh payload excluded. New64face water disc uses full native foam mask/static palette adaptation,not full shader;used surface lowers. No generation/repaint. Public render_brine_tub.py,21artifact/fullCore36759ID53pair/fallback checks pass. Native antivenom PNG and ordinary party antivenom/no-item/RNG/used/revisit pass14captures including4old luggage repeats;observed Stress5to0,not HP-heal branch.121targets/config18source44foreign/raw journals/2CSV exact,3owned processes closed,installer/all3QA consumed,no restore.38primary designs remain2base10quest26DLC;legacy/owner separate. Read v41/CONTINUE.
+
+The public renderer retains every native tub-body face and full paint,excludes the whole original payload and lowers only a new native-mask water surface. Common ground buries the native skirt.
+
+
 ## Woodland carcass with protected local state, round390
 
 Accepted390 beast_carcass/Tangle is Fallen woodland boar. Current deliberate full pack-beast-CANDIDATE-v02,host387/Core367 exact.58accepted IDs57base+1DLC-design,52pairs104PNGs;old57entries51records102PNGs exact. Existing389generated outputs reused,no new generation/extraction390. Public local component adapter/strict20%guard protects body and reviewed ivory/outline pixels;orphan-strand trials rejected. Native herbs input and ordinary herbs/no-item party/outcome/RNG/used/revisit pass10captures.21artifact/fullCore36758ID52pair/fallback checks pass;Release1330Core297UI prior387,no build390.119targets/config17source44foreign/raw journals/2CSV verified,3owned processes closed,both installers/allQA consumed,no restore.39primary designs remain3base10quest26DLC;legacy/owner separate. Read v40/CONTINUE.
