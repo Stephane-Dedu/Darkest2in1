@@ -36,6 +36,7 @@ internal static class CrawlSceneryCheck
     private static int _motionFrames;
     private static bool _motionSampled;
     private static int _curioSupplyBefore, _curioCounter;
+    private static string[] _curioResolveBefore;
     private static Texture _curioUsed;
     internal static bool OwnsSession => _save != null && ReferenceEquals(Session.Current?.Save,_save) && Session.Current.SavePath == null;
 
@@ -128,6 +129,7 @@ internal static class CrawlSceneryCheck
                     Require(HeroStage.Lit && HeroStage.Instance?.Texture!=null,"Native party missing beside curio");
                     CurioCapture("closed");
                     _curioCounter=exp.RandomCounter;
+                    _curioResolveBefore=exp.Party.Select(id=>Dd1Stress.Trait(Dd2Api.Actor(d.Party.Guid(id)))).ToArray();
                     _curioSupplyBefore=exp.Pack.Count(CurioCases[_region][2]);
                     Advance("curio-closed-captured",d,212,1);break;
                 case 212:
@@ -135,7 +137,13 @@ internal static class CrawlSceneryCheck
                     d.Investigate(exp.Party[0],supply=="none"?null:supply);
                     Require(d.Crawl.LastCurio!=null && d.Crawl.CurrentTile.Resolved,"Ordinary native-party curio did not resolve");
                     if(supply!="none")Require(exp.Pack.Count(supply)==_curioSupplyBefore-1,"Curio supply was not consumed exactly once");
-                    Require(exp.RandomCounter==_curioCounter+2,"Curio resolution did not preserve the ordinary outcome and loot-selection RNG steps");
+                    // A first resolve break uses Dd1Stress.NextRng once in addition
+                    // to Crawl's outcome and loot-selection streams. Keep an exact
+                    // counter check, including only observed new native traits.
+                    int resolveBreaks=exp.Party.Select((id,i)=>_curioResolveBefore[i]==null
+                        && Dd1Stress.Trait(Dd2Api.Actor(d.Party.Guid(id)))!=null ? 1 : 0).Sum();
+                    Require(exp.RandomCounter==_curioCounter+2+resolveBreaks,"Curio resolution did not preserve the ordinary outcome, loot-selection and observed resolve-break RNG steps");
+                    Plugin.Log.LogInfo($"[regional curio actors] RNG {CurioCases[_region][0]}/{Regions[_region]}; before={_curioCounter}; after={exp.RandomCounter}; resolveBreaks={resolveBreaks}");
                     Plugin.Log.LogInfo("[regional curio actors] RESULT "+CurioCases[_region][0]+"/"+Regions[_region]+"/"+supply+"; "+d.Crawl.LastCurio.Text);
                     Advance("curio-result",d,213,2);break;
                 case 213:

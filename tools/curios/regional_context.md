@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current387: open_grave accepted as Violated field grave in the Tangle.
+Accepted387 open_grave/dd2_forest is Violated field grave. Current full pack-open-grave-CANDIDATE-v01,host387/Core367.56accepted IDs55base+1DLC,50pairs100PNGs;all old55entries49records98PNGs exact. Native marker fixed,only missing pit generated/local cloth state patch. Native input/party/stress100 resolve/RNG/used/revisit pass. Ten final valid captures include4old glyph repeats;one initial failed frame superseded. Fresh frozen QA-only host fix retains exact +2 normal/+3 observed resolve-break counters,not gameplay changes. Release0errors3priorwarnings/1330Core/297UI/19artifact/fullCorecatalog pass.115targets/config/source/CSV44foreign/raw journals verified,all3owned processes closed,install/runtime/replay consumed,no restore.41primary designs remain5base10quest26DLC;legacy/owner separate. Read v37/CONTINUE.
+Canonical ALL/no-supply/Stress5 retained. Actual stress100 resolve test remains active; the QA counter now accounts for its additional stream. Classic/other-region/owner presentation stays.
+
+
 Current386: secret_stash accepted with four contextual coffer/cargo paintings.
 Accepted386 secret_stash uses the four direct reviewed same-region locked_display_cabinet paintings. Current pack-secret-CANDIDATE-v01/runtime367.55accepted IDs54base+1DLC,still49pairs98PNGs;zero new art. All old54entries/49records/98PNGs exact. Native four-region PNG/key-party,independent old-owner state,no-item/RNG/used/revisit checks pass32captures including4old repeats. Current actualCore367 full55ID49pair/direct-object/fallback checks pass;no build.113targets/config44foreign/raw journals/source/CSV verified,DD2closed,all385/386helpers consumed,no restore.42primary designs remain6base10quest26DLC;legacy/owner separate. Read v36/CONTINUE.
 Canonical secret-room treasure/key COLLECTOR3/no-item B3 retain. Synthetic hallway fixtures do not establish natural hallway availability or saved secret-room-route QA. Classic/FadedMemory original presentation stays.
