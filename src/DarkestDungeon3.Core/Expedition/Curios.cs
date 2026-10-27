@@ -15,7 +15,7 @@ public sealed class CurioResult
 
 public sealed class CurioOutcome
 {
-    public string Type;        // Nothing, Loot, Quirk, Effect, Purge, Scouting, Teleport, Disease
+    public string Type;        // Nothing, Loot, Quirk, Effect, Purge, Scouting, Teleport, Disease, Summon
     public float Weight;
     public List<CurioResult> Results = new();
     public string Text;
@@ -75,24 +75,30 @@ public sealed class CurioLibrary
         var lib = new CurioLibrary();
         CurioDef current = null;
         bool inItems = false;
+        bool expectingId = false;
         string pendingLabel = null;
 
-        foreach (var line in lines)
+        var rows = lines.Select(Csv).ToArray();
+        for (int index = 0; index < rows.Length; index++)
         {
-            var c = Csv(line);
+            var c = rows[index];
             string Col(int i) => i < c.Count ? c[i].Trim() : "";
 
-            // ",N,Name,,Category" starts a new curio.
-            if (int.TryParse(Col(1), out _) && Col(2) != "")
+            // Some DLC blocks omit the numeric tracker. The next ID STRING
+            // row still identifies their header without relying on category names.
+            bool followedById = index + 1 < rows.Length && rows[index + 1].Count > 2
+                && rows[index + 1][2].Trim() == "ID STRING";
+            if (Col(2) != "" && (int.TryParse(Col(1), out _) || followedById))
             {
                 current = new CurioDef { Name = Col(2), Category = Col(4) };
                 inItems = false;
+                expectingId = false;
                 pendingLabel = null;
                 continue;
             }
             if (current == null) continue;
 
-            if (Col(2) == "ID STRING") continue;
+            if (Col(2) == "ID STRING") { expectingId = true; continue; }
             if (Col(2) == "Item Interactions") { inItems = true; continue; }
 
             if (inItems)
@@ -108,10 +114,11 @@ public sealed class CurioLibrary
 
             // Left-hand labels: the id comes first, then "REGION FOUND"/value, "FULL CURIO?"/value, "TAGS"/values.
             string label = Col(2);
-            if (current.Id == null && label != "" && Col(4) == "Nothing")
+            if (current.Id == null && label != "" && (expectingId || Col(4) == "Nothing"))
             {
                 current.Id = label;
                 lib.Curios[label] = current;
+                expectingId = false;
             }
             else if (label is "REGION FOUND" or "FULL CURIO?" or "TAGS") pendingLabel = label;
             else if (pendingLabel == "REGION FOUND" && label != "") { current.Region = label; pendingLabel = null; }
@@ -123,7 +130,7 @@ public sealed class CurioLibrary
 
             // The outcome table on the right: type, weight, then up to three (result, weight) pairs.
             string type = Col(4);
-            if (type is "Nothing" or "Loot" or "Quirk" or "Effect" or "Purge" or "Scouting" or "Teleport" or "Disease")
+            if (type is "Nothing" or "Loot" or "Quirk" or "Effect" or "Purge" or "Scouting" or "Teleport" or "Disease" or "Summon")
             {
                 float weight = TryFloat(Col(5));
                 var outcome = ReadOutcome(type, weight, c, Col(17));
