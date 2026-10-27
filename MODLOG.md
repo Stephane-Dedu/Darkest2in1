@@ -11962,3 +11962,53 @@ duplicate/347global/helper/generated DinnerCart used variant. Sconce pending,
 not native bone votive. Full Shambler building unsuitable compact altar.
 Hamlet354QA365/expedition340 parked. HeavyD:,limited space,no redundant exports
 or unrelated deletion. No saved/controller/long-session/natural-spawn claim.
+
+
+## Round381: native roadside post with a missing portable torch component
+
+Round381 accepts sconce as Roadside spare torch in all four DD2 outdoor regions.
+Read local-art/ui-overhaul/curio-regional-coherence-v31/CONTINUE.md first.
+Runtime367 unchanged; full pack-torch-CANDIDATE-v01 installed.52accepted IDs
+51base-runtime+1DLC,47distinct pairs94PNGs. Four contexts are one identity/pair.
+Old51entries46records92PNGs exact. Canonical ALL/no-supply/TORCHONLY one draw
+and original An unburned torch is found. text unchanged; actual every region
+awards1torch. Classic original sconce art/name/text and FadedMemory retained.
+No gameplay/spawn/save change or natural-encounter claim.
+
+Complete native common_prop_lamppost551v485tri/UV/full2048paint/tint1 retained,
+one renderer verified against actual installed source. Used raw RGBA exactly
+equals native reference. Only missing unused portable torch/rope is generated.
+Two calls: wrong-canvas/redrawn whole-post edit rejected; isolated component
+explicitly cropped608/78/827/1159,uniformscale.42,offset612/108 on immutable
+1024nativeplate. No native-body registration/repaint or native torch-geometry
+claim. Domain41768pixels/20774changes,bounds615/112/701/559,source563+fixed.
+Public renderer reproduces native plate pixels; public assembler keeps exact
+native body.17artifact tests pass,including2new immutability/crop/domain tests.
+Existing20%domain/registration/foot guards retained. Initialfoot899 rejected;
+measured947selected. Fit472x832foot236/816width198.5577height350,350preferred
+over300 in actual four-region offline comparisons. Cull2/opaque unlit native
+paint modeled,not full Unity lighting/fog/dither/outline shader.
+
+Native PNG click/padding and four-native-hero ordinary none-item Torch1,
+outcome/RNG/used/revisit pass all four regions. Actual scenery/materials/party/
+ground/torch disappearance/results reviewed.24captures8PNG16actors for ONEid.
+Default old urn/holy_water PNG health probe is NOT a sconce supply interaction.
+Both owned QA processes closed after retained PASS;109targets/config44foreign/
+raw journals/prior7source+3ownedPython/2CSV verified. Installer381/both QA
+stages consumed,no restore. ActualCore367 full52ID47pair/all-old/fourregion/
+classic/owner checks pass381. No C#build;1330Core297UI remain prior367.
+
+Whole assist-torch prefabs are merchant/crowd/wagon/road scenes,not selected
+torch bodies; final hierarchy93/103/106nodes resolved without missing parts.
+Old get_obj traversal failed and was superseded by correct UnityPy.deref.
+Do not repeat those studies or infer absence from old errors. Existing full
+native wagon/crowd sprites inspected,not forced into a compact pickup.
+45primary designs remain9base10quest26DLC;6legacy/owner separate. Next inspect
+appropriate complete native book/paper/glyph sources for Foetor writings.
+Preserve all accepted art; no repeated extraction/generation/consumed helpers.
+Keep art readiness/runtime integration/encounter availability/gameplay QA
+separate. Same job continues to real full completion,usage gate8%,checkpoint
+before7-8%reserve/context limit. Never deploy while DD2runs. Protected estates
+1/3,all saves and abandoned Documents checkout forbidden. Preserve concurrent
+raw bytes; no dirty shared C#build/stale runtime/config/pack restores. HeavyD:
+limited space,no unrelated deletion. Hamlet354QA365/expedition340 parked.

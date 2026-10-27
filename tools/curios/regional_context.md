@@ -1,5 +1,16 @@
 # Curios must belong to their surroundings
 
+Current381: sconce accepted as Roadside spare torch in all4DD2 outdoor regions.
+Complete native post551v485tri/UV/full2048paint/tint retained; only missing
+portable unlit torch/rope generated. Used RGBA equals native post exactly.
+Native input and four-hero ordinary Torch1/RNG/used/revisit pass all4regions,
+24frames for ONEid/pair.17artifact/fullCore36752ID47pair/fallback checks pass.
+52accepted IDs51base+1DLC,47pairs94PNGs,old51entries/art exact. Runtime367 same,
+109targets/config44foreign/source/CSV preserved,DD2closed. Installer381/both
+QA stages consumed,no restore. Read v31/CONTINUE.45primary designs remain.
+Whole assistance nodes are not compact torch bodies; no repeat source studies.
+
+
 Current379: Tangle-only bandits_trapped_chest accepted as Trapped field coffer.
 Explicit direct same-region native cabinet/coffer reuse,no new painting/PNG.
 Weald tutorial/key/guaranteed no-itemBlight1 retain; classic/other regions original.
