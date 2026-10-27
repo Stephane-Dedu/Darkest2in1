@@ -43,31 +43,68 @@ public sealed class CurioLibrary
 {
     public Dictionary<string, CurioDef> Curios { get; } = new();
     private IReadOnlyDictionary<string, string> _propSprites = new Dictionary<string, string>();
+    private readonly Dictionary<string, string> _contentSources = new();
 
     public CurioDef Get(string id) => id != null && Curios.TryGetValue(id, out var c) ? c : null;
 
     public string SpriteOf(string propId) => propId != null && _propSprites.TryGetValue(propId, out var sprite) ? sprite : propId;
 
-    public static CurioLibrary Load(Dd1Install dd1)
+    /// <summary>Loaded data owner: "base", a DLC folder name, or null for unknown/unannotated data.</summary>
+    public string ContentSourceOf(string id) => id != null && _contentSources.TryGetValue(id, out var source) ? source : null;
+
+    // Preserve the existing entry point and its base-only behavior.
+    public static CurioLibrary Load(Dd1Install dd1) => Load(dd1, includeDlc: false);
+
+    /// <summary>Opt-in canonical data availability; this does not enable loot scopes, routes or spawns.</summary>
+    public static CurioLibrary Load(Dd1Install dd1, bool includeDlc)
     {
         var library = Parse(File.ReadAllLines(dd1.PathOf("curios", "curio_type_library.csv")));
-        library._propSprites = LoadPropSprites(dd1);
+        foreach (var id in library.Curios.Keys) library._contentSources[id] = "base";
+        if (includeDlc)
+            foreach (var file in DlcCurioFiles(dd1, "*curio_type_library.csv"))
+                foreach (var entry in Parse(File.ReadAllLines(file.Path)).Curios)
+                    if (!library.Curios.ContainsKey(entry.Key))
+                    {
+                        library.Curios.Add(entry.Key, entry.Value);
+                        library._contentSources.Add(entry.Key, file.Source);
+                    }
+        library._propSprites = LoadPropSprites(dd1, includeDlc);
         return library;
     }
 
     /// <summary>Native prop IDs can share art without sharing effects (e.g. the Thanks Chest).</summary>
-    public static IReadOnlyDictionary<string, string> LoadPropSprites(Dd1Install dd1)
+    public static IReadOnlyDictionary<string, string> LoadPropSprites(Dd1Install dd1) => LoadPropSprites(dd1, includeDlc: false);
+
+    public static IReadOnlyDictionary<string, string> LoadPropSprites(Dd1Install dd1, bool includeDlc)
     {
         var sprites = new Dictionary<string, string>();
-        string path = dd1.PathOf("curios", "curio_props.csv");
-        if (!File.Exists(path)) return sprites;
-        foreach (var line in File.ReadLines(path).Skip(1))
-        {
-            var cells = Csv(line);
-            if (cells.Count >= 2 && !string.IsNullOrWhiteSpace(cells[0]) && !string.IsNullOrWhiteSpace(cells[1]))
-                sprites[cells[0].Trim()] = cells[1].Trim();
-        }
+        Read(dd1.PathOf("curios", "curio_props.csv"), overwrite: true);
+        if (includeDlc)
+            foreach (var file in DlcCurioFiles(dd1, "*curio_props.csv")) Read(file.Path, overwrite: false);
         return sprites;
+
+        void Read(string path, bool overwrite)
+        {
+            if (!File.Exists(path)) return;
+            foreach (var line in File.ReadLines(path).Skip(1))
+            {
+                var cells = Csv(line);
+                if (cells.Count >= 2 && !string.IsNullOrWhiteSpace(cells[0]) && !string.IsNullOrWhiteSpace(cells[1])
+                    && (overwrite || !sprites.ContainsKey(cells[0].Trim())))
+                    sprites[cells[0].Trim()] = cells[1].Trim();
+            }
+        }
+    }
+
+    private static IEnumerable<(string Source, string Path)> DlcCurioFiles(Dd1Install dd1, string pattern)
+    {
+        foreach (var folder in dd1.DlcFolders())
+        {
+            string curios = Path.Combine(folder, "curios");
+            if (!Directory.Exists(curios)) continue;
+            foreach (var path in Directory.GetFiles(curios, pattern).OrderBy(p => p, StringComparer.Ordinal))
+                yield return (Path.GetFileName(folder), path);
+        }
     }
 
     public static CurioLibrary Parse(IEnumerable<string> lines)
