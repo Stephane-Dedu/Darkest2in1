@@ -1,5 +1,10 @@
 # Curios must belong to their surroundings
 
+Current390: beast_carcass accepted as Fallen woodland boar in the Tangle.
+Accepted390 beast_carcass/Tangle is Fallen woodland boar. Current deliberate full pack-beast-CANDIDATE-v02,host387/Core367 exact.58accepted IDs57base+1DLC-design,52pairs104PNGs;old57entries51records102PNGs exact. Existing389generated outputs reused,no new generation/extraction390. Public local component adapter/strict20%guard protects body and reviewed ivory/outline pixels;orphan-strand trials rejected. Native herbs input and ordinary herbs/no-item party/outcome/RNG/used/revisit pass10captures.21artifact/fullCore36758ID52pair/fallback checks pass;Release1330Core297UI prior387,no build390.119targets/config17source44foreign/raw journals/2CSV verified,3owned processes closed,both installers/allQA consumed,no restore.39primary designs remain3base10quest26DLC;legacy/owner separate. Read v40/CONTINUE.
+Canonical Weald/herbs/Ploot/quirk/disease/nothing and classic/other-region/owner retain. Native farm cart/human remains were unsuitable whole wild beasts;no forced source substitution or natural-spawn claim.
+
+
 Current388: incursion_knapsack accepted as a native traveller sack in four regions.
 Accepted388 incursion_knapsack uses the complete native sack in all4DD2 regions;only missing opened-mouth/collar state paint generated. Current pack-sack-CANDIDATE-v01,host387/Core367 exact.57accepted IDs56base+1DLC,51pairs102PNGs;old56entries50records100PNGs exact. Public native/state RGBA reproduction,19artifact and actualCore367 full57ID51pair/fallback checks pass. Native four-region PNG/party/loot/RNG/used/revisit pass24captures for ONEidentity/pair.117targets/config/source/CSV44foreign raw journals verified,owned processes closed,installer/QA consumed,no restore.40primary designs remain4base10quest26DLC;legacy/owner separate. Read v38/CONTINUE.
 Canonical ALL/no-supply/T_INCURSIONSACK1+CH3 and original classic sprite alias retain. Synthetic fixtures do not prove natural encounter availability.
