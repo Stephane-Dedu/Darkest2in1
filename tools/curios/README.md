@@ -1,5 +1,12 @@
 # Curio rework: design catalog v01
 
+## Secret stash reuses reviewed regional art, round386
+
+Accepted386 secret_stash uses the four direct reviewed same-region locked_display_cabinet paintings. Current pack-secret-CANDIDATE-v01/runtime367.55accepted IDs54base+1DLC,still49pairs98PNGs;zero new art. All old54entries/49records/98PNGs exact. Native four-region PNG/key-party,independent old-owner state,no-item/RNG/used/revisit checks pass32captures including4old repeats. Current actualCore367 full55ID49pair/direct-object/fallback checks pass;no build.113targets/config44foreign/raw journals/source/CSV verified,DD2closed,all385/386helpers consumed,no restore.42primary designs remain6base10quest26DLC;legacy/owner separate. Read v36/CONTINUE.
+
+Direct regional aliases reuse the existing painting object in the same region and preserve independent curio rules and used flags. No new painting or PNG is counted for this recipient.
+
+
 ## Condemned scriptures accepted, round385
 
 Accepted round385: pile_of_scrolls/dd2_farm is Condemned scriptures. Current full pack-books-CANDIDATE-v02, runtime367 unchanged.54accepted identities53base+1DLC,49pairs98PNGs;old53entries48records96PNGs exact. Native torch input, real negative-quirk purge, final no-item stress wording, RNG, used state and revisit pass.18total captures/14final valid include4old glyph repeats.113targets/config44foreign/raw journals/source/CSV verified. DD2closed,both installers/all4QA stages consumed,no restore.43primary designs remain7base10quest26DLC;legacy/owner separate. Read v35/CONTINUE.
