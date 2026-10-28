@@ -108,15 +108,19 @@ def catalog(inventory, selection, output):
             art_id = binding.get('ArtId')
             if art_id in regional_pairs:
                 owner = regional_pairs[art_id]['curio_id']
-                if owner != key:
-                    source_binding = regions.get(owner, {})
-                    source_binding = source_binding.get(region, {}) if isinstance(source_binding, dict) else {}
-                    if regional_aliases.get(key) != owner or not isinstance(source_binding, dict) or source_binding.get('ArtId') != art_id:
-                        raise ValueError('Regional painting belongs to a different curio without a same-region shared-art alias')
-                    shared_referenced.add(key)
                 referenced.add(art_id)
-            elif art_id not in pairs:
+            elif art_id in pairs:
+                owner = art_id
+            else:
                 raise ValueError('Regional binding has no reviewed painting')
+            # The original-sprite alias contract still covers its reviewed default pair.
+            original_alias = art_id in pairs and aliases.get(key) == owner
+            if owner != key and not original_alias:
+                source_binding = regions.get(owner, {})
+                source_binding = source_binding.get(region, {}) if isinstance(source_binding, dict) else {}
+                if regional_aliases.get(key) != owner or not isinstance(source_binding, dict) or source_binding.get('ArtId') != art_id:
+                    raise ValueError('Regional painting belongs to a different curio without a same-region shared-art alias')
+                shared_referenced.add(key)
     if referenced != regional_pairs.keys():
         raise ValueError('Unreferenced regional painting')
     if shared_referenced != regional_aliases.keys():

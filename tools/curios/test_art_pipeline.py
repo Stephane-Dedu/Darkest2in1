@@ -313,6 +313,71 @@ class PairRegistrationTests(unittest.TestCase):
                     catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
                 self.assertFalse((root / 'review').exists())
 
+    def shared_default_selection(self, root):
+        selection = self.shared_regional_selection(root)
+        selection['regional_pairs'] = []
+        selection['region_art_overrides']['fixture']['dd2_city']['ArtId'] = 'fixture'
+        selection['region_art_overrides']['recipient']['dd2_city']['ArtId'] = 'fixture'
+        return selection
+
+    def test_default_painting_can_be_explicitly_shared_without_duplicate_artifacts(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selection = self.shared_default_selection(root)
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            doc = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(len(doc['Entries']), 2)
+            self.assertEqual([a['Id'] for a in doc['Artifacts']], ['fixture'])
+            self.assertEqual(len(list((root / 'pack/art').glob('*.png'))), 2)
+            recipient = next(e for e in doc['Entries'] if e['Id'] == 'recipient')
+            self.assertNotIn('ArtId', recipient)
+            self.assertEqual(list(recipient['Regions']), ['dd2_city'])
+            review = json.loads((root / 'pack/review/coverage.json').read_text())
+            self.assertEqual(review['regional_artifacts'], [])
+            self.assertEqual(review['regional_shared_art_aliases'], {'recipient': 'fixture'})
+            self.assertEqual(next(e for e in review['entries'] if e['id'] == 'recipient')['shared_regional_art_source'], 'fixture')
+
+    def test_default_regional_sharing_still_requires_direct_same_region_owner_and_exact_pixels(self):
+        for problem in ('implicit', 'missing_source_binding', 'wrong_region', 'wrong_painting', 'changed_pixels'):
+            with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                selection = self.shared_default_selection(root)
+                if problem == 'implicit': selection.pop('regional_aliases')
+                elif problem == 'missing_source_binding': selection['region_art_overrides'].pop('fixture')
+                elif problem == 'wrong_region':
+                    selection['region_art_overrides']['recipient']['dd2_forest'] = selection['region_art_overrides']['recipient'].pop('dd2_city')
+                elif problem == 'wrong_painting': selection['region_art_overrides']['fixture']['dd2_city']['ArtId'] = 'unknown'
+                else:
+                    path = root / 'default/fixture-used.png'
+                    with Image.open(path) as image:
+                        image.putpixel((0, 0), (255, 0, 0, 255)); image.save(path)
+                (root / 'selection.json').write_text(json.dumps(selection))
+                with self.assertRaises(ValueError):
+                    catalog(root / 'inventory.json', root / 'selection.json', root / 'review')
+                self.assertFalse((root / 'review').exists())
+
+    def test_original_sprite_alias_default_pair_contract_is_unchanged(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            selection = self.shared_default_selection(root)
+            inventory_path = root / 'inventory.json'
+            inventory = json.loads(inventory_path.read_text())
+            inventory[0]['sprite'] = 'fixture'
+            next(e for e in inventory if e['id'] == 'recipient')['sprite'] = 'fixture'
+            inventory_path.write_text(json.dumps(inventory))
+            selection['aliases'] = {'recipient': 'fixture'}
+            selection['regional_only'] = []
+            selection['regional_aliases'] = {}
+            selection['region_art_overrides'].pop('fixture')
+            (root / 'selection.json').write_text(json.dumps(selection))
+            with contextlib.redirect_stdout(io.StringIO()):
+                build(root / 'inventory.json', root / 'selection.json', root / 'pack')
+            doc = json.loads((root / 'pack/manifest.json').read_text())
+            self.assertEqual(len(doc['Artifacts']), 1)
+            self.assertEqual(next(e for e in doc['Entries'] if e['Id'] == 'recipient')['ArtId'], 'fixture')
+
     def test_shared_alias_cannot_bypass_owner_region_or_pair_integrity(self):
         for problem in ('implicit', 'wrong_source', 'wrong_region', 'missing_source_binding', 'unused', 'changed_pixels'):
             with self.subTest(problem=problem), tempfile.TemporaryDirectory() as directory:
