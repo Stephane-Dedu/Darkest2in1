@@ -27,6 +27,7 @@ internal static class CurioDesignPreview
     private static bool KeyRewardChest => Id == "redkey_heirloom_chest" || Id == "bluekey_heirloom_chest" || Id == "greenkey_heirloom_chest" || Id == "yellowkey_heirloom_chest";
     private static string Title => Id switch
     {
+        "trinket_chest" => "Trinket chest",
         "redkey_heirloom_chest" => "Red key-reward chest",
         "bluekey_heirloom_chest" => "Blue key-reward chest",
         "greenkey_heirloom_chest" => "Green key-reward chest",
@@ -38,6 +39,7 @@ internal static class CurioDesignPreview
     };
     private static string PreviewSupply => KeyRewardChest ? null : Id switch
     {
+        "trinket_chest" => Supply.Key,
         "cc_bone_pile" => Supply.Bandage,
         "cc_bloodflower" => Supply.Shovel,
         "cc_hive" => Supply.Torch,
@@ -73,7 +75,7 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
-                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || KeyRewardChest, "Only reviewed canonical Courtyard designs are supported");
+                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || KeyRewardChest, "Only reviewed canonical Courtyard designs are supported");
                 string csv = s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
                 Require(File.ReadAllText(csv).Contains("," + Id + ","), "Canonical DLC identity missing");
                 var estate = new Estate { Name = "Unsaved DLC design preview", Seed = 73232, Week = 12, OpeningRaidPending = false };
