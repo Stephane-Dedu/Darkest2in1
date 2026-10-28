@@ -17,6 +17,7 @@ namespace DarkestDungeon3.Ui;
 internal static class CurioPreview
 {
     private static readonly bool Checking = Environment.GetCommandLineArgs().Contains("-dd3-curio-check");
+    private static readonly bool QuestActivationChecking = Environment.GetCommandLineArgs().Contains("-dd3-curio-quest-activate-check");
     private static readonly bool Regional = Environment.GetCommandLineArgs().Contains("-dd3-curio-regions");
     private static readonly string[] Regions = { "dd2_city", "dd2_forest", "dd2_farm", "dd2_coast" };
     // Explicit opt-in cases let regional-only candidates use their real scenery.
@@ -27,7 +28,9 @@ internal static class CurioPreview
     private static readonly string[] SupplyCase = Environment.GetCommandLineArgs()
         .FirstOrDefault(a=>a.StartsWith("-dd3-curio-supply=",StringComparison.Ordinal))?
         .Substring("-dd3-curio-supply=".Length).Split('@');
-    private static string SupplyItem => SupplyCase==null ? Supply.HolyWater : SupplyCase[2];
+    private static string _questSupplyItem;
+    private static string SupplyItem => QuestActivationChecking && (_step==17 || _step==18) ? Supply.HolyWater
+        : _questSupplyItem ?? (SupplyCase==null ? Supply.HolyWater : SupplyCase[2]);
     private static readonly bool Requested = Checking;
     private static readonly string Shots = Environment.GetCommandLineArgs().FirstOrDefault(a=>a.StartsWith("-dd3-curio-shots=",StringComparison.Ordinal))?.Substring("-dd3-curio-shots=".Length);
     private static readonly CrawlUi Ui = new();
@@ -94,7 +97,7 @@ internal static class CurioPreview
             Event injected=original.type==EventType.Repaint && _inputFrame!=Time.frameCount && _captureFrame!=Time.frameCount ? Input() : null;
             if(injected!=null){Event.current=injected;_inputFrame=Time.frameCount;}
             Drag.Begin();
-            if(injected!=null && (_step==12 || _step==14))
+            if(injected!=null && (_step==12 || _step==14 || _step==17))
                 Drag.Source(new Rect(650,810,100,100),new PackStack(Expedition.Pack,0,SupplyItem),_=>{});
             Ui.DrawCurioPreview(Driver.Instance.Crawl,Expedition);
             Drag.Overlay();
@@ -129,8 +132,10 @@ internal static class CurioPreview
             Require(_definitions.Length>0,"No exact curio paintings loaded");
             Require(SupplyCase==null || SupplyCase.Length==3 && Regions.Contains(SupplyCase[1]) &&
                 NativeCurioArt.Definitions.Any(d=>d.Id==SupplyCase[0]) &&
-                new[]{Supply.HolyWater,Supply.Bandage,Supply.Antivenom,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(SupplyCase[2]),
+                (new[]{Supply.HolyWater,Supply.Bandage,Supply.Antivenom,Supply.Shovel,Supply.Key,Supply.Herbs,Supply.Torch}.Contains(SupplyCase[2])
+                    || QuestActivationChecking && SupplyCase[2]=="quest"),
                 "Invalid explicit curio supply QA case");
+            if(QuestActivationChecking)Require(SupplyCase!=null && SupplyCase[2]=="quest","Quest activation input QA requires an explicit quest case");
         }
         var exp=Expedition;var room=exp.Map.Rooms[0];
         if(_step==0)
@@ -138,7 +143,9 @@ internal static class CurioPreview
             if(_index>=_definitions.Length)
             {
                 Set(SupplyCase==null ? "decorative_urn" : SupplyCase[0],SupplyCase==null ? null : SupplyCase[1]);
-                exp.Pack.Add(SupplyItem,2);_holy=exp.Pack.Count(SupplyItem);_step=11;return;
+                exp.Pack.Add(SupplyItem,QuestActivationChecking?exp.Goal.StartingItems[0].Amount:2);
+                if(QuestActivationChecking)exp.Pack.Add(Supply.HolyWater,1);
+                _holy=exp.Pack.Count(SupplyItem);_step=11;return;
             }
             Set(_definitions[_index].Id,Cases.Length>0 ? Cases[_index][1] : null);_step=1;return;
         }
@@ -162,7 +169,7 @@ internal static class CurioPreview
         if(_step==16 && Time.unscaledTime>=_until)
         {
             _done=true;
-            Plugin.Log.LogInfo("[curio check] PASS: "+(Cases.Length>0 ? Cases.Length+" explicit regional cases" : Regional ? "4 regional cabinet cases" : _definitions.Length+" exact IDs")+" closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and ordinary "+room.CurioId+"/"+SupplyItem+" supply resolution; no estate/native host/save access");
+            Plugin.Log.LogInfo("[curio check] PASS: "+(Cases.Length>0 ? Cases.Length+" explicit regional cases" : Regional ? "4 regional cabinet cases" : _definitions.Length+" exact IDs")+" closed/used; actual DrawProp click and padding rejection; actual Drag.Source/Drop and "+(QuestActivationChecking?"canonical quest activation ":"ordinary ")+room.CurioId+"/"+SupplyItem+" supply resolution; no estate/native host/save access");
         }
     }
     private static void Set(string id,string region=null)
@@ -172,14 +179,27 @@ internal static class CurioPreview
             id.Contains("tent") ? "dd2_forest" : id.Contains("bones") ? "dd2_farm" : "dd2_city";
         if(region!=null)exp.Quest.Dungeon=region;
         else if (Regional && id=="locked_display_cabinet") exp.Quest.Dungeon=Regions[_index];
+        if(QuestActivationChecking)
+        {
+            _questSupplyItem=null;exp.Goal=null;exp.GoalProgress=0;exp.QuestComplete=false;exp.Map.Rooms[0].IsQuestGoal=false;
+            if(id==SupplyCase[0])
+            {
+                var goal=Session.Current.Campaign.Goals.For("inventory_activate",exp.Quest.Dungeon);
+                Require(goal!=null && goal.Type=="activate" && goal.CurioName==id && goal.Amount==3
+                    && goal.NeedsItem && goal.StartingItems.Count==1 && goal.StartingItems[0].Amount==3,
+                    "No matching canonical three-item activation goal for input QA");
+                exp.Goal=goal;exp.Quest.Type="inventory_activate";exp.Quest.GoalId=goal.Id;
+                exp.Map.Rooms[0].IsQuestGoal=true;_questSupplyItem=ItemCatalog.QuestKey(goal.StartingItems[0].Id);
+            }
+        }
         Panel.SetValue(Ui,null);_counter=exp.RandomCounter;_until=Time.unscaledTime+1.6f;_usedCaptured=false;
         NativeCurioArt.Clear();NativeCurioArt.Prepare(exp);
     }
     private static Event Input()
     {
-        if(_step!=2&&_step!=3&&_step!=4&&_step!=5&&_step!=12&&_step!=13&&_step!=14&&_step!=15)return null;
+        if(_step!=2&&_step!=3&&_step!=4&&_step!=5&&_step!=12&&_step!=13&&_step!=14&&_step!=15&&_step!=17&&_step!=18)return null;
         var at=_painting.At(1040,690);
-        bool source=_step==12||_step==14;
+        bool source=_step==12||_step==14||_step==17;
         bool empty=_step==2||_step==3||_step==13;
         Vector2 point=source?new Vector2(700,860):empty?new Vector2(at.Left+1,at.Top+1):Opaque(at);
         bool down=_step==2||_step==4||source;
@@ -205,10 +225,31 @@ internal static class CurioPreview
             Require(Panel.GetValue(Ui)!=null,"Opaque paint did not open the curio");
             Panel.SetValue(Ui,null);exp.Map.Rooms[0].CurioTaken=true;_until=Time.unscaledTime+1.6f;
         }
-        if(_step==13)Require(exp.Pack.Count(SupplyItem)==_holy&&!exp.Map.Rooms[0].CurioTaken&&exp.RandomCounter==_counter,"A padding drop consumed a supply or resolved the curio");
+        if(_step==13)
+        {
+            Require(exp.Pack.Count(SupplyItem)==_holy&&!exp.Map.Rooms[0].CurioTaken&&exp.RandomCounter==_counter,"A padding drop consumed a supply or resolved the curio");
+            if(QuestActivationChecking){_step=17;return;}
+        }
+        if(_step==18)
+        {
+            Require(QuestActivationChecking && exp.Pack.Count(_questSupplyItem)==_holy && exp.Pack.Count(Supply.HolyWater)==1
+                && !exp.Map.Rooms[0].CurioTaken && exp.GoalProgress==0 && !exp.QuestComplete
+                && Driver.Instance.Crawl.LastCurio==null && exp.RandomCounter==_counter,
+                "Wrong ordinary supply drop changed the quest objective/inventory/RNG");
+            Plugin.Log.LogInfo("[curio check] QUEST wrong ordinary supply drop rejected; canonical quest inventory/progress/RNG unchanged");
+            _step=14;return;
+        }
         if(_step==15)
         {
             Require(exp.Pack.Count(SupplyItem)==_holy-1&&exp.Map.Rooms[0].CurioTaken&&Driver.Instance.Crawl.LastCurio!=null,"Opaque supply drop did not run ordinary curio resolution exactly once");
+            if(QuestActivationChecking)
+            {
+                var report=Driver.Instance.Crawl.LastCurio;
+                Require(report.OutcomeType=="Quest" && report.ItemUsed==_questSupplyItem && report.Loot.Count==0
+                    && report.LeftBehind.Count==0 && exp.GoalProgress==1 && !exp.QuestComplete && exp.RandomCounter==_counter,
+                    "Opaque quest item drop did not preserve canonical activation/progress/RNG");
+                Plugin.Log.LogInfo("[curio check] QUEST actual Drag.Source/Drop PASS; goal="+exp.Goal.Id+"; item="+_questSupplyItem+"; progress1/3; no interaction RNG");
+            }
             Plugin.Log.LogInfo("[curio check] SUPPLY "+exp.Map.Rooms[0].CurioId+"/"+SupplyItem+"; region="+exp.Quest.Dungeon+"; result="+Driver.Instance.Crawl.LastCurio.Text);
             _until=Time.unscaledTime+1.6f;
         }
