@@ -1165,3 +1165,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round415 Hive DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/torch drop DISPATCH/used/reload frames.69visual designs accepted;live67unchanged.
 - [?] Hive canonical DLC gameplay/natural availability remain pending.28primary designs remain2base2quest24DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round416 Bloodflower DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/shovel drop DISPATCH/used/reload frames.70visual designs accepted;live67unchanged.
+- [?] Bloodflower canonical DLC gameplay/natural availability remain pending.27primary designs remain2base2quest23DLC;6legacy/FadedMemory separate.
