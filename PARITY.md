@@ -1149,3 +1149,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round408 reliquary/Sprawl Relic urn,direct same-region generated decorative_urn reuse. Native canonical three-relic collection,completion,no-RNG,spent/revisit,source holy-water outcome and GUI checks pass.65 accepted IDs/54 pairs/108 PNGs.
 - [?] Remaining32 primary designs:2 base,4 quest,26 DLC. Natural availability and other QA scopes remain separate.
+
+
+- [x] Round410 protective_ward/Shroud Coastal runic ward;complete native model,explicit dormant disc grade/used original paint. Canonical quest lantern actualGUI/native-party rejection,three uses/completion/noRNG/used/revisit pass.66 accepted IDs/55 pairs110 PNGs.
+- [?] Remaining31 primary designs:2 base,3 quest,26 DLC;natural availability and other QA scopes remain separate.
