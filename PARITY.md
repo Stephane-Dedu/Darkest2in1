@@ -1161,3 +1161,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round413 Wine Crate DLC DESIGN native Courtyard/four-hero scale,DrawProp alpha picking/padding/drop dispatch,used/reload pass5frames.68accepted visual/catalog designs;livecatalog67unchanged.
 - [?] Wine Crate canonical DLC mechanics/runtime/natural availability remain pending.29primary visual designs remain2base2quest25DLC;legacy6/FadedMemory separate.
+
+
+- [x] Round415 Hive DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/torch drop DISPATCH/used/reload frames.69visual designs accepted;live67unchanged.
+- [?] Hive canonical DLC gameplay/natural availability remain pending.28primary designs remain2base2quest24DLC;6legacy/FadedMemory separate.

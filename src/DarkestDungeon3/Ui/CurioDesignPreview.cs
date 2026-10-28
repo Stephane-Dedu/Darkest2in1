@@ -22,7 +22,10 @@ internal static class CurioDesignPreview
     internal static readonly bool Requested = Environment.GetCommandLineArgs().Contains("-dd3-curio-design-check");
     internal static readonly string Root = Argument("-dd3-curio-design-root=");
     private static readonly string Shots = Argument("-dd3-curio-design-shots=");
-    private const string Id = "cc_wine_crate", Region = "courtyard";
+    private static readonly string Id = Argument("-dd3-curio-design-id=") ?? "cc_wine_crate";
+    private const string Region = "courtyard";
+    private static string Title => Id == "cc_hive" ? "Hive" : "Wine Crate";
+    private static string PreviewSupply => Id == "cc_hive" ? Supply.Torch : Supply.Antivenom;
     private static SaveFile _save;
     private static bool _done, _failed, _used, _reload;
     private static int _step, _inputFrame = -1, _captureFrame = -1, _counter;
@@ -53,8 +56,9 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
+                Require(Id == "cc_wine_crate" || Id == "cc_hive", "Only reviewed canonical Courtyard designs are supported");
                 string csv = s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
-                Require(File.ReadAllText(csv).Contains(",cc_wine_crate,"), "Canonical DLC identity missing");
+                Require(File.ReadAllText(csv).Contains("," + Id + ","), "Canonical DLC identity missing");
                 var estate = new Estate { Name = "Unsaved DLC design preview", Seed = 73232, Week = 12, OpeningRaidPending = false };
                 foreach (string cls in new[] { "highwayman", "grave_robber", "plague_doctor", "man_at_arms" })
                     estate.Roster.Add(new HeroRecord { Id = "design-" + cls, Name = cls, ClassId = cls, ResolveLevel = 1 });
@@ -63,7 +67,7 @@ internal static class CurioDesignPreview
                 var exp = new ExpeditionState { Map = map, RoomId = 0, Seed = 73232, Started = true, Light = 100,
                     Quest = new QuestOffer { Id = "curio-design-preview", Dungeon = Region, Type = "cleanse", Difficulty = 1 },
                     Party = estate.Roster.Select(h => h.Id).ToList() };
-                exp.Pack.Add(Supply.Antivenom, 1);
+                exp.Pack.Add(PreviewSupply, 1);
                 _save = new SaveFile { Estate = estate, Expedition = exp }; s.Save = _save;
                 _started = Time.unscaledTime; Application.runInBackground = true;
                 NativeCurioArt.Clear();
@@ -101,7 +105,7 @@ internal static class CurioDesignPreview
                 if (injected != null) { Event.current = injected; _inputFrame = Time.frameCount; }
                 Click.SetValue(null, false); Drop.SetValue(null, null); Drag.Begin();
                 if (injected != null && (_step == 6 || _step == 8))
-                    Drag.Source(new Rect(650, 810, 100, 100), new PackStack(exp.Pack, 0, Supply.Antivenom), _ => { });
+                    Drag.Source(new Rect(650, 810, 100, 100), new PackStack(exp.Pack, 0, PreviewSupply), _ => { });
                 Prop.Invoke(null, new object[] { "curios", Id, _used, 1040f, true });
                 Drag.Overlay();
                 if (injected != null) Verify();
@@ -118,10 +122,10 @@ internal static class CurioDesignPreview
                     if (_step == 1) { Capture("closed"); _step = 2; _next = Time.unscaledTime + 1; }
                     else if (_step == 12) { Capture("used"); _step = 13; _reload = true; _next = Time.unscaledTime + 2; }
                     else if (_step == 13 && _reload) { NativeCurioArt.Clear(); _reload = false; _next = Time.unscaledTime + 2; }
-                    else if (_step == 13 && !_reload) { Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS cc_wine_crate/courtyard; native four-hero scale, actual DrawProp alpha picking/padding/drop dispatch, inactive used state and reload; NO canonical resolution or gameplay claim"); }
+                    else if (_step == 13 && !_reload) { Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS " + Id + "/" + Region + "; native four-hero scale, actual DrawProp alpha picking/padding/drop dispatch, inactive used state and reload; NO canonical resolution or gameplay claim"); }
                 }
             }
-            ExpeditionSkin.Text(new Rect(45, 25, 1800, 55), "Wine Crate / Courtyard / DESIGN visual and input check", 28, ExpeditionSkin.Ivory);
+            ExpeditionSkin.Text(new Rect(45, 25, 1800, 55), Title + " / Courtyard / DESIGN visual and input check", 28, ExpeditionSkin.Ivory);
             ExpeditionSkin.Text(new Rect(45, 775, 1800, 55), "Unsaved native actors. Closed/used art states only. No supply consumption, loot or canonical outcome.", 22, ExpeditionSkin.Muted);
             ExpeditionSkin.Text(new Rect(45, 840, 1800, 55), _failed ? "FAILED. See retained log." : _done ? "Design check complete. Canonical DLC mechanics remain pending." : "Checking fixed body, picking, drop dispatch and used-state reload.", 22, ExpeditionSkin.Muted);
         }
@@ -156,7 +160,7 @@ internal static class CurioDesignPreview
         if (_step == 3) Require(!clicked && dropped == null, "Padding activated the design");
         if (_step == 5) { Require(clicked, "Opaque paint was not clickable"); Capture("picked"); }
         if (_step == 7) Require(dropped == null, "Padding accepted a drop");
-        if (_step == 9) { Require(dropped == Supply.Antivenom, "Opaque drop dispatch missing"); Capture("drop"); _used = true; }
+        if (_step == 9) { Require(dropped == PreviewSupply, "Opaque drop dispatch missing"); Capture("drop"); _used = true; }
         if (_step == 11) Require(!clicked && dropped == null, "Used design remained interactive");
         CheckUnchanged(); _step++; _next = Time.unscaledTime + .35f;
     }
