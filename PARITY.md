@@ -1181,3 +1181,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round426 trinket_chest DLC DESIGN:five native Courtyard/four-hero alpha/padding/real-key DropDISPATCH/used/reload frames;normal flag-absent ward quest GUI2repeat frames.76visual designs/62pairs124PNGs private,live67unchanged.
 - [?] Canonical key consumption/trinket loot,DLC activation and natural availability remain pending.21primary designs remain2base2quest17DLC;6legacy/FadedMemory owner separate.
+
+
+- [x] Round427 cc_treasure_chest DLC DESIGN:5native Courtyard/four-hero/alpha/padding/keyDropDISPATCH/used/reload frames;normal ward quest GUI2repeatframes.77visual designs/63pairs126PNGs private;live67unchanged.
+- [?] Canonical key consumption/loot,DLC runtime activation/natural availability remain pending.20primary designs remain2base2quest16DLC;6legacy/FadedMemory separate.
