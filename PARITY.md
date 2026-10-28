@@ -1153,3 +1153,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round410 protective_ward/Shroud Coastal runic ward;complete native model,explicit dormant disc grade/used original paint. Canonical quest lantern actualGUI/native-party rejection,three uses/completion/noRNG/used/revisit pass.66 accepted IDs/55 pairs110 PNGs.
 - [?] Remaining31 primary designs:2 base,3 quest,26 DLC;natural availability and other QA scopes remain separate.
+
+
+- [x] Round411 infected_corpse/Tangle: complete native corpse/slab plus one bounded generated vapour cue, used native body exact. Canonical quest-antivenom GUI and native-party rejection, three uses, completion, noRNG, used/revisit pass11frames.67accepted IDs/56pairs112PNGs.
+- [?] Thirty primary designs remain:2base,2quest,26DLC; art, integration, natural availability and gameplay scopes stay separate.
