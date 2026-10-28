@@ -1169,3 +1169,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round416 Bloodflower DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/shovel drop DISPATCH/used/reload frames.70visual designs accepted;live67unchanged.
 - [?] Bloodflower canonical DLC gameplay/natural availability remain pending.27primary designs remain2base2quest23DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round418 Bone Pile DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/bandage drop DISPATCH/used/reload frames.71visual designs accepted;live67unchanged.
+- [?] Bone Pile canonical DLC gameplay/Summon/natural availability remain pending.26primary designs remain2base2quest22DLC;6legacy/FadedMemory separate.
