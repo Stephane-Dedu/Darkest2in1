@@ -1185,3 +1185,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round427 cc_treasure_chest DLC DESIGN:5native Courtyard/four-hero/alpha/padding/keyDropDISPATCH/used/reload frames;normal ward quest GUI2repeatframes.77visual designs/63pairs126PNGs private;live67unchanged.
 - [?] Canonical key consumption/loot,DLC runtime activation/natural availability remain pending.20primary designs remain2base2quest16DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round428 cc_food_cart DLC DESIGN: 5 native paired Foetor/four-hero/alpha/padding/herbsDropDISPATCH/used/reload frames; default Wine Crate 5 repeat frames and normal ward quest GUI 2 repeat frames.78 visual designs/64 pairs128PNGs private; live67 unchanged.
+- [?] Canonical herbs consumption/loot/effects/Curse, DLC runtime activation and natural availability remain pending.19 primary designs remain2base2quest15DLC;6legacy/FadedMemory separate.
