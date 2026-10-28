@@ -1157,3 +1157,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round411 infected_corpse/Tangle: complete native corpse/slab plus one bounded generated vapour cue, used native body exact. Canonical quest-antivenom GUI and native-party rejection, three uses, completion, noRNG, used/revisit pass11frames.67accepted IDs/56pairs112PNGs.
 - [?] Thirty primary designs remain:2base,2quest,26DLC; art, integration, natural availability and gameplay scopes stay separate.
+
+
+- [x] Round413 Wine Crate DLC DESIGN native Courtyard/four-hero scale,DrawProp alpha picking/padding/drop dispatch,used/reload pass5frames.68accepted visual/catalog designs;livecatalog67unchanged.
+- [?] Wine Crate canonical DLC mechanics/runtime/natural availability remain pending.29primary visual designs remain2base2quest25DLC;legacy6/FadedMemory separate.
