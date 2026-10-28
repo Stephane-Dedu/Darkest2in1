@@ -1141,3 +1141,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round406 animalistic_shrine/Foetor Bone cult shrine;canonical quest pickaxe GUI drag/drop,missing/wrong rejection,three native-party uses/completion/noRNG/used/revisit and source/gather regressions.63accepted IDs/53pairs106PNG,58base+4quest+1DLCdesign.
 - [?] Remaining34required designs2base6quest26DLC;natural/saved/controller/long-session scopes separate. Round406 accepts animalistic_shrine/Foetor as Bone cult shrine through direct same-region reuse of the accepted skull_altar painting. Actual native quest-item drag/drop, wrong-item rejection and the four-hero canonical pickaxe quest pass, including three uses, completion, unchanged interaction RNG and spent-state revisit. Coverage is63accepted identities:58base,4quest and1DLCdesign, with53distinct state pairs/106PNGs.34required identities remain:2base,6quest and26DLCdesigns.
+
+
+- [x] Round407 corrupted_altar/Sprawl:existing392bowl/native stone first accepted binding;canonical quest holy-water GUI/native-party rejection,three uses/completion/noRNG/used/revisit.64accepted/54pairs108PNGs.
+- [?] Remaining33primary identities2base5quest26DLC;ShamblerSummon/natural/saved/controller/longsession remain separate.
