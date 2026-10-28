@@ -1145,3 +1145,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round407 corrupted_altar/Sprawl:existing392bowl/native stone first accepted binding;canonical quest holy-water GUI/native-party rejection,three uses/completion/noRNG/used/revisit.64accepted/54pairs108PNGs.
 - [?] Remaining33primary identities2base5quest26DLC;ShamblerSummon/natural/saved/controller/longsession remain separate.
+
+
+- [x] Round408 reliquary/Sprawl Relic urn,direct same-region generated decorative_urn reuse. Native canonical three-relic collection,completion,no-RNG,spent/revisit,source holy-water outcome and GUI checks pass.65 accepted IDs/54 pairs/108 PNGs.
+- [?] Remaining32 primary designs:2 base,4 quest,26 DLC. Natural availability and other QA scopes remain separate.
