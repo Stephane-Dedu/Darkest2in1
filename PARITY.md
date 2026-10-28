@@ -1173,3 +1173,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round418 Bone Pile DLC DESIGN:5native Courtyard/fourhero/DrawProp alpha/padding/bandage drop DISPATCH/used/reload frames.71visual designs accepted;live67unchanged.
 - [?] Bone Pile canonical DLC gameplay/Summon/natural availability remain pending.26primary designs remain2base2quest22DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round423 FOUR key-reward chest DLC DESIGNS:separate native Courtyard/four-hero click/padding/used/reload reviews,8frames;one complete native painting.75visual designs/61pairs122PNGs accepted privately;live67unchanged.
+- [?] Canonical key rewards,DLC gameplay/runtime/natural availability pending.22primary designs remain2base2quest18DLC;6legacy/FadedMemory owner separate.

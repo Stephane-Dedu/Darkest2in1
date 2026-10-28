@@ -24,14 +24,19 @@ internal static class CurioDesignPreview
     private static readonly string Shots = Argument("-dd3-curio-design-shots=");
     private static readonly string Id = Argument("-dd3-curio-design-id=") ?? "cc_wine_crate";
     private const string Region = "courtyard";
+    private static bool KeyRewardChest => Id == "redkey_heirloom_chest" || Id == "bluekey_heirloom_chest" || Id == "greenkey_heirloom_chest" || Id == "yellowkey_heirloom_chest";
     private static string Title => Id switch
     {
+        "redkey_heirloom_chest" => "Red key-reward chest",
+        "bluekey_heirloom_chest" => "Blue key-reward chest",
+        "greenkey_heirloom_chest" => "Green key-reward chest",
+        "yellowkey_heirloom_chest" => "Yellow key-reward chest",
         "cc_bone_pile" => "Vampire bones",
         "cc_bloodflower" => "Bloodflowers",
         "cc_hive" => "Hive",
         _ => "Wine Crate"
     };
-    private static string PreviewSupply => Id switch
+    private static string PreviewSupply => KeyRewardChest ? null : Id switch
     {
         "cc_bone_pile" => Supply.Bandage,
         "cc_bloodflower" => Supply.Shovel,
@@ -68,7 +73,7 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
-                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile", "Only reviewed canonical Courtyard designs are supported");
+                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || KeyRewardChest, "Only reviewed canonical Courtyard designs are supported");
                 string csv = s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
                 Require(File.ReadAllText(csv).Contains("," + Id + ","), "Canonical DLC identity missing");
                 var estate = new Estate { Name = "Unsaved DLC design preview", Seed = 73232, Week = 12, OpeningRaidPending = false };
@@ -79,7 +84,7 @@ internal static class CurioDesignPreview
                 var exp = new ExpeditionState { Map = map, RoomId = 0, Seed = 73232, Started = true, Light = 100,
                     Quest = new QuestOffer { Id = "curio-design-preview", Dungeon = Region, Type = "cleanse", Difficulty = 1 },
                     Party = estate.Roster.Select(h => h.Id).ToList() };
-                exp.Pack.Add(PreviewSupply, 1);
+                if (!KeyRewardChest) exp.Pack.Add(PreviewSupply, 1);
                 _save = new SaveFile { Estate = estate, Expedition = exp }; s.Save = _save;
                 _started = Time.unscaledTime; Application.runInBackground = true;
                 NativeCurioArt.Clear();
@@ -134,7 +139,7 @@ internal static class CurioDesignPreview
                     if (_step == 1) { Capture("closed"); _step = 2; _next = Time.unscaledTime + 1; }
                     else if (_step == 12) { Capture("used"); _step = 13; _reload = true; _next = Time.unscaledTime + 2; }
                     else if (_step == 13 && _reload) { NativeCurioArt.Clear(); _reload = false; _next = Time.unscaledTime + 2; }
-                    else if (_step == 13 && !_reload) { Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS " + Id + "/" + Region + "; native four-hero scale, actual DrawProp alpha picking/padding/drop dispatch, inactive used state and reload; NO canonical resolution or gameplay claim"); }
+                    else if (_step == 13 && !_reload) { if (!KeyRewardChest) Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS " + Id + "/" + Region + "; native four-hero scale, actual DrawProp " + (KeyRewardChest ? "click/padding; no item route exercised" : "alpha picking/padding/drop dispatch") + ", inactive used state and reload; NO canonical resolution or gameplay claim"); }
                 }
             }
             ExpeditionSkin.Text(new Rect(45, 25, 1800, 55), Title + " / Courtyard / DESIGN visual and input check", 28, ExpeditionSkin.Ivory);
@@ -170,7 +175,17 @@ internal static class CurioDesignPreview
     {
         bool clicked = (bool)Click.GetValue(null); string dropped = (string)Drop.GetValue(null);
         if (_step == 3) Require(!clicked && dropped == null, "Padding activated the design");
-        if (_step == 5) { Require(clicked, "Opaque paint was not clickable"); Capture("picked"); }
+        if (_step == 5)
+        {
+            Require(clicked, "Opaque paint was not clickable");
+            if (KeyRewardChest)
+            {
+                _used = true;
+                CheckUnchanged(); _step = 10; _next = Time.unscaledTime + .35f;
+                return;
+            }
+            Capture("picked");
+        }
         if (_step == 7) Require(dropped == null, "Padding accepted a drop");
         if (_step == 9) { Require(dropped == PreviewSupply, "Opaque drop dispatch missing"); Capture("drop"); _used = true; }
         if (_step == 11) Require(!clicked && dropped == null, "Used design remained interactive");
