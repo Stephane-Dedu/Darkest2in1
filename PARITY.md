@@ -1201,3 +1201,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round432 com_hero_health_heal DLC DESIGN:2native Farmstead/four-hero/no-item/padding/inactive/reload frames,one native-body+generated-produce painting. Default Wine5 and ordinary ward quest GUI2 repeat frames.82visual designs67pairs134PNGs private;live67unchanged.
 - [?] Canonical HealSelf COM,DLC runtime activation and natural availability remain pending.15primary designs remain2base2quest11DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round433 com_party_health_heal DLC DESIGN:2native Farmstead/four-hero/no-item/padding/inactive/reload frames,one complete native tub/sign+generated-produce painting. Default Wine5 and ordinary ward quest GUI2 repeat frames.83visual designs68pairs136PNGs private;live67unchanged.
+- [?] Canonical HealParty COM,DLC runtime activation and natural availability remain pending.14primary designs remain2base2quest10DLC;6legacy/FadedMemory separate.
