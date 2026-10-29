@@ -24,13 +24,14 @@ internal static class CurioDesignPreview
     private static readonly string Shots = Argument("-dd3-curio-design-shots=");
     private static readonly string Id = Argument("-dd3-curio-design-id=") ?? "cc_wine_crate";
     private static bool ProvisionDesign => Id == "com_provisionbox_1" || Id == "com_provisionbox_2";
-    private static bool FarmsteadDesign => Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || ProvisionDesign;
+    private static bool FarmsteadDesign => Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || ProvisionDesign;
     private static string Region => FarmsteadDesign ? "farm" : Id == "cc_food_cart" ? "dd2_farm" : "courtyard";
     private static string ContextName => FarmsteadDesign ? "Farmstead" : Id == "cc_food_cart" ? "Foetor (paired Warrens design)" : "Courtyard";
     private static bool KeyRewardChest => Id == "redkey_heirloom_chest" || Id == "bluekey_heirloom_chest" || Id == "greenkey_heirloom_chest" || Id == "yellowkey_heirloom_chest";
-    private static bool NoItemDesign => KeyRewardChest || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal";
+    private static bool NoItemDesign => KeyRewardChest || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal";
     private static string Title => Id switch
     {
+        "com_hero_stress_heal" => "Glimmering stone mound",
         "com_party_health_heal" => "Harvest sign and produce tub",
         "com_hero_health_heal" => "Fresh produce tub",
         "com_provisionbox_1" => "Provision armoire",
@@ -90,7 +91,7 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
-                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || ProvisionDesign || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
+                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || ProvisionDesign || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
                 string csv = FarmsteadDesign
                     ? s.Dd1.PathOf("dlc", "735730_color_of_madness", "curios", "com_curio_type_library.csv")
                     : s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
