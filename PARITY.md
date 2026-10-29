@@ -1213,3 +1213,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round435 com_party_stress_heal DLC DESIGN:2native Farmstead/four-hero/no-item/padding/inactive/reload frames. Complete249v206tri native heap,one generated missing spade and two retained434nodule-card instances. Default Wine5/ordinary ward GUI2 repeats.85visual designs70pairs140PNGs PRIVATE;live67unchanged.
 - [?] Canonical StressHealParty COM,DLC runtime activation and natural availability pending.12primary designs remain2base2quest8DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round436 com_treasure DLC DESIGN:2native Farmstead/four-hero/no-item/padding/inactive/reload frames. Generated split-barrel body and crystal components,whole shell/feet fixed. Default Wine5/ordinary ward GUI2 repeats.86visual designs71pairs142PNGs PRIVATE;live67unchanged.
+- [?] Canonical COM_TREASURE_1 loot,DLC runtime activation and natural availability pending.11primary designs remain2base2quest7DLC;6legacy/FadedMemory separate.
