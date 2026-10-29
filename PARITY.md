@@ -1189,3 +1189,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round428 cc_food_cart DLC DESIGN: 5 native paired Foetor/four-hero/alpha/padding/herbsDropDISPATCH/used/reload frames; default Wine Crate 5 repeat frames and normal ward quest GUI 2 repeat frames.78 visual designs/64 pairs128PNGs private; live67 unchanged.
 - [?] Canonical herbs consumption/loot/effects/Curse, DLC runtime activation and natural availability remain pending.19 primary designs remain2base2quest15DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round429 com_fireplace DLC DESIGN: 2 native Farmstead/four-hero/alpha/padding/no-item/used/reload frames; default Wine Crate 5 repeat frames and normal ward quest GUI 2 repeat frames.79 visual designs/65 pairs130PNGs private; live67 unchanged.
+- [?] Canonical firewood/camping effects, DLC runtime activation and natural availability remain pending.18 primary designs remain2base2quest14DLC;6legacy/FadedMemory separate.
