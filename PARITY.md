@@ -1217,3 +1217,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round436 com_treasure DLC DESIGN:2native Farmstead/four-hero/no-item/padding/inactive/reload frames. Generated split-barrel body and crystal components,whole shell/feet fixed. Default Wine5/ordinary ward GUI2 repeats.86visual designs71pairs142PNGs PRIVATE;live67unchanged.
 - [?] Canonical COM_TREASURE_1 loot,DLC runtime activation and natural availability pending.11primary designs remain2base2quest7DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round439 com_millerwife_curio DLC DESIGN:3native Farmstead/four-hero closed/departed-used/post-reload-revisit frames;real opaque/padding/inactive no-item input. Generated complete ghost WOMAN/basket/gown,source-proved fully empty used state. Ordinary NONEMPTY-used mound2/normalwardGUI2 repeat controls.87visual designs72pairs144PNGs PRIVATE;live67unchanged.
+- [?] Canonical MILDRED_KEY_1 loot,DLC runtime/naturalavailability and both Shrew artwork/estate-blood/Ruins contexts pending.10primary designs remain2base2quest6DLC;6legacy/FadedMemory separate.

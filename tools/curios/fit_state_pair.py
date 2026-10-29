@@ -12,6 +12,7 @@ import math
 from pathlib import Path
 
 from PIL import Image
+from departed_state import SEMANTICS, departure_proof
 
 
 def sha(path):
@@ -26,6 +27,7 @@ def fit(spec_path, output):
         raise ValueError('Use a new output folder')
     spec = json.loads(spec_path.read_text(encoding='utf-8-sig'))
     key = spec['id']
+    departed = departure_proof(spec, spec_path.parent)
     if not key or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in key):
         raise ValueError('Unsafe curio identity')
     height = spec.get('pixel_span', spec.get('pixel_height', 900))
@@ -64,16 +66,25 @@ def fit(spec_path, output):
         resized = image.resize((round(image.width * factor), round(image.height * factor)), Image.Resampling.LANCZOS)
         foot = (fx * factor, fy * factor)
         bounds = resized.getchannel('A').point(lambda a: 255 if a > 8 else 0).getbbox()
-        if bounds is None:
+        empty_used = state == 'used' and departed is not None
+        if empty_used:
+            if image.getchannel('A').getextrema() != (0, 0):
+                raise ValueError('A departed used sprite must be completely transparent')
+            closed = items['closed']
+            same_landmarks = {k: v for k, v in record.items() if k != 'file'} == {k: v for k, v in closed['record'].items() if k != 'file'}
+            if image.size != closed['source_size'] or not same_landmarks:
+                raise ValueError('Departed art must retain the closed canvas and virtual ground landmarks')
+        elif bounds is None:
             raise ValueError('Empty source sprite')
-        half_width = max(half_width, foot[0] - bounds[0], bounds[2] - foot[0])
-        min_y = min(min_y, bounds[1] - foot[1] + height)
+        if bounds is not None:
+            half_width = max(half_width, foot[0] - bounds[0], bounds[2] - foot[0])
+            min_y = min(min_y, bounds[1] - foot[1] + height)
         # Soft contact shadows may enter the padding. Opaque geometry may not
         # extend below the reviewed foot anchor by more than that padding.
         opaque = resized.getchannel('A').point(lambda a: 255 if a > 128 else 0).getbbox()
         if opaque and opaque[3] > foot[1] + padding:
             raise ValueError('Foot landmark would clip opaque geometry')
-        items[state] = {'image': resized, 'foot': foot, 'factor': factor, 'source': source, 'record': record}
+        items[state] = {'image': resized, 'foot': foot, 'factor': factor, 'source': source, 'record': record, 'source_size': image.size}
     width = math.ceil(half_width + padding) * 2
     top = math.ceil(-min_y) + padding
     canvas_height = top + height + padding
@@ -91,6 +102,9 @@ def fit(spec_path, output):
                 'registered_landmark_scale_and_ground': True, 'source_alpha_resampled_without_thresholding': True,
                 'native_verified': False, 'installed': False,
                 'spec_sha256': sha(spec_path), 'recipe_sha256': sha(Path(__file__)), 'states': {}}
+    if departed is not None:
+        metadata['used_state_semantics'] = SEMANTICS
+        metadata['departure_proof'] = departed
     if 'pixel_span' in spec:
         metadata['canonical_landmark_span'] = metadata.pop('canonical_landmark_height')
     for state, item in items.items():

@@ -24,13 +24,14 @@ internal static class CurioDesignPreview
     private static readonly string Shots = Argument("-dd3-curio-design-shots=");
     private static readonly string Id = Argument("-dd3-curio-design-id=") ?? "cc_wine_crate";
     private static bool ProvisionDesign => Id == "com_provisionbox_1" || Id == "com_provisionbox_2";
-    private static bool FarmsteadDesign => Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure" || ProvisionDesign;
+    private static bool FarmsteadDesign => Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure" || Id == "com_millerwife_curio" || ProvisionDesign;
     private static string Region => FarmsteadDesign ? "farm" : Id == "cc_food_cart" ? "dd2_farm" : "courtyard";
     private static string ContextName => FarmsteadDesign ? "Farmstead" : Id == "cc_food_cart" ? "Foetor (paired Warrens design)" : "Courtyard";
     private static bool KeyRewardChest => Id == "redkey_heirloom_chest" || Id == "bluekey_heirloom_chest" || Id == "greenkey_heirloom_chest" || Id == "yellowkey_heirloom_chest";
-    private static bool NoItemDesign => KeyRewardChest || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure";
+    private static bool NoItemDesign => KeyRewardChest || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure" || Id == "com_millerwife_curio";
     private static string Title => Id switch
     {
+        "com_millerwife_curio" => "Mildred's wandering spirit",
         "com_treasure" => "Crystalline split barrel",
         "com_party_stress_heal" => "Spade-marked glimmering mound",
         "com_hero_stress_heal" => "Glimmering stone mound",
@@ -93,7 +94,7 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
-                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure" || ProvisionDesign || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
+                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || Id == "com_hero_health_heal" || Id == "com_party_health_heal" || Id == "com_hero_stress_heal" || Id == "com_party_stress_heal" || Id == "com_treasure" || Id == "com_millerwife_curio" || ProvisionDesign || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
                 string csv = FarmsteadDesign
                     ? s.Dd1.PathOf("dlc", "735730_color_of_madness", "curios", "com_curio_type_library.csv")
                     : s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
@@ -169,12 +170,12 @@ internal static class CurioDesignPreview
                     if (_step == 1) { Capture("closed"); _step = 2; _next = Time.unscaledTime + 1; }
                     else if (_step == 12) { Capture("used"); _step = 13; _reload = true; _next = Time.unscaledTime + 2; }
                     else if (_step == 13 && _reload) { NativeCurioArt.Clear(); _reload = false; _next = Time.unscaledTime + 2; }
-                    else if (_step == 13 && !_reload) { if (!NoItemDesign) Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS " + Id + "/" + Region + "; native four-hero scale, actual DrawProp " + (NoItemDesign ? "click/padding; no item route exercised" : "alpha picking/padding/drop dispatch") + ", inactive used state and reload; NO canonical resolution or gameplay claim"); }
+                    else if (_step == 13 && !_reload) { if (!NoItemDesign || Id == "com_millerwife_curio") Capture("revisit"); _done = true; CheckUnchanged(); Plugin.Log.LogInfo("[curio design] PASS " + Id + "/" + Region + "; native four-hero scale, actual DrawProp " + (NoItemDesign ? "click/padding; no item route exercised" : "alpha picking/padding/drop dispatch") + ", inactive used state and reload; NO canonical resolution or gameplay claim"); }
                 }
             }
             ExpeditionSkin.Text(new Rect(45, 25, 1800, 55), Title + " / " + ContextName + " / DESIGN visual and input check", 28, ExpeditionSkin.Ivory);
             ExpeditionSkin.Text(new Rect(45, 775, 1800, 55), "Unsaved native actors. Closed/used art states only. No supply consumption, loot or canonical outcome.", 22, ExpeditionSkin.Muted);
-            ExpeditionSkin.Text(new Rect(45, 840, 1800, 55), _failed ? "FAILED. See retained log." : _done ? "Design check complete. Canonical DLC mechanics remain pending." : "Checking fixed body, picking, drop dispatch and used-state reload.", 22, ExpeditionSkin.Muted);
+            ExpeditionSkin.Text(new Rect(45, 840, 1800, 55), _failed ? "FAILED. See retained log." : _done ? "Design check complete. Canonical DLC mechanics remain pending." : Id == "com_millerwife_curio" ? "Checking figure departure, picking and used-state reload." : "Checking fixed body, picking, drop dispatch and used-state reload.", 22, ExpeditionSkin.Muted);
         }
         catch (Exception e) { Fail(e); }
         finally { Event.current = original; }

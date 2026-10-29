@@ -8,6 +8,7 @@ import unicodedata
 from pathlib import Path
 
 from PIL import Image
+from departed_state import departure_proof
 
 
 def sha(path):
@@ -17,6 +18,7 @@ def sha(path):
 def audit_pair(folder):
     metadata = json.loads((folder / 'provenance.json').read_text())
     key = metadata['id']
+    departed = departure_proof(metadata, folder)
     if not isinstance(key, str) or not key or len(key) > 80 or any(c not in 'abcdefghijklmnopqrstuvwxyz0123456789_' for c in key):
         raise ValueError('Unsafe curio painting identity')
     width, size = metadata['proposed_runtime_width'], metadata['size']
@@ -32,6 +34,12 @@ def audit_pair(folder):
         with Image.open(path) as image:
             if image.mode != 'RGBA' or list(image.size) != size or image.getchannel('A').getextrema()[0] != 0:
                 raise ValueError('Missing consistent RGBA state pair')
+            extrema = image.getchannel('A').getextrema()
+            if state == 'used' and departed is not None:
+                if extrema != (0, 0):
+                    raise ValueError('A departed used sprite must be completely transparent')
+            elif extrema[1] <= 8:
+                raise ValueError('Empty source sprite')
         if sha(path) != metadata['states'][state]['output_sha256']:
             raise ValueError('Candidate PNG changed after fitting')
         if any(abs(a - b) > .51 for a, b in zip(metadata['foot_anchor'], metadata['states'][state]['registered_foot'])):
