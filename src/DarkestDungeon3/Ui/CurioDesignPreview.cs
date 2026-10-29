@@ -23,12 +23,16 @@ internal static class CurioDesignPreview
     internal static readonly string Root = Argument("-dd3-curio-design-root=");
     private static readonly string Shots = Argument("-dd3-curio-design-shots=");
     private static readonly string Id = Argument("-dd3-curio-design-id=") ?? "cc_wine_crate";
-    private static string Region => Id == "com_fireplace" ? "farm" : Id == "cc_food_cart" ? "dd2_farm" : "courtyard";
-    private static string ContextName => Id == "com_fireplace" ? "Farmstead" : Id == "cc_food_cart" ? "Foetor (paired Warrens design)" : "Courtyard";
+    private static bool ProvisionDesign => Id == "com_provisionbox_1" || Id == "com_provisionbox_2";
+    private static bool FarmsteadDesign => Id == "com_fireplace" || ProvisionDesign;
+    private static string Region => FarmsteadDesign ? "farm" : Id == "cc_food_cart" ? "dd2_farm" : "courtyard";
+    private static string ContextName => FarmsteadDesign ? "Farmstead" : Id == "cc_food_cart" ? "Foetor (paired Warrens design)" : "Courtyard";
     private static bool KeyRewardChest => Id == "redkey_heirloom_chest" || Id == "bluekey_heirloom_chest" || Id == "greenkey_heirloom_chest" || Id == "yellowkey_heirloom_chest";
     private static bool NoItemDesign => KeyRewardChest || Id == "com_fireplace";
     private static string Title => Id switch
     {
+        "com_provisionbox_1" => "Provision armoire",
+        "com_provisionbox_2" => "Provision chest",
         "com_fireplace" => "Crystalline ruined hearth",
         "cc_food_cart" => "Tainted serving stall",
         "cc_treasure_chest" => "Treasure chest",
@@ -44,6 +48,8 @@ internal static class CurioDesignPreview
     };
     private static string PreviewSupply => NoItemDesign ? null : Id switch
     {
+        "com_provisionbox_1" => Supply.Key,
+        "com_provisionbox_2" => Supply.Key,
         "cc_food_cart" => Supply.Herbs,
         "cc_treasure_chest" => Supply.Key,
         "trinket_chest" => Supply.Key,
@@ -82,8 +88,8 @@ internal static class CurioDesignPreview
                 Require(Path.IsPathRooted(Root ?? "") && Path.IsPathRooted(Shots ?? "") && Directory.Exists(Root), "Absolute private design pack and output paths required");
                 Require(Path.GetFullPath(Root).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && Path.GetFullPath(Shots).StartsWith(@"D:\CodexArtifacts\DarkestDungeon3\", StringComparison.OrdinalIgnoreCase) && !Directory.Exists(Shots), "Use new private task outputs only");
                 Require(!Environment.GetCommandLineArgs().Any(a => a == "-dd3-curio-check" || a == "-dd3-curio-actors-check"), "Run design QA in an isolated process");
-                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
-                string csv = Id == "com_fireplace"
+                Require(Id == "cc_wine_crate" || Id == "cc_hive" || Id == "cc_bloodflower" || Id == "cc_bone_pile" || Id == "trinket_chest" || Id == "cc_treasure_chest" || Id == "cc_food_cart" || Id == "com_fireplace" || ProvisionDesign || KeyRewardChest, "Only reviewed canonical DLC design cases are supported");
+                string csv = FarmsteadDesign
                     ? s.Dd1.PathOf("dlc", "735730_color_of_madness", "curios", "com_curio_type_library.csv")
                     : s.Dd1.PathOf("dlc", "580100_crimson_court", "curios", "cc_curio_type_library.csv");
                 Require(File.ReadAllText(csv).Contains("," + Id + ","), "Canonical DLC identity missing");
@@ -102,7 +108,7 @@ internal static class CurioDesignPreview
                 AccessTools.Property(typeof(Driver), nameof(Driver.Phase)).SetValue(d, Phase.Embarking, null);
                 Require(Dd2Run.Start(() => AccessTools.Method(typeof(Driver), "OnRoadReady").Invoke(d, null),
                     () => Fail(new InvalidOperationException("Native design host did not become ready"))), "Native host start rejected");
-                Plugin.Log.LogInfo(Id == "com_fireplace"
+                Plugin.Log.LogInfo(FarmsteadDesign
                     ? "[curio design] transient canonical Farmstead visual context; no generated encounter, resolver, estate path or persistence"
                     : Id == "cc_food_cart"
                     ? "[curio design] transient paired Foetor visual context for canonical Warrens design; no generated encounter, resolver, estate path or persistence"
@@ -123,7 +129,7 @@ internal static class CurioDesignPreview
             Gui.Begin(); GUI.depth = -1000; Gui.BlockInput(true);
             var exp = _save.Expedition;
             NativeCurioArt.Prepare(exp);
-            if (_background == null) _background = Art.Png(Id == "com_fireplace"
+            if (_background == null) _background = Art.Png(FarmsteadDesign
                 ? Session.Current.Dd1.PathOf("dlc", "735730_color_of_madness", "dungeons", "farm", "farm.room_wall.windmill.png")
                 : Id == "cc_food_cart"
                 ? Path.Combine(Path.GetDirectoryName(typeof(Plugin).Assembly.Location) ?? ".", "data", "scenery", "dd2_farm-02.png")

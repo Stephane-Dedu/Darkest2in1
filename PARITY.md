@@ -1193,3 +1193,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round429 com_fireplace DLC DESIGN: 2 native Farmstead/four-hero/alpha/padding/no-item/used/reload frames; default Wine Crate 5 repeat frames and normal ward quest GUI 2 repeat frames.79 visual designs/65 pairs130PNGs private; live67 unchanged.
 - [?] Canonical firewood/camping effects, DLC runtime activation and natural availability remain pending.18 primary designs remain2base2quest14DLC;6legacy/FadedMemory separate.
+
+
+- [x] Round431 com_provisionbox_1 and_2 DLC DESIGNS: 5 native Farmstead/four-hero/alpha/padding/keyDropDISPATCH/used/reload frames EACH, one new shared painting; default Wine Crate 5 repeat frames and normal ward quest GUI 2 repeat frames.81 visual designs/66 pairs132PNGs private; live67 unchanged.
+- [?] Canonical key consumption/hidden-panel/loot effects, DLC runtime activation and natural availability remain pending.16 primary designs remain2base2quest12DLC;6legacy/FadedMemory separate.
