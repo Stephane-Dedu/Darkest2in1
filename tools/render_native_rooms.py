@@ -98,7 +98,6 @@ def main():
     # Validate every selected dependency before publishing any files.
     sources, floors = [], {}
     for region in PALETTES:
-        floors[region] = floor_source(kit, region)
         for role, kind in SCENES.items():
             kind = OVERRIDES.get(region, {}).get(role, kind)
             short = f"{region}_{kind}"
@@ -107,6 +106,7 @@ def main():
             folder = kit / "arenas" / f"scenes_scenes_combat_arena_{short}"
             if not (folder / "scene.json").is_file():
                 raise FileNotFoundError(folder)
+            floors[(region, kind)] = floor_source(kit, region, kind)
             sources.append((region, role, kind, folder))
     output.mkdir(parents=True, exist_ok=True)
     temp = output / "render-passes"
@@ -116,7 +116,8 @@ def main():
     for region, role, kind, folder in sources:
         target = output / f"dd2_{region}-arena-{role}.png"
         shade, top, bottom, haze = PALETTES[region]
-        floor_folder, floor_key, floor_data, floor_texture, period = floors[region]
+        floor_folder, floor_key, floor_data, floor_texture, period = floors[(region, kind)]
+        floor_shade = shade * .35 if "sand_" in floor_data["name"] else shade
         phase = list(SCENES).index(role) + 1
         completion = temp / f"{region}-{kind}-complete.json"
         recipe = {"scene": digest(folder / "scene.json"), "floor": digest(floor_texture),
@@ -130,13 +131,22 @@ def main():
             objects, lo, hi = L.build(folder, place=np.diag([ENVIRONMENT_SCALE]*3+[1]), respect_active=True, shade=shade)
             if not objects:
                 raise ValueError(f"Empty native arena: {folder}")
+            # The uniform albedo lift used for dark timber overexposes the
+            # Shroud's pale sand. Preserve its native grain/UVs under a lower
+            # exposure, also used by the foreground extension.
+            for material in bpy.data.materials:
+                if material.name.startswith("coast_road_sand_") and material.use_nodes:
+                    for node in material.node_tree.nodes:
+                        if node.type == "MIX_RGB" and node.blend_type == "MULTIPLY":
+                            tint = node.inputs[2].default_value
+                            node.inputs[2].default_value = tuple(v * .35 for v in tint[:3]) + (1,)
             for obj in objects:
                 distance = float(np.mean([c[1] for c in obj.bound_box]))
                 obj["band"] = "far" if distance > 90 else "mid" if distance > 28 else "near"
             # Driving lanes and board atlases are not seamless room floors. Keep
             # native arena geometry/UVs and extend its foreground with regional paint.
             ground = stage_floor(L, floor_folder, floor_key, floor_data, shade=shade, band="ground")
-            floor_paint(ground, floor_folder, floor_data, shade, period, phase)
+            floor_paint(ground, floor_folder, floor_data, floor_shade, period, phase)
             stage_camera(L, res=(w,h))
             for band in ("ground", "far", "mid", "near"):
                 visible = False
@@ -156,6 +166,7 @@ def main():
                         "native_arena": folder.name, "source_scene_sha256": digest(folder / "scene.json"),
                         "floor_material": floor_data["name"], "floor_texture_sha256": digest(floor_texture),
                         "floor_periods": [period, period * 1.37, period * .83], "floor_phase": phase,
+                        "floor_shade": floor_shade,
                         "size": [w, h]})
         print(f"READY {target.name}", flush=True)
     manifest = {"version": 3, "generated_art": False, "source_kit": str(kit),

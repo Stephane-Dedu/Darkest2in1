@@ -1,5 +1,51 @@
 # Private DD2 corridor scenery
 
+## Open native composition, v21, October 31, 2026
+
+The v21 recipe in `scenery_composition.py` recedes the main scenery and spaces
+secondary trees, crop banks, boats and verges. Native meshes retain their paint
+and UVs. The Sprawl has no decorative containers in the walking lane; searchable
+objects belong to the curio layer. The camera, hero footline and runtime movement
+remain unchanged.
+
+Some Foetor distance tiles expose raised bases after their native dark foundation
+is removed. Lower their retained mesh bounds to the ground, as already done for
+Tangle scenery; otherwise the more open layout reveals floating rectangular
+silhouettes. Their original mesh proportions and UVs remain intact.
+
+Ground now uses native urgent-repair rubble, Foetor straw, Tangle roots and
+Shroud mixed boards. Smaller world periods preserve finer detail. Earth, straw
+and roots use three independent mappings with narrow irregular joins. Structural
+planks use one mapping: blending scaled plank grids created split edges. The
+original full driving lanes are no longer repeated underneath. The v09 native
+ocean maps are reused without another export. No generated art, additional
+runtime textures or shaders are introduced.
+
+Run the complete recipe into a fresh private folder, with the kit outside Git:
+
+```powershell
+blender -b --threads 6 --python-exit-code 1 --python tools/render_native_corridors.py -- <kit> <passes> --ocean <v09-ocean>
+python tools/render_native_corridors.py <kit> <passes> --compose-only
+python tools/compose_corridor_depth.py <passes> <pack>
+python tools/review_corridor_depth.py <installed-pack> <pack> <review> --hall-tiles 9 --video
+```
+
+Check all six choices per region at both ends and the centre, then repeat crop
+checks for 6- and 12-square halls. The review now matches gameplay's single
+registered plate, including hall-length zoom and the y680 anchor. The old
+three-depth motion preview concealed alignment problems and is no longer used
+for acceptance. Depth companions remain private authoring artifacts.
+
+Render completion tracks recipe hashes per band. A selective rebuild cannot
+mark unrelated passes current, and an empty band writes a transparent image
+instead of retaining stale props. Canonical PNGs remain 4096x768, 8-bit RGB,
+within the existing pixel/file budgets. Close-crop sharpness is still limited
+by that runtime budget; the renderer does not reconstruct native lighting/VFX.
+
+Private work, validation, before/after views and guarded art-only installer:
+`local-art/scenery-immersion-v21`. Consult MODLOG/PARITY for installation and
+native acceptance; an offline review does not establish live walking quality.
+
 ## Registered camera movement, round256, October 16, 2026
 
 The complete native perspective plate now supplies the corridor image throughout

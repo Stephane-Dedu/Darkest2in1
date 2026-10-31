@@ -88,6 +88,11 @@ def compose(source, output, only=None):
                 if path.is_file():
                     target.alpha_composite(prepare_layer(path, band, region))
         record = dict(entry)
+        completion = source / "passes" / f"{entry['short']}-complete.json"
+        if completion.is_file():
+            # Selective rebuilds can retain other regions from an earlier
+            # recipe. Preserve the actual provenance of each rendered pass.
+            record["render_band_recipes"] = json.loads(completion.read_text()).get("bands", {})
         record["source_pass_sha256"] = {path.name: digest(path) for path in sorted(
             (source / "passes").glob(f"{entry['short']}-*.png"))}
         record["layers"] = []

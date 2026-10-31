@@ -16,10 +16,13 @@ from compose_corridor_depth import BANDS, TRAVEL
 NAMES = {"city": "Sprawl", "farm": "Foetor", "forest": "Tangle", "coast": "Shroud"}
 
 
-def crop(image, progress, size=(1920,720)):
+def crop(image, progress, size=(1920,720), tile_count=0):
     """Pixel equivalent of CorridorPanoramaLayout.Crop, including the y680 footline."""
     w, h = image.size
     scale = max(1920 / w, 720 / h) * 1.08
+    if tile_count > 0:
+        required = (1920 + max(6, tile_count) * 360) / w
+        scale = max(scale, min(required, scale * 1.6))
     left = (w * scale - 1920) * max(0, min(1, progress)) / scale
     top = (680 / 720 * h * scale - 680) / scale
     result = image.transform(size, Image.Transform.EXTENT,
@@ -40,7 +43,7 @@ def frame(images, progress, size=(1920,720)):
     return result.convert("RGB")
 
 
-def review(before, after, output, video=False):
+def review(before, after, output, video=False, tile_count=9):
     before, after, output = [Path(p).resolve() for p in (before, after, output)]
     repo = Path(__file__).resolve().parents[1]
     if output == repo or repo in output.parents:
@@ -58,25 +61,28 @@ def review(before, after, output, video=False):
             continue
         file = entries[short]["file"]
         original = Image.open(before / file).convert("RGB")
-        depths = layers(after, file)
-        old_view, new_view = crop(original, .5).convert("RGB"), frame(depths, .5)
+        # Gameplay pans a single registered plate. The old independent-depth
+        # preview concealed ground/prop alignment faults and omitted hall zoom.
+        plate = Image.open(after / file).convert("RGB")
+        old_view = crop(original, .5, tile_count=tile_count).convert("RGB")
+        new_view = crop(plate, .5, tile_count=tile_count).convert("RGB")
         new_view.save(output / f"{region}-preview.png")
         comparison.paste(old_view.resize((960, 360), Image.Resampling.LANCZOS), (0, row*408+48))
         comparison.paste(new_view.resize((960, 360), Image.Resampling.LANCZOS), (960, row*408+48))
         draw = ImageDraw.Draw(comparison)
         draw.text((16, row*408+8), name + " / before", fill=(202, 194, 176), font=font)
-        draw.text((976, row*408+8), name + " / depth pass, offline preview", fill=(202, 194, 176), font=font)
-        all_rows.append((name, original, depths))
+        draw.text((976, row*408+8), name + f" / native scenery, {tile_count}-tile hall", fill=(202, 194, 176), font=font)
+        all_rows.append((name, original, plate))
     comparison.save(output / "comparison.jpg", quality=95)
     # Every variant at both hall ends and the centre exposes gaps and excessive
     # foreground coverage that a single carefully chosen crop would hide.
     atlas = Image.new("RGB", (1440, len(entries)*212), (12,15,19))
     for row, entry in enumerate(entries.values()):
-        depths = layers(after,entry["file"])
+        plate = Image.open(after / entry["file"]).convert("RGB")
         draw = ImageDraw.Draw(atlas)
         draw.text((8,row*212+2),entry["short"],fill=(202,194,176))
         for col,progress in enumerate((0,.5,1)):
-            atlas.paste(frame(depths,progress).resize((480,180),Image.Resampling.LANCZOS),(col*480,row*212+28))
+            atlas.paste(crop(plate,progress,(480,180),tile_count),(col*480,row*212+28))
     atlas.save(output / "all-variants.jpg", quality=92)
     for region in NAMES:
         indices = [i for i,entry in enumerate(entries.values()) if entry["short"].startswith(region+"-")]
@@ -90,15 +96,15 @@ def review(before, after, output, video=False):
             process = subprocess.Popen([ffmpeg,"-y","-f","rawvideo","-pix_fmt","rgb24","-s","1600x348",
                 "-r","24","-i","pipe:0","-an","-c:v","libx264","-crf","18","-pix_fmt","yuv420p",
                 "-movflags","+faststart",str(output/"motion-comparison.mp4")],stdin=subprocess.PIPE,stderr=log)
-            for name, original, depths in all_rows:
+            for name, original, plate in all_rows:
                 for step in range(144):
                     progress = .5 - .5 * math.cos(2*math.pi*step/143)
                     canvas = Image.new("RGB",(1600,348),(12,15,19))
-                    canvas.paste(crop(original,progress,(800,300)).convert("RGB"),(0,48))
-                    canvas.paste(frame(depths,progress,(800,300)),(800,48))
+                    canvas.paste(crop(original,progress,(800,300),tile_count).convert("RGB"),(0,48))
+                    canvas.paste(crop(plate,progress,(800,300),tile_count).convert("RGB"),(800,48))
                     draw=ImageDraw.Draw(canvas)
                     draw.text((12,8),name+" / before",font=font,fill=(202,194,176))
-                    draw.text((812,8),"native paint / three scenery depths",font=font,fill=(202,194,176))
+                    draw.text((812,8),f"native paint / {tile_count}-tile hall",font=font,fill=(202,194,176))
                     process.stdin.write(canvas.tobytes())
             process.stdin.close()
             if process.wait() != 0:
@@ -112,5 +118,6 @@ if __name__ == "__main__":
     parser.add_argument("after",type=Path)
     parser.add_argument("output",type=Path)
     parser.add_argument("--video",action="store_true")
+    parser.add_argument("--hall-tiles",type=int,default=9)
     args=parser.parse_args()
-    review(args.before,args.after,args.output,args.video)
+    review(args.before,args.after,args.output,args.video,args.hall_tiles)

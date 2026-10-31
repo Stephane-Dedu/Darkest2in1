@@ -1,5 +1,15 @@
 # Native room floors
 
+The v21 correction (October 31, 2026) targets only Shroud `resist` and
+`gaunt_chirurgeon` beach scenes, installed as battle01/battle04. Their native
+sand was overexposed by the uniform multiplier used for dark timber. Its
+original grain/UVs now use 35% of that exposure, and their foreground extension
+uses the same native sand instead of pier boards. Other room recipes and
+geometry stay unchanged. The private patch and comparisons live beside the
+v21 corridors; the aggregate room manifest records each entry's source recipe
+when combining these two renders with the thirty retained rooms. Native
+acceptance is recorded separately in MODLOG/PARITY.
+
 Rooms use one full-frame 2880 x 1080 PNG. `RoomPanoramaUi` draws it once at
 1920 x 720. The camera places the heroes' feet at y680. Private native rooms
 retain their orientation, including on revisits, and do not consume gameplay RNG.

@@ -1,3 +1,6 @@
+LATEST440: NATIVE SCENERY V21 INSTALLED; OFFLINE QA ONLY
+24 calmer DD2 corridors plus2 Shroud sand-room corrections are installed with exact rollback in local-art/scenery-immersion-v21. Removed decorative Sprawl containers, replaced repeating lane floors, kept coherent Shroud planks, thinned near scenery and grounded floating Foetor distant tiles.100 art/manifest files changed; all other plugin/data/config/scenery files hash-preserved. Runtime/camera/stride and saves unchanged.9 Python camera/composition cases and private artifact checks pass; all24 variants reviewed at ends/centre with short/long zoom coverage. Native walking/curio/battle-cover acceptance remains pending. Owner requires DD2 stay closed until permission; this round did not launch it. Old v09/v10 installers can overwrite this art: use v21 evidence/backup instead. Existing curio/Core deployment state below remains valid.
+
 LATEST439: MILDRED DEPARTURE DESIGN ACCEPTED
 Round439 accepts com_millerwife_curio as Mildred's wandering spirit Farmstead DLC DESIGN. Coverage is87of97 identities:58base,8quest,21DLC designs,72distinct pairs144PNGs PRIVATE. Ten required identities remain:2base,2quest,6DLC. Live gameplay art stays67identities56pairs112PNGs.
 

@@ -1221,3 +1221,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round439 com_millerwife_curio DLC DESIGN:3native Farmstead/four-hero closed/departed-used/post-reload-revisit frames;real opaque/padding/inactive no-item input. Generated complete ghost WOMAN/basket/gown,source-proved fully empty used state. Ordinary NONEMPTY-used mound2/normalwardGUI2 repeat controls.87visual designs72pairs144PNGs PRIVATE;live67unchanged.
 - [?] Canonical MILDRED_KEY_1 loot,DLC runtime/naturalavailability and both Shrew artwork/estate-blood/Ruins contexts pending.10primary designs remain2base2quest6DLC;6legacy/FadedMemory separate.
+
+
+- [?] Round440: v21 native scenery installed while closed:24 calmer corridors, empty Sprawl decorative-container pass, finer native ground, coherent Shroud planks, grounded Foetor distance tiles, and2 sand-corrected Shroud rooms.9offline Python cases and all100 asset/preservation checks pass;30other room paintings unchanged. Private evidence:local-art/scenery-immersion-v21.
+- [?] V21 real-hero/curio readability, foot contact, continuous/reverse walking, entries and battle covers still need native estate2 acceptance after explicit launch permission. Baked lighting and current4096x768 resolution remain limits; no live perfection claim.

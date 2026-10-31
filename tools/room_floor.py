@@ -12,10 +12,19 @@ PAINTS = {
     "forest": ("roads/road_forest_brambles_diagonal_quad_01", "forest_road_roots_01", 22),
     "coast": ("roads/road_coast_diagonal_corner_01", "coast_road_01_mix_alt", 22),
 }
+CORRIDOR_PAINTS = dict(PAINTS, farm=("roads/road_farm_crops_4way", "farm_road_variation_01", 12))
+CORRIDOR_PERIODS = {"city": 12, "farm": 12, "forest": 11, "coast": 12}
 
 
-def source(kit, region):
-    folder, name, period = PAINTS[region]
+def source(kit, region, arena=None, corridor=False):
+    folder, name, period = (CORRIDOR_PAINTS if corridor else PAINTS)[region]
+    if corridor:
+        period = CORRIDOR_PERIODS[region]
+    # Beach encounters have sand under their original landmarks. Extending
+    # them with pier boards creates a conspicuous material seam at the feet.
+    if region == "coast" and arena in ("resist", "gaunt_chirurgeon"):
+        folder = f"arenas/scenes_scenes_combat_arena_coast_{arena}"
+        name, period = "coast_road_sand_02_combat", 22
     folder = kit / folder
     document = json.loads((folder / "scene.json").read_text())
     key, data = next((k, v) for k, v in document["materials"].items() if v["name"] == name)
@@ -25,7 +34,7 @@ def source(kit, region):
     return folder, key, data, path, period
 
 
-def paint(ground, folder, data, shade, period, phase):
+def paint(ground, folder, data, shade, period, phase, corridor=False):
     """Blend independently mapped native paint in broad, irregular world patches.
 
     The original eight-unit lane repeat is not sampled. Periods differ, and
@@ -58,7 +67,8 @@ def paint(ground, folder, data, shade, period, phase):
         nt.links.new(orientation.outputs[0], mapping.inputs[0])
         texture = nt.nodes.new("ShaderNodeTexImage")
         texture.image = image
-        nt.links.new(mapping.outputs[0], texture.inputs["Vector"])
+        coordinates = mapping.outputs[0]
+        nt.links.new(coordinates, texture.inputs["Vector"])
         return texture.outputs["Color"]
 
     def mix(a, b, scale, offset):
@@ -72,8 +82,8 @@ def paint(ground, folder, data, shade, period, phase):
         nt.links.new(coordinates.outputs[0], noise.inputs["Vector"])
         boundary = nt.nodes.new("ShaderNodeMapRange")
         boundary.interpolation_type = "SMOOTHSTEP"
-        boundary.inputs["From Min"].default_value = .43
-        boundary.inputs["From Max"].default_value = .57
+        boundary.inputs["From Min"].default_value = .48 if corridor else .43
+        boundary.inputs["From Max"].default_value = .52 if corridor else .57
         nt.links.new(noise.outputs["Fac"], boundary.inputs["Value"])
         blend = nt.nodes.new("ShaderNodeMixRGB")
         nt.links.new(boundary.outputs[0], blend.inputs[0])
@@ -84,7 +94,10 @@ def paint(ground, folder, data, shade, period, phase):
     a = sample(period, (.137 + phase * .173, .419))
     b = sample(period * 1.37, (.713, .197 + phase * .137))
     c = sample(period * .83, (.381 + phase * .079, .831))
-    painted = mix(mix(a, b, .13, phase * 11.73), c, .087, 37 + phase * 3.17)
+    # Boards are rigid objects: blending differently scaled plank grids makes
+    # their edges split and double. Retain one mapping for a coherent pier.
+    painted = a if corridor and data["name"].startswith("coast_road_") else mix(
+        mix(a, b, .13, phase * 11.73), c, .087, 37 + phase * 3.17)
     tint = nt.nodes.new("ShaderNodeMixRGB")
     tint.blend_type = "MULTIPLY"
     tint.inputs[0].default_value = 1

@@ -15,10 +15,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_native_rooms import PALETTES, FLOORS, digest
 from scenery_camera import ENVIRONMENT_SCALE, create as stage_camera, floor as stage_floor, settings as camera_settings, configure_materials
+from room_floor import source as floor_source, paint as floor_paint
+import scenery_composition as composition
 
 ROADS = {"city": "road_city_straight_single", "farm": "road_farm_straight_single",
          "forest": "road_forest_straight_single", "coast": "road_coast_straight_single_01"}
 W, H = 4096, 768
+BANDS = ("ground", "sky", "vfar", "far", "wall", "road")
 
 # Low native scenery omitted by the tall-wall selection. These retain their own
 # painted UVs and give the lane an uneven edge instead of an endless flat floor.
@@ -49,8 +52,9 @@ INFILL = {
               ("coast_tile_11", "coast_", .33,.45)),
 }
 LITTER = {
-    "city": (("exp/camp_crate", "camp_props", .75,1.20),
-             ("exp/camp_barrel", "camp_props", .75,1.20)),
+    # Searchable containers belong to the interactive curio layer. Keeping a
+    # painted coffer in the walking lane falsely promises a click target.
+    "city": (),
     "farm": (("farm_tile_05", "farm_shrubs_and_tufts", .30,.50),
              ("farm_tile_12", "farm_shrubs_and_tufts", .30,.50),
              ("farm_tile_10", "farm_fences_and_walls", .40,.60)),
@@ -364,7 +368,16 @@ def main():
             rng = random.Random(seed)
             rw = sizes[road]
             placements = []
-            if args.bands or args.ocean and region == "coast" or not (passes / f"{short}-complete.json").is_file():
+            completion = passes / f"{short}-complete.json"
+            recipe = {"camera": camera_settings(True), "environment_scale": ENVIRONMENT_SCALE,
+                      "renderer": digest(Path(__file__)),
+                      "composition": digest(Path(composition.__file__)),
+                      "floor_tool": digest(Path(__file__).with_name("room_floor.py")),
+                      "ocean": digest(args.ocean / "materials.json") if args.ocean and region == "coast" else None}
+            completed = json.loads(completion.read_text()).get("bands", {}) if completion.is_file() else {}
+            requested = args.bands or [band for band in BANDS if completed.get(band) != recipe
+                                       or not (passes / f"{short}-{band}.png").is_file()]
+            if requested:
                 L.reset()
                 def put(asset, x, z, rotation, band, light, scale=1, ground=False):
                     matrix, _ = L.place_matrix(src / asset, (x, bottoms[asset], z), rotation, scale=scale)
@@ -387,7 +400,8 @@ def main():
                         raise ValueError(f"Empty verge or scenery entering the actor lane: {asset}")
                     # Some native foliage sits above a discarded driving foundation.
                     # Keep buried roots as authored; lower only raised bases to the lane.
-                    sink = float(lo[2]+.12) if objects and (ground or region == "forest" and lo[2] > 0) else 0
+                    raised_scenery = (region == "forest" or region == "farm" and band in ("far", "vfar")) and lo[2] > 0
+                    sink = float(lo[2]+.12) if objects and (ground or raised_scenery) else 0
                     if sink:
                         for obj in objects:
                             for vertex in obj.data.vertices:
@@ -433,7 +447,10 @@ def main():
                         index += 1
                         rotation = rng.choice([0,0,180] if band == "wall" else [0,180])
                         size = sizes[name]
-                        put(name, float(x+size[0]/2), float(z+size[2]/2), rotation, band, light)
+                        scale = composition.WALL_SCALE[region] if band == "wall" else 1
+                        retreat = composition.WALL_RETREAT[region] if band == "wall" else 0
+                        put(name, float(x+size[0]/2), float(z+retreat+size[2]*scale/2),
+                            rotation, band, light, scale=scale)
                         x += float(size[0])+rng.uniform(*gap)
                 wall_depth = max(2.8,rw[0]/2-4) if region == "city" else rw[0]/2-(4 if region in VERGES else 1)
                 row(walls, wall_depth, "wall", shade)
@@ -469,6 +486,8 @@ def main():
                 if region in INFILL:
                     infill_rng = random.Random(seed+31871)
                     def infill_row(pool, depth, gap, band, light):
+                        if not pool:
+                            return
                         x, previous = -82.0, None
                         while x < 82:
                             item = infill_rng.choice([p for p in pool if p != previous])
@@ -478,9 +497,9 @@ def main():
                                           infill_rng.choice((0,180))+infill_rng.uniform(-25,25),
                                           infill_rng.uniform(low,high), band, light)
                             x += infill_rng.uniform(*gap)
-                    infill_row(INFILL[region], (4.0,7.0) if region == "farm" else (3.2,5.0),
-                               {"city":(12,20),"farm":(6,10),"coast":(8,13)}[region], "wall", shade*.90)
-                    infill_row(LITTER[region], (1.8,4.0), (3.2,6.0) if region == "farm" else (5.0,9.0),
+                    infill_row(INFILL[region], composition.INFILL_DEPTH[region],
+                               composition.INFILL_GAP[region], "wall", shade*.90)
+                    infill_row(LITTER[region], (4.0,6.0), composition.LITTER_GAP[region],
                                "road", shade*(.88 if region == "farm" else .65))
                 if region == "forest":
                     woodland_rng = random.Random(seed+91237)
@@ -494,18 +513,18 @@ def main():
                         tree = woodland_rng.choice([t for t in trees if t != previous_tree])
                         previous_tree = tree
                         name, fragment, low, high = tree
-                        scale = woodland_rng.uniform(low,high)
-                        planted_parts(name, fragment, x, woodland_rng.uniform(3.2,6.0),
+                        scale = woodland_rng.uniform(low,high) * composition.TREE_SCALE
+                        planted_parts(name, fragment, x, woodland_rng.uniform(*composition.TREE_DEPTH),
                                       woodland_rng.choice((0,180))+woodland_rng.uniform(-35,35),
                                       scale, "wall", shade*.94)
-                        x += woodland_rng.uniform(3.2,5.8)
+                        x += woodland_rng.uniform(*composition.TREE_GAP)
                     # Small native undergrowth fills the gaps between the trunks,
                     # rather than repeating one full-width strip of giant ferns.
                     x = -80.0
                     while x < 80:
-                        planted_parts("forest_tile_11", "foliage", x, woodland_rng.uniform(1.8,5.0),
-                                      woodland_rng.uniform(0,360), woodland_rng.uniform(.12,.25), "road", shade*.88)
-                        x += woodland_rng.uniform(2.8,6.0)
+                        planted_parts("forest_tile_11", "foliage", x, woodland_rng.uniform(4.0,7.0),
+                                      woodland_rng.uniform(0,360), woodland_rng.uniform(*composition.UNDERGROWTH_SCALE), "road", shade*.88)
+                        x += woodland_rng.uniform(*composition.UNDERGROWTH_GAP)
                 # Keep this RNG independent: adding a clump must not shuffle the
                 # architecture or distant skyline. A shallow lane-edge row is
                 # behind the actors, with a clear level path at depth zero.
@@ -517,12 +536,12 @@ def main():
                         pool = [name for name in VERGES[region] if name != previous]
                         name = verge_rng.choice(pool)
                         previous = name
-                        scale = verge_rng.uniform(.45,.70) if region != "farm" else verge_rng.uniform(.65,.90)
+                        scale = verge_rng.uniform(*composition.VERGE_SCALE[region])
                         rotation = verge_rng.choice((0,180))
-                        depth = verge_rng.uniform(3.0,4.5)
+                        depth = verge_rng.uniform(5.0,8.0)
                         put(name, x, depth+float(sizes[name][2])*scale/2, rotation, "road", shade*.92,
                             scale=scale, ground=True)
-                        x += float(sizes[name][0])*scale+verge_rng.uniform(1.5,5.0)
+                        x += float(sizes[name][0])*scale+verge_rng.uniform(*composition.VERGE_GAP)
                 if skies:
                     matrix, _ = L.place_matrix(src/skies[0], (0,-6,150), keep_vfx_mats=True)
                     objects, _, _ = L.build(src/skies[0], matrix, shade=shade, keep_vfx_mats=True)
@@ -535,8 +554,8 @@ def main():
                         for vertex in obj.data.vertices:
                             vertex.co *= ENVIRONMENT_SCALE
                 ground = stage_floor(L, folder, key, floor_data, shade=shade,depth_end=16 if region == "coast" else 210)
-                paint_settings = {"uv_scale":uv_scale,"coverage":coverage,"phase":0 if region == "forest" else variant}
-                ground_contact(ground, detail_paint, shade, paint_settings)
+                paint_folder, _, paint_data, _, paint_period = floor_source(kit, region, corridor=True)
+                floor_paint(ground, paint_folder, paint_data, shade, paint_period, variant, corridor=True)
                 if region == "coast":
                     # The Shroud's far ground is open water, not an endless wooden pier.
                     # The base-colour kit omits this shader's cloud/foam maps.
@@ -560,8 +579,8 @@ def main():
                     water["band"] = "ground"
                     water.data.materials.append(sea)
                 stage_camera(L, corridor=True, res=(W,H))
-                for band in ("ground","sky","vfar","far","wall","road"):
-                    if args.bands and band not in args.bands:
+                for band in BANDS:
+                    if band not in requested:
                         continue
                     visible = False
                     for obj in bpy.data.objects:
@@ -573,17 +592,26 @@ def main():
                             visible = visible or obj.visible_camera
                     if visible:
                         L.render(passes/f"{short}-{band}.png", samples=12 if band == "ground" else 4, transparent=True)
+                    else:
+                        # A partial rebuild must also clear a now-empty pass;
+                        # retaining the old PNG would paint removed props again.
+                        L.render(passes/f"{short}-{band}.png", samples=1, transparent=True)
+                    completed[band] = recipe
                 (passes/f"{short}-placements.json").write_text(json.dumps(placements, indent=2), encoding="utf-8")
-                (passes/f"{short}-complete.json").write_text(json.dumps({"camera":camera_settings(True),"environment_scale":ENVIRONMENT_SCALE}))
+                completion.write_text(json.dumps({"bands": completed}))
             entries.append({"file": f"dd2_{region}-corridor-{variant:02d}.png", "short": short,
                             "region": "dd2_"+region, "seed": seed, "size": [W,H],
                             "road_scene_sha256": digest(src/road/"scene.json"),
                             "floor_material": floor_name, "floor_texture_sha256": digest((folder/floor_data["texture"]).resolve()),
-                            "placements_sha256": digest(passes/f"{short}-placements.json")})
-            entries[-1]["ground_detail_material"] = detail_data["name"]
-            entries[-1]["ground_detail_texture_sha256"] = digest((detail_folder/detail_data["texture"]).resolve())
-            entries[-1]["ground_detail_world_period"] = 8/uv_scale
-            entries[-1]["ground_detail_phase"] = 0 if region == "forest" else variant
+                            "placements_sha256": digest(passes/f"{short}-placements.json"),
+                            "render_band_recipes": json.loads(completion.read_text())["bands"]})
+            paint_folder, _, paint_data, paint_texture, paint_period = floor_source(kit, region, corridor=True)
+            entries[-1]["ground_detail_material"] = paint_data["name"]
+            entries[-1]["ground_detail_texture_sha256"] = digest(paint_texture)
+            entries[-1]["ground_detail_world_periods"] = ([paint_period] if region == "coast" else
+                                                         [paint_period, paint_period*1.37, paint_period*.83])
+            entries[-1]["ground_detail_phase"] = variant
+            entries[-1]["composition_profile"] = composition.PROFILE
             if region == "coast" and args.ocean:
                 resources = args.ocean.resolve()
                 entries[-1]["ocean_resources"] = str(resources)
@@ -594,16 +622,16 @@ def main():
     manifest = {"version": 4, "generated_art": False, "source_kit": str(kit),
                 "tool_sha256": digest(Path(__file__).resolve()), "files": entries,
                 "camera_tool_sha256": digest(Path(__file__).with_name("scenery_camera.py")),
-                "changes": ["Shared hero-calibrated room/corridor stage camera", "4096x768 lateral view without architecture repetition",
-                            "Continuous level native ground with shared world UVs", "Native environment doubled for four-unit heroes",
-                            "Native floor paint with three-unit local geometry contact",
-                            "Broad subtle floor value variation preserves the native paint and shared UV scale",
-                            "Discard empty Tangle foundations and ground raised foliage bases",
-                            "Closer rear scenery and irregular native foliage/rubble verges behind the actor lane",
-                            "Near Tangle trunks rooted from retained mesh bounds and small irregular undergrowth",
-                            "Native Tangle root paint breaks parallel road strips at a different world period",
-                            "Region-specific rubble, earthen footpath and worn-board paint with independent variant patch phases",
-                            "Closer Sprawl masonry, Foetor crop banks and Shroud wreckage with low native roadside details"],
+                "composition_tool_sha256": digest(Path(composition.__file__)),
+                "floor_tool_sha256": digest(Path(__file__).with_name("room_floor.py")),
+                "changes": ["Shared hero-calibrated camera and unchanged y680 walking contact",
+                            "4096x768 continuous scenery with original native paint and mesh UVs",
+                            "Receded and scaled wall scenery, spaced trees and restrained native verges",
+                            "No non-interactive city containers in the walking lane",
+                            "Continuous regional ground with native geometry contact shading",
+                            "Three native straw/rubble/root mappings with irregular joins and finer texture scale",
+                            "Foetor straw excludes driving ruts; Shroud boards retain one coherent mapping",
+                            "Render cache tracks recipe identity separately for every pass"],
                 "camera": camera_settings(True), "environment_scale":ENVIRONMENT_SCALE,
                 "limits": ["Unlit native albedo with approximate depth haze; native deferred lighting is not reproduced"]}
     manifest_path = output/"render-manifest.json"

@@ -14,6 +14,24 @@ from review_corridor_depth import crop, frame
 
 
 class CorridorDepthTest(unittest.TestCase):
+    def test_runtime_hall_zoom_preserves_the_authored_footline_and_never_exposes_an_edge(self):
+        pixels = np.full((768,4096,3), 30, dtype=np.uint8)
+        pixels[724:727,:,0] = 250
+        plate = Image.fromarray(pixels)
+        for count in (0, 1, 6, 9, 12, 30):
+            for progress in (-1, 0, .5, 1, 2):
+                view = np.asarray(crop(plate, progress, tile_count=count))
+                self.assertLessEqual(abs(int(np.argmax(view[:,960,0])) - 680), 2)
+                self.assertEqual(30, int(view[:,:,1].min()))
+        # Nine-square halls use a closer crop than short halls. This caught the
+        # old review script, which showed only the base overscan for every hall.
+        stripes = np.zeros((768,4096,3), dtype=np.uint8)
+        stripes[:,1800:2300] = 255
+        plate = Image.fromarray(stripes)
+        short = np.asarray(crop(plate,.5,tile_count=6))[360,:,0]
+        long = np.asarray(crop(plate,.5,tile_count=12))[360,:,0]
+        self.assertGreater(int((long>200).sum()), int((short>200).sum()) * 1.4)
+
     def test_native_ground_is_opaque_under_near_wall_bases_but_keeps_a_soft_horizon(self):
         with tempfile.TemporaryDirectory(prefix="dd3-depth-") as temporary:
             pixels=np.zeros((SIZE[1],SIZE[0],4),dtype=np.uint8)
