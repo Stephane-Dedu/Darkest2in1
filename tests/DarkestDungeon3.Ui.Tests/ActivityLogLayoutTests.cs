@@ -108,7 +108,7 @@ public class ActivityLogLayoutTests
     [Fact]
     public void BuildingCardUsesNativeNamesAndTemplateWithSavedPercentageAndOneMessage()
     {
-        var lore = Dd1Lore.Load(Dd1Install.Find());
+        var lore = Dd1Lore.Load(Dd1TestInstall.Find());
         var upgrade = new ActivityBuildingUpgrade { MessageIndex = 0, Building = "stage_coach", Tree = "stage_coach.rostersize", Code = "a", Percent = 8 };
         string Format(ActivityBuildingUpgrade b) => ActivityLogLayout.BuildingText(b, lore.Text("str_building_upgraded_to_percent"), lore.Text("town_name_" + b.Building));
         Assert.Equal("Stage Coach has been leveled up to 8%", Format(upgrade));

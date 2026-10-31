@@ -17,7 +17,7 @@ public class CrawlMapTests : IDisposable
 
     public CrawlMapTests()
     {
-        Session.Current = new Session { Dd1 = Dd1Install.Find() };
+        Session.Current = new Session { Dd1 = Dd1TestInstall.Find() };
         GUI.enabled = true;
         GUIUtility.clipOffset = default;
     }

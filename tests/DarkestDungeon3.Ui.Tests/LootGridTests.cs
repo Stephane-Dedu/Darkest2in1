@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Ui.Tests;
 
 public class LootGridTests : IDisposable
 {
-    private static readonly CrawlContent Content = CrawlContent.Load(Dd1Install.Find());
+    private static readonly CrawlContent Content = CrawlContent.Load(Dd1TestInstall.Find());
     private readonly LootGridUi _grid = new();
 
     private static void Send(EventType type, float x = 0, float y = 0)

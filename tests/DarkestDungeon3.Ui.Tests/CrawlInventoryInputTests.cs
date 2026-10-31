@@ -11,7 +11,7 @@ namespace DarkestDungeon3.Ui.Tests;
 public class CrawlInventoryInputTests : IDisposable
 {
     private static readonly Rect Item = new(980, 748, 72, 144);
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
     private sealed class Party : IParty

@@ -62,7 +62,7 @@ public class ProvisionCancelTests : IDisposable
         var cart = Get<Inventory>(ui, "_cart");
         Set(ui, "_provisioning", true);
         cart.Add(Supply.Torch, 3);
-        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
         var quest = new QuestOffer { Id = "next", Dungeon = "crypts", Type = "explore", Length = 1, Difficulty = 1, MapSeed = 72 };
         Set(ui, "_quest", quest);
         var hero = new HeroRecord { Id = "new-party", ClassId = "highwayman" };

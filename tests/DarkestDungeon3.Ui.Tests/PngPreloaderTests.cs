@@ -12,7 +12,7 @@ public class PngPreloaderTests
     public void NativeTownWarmupDefersAllTextureApisAndUploadsAtMostOneImagePerPump()
     {
         var loader = new PngPreloader();
-        var dd1 = Dd1Install.Find();
+        var dd1 = Dd1TestInstall.Find();
         string[] paths = PngPreloader.InitialTownImages.Select(relative => dd1.PathOf(relative.Split('/'))).ToArray();
         Assert.Equal(12, paths.Length);
         Assert.Equal(paths.Length, paths.Distinct().Count());
@@ -59,7 +59,7 @@ public class PngPreloaderTests
         {
             string missing = Path.Combine(fixture, "missing.png");
             string corrupt = Path.Combine(fixture, "corrupt.png");
-            string valid = Dd1Install.Find().PathOf("campaign", "town", "town_bg.png");
+            string valid = Dd1TestInstall.Find().PathOf("campaign", "town", "town_bg.png");
             File.WriteAllBytes(corrupt, Array.Empty<byte>());
             loader.Request(missing);
             loader.Request(corrupt);

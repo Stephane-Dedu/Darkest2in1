@@ -11,7 +11,7 @@ namespace DarkestDungeon3.Ui.Tests;
 
 public sealed class MapNavigationTests
 {
-    private static readonly CrawlRules Rules = CrawlRules.FromDd1(Dd1Campaign.Load(Dd1Install.Find()).Rules);
+    private static readonly CrawlRules Rules = CrawlRules.FromDd1(Dd1Campaign.Load(Dd1TestInstall.Find()).Rules);
     private sealed class Party : IParty
     {
         public IReadOnlyList<string> Alive => new[] { "hero" };

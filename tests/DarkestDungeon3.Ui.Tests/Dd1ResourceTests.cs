@@ -18,7 +18,7 @@ public class Dd1ResourceTests
             string[] names = { "ubuntu", "ubuntu_m", "dwarvenaxe-m", "dwarvenaxe-l" };
             foreach (string name in names) Assert.Null(Dd1Font.Get(name));
             Assert.Empty(Texture2D.ApiThreads);
-            Session.Current = new Session { Dd1 = Dd1Install.Find() };
+            Session.Current = new Session { Dd1 = Dd1TestInstall.Find() };
             foreach (string name in names)
             {
                 var font = Dd1Font.Get(name);
@@ -43,7 +43,7 @@ public class Dd1ResourceTests
             Assert.Null(Dd1Text.Get("miscellaneous", "menu_base_element_watch_intro"));
             Session.Current = new Session();
             Assert.Null(Dd1Text.Get("miscellaneous", "menu_base_element_watch_intro"));
-            Session.Current.Dd1 = Dd1Install.Find();
+            Session.Current.Dd1 = Dd1TestInstall.Find();
             Assert.Equal("Watch Intro Cinematic", Dd1Text.Get("miscellaneous", "menu_base_element_watch_intro"));
             Assert.Null(Dd1Text.Get("miscellaneous", "unknown_native_label"));
         }

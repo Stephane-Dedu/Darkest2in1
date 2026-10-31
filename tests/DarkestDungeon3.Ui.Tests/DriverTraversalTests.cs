@@ -31,7 +31,7 @@ public class DriverTraversalTests
             Map = new DungeonMap { Rooms = { new Room { Id = 0, Visited = true, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
                 Corridors = { new Corridor { Id = 0, RoomA = 0, RoomB = 1,
                     Tiles = { new HallTile { Index = 0, Content = content, ContentId = content == HallContent.Trap ? "trap" : null }, new HallTile { Index = 1 } } } } } };
-        return new Driver { Crawl = new Crawl(state, CrawlRules.FromDd1(Dd1Campaign.Load(Dd1Install.Find()).Rules), new Party()) };
+        return new Driver { Crawl = new Crawl(state, CrawlRules.FromDd1(Dd1Campaign.Load(Dd1TestInstall.Find()).Rules), new Party()) };
     }
 
     [Theory]

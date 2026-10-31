@@ -45,7 +45,7 @@ public class DragTests : IDisposable
         Assert.Equal("recruit", recruit.HeroId);
         // The real recruitment/save path, not just a payload assertion.
         var estate = new Estate { Recruits = { new HeroRecord { Id = recruit.HeroId, ClassId = "vestal", Name = "Vestal" } } };
-        var hamlet = new Hamlet(estate, null, Buildings.Load(Dd1Install.Find()), null);
+        var hamlet = new Hamlet(estate, null, Buildings.Load(Dd1TestInstall.Find()), null);
         Assert.True(hamlet.Recruit(recruit.HeroId));
         Assert.Empty(estate.Recruits);
         Assert.Single(estate.Roster);
@@ -135,7 +135,7 @@ public class DragTests : IDisposable
         Assert.Equal(EventType.Used, Event.current.type);
         Assert.True(Drag.Drop<Recruit>(Roster, out var carried));
         var estate = new Estate { Recruits = { new HeroRecord { Id = carried.HeroId, ClassId = "vestal" } } };
-        var hamlet = new Hamlet(estate, null, Buildings.Load(Dd1Install.Find()), null);
+        var hamlet = new Hamlet(estate, null, Buildings.Load(Dd1TestInstall.Find()), null);
         Assert.True(hamlet.Recruit(carried.HeroId));
         Assert.Empty(estate.Recruits); Assert.Single(estate.Roster);
         Assert.False(Drag.Drop<Recruit>(Roster, out _));

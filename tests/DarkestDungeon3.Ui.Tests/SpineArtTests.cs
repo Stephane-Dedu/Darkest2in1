@@ -13,7 +13,7 @@ public class SpineArtTests
     public void FirstRequestQueuesTheBakeAndUnityApisStayOnThePumpThread()
     {
         Texture2D.ApiThreads.Clear();
-        var folder = TownLayout.ArtFolder(Dd1Install.Find(), "stage_coach", true, 0);
+        var folder = TownLayout.ArtFolder(Dd1TestInstall.Find(), "stage_coach", true, 0);
         const string variant = "test-idle";
         var first = SpineArt.Get(folder, variant, s => TownLayout.IdleSlot(s.Name));
         Assert.Null(first);

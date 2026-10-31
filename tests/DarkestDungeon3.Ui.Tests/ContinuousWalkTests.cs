@@ -34,7 +34,7 @@ public class ContinuousWalkTests
             Map = new DungeonMap { Rooms = { new Room { Id = 0, Visited = true, CorridorIds = { 0 } }, new Room { Id = 1, CorridorIds = { 0 } } },
                 Corridors = { hall } } };
         return new Driver { SceneryWidth = width, SceneryHeight = height, ProjectedLegPixels = leg,
-            Crawl = new Crawl(state, CrawlRules.FromDd1(Dd1Campaign.Load(Dd1Install.Find()).Rules), new Party()) };
+            Crawl = new Crawl(state, CrawlRules.FromDd1(Dd1Campaign.Load(Dd1TestInstall.Find()).Rules), new Party()) };
     }
 
     private static float Camera(Driver driver) => CorridorSceneMotion.Camera(driver.SceneryWidth, driver.SceneryHeight,

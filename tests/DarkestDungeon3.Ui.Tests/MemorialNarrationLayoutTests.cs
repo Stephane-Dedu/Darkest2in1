@@ -10,7 +10,7 @@ public class MemorialNarrationLayoutTests
     [Fact]
     public void NativeLongNarrationFitsItsMeasuredCardAndNextRow()
     {
-        var lore = Dd1Lore.Load(Dd1Install.Find());
+        var lore = Dd1Lore.Load(Dd1TestInstall.Find());
         var entries = new[] { new MemorialNarration { PlotId = "plot_kill_necromancer_1", Complete = true }, new MemorialNarration { PlotId = "plot_darkest_dungeon_1" } };
         var layout = MemorialNarrationLayout.Build(entries, lore, _ => 900);
         Assert.Equal(lore.Text("str_plot_kill_necromancer_1_audio_line"), layout.Rows[0].Caption);
@@ -23,7 +23,7 @@ public class MemorialNarrationLayoutTests
     [Fact]
     public void ShortCardsRetainNativePortraitHeightAndEmptyCategoriesHaveNoRows()
     {
-        var lore = Dd1Lore.Load(Dd1Install.Find());
+        var lore = Dd1Lore.Load(Dd1TestInstall.Find());
         var layout = MemorialNarrationLayout.Build(new[] { new MemorialNarration { PlotId = "plot_kill_hag_1" } }, lore, _ => 20);
         Assert.Equal(120, Assert.Single(layout.Rows).Height);
         Assert.Equal(130, layout.Height);

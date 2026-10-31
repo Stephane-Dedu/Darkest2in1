@@ -1225,3 +1225,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [?] Round440: v21 native scenery installed while closed:24 calmer corridors, empty Sprawl decorative-container pass, finer native ground, coherent Shroud planks, grounded Foetor distance tiles, and2 sand-corrected Shroud rooms.9offline Python cases and all100 asset/preservation checks pass;30other room paintings unchanged. Private evidence:local-art/scenery-immersion-v21.
 - [?] V21 real-hero/curio readability, foot contact, continuous/reverse walking, entries and battle covers still need native estate2 acceptance after explicit launch permission. Baked lighting and current4096x768 resolution remain limits; no live perfection claim.
+
+
+- [x] Round445 UI regression data source: test-only DD3_TEST_DD1 selects healthy explicit DD1 data;invalid explicit paths reject without Steam fallback. All297existing UI tests plus2configuration checks pass299/299 on the C:source,zero filtered/skipped. Production discovery/Core/game configuration unchanged.
+- [?] Hooded Shrew native input/departure/revisit and Elder Ruins design remain pending under the newer no-launch hold. Accepted87/97 unchanged. E:sourceCRC issue remains unrepaired;regression uses explicitC:data.
