@@ -17,6 +17,7 @@ from render_native_rooms import PALETTES, FLOORS, digest
 from scenery_camera import ENVIRONMENT_SCALE, create as stage_camera, floor as stage_floor, settings as camera_settings, configure_materials
 from room_floor import source as floor_source, paint as floor_paint
 import scenery_composition as composition
+import ground_distance
 
 ROADS = {"city": "road_city_straight_single", "farm": "road_farm_straight_single",
          "forest": "road_forest_straight_single", "coast": "road_coast_straight_single_01"}
@@ -373,6 +374,8 @@ def main():
                       "renderer": digest(Path(__file__)),
                       "composition": digest(Path(composition.__file__)),
                       "floor_tool": digest(Path(__file__).with_name("room_floor.py")),
+                      "distance_tool": digest(Path(ground_distance.__file__)),
+                      "distance_paint": ground_distance.describe(kit, region),
                       "ocean": digest(args.ocean / "materials.json") if args.ocean and region == "coast" else None}
             completed = json.loads(completion.read_text()).get("bands", {}) if completion.is_file() else {}
             requested = args.bands or [band for band in BANDS if completed.get(band) != recipe
@@ -542,6 +545,19 @@ def main():
                         put(name, x, depth+float(sizes[name][2])*scale/2, rotation, "road", shade*.92,
                             scale=scale, ground=True)
                         x += float(sizes[name][0])*scale+verge_rng.uniform(*composition.VERGE_GAP)
+                # A few low clumps break up the receding ground without adding
+                # landmarks or clutter to the actor lane. Keep native paint/UVs
+                # and ground from actual root bounds in the ground pass.
+                if region in ("farm", "forest"):
+                    detail_rng = random.Random(seed + 50437)
+                    x = -74.0
+                    while x < 75:
+                        asset, fragment = (("farm_tile_05", "farm_shrubs_and_tufts") if region == "farm"
+                                           else ("forest_tile_11", "foliage"))
+                        planted_parts(asset, fragment, x, detail_rng.uniform(9, 20),
+                                      detail_rng.uniform(0, 360), detail_rng.uniform(.09, .15),
+                                      "ground", shade*.82)
+                        x += detail_rng.uniform(15, 24)
                 if skies:
                     matrix, _ = L.place_matrix(src/skies[0], (0,-6,150), keep_vfx_mats=True)
                     objects, _, _ = L.build(src/skies[0], matrix, shade=shade, keep_vfx_mats=True)
@@ -555,7 +571,8 @@ def main():
                             vertex.co *= ENVIRONMENT_SCALE
                 ground = stage_floor(L, folder, key, floor_data, shade=shade,depth_end=16 if region == "coast" else 210)
                 paint_folder, _, paint_data, _, paint_period = floor_source(kit, region, corridor=True)
-                floor_paint(ground, paint_folder, paint_data, shade, paint_period, variant, corridor=True)
+                floor_paint(ground, paint_folder, paint_data, shade, paint_period, variant,
+                            corridor=True, distance_detail=(kit, region))
                 if region == "coast":
                     # The Shroud's far ground is open water, not an endless wooden pier.
                     # The base-colour kit omits this shader's cloud/foam maps.
@@ -612,6 +629,7 @@ def main():
                                                          [paint_period, paint_period*1.37, paint_period*.83])
             entries[-1]["ground_detail_phase"] = variant
             entries[-1]["composition_profile"] = composition.PROFILE
+            entries[-1]["ground_distance_detail"] = ground_distance.describe(kit, region)
             if region == "coast" and args.ocean:
                 resources = args.ocean.resolve()
                 entries[-1]["ocean_resources"] = str(resources)

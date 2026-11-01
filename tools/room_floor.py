@@ -34,7 +34,7 @@ def source(kit, region, arena=None, corridor=False):
     return folder, key, data, path, period
 
 
-def paint(ground, folder, data, shade, period, phase, corridor=False):
+def paint(ground, folder, data, shade, period, phase, corridor=False, distance_detail=None):
     """Blend independently mapped native paint in broad, irregular world patches.
 
     The original eight-unit lane repeat is not sampled. Periods differ, and
@@ -103,6 +103,11 @@ def paint(ground, folder, data, shade, period, phase, corridor=False):
     tint.inputs[0].default_value = 1
     tint.inputs[2].default_value = tuple(x * shade for x in data["tint"][:3]) + (1,)
     nt.links.new(painted, tint.inputs[1])
+    surface = tint.outputs[0]
+    if distance_detail is not None:
+        from ground_distance import paint as distance_paint
+        kit, region = distance_detail
+        surface = distance_paint(nt, surface, position, kit, region, shade, phase)
     ao = nt.nodes.new("ShaderNodeAmbientOcclusion")
     ao.inputs["Distance"].default_value = 3
     ao.samples = 8
@@ -112,6 +117,6 @@ def paint(ground, folder, data, shade, period, phase, corridor=False):
     multiply = nt.nodes.new("ShaderNodeMixRGB")
     multiply.blend_type = "MULTIPLY"
     multiply.inputs[0].default_value = 1
-    nt.links.new(tint.outputs[0], multiply.inputs[1])
+    nt.links.new(surface, multiply.inputs[1])
     nt.links.new(contact.outputs[0], multiply.inputs[2])
     nt.links.new(multiply.outputs[0], emission.inputs["Color"])

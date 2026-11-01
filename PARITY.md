@@ -1229,3 +1229,8 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 
 - [x] Round445 UI regression data source: test-only DD3_TEST_DD1 selects healthy explicit DD1 data;invalid explicit paths reject without Steam fallback. All297existing UI tests plus2configuration checks pass299/299 on the C:source,zero filtered/skipped. Production discovery/Core/game configuration unchanged.
 - [?] Hooded Shrew native input/departure/revisit and Elder Ruins design remain pending under the newer no-launch hold. Accepted87/97 unchanged. E:sourceCRC issue remains unrepaired;regression uses explicitC:data.
+
+
+- [?] Scenery ground v22 installed closed (Nov 1): 24 corridors gain irregular native material patches, quieter distant soil and sparse low foliage. All 24 rendered contact strips/ground alpha and 120 other raw passes unchanged; 9 offline regressions and 49 file artifact checks pass. All 32 room paintings retained. Evidence: local-art/scenery-ground-v22.
+- [?] V22 live-hero walking, curio readability and battle covers need native estate 2 validation once launches are permitted. No game launched for this change.
+- [?] V22 installed after DD2 closed independently: 49 updates verified, 340 other files preserved. Exact rollback and installation hashes retained privately.

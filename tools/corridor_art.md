@@ -1,5 +1,31 @@
 # Private DD2 corridor scenery
 
+## Ground depth and small details, v22, November 1, 2026
+
+`ground_distance.py` breaks up the receding floor in world space. The walking
+surface retains its native mapping through depth 3. Beyond it, irregular patches
+introduce bare charred earth in the Sprawl, worn earthen paving among Foetor
+straw, root/skull debris in the Tangle and wet sand between Shroud boards. The
+dense foreground pattern gives way to quieter native soil toward the horizon.
+The pier uses a shorter transition because it ends at world depth 16. Original
+planks keep one coherent mapping; they are never warped or blended into a
+second plank grid.
+
+A separate seeded scatter adds a few small native foliage/shrub clumps behind
+the lane in the Tangle/Foetor. Actual retained mesh bounds ground their roots.
+These details render into the ground pass; the five other raw passes stay
+byte-identical to v21. Landmark layout, camera, walking speed and room art are
+unchanged. The added native paint and source hashes are recorded per scene.
+
+Copy the v21 raw pass directory into a new private folder, then rerender
+`--bands ground --ocean <v09-ocean>` using `render_native_corridors.py`. Compose
+and review the canonical plates at 6/9/12-square zoom. Private v22 validation
+compares the actual rendered contact strip (source rows 710-767), alpha and the
+five unchanged passes before allowing installation. Only changed canonical/front
+PNGs and the corridor manifest should be installed. Evidence and the guarded
+installer live in `local-art/scenery-ground-v22`; native acceptance remains
+separate from offline review.
+
 ## Open native composition, v21, October 31, 2026
 
 The v21 recipe in `scenery_composition.py` recedes the main scenery and spaces
