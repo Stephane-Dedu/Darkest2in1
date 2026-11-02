@@ -1,3 +1,8 @@
+LATEST: SCENERY CLEANUP V23 INSTALLED; OFFLINE QA ONLY (NOVEMBER 2)
+24 corridors now have smoother receding texture spacing and quieter stretches between native ground details. Near-lane UV size/world spacing and all ground geometry/alpha remain fixed; colour changes supersede v22's exact RGB-strip claim. Shroud water has calmer distant detail; the duplicate whole-tile shoreline row is removed, leaving retained props inside the pier. All 18 land layouts and all other coastal placements are exact.
+
+49 art/manifest files installed while DD2 was stopped; 114 raw passes, 48 back/middle companions and all 32 rooms preserved. Nine camera/composition cases pass. All other installed plugin/data/config files are hash-exact. Private local-art/scenery-clean-v23 holds rollback, recipes, comparisons and validation. No launch, save access or runtime deployment. Live acceptance remains pending under the no-launch hold. Earlier v21/v22 installers restore older scenery. Existing curio/Core state below remains valid.
+
 LATEST: SCENERY GROUND V22 INSTALLED; OFFLINE QA ONLY (NOVEMBER 1)
 24 corridors now break up the receding floor with native charred earth, path, root debris and wet sand patches, plus sparse low Foetor/Tangle foliage. Ground-only rebuild: 49 files installed after DD2 closed independently. All 24 actor-contact strips and ground alpha remain pixel-identical; 120 other raw passes and 48 back/middle companions are unchanged. All 340 other installed files, including 32 rooms and plugin/data/config, match their prior hashes. Nine camera/composition cases pass; live walking/curio/battle acceptance remains pending under the no-launch hold. This task did not close or launch DD2 or access saves.
 

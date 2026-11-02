@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_native_rooms import PALETTES, FLOORS, digest
 from scenery_camera import ENVIRONMENT_SCALE, create as stage_camera, floor as stage_floor, settings as camera_settings, configure_materials
-from room_floor import source as floor_source, paint as floor_paint
+from room_floor import source as floor_source, paint as floor_paint, CORRIDOR_DEPTH_PERIOD
 import scenery_composition as composition
 import ground_distance
 
@@ -29,7 +29,6 @@ BANDS = ("ground", "sky", "vfar", "far", "wall", "road")
 VERGES = {
     "forest": ("forest_tile_11", "forest_tile_05", "forest_tile_brambles_01"),
     "farm": ("farm_tile_05", "farm_tile_06", "farm_tile_12", "farm_tile_20"),
-    "coast": ("coast_tile_14", "coast_tile_10", "coast_tile_07"),
 }
 
 GROUND_DETAILS = {
@@ -231,29 +230,49 @@ def ocean_material(folder, variant):
         nt.links.new(mapping.outputs[0], texture.inputs["Vector"])
         return texture.outputs["Color"]
 
-    cloud_a = sample("_CloudMaskTexture", (1/28, 1/19), (variant*.173, variant*.071))
-    cloud_b = sample("_CloudMaskTexture", (1/43, -1/31), (.37+variant*.053, .19))
+    cloud_a = sample("_CloudMaskTexture", (1/28, 1/57), (variant*.173, variant*.071))
+    cloud_b = sample("_CloudMaskTexture", (1/43, -1/93), (.37+variant*.053, .19))
     cloud = nt.nodes.new("ShaderNodeMath")
     cloud.operation = "MULTIPLY"
     nt.links.new(cloud_a, cloud.inputs[0])
     nt.links.new(cloud_b, cloud.inputs[1])
+    depth = nt.nodes.new("ShaderNodeSeparateXYZ")
+    nt.links.new(position.outputs["Position"], depth.inputs[0])
+    detail = nt.nodes.new("ShaderNodeMapRange")
+    detail.interpolation_type = "SMOOTHSTEP"
+    detail.clamp = True
+    detail.inputs["From Min"].default_value = 50
+    detail.inputs["From Max"].default_value = 180
+    detail.inputs["To Min"].default_value = 1
+    detail.inputs["To Max"].default_value = 0
+    nt.links.new(depth.outputs["Y"], detail.inputs["Value"])
+    # Native wave detail settles into the distance instead of stacking thin,
+    # aliased stripes at the crawl camera's grazing angle.
+    calm = nt.nodes.new("ShaderNodeMixRGB")
+    calm.inputs[1].default_value = (.24, .24, .24, 1)
+    nt.links.new(detail.outputs[0], calm.inputs[0])
+    nt.links.new(cloud.outputs[0], calm.inputs[2])
     intensity = nt.nodes.new("ShaderNodeMapRange")
     intensity.inputs["To Min"].default_value = .018
     intensity.inputs["To Max"].default_value = .12
-    nt.links.new(cloud.outputs[0], intensity.inputs["Value"])
+    nt.links.new(calm.outputs[0], intensity.inputs["Value"])
     water = nt.nodes.new("ShaderNodeMixRGB")
     water.blend_type = "MULTIPLY"
     water.inputs[0].default_value = 1
     color = data["colors"]["_ColorA"]
     water.inputs[1].default_value = (color["r"], color["g"], color["b"], 1)
     nt.links.new(intensity.outputs[0], water.inputs[2])
-    foam = sample("_FoamTexture", (1/38, 1/9), (.19+variant*.127, variant*.091))
+    foam = sample("_FoamTexture", (1/38, 1/27), (.19+variant*.127, variant*.091))
     foam_weight = nt.nodes.new("ShaderNodeMath")
     foam_weight.operation = "MULTIPLY"
     nt.links.new(foam, foam_weight.inputs[0])
     nt.links.new(cloud.outputs[0], foam_weight.inputs[1])
     foam_mix = nt.nodes.new("ShaderNodeMixRGB")
-    nt.links.new(foam_weight.outputs[0], foam_mix.inputs[0])
+    foam_distance = nt.nodes.new("ShaderNodeMath")
+    foam_distance.operation = "MULTIPLY"
+    nt.links.new(foam_weight.outputs[0], foam_distance.inputs[0])
+    nt.links.new(detail.outputs[0], foam_distance.inputs[1])
+    nt.links.new(foam_distance.outputs[0], foam_mix.inputs[0])
     nt.links.new(water.outputs[0], foam_mix.inputs[1])
     color = data["colors"]["_FoamColor"]
     foam_mix.inputs[2].default_value = (color["r"]*.14, color["g"]*.14, color["b"]*.14, 1)
@@ -455,7 +474,7 @@ def main():
                         put(name, float(x+size[0]/2), float(z+retreat+size[2]*scale/2),
                             rotation, band, light, scale=scale)
                         x += float(size[0])+rng.uniform(*gap)
-                wall_depth = max(2.8,rw[0]/2-4) if region == "city" else rw[0]/2-(4 if region in VERGES else 1)
+                wall_depth = max(2.8,rw[0]/2-4) if region == "city" else rw[0]/2-4
                 row(walls, wall_depth, "wall", shade)
                 row(distant or walls, rw[0]/2+22, "far", shade*.8, gap=(-6,0))
                 row(distant or walls, rw[0]/2+48, "vfar", shade*.6, -110,110,(-8,0))
@@ -531,6 +550,9 @@ def main():
                 # Keep this RNG independent: adding a clump must not shuffle the
                 # architecture or distant skyline. A shallow lane-edge row is
                 # behind the actors, with a clear level path at depth zero.
+                # The Shroud already has a sparse retained-parts row on its
+                # pier. Whole verge tiles duplicated fish/posts and extended
+                # beyond the depth-16 bank, making fish appear to float.
                 if region in VERGES:
                     verge_rng = random.Random(seed+73019)
                     x = -80.0
@@ -628,8 +650,11 @@ def main():
             entries[-1]["ground_detail_world_periods"] = ([paint_period] if region == "coast" else
                                                          [paint_period, paint_period*1.37, paint_period*.83])
             entries[-1]["ground_detail_phase"] = variant
+            entries[-1]["ground_detail_depth_period_multiplier"] = CORRIDOR_DEPTH_PERIOD[region]
             entries[-1]["composition_profile"] = composition.PROFILE
             entries[-1]["ground_distance_detail"] = ground_distance.describe(kit, region)
+            if region == "coast":
+                entries[-1]["coast_bank_profile"] = "single-grounded-prop-row-v23"
             if region == "coast" and args.ocean:
                 resources = args.ocean.resolve()
                 entries[-1]["ocean_resources"] = str(resources)

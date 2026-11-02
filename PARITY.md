@@ -1234,3 +1234,7 @@ Built 2026-10-03 (loop round 0) from DD1's data (`shared/rules.json`, `campaign/
 - [?] Scenery ground v22 installed closed (Nov 1): 24 corridors gain irregular native material patches, quieter distant soil and sparse low foliage. All 24 rendered contact strips/ground alpha and 120 other raw passes unchanged; 9 offline regressions and 49 file artifact checks pass. All 32 room paintings retained. Evidence: local-art/scenery-ground-v22.
 - [?] V22 live-hero walking, curio readability and battle covers need native estate 2 validation once launches are permitted. No game launched for this change.
 - [?] V22 installed after DD2 closed independently: 49 updates verified, 340 other files preserved. Exact rollback and installation hashes retained privately.
+
+
+- [?] Scenery cleanup v23 installed closed (Nov 2): 24 corridors get smoother receding texture spacing and grouped native ground detail; Shroud water loses distant banding and a duplicate offshore prop row is removed. All 24 ground alpha masks/contact positions remain fixed. Nine offline camera/composition cases pass; 49 updated files verified, all 32 rooms retained. Evidence: local-art/scenery-clean-v23.
+- [?] V23 is reviewed offline only. Real heroes, curios, walking and battle covers still need native estate 2 acceptance once launches are allowed. No game or save was opened for this work.

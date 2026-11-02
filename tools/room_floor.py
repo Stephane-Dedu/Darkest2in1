@@ -14,6 +14,7 @@ PAINTS = {
 }
 CORRIDOR_PAINTS = dict(PAINTS, farm=("roads/road_farm_crops_4way", "farm_road_variation_01", 12))
 CORRIDOR_PERIODS = {"city": 12, "farm": 12, "forest": 11, "coast": 12}
+CORRIDOR_DEPTH_PERIOD = {"city": 2.5, "farm": 3, "forest": 3, "coast": 2}
 
 
 def source(kit, region, arena=None, corridor=False):
@@ -58,17 +59,42 @@ def paint(ground, folder, data, shade, period, phase, corridor=False, distance_d
     orientation.inputs["Angle"].default_value = -math.pi / 2
     nt.links.new(position, orientation.inputs["Vector"])
     image = bpy.data.images.load(str((folder / data["texture"]).resolve()), check_existing=True)
+    depth_period = CORRIDOR_DEPTH_PERIOD[distance_detail[1]] if corridor and distance_detail else 1
+    coordinates = orientation.outputs[0]
+    if depth_period != 1:
+        def math_node(operation, a, b):
+            node = nt.nodes.new("ShaderNodeMath")
+            node.operation = operation
+            for index, value in enumerate((a, b)):
+                if isinstance(value, (float, int)):
+                    node.inputs[index].default_value = value
+                else:
+                    nt.links.new(value, node.inputs[index])
+            return node.outputs[0]
+        separate = nt.nodes.new("ShaderNodeSeparateXYZ")
+        nt.links.new(coordinates, separate.inputs[0])
+        # Orientation maps world depth to texture X. Keep its derivative at one
+        # through the actor lane, then reduce repeats smoothly toward the back:
+        # f(y) = y - (1 - 1/ratio) * d*d/(d+12), d = max(y-3, 0).
+        # f' stays positive; UVs never fold or slide independently of the floor.
+        depth = separate.outputs["X"]
+        d = math_node("MAXIMUM", math_node("SUBTRACT", depth, 3), 0)
+        amount = math_node("DIVIDE", math_node("MULTIPLY", d, d), math_node("ADD", d, 12))
+        adjusted = math_node("SUBTRACT", depth, math_node("MULTIPLY", amount, 1-1/depth_period))
+        combine = nt.nodes.new("ShaderNodeCombineXYZ")
+        nt.links.new(adjusted, combine.inputs["X"])
+        nt.links.new(separate.outputs["Y"], combine.inputs["Y"])
+        coordinates = combine.outputs[0]
 
     def sample(scale, offset):
         mapping = nt.nodes.new("ShaderNodeVectorMath")
         mapping.operation = "MULTIPLY_ADD"
         mapping.inputs[1].default_value = (1 / scale, 1 / scale, 0)
         mapping.inputs[2].default_value = (*offset, 0)
-        nt.links.new(orientation.outputs[0], mapping.inputs[0])
+        nt.links.new(coordinates, mapping.inputs[0])
         texture = nt.nodes.new("ShaderNodeTexImage")
         texture.image = image
-        coordinates = mapping.outputs[0]
-        nt.links.new(coordinates, texture.inputs["Vector"])
+        nt.links.new(mapping.outputs[0], texture.inputs["Vector"])
         return texture.outputs["Color"]
 
     def mix(a, b, scale, offset):

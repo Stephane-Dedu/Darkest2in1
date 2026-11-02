@@ -15,6 +15,7 @@ PATCHES = {
 SOILS = {r: ("roads/forest_mid_ground", "forest_ground_dark") if r == "forest"
          else ("roads/farm_node_story_assist", "farm_ground_dark") for r in PATCHES}
 TRANSITIONS = {r: (4, 14) if r == "coast" else (6, 28) for r in PATCHES}
+LANE_COVERAGE = {"city": (.55, 1.0), "farm": (.18, .90), "forest": (.06, .78)}
 
 
 def source(kit, folder, name):
@@ -32,11 +33,13 @@ def describe(kit, region):
     folder, name, period, exposure = PATCHES[region]
     _, patch = source(kit, folder, name)
     _, soil = source(kit, *SOILS[region])
-    return {"profile": "native-ground-depth-v22", "patch_material": name,
+    return {"profile": "native-ground-depth-v23", "patch_material": name,
             "patch_sha256": hashlib.sha256(patch.read_bytes()).hexdigest(),
             "soil_sha256": hashlib.sha256(soil.read_bytes()).hexdigest(),
             "patch_period": period, "patch_exposure": exposure,
-            "lane_unchanged_to_world_depth": 3, "distance_transition": list(TRANSITIONS[region])}
+            "lane_detail_coverage": LANE_COVERAGE.get(region),
+            "distance_transition_starts_at_world_depth": 3,
+            "distance_transition": list(TRANSITIONS[region])}
 
 
 def paint(nt, base, position, kit, region, shade, phase):
@@ -85,7 +88,7 @@ def paint(nt, base, position, kit, region, shade, phase):
     depth = separate.outputs["Y"]
     lane_guard = ramp(depth, 3, 6)
     # Wavy boundaries avoid replacing one repeated strip with another. The
-    # independent lane guard makes the entire actor-side surface exactly stable.
+    # independent lane guard keeps the distance transition behind the actors.
     distance = math("ADD", depth, math("MULTIPLY", noise.outputs["Fac"], 12))
     recede = math("MULTIPLY", lane_guard, ramp(distance, *TRANSITIONS[region]))
     # Wet sand needs distinct deposits, not a translucent wash that makes
@@ -110,10 +113,16 @@ def paint(nt, base, position, kit, region, shade, phase):
         nt.links.new(tex.outputs["Color"], tint.inputs[1])
         return tint.outputs[0]
 
+    soil = texture(*SOILS[region], 18, 1)
+    if region in LANE_COVERAGE:
+        # Native floor marks occur in groups, with breathing room between them.
+        # The same field continues through the actor lane and the background;
+        # this is colour only, never displacement or a camera-dependent fade.
+        low, high = LANE_COVERAGE[region]
+        base = mix(soil, base, ramp(noise.outputs["Fac"], .42, .60, low, high))
     patch = texture(*PATCHES[region])
     result = mix(base, patch, math("MULTIPLY", recede, islands))
     # Distant painted soil replaces dense repeated motifs before the horizon;
     # nearby detail and the texture's original orientation remain intact.
-    soil = texture(*SOILS[region], 18, 1)
     distant = math("MULTIPLY", recede, ramp(distance, 32, 100, 0, .78))
     return mix(result, soil, distant)

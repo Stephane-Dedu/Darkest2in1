@@ -1,5 +1,33 @@
 # Private DD2 corridor scenery
 
+## Cleaner surface coverage and shoreline, v23, November 2, 2026
+
+The six-degree crawl camera compresses the receding texture axis. In corridor
+paint only, `room_floor.py` now spaces repeats progressively farther apart past
+world depth 3, using a smooth, strictly increasing UV mapping. Nearby motif size
+and horizontal world spacing stay fixed. The floor mesh, camera and movement
+are unchanged. The room-rendering path keeps its previous mapping.
+
+`ground_distance.py` groups native paving, straw and roots into irregular patches
+with quieter native soil between them. This includes the near floor: v22's
+pixel-identical walking-strip guarantee no longer applies to colour. Its geometry,
+opacity and contact position do remain fixed. Existing small native foliage is
+retained; no extra prop scatter is added.
+
+Shroud water uses the same extracted cloud/foam maps, with fewer repeats in depth
+and reduced contrast toward the horizon. A redundant whole-tile verge row has
+been removed from the Shroud. It duplicated the sparse retained-parts row and
+placed fish past the depth-16 pier. All retained shoreline props fit inside the
+pier; major landmarks and the four background passes are unchanged.
+
+Rebuild the 24 ground passes and the six Shroud road passes from a v22 copy.
+Compose and review start/middle/end crops at 6/9/12-square framing. Validate the
+24 unchanged ground alpha masks, opaque contact strips, unchanged 18 land layouts,
+exact removal of the extra row in six coast layouts, 114 untouched raw passes and
+48 untouched back/middle companions. Stage only the 24 canonical plates, 24 front
+companions and manifest. Private evidence and guarded installer:
+`local-art/scenery-clean-v23`. No runtime shader or extra gameplay texture is added.
+
 ## Ground depth and small details, v22, November 1, 2026
 
 `ground_distance.py` breaks up the receding floor in world space. The walking
