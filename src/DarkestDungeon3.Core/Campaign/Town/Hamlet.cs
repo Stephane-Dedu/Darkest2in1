@@ -102,7 +102,9 @@ public sealed class Hamlet
             ClassId = classId,
             Name = Catalog.RandomName(classId, rng),
             ResolveLevel = level,
-            ResolveXp = level > 0 ? Dd1.ZoneLevelThresholds[Math.Min(level, Dd1.ZoneLevelThresholds.Count - 1)] : 0,
+            // The hero's own resolve table: a zone's level thresholds are a different scale.
+            ResolveXp = level > 0 && Dd1.HeroResolveThresholds.Count > 0
+                ? Dd1.HeroResolveThresholds[Math.Min(level, Dd1.HeroResolveThresholds.Count - 1)] : 0,
             WeekRecruited = Estate.Week,
         };
         // DD1 recruits arrive with one positive and one negative quirk, more for experienced recruits.
@@ -389,8 +391,11 @@ public sealed class Hamlet
     /// The party embarked (or the player chose to skip): resolve every town activity, then roll the next week's
     /// recruits, wagon stock and quest board. DD1 advances the week once per expedition.
     /// </summary>
-    public List<string> EndWeek()
+    /// <param name="away">Heroes who just left on the expedition: they are not resting in the Hamlet, so the idle
+    /// stress relief passes them by.</param>
+    public List<string> EndWeek(IEnumerable<string> away = null)
     {
+        var gone = new HashSet<string>(away ?? Enumerable.Empty<string>());
         CampaignJournal.Initialize(Estate);
         var log = new List<string>();
         var actors = new List<ActivityTownActor>();
@@ -412,6 +417,7 @@ public sealed class Hamlet
             }
             if (hero.Activity == null)
             {
+                if (gone.Contains(hero.Id)) continue;
                 // DD1: idle heroes shed a little stress each visit; a town event can multiply it.
                 float dd1Relief = Dd1.IdleStressHeal * (1f + EventData("idle_buff").Sum(d => Dd1.Buffs?.Get(d.Str)?.Amount ?? 0f));
                 float idleRelief = ToDd2Points(dd1Relief, rng);

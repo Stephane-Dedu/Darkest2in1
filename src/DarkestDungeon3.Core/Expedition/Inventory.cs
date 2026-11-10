@@ -142,7 +142,12 @@ public sealed class Inventory
         return SlotsUsed(catalog) - Stacks(Count(id), stack) + Stacks(Count(id) + amount, stack) <= Slots;
     }
 
-    private static int Stacks(int count, int stackLimit) => (count + stackLimit - 1) / System.Math.Max(1, stackLimit);
+    private static int Stacks(int count, int stackLimit)
+    {
+        // A missing or zero limit means one per slot, never "the last item takes no slot".
+        stackLimit = System.Math.Max(1, stackLimit);
+        return (count + stackLimit - 1) / stackLimit;
+    }
 
     // ---- DD1's arranged pack: each slot holds one stack, where the player put it ----
 

@@ -225,9 +225,16 @@ internal sealed partial class Driver : MonoBehaviour
         int cost = opening ? 0 : bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);   // the opening's pack is DD1's, free
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
-        S.Save.Estate.Add(Currency.Gold, -cost);
         // DD1's opening raid comes before the first week: no free supplies, no town event buffs, no week passing.
-        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner);
+        // The map is built before anything is paid: a departure that cannot be created costs nothing.
+        ExpeditionState exp;
+        try { exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner); }
+        catch (System.Exception e)
+        {
+            Plugin.Log.LogError("[embark] the expedition could not be created: " + e);
+            return "The expedition could not be prepared (see the log).";
+        }
+        S.Save.Estate.Add(Currency.Gold, -cost);
         exp.ProvisionCost = cost;
         if (!opening)
             foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
@@ -238,8 +245,8 @@ internal sealed partial class Driver : MonoBehaviour
                 }
         S.Save.Expedition = exp;
         if (opening) S.Save.Estate.OpeningRaidPending = false;
-        // DD1 resolves town activities while the party is away.
-        else S.Hamlet.EndWeek();
+        // DD1 resolves town activities while the party is away; the party itself is not resting in town.
+        else S.Hamlet.EndWeek(exp.Party);
         CampaignJournal.Embark(S.Save.Estate, quest, party);
         S.Persist();
 
