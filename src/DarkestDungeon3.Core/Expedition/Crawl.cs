@@ -367,13 +367,10 @@ public sealed class Crawl
         State.ProvisionsConsumed.Clear();
         if (State.InRoom)
         {
-            var corridor = State.CameFromCorridorId >= 0 ? Map.Corridor(State.CameFromCorridorId) : null;
-            if (corridor == null) return Flush();            // nowhere to fall back to (shouldn't happen)
-            int fromRoom = State.RoomId;
-            State.CorridorId = corridor.Id;
-            State.TileIndex = State.CameFromTileIndex;
-            State.HeadingRoomId = corridor.RoomA == fromRoom ? corridor.RoomB : corridor.RoomA;   // facing away
-            State.RoomId = -1;
+            // Nowhere to fall back to (the entrance, or a saved square that no longer leads here). A fight that
+            // belongs to the room still waits there, checkpoint and all. Night raiders are not on the map: once
+            // fled they are gone, and the party must not keep an encounter that nothing can start again.
+            if (!FallBackFrom(CurrentRoom) && CurrentRoom.HasBattle && !CurrentRoom.Cleared) return Flush();
         }
         else if (CurrentCorridor is { } corridor)
         {
@@ -394,6 +391,34 @@ public sealed class Crawl
         State.FightCheckpoint = null;
         Emit(CrawlEventType.Retreated);
         return Flush();
+    }
+
+    /// <summary>Move a retreating party out of a room: through the secret door it came by, else onto the hall
+    /// square it entered from, facing away. False when no saved square leads to this room.</summary>
+    private bool FallBackFrom(Room room)
+    {
+        int corridorId = room.IsSecret ? State.SecretReturnCorridorId : State.CameFromCorridorId;
+        int tileIndex = room.IsSecret ? State.SecretReturnTileIndex : State.CameFromTileIndex;
+        if (corridorId < 0 || corridorId >= Map.Corridors.Count) return false;
+        var corridor = Map.Corridor(corridorId);
+        if (tileIndex < 0 || tileIndex >= corridor.Tiles.Count) return false;
+        int heading;
+        if (room.IsSecret)
+        {
+            heading = State.SecretReturnHeadingRoomId;
+            if (corridor.Tiles[tileIndex].SecretRoomId != room.Id || (heading != corridor.RoomA && heading != corridor.RoomB)) return false;
+            State.SecretReturnCorridorId = State.SecretReturnTileIndex = State.SecretReturnHeadingRoomId = -1;
+        }
+        else
+        {
+            if (corridor.RoomA != room.Id && corridor.RoomB != room.Id) return false;
+            heading = corridor.Other(room.Id);
+        }
+        State.CorridorId = corridor.Id;
+        State.TileIndex = tileIndex;
+        State.HeadingRoomId = heading;
+        State.RoomId = -1;
+        return true;
     }
 
     /// <summary>Report a won fight at the party's current spot.</summary>
@@ -422,7 +447,7 @@ public sealed class Crawl
         {
             var room = CurrentRoom;
             room.Cleared = true;
-            if (room.Content is RoomContent.GuardedCurio or RoomContent.GuardedTreasure && room.CurioId != null)
+            if (room.Content is RoomContent.GuardedCurio or RoomContent.GuardedTreasure && room.CurioId != null && !room.CurioTaken)
                 Emit(CrawlEventType.Curio, roomId: room.Id, contentId: room.CurioId);
         }
         else if (CurrentTile != null)
@@ -829,10 +854,17 @@ public sealed class Crawl
         else if (!firstVisit)
         {
             // Walking back through explored halls: DD1 can spring a wandering fight or a hunger check.
-            if (rng.Chance(_rules.ReturnBattleChance)) EmitBattle(CrawlEventType.Ambush, tile, corridor: true, rng);
+            // The wanderers become the square's battle, so they only come where nothing is left to do: on a waiting
+            // curio, trap, obstacle or fled fight they would erase it, and a quest curio with it.
+            bool wanderers = rng.Chance(_rules.ReturnBattleChance);
+            if (wanderers) { if (!HasWaitingContent(tile)) EmitBattle(CrawlEventType.Ambush, tile, corridor: true, rng); }
             else if (rng.Chance(_rules.ReturnHungerChance)) HungerCheck();
         }
     }
+
+    /// <summary>Something on this square still waits for the party (its curio, trap, obstacle or fight).</summary>
+    private static bool HasWaitingContent(HallTile tile) => !tile.Resolved
+        && tile.Content is HallContent.Curio or HallContent.Trap or HallContent.Obstacle or HallContent.Battle;
 
     private void EnterRoom(Room room, bool enteringDungeon = false)
     {
