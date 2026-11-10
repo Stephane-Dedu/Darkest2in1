@@ -42,7 +42,9 @@ internal sealed partial class HamletUi
     {
         var stage = Dd2.HamletStage.Instance;
         stage?.Request();
-        if (stage?.Ready != true)
+        if (stage?.Ready == true) _flatTown = false;
+        // The flat town only stands in for a scene that failed; a retry in progress shows the torch again.
+        else if (!_flatTown || (stage != null && stage.Failure == null))
         {
             Dd1Audio.StopNarration();
             DrawTownLoading(stage);

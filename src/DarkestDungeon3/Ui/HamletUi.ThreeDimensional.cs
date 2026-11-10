@@ -11,6 +11,10 @@ internal sealed partial class HamletUi
     internal static readonly Rect ResetViewButton = new(1340, 36, 170, 38);
     internal static readonly Rect CameraMotionButton = new(1100, 36, 230, 38);
     private string _townKeyboardFocus;
+    internal static readonly Rect MemorialButton = new(900, 36, 190, 38);
+    /// <summary>The player continued past a town scene that failed to load. The Hamlet stays playable on DD1's
+    /// flat backdrop, every service on the left navigation, until a retry brings the scene back.</summary>
+    private static bool _flatTown;
 
     private static void DrawTownLoading(HamletStage stage)
     {
@@ -21,6 +25,8 @@ internal sealed partial class HamletUi
         if (error == null) return;
         ExpeditionSkin.Text(new Rect(460, 824, 1000, 90), error, 26, ExpeditionSkin.Red, TextAnchor.MiddleCenter);
         if (stage != null && ExpeditionSkin.Button(new Rect(710, 920, 500, 65), "Retry scenery", size: 26)) stage.Retry();
+        if (ExpeditionSkin.Button(new Rect(710, 996, 500, 60), "Continue without scenery", size: 24))
+        { HamletLoadingTorch.Hide(); _flatTown = true; }
         if (!HamletPreview.OwnsSession && ExpeditionSkin.Button(new Rect(80, 996, 360, 60), "Main menu", size: 24))
         { HamletLoadingTorch.Hide(); Driver.Instance?.LeaveHamlet(); }
     }
@@ -51,7 +57,11 @@ internal sealed partial class HamletUi
     {
         var stage = HamletStage.Instance;
         stage?.Request();
-        if (stage?.Ready != true) { DrawTownLoading(stage); return; }
+        if (stage?.Ready != true)
+        {
+            if (_flatTown) DrawFlatTown(interactive); else DrawTownLoading(stage);
+            return;
+        }
         GUI.DrawTexture(new Rect(0, 0, Gui.W, Gui.H), stage.Texture);
         if (HamletPreview.OwnsSession && HamletPreview.PaintAuditRequested)
             GUI.DrawTexture(new Rect(125,685,260,220),stage.GroundPaintTexture,ScaleMode.ScaleToFit);
@@ -81,6 +91,22 @@ internal sealed partial class HamletUi
             Open(hovered);
             stage.SetFocus(hovered);
         }
+    }
+
+    /// <summary>The Hamlet without its 3D scene: DD1's painted town behind the same navigation, roster and Embark
+    /// bar. The Memorial has no navigation icon, so it gets a banner here.</summary>
+    private void DrawFlatTown(bool interactive)
+    {
+        var all = new Rect(0, 0, Gui.W, Gui.H);
+        Gui.Fill(all, new Color(.03f, .027f, .025f, 1f));
+        var backdrop = Art.TownBackdrop;
+        if (backdrop != null) GUI.DrawTexture(all, backdrop, ScaleMode.ScaleAndCrop);
+        _hovered = null;
+        _townKeyboardFocus = null;
+        if (_panel != Panel.Town) return;
+        ExpeditionSkin.Text(new Rect(300, 132, 950, 30), "Town scenery is unavailable. The services are on the left.", 20,
+            ExpeditionSkin.Ivory, TextAnchor.MiddleCenter);
+        if (interactive && GUI.enabled && TownControl(MemorialButton, "Memorial", 20)) Open(Core.Campaign.Town.Buildings.Memorial);
     }
 
     private void NavigateTown(HamletStage stage)

@@ -91,15 +91,19 @@ internal sealed partial class CampaignMenu : MonoBehaviour
         // A new estate starts on the Old Road; a saved expedition resumes its own scenery.
         var scenery=_newName==null && _selected?.Save?.Expedition==null ? Dd2.HamletStage.Instance : null;
         scenery?.Request();
-        var error=status.Error ?? scenery?.Failure;
+        // A town scene that cannot load must not lock the estate: the Hamlet reports it, offers the retry and
+        // stays playable on DD1's flat backdrop. Only missing campaign assets hold the torch screen.
+        bool sceneryFailed=scenery?.Failure!=null;
+        var error=status.Error;
         _loadMessage.text = error ?? "";
         _retry.gameObject.SetActive(error != null);
-        if (error!=null || !status.Ready || scenery?.Ready==false || !_torch.Finished || Time.frameCount <= _enterFrame + 1) return;
+        if (error!=null || !status.Ready || (!sceneryFailed && scenery?.Ready==false) || !_torch.Finished || Time.frameCount <= _enterFrame + 1) return;
         if (!_reportedReady)
         {
             _reportedReady = true;
             Plugin.Log.LogInfo("[campaign menu] asset gate ready; torch screen painted before campaign handoff");
-            if (scenery!=null) Plugin.Log.LogInfo("[campaign menu] standard3D Hamlet ready before torch handoff");
+            if (sceneryFailed) Plugin.Log.LogWarning("[campaign menu] town scenery failed (" + scenery.Failure + "); entering the Hamlet without it");
+            else if (scenery!=null) Plugin.Log.LogInfo("[campaign menu] standard3D Hamlet ready before torch handoff");
         }
         if (ReadOnlyCheck)
         {
