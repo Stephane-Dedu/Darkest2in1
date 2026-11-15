@@ -5,7 +5,7 @@ Scope: the main loop read end to end in source - estate load, Hamlet week, quest
 walking, curios, traps and obstacles, fights (start, retreat, win, wipe), camping, return, results, reload.
 Method: code trace plus offline tests. DD2 was NOT launched (the 2 November no-launch instruction still
 stands), nothing was deployed, no save was opened. Every fix below is proven by unit tests only and still
-needs a native check on estate 2. Nothing was committed or pushed.
+needs a native check on estate 2. Iteration 1 was committed and pushed as 52377d9; iteration 2 below.
 
 Test state after the fixes, working tree, DD1 data from C:\Users\Piral\darkestwithdlc\game:
   Core 1391 pass / 2 fail (both pre-existing, see T3)   UI 312 pass / 0 fail
@@ -96,7 +96,7 @@ B3. "Re-open the estate to cancel this departure" is the only way out of a faile
     The recovery screen asks the player to go to the main menu and back. A "Cancel departure (refund)"
     button there would do the same thing without the round trip.
 
-B4. Retreat chance and quirk replacement are not reload-safe.
+B4. [Half fixed: C6] Retreat chance and quirk replacement are not reload-safe.
     Dd2Combat uses an unseeded System.Random for the DD1 retreat roll, and Dd2Party.AddDd1Quirk seeds the
     "which quirk gets replaced" pick from the clock. Everything else is seeded from the save so a reload
     cannot reroll. Proposal: seed both from the expedition (Seed, RandomCounter).
@@ -105,7 +105,7 @@ B5. Purge and cure ignore locked quirks and always take the first match.
     Dd2Party.PurgeNegative / CureDisease remove the first negative quirk or disease in list order, locked
     or not. DD1 picks at random and (to check in the DD1 code map) should leave Sanitarium-locked quirks.
 
-B6. Secret room with a fight: a retreat has no door to fall back through.
+B6. [Fixed: C5] Secret room with a fight: a retreat has no door to fall back through.
     EnterSecretRoom does not record the entry square, so before A1 a retreat there could move the party
     to an unrelated corridor. A1 now keeps them in the room. Better: record the secret door's square as
     the fallback, so the retreat lands back in the corridor.
@@ -115,7 +115,7 @@ B7. A save that fails to write is silent.
     With C: at 93% this is not theoretical: it hit 12 MB free on 17 October. Proposal: a visible "Could
     not save" banner, and refuse to embark when the first save of the expedition fails.
 
-B8. The low-supplies confirmation is not re-armed.
+B8. [Fixed: C3] The low-supplies confirmation is not re-armed.
     After "Embark again to go anyway", changing the cart (or the warning changing from food to torches)
     keeps the confirmation, so the next click embarks without showing the new warning.
 
@@ -123,7 +123,7 @@ B9. Spent provisions and supplies vanish at homecoming without a line in the rec
     Only gold, heirlooms, gems, trinkets and journal pages are listed. A short "Unused supplies were
     left behind" line would explain why the pack on the results page is shorter than the pack carried.
 
-B10. Curio outcome when the wrong item is passed.
+B10. [Fixed: C4] Curio outcome when the wrong item is passed.
     CurioResolver falls back to the ordinary weighted outcome if an item that has no interaction is
     supplied. The UI blocks this today ("Nothing happens"); the Core rule itself would silently resolve
     the curio by hand. Worth a guard in Core so a future caller cannot spend the curio by mistake.
@@ -132,7 +132,7 @@ B10. Curio outcome when the wrong item is passed.
 T. TEST AND TOOLING FINDINGS
 ----------------------------
 
-T1. The offline runner cannot pass on committed HEAD (f171c6f) on this machine.
+T1. [Resolved by 3765bce, iteration 2] The offline runner could not pass on committed HEAD (f171c6f).
     Run 20261115-085907-98278b: Core 861/1350 (489 fail), UI 299/299, Python fail.
     - Core at HEAD still finds DD1 through the default E: Steam install, which has read errors. The fix
       (Dd1TestInstall + DD3_TEST_DD1 in ~95 test files) has been staged since 2 November, not committed.
@@ -173,3 +173,91 @@ P5. Add a free-space check at startup and before embark (warn under ~500 MB), gi
 
 Not covered in this pass: native rendering and input, DD2 combat internals, Hamlet 3D stage, Faded
 Memory, plot maps and the Darkest Dungeon, town building screens beyond the week cycle.
+
+
+==================================================
+ITERATION 2 - 2026-11-15 (offline; DD2 not launched, nothing deployed, no save opened)
+==================================================
+
+Committed first: 3765bce (the staged DD3_TEST_DD1 test migration + QA runner, with the A8 compile
+fixes) and 52377d9 (iteration 1). The offline runner now passes on HEAD apart from known data cases:
+run 20261115-092106-30e03c on the candidate: Core 1364/1367, UI 299/299, Python 18/18.
+
+Test state after iteration 2, working tree: Core 1403/1405 (the two T3 cases), UI 315/315, plugin
+Release build 0 errors.
+
+C. BUGS FIXED IN ITERATION 2
+----------------------------
+
+C1. Dungeon XP was read from the wrong column.  [P1, progression parity]
+    Homecoming indexed progression.json's quest_completion_xp_table by quest DIFFICULTY. DD1 indexes it
+    by quest LENGTH: in the DD1 code map, the dungeon-XP grant reads the quest field that the quest
+    serializer names "length" (difficulty is the field before it), and the Unity port agrees. A short
+    champion quest gave 6 XP instead of 2; a long apprentice quest 2 instead of 4.
+    It also ignored completion_dungeon_xp: every boss quest and every Darkest Dungeon part has it false,
+    so beating a boss leveled the zone too. Only the tutorial has it true.
+    Existing XP in saves is untouched; only future gains change. Zone levels gate boss quests and quest
+    difficulty, so the pace of a campaign changes: worth a look by the owner (see D1).
+    Homecoming.ZoneXp, QuestGoals (PlotQuest.CompletionDungeonXp)
+
+C2. A busy, missing or last hero could be dismissed.  [P2]
+    The hero sheet dismissed any hero after two clicks. A hero in the tavern, abbey or sanitarium lost
+    the gold paid for the stay or treatment; a missing hero could be dismissed while away; the last hero
+    could go (DD1: "You need at least 1 hero to venture on", str_hero_cant_dismiss_confirm).
+    Now: Hamlet.WhyCantDismiss (available heroes only, as the Unity port, and never the last), and
+    DD1's own confirmation texts: str_hero_dismiss_confirm, or str_hero_dismiss_warning_confirm when
+    fewer than four heroes would be left. The older HamletUi hero page (not normally reachable) had a
+    one-click Dismiss button: it now follows the same rule.
+
+C3. (B8) The low-supply confirmation answered every later warning too.
+    One "Embark again" covered whatever the warning became after the cart changed, and with several
+    problems (no food AND no torches) only the first was ever shown. The warnings are now asked one at
+    a time, most important first, and a warning raised by a cart change is asked before leaving.
+    EmbarkUi.ConfirmWarnings / PendingWarning (UI tests).
+
+C4. (B10) Core resolved a curio by hand when given an item that does nothing there.
+    Crawl.InteractCurio now refuses (returns null, curio and item untouched) when the item has no
+    interaction on that curio or the pack holds none. The UI already blocked it; this covers any caller.
+
+C5. (B6) A retreat from a fight in a secret room did not leave through its door.
+    FleeBattle now falls back through the secret door to the hall square it was found on. A room's own
+    battle stays there and starts again when the party re-enters.
+
+C6. (B4, half) The quirk replaced at the quirk limit was picked from the clock.
+    Dd2Party.AddDd1Quirk now seeds the pick from the hero, the new quirk and the quirks held
+    (QuirkLimits.ReplacementSeed, FNV-1a, order independent), so the same gain replaces the same quirk
+    after a reload. The retreat roll stays unseeded on purpose: DD2's own combat draws are not
+    reload-safe, so seeding that one roll would not make a fight repeatable.
+
+New tests: JourneyRegressionTests (+9 cases), QuirkLimitTests (+1), HamletTests (+2),
+ProvisionCancelTests (+3). Adjusted to the new dismiss rule: CaretakerGoalsTests, TownResolveTests.
+
+D. FOUND IN ITERATION 2, NOT CHANGED
+------------------------------------
+
+D1. The zone-XP fix changes campaign pace (C1).  [user]
+    DD1-faithful, but players used to the old rate will level zones more slowly on short high-level
+    quests and stop leveling from boss kills. If the owner prefers the old pace for DD2 regions, the
+    switch is one function (Homecoming.ZoneXp).
+
+D2. Cancelling a stay refunds today's price, not the price paid.
+    Hamlet.CancelActivity refunds ActivityCost(a) at the moment of cancelling. A building cost upgrade
+    bought after placing the hero lowers the refund. Fix: store what was paid on the hero (save-format
+    field), refund that.
+
+D3. A hero locked in a building ("refuses to leave") stays a second week and gets its relief again
+    for free. Whether DD1 charges or heals that second week is unverified (check the DD1 code map).
+
+D4. B5 remains: purge and cure take the first match and ignore locks. Not checked against the DD1
+    code map in this pass.
+
+D5. B1, B2, B3, B7 and B9 remain as written above (they need a decision or a larger change).
+
+T5. RegionalSceneryTests.PrimarySceneryUsesRealNativeAddressKeysAndOneContinuousFloor reads
+    "<repo>\..\game\Darkest Dungeon II_Data\StreamingAssets\aa\catalog.json". It passes in the working
+    tree (C:\Users\Piral\DarkestDungeon3\game exists) and fails in the QA runner's frozen copy, where
+    "..\game" does not exist. It should take the game folder from DD3_TEST_DD2 or the build's GameDir.
+
+P6. A Hamlet invariant test like P2: after every town action (recruit, dismiss, activity, cancel,
+    treatment, upgrade, embark), gold never goes negative, no hero is both in an activity and in the
+    party, and every refund equals what was paid.

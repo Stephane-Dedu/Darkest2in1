@@ -21,6 +21,23 @@ public class QuirkLimitTests
     }
 
     [Fact]
+    public void TheReplacedQuirkIsTheSameAfterAReload()
+    {
+        var held = new List<string> { "neg_1", "neg_2", "neg_3", "neg_4", "neg_5", "pos_1" };
+        var reordered = new List<string> { "pos_1", "neg_5", "neg_3", "neg_1", "neg_4", "neg_2" };   // as DD2 may list them
+        int seed = QuirkLimits.ReplacementSeed("hero-7", "neg_new", held);
+        Assert.Equal(seed, QuirkLimits.ReplacementSeed("hero-7", "neg_new", reordered));
+        Assert.NotEqual(seed, QuirkLimits.ReplacementSeed("hero-7", "neg_other", held));
+        Assert.NotEqual(QuirkLimits.ReplacementSeed("ab", "c", held), QuirkLimits.ReplacementSeed("a", "bc", held));
+
+        var first = Limits.Gain(held, null, "neg_new", Positive, Disease, new Rng(seed));
+        for (int i = 0; i < 5; i++)
+            Assert.Equal(first, Limits.Gain(reordered, null, "neg_new", Positive, Disease,
+                new Rng(QuirkLimits.ReplacementSeed("hero-7", "neg_new", reordered))));
+        Assert.StartsWith("neg_", first.Replaced);
+    }
+
+    [Fact]
     public void OverTheCapReplacesAnUnlockedQuirkOfTheSameKind()
     {
         var quirks = new List<string> { "pos_1", "pos_2", "pos_3", "pos_4", "neg_1" };

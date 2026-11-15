@@ -23,7 +23,8 @@ public class ProvisionCancelTests : IDisposable
     {
         var ui = new EmbarkUi();
         Set(ui, "_provisioning", true);
-        Set(ui, "_confirmLow", true);
+        Set(ui, "_armedWarning", "No torches");
+        Get<HashSet<string>>(ui, "_confirmedWarnings").Add("Low food");
         Set(ui, "_error", "Previous embark failed");
         var cart = Get<Inventory>(ui, "_cart");
         cart.Add(Supply.Food, 12);
@@ -46,7 +47,8 @@ public class ProvisionCancelTests : IDisposable
         Assert.Empty(cart.Items);
         Assert.Empty(cart.Layout);
         Assert.False(Get<bool>(ui, "_provisioning"));
-        Assert.False(Get<bool>(ui, "_confirmLow"));
+        Assert.Null(Get<string>(ui, "_armedWarning"));
+        Assert.Empty(Get<HashSet<string>>(ui, "_confirmedWarnings"));
         Assert.Null(Get<string>(ui, "_error"));
         Assert.Same(quest, Get<QuestOffer>(ui, "_quest"));
         Assert.Equal(new[] { "hero-a", "hero-b" }, party);
@@ -90,7 +92,46 @@ public class ProvisionCancelTests : IDisposable
         Assert.Equal(12, Get<Inventory>(ui, "_cart").Count(Supply.Food));
         Assert.Equal(3, Get<Inventory>(ui, "_cart").Layout.Count);
         Assert.True(Get<bool>(ui, "_provisioning"));
-        Assert.True(Get<bool>(ui, "_confirmLow"));
+        Assert.Equal("No torches", Get<string>(ui, "_armedWarning"));
+        Assert.Contains("Low food", Get<HashSet<string>>(ui, "_confirmedWarnings"));
         Assert.Equal("Previous embark failed", Get<string>(ui, "_error"));
+    }
+
+    [Fact]
+    public void EachLowSupplyWarningIsAskedInTurn()
+    {
+        var confirmed = new HashSet<string>();
+        string armed = null;
+        var both = new[] { "Low food", "No torches" };
+
+        Assert.Equal("Low food", EmbarkUi.PendingWarning(both, confirmed));
+        Assert.False(EmbarkUi.ConfirmWarnings(both, confirmed, ref armed));   // Embark: the food question
+        Assert.Equal("Low food", armed);
+        Assert.False(EmbarkUi.ConfirmWarnings(both, confirmed, ref armed));   // answered; now the torch question
+        Assert.Equal("No torches", armed);
+        Assert.Equal("No torches", EmbarkUi.PendingWarning(both, confirmed));
+        Assert.True(EmbarkUi.ConfirmWarnings(both, confirmed, ref armed));    // answered: the party leaves
+        Assert.Null(armed);
+    }
+
+    [Fact]
+    public void AWarningRaisedAfterTheCartChangesIsAskedBeforeLeaving()
+    {
+        var confirmed = new HashSet<string>();
+        string armed = null;
+        var food = new[] { "Low food" };
+        Assert.False(EmbarkUi.ConfirmWarnings(food, confirmed, ref armed));
+        // The player sells their torches before pressing Embark again: the old answer does not cover the new question.
+        var both = new[] { "Low food", "No torches" };
+        Assert.False(EmbarkUi.ConfirmWarnings(both, confirmed, ref armed));
+        Assert.Equal("No torches", armed);
+        Assert.True(EmbarkUi.ConfirmWarnings(both, confirmed, ref armed));
+    }
+
+    [Fact]
+    public void NoWarningMeansEmbarkGoesAtOnce()
+    {
+        string armed = null;
+        Assert.True(EmbarkUi.ConfirmWarnings(System.Array.Empty<string>(), new HashSet<string>(), ref armed));
     }
 }

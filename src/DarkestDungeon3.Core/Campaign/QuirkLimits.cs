@@ -46,6 +46,24 @@ public sealed class QuirkLimits
         return (true, rng.Pick(replaceable));
     }
 
+    /// <summary>
+    /// A seed for <see cref="Gain"/>'s replacement pick that depends only on the hero, the new quirk and the quirks
+    /// held (in any order), so the same gain replaces the same quirk after a reload. FNV-1a, stable across runtimes.
+    /// </summary>
+    public static int ReplacementSeed(string heroId, string quirk, IEnumerable<string> current)
+    {
+        uint h = 2166136261;
+        void Mix(string s)
+        {
+            foreach (char c in s ?? "") { h ^= c; h *= 16777619; }
+            h ^= 0xFF; h *= 16777619;   // separator, so ("ab","c") and ("a","bc") differ
+        }
+        Mix(heroId);
+        Mix(quirk);
+        foreach (string q in (current ?? Enumerable.Empty<string>()).OrderBy(q => q, StringComparer.Ordinal)) Mix(q);
+        return unchecked((int)h);
+    }
+
     /// <summary>Apply <see cref="Gain"/> to a quirk list. Returns the replaced quirk, or null.</summary>
     public string Apply(List<string> quirks, ICollection<string> locked, string quirk, Func<string, bool> isPositive, Func<string, bool> isDisease, Rng rng, out bool gained)
     {

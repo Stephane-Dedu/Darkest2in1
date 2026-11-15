@@ -136,10 +136,26 @@ public sealed class Hamlet
         return true;
     }
 
+    /// <summary>Why this hero can't be let go, or null. A hero staying in a building or gone missing can't be dismissed
+    /// (the Unity port: status Available only; a stay is cancelled, and refunded, first), nor the last one
+    /// (DD1's str_hero_cant_dismiss_confirm: "You need at least 1 hero to venture on").</summary>
+    public string WhyCantDismiss(HeroRecord hero)
+    {
+        if (hero == null || !Estate.Roster.Contains(hero)) return "Unknown";
+        if (hero.MissingWeeks > 0) return "Missing.";
+        if (hero.Activity != null) return "Busy: take them out of the building first.";
+        if (!Estate.Roster.Any(h => h != hero && !h.IsDead)) return "LastHero";
+        return null;
+    }
+
+    /// <summary>DD1 asks again (str_hero_dismiss_warning_confirm) when fewer than four heroes would be left to embark.</summary>
+    public bool DismissLeavesTooFew(HeroRecord hero) =>
+        Estate.Roster.Count(h => h != hero && !h.IsDead && h.MissingWeeks == 0) < 4;
+
     public bool Dismiss(string heroId)
     {
         var hero = Estate.Hero(heroId);
-        if (hero == null) return false;
+        if (WhyCantDismiss(hero) != null) return false;
         CaretakerGoals.Record(Estate, hero);
         Estate.Roster.Remove(hero);
         foreach (var t in hero.WornTrinkets) Estate.Trinkets.Add(t);

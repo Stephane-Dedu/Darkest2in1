@@ -287,6 +287,37 @@ public class HamletTests
         Assert.True(h.Dismiss(recruit.Id));
         Assert.Equal(2, h.Estate.Roster.Count);
     }
+
+    [Fact]
+    public void BusyMissingAndLastHeroesCannotBeDismissed()
+    {
+        var h = NewHamlet();
+        var (a, b) = (h.Estate.Roster[0], h.Estate.Roster[1]);
+        Assert.True(h.DismissLeavesTooFew(a));                      // DD1 warns: fewer than four would be left
+
+        a.Activity = "tavern.bar";
+        Assert.NotNull(h.WhyCantDismiss(a));
+        Assert.False(h.Dismiss(a.Id));                              // the stay's gold is not lost with the hero
+        a.Activity = null;
+        a.MissingWeeks = 1;
+        Assert.Equal("Missing.", h.WhyCantDismiss(a));
+        a.MissingWeeks = 0;
+
+        Assert.True(h.Dismiss(a.Id));
+        Assert.Equal("LastHero", h.WhyCantDismiss(b));
+        Assert.False(h.Dismiss(b.Id));
+        Assert.Same(b, Assert.Single(h.Estate.Roster));
+    }
+
+    [Fact]
+    public void NoWarningWhileFourHeroesStay()
+    {
+        var h = NewHamlet();
+        for (int i = h.Estate.Roster.Count; i < 5; i++) h.Estate.Roster.Add(new HeroRecord { Id = "extra" + i, ClassId = "crusader" });
+        Assert.False(h.DismissLeavesTooFew(h.Estate.Roster[4]));
+        h.Estate.Roster[0].MissingWeeks = 2;                        // a missing hero can't embark either
+        Assert.True(h.DismissLeavesTooFew(h.Estate.Roster[4]));
+    }
     [Fact]
     public void Blacksmith_sells_dd1_weapon_ranks_behind_its_own_upgrades_and_resolve()
     {

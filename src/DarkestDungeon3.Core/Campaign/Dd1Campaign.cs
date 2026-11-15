@@ -20,7 +20,7 @@ public sealed class Dd1Campaign
     public Dictionary<string, List<List<(string Type, int Length, float Chance)>>> QuestTables { get; } = new();
     /// <summary>Quests on the board per town visit, by progression index.</summary>
     public List<int> QuestsPerVisit { get; } = new();
-    /// <summary>Zone XP gained per finished quest, by difficulty.</summary>
+    /// <summary>Zone XP gained per finished quest, by quest length (see Homecoming.ZoneXp).</summary>
     public List<int> ZoneXpPerQuest { get; } = new();
     /// <summary>Zone XP needed for each zone level.</summary>
     public List<int> ZoneLevelThresholds { get; } = new();

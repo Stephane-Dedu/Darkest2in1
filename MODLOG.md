@@ -12529,3 +12529,20 @@ New: tests/DarkestDungeon3.Core.Tests/JourneyRegressionTests.cs (11 cases). Work
 Runner on committed HEAD f171c6f (run 20261115-085907-98278b) fails regardless of code: Core 861/1350 because HEAD tests still read the E: Steam DD1 install with read errors, and qa_runner_test.py is staged only (0 tests). The staged Dd1TestInstall migration and QA files need committing before runbook step 00 can pass.
 
 Open, not changed (details in findingsfable.txt): failed departure still costs the week and one-expedition buffs; a failed opening raid is skipped for good; retreat roll and quirk replacement use unseeded randomness; Persist failures are silent; purge ignores locked quirks.
+
+## Journey trace 2 - zone XP, dismissal, provisioning questions, November 15, 2026 (offline)
+
+Committed 3765bce (the 2 November staged DD3_TEST_DD1 test migration, QA runner and runbook, plus the three compile fixes) and 52377d9 (iteration 1), pushed. The runner on that candidate (run 20261115-092106-30e03c): Core 1364/1367, UI 299/299, python 18/18. The 3 Core failures are Dd1HeroArtTests duelist/runaway (data) and RegionalSceneryTests, which reads <repo>\..\game and so fails in the frozen copy.
+
+DD1 facts found (code map, own words):
+- Dungeon XP on quest completion = progression.json quest_completion_xp_table[quest length]. The grant reads the quest field at +0x11c; the quest serializer writes "difficulty" at +0x118 and "length" at +0x11c. No difficulty term (the Unity port adds (difficulty+1)/2; the exe does not). Plot quests: completion_dungeon_xp is top level in quest.plot_quests.json, true only for plot_tutorial_crypts in the base game.
+- Dismissal (localization/miscellaneous.string_table.xml): str_hero_cant_dismiss_confirm "You need at least 1 hero to venture on", str_hero_dismiss_confirm, str_hero_dismiss_warning_confirm (fewer than 4 compatible heroes), character_panel_dismiss_tt. The Unity port also requires HeroStatus.Available.
+
+Changes:
+- Homecoming.ZoneXp: by length, none for plot quests whose CompletionDungeonXp is false (new PlotQuest field, read from DD1 data at homecoming, so old saves work). Saved XP untouched; future pace changes.
+- Hamlet.WhyCantDismiss / DismissLeavesTooFew; HeroSheet uses them with DD1 texts; the old HamletUi hero page button follows the same rule.
+- EmbarkUi: _confirmLow replaced by _armedWarning + _confirmedWarnings; ConfirmWarnings asks each warning in turn (food, torches, trinkets).
+- Crawl.InteractCurio refuses an item with no interaction on the curio or not in the pack. Crawl.FleeBattle in a secret room steps out through its door (StepOutOfSecretRoom, shared with ExitSecretRoom).
+- QuirkLimits.ReplacementSeed (FNV-1a over hero, quirk, sorted held quirks) replaces Environment.TickCount in Dd2Party.AddDd1Quirk.
+
+Working tree: Core 1403/1405 (the two duelist/runaway data cases), UI 315/315, plugin Release Deploy=false 0 errors. No game launch, deploy or save access. findingsfable.txt section C/D has the details and the open items (refund at current price, locked activity second week, purge locks).

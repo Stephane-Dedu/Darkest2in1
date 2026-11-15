@@ -1252,9 +1252,10 @@ internal sealed partial class HamletUi
                 x++;
             }
         }
-        if (Gui.DdButton(new Rect(area.xMax - 230, area.yMax - 56, 220, 46), "Dismiss hero", true, 20))
+        // Fallback page (the DD1 hero sheet normally replaces it); same rule as the sheet: no busy, missing or last hero.
+        if (Gui.DdButton(new Rect(area.xMax - 230, area.yMax - 56, 220, 46), "Dismiss hero", S.Hamlet.WhyCantDismiss(h) == null, 20)
+            && S.Hamlet.Dismiss(h.Id))
         {
-            S.Hamlet.Dismiss(h.Id);
             S.Persist();
             _panel = Panel.Town;
         }

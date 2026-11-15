@@ -417,20 +417,23 @@ internal sealed partial class EmbarkUi
         int minFood = S.Provisioner.MinimumFood(length);
         bool lowFood = _cart.Count(Supply.Food) < minFood, noTorch = _cart.Count(Supply.Torch) == 0;
         bool fewTrinkets = Embark.TrinketWarning(S.Campaign, _quest, heroes);   // DD1: under half the trinket slots filled
-        if (why == null && (lowFood || noTorch || fewTrinkets))
+        // DD1's own questions (localization: town_provision_*), asked one at a time, most important first.
+        var warnings = new List<string>(3);
+        if (why == null)
         {
-            // DD1's own questions (localization: town_provision_*).
-            string warn = lowFood ? (S.Lore?.Text("town_provision_not_enough_food_confirm_format")?.Replace("%d", minFood.ToString()) ?? $"Less than {minFood} food: the party may starve.")
-                : noTorch ? "No torches: the dark will press in."
-                : S.Lore?.Text("town_provision_no_trinkets_equipped") ?? "Your party is not fully outfitted with trinkets. Really embark?";
-            ExpeditionSkin.Text(new Rect(1080, 978, 480, 90), warn + (_confirmLow ? "\nEmbark again to go anyway." : ""), 22, ExpeditionSkin.Red, TextAnchor.MiddleRight);
+            if (lowFood) warnings.Add(S.Lore?.Text("town_provision_not_enough_food_confirm_format")?.Replace("%d", minFood.ToString()) ?? $"Less than {minFood} food: the party may starve.");
+            if (noTorch) warnings.Add("No torches: the dark will press in.");
+            if (fewTrinkets) warnings.Add(S.Lore?.Text("town_provision_no_trinkets_equipped") ?? "Your party is not fully outfitted with trinkets. Really embark?");
         }
+        string warn = PendingWarning(warnings, _confirmedWarnings);
+        if (warn != null)
+            ExpeditionSkin.Text(new Rect(1080, 978, 480, 90), warn + (_armedWarning == warn ? "\nEmbark again to go anyway." : ""), 22, ExpeditionSkin.Red, TextAnchor.MiddleRight);
         if (why != null || cost > gold) ExpeditionSkin.Text(new Rect(1080, 978, 480, 90), why ?? "Not enough gold for these supplies.", 22, ExpeditionSkin.Red, TextAnchor.MiddleRight);
         if (ExpeditionSkin.Button(new Rect(1580, 980, 320, 86), "Embark", why == null && cost <= gold, 40))
         {
-            if ((lowFood || noTorch || fewTrinkets) && !_confirmLow) { _confirmLow = true; return; }
+            if (!ConfirmWarnings(warnings, _confirmedWarnings, ref _armedWarning)) return;
             if (Preview) { _error = "Read-only preview. No expedition started."; return; }
-            _confirmLow = false;
+            ResetWarnings();
             var bought = new Inventory { Layout = new List<string>(_cart.Layout) };   // keep the arrangement
             foreach (var kv in _cart.Items) bought.Add(kv.Key, kv.Value);
             _error = Driver.Instance.Embark(_quest, heroes, bought);

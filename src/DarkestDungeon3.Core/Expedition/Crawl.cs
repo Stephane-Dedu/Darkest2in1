@@ -54,6 +54,9 @@ public sealed class Crawl
             return State.PendingCurio = questReport;
         }
         if (_content?.Curios == null) return null;
+        // An item that does nothing on this curio, or one the pack no longer holds, must not spend the curio as an
+        // investigation by hand: DD1 says nothing happens and leaves both the item and the curio.
+        if (itemId != null && (State.Pack.Count(itemId) <= 0 || !_content.Curios.UsefulItems(curio).Contains(itemId))) return null;
 
         var report = _content.Curios.Resolve(curio, heroId, itemId, State, _party, NextRng());
         if (State.InRoom) CurrentRoom.CurioTaken = true;
@@ -317,20 +320,28 @@ public sealed class Crawl
     public List<CrawlEvent> ExitSecretRoom()
     {
         _events.Clear();
-        if (!CanNavigate || CurrentRoom?.IsSecret != true || IsBlocked
-            || State.SecretReturnCorridorId < 0 || State.SecretReturnCorridorId >= Map.Corridors.Count) return Blocked();
+        if (!CanNavigate || IsBlocked || !StepOutOfSecretRoom()) return Blocked();
+        // Returning to the same square replays no movement, stress, light, hunger or ambush effects.
+        Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
+        return Flush();
+    }
+
+    /// <summary>Put the party back on the hall square whose secret door it came through. False (nothing moved) when
+    /// the party is not in a secret room or the remembered square is not that room's door.</summary>
+    private bool StepOutOfSecretRoom()
+    {
+        if (CurrentRoom?.IsSecret != true
+            || State.SecretReturnCorridorId < 0 || State.SecretReturnCorridorId >= Map.Corridors.Count) return false;
         var corridor = Map.Corridor(State.SecretReturnCorridorId);
         if (State.SecretReturnTileIndex < 0 || State.SecretReturnTileIndex >= corridor.Tiles.Count
             || corridor.Tiles[State.SecretReturnTileIndex].SecretRoomId != State.RoomId
-            || (State.SecretReturnHeadingRoomId != corridor.RoomA && State.SecretReturnHeadingRoomId != corridor.RoomB)) return Blocked();
+            || (State.SecretReturnHeadingRoomId != corridor.RoomA && State.SecretReturnHeadingRoomId != corridor.RoomB)) return false;
         State.RoomId = -1;
         State.CorridorId = corridor.Id;
         State.TileIndex = State.SecretReturnTileIndex;
         State.HeadingRoomId = State.SecretReturnHeadingRoomId;
         State.SecretReturnCorridorId = State.SecretReturnTileIndex = State.SecretReturnHeadingRoomId = -1;
-        // Returning to the same square replays no movement, stress, light, hunger or ambush effects.
-        Emit(CrawlEventType.EnteredTile, tile: CurrentTile, contentId: CurrentTile.ContentId);
-        return Flush();
+        return true;
     }
 
     /// <summary>Walk one square toward the room the party is heading for (forward) or back the way it came.</summary>
@@ -371,7 +382,11 @@ public sealed class Crawl
         _events.Clear();
         if (State.Ended) return Blocked();
         State.ProvisionsConsumed.Clear();
-        if (State.InRoom)
+        if (State.InRoom && CurrentRoom?.IsSecret == true && StepOutOfSecretRoom())
+        {
+            // A secret room's only way out is the door the party found: fall back through it to that hall square.
+        }
+        else if (State.InRoom)
         {
             var corridor = State.CameFromCorridorId >= 0 && State.CameFromCorridorId < Map.Corridors.Count
                 ? Map.Corridor(State.CameFromCorridorId) : null;

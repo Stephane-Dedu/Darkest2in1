@@ -79,6 +79,48 @@ public class JourneyRegressionTests
         Assert.Null(state.PendingEncounter);
     }
 
+    /// <summary>The party stands in secret room 2, found through the door on hall square 1.</summary>
+    private static (Crawl Crawl, ExpeditionState State) InSecretRoom(RoomContent content)
+    {
+        var (crawl, state) = Hall(4, Quiet(), new HallTile { Visited = true, Resolved = true },
+            new HallTile { Visited = true, Resolved = true, SecretRoomId = 2 });
+        state.Map.Rooms.Add(new Room { Id = 2, IsSecret = true, Visited = true, Scouted = true, Content = content });
+        state.RoomId = 2;
+        state.CameFromCorridorId = 0; state.CameFromTileIndex = 0;   // the last ordinary door was room 0's
+        state.SecretReturnCorridorId = 0; state.SecretReturnTileIndex = 1; state.SecretReturnHeadingRoomId = 1;
+        return (crawl, state);
+    }
+
+    [Fact]
+    public void FleeingACampAmbushInASecretRoomFallsBackThroughItsDoor()
+    {
+        var (crawl, state) = InSecretRoom(RoomContent.Empty);
+        state.PendingEncounter = new CrawlEvent { Type = CrawlEventType.Ambush, RoomId = 2, ContentId = "camp" };
+
+        Assert.Contains(crawl.FleeBattle(), e => e.Type == CrawlEventType.Retreated);
+
+        Assert.False(state.InRoom);
+        Assert.Equal((0, 1, 1), (state.CorridorId, state.TileIndex, state.HeadingRoomId));
+        Assert.Equal(-1, state.SecretReturnCorridorId);
+        Assert.Null(state.PendingEncounter);
+        Assert.True(crawl.CanNavigate);
+        Assert.True(crawl.CanEnterSecretRoom);                       // the way back in is still there
+    }
+
+    [Fact]
+    public void FleeingASecretRoomsOwnFightLeavesItThereForTheReturn()
+    {
+        var (crawl, state) = InSecretRoom(RoomContent.Battle);
+        state.PendingEncounter = new CrawlEvent { Type = CrawlEventType.Battle, RoomId = 2 };
+
+        crawl.FleeBattle();
+
+        Assert.Equal((0, 1), (state.CorridorId, state.TileIndex));
+        Assert.False(state.Map.Room(2).Cleared);
+        Assert.Contains(crawl.EnterSecretRoom(), e => e.Type == CrawlEventType.Battle);
+        Assert.True(crawl.FightWaiting);
+    }
+
     [Fact]
     public void AFledHallFightStartsAgainWhenThePartyWalksBackIntoIt()
     {
@@ -155,6 +197,49 @@ public class JourneyRegressionTests
         Assert.False(crawl.FightWaiting);
     }
 
+    private static readonly System.Lazy<CrawlContent> Full = new(() => CrawlContent.Load(Install));
+
+    /// <summary>The party stands on a hall square holding <paramref name="curio"/>, with the real curio rules.</summary>
+    private static (Crawl Crawl, ExpeditionState State, HallTile Tile) OnCurio(string curio)
+    {
+        var tile = new HallTile { Content = HallContent.Curio, ContentId = curio, Visited = true };
+        var (_, state) = Hall(9, Quiet(), tile);
+        state.RoomId = -1; state.CorridorId = 0; state.TileIndex = 0; state.HeadingRoomId = 1;
+        return (new Crawl(state, Quiet(), new FakeParty("a", "b"), Full.Value), state, tile);
+    }
+
+    [Theory]
+    [InlineData(Supply.Torch, 1)]          // carried, but does nothing on a locked chest
+    [InlineData("skeleton_key", 0)]        // the right item, but the pack no longer holds one
+    public void AnItemThatCannotBeUsedHereLeavesTheCurioAndTheItem(string item, int carried)
+    {
+        var (crawl, state, tile) = OnCurio("heirloom_chest");
+        if (carried > 0) state.Pack.Add(item, carried);
+        Assert.Equal("heirloom_chest", crawl.CurioHere);
+
+        Assert.Null(crawl.InteractCurio("a", item, out var overflow));
+
+        Assert.Empty(overflow);
+        Assert.False(tile.Resolved);
+        Assert.Equal("heirloom_chest", crawl.CurioHere);
+        Assert.Null(state.PendingCurio);
+        Assert.Equal(carried, state.Pack.Count(item));
+    }
+
+    [Fact]
+    public void TheRightItemStillOpensTheCurio()
+    {
+        var (crawl, state, tile) = OnCurio("heirloom_chest");
+        state.Pack.Add("skeleton_key", 1);
+
+        var report = crawl.InteractCurio("a", "skeleton_key", out _);
+
+        Assert.NotNull(report);
+        Assert.Equal("skeleton_key", report.ItemUsed);
+        Assert.True(tile.Resolved);
+        Assert.Equal(0, state.Pack.Count("skeleton_key"));
+    }
+
     [Fact]
     public void HeroesLeavingOnTheExpeditionDoNotRestInTown()
     {
@@ -173,6 +258,37 @@ public class JourneyRegressionTests
         Assert.DoesNotContain(log, line => line.StartsWith(away.Name + " rested"));
         Assert.Contains(log, line => line.StartsWith(home.Name + " rested"));
         Assert.Equal(1, estate.Week);
+    }
+
+    [Theory]
+    [InlineData(1, 5, 2)]   // a short champion quest: the table by length, not by difficulty (was 6)
+    [InlineData(3, 1, 4)]   // a long apprentice quest (was 2)
+    [InlineData(2, 3, 3)]
+    public void DungeonXpFollowsTheQuestLength(int length, int difficulty, int expected)
+    {
+        var quest = new QuestOffer { Dungeon = "crypts", Type = "explore", Length = length, Difficulty = difficulty };
+        Assert.Equal(new[] { 0, 2, 3, 4, 5, 6 }, Dd1.ZoneXpPerQuest);
+        Assert.Equal(expected, Homecoming.ZoneXp(Dd1, quest));
+    }
+
+    [Fact]
+    public void BossQuestsGiveNoDungeonXpButTheTutorialDoes()
+    {
+        var boss = Dd1.Goals.Plot.First(p => p.Id == "plot_kill_necromancer_1");
+        var tutorial = Dd1.Goals.Plot.First(p => p.Id == "plot_tutorial_crypts");
+        Assert.False(boss.CompletionDungeonXp);
+        Assert.True(tutorial.CompletionDungeonXp);
+
+        var estate = new Estate();
+        var offer = QuestBoard.PlotOffer(estate, Dd1, boss);
+        Assert.Equal(0, Homecoming.ZoneXp(Dd1, offer));
+        Assert.Equal(Dd1.ZoneXpPerQuest[tutorial.Length], Homecoming.ZoneXp(Dd1, QuestBoard.PlotOffer(estate, Dd1, tutorial)));
+
+        int completed = estate.QuestsCompleted;
+        var report = Homecoming.Report(estate, Dd1, new ExpeditionState { Quest = offer, QuestComplete = true }, new HeroOutcome[0]);
+        Assert.Equal("complete", report.Result);
+        Assert.False(estate.ZoneXp.ContainsKey(offer.Dungeon));   // the boss is beaten; the zone does not level from it
+        Assert.Equal(completed + 1, estate.QuestsCompleted);
     }
 
     [Fact]

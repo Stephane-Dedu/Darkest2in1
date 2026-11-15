@@ -39,6 +39,8 @@ public sealed class PlotQuest
     public int RetreatKillCount;
     /// <summary>DD1: no surprise / no scouting in the quest (the Darkest Dungeon), and a win clears the roster's stress.</summary>
     public bool SurpriseEnabled = true, ScoutingEnabled = true, ClearsRosterStress;
+    /// <summary>DD1 completion_dungeon_xp: whether finishing it adds dungeon XP (only the tutorial among the base plot quests).</summary>
+    public bool CompletionDungeonXp = true;
     /// <summary>DD1: buffs the whole roster gets when a party of at least this resolve fails the quest.</summary>
     public List<string> RosterBuffsOnFailure = new();
     public int RosterBuffMinResolve;
@@ -104,6 +106,7 @@ public sealed class QuestGoals
                 SurpriseEnabled = (bool?)p["is_surprise_enabled"] ?? true,
                 ScoutingEnabled = (bool?)p["is_scouting_enabled"] ?? true,
                 ClearsRosterStress = (bool?)p["is_roster_stress_cleared_on_completion"] ?? false,
+                CompletionDungeonXp = (bool?)p["completion_dungeon_xp"] ?? true,
                 RosterBuffsOnFailure = (p["roster_buffs_to_apply_on_failure"] as JArray ?? new JArray()).Select(x => (string)x).ToList(),
                 RosterBuffMinResolve = (int?)p["roster_buff_on_failure_minimum_party_resolve_level"] ?? 0,
                 MapName = string.IsNullOrEmpty((string)quest["map_name"]) ? null : (string)quest["map_name"],

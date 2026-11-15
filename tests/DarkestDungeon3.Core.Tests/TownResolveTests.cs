@@ -81,6 +81,8 @@ public class TownResolveTests
         estate.Roster.Add(new HeroRecord { Id = "idle", Name = "Dismas", ClassId = "highwayman", ResolveLevel = 5, ResolveXp = 47 });
         Town(estate).StartTownEvent(new Rng(2));
         var loaded = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
+        Assert.False(Town(loaded).Dismiss("idle"));                // DD1 never lets the last hero go
+        loaded.Roster.Add(new HeroRecord { Id = "stays", ClassId = "plague_doctor" });
         Assert.True(Town(loaded).Dismiss("idle"));
         Assert.Equal("highwayman", Assert.Single(loaded.CompletedResolveGoals));
         var actor = Assert.Single(Assert.Single(loaded.ActivityLog).TownActors);

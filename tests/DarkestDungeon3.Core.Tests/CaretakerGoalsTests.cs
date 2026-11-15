@@ -48,13 +48,14 @@ public class CaretakerGoalsTests
         var estate = new Estate { RandomCounter = 4 };
         estate.Roster.Add(new HeroRecord { Id = "a", ClassId = "highwayman", ResolveLevel = 6, Trinkets = { "keepsake" } });
         estate.Roster.Add(new HeroRecord { Id = "b", ClassId = "vestal", ResolveLevel = 5 });
+        estate.Roster.Add(new HeroRecord { Id = "c", ClassId = "crusader" });   // DD1 keeps at least one hero
         var hamlet = new Hamlet(estate, Dd1, Buildings, new FakeCatalog());
         Assert.True(hamlet.Dismiss("a")); Assert.True(hamlet.Dismiss("b"));
         Assert.False(hamlet.Dismiss("missing"));
         var loaded = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson()).Estate;
         Assert.Equal("highwayman", Assert.Single(loaded.CompletedResolveGoals));
         Assert.Equal("keepsake", Assert.Single(loaded.Trinkets));
-        Assert.Empty(loaded.Roster);
+        Assert.Equal("c", Assert.Single(loaded.Roster).Id);
         Assert.Equal(4, loaded.RandomCounter);
     }
 

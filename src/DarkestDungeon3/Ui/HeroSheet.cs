@@ -98,12 +98,20 @@ internal static class HeroSheet
 
         var dismiss = At(20, 70, 32, 32);
         if (Ch("icon_dismiss.png") is { } d) GUI.DrawTexture(dismiss, d);
+        string why = S.Hamlet.WhyCantDismiss(h);
+        if (why == "LastHero") why = S.Lore?.Text("str_hero_cant_dismiss_confirm") ?? "You need at least 1 hero to venture on. This one cannot be dismissed just yet.";
         if (dismiss.Contains(Event.current.mousePosition))
-            Gui.Text(At(56, 70, 380, 32), _confirmDismiss == h.Id ? "Click again to dismiss for good" : "Dismiss hero", 18, Gui.Blood, TextAnchor.MiddleLeft);
+            Gui.Text(At(56, 70, 380, 32), why != null ? "Cannot dismiss" : _confirmDismiss == h.Id ? "Click again to dismiss for good"
+                : S.Lore?.Text("character_panel_dismiss_tt") ?? "Dismiss hero", 18, why != null ? Gui.Dim : Gui.Blood, TextAnchor.MiddleLeft);
         if (Gui.Hotspot(dismiss))
         {
-            if (_confirmDismiss == h.Id) { S.Hamlet.Dismiss(h.Id); S.Persist(); _confirmDismiss = null; close(); return; }
+            if (why != null) { _confirmDismiss = null; Gui.Announce(why); Dd1Audio.Play("/ui/shared/button_invalid"); return; }
+            if (_confirmDismiss == h.Id) { if (S.Hamlet.Dismiss(h.Id)) S.Persist(); _confirmDismiss = null; close(); return; }
             _confirmDismiss = h.Id;
+            // DD1's own questions: a plain confirmation, or the warning that fewer than four heroes would remain.
+            Gui.Announce(S.Hamlet.DismissLeavesTooFew(h)
+                ? S.Lore?.Text("str_hero_dismiss_warning_confirm") ?? "You will no longer have 4 compatible heroes to venture on with if you dismiss this hero. Are you sure you want to dismiss this hero?"
+                : S.Lore?.Text("str_hero_dismiss_confirm") ?? "This will dismiss the hero permanently. Are you sure you want to dismiss this hero?", 3.5f);
         }
     }
 

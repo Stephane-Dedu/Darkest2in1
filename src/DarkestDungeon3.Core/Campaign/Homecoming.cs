@@ -61,6 +61,19 @@ public static class Homecoming
         return list;
     }
 
+    /// <summary>
+    /// Dungeon XP for finishing <paramref name="quest"/>. DD1 indexes progression.json's quest_completion_xp_table by
+    /// the quest's length (the exe reads the quest's length field there; the Unity port agrees), and a plot quest
+    /// whose completion_dungeon_xp is false (every boss and Darkest Dungeon quest) adds none.
+    /// </summary>
+    public static int ZoneXp(Dd1Campaign dd1, QuestOffer quest)
+    {
+        if (dd1 == null || quest == null) return 0;
+        if (quest.IsPlot && dd1.Goals?.Plot.FirstOrDefault(p => p.Id == quest.PlotId) is { CompletionDungeonXp: false }) return 0;
+        var table = dd1.ZoneXpPerQuest;
+        return quest.Length >= 0 && quest.Length < table.Count ? table[quest.Length] : 0;
+    }
+
     public static HomecomingReport Report(Estate estate, Dd1Campaign dd1, ExpeditionState expedition, IEnumerable<HeroOutcome> outcomes,
                                           ItemCatalog items = null, Func<string, string> trinketOfRarity = null,
                                           Func<string, IEnumerable<Dd1Buff>> equipmentBuffs = null)
@@ -129,8 +142,8 @@ public static class Homecoming
                 log.Add($"Quest reward: {r}");
             }
             estate.QuestsCompleted++;
-            int zoneXp = quest.Difficulty < dd1.ZoneXpPerQuest.Count ? dd1.ZoneXpPerQuest[quest.Difficulty] : 2;
-            estate.ZoneXp[quest.Dungeon] = (estate.ZoneXp.TryGetValue(quest.Dungeon, out var z) ? z : 0) + zoneXp;
+            int zoneXp = ZoneXp(dd1, quest);
+            if (zoneXp > 0) estate.ZoneXp[quest.Dungeon] = (estate.ZoneXp.TryGetValue(quest.Dungeon, out var z) ? z : 0) + zoneXp;
             if (quest.IsPlot && quest.PlotId != null) estate.CompletedPlotQuests.Add(quest.PlotId);
         }
 

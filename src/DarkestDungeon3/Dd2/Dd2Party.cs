@@ -72,7 +72,9 @@ internal sealed class Dd2Party : IParty, ITravelResistance, IResolveParty
         var current = instances.Select(i => i.Definition.m_Id).ToList();
         var locked = s?.Save.Estate.Hero(heroId)?.LockedQuirks ?? new List<string>();
         var limits = s?.Campaign?.QuirkLimits ?? new Core.Campaign.QuirkLimits();
-        var (gained, replaced) = limits.Gain(current, locked, quirk.m_Id, _catalog.IsPositive, _catalog.IsDisease, new Core.Rng(System.Environment.TickCount));
+        // Seeded from the hero and their quirks, not the clock: a gain replayed after a reload replaces the same quirk.
+        var rng = new Core.Rng(Core.Campaign.QuirkLimits.ReplacementSeed(heroId, quirk.m_Id, current));
+        var (gained, replaced) = limits.Gain(current, locked, quirk.m_Id, _catalog.IsPositive, _catalog.IsDisease, rng);
         if (!gained) return null;
         if (replaced != null && instances.FirstOrDefault(i => i.Definition.m_Id == replaced) is { } old)
         {
