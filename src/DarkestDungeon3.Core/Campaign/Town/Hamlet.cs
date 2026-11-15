@@ -389,8 +389,10 @@ public sealed class Hamlet
     /// The party embarked (or the player chose to skip): resolve every town activity, then roll the next week's
     /// recruits, wagon stock and quest board. DD1 advances the week once per expedition.
     /// </summary>
-    public List<string> EndWeek()
+    /// <param name="away">Heroes leaving on the expedition: they are not idle in town, so they get no rest.</param>
+    public List<string> EndWeek(IEnumerable<string> away = null)
     {
+        var gone = new HashSet<string>(away ?? Enumerable.Empty<string>(), StringComparer.Ordinal);
         CampaignJournal.Initialize(Estate);
         var log = new List<string>();
         var actors = new List<ActivityTownActor>();
@@ -410,6 +412,7 @@ public sealed class Hamlet
                 Capture(hero, first);
                 continue;
             }
+            if (hero.Activity == null && gone.Contains(hero.Id)) continue;
             if (hero.Activity == null)
             {
                 // DD1: idle heroes shed a little stress each visit; a town event can multiply it.

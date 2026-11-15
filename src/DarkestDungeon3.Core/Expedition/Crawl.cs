@@ -223,6 +223,12 @@ public sealed class Crawl
               && (CurrentTile.Content is HallContent.Battle or HallContent.Obstacle
                   || (CurrentTile.Content == HallContent.Trap && CurrentTile.Scouted));   // DD1: a spotted trap stops the party until dealt with
 
+    /// <summary>A fight is waiting here and can be (re)started by hand: the room's or square's own battle, or an
+    /// already-rolled encounter (a camp ambush has no battle on the map) whose start failed or was fled.</summary>
+    public bool FightWaiting => !State.Ended && State.Camp == null
+        && (State.PendingEncounter is { Type: CrawlEventType.Battle or CrawlEventType.Ambush }
+            || (IsBlocked && (State.InRoom || CurrentTile?.Content == HallContent.Battle)));
+
     /// <summary>Put the party in the entrance room at the start of the expedition.</summary>
     public List<CrawlEvent> Begin()
     {
@@ -367,13 +373,23 @@ public sealed class Crawl
         State.ProvisionsConsumed.Clear();
         if (State.InRoom)
         {
-            var corridor = State.CameFromCorridorId >= 0 ? Map.Corridor(State.CameFromCorridorId) : null;
-            if (corridor == null) return Flush();            // nowhere to fall back to (shouldn't happen)
+            var corridor = State.CameFromCorridorId >= 0 && State.CameFromCorridorId < Map.Corridors.Count
+                ? Map.Corridor(State.CameFromCorridorId) : null;
             int fromRoom = State.RoomId;
-            State.CorridorId = corridor.Id;
-            State.TileIndex = State.CameFromTileIndex;
-            State.HeadingRoomId = corridor.RoomA == fromRoom ? corridor.RoomB : corridor.RoomA;   // facing away
-            State.RoomId = -1;
+            bool wayBack = corridor != null && (corridor.RoomA == fromRoom || corridor.RoomB == fromRoom)
+                && State.CameFromTileIndex >= 0 && State.CameFromTileIndex < corridor.Tiles.Count;
+            // Nowhere to fall back to (the entrance room, or an entry square that is not this room's). The room's
+            // own battle still holds the party there with its checkpoint, to be fought again. A fight that is not
+            // the room's (a camp ambush) is simply over: otherwise the crawl would wait for ever on an encounter
+            // that nothing on the map can restart.
+            if (!wayBack && IsBlocked) return Flush();
+            if (wayBack)
+            {
+                State.CorridorId = corridor.Id;
+                State.TileIndex = State.CameFromTileIndex;
+                State.HeadingRoomId = corridor.RoomA == fromRoom ? corridor.RoomB : corridor.RoomA;   // facing away
+                State.RoomId = -1;
+            }
         }
         else if (CurrentCorridor is { } corridor)
         {
@@ -826,10 +842,18 @@ public sealed class Crawl
                     break;
             }
         }
+        else if (!firstVisit && !tile.Resolved && tile.Content == HallContent.Battle)
+        {
+            // The fight the party fled is still here: walking back into it starts it again, as a room's does.
+            EmitBattle(CrawlEventType.Battle, tile, corridor: true, rng);
+        }
         else if (!firstVisit)
         {
             // Walking back through explored halls: DD1 can spring a wandering fight or a hunger check.
-            if (rng.Chance(_rules.ReturnBattleChance)) EmitBattle(CrawlEventType.Ambush, tile, corridor: true, rng);
+            // A wandering fight takes over the square, so it never lands on one that still holds something
+            // (an untouched curio, a quest objective, a spotted trap, an obstacle): that would erase it.
+            bool free = tile.Resolved || tile.Content == HallContent.Empty;
+            if (rng.Chance(_rules.ReturnBattleChance)) { if (free) EmitBattle(CrawlEventType.Ambush, tile, corridor: true, rng); }
             else if (rng.Chance(_rules.ReturnHungerChance)) HungerCheck();
         }
     }

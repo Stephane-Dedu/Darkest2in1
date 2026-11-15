@@ -960,7 +960,7 @@ internal sealed partial class CrawlUi
         string curio = crawl.CurioHere;
         bool obstacle = tile is { Content: HallContent.Obstacle, Resolved: false };
         bool trap = tile is { Content: HallContent.Trap, Resolved: false } && tile.Scouted;
-        bool battleStuck = crawl.IsBlocked && (exp.InRoom || tile?.Content == HallContent.Battle);
+        bool battleStuck = crawl.FightWaiting;
         string here = CrawlInventoryInput.CurioPanelKey(crawl);
         if (CurioDrop != null && curio != null) { string item = CurioDrop; CurioDrop = null; _curioPanel = here; UseOnCurio(crawl, curio, item); return; }
         if (CurioClicked && curio != null) _curioPanel = here;

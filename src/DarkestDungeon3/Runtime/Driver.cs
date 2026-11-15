@@ -225,9 +225,16 @@ internal sealed partial class Driver : MonoBehaviour
         int cost = opening ? 0 : bought.Items.Sum(kv => hamlet.ProvisionPrice(S.Provisioner, S.Content.Items, kv.Key) * kv.Value);   // the opening's pack is DD1's, free
         if (S.Save.Estate.Get(Currency.Gold) < cost) return "Not enough gold for these provisions.";
 
-        S.Save.Estate.Add(Currency.Gold, -cost);
         // DD1's opening raid comes before the first week: no free supplies, no town event buffs, no week passing.
-        var exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner);
+        ExpeditionState exp;
+        try { exp = Core.Campaign.Embark.Create(S.Campaign, quest, party, bought, opening ? null : S.Provisioner); }
+        catch (System.Exception e)
+        {
+            // Nothing has been paid or saved yet: the player stays in town with their gold and can try another quest.
+            Plugin.Log.LogError("[embark] the expedition could not be prepared: " + e);
+            return "This expedition could not be prepared. Nothing was spent; choose another quest.";
+        }
+        S.Save.Estate.Add(Currency.Gold, -cost);
         exp.ProvisionCost = cost;
         if (!opening)
             foreach (var buff in hamlet.EmbarkPartyBuffs(quest))
@@ -238,8 +245,8 @@ internal sealed partial class Driver : MonoBehaviour
                 }
         S.Save.Expedition = exp;
         if (opening) S.Save.Estate.OpeningRaidPending = false;
-        // DD1 resolves town activities while the party is away.
-        else S.Hamlet.EndWeek();
+        // DD1 resolves town activities while the party is away; the party itself is not resting in town.
+        else S.Hamlet.EndWeek(exp.Party);
         CampaignJournal.Embark(S.Save.Estate, quest, party);
         S.Persist();
 
@@ -309,8 +316,7 @@ internal sealed partial class Driver : MonoBehaviour
         Party = new Dd2Party(guids, S.Catalog);
         Crawl = new Crawl(Expedition, S.Rules, Party, S.Content);
         Crawl.HeroDd1Class = id => S.Campaign.HeroUpgrades.Dd1Class(S.Save.Estate.Hero(id)?.ClassId);
-        Crawl.EquipmentBuffs = id => S.Save.Estate.Hero(id)?.WornTrinkets.Select(Dd1TrinketData.Get).Where(t => t != null)
-            .SelectMany(t => t.BuffIds).Select(S.Content.Buffs.Get).Where(b => b != null);
+        Crawl.EquipmentBuffs = EquipmentBuffs;
         Crawl.TrinketOfRarity = (rarity, rng) => S.Catalog.RandomTrinket(rarity, rng);
         CapturePartyState();
         Dd2Api.Torch = Expedition.Light;
@@ -320,6 +326,12 @@ internal sealed partial class Driver : MonoBehaviour
         if (FadedMemory.Active(Expedition)) { StartFight(FightKind.Room, false); return; }
         Handle(resuming ? Crawl.Resume() : Crawl.Begin());
     }
+
+    /// <summary>DD1 buffs of the trinkets a hero wears. Read from the estate, so a homecoming resumed from a save
+    /// (no crawl yet) pays the same resolve XP bonus as one finished in play.</summary>
+    private IEnumerable<Core.Dd1.Dd1Buff> EquipmentBuffs(string heroId) =>
+        S.Save.Estate.Hero(heroId)?.WornTrinkets.Select(Dd1TrinketData.Get).Where(t => t != null)
+            .SelectMany(t => t.BuffIds).Select(S.Content.Buffs.Get).Where(b => b != null);
 
     public void CapturePartyState()
     {
@@ -521,11 +533,15 @@ internal sealed partial class Driver : MonoBehaviour
 
     public void Fight()
     {
-        if (Crawl == null || !Crawl.IsBlocked) return;
+        if (Crawl == null || Phase != Phase.Crawling || !Crawl.FightWaiting) return;
         bool inRoom = Expedition.InRoom;
         var room = inRoom ? Crawl.CurrentRoom : null;
-        var kind = room is { Content: Core.Dungeon.RoomContent.Boss } ? FightKind.Boss : inRoom ? FightKind.Room : FightKind.Hall;
-        StartFight(kind, heroesSurprised: false);
+        // An already-rolled encounter keeps its identity and surprise: a camp ambush has no battle on the map, so
+        // without this a start that failed (DD2 still changing scenes) could never be retried.
+        var pending = Expedition.PendingEncounter;
+        var kind = pending is { Type: CrawlEventType.Ambush, ContentId: "camp" } ? FightKind.CampAmbush
+            : room is { Content: Core.Dungeon.RoomContent.Boss, Cleared: false } ? FightKind.Boss : inRoom ? FightKind.Room : FightKind.Hall;
+        StartFight(kind, pending?.HeroesSurprised ?? false, pending?.MonstersSurprised ?? false);
     }
 
     private int _debugFights;
@@ -815,7 +831,7 @@ internal sealed partial class Driver : MonoBehaviour
     {
         var exp = Expedition;
         var rng = new Rng(exp.Seed * 31 + exp.StepsTaken);
-        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng), Crawl?.EquipmentBuffs);
+        LastReport = Homecoming.Report(S.Save.Estate, S.Campaign, exp, outcomes, S.Content.Items, rarity => S.Catalog.RandomTrinket(rarity, rng), EquipmentBuffs);
         HomecomingLog = LastReport.Log;
         S.Save.Expedition = null;
         S.Persist();

@@ -1,0 +1,175 @@
+Darkest2in1 - end-to-end journey trace, 2026-11-15
+==================================================
+
+Scope: the main loop read end to end in source - estate load, Hamlet week, quest and provisions, embark,
+walking, curios, traps and obstacles, fights (start, retreat, win, wipe), camping, return, results, reload.
+Method: code trace plus offline tests. DD2 was NOT launched (the 2 November no-launch instruction still
+stands), nothing was deployed, no save was opened. Every fix below is proven by unit tests only and still
+needs a native check on estate 2. Nothing was committed or pushed.
+
+Test state after the fixes, working tree, DD1 data from C:\Users\Piral\darkestwithdlc\game:
+  Core 1391 pass / 2 fail (both pre-existing, see T3)   UI 312 pass / 0 fail
+  Python 18 pass (qa_runner 9, scenery_camera 2, corridor_depth 7)   Plugin Release build: 0 errors
+
+
+A. BUGS FIXED
+-------------
+
+A1. Fleeing a camp ambush in the entrance room froze the expedition.  [P1, progression]
+    Crawl.FleeBattle returned early when the room had no hall behind it, leaving the rolled encounter and
+    its fight checkpoint in place. The room has no battle of its own, so there was no Fight prompt, no
+    walking, no camping and no Leave/Retreat. Only quitting helped, and the reload replayed the same
+    ambush. Reachable in normal play: camp in the first room, get ambushed, retreat.
+    Fix: a fled fight that is not the room's own is now over (encounter and checkpoint cleared, "Retreated"
+    raised). A room's own battle with nowhere to fall back to keeps its checkpoint as before.
+    Also guards the remembered entry square: it is used only if it really is a door of the current room.
+    src/DarkestDungeon3.Core/Expedition/Crawl.cs (FleeBattle)
+
+A2. A wandering fight could erase a curio, quest objective, trap or obstacle.  [P1 for quest curios]
+    Walking back over a visited hall square can roll a wandering fight, which turns the square into a
+    battle square. It did so even when the square still held an untouched curio, a spotted trap or an
+    obstacle. After the fight the square was marked resolved, so the curio was gone. On a hall square
+    that is a quest objective (activate / gather quests) the quest could no longer be completed.
+    Fix: the wandering fight only lands on an empty or finished square. The random draws are unchanged,
+    so existing saves keep their sequence.
+    src/DarkestDungeon3.Core/Expedition/Crawl.cs (EnterTile)
+
+A3. A hall fight the party fled did not start again when they walked back into it.  [P2]
+    Rooms restart their fight on re-entry; hall squares did not. The party walked onto the square, got
+    pinned there (no stepping either way) and had to notice the "Fight" scroll. Now walking back in
+    starts the fight, like a room.
+    src/DarkestDungeon3.Core/Expedition/Crawl.cs (EnterTile)
+
+A4. A fight whose start failed could not be retried when it had no battle on the map.  [P1, rare]
+    Dd2Combat.Start refuses while DD2 is still changing scenes. For a room or hall battle the Fight
+    scroll gave a retry; for a camp ambush nothing did (the room is already cleared), so the crawl waited
+    for ever. The manual retry also dropped the rolled surprise (always "nobody surprised").
+    Fix: new Crawl.FightWaiting (the map's battle OR an already-rolled encounter). The Fight scroll and
+    Driver.Fight use it, and the retry keeps the encounter's kind (camp ambush) and surprise.
+    Crawl.cs, src/DarkestDungeon3/Runtime/Driver.cs (Fight), src/DarkestDungeon3/Ui/CrawlUi.cs (DrawPrompt)
+
+A5. Heroes leaving on the expedition got the town's idle rest.  [P2, balance]
+    The week ends at embark. Every hero with no activity received the idle stress relief and a journal
+    line "<name> rested in the Hamlet" - including the four walking out of the gate, who then entered
+    the dungeon with less stress. DD1 (and the Unity port: status RaidParty is not Available) rests only
+    heroes who stay. Fix: Hamlet.EndWeek(away) skips the party; rolls for the new week are unchanged.
+    src/DarkestDungeon3.Core/Campaign/Town/Hamlet.cs, Driver.cs (Embark)
+
+A6. Results reached through a reload paid no trinket resolve-XP bonus.  [P3]
+    Homecoming read worn-trinket buffs through the live crawl object, which does not exist when an ended
+    expedition is finished from a save. Now read from the estate in both cases.
+    Driver.cs (EquipmentBuffs, CompleteHomecoming)
+
+A7. A failed expedition setup could cost the provisions' gold.  [P2, defensive]
+    Gold was deducted before the map and pack were built. If that step threw, the gold was gone in memory
+    and the next save kept the loss. Now the expedition is built first; on failure the player stays in
+    town with a message and nothing spent.
+    Driver.cs (Embark)
+
+A8. The working tree's test projects did not compile.  [tooling]
+    - Three Core tests referenced DarkestDungeon3.Core.Dd1.Dd1TestInstall (a search-and-replace slip in
+      the staged data-path migration): ExperimentalHeroesTests, ResolveStressTests, TrinketEquipmentTests.
+    - The untracked AssetPrewarmLeaseTests had no link to AssetPrewarmLeases.cs in the UI test project.
+    - PlaytestLifecycleTests (staged, new) asserted free firewood but embarked without a provisioner, so
+      all four regions failed on line 34. It now passes the provisioner, as the real embark does.
+
+New regression tests: tests/DarkestDungeon3.Core.Tests/JourneyRegressionTests.cs (11 cases, A1-A5).
+
+
+B. BAD EXPERIENCES FOUND, NOT CHANGED (need a decision or a native check)
+------------------------------------------------------------------------
+
+B1. A failed departure still costs a week.
+    Embark ends the week, rolls new recruits/wagon/quests/town event and consumes one-expedition town
+    buffs before DD2 has opened the dungeon. If the dungeon never opens, reloading refunds the gold only.
+    The week, the old quest board and those buffs are gone, and the journal says the party set out.
+    Proposal: end the week when the party first stands in the dungeon (Crawl.Begin), or snapshot the
+    pre-embark estate inside the expedition and restore it on refund.
+
+B2. A failed opening raid is skipped for good.
+    OpeningRaidPending is cleared at embark. If "The Old Road" fails to open, the refund path returns
+    the player to the Hamlet and the tutorial raid (and its gold) never comes back. I did not re-arm it
+    automatically: if the failure were permanent the estate would loop on the retry. Proposal: re-arm it
+    once, or offer "Retry the Old Road / Skip" on the recovery screen.
+
+B3. "Re-open the estate to cancel this departure" is the only way out of a failed embark.
+    The recovery screen asks the player to go to the main menu and back. A "Cancel departure (refund)"
+    button there would do the same thing without the round trip.
+
+B4. Retreat chance and quirk replacement are not reload-safe.
+    Dd2Combat uses an unseeded System.Random for the DD1 retreat roll, and Dd2Party.AddDd1Quirk seeds the
+    "which quirk gets replaced" pick from the clock. Everything else is seeded from the save so a reload
+    cannot reroll. Proposal: seed both from the expedition (Seed, RandomCounter).
+
+B5. Purge and cure ignore locked quirks and always take the first match.
+    Dd2Party.PurgeNegative / CureDisease remove the first negative quirk or disease in list order, locked
+    or not. DD1 picks at random and (to check in the DD1 code map) should leave Sanitarium-locked quirks.
+
+B6. Secret room with a fight: a retreat has no door to fall back through.
+    EnterSecretRoom does not record the entry square, so before A1 a retreat there could move the party
+    to an unrelated corridor. A1 now keeps them in the room. Better: record the secret door's square as
+    the fallback, so the retreat lands back in the corridor.
+
+B7. A save that fails to write is silent.
+    Session.Persist logs and returns false; nearly every caller ignores it (embark, fights, curios, camp).
+    With C: at 93% this is not theoretical: it hit 12 MB free on 17 October. Proposal: a visible "Could
+    not save" banner, and refuse to embark when the first save of the expedition fails.
+
+B8. The low-supplies confirmation is not re-armed.
+    After "Embark again to go anyway", changing the cart (or the warning changing from food to torches)
+    keeps the confirmation, so the next click embarks without showing the new warning.
+
+B9. Spent provisions and supplies vanish at homecoming without a line in the recap.
+    Only gold, heirlooms, gems, trinkets and journal pages are listed. A short "Unused supplies were
+    left behind" line would explain why the pack on the results page is shorter than the pack carried.
+
+B10. Curio outcome when the wrong item is passed.
+    CurioResolver falls back to the ordinary weighted outcome if an item that has no interaction is
+    supplied. The UI blocks this today ("Nothing happens"); the Core rule itself would silently resolve
+    the curio by hand. Worth a guard in Core so a future caller cannot spend the curio by mistake.
+
+
+T. TEST AND TOOLING FINDINGS
+----------------------------
+
+T1. The offline runner cannot pass on committed HEAD (f171c6f) on this machine.
+    Run 20261115-085907-98278b: Core 861/1350 (489 fail), UI 299/299, Python fail.
+    - Core at HEAD still finds DD1 through the default E: Steam install, which has read errors. The fix
+      (Dd1TestInstall + DD3_TEST_DD1 in ~95 test files) has been staged since 2 November, not committed.
+    - tests/qa_runner_test.py, tools/qa/run.py and steps.json are staged only, so the frozen HEAD has no
+      runner tests (0 tests counts as a failure).
+    So `run.py run --suite full` reports FAIL whatever the code does, and the ledger's installed build is
+    "not recorded". Committing that staged set (after review) is the first step of runbook step 00.
+
+T2. The runner tests HEAD only; fixes in the working tree are invisible to it.
+    Useful as a guard against shared dirty files, but it means an agent's fix cannot be checked by the
+    runner before it is committed. The fixes above were run directly with dotnet test on the working tree.
+
+T3. Dd1HeroArtTests.MissingOrInvalidClassNeverBorrowsUnrelatedOrArenaArt fails for "duelist" and
+    "runaway" with the darkestwithdlc data: dlc\4964110_fires_edge really contains DD1 art for both.
+    The test's assumption (these classes have no DD1 art) is false for the active data folder. Either
+    use ids that exist nowhere, or decide whether those two classes should use that art.
+
+T4. Forty-odd files of other sessions' runtime work are uncommitted (shieldbreaker, combat prewarm,
+    balance, curio preview) and ~95 test files are staged. Nothing here touched them beyond A8.
+
+
+P. IMPROVEMENT PROPOSALS
+------------------------
+
+P1. One Core entry point per lifecycle step. Embark, refund and homecoming are assembled in Driver from
+    several Core calls in a fixed order (gold, create, buffs, week, journal, save). Each ordering bug
+    found here (A5, A7, B1) lived in that glue, where no Core test can reach. A Core "Departure.Commit"
+    and "Departure.Refund" with tests would cover them.
+P2. A scripted whole-expedition Core test that plays every branch (hall fight fled and re-entered, camp
+    ambush fled, wandering fight on each square kind, wipe, retreat) and asserts after every step that
+    the party can always do one of: walk, fight, camp, dismiss, leave. That invariant would have caught
+    A1 and A4 directly.
+P3. Show the rolled surprise on the manual Fight scroll ("Ambush!" / "Caught unawares") now that the
+    retry keeps it.
+P4. Battle-start timing is logged ([combat timing]) but not collected. Writing those lines to a small
+    CSV per session would give runbook step 05 its five warm samples without a stopwatch.
+P5. Add a free-space check at startup and before embark (warn under ~500 MB), given B7.
+
+Not covered in this pass: native rendering and input, DD2 combat internals, Hamlet 3D stage, Faded
+Memory, plot maps and the Darkest Dungeon, town building screens beyond the week cycle.

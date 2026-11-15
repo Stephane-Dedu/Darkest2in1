@@ -12509,3 +12509,23 @@ The Shroud's existing native cloud/foam maps now repeat less in depth and lose c
 Rejected an initial uniform depth-scale sample because it lengthened nearby motifs. Retained the smooth distance-only mapping instead. Reviewed all 24 corridor variants at their starts, middles and ends with short/long framing and ground closeups. All 24 ground alpha masks remain pixel-identical, with fully opaque actor-contact strips. All 114 unaffected raw passes and 48 back/middle companions are hash-exact. Nine existing camera/composition cases pass. All 96 PNGs pass dimensions, 8-bit mode, file-size limits and hashes; only 49 installation files differ. These are offline checks, not live walking acceptance.
 
 Art-only deployment while DD2 was stopped installed 24 canonical corridor PNGs, 24 front companions and the manifest. 340 other art/plugin/data/config files, including all 32 room paintings, remain hash-exact. Backup: `C:\Users\Piral\DarkestDungeon3\local-art\scenery-clean-v23\install-backup-20261102-160855.zip`. Private sources, recipe snapshots, renders, comparisons, validation and guarded installer: `C:\Users\Piral\DarkestDungeon3\local-art\scenery-clean-v23`. No game launched, save accessed or runtime assembly deployed. Other agents' source work stays untouched. Native hero/curio readability, walking and battle covers remain pending under the no-launch hold. Lighting is still baked/approximate; close zoom is still bounded by the existing 4096x768 corridor format.
+
+
+## Journey trace - retreat, wandering-fight and week-end fixes, November 15, 2026 (offline)
+
+Read the whole loop in source (estate load, week, embark, walking, curios, fights, camp, return, reload). No launch, no deployment, no save access; nothing committed. Full list with proposals: `findingsfable.txt` in the repo root.
+
+Fixed in the working tree, unit-tested only:
+- Crawl.FleeBattle: fleeing a fight that is not the room own battle (camp ambush) with no hall behind the room now ends the encounter. Before, PendingEncounter and the checkpoint stayed, with no Fight prompt, no walking and no Leave: a camp ambush fled in the entrance room froze the crawl until a reload replayed it. A room own battle with nowhere to go keeps its checkpoint (existing FightCheckpointTests rule). The remembered entry square is used only when it is a door of the current room.
+- Crawl.EnterTile: a wandering return fight only takes an empty or resolved hall square. It used to overwrite an untouched curio, quest-objective curio, spotted trap or obstacle, which was then marked resolved by the win. RNG draws unchanged.
+- Crawl.EnterTile: walking back onto a fled hall battle square starts that fight again (rooms already did).
+- New Crawl.FightWaiting (map battle or an already-rolled encounter). CrawlUi Fight scroll and Driver.Fight use it; the manual retry keeps camp-ambush kind and the rolled surprise. Before, a camp ambush whose Dd2Combat.Start was refused (mode change in progress) had no retry.
+- Hamlet.EndWeek(away): heroes leaving on the expedition no longer get idle rest or the rested-in-the-Hamlet journal line. Driver.Embark passes the party. Unity port agrees (HeroStatus.RaidParty is not Available).
+- Driver: worn-trinket buffs for homecoming come from the estate, so results finished from a reloaded save pay the same resolve XP bonus. Embark builds the expedition before charging gold; a setup exception returns a message and spends nothing.
+- Test projects compile again: three over-qualified Dd1TestInstall references, the missing AssetPrewarmLeases link in the UI test project, and PlaytestLifecycleTests embarking without a provisioner while asserting free firewood.
+
+New: tests/DarkestDungeon3.Core.Tests/JourneyRegressionTests.cs (11 cases). Working tree with DD3_TEST_DD1=C:\Users\Piral\darkestwithdlc\game: Core 1391/1393, UI 312/312, python 18/18, plugin Release build with Deploy=false 0 errors. The two Core failures are Dd1HeroArtTests duelist/runaway: dlc/4964110_fires_edge in that data folder really has DD1 art for both, so the test premise is wrong for the active data.
+
+Runner on committed HEAD f171c6f (run 20261115-085907-98278b) fails regardless of code: Core 861/1350 because HEAD tests still read the E: Steam DD1 install with read errors, and qa_runner_test.py is staged only (0 tests). The staged Dd1TestInstall migration and QA files need committing before runbook step 00 can pass.
+
+Open, not changed (details in findingsfable.txt): failed departure still costs the week and one-expedition buffs; a failed opening raid is skipped for good; retreat roll and quirk replacement use unseeded randomness; Persist failures are silent; purge ignores locked quirks.
