@@ -13,7 +13,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>Everything the crawl and the fights draw from DD1 is where the plugin looks for it.</summary>
 public class Dd1AssetTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
     private readonly ITestOutputHelper _out;
     public Dd1AssetTests(ITestOutputHelper output) => _out = output;
@@ -82,7 +82,7 @@ public class Dd1AssetTests
 
 public class CurioItemTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
 
@@ -105,7 +105,7 @@ public class CurioItemTests
 
 public class TrapRuleTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
 
     [Fact]

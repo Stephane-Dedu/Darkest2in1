@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class CaretakerQuestTests
 {
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     [Fact]
     public void NewCampaignListsAllNativeLairTiersAndSupportedStoryGoals()

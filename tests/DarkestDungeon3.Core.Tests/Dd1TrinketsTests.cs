@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class Dd1TrinketsTests
 {
-    private static readonly Dd1Trinkets Base = Dd1Trinkets.LoadBase(Dd1Install.Find());
+    private static readonly Dd1Trinkets Base = Dd1Trinkets.LoadBase(Dd1TestInstall.Find());
 
     [Theory]
     [InlineData("very_rare", 24)]

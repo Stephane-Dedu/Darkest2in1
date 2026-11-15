@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "steps": [
+    {"id":"01","title":"Town, party, Paths and trinkets","suite":"town","anchor":"01-town-party-paths-and-trinkets"},
+    {"id":"02","title":"Quest selection and provisions","suite":"embark","anchor":"02-quest-selection-and-provisions"},
+    {"id":"03","title":"Walking, scenery and navigation","suite":"travel","anchor":"03-walking-scenery-and-navigation"},
+    {"id":"04","title":"Curios, supplies and full inventory","suite":"curios","anchor":"04-curios-supplies-and-full-inventory"},
+    {"id":"05","title":"Ordinary battles and transitions","suite":"combat","anchor":"05-ordinary-battles-and-transitions"},
+    {"id":"06","title":"Camping and continued exploration","suite":"camp","anchor":"06-camping-and-continued-exploration"},
+    {"id":"07","title":"Return, progression and saved reload","suite":"return","anchor":"07-return-progression-and-saved-reload"},
+    {"id":"08","title":"Retreat, defeat and recovery","suite":"recovery","anchor":"08-retreat-defeat-and-recovery"},
+    {"id":"09","title":"Expedition balance and economy","suite":"balance","anchor":"09-expedition-balance-and-economy"},
+    {"id":"10","title":"Other regions and repeated-session acceptance","suite":"full","anchor":"10-other-regions-and-repeated-session-acceptance"}
+  ],
+  "suites": {
+    "smoke": {
+      "core": ["PlaytestLifecycleTests","Dd1TestInstallTests","SavePublicationTests","ExpeditionRecoveryTests","StartingPackTests","CrawlResumeTests","SavedCurioTests","SavedSpoilsTests","ExpeditionExitTests"],
+      "ui": ["Dd1TestInstallTests","ContinuousWalkTests","FightTransitionTests","TrinketShopTests","ProvisionCancelTests","RunRecoveryTests"],
+      "python": ["qa_runner_test.py","scenery_camera_test.py","corridor_depth_test.py"]
+    },
+    "full": {"core":["*"],"ui":["*"],"python":["qa_runner_test.py","scenery_camera_test.py","corridor_depth_test.py"]},
+    "town": {"core":["HamletTests","HeroPathTests","WagonStockTests","TrinketEquipmentTests","TrinketDescriptionTests"],"ui":["TrinketShopTests","TooltipLayoutTests","ItemTextTests","EstatePickerSlotTests"]},
+    "embark": {"core":["CampaignTests","StartingPackTests","ExpeditionFormationTests","MapGeneratorTests","QuestGoalTests","ExpeditionMapCameraTests"],"ui":["ProvisionCancelTests","ExpeditionHudTests","ExpeditionMapEffectsTests"]},
+    "travel": {"core":["CrawlNavigationTests","CorridorSceneMotionTests","CorridorTravelDistanceTests","CorridorProjectionTests","CorridorDoorTests","PrivateRoomSceneryTests"],"ui":["ContinuousWalkTests","CorridorWalkCycleTests","DriverTraversalTests","CorridorRegistrationTests","CorridorPanoramaUiTests","RoomPanoramaUiTests"],"python":["scenery_camera_test.py","corridor_depth_test.py"]},
+    "curios": {"core":["SavedCurioTests","SavedSpoilsTests","CurioOwnerResolutionTests","CurioActorTests","PartialLootTests","NativeCurioCatalogTests"],"ui":["NativeCurioArtTests","CrawlInventoryInputTests","LootGridTests"]},
+    "combat": {"core":["ExpeditionFightTests","FightCheckpointTests","CorpseTests","BattleLootTests","CombatSupplyTests","ZoneEncounterTests"],"ui":["FightTransitionTests","FightBackdropLayoutTests","ActorRestoreTests","DeferredPollTests"]},
+    "camp": {"core":["CampingTests","CampLootTests","CampLightTests","SavedMealTests","CrawlResumeTests"]},
+    "return": {"core":["PlaytestLifecycleTests","LoopTests","ExpeditionExitTests","ExpeditionRecoveryTests","CampaignJournalTests","SavePublicationTests"],"ui":["CampaignLoadStatusTests","RunRecoveryTests"]},
+    "recovery": {"core":["PlaytestLifecycleTests","SaveRecoveryTests","SavePublicationTests","ExpeditionRecoveryTests","FightCheckpointTests","EndedCrawlTests","SavedMealTests","SavedCurioTests","SavedSpoilsTests"],"ui":["RunRecoveryTests","ActorRestoreTests"]},
+    "balance": {"core":["ZoneEncounterTests","BattleLootTests","HallwayStressTests","ResolveStressTests","CampaignTests","HeroPathTests","TrinketEquipmentTests"]}
+  }
+}

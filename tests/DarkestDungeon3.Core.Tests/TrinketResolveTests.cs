@@ -6,7 +6,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class TrinketResolveTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Campaign = Dd1Campaign.Load(Install);
     private static readonly Dd1Trinkets Trinkets = Dd1Trinkets.LoadBase(Install);
     private const string Portrait = "dd3_dd1_ancestors_portrait";

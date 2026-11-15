@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class WagonStockTests
 {
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
     private static readonly Buildings Buildings = Buildings.Load(Dd1.Install);
 
     private sealed class RepeatingCatalog : FakeCatalog

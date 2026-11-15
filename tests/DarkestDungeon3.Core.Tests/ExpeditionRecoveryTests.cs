@@ -88,7 +88,7 @@ public class ExpeditionRecoveryTests
     {
         var save = Save(); save.Expedition.Ended = true; save.Expedition.QuestComplete = !retreat; save.Expedition.Retreated = retreat;
         save.Expedition.Quest.Rewards.Add(new Reward { Type = Currency.Gold, Amount = 100 });
-        var native = Dd1Campaign.Load(Dd1Install.Find());
+        var native = Dd1Campaign.Load(Dd1TestInstall.Find());
         Assert.Equal(ExpeditionLoadRoute.Results, ExpeditionRecovery.Inspect(save));
         var report = Homecoming.Report(save.Estate, native, save.Expedition, ExpeditionParty.Outcomes(save.Expedition, save.Estate));
         Assert.Equal(retreat ? "retreat" : "complete", report.Result);

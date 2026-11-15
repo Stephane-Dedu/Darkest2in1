@@ -41,7 +41,7 @@ public class ExperimentalHeroesTests
     [Fact]
     public void VisitorUsesOrdinaryRecruitmentAndCrusaderProgressionCosts()
     {
-        var dd1=DarkestDungeon3.Core.Dd1.Dd1Install.Find();
+        var dd1=Dd1TestInstall.Find();
         var estate=new Estate();
         var hamlet=new Hamlet(estate,Dd1Campaign.Load(dd1),Buildings.Load(dd1),new FakeCatalog());
         var visitor=ExperimentalHeroes.InviteVilhelm(hamlet,new DarkestDungeon3.Core.Rng(42));

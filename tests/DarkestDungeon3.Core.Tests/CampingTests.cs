@@ -13,7 +13,7 @@ public class CampingTests
     private readonly ITestOutputHelper _out;
     public CampingTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
 

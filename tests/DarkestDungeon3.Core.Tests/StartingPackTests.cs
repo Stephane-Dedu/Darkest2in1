@@ -9,9 +9,9 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class StartingPackTests
 {
-    private static readonly Dd1Campaign Campaign = Dd1Campaign.Load(Dd1Install.Find());
-    private static readonly ItemCatalog Items = ItemCatalog.Load(Dd1Install.Find());
-    private static readonly Provisioner Store = Provisioner.Load(Dd1Install.Find(), Items);
+    private static readonly Dd1Campaign Campaign = Dd1Campaign.Load(Dd1TestInstall.Find());
+    private static readonly ItemCatalog Items = ItemCatalog.Load(Dd1TestInstall.Find());
+    private static readonly Provisioner Store = Provisioner.Load(Dd1TestInstall.Find(), Items);
     private static readonly HeroRecord[] Party = {
         new() { Id = "a", ClassId = "crusader" }, new() { Id = "b", ClassId = "highwayman" },
         new() { Id = "c", ClassId = "plague_doctor" }, new() { Id = "d", ClassId = "vestal" }

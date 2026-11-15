@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class SurpriseTests
 {
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
     private static readonly CrawlContent Content = new() { Buffs = Dd1.Buffs };
 
     private static Crawl RoomBattle(int seed, CrawlRules rules, params string[] heroes)

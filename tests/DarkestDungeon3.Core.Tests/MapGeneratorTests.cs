@@ -11,7 +11,7 @@ public class MapGeneratorTests
     private readonly ITestOutputHelper _out;
     public MapGeneratorTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Install Dd1 = Dd1Install.Find();
+    private static readonly Dd1Install Dd1 = Dd1TestInstall.Find();
 
     [Fact]
     public void City_corridors_do_not_repeat_the_same_curio_in_adjacent_squares()

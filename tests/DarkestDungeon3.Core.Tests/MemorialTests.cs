@@ -11,7 +11,7 @@ public class MemorialTests
     [Fact]
     public void Dd1sPrologueCanBeReplayedAndTheEpilogueRequiresTheFinalQuest()
     {
-        var media = Memorial.Load(Dd1Install.Find());
+        var media = Memorial.Load(Dd1TestInstall.Find());
         var completed = new List<string>();
         Assert.Equal(new[] { "prologue", "boss_entries", "dd_entries", "epilog", "backerjournal" }, media.Categories.Select(c => c.Name));
         Assert.Equal(3, media.Videos.Count);

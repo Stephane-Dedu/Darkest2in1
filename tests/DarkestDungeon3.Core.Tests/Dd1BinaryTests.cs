@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's hand-made plot maps (maps/*.dm) read with the binary-file reader.</summary>
 public class Dd1BinaryTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     private static Dd1Binary Map(string name) => Dd1Binary.Load(Install.PathOf("maps", name + ".dm"));
 

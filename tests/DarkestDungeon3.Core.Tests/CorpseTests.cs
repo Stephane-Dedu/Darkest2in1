@@ -6,7 +6,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's corpse rule (death_class in each monster's info.darkest).</summary>
 public class CorpseTests
 {
-    private static readonly Dd1Corpse Corpses = new(Dd1Install.Find());
+    private static readonly Dd1Corpse Corpses = new(Dd1TestInstall.Find());
 
     [Fact]
     public void OnlyMonstersWithACorpseClassLeaveOne()

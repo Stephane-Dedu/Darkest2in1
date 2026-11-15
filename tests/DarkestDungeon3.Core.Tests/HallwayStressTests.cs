@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class HallwayStressTests
 {
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     private static (Crawl Crawl, FakeParty Party) Crawl(HallContent content, bool backward = false, int seed = 1, float light = 100)
     {

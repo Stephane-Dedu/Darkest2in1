@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's quirk limits: 5 positive, 5 negative, 3 diseases; over the cap a new quirk replaces an unlocked one.</summary>
 public class QuirkLimitTests
 {
-    private static readonly QuirkLimits Limits = QuirkLimits.FromDd1(Dd1Campaign.Load(Dd1Install.Find()).Rules);
+    private static readonly QuirkLimits Limits = QuirkLimits.FromDd1(Dd1Campaign.Load(Dd1TestInstall.Find()).Rules);
     private static bool Positive(string q) => q.StartsWith("pos_");
     private static bool Disease(string q) => q.StartsWith("disease_");
 

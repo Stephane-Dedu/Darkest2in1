@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class CrawlNavigationTests
 {
-    private static readonly CrawlContent Content = CrawlContent.Load(Dd1Install.Find());
+    private static readonly CrawlContent Content = CrawlContent.Load(Dd1TestInstall.Find());
 
     public static IEnumerable<object[]> PendingLocations =>
         from location in new[] { "room", "hall", "secret" }

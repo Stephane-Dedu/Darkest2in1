@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class TravelConditionTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
     private static readonly CrawlRules Rules = CrawlRules.FromDd1(Dd1Campaign.Load(Install).Rules);
     private static (Crawl, FakeParty) New()

@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>Spine 2.1 setup poses from the user's DD1 install (town buildings, curios, heroes).</summary>
 public class SpineTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     private static (SpineSkeleton, SpineAtlas) Load(params string[] dir)
     {
@@ -110,7 +110,7 @@ public class SpineRasterTests
 
 public class TownLayoutTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Fact]
     public void Buildings_stand_where_dd1_puts_them_back_to_front()

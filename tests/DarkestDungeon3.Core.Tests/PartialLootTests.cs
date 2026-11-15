@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class PartialLootTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
 
     [Theory]

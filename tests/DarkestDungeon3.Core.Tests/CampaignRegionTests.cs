@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class CampaignRegionTests
 {
-    private static readonly Dd1Campaign Data = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Data = Dd1Campaign.Load(Dd1TestInstall.Find());
     [Fact]
     public void MapLocationsExposeEnabledVariantsWhileKeepingContractsAndBossesIndependent()
     {
@@ -70,7 +70,7 @@ public class CampaignRegionTests
     {
         var e = new Estate { Seed = 3, QuestsCompleted = 6, RegionLayoutVersion = CampaignRegions.LayoutVersion };
         e.ZoneXp["weald"] = 12; e.ZoneXp["dd2_forest"] = 20;
-        var hamlet = new Hamlet(e, Data, Buildings.Load(Dd1Install.Find()), new FakeCatalog());
+        var hamlet = new Hamlet(e, Data, Buildings.Load(Dd1TestInstall.Find()), new FakeCatalog());
         hamlet.SetZoneToggle("weald", true); Assert.Contains(e.Quests, q => q.Dungeon == "weald");
         hamlet.SetZoneToggle("weald", false); Assert.DoesNotContain(e.Quests, q => q.Dungeon == "weald");
         Assert.Equal(12, e.ZoneXp["weald"]); Assert.Equal(20, e.ZoneXp["dd2_forest"]);

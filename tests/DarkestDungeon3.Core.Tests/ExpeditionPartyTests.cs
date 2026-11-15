@@ -72,7 +72,7 @@ public class ExpeditionPartyTests
     [Fact]
     public void RecordedDeathAndChangedLoadoutReachActualHomecomingAfterReload()
     {
-        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
         var estate = new Estate { Seed = 91 };
         estate.Roster.Add(new HeroRecord { Id = "a", ClassId = "highwayman", Name = "Survivor", Stress = 1, Quirks = { "stale_quirk" } });
         estate.Roster.Add(new HeroRecord { Id = "b", ClassId = "plague_doctor", Name = "Fallen" });

@@ -25,7 +25,7 @@ public class ResolveStressTests
     }
     [Fact] public void InstalledTraitsLoadWithNativeWeightsAndClassSpecificActs()
     {
-        var install=DarkestDungeon3.Core.Dd1.Dd1Install.Find();
+        var install=Dd1TestInstall.Find();
         var rules=ResolveStress.Load(install,DarkestDungeon3.Core.Campaign.Dd1Campaign.Load(install).Rules);
         Assert.Equal(7,rules.Traits.Count(t=>t.Generated && !t.Virtuous));
         Assert.Equal(5,rules.Traits.Count(t=>t.Generated && t.Virtuous));

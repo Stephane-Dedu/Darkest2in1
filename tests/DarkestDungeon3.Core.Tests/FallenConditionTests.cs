@@ -18,7 +18,7 @@ public class FallenConditionTests
         exp.Pack.Add(Currency.Gold, 500);
         exp.Pack.Add(Currency.Crest, 4);
         exp.Pack.Add("trinket:unclaimed_test_ring", 1);
-        var report = Homecoming.Report(estate, Dd1Campaign.Load(Dd1Install.Find()), exp,
+        var report = Homecoming.Report(estate, Dd1Campaign.Load(Dd1TestInstall.Find()), exp,
             new[] { new HeroOutcome { HeroId = "a", Died = true } });
         Assert.Equal("defeat", report.Result);
         Assert.Equal(0, estate.QuestsCompleted);
@@ -31,7 +31,7 @@ public class FallenConditionTests
     [Fact]
     public void RecordedQuirksReachTheGraveAndExistingFromBeyondWithoutChangingLoadoutPolicy()
     {
-        var install = Dd1Install.Find(); var dd1 = Dd1Campaign.Load(install); var buildings = Buildings.Load(install);
+        var install = Dd1TestInstall.Find(); var dd1 = Dd1Campaign.Load(install); var buildings = Buildings.Load(install);
         var estate = new Estate { Seed = 51, Week = 19 };
         var hero = new HeroRecord
         {
@@ -78,7 +78,7 @@ public class FallenConditionTests
         var estate = new Estate { Roster = { new HeroRecord { Id = "a", ClassId = "highwayman", Quirks = { "old" } } } };
         var exp = new ExpeditionState { Ended = true, Quest = new QuestOffer { Dungeon = "dd2_city", Type = "explore" } };
         var outcome = new HeroOutcome { HeroId = "a", Died = true, Quirks = knownEmpty ? new List<string>() : null };
-        Homecoming.Report(estate, Dd1Campaign.Load(Dd1Install.Find()), exp, new[] { outcome });
+        Homecoming.Report(estate, Dd1Campaign.Load(Dd1TestInstall.Find()), exp, new[] { outcome });
         Assert.Equal(knownEmpty ? Array.Empty<string>() : new[] { "old" }, Assert.Single(estate.Graveyard).Quirks);
         var loaded = SaveFile.FromJson(new SaveFile { Estate = estate }.ToJson());
         Assert.Equal(estate.Graveyard[0].Quirks, loaded.Estate.Graveyard[0].Quirks);

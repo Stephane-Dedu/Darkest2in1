@@ -15,7 +15,7 @@ public class SavedMealTests
     [InlineData(Meal.Feast, 0, .75f)]
     public void NativeMealChoiceAndPartyConditionSurviveSaveWithoutEatingOrRollingAgain(Meal meal, int foodLeft, float health)
     {
-        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
         var rules = CrawlRules.FromDd1(dd1.Rules);
         var state = new ExpeditionState
         {

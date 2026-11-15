@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class InventoryLayoutTests
 {
-    private static readonly ItemCatalog Items = ItemCatalog.Load(Dd1Install.Find());
+    private static readonly ItemCatalog Items = ItemCatalog.Load(Dd1TestInstall.Find());
 
     [Fact]
     public void Stacks_keep_the_slots_the_player_gave_them()

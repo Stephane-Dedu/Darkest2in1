@@ -14,7 +14,7 @@ public class BestiaryTests
     private static readonly string Json = Path.GetFullPath(Path.Combine(
         System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "monsters.json"));
     private static readonly Dd1Bestiary Bestiary = Dd1Bestiary.Load(Json);
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
     private static readonly CrawlContent Content = CrawlContent.Load(Install);
 
@@ -92,7 +92,7 @@ public class MonsterNameTests
     [Fact]
     public void Dd1NamesMonstersAndTheirSkills()
     {
-        var lore = Dd1Lore.Load(Dd1Install.Find());
+        var lore = Dd1Lore.Load(Dd1TestInstall.Find());
         Assert.Equal("Swine Drummer", lore.MonsterNames["swine_drummer_A"]);
         Assert.True(lore.MonsterSkillNames.ContainsKey("crossbow_shot"));
         Assert.True(lore.MonsterNames.Count > 100);

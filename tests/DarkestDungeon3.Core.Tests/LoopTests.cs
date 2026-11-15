@@ -15,7 +15,7 @@ public class LoopTests
     private readonly ITestOutputHelper _out;
     public LoopTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     private static Estate NewEstate()
     {

@@ -8,7 +8,7 @@ public class Dd1ColourTests
     [Fact]
     public void EquipmentTooltipColoursResolveActualInstalledAliases()
     {
-        var colours = Dd1Colours.Load(Dd1Install.Find().PathOf("colours", "base.colours.darkest"));
+        var colours = Dd1Colours.Load(Dd1TestInstall.Find().PathOf("colours", "base.colours.darkest"));
         Assert.Equal(0xC8B46EFFu, colours.Rgba("equipment_tooltip_title"));
         Assert.Equal(0xAEACA2FFu, colours.Rgba("equipment_tooltip_body"));
         Assert.Equal(0x3B61A7FFu, colours.Rgba("rare"));

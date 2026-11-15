@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class Dd1TrinketEffectTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Trinkets Items = Dd1Trinkets.LoadBase(Install);
     private static readonly Dd1Buffs Buffs = Dd1Buffs.Load(Install);
 

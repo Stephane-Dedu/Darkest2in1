@@ -45,7 +45,7 @@ public class RecruitClassesTests
     [InlineData("bounty_hunter")]
     public void ExtraNativeClassesUseTheOrdinaryWeeklyCoachAndPermanentRoster(string classId)
     {
-        var install = Dd1Install.Find();
+        var install = Dd1TestInstall.Find();
         var estate = new Estate { Seed = 234 };
         var hamlet = new Hamlet(estate, Dd1Campaign.Load(install), Buildings.Load(install), new SingleClassCatalog(classId));
         hamlet.RefreshWeek();
@@ -62,7 +62,7 @@ public class RecruitClassesTests
     [Fact]
     public void ReynauldIsACrusaderWhenDd2HasOne()
     {
-        var install = Dd1Install.Find();
+        var install = Dd1TestInstall.Find();
         var dd1 = Dd1Campaign.Load(install);
         var buildings = Buildings.Load(install);
         var withDlc = Hamlet.NewEstate(7, dd1, buildings, new DlcCatalog());

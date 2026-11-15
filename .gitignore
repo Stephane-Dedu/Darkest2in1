@@ -10,3 +10,5 @@ extracted/
 !lib/README.md
 # machine-specific build paths
 Directory.Build.local.props
+# Local QA source snapshots, logs, installed hashes and manual acceptance history.
+.qa/

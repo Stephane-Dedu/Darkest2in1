@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class Dd1HeroArtTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Theory]
     [InlineData("abomination")]

@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class PlotSecretRoomTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
 
     [Theory]

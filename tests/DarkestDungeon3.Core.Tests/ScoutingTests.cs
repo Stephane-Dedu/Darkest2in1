@@ -74,7 +74,7 @@ public class ScoutingTests
     [InlineData(1f, 8)]
     public void CrawlUsesNormalOrCriticalScoutingDistance(float critical, int expected)
     {
-        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
         var rules = CrawlRules.FromDd1(dd1.Rules);
         Assert.Equal(0.5f, rules.ScoutCriticalChance);
         rules.ScoutChanceBase = 1f;
@@ -99,7 +99,7 @@ public class ScoutingTests
     [Fact]
     public void EnteringADungeonUsesItsOwnChanceWithoutTheRadiantLightBonus()
     {
-        var dd1 = Dd1Campaign.Load(Dd1Install.Find());
+        var dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
         var rules = CrawlRules.FromDd1(dd1.Rules);
         Assert.Equal(0f, rules.ScoutEntryChance);
         rules.ScoutChanceBase = 1f;   // even a guaranteed room scout must not leak into entry scouting

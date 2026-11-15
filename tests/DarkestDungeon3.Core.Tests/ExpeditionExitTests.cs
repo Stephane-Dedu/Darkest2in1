@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class ExpeditionExitTests
 {
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     [Theory]
     [InlineData(false, "curio")]
@@ -104,7 +104,7 @@ public class ExpeditionExitTests
     [InlineData(true, true)]
     public void ExplicitReturnWaitsForRequiredLootThenEndsOnceWithTheCorrectOutcome(bool complete, bool curio)
     {
-        var content = CrawlContent.Load(Dd1Install.Find());
+        var content = CrawlContent.Load(Dd1TestInstall.Find());
         var drop = new LootDrop { Type = "quest_item", Id = "holy_relic", Amount = 1 };
         var state = new ExpeditionState { Started = true, QuestComplete = complete, Quest = new QuestOffer { CanRetreat = true }, RandomCounter = 47 };
         if (curio) state.PendingCurio = new CurioReport { Loot = { drop }, LeftBehind = { drop } };

@@ -11,7 +11,7 @@ public class BattleLootTests
     [Fact]
     public void TrinketsNeedAPackSlot()
     {
-        var items = ItemCatalog.Load(Dd1Install.Find());
+        var items = ItemCatalog.Load(Dd1TestInstall.Find());
         var pack = new Inventory();
         pack.Add("food", Inventory.Slots * items.StackLimit("food"));        // every slot full of food
         Assert.Equal(Inventory.Slots, pack.SlotsUsed(items));
@@ -37,7 +37,7 @@ public class BattleLootTests
         Assert.Same(concrete, LootDrop.ResolveTrinket(concrete, (r, rng) => "x", new Rng(1))); // already a trinket
     }
 
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly BattleLoot Battles = BattleLoot.Load(Install);
     private static readonly LootTables Tables = LootTables.Load(Install);
 

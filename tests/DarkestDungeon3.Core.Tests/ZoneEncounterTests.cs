@@ -12,7 +12,7 @@ public class ZoneEncounterTests
     private static readonly string ZonesJson = Path.GetFullPath(Path.Combine(
         System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "zones.json"));
     private static readonly ZoneEncounters Zones = ZoneEncounters.Load(ZonesJson);
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     [Fact]
     public void EveryDd1ZoneHasFights()

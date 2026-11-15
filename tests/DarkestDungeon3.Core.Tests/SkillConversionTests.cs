@@ -15,7 +15,7 @@ public class SkillConversionTests
     private readonly ITestOutputHelper _out;
     public SkillConversionTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly string Excel = File.Exists(@"C:\Users\Piral\DarkestDungeon3\game\Darkest Dungeon II_Data\StreamingAssets\Excel\quirk_data_export.Group.csv")
         ? @"C:\Users\Piral\DarkestDungeon3\game\Darkest Dungeon II_Data\StreamingAssets\Excel"
         : @"C:\Users\Piral\dd2-decomp\data\Excel";

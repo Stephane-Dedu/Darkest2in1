@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class MemorialNarrationTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Campaign = Dd1Campaign.Load(Install);
     private static readonly Dd1Lore Lore = Dd1Lore.Load(Install);
     private static readonly Memorial Media = Memorial.Load(Install);

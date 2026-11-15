@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class MemorialJournalTests
 {
-    private static readonly Dd1Lore Lore = Dd1Lore.Load(Dd1Install.Find());
+    private static readonly Dd1Lore Lore = Dd1Lore.Load(Dd1TestInstall.Find());
 
     [Fact]
     public void OnlyRecoveredNativePagesAppearInOrderWithoutChangingStateOrRandomness()

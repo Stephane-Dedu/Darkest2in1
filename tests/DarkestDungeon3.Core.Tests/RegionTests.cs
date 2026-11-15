@@ -13,7 +13,7 @@ public class RegionTests
 {
     private static readonly ZoneEncounters Zones = ZoneEncounters.Load(Path.GetFullPath(Path.Combine(
         System.AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "zones.json")));
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     // Loading zones.json is what registers the regions; make sure it happened before each test.
     public RegionTests() => Assert.NotNull(Zones);

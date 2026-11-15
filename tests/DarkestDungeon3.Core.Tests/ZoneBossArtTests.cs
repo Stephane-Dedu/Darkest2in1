@@ -30,7 +30,7 @@ public class ZoneBossArtTests
     [Fact]
     public void InstalledNecromancerFallbackIsLibraryAndNeverEntrance()
     {
-        var art = ZoneArt.Load(Dd1Install.Find(), "crypts");
+        var art = ZoneArt.Load(Dd1TestInstall.Find(), "crypts");
         foreach (string tier in new[] { "A", "B", "C" })
         {
             string wall = art.BossRoom("necromancer_" + tier);
@@ -43,7 +43,7 @@ public class ZoneBossArtTests
     [Fact]
     public void InstalledPlotSpecificFinalArtRetainsExactIdentity()
     {
-        var art = ZoneArt.Load(Dd1Install.Find(), "weald");
+        var art = ZoneArt.Load(Dd1TestInstall.Find(), "weald");
         string wall = art.BossRoom("shrieker_A", "plot_crow_trinket");
         Assert.True(File.Exists(wall));
         Assert.EndsWith("weald.final_room_wall.plot_crow_trinket.png", wall);

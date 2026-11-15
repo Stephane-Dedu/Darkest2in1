@@ -11,7 +11,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's hand-made plot maps (maps/*.dm) turned into dungeon maps.</summary>
 public class PlotMapTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
 
     private static DungeonMap Load(string name, string dungeon, string type = "kill_boss") =>

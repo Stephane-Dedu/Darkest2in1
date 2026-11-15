@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>Spine 2.1 animations from the user's DD1 install (monsters and heroes).</summary>
 public class SpineAnimationTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private readonly ITestOutputHelper _out;
     public SpineAnimationTests(ITestOutputHelper output) => _out = output;
 
@@ -80,7 +80,7 @@ public class SpineAnimationTests
 /// <summary>Writes posed meshes as JSON for an offline look (set DD3_POSE_DUMP to a folder to enable).</summary>
 public class SpinePoseDump
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Fact]
     public void Dump()

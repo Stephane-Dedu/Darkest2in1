@@ -11,7 +11,7 @@ public class CampaignTests
     private readonly ITestOutputHelper _out;
     public CampaignTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
 
     [Fact]
     public void LoadsDd1CampaignTables()

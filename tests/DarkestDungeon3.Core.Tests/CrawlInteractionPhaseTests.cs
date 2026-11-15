@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class CrawlInteractionPhaseTests
 {
-    private static readonly CrawlContent Content = CrawlContent.Load(Dd1Install.Find());
+    private static readonly CrawlContent Content = CrawlContent.Load(Dd1TestInstall.Find());
 
     public static IEnumerable<object[]> Cases =>
         from action in new[] { "curio-room", "curio-hall", "skip-room", "skip-hall", "obstacle", "trap" }

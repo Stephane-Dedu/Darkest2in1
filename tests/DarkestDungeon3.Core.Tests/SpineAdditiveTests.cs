@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's additive slots (building lights) brighten what is drawn instead of painting white shapes.</summary>
 public class SpineAdditiveTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Fact]
     public void HoveredBuildingIsItsOutlineBehindTheBuilding()

@@ -36,7 +36,7 @@ public class CrawlTests
     private readonly ITestOutputHelper _out;
     public CrawlTests(ITestOutputHelper output) => _out = output;
 
-    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1Install.Find());
+    private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Dd1TestInstall.Find());
     private static readonly CrawlRules Rules = CrawlRules.FromDd1(Dd1.Rules);
 
     private static (Crawl crawl, FakeParty party) NewCrawl(string zone, string size, string type, int seed, int food = 16, int torches = 8, int shovels = 2)
@@ -107,7 +107,7 @@ public class CrawlTests
     [InlineData(true)]
     public void OnlyDeliberateDisarmingCanAvoidATrap(bool scouted)
     {
-        var content = CrawlContent.Load(Dd1Install.Find());
+        var content = CrawlContent.Load(Dd1TestInstall.Find());
         int disarmed = 0;
         for (int seed = 1; seed <= 32; seed++)
         {
@@ -164,7 +164,7 @@ public class CrawlTests
             Map = map, Seed = 8, Party = { "a" }, RoomId = -1, CorridorId = 0, TileIndex = 0, HeadingRoomId = 1,
         };
         var party = new FakeParty("a");
-        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1TestInstall.Find()));
         Assert.True(crawl.IsBlocked);
         var events = crawl.Step(forward);
         Assert.Equal(forward, tile.Resolved);
@@ -202,7 +202,7 @@ public class CrawlTests
         };
         state.Pack.Add(Supply.Shovel, shovels);
         var party = new FakeParty("a", "b");
-        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1Install.Find()));
+        var crawl = new Crawl(state, Rules, party, CrawlContent.Load(Dd1TestInstall.Find()));
         Assert.True(crawl.IsBlocked);
         Assert.Contains(crawl.ClearObstacle(), e => e.Type == CrawlEventType.ObstacleCleared);
         Assert.False(crawl.IsBlocked);

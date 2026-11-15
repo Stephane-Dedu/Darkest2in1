@@ -9,7 +9,7 @@ namespace DarkestDungeon3.Core.Tests;
 /// <summary>DD1's opening cinematics: subtitles and audio from video/*.ogv and *.sub.</summary>
 public class CinematicTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Fact]
     public void HouseOfRuinIsSubtitledWithTheAncestorsLines()

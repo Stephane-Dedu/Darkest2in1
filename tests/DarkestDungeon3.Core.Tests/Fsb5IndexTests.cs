@@ -7,7 +7,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class Fsb5IndexTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
 
     [Fact]
     public void FindsDd1SamplesByName()
@@ -32,7 +32,7 @@ public class Dd1AudioNameTests
     [Fact]
     public void EverySampleWeAskForExists()
     {
-        string dir = Dd1Install.Find().PathOf("audio", "secondary_banks");
+        string dir = Dd1TestInstall.Find().PathOf("audio", "secondary_banks");
         var index = Fsb5Index.Load(new[] { "music", "ambience", "general", "ui_dungeon", "ui_shared", "ui_town", "raid_screen", "town" }
             .Select(b => Path.Combine(dir, b + ".bank")));
         var names = new[]

@@ -66,7 +66,7 @@ public class TrinketEquipmentTests
     {
         var h = Hero("a"); h.SetTrinket(1, "charm");
         var expedition = new Core.Expedition.ExpeditionState { Quest = new QuestOffer { Dungeon = "dd2_city", Difficulty = 1, Length = 1 } };
-        Homecoming.Apply(E, Dd1Campaign.Load(Core.Dd1.Dd1Install.Find()), expedition,
+        Homecoming.Apply(E, Dd1Campaign.Load(Dd1TestInstall.Find()), expedition,
             new[] { new HeroOutcome { HeroId = h.Id, Trinkets = new() { "charm" } } });
         Assert.Null(h.TrinketAt(0)); Assert.Equal("charm", h.TrinketAt(1));
         Assert.Empty(E.Trinkets);

@@ -42,6 +42,7 @@ independent. Do not move contracts into a separate strip below the map.
 3. Anything not written in these two files is lost at the next context compaction.
 
 ## Working branch and the parity loop
+- For "run/try the tests", "what is my next step", or a playtest result, follow `PLAYTEST_RUNBOOK.md` and run `python tools/qa/run.py status`. It owns the repeatable test cycle and local acceptance ledger. Respect the latest user launch restriction; offline test success is not native acceptance.
 - Work directly on `main` (owner instruction, 2026-10-10). The former working branch is merged; commit and push each verified round to `main`.
 - `tools/handoff_prompt.md` is the prompt to start any session or agent on this project; leave the same handoff when you stop.
 - The improvement loop prompt is in `tools/parity_loop.md`. Start it with `/loop` followed by that text, and only when the

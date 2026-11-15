@@ -15,7 +15,7 @@ public class CinematicStreamTests
     [InlineData("old_road", 661094, "290D3E4CDB19634D2C250ABDB7DB745D124F74378EFA4C01CBBAD78201F4B4E8")]
     public void NativeAudioIsByteIdenticalToThePreviousExtractor(string name, int length, string hash)
     {
-        using var file = File.OpenRead(Dd1Cinematic.VideoPath(Dd1Install.Find(), name));
+        using var file = File.OpenRead(Dd1Cinematic.VideoPath(Dd1TestInstall.Find(), name));
         using var input = new ChunkedInput(file, 4096);
         using var output = new MemoryStream();
         Assert.Equal(length, Dd1Cinematic.VorbisAudio(input, output));

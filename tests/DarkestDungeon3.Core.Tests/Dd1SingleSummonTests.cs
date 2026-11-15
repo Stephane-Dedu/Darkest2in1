@@ -8,7 +8,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class Dd1SingleSummonTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly EffectLibrary Effects = EffectLibrary.Load(Install);
 
     [Theory]

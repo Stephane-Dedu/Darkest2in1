@@ -10,7 +10,7 @@ namespace DarkestDungeon3.Core.Tests;
 
 public class CampaignJournalTests
 {
-    private static readonly Dd1Install Install = Dd1Install.Find();
+    private static readonly Dd1Install Install = Dd1TestInstall.Find();
     private static readonly Dd1Campaign Dd1 = Dd1Campaign.Load(Install);
     private static readonly Buildings Buildings = Buildings.Load(Install);
 
