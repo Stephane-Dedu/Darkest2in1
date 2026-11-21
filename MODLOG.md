@@ -12546,3 +12546,9 @@ Changes:
 - QuirkLimits.ReplacementSeed (FNV-1a over hero, quirk, sorted held quirks) replaces Environment.TickCount in Dd2Party.AddDd1Quirk.
 
 Working tree: Core 1403/1405 (the two duelist/runaway data cases), UI 315/315, plugin Release Deploy=false 0 errors. No game launch, deploy or save access. findingsfable.txt section C/D has the details and the open items (refund at current price, locked activity second week, purge locks).
+
+## Status 2026-11-21, Claude loop round C3 (Abomination form after in-place fights)
+- Native fact (DD2 decomp): `ActorInstance.OnBattleEnd` -> `SetActorModeToDefault()` -> `SetActorMode` changes only data (m_ActorDataMode, stats). `ActorBhv` switches art roots only in Update when `m_IsModeDirty`, which only `EventActorChangeMode` for its guid sets. Native DD2 rebuilds actors on the road after a battle; our in-place fights keep HeroStage's own ActorBhv per hero, which also hears the transform event in the fight.
+- Fix: Core `StageHeroForm.Resync`, plus `HeroStage.ResyncForm` (FieldRef `m_ActorArtModeIndex`, `GetIdForMode`, `SetMode`, then clearing `_fitted`/`_campPoses`/`_motion` so the rig binds to the new root's bones). A per-actor failure set keeps an exception from breaking the stage loop.
+- Gotcha: the Edit tool rewrote HeroStage.cs's 57 LF-only lines (Astra's) as CRLF. I restored them from the pre-edit snapshot with a byte-level difflib patch; the diff now holds only my 39 lines. Check `tr -cd '\r' | wc -c` after any Edit on a mixed-ending file.
+- Native: pending (no relaunch go-ahead). The Abomination needs a transform fight followed by corridor travel; neither the battle nor the paths visual fixture covers that path today.

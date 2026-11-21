@@ -289,6 +289,7 @@ internal sealed class HeroStage : MonoBehaviour
         _motion.Clear();
         _motionUnavailable.Clear();
         _campPoses.Clear();
+        _formFailed.Clear();
         _camping = false;
         WalkSpeed = 0;
         WalkDistancePixels = 0;
@@ -464,6 +465,7 @@ internal sealed class HeroStage : MonoBehaviour
             slot.localPosition = new Vector3(p.x, (720f - feet) / PixelsPerUnit, p.z);
             var actor = _heroes[i].actor;
             if (actor == null || actor.IsLoading || !_shown.Contains(actor)) continue;
+            if (ResyncForm(actor)) continue;
             if (ShieldbreakerModel.IsShieldbreaker(actor))
             {
                 bool fallback = !ShieldbreakerModel.IsReady(actor);
@@ -501,6 +503,43 @@ internal sealed class HeroStage : MonoBehaviour
             if (slot != null)
                 foreach (var t in slot.GetComponentsInChildren<Transform>(includeInactive: true))
                     if (t.gameObject.layer != Layer) t.gameObject.layer = Layer;
+    }
+
+    private static readonly HarmonyLib.AccessTools.FieldRef<ActorBhv, int> ArtModeIndex =
+        HarmonyLib.AccessTools.FieldRefAccess<ActorBhv, int>("m_ActorArtModeIndex");
+    private readonly HashSet<ActorBhv> _formFailed = new();
+
+    /// <summary>DD2 resets a transformed hero's data mode at battle end without the event that swaps its art (see
+    /// StageHeroForm), so this stage model can keep the beast after an in-place fight. Switch it back, then bind
+    /// its walk again on the new root.</summary>
+    private bool ResyncForm(ActorBhv actor)
+    {
+        if (_formFailed.Contains(actor)) return false;
+        try
+        {
+            int count = actor.GetNumModes();
+            if (count < 2 || Dd2Combat.InFight) return false;
+            int index = ArtModeIndex(actor);
+            string drawn = index >= 0 && index < count ? actor.GetIdForMode(index) : null;
+            string data = Dd2Api.Actor(actor.GetActorGuid())?.ActorDataMode?.Id;
+            if (data == null || data == drawn) return false;
+            var modes = new string[count];
+            for (int m = 0; m < count; m++) modes[m] = actor.GetIdForMode(m);
+            string target = StageHeroForm.Resync(false, actor.IsTimelinePlaying, drawn, data, modes);
+            if (target == null) return false;
+            if (_motion.TryGetValue(actor, out var motion)) { motion.Restore(); _motion.Remove(actor); }
+            _motionUnavailable.Remove(actor);
+            _campPoses.Remove(actor);
+            actor.SetMode(target);
+            Plugin.Log.LogInfo($"[stage] hero {actor.GetActorGuid()}: form {drawn} -> {target} (data mode reset after the fight)");
+            return true;
+        }
+        catch (System.Exception e)
+        {
+            _formFailed.Add(actor);
+            Plugin.Log.LogWarning($"[stage] form resync {actor.GetActorGuid()}: {e.Message}; retaining drawn form");
+            return false;
+        }
     }
 
     private void UpdateCampPose(ActorBhv actor, Transform slot, CorridorHeroMotion motion)
